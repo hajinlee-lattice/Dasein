@@ -4,10 +4,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.apps.cdl.dao.DataCollectionStatusDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;

@@ -123,6 +123,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         case EXPORT_DATA:
             appId = export(scoringCommand);
             break;
+        default:
         }
 
         return appId;

@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
 
     @Test(groups = "functional")
-    public void testKVDepivot() throws Exception {
+    public void testKVDepivot() {
         uploadAvro();
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
@@ -42,46 +42,41 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
             System.out.println(record);
             Assert.assertNull(record.get("Timestamp"));
             if (record.get(KEY_ATTR).equals("Attr1")) {
-                if (new Long(5L).equals(record.get("RowId"))) {
-                    Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(String.class)),
-                            null);
+                if (Long.valueOf(5L).equals(record.get("RowId"))) {
+                    Assert.assertNull(record.get(KVDepivotStrategy.valueAttr(String.class)));
                 } else {
                     Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Boolean.class)),
                             String.valueOf(record.get("RowId")));
                 }
             }
             if (record.get(KEY_ATTR).equals("Attr2")) {
-                if (new Long(4L).equals(record.get("RowId"))) {
-                    Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Double.class)),
-                            null);
+                if (Long.valueOf(4L).equals(record.get("RowId"))) {
+                    Assert.assertNull(record.get(KVDepivotStrategy.valueAttr(Double.class)));
                 } else {
                     Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Double.class)), 1.0);
                 }
             }
             if (record.get(KEY_ATTR).equals("Attr3")) {
-                if (new Long(3L).equals(record.get("RowId"))) {
-                    Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Integer.class)),
-                            null);
+                if (Long.valueOf(3L).equals(record.get("RowId"))) {
+                    Assert.assertNull(record.get(KVDepivotStrategy.valueAttr(Integer.class)));
                 } else {
                     Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Integer.class)), 1);
                 }
             }
             if (record.get(KEY_ATTR).equals("Attr4")) {
-                if (new Long(2L).equals(record.get("RowId"))) {
-                    Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Boolean.class)),
-                            null);
+                if (Long.valueOf(2L).equals(record.get("RowId"))) {
+                    Assert.assertNull(record.get(KVDepivotStrategy.valueAttr(Boolean.class)));
                 } else {
                     Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Boolean.class)),
                             Boolean.TRUE);
                 }
             }
             if (record.get(KEY_ATTR).equals("Attr5")) {
-                if (new Long(5L).equals(record.get("RowId"))) {
+                if (Long.valueOf(5L).equals(record.get("RowId"))) {
                     Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(String.class)),
                             "only me");
                 } else {
-                    Assert.assertEquals(record.get(KVDepivotStrategy.valueAttr(Boolean.class)),
-                            null);
+                    Assert.assertNull(record.get(KVDepivotStrategy.valueAttr(Boolean.class)));
                 }
             }
         }
@@ -90,7 +85,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testKVReconstruct() throws Exception {
+    public void testKVReconstruct() {
         uploadAvro();
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
@@ -117,10 +112,10 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
             Assert.assertEquals(record.getSchema().getFields().get(3).name(), "Attr3");
             Assert.assertEquals(record.getSchema().getFields().get(4).name(), "Attr2");
             Assert.assertEquals(record.getSchema().getFields().get(5).name(), "Attr1");
-            if (new Long(1L).equals(record.get("RowId"))) {
+            if (Long.valueOf(1L).equals(record.get("RowId"))) {
                 Assert.assertEquals(record.get("Attr1").toString(), "1");
             }
-            if (new Long(5L).equals(record.get("RowId"))) {
+            if (Long.valueOf(5L).equals(record.get("RowId"))) {
                 Assert.assertEquals(record.get("Attr5").toString(), "only me");
             }
         }
@@ -128,7 +123,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testTwoTableKV() throws Exception {
+    public void testTwoTableKV() {
         uploadTwoTableAvro();
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
@@ -198,6 +193,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 case "5":
                     Assert.assertEquals(record.get("Attr4"), false);
                     break;
+                default:
             }
         }
         cleanupDynamicSource();

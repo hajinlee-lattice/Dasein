@@ -73,7 +73,7 @@ public class CreatePMMLModelUnitTestNG {
 
         boolean found = false;
         for (String feature : features) {
-            if (feature.equals("PD_DA_JobTitle")) {
+            if ("PD_DA_JobTitle".equals(feature)) {
                 found = true;
             }
         }

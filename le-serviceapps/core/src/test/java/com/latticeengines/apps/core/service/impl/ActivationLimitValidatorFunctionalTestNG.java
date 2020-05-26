@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.util.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -51,7 +50,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         prop.setCustomValue(AttrState.Active);
         for (int i = 0; i < mockHGLimit; i++) {
             AttrConfig config = new AttrConfig();
-            config.setAttrName(StringUtils.format("Attr%d", i));
+            config.setAttrName(String.format("Attr%d", i));
             config.setDataLicense("HG");
             config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);

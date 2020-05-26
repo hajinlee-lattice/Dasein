@@ -87,7 +87,7 @@ public class ServiceServiceImpl implements ServiceService {
             doc.setNodes(confDir.findSelectableFields(includeDynamicOpts));
 
             return doc;
-        } else if (serviceName.equals("SpaceConfiguration")) {
+        } else if ("SpaceConfiguration".equals(serviceName)) {
             DocumentDirectory confDir = batonService.getDefaultConfiguration("SpaceConfiguration");
             DocumentDirectory metaDir = batonService.getConfigurationSchema("SpaceConfiguration");
             confDir.makePathsLocal();

@@ -93,8 +93,8 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     @Test(groups = "deployment")
     public void testMatchCorrectness() {
         String dataCloudVersion  = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
-        Integer numGoodAccounts = new Double(numRecords * 0.8).intValue();
-        Integer numBadAccounts = numRecords - numGoodAccounts;
+        Integer numGoodAccounts = Double.valueOf(numRecords * 0.8).intValue();
+        int numBadAccounts = numRecords - numGoodAccounts;
 
         List<List<Object>> data = getGoodAccounts(numGoodAccounts);
         data.addAll(getGarbageDomainAccounts(numBadAccounts));

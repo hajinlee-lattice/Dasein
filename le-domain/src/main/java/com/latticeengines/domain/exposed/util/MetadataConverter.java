@@ -292,13 +292,13 @@ public final class MetadataConverter {
                 attribute.setNullable(Boolean.valueOf(field.getProp("Nullable")));
             }
             // standardize date and datetime display
-            if (type.equals("date")) {
+            if ("date".equals(type)) {
                 attribute.setPropertyValue("dateformat", "YYYY-MM-DD");
-            } else if (type.equals("datetime")) {
+            } else if ("datetime".equals(type)) {
                 attribute.setPropertyValue("dateFormat", "YYYY-MM-DD'T'HH:mm:ss.sssZ");
             }
 
-            if (type.equals("picklist")) {
+            if ("picklist".equals(type)) {
                 String enumValuesString = field.getProp("enumValues");
                 List<String> enumValues = Arrays.asList(enumValuesString.split(","));
                 attribute.setCleanedUpEnumValues(enumValues);

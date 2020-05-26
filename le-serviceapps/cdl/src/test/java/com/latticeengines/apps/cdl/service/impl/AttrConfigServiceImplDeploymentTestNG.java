@@ -226,6 +226,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         true, true, //
                         false, true, //
                         false, true);
+                break;
+            default:
             }
             return true;
         });
@@ -311,6 +313,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         true, true, //
                         false, true, //
                         false, false);
+                break;
+            default:
             }
             return true;
         });
@@ -366,6 +370,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, false, //
                         true, true);
                 break;
+            default:
             }
             return true;
         });

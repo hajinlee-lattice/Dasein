@@ -284,7 +284,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
         Assert.assertNotNull(table);
         List<Attribute> attributes = table.getAttributes();
-        Assert.assertEquals(new Integer(attributes.size()), new Integer(attrs));
+        Assert.assertEquals(Integer.valueOf(attributes.size()), Integer.valueOf(attrs));
     }
 
     private void cleanupRegisteredTable(String tableName) {
@@ -301,7 +301,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
             recordMap.put(id, record);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, new Integer(5));
+        Assert.assertEquals(rowCount, Integer.valueOf(5));
         GenericRecord record = recordMap.get("1");
         Assert.assertEquals(record.get("Domain").toString(), "google.com");
         Assert.assertEquals(record.get("Email").toString(), "123@google.com");
@@ -314,8 +314,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
         record = recordMap.get("3");
         Assert.assertEquals(record.get("Domain").toString(), "salesforce.com");
-        Assert.assertEquals(record.get("Email"), null);
-        Assert.assertEquals(record.get("FirstName"), null);
+        Assert.assertNull(record.get("Email"));
+        Assert.assertNull(record.get("FirstName"));
 
         record = recordMap.get("4");
         Assert.assertEquals(record.get("Domain").toString(), "microsoft.com");
@@ -324,8 +324,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
         record = recordMap.get("5");
         Assert.assertEquals(record.get("Domain").toString(), "faceboook.com");
-        Assert.assertEquals(record.get("Email"), null);
-        Assert.assertEquals(record.get("FirstName"), null);
+        Assert.assertNull(record.get("Email"));
+        Assert.assertNull(record.get("FirstName"));
     }
 
     @Override
@@ -340,13 +340,13 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
             recordMap.put(id, record);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, new Integer(5));
+        Assert.assertEquals(rowCount, Integer.valueOf(5));
         GenericRecord record = recordMap.get("1");
         Assert.assertEquals(record.get("Domain").toString(), "google.com");
         // Assert.assertEquals(record.get("Email").toString(),
         // "123@google.com");
         Assert.assertEquals(record.get("FirstName").toString(), "John");
-        Assert.assertEquals(record.get("LastName"), null);
+        Assert.assertNull(record.get("LastName"));
         Assert.assertEquals(record.get("LatticeAccountId").toString(), "260002248202");
         // Assert.assertNotNull(record.get("CREATION_DATE"));
         // Assert.assertNotNull(record.get("UPDATE_DATE"));
@@ -362,8 +362,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         record = recordMap.get("3");
         Assert.assertEquals(record.get("Domain").toString(), "salesforce.com");
         // Assert.assertEquals(record.get("Email"), null);
-        Assert.assertEquals(record.get("FirstName"), null);
-        Assert.assertEquals(record.get("LastName"), null);
+        Assert.assertNull(record.get("FirstName"));
+        Assert.assertNull(record.get("LastName"));
         Assert.assertEquals(record.get("LatticeAccountId").toString(), "440000526702");
 
         record = recordMap.get("4");

@@ -37,8 +37,8 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
         List<BucketedScore> notNullBuckets = Arrays.stream(summary.getBucketedScores()).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         Assert.assertEquals(notNullBuckets.size(), 96);
-        Assert.assertEquals(notNullBuckets.stream().map(BucketedScore::getNumLeads).reduce(0, (a, b) -> a + b),
-                new Integer(summary.getTotalNumLeads()));
+        Assert.assertEquals(notNullBuckets.stream().map(BucketedScore::getNumLeads).reduce(0, Integer::sum),
+                Integer.valueOf(summary.getTotalNumLeads()));
         notNullBuckets.stream().forEach(bucket -> {
             Assert.assertNull(bucket.getAverageExpectedRevenue());
             Assert.assertNull(bucket.getExpectedRevenue());
@@ -70,12 +70,12 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
                 .collect(Collectors.toList());
         Assert.assertEquals(notNullBuckets.size(), 96);
         Assert.assertEquals(notNullBuckets.stream().map(BucketedScore::getNumLeads).reduce(0, (a, b) -> a + b),
-                new Integer(summary.getTotalNumLeads()));
+                Integer.valueOf(summary.getTotalNumLeads()));
         AtomicDouble totalExpectedRevenue = new AtomicDouble(0D);
         AtomicInteger totalLeads = new AtomicInteger(0);
         AtomicDouble totalConvertedLeads = new AtomicDouble(0D);
 
-        notNullBuckets.stream().forEach(bucket -> {
+        notNullBuckets.forEach(bucket -> {
             Assert.assertNotNull(bucket.getAverageExpectedRevenue());
             Assert.assertNotNull(bucket.getExpectedRevenue());
             Assert.assertNotNull(bucket.getLeftExpectedRevenue());
@@ -154,10 +154,11 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
             case "D":
                 Assert.assertEquals(lift, 0.04, JsonUtils.serialize(bucketMetadata));
                 break;
+            default:
             }
         }
         Integer sumCount = bucketMetadataList.stream().map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b);
-        Assert.assertEquals(sumCount, new Integer(summary.getTotalNumLeads()));
+        Assert.assertEquals(sumCount, Integer.valueOf(summary.getTotalNumLeads()));
     }
 
     @Test(groups = "unit")
@@ -200,10 +201,11 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
                 Assert.assertEquals(bucketMetadata.getTotalExpectedRevenue(), 1156.5584757197066,
                         JsonUtils.serialize(bucketMetadata));
                 break;
+            default:
             }
         }
         Integer sumCount = bucketMetadataList.stream().map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b);
-        Assert.assertEquals(sumCount, new Integer(summary.getTotalNumLeads()));
+        Assert.assertEquals(sumCount, Integer.valueOf(summary.getTotalNumLeads()));
         System.out.println(JsonUtils.serialize(summary.getBarLifts()));
     }
 

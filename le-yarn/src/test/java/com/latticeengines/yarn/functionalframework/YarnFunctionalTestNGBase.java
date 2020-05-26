@@ -3,6 +3,7 @@ package com.latticeengines.yarn.functionalframework;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -14,7 +15,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;

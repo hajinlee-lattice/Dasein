@@ -524,6 +524,7 @@ public class CDLResource {
                         fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                     }
                     break;
+                default:
             }
         }
         List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(

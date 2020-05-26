@@ -3,11 +3,11 @@ package com.latticeengines.eai.service.impl;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -68,9 +68,9 @@ public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService 
         EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailEntityMgr
                 .findByCollectionIdentifier(collectionIdentifier);
         if (eaiImportJobDetail != null) {
-            if (!StringUtils.isEmpty(eaiImportJobDetail.getLoadApplicationId())) {
+            if (StringUtils.isNotBlank(eaiImportJobDetail.getLoadApplicationId())) {
                 // YarnUtils.kill(client,ConverterUtils.toApplicationId(eaiImportJobDetail.getLoadApplicationId()));
-                jobService.killJob(ConverterUtils.toApplicationId(eaiImportJobDetail.getLoadApplicationId()));
+                jobService.killJob(ApplicationId.fromString(eaiImportJobDetail.getLoadApplicationId()));
             }
         }
     }

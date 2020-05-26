@@ -88,8 +88,9 @@ public class AMStatsHQDunsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     Assert.assertEquals(hqduns, "duns");
                     break;
                 case 6:
-                    Assert.assertEquals(hqduns, null);
+                    Assert.assertNull(hqduns);
                     break;
+                default:
             }
         }
     }

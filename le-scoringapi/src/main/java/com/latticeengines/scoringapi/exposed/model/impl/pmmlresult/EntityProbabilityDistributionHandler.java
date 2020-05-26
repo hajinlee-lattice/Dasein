@@ -23,7 +23,7 @@ public class EntityProbabilityDistributionHandler extends PMMLResultHandlerBase 
 
         double predicted = distribution.getProbability(r.toString());
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
-        result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+        result.put(ScoreType.PERCENTILE, Double.valueOf(predicted * 100.).intValue());
 
     }
 

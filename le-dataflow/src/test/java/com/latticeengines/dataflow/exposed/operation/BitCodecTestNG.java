@@ -130,6 +130,7 @@ public class BitCodecTestNG extends DataFlowOperationFunctionalTestNGBase {
                     Assert.assertNull(record.get("g3"));
                     Assert.assertNull(record.get("g4"));
                     break;
+                default:
             }
         }
     }

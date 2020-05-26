@@ -204,6 +204,7 @@ public class CompositeGraphEntityMgrImpl implements CompositeGraphEntityMgr {
                 }
             }
             break;
+        default:
         }
     }
 

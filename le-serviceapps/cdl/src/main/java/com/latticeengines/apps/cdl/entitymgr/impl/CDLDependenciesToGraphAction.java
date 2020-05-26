@@ -92,11 +92,13 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
                 createRatingAttr(ratingEngine, VertexType.RATING_PREDICTED_REV_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.PredictedRevenue));
+                // falls through
             case CUSTOM_EVENT:
                 createRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
                 createRatingAttr(ratingEngine, VertexType.RATING_PROB_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Probability));
+                // falls through
             default:
                 createRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
             }
@@ -265,11 +267,13 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
                 deleteRatingAttr(ratingEngine, VertexType.RATING_PREDICTED_REV_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.PredictedRevenue));
+                // falls through
             case CUSTOM_EVENT:
                 deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
                 deleteRatingAttr(ratingEngine, VertexType.RATING_PROB_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Probability));
+                // falls through
             default:
                 deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
             }

@@ -1,7 +1,7 @@
 package com.latticeengines.redshiftdb.load;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +29,9 @@ public class RedshiftLoadTestHarness {
         // setup testers as per the config
         Random random = new Random();
         if (possibleStmtTypes.size() < 1)
-            possibleStmtTypes = new HashSet<>(Arrays.asList(LoadTestStatementType.Query_Numeric_Join));
+            possibleStmtTypes = new HashSet<>(Collections.singletonList(LoadTestStatementType.Query_Numeric_Join));
 
-        LoadTestStatementType[] typesArray = possibleStmtTypes
-                .toArray(new LoadTestStatementType[possibleStmtTypes.size()]);
+        LoadTestStatementType[] typesArray = possibleStmtTypes.toArray(new LoadTestStatementType[0]);
 
         for (int i = 0; i < load; ++i) {
             LoadTestStatementType statementType = typesArray[random.nextInt(possibleStmtTypes.size())];
@@ -48,6 +47,8 @@ public class RedshiftLoadTestHarness {
             case "QueryMultiConditionalTest":
                 testers.add(new MultiConditionalQueryLoadTest(i, stmtsPerTester, maxSleepTime, jdbcTemplate));
                 break;
+
+            default:
             }
         }
     }

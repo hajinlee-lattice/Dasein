@@ -70,7 +70,7 @@ public class MultiConditionalQueryLoadTest extends AbstractLoadTest {
 
     private String getValueforType(String columnType) {
         Random rng = new Random();
-        if (columnType.equals("boolean")) {
+        if ("boolean".equals(columnType)) {
             return Integer.toString(rng.nextInt(2));
         }
         return Integer.toString(rng.nextInt(100));
@@ -79,7 +79,7 @@ public class MultiConditionalQueryLoadTest extends AbstractLoadTest {
     private String getRandomComparisonType(String columnType) {
         List<String> comparisonTypes = Arrays.asList("=", "!=", "<", "<=", ">", ">=");
         Random rng = new Random();
-        if (columnType.equals("boolean")) {
+        if ("boolean".equals(columnType)) {
             return comparisonTypes.get(rng.nextInt(2));
         }
         return comparisonTypes.get(rng.nextInt(comparisonTypes.size()));

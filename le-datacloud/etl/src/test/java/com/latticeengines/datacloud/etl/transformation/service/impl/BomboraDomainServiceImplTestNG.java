@@ -89,8 +89,8 @@ public class BomboraDomainServiceImplTestNG
                 log.info(String.valueOf(id));
             }
             Assert.assertTrue(
-                    (domain.equals("null") && timestamp == null) || (domain.equals("google.com") && timestamp != null)
-                            || (domain.equals("uber.com") && timestamp != null));
+                    ("null".equals(domain) && timestamp == null) || ("google.com".equals(domain) && timestamp != null)
+                            || ("uber.com".equals(domain) && timestamp != null));
 
             rowNum++;
         }

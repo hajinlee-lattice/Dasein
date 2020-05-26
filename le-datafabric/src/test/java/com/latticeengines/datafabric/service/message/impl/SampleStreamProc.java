@@ -11,11 +11,11 @@ public class SampleStreamProc implements FabricStreamProc {
 
     public synchronized void processRecord(String recordType, String id, GenericRecord record) {
 
-        if (!id.equals("yyangdev" + messageCount)) {
+        if (!("yyangdev" + messageCount).equals(id)) {
             invalidMessages++;
         }
         String company = record.get("company").toString();
-        if (!company.equals("myCompany")) {
+        if (!"myCompany".equals(company)) {
             invalidMessages++;
         }
         messageCount++;

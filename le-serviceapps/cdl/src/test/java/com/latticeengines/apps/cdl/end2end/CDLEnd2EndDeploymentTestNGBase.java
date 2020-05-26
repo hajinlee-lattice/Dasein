@@ -942,6 +942,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             break;
         case Contact:
             modifyFieldMappingsForContact(fieldMappingDocument);
+            break;
         default:
         }
     }

@@ -20,21 +20,21 @@ public class VdbValueConverter implements ValueConverter {
         }
         String valueStr = (String)value;
         if (targetType.equals(Double.class)) {
-            return (T) new Double(valueStr);
+            return (T) Double.valueOf(valueStr);
         } else if (targetType.equals(Float.class)) {
-            return (T) new Float(valueStr);
+            return (T) Float.valueOf(valueStr);
         } else if (targetType.equals(Integer.class)) {
             try {
-                return (T) new Integer(valueStr);
+                return (T) Integer.valueOf(valueStr);
             } catch (NumberFormatException e) {
-                return (T) new Integer(new Double(valueStr).intValue());
+                return (T) Integer.valueOf(Double.valueOf(valueStr).intValue());
             }
         } else if (targetType.equals(Long.class)) {
-            return (T) new Long(valueStr);
+            return (T) Long.valueOf(valueStr);
         } else if (targetType.equals(String.class)) {
-            return (T) new String(valueStr);
+            return (T) valueStr;
         } else if (targetType.equals(Boolean.class)) {
-            if (valueStr.equals("1") || valueStr.equalsIgnoreCase("true")) {
+            if ("1".equals(valueStr) || "true".equalsIgnoreCase(valueStr)) {
                 return (T) Boolean.TRUE;
             } else {
                 return (T) Boolean.FALSE;

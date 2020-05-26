@@ -488,19 +488,16 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), minPageSize);
-        Long lastModificationDate = 0L;
+        long lastModificationDate = 0L;
 
         for (Recommendation recommendation : recommendations) {
             Assert.assertNotNull(recommendation.getRecommendationId());
             Assert.assertNotNull(recommendation.getPid());
             Assert.assertNotNull(recommendation.getTenantId());
             Assert.assertEquals(recommendation.getTenantId().longValue(), TENANT_PID);
-            Object timestamp = new Long(recommendation.getLastUpdatedTimestamp().getTime());
-            if (!(timestamp instanceof Long)) {
-                timestamp = Long.parseLong(timestamp.toString());
-            }
-            if ((Long) timestamp > lastModificationDate) {
-                lastModificationDate = (Long) timestamp;
+            long timestamp = recommendation.getLastUpdatedTimestamp().getTime();
+            if (timestamp > lastModificationDate) {
+                lastModificationDate = timestamp;
             }
             compareOriginalAndExtractedRecommendations(originalRecommendation, recommendation);
         }

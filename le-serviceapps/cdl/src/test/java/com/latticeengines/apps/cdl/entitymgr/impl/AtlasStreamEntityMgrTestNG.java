@@ -3,7 +3,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -37,7 +37,7 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
             Assert.assertNotNull(stream.getPid());
         }
     }
-    
+
     // [ Name + Tenant ] need to be unique
     @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = {
             DataIntegrityViolationException.class })

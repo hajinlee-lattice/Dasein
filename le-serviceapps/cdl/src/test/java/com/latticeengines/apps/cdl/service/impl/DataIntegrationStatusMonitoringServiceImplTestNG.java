@@ -261,10 +261,10 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId(), false);
         Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
-        Assert.assertEquals(new Long(1), playLaunch.getContactsErrored());
-        Assert.assertEquals(new Long(1), playLaunch.getContactsDuplicated());
-        Assert.assertEquals(new Long(1), playLaunch.getAudienceSize());
-        Assert.assertEquals(new Long(1), playLaunch.getMatchedCount());
+        Assert.assertEquals(Long.valueOf(1), playLaunch.getContactsErrored());
+        Assert.assertEquals(Long.valueOf(1), playLaunch.getContactsDuplicated());
+        Assert.assertEquals(Long.valueOf(1), playLaunch.getAudienceSize());
+        Assert.assertEquals(Long.valueOf(1), playLaunch.getMatchedCount());
 
         updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);

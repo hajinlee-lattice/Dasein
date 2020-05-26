@@ -1,15 +1,12 @@
 package com.latticeengines.eai.service.impl.s3;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -17,14 +14,12 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
-import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -96,7 +91,7 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
             throw new IllegalArgumentException("Splitting only works for avro file now.");
         }
 
-        Double downloadProgress = 0.0;
+        double downloadProgress = 0.0;
         if (shouldSplit(config)) {
             log.info("Downloading original file into splits on local.");
             Long totalRecords = AvroUtils.count(yarnConfiguration, hdfsPath);
@@ -113,17 +108,17 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
                         new GenericDatumWriter<GenericRecord>())) {
                     FileUtils.touch(avroFile);
                     writer.create(schema, avroFile);
-                    Long fileSize = FileUtils.sizeOf(avroFile);
-                    Long recordsInFile = 0L;
+                    long fileSize = FileUtils.sizeOf(avroFile);
+                    long recordsInFile = 0L;
                     while (fileSize < splitSize && iterator.hasNext()) {
                         GenericRecord datum = iterator.next();
                         writer.append(datum);
                         recordsInFile++;
                         fileSize = FileUtils.sizeOf(avroFile);
                     }
-                    downloadProgress += recordsInFile.doubleValue() / totalRecords.doubleValue();
+                    downloadProgress += (double) recordsInFile / totalRecords.doubleValue();
                     log.info("Downloaded " + recordsInFile + " records to split " + splitFileName + String.format(
-                            " (%.2f MB): %.2f %%", fileSize.doubleValue() / 1024.0 / 1024.0, downloadProgress * 100));
+                            " (%.2f MB): %.2f %%", (double) fileSize / 1024.0 / 1024.0, downloadProgress * 100));
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to write to split file " + splitFileName, e);
                 }
@@ -143,6 +138,7 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
         return numAvroFiles;
     }
 
+    @SuppressWarnings("checkstyle:AnonInnerLength")
     public int parallelDownloadToLocal(HdfsToS3Configuration config) {
         final boolean needToSplit = shouldSplit(config);
 
@@ -170,99 +166,10 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, filePaths.size()));
         Map<String, Future<Long>> futures = new LinkedHashMap<>();
         for (final String filePath : filePaths) {
-            futures.put(filePath, executorService.submit(new Callable<Long>() {
-
-                Integer splitIdx = 0;
-                Long splitSize;
-
-                @Override
-                public Long call() {
-                    if (needToSplit) {
-                        splitSize = config.getSplitSize();
-                        return splitToLocal(filePath);
-                    } else {
-                        return downloadToLocal(filePath);
-                    }
-                }
-
-                private Long downloadToLocal(String filePath) {
-                    log.info("Downloading original file " + filePath + " to local as a whole.");
-                    String fileName = new Path(filePath).getName();
-                    try {
-                        boolean hasRecords = AvroUtils.hasRecords(yarnConfiguration, filePath);
-                        if (hasRecords) {
-                            File avroFile = new File(LOCAL_CACHE + "/" + fileName);
-                            HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, avroFile.getAbsolutePath());
-                            FileUtils.deleteQuietly(new File(LOCAL_CACHE + "/." + fileName + ".crc"));
-                            Long fileSize = FileUtils.sizeOf(avroFile);
-                            log.info("Downloaded filePath to " + fileName
-                                    + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
-                        } else {
-                            log.warn("Avro file " + filePath + " has 0 rows, skip download to local.");
-                        }
-                        return 1L;
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to download to split file " + fileName, e);
-                    }
-                }
-
-                private Long splitToLocal(String filePath) throws IllegalArgumentException {
-                    log.info("Downloading original file " + filePath + " to local, and split into chunks of "
-                            + splitSize / 1024.0 / 1024.0 + " MB.");
-                    Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
-                    Long recordsInFile = 0L;
-                    while (iterator.hasNext()) {
-                        String fileName = new Path(filePath).getName().replace(".avro", "-" + splitIdx + ".avro");
-                        File avroFile = new File(LOCAL_CACHE + "/" + fileName);
-                        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                                new GenericDatumWriter<>())) {
-                            writer.setCodec(CodecFactory.snappyCodec());
-                            FileUtils.touch(avroFile);
-                            Long fileSize = FileUtils.sizeOf(avroFile);
-                            if (fileSize == 0) {
-                                writer.create(schema, avroFile);
-                            }
-                            Long fileSizeIncrement = 0L;
-                            while (fileSizeIncrement < splitSize && iterator.hasNext()) {
-                                GenericRecord datum = iterator.next();
-                                writer.append(datum);
-                                recordsInFile++;
-                                fileSizeIncrement = FileUtils.sizeOf(avroFile) - fileSize;
-                            }
-                            fileSize = FileUtils.sizeOf(avroFile);
-                            log.info("Downloaded " + recordsInFile + " records to " + fileName
-                                    + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to write to split file " + fileName, e);
-                        }
-                        splitIdx++;
-                    }
-                    return recordsInFile;
-                }
-
-                @SuppressWarnings("unused")
-                private Long copyToLocalJson(String filePath) throws IllegalArgumentException, IOException {
-                    log.info("Downloading original file " + filePath + " to local.");
-                    Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
-                    Long recordsInFile = 0L;
-                    String fileName = new Path(filePath).getName().replace(".avro", ".json");
-                    File jsonFile = new File(LOCAL_CACHE + "/" + fileName);
-                    FileUtils.touch(jsonFile);
-                    try (BufferedWriter writer = new BufferedWriter(
-                            new FileWriter(LOCAL_CACHE + "/" + fileName, true))) {
-                        while (iterator.hasNext()) {
-                            GenericRecord datum = iterator.next();
-                            writer.write(datum.toString());
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to write to split file " + fileName, e);
-                    }
-                    Long fileSize = FileUtils.sizeOf(jsonFile);
-                    log.info("Downloaded " + recordsInFile + " records to " + fileName
-                            + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
-                    return recordsInFile;
-                }
-            }));
+            long splitSize = needToSplit ? config.getSplitSize() : -1L;
+            futures.put(filePath, executorService.submit( //
+                    new HdfsToS3Uploader(yarnConfiguration, LOCAL_CACHE, needToSplit, splitSize, schema, filePath) //
+            ));
         }
         for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
             String file = entry.getKey();

@@ -438,7 +438,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), 2);
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(1));
+        Assert.assertEquals(output.getStatistics().getRowsMatched(), Integer.valueOf(1));
         output.setMetadata(null);
         log.info("MatchOutput: {}", JsonUtils.serialize(output));
         Assert.assertTrue(output.getResult().get(0).isMatched());

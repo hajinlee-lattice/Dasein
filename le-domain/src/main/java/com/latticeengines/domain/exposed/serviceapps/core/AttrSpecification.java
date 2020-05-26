@@ -202,10 +202,12 @@ public class AttrSpecification {
             case LookupId:
                 return AttrSpecification.CDL_LOOKUP_ID();
             case Extension:
-                if (entity != null && entity == BusinessEntity.Account) {
+                if (BusinessEntity.Account.equals(entity)) {
                     return AttrSpecification.CDL_ACCOUNT_EXTENSION();
-                } else if (entity != null && entity == BusinessEntity.Contact) {
+                } else if (BusinessEntity.Contact.equals(entity)) {
                     return AttrSpecification.CDL_CONTACT_EXTENSION();
+                } else {
+                    return AttrSpecification.DEFAULT();
                 }
             default:
                 return AttrSpecification.DEFAULT();

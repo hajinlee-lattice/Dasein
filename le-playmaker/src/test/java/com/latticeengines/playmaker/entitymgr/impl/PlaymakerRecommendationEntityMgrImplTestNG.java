@@ -313,7 +313,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
                 Assert.assertNotNull(a.get(field));
                 if (type == Long.class) {
                     Long val = Long.parseLong("" + a.get(field));
-                    if (field.equals("RowNum")) {
+                    if ("RowNum".equals(field)) {
                         Assert.assertEquals(val, Long.valueOf(rowCount + offset));
                     }
                 }

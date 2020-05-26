@@ -257,15 +257,15 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
                         return false;
                     }
                     String name = file.getPath().getName();
-                    return name.equals("modelsummary.json");
+                    return "modelsummary.json".equals(name);
                 });
-        assertTrue(paths.size() == 1);
+        assertEquals(paths.size(), 1);
         String modelSummaryPath = paths.get(0);
         String uuid = UuidUtils.parseUuid(modelSummaryPath);
         String modelId = "ms__" + uuid + "-PLSModel";
 
         List<Table> tables = metadataProxy.getTables(tenant2.getId());
-        assertTrue(tables.size() == 2);
+        assertEquals(tables.size(), 2);
         String newEventTableName = modelSummaryPath.split("/")[8];
         String newTrainingTableName = tables.get(0).getName().equals(newEventTableName)
                 ? tables.get(1).getName() : tables.get(0).getName();

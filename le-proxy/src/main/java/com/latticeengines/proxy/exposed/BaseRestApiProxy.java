@@ -152,7 +152,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected String constructUrl(Object path, Object... variables) {
-        if (hostport == null || hostport.equals("")) {
+        if (hostport == null || "".equals(hostport)) {
             throw new NullPointerException("hostport must be set");
         }
 

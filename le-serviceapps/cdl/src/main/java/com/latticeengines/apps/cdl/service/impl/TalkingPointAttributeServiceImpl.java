@@ -117,6 +117,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
                 case Variable:
                     toReturn.addNotion(notion, getVariableAttributes());
                     break;
+                default:
                 }
             } else {
                 toReturn.addInvalidNotion(notion);

@@ -124,6 +124,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         case SUBMIT_MODELS:
             appIds = submitModel(tupleId, modelCommand, commandParameters);
             break;
+        default:
         }
 
         return appIds;

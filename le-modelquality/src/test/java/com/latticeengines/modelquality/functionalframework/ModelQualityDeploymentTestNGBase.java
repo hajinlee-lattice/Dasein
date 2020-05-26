@@ -469,11 +469,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             String status = modelQualityProxy.getModelRunStatusByName(modelName);
             ModelRun modelRun = modelRunEntityMgr.findByName(modelName);
 
-            if (status.equals("COMPLETED")) {
+            if ("COMPLETED".equals(status)) {
                 break;
             }
 
-            if (status.equals("FAILED")) {
+            if ("FAILED".equals(status)) {
                 String msg = String.format("Failed due to= %s", modelRun.getErrorMessage());
                 if (failWithAssert) {
                     Assert.fail(msg);

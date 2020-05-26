@@ -38,6 +38,7 @@ public final class RightsUtilities {
                 case "create":
                     rightsDocument.setMayCreate(true);
                     break;
+                default:
             }
         }
 

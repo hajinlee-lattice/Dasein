@@ -17,11 +17,11 @@ public class VdbValueConverterUnitTestNG {
     @DataProvider(name = "valueDataProvider")
     Object[][] valueDataProvider() {
         return new Object[][]{
-                {Double.class, "10.1", new Double("10.1")},
-                {Integer.class, "123", new Integer("123")},
-                {Integer.class, "123.123", new Integer("123")},
-                {Float.class, "123.123", new Float("123.123")},
-                {Long.class, "123123123123123123", new Long("123123123123123123")},
+                {Double.class, "10.1", Double.parseDouble("10.1")},
+                {Integer.class, "123", Integer.valueOf("123")},
+                {Integer.class, "123.123", Integer.valueOf("123")},
+                {Float.class, "123.123", Float.parseFloat("123.123")},
+                {Long.class, "123123123123123123", Long.valueOf("123123123123123123")},
         };
     }
 }

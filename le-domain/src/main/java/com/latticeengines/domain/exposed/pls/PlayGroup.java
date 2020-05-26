@@ -104,7 +104,7 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
     }
 
     public static String getIdForBIS(String type) {
-        return StringUtils.isNotEmpty(type) && type.equals("List") ? "ADefault" : type;
+        return StringUtils.isNotEmpty(type) && "List".equals(type) ? "ADefault" : type;
     }
 
     @Override

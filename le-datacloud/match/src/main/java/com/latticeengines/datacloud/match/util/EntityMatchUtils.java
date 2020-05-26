@@ -92,7 +92,6 @@ public final class EntityMatchUtils {
         if (entry == null) {
             return StringUtils.EMPTY;
         }
-
         String[] values;
         switch (entry.getType()) {
         case DUNS:
@@ -105,8 +104,9 @@ public final class EntityMatchUtils {
             return String.format("{Domain=%s,Country=%s}", values[0], values[1]);
         case EXTERNAL_SYSTEM:
             return String.format("{System=%s,ID=%s}", entry.getSerializedKeys(), entry.getSerializedValues());
+        default:
+            return StringUtils.EMPTY;
         }
-        return StringUtils.EMPTY;
     }
 
     /**
@@ -193,7 +193,7 @@ public final class EntityMatchUtils {
 
     /**
      * Create a new {@link Tenant} with ID fields standardized
-     * 
+     *
      * @param tenant
      *            input tenant, must not be {@literal null} and contains non-null ID
      * @return non null tenant with standardized ID field

@@ -31,17 +31,17 @@ public class AnnotationCacheServiceTestNG extends AbstractTestNGSpringContextTes
         final Integer key = 0;
         cacheEntity.putValueBypassCache(key, 0);
 
-        assertEquals(cacheEntity.getValue(key), new Integer(0));
+        assertEquals(cacheEntity.getValue(key), Integer.valueOf(0));
         cacheEntity.putValueBypassCache(key, 1);
-        assertEquals(cacheEntity.getValue(key), new Integer(0));
-        assertEquals(cacheEntity.getValueBypassCache(key), new Integer(1));
+        assertEquals(cacheEntity.getValue(key), Integer.valueOf(0));
+        assertEquals(cacheEntity.getValueBypassCache(key), Integer.valueOf(1));
 
         cacheEntity.putValue(key, 2);
-        assertEquals(cacheEntity.getValue(key), new Integer(2));
-        assertEquals(cacheEntity.getValueBypassCache(key), new Integer(2));
+        assertEquals(cacheEntity.getValue(key), Integer.valueOf(2));
+        assertEquals(cacheEntity.getValueBypassCache(key), Integer.valueOf(2));
 
         cacheEntity.putValue(key, 3);
-        assertEquals(cacheEntity.getValue(key), new Integer(3));
-        assertEquals(cacheEntity.getValueBypassCache(key), new Integer(3));
+        assertEquals(cacheEntity.getValue(key), Integer.valueOf(3));
+        assertEquals(cacheEntity.getValueBypassCache(key), Integer.valueOf(3));
     }
 }

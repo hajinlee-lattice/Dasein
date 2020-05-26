@@ -36,7 +36,7 @@ public class DataCollectionStatusEntityMgrImplTestNG extends CDLFunctionalTestNG
         DataCollectionStatus retrievedStatus = dataCollectionStatusEntityMgr.findByTenantAndVersion(mainTestTenant,
                 DataCollection.Version.Blue);
         System.out.print(JsonUtils.serialize(retrievedStatus));
-        Assert.assertEquals(retrievedStatus.getAccountCount(), new Long(10L));
+        Assert.assertEquals((long) retrievedStatus.getAccountCount(), 10L);
 
         status.setAccountCount(20L);
         dataCollectionStatusEntityMgr.createOrUpdate(status);
@@ -44,7 +44,7 @@ public class DataCollectionStatusEntityMgrImplTestNG extends CDLFunctionalTestNG
         Thread.sleep(500);
         retrievedStatus = dataCollectionStatusEntityMgr.findByTenantAndVersion(mainTestTenant,
                 DataCollection.Version.Blue);
-        Assert.assertEquals(retrievedStatus.getAccountCount(), new Long(20L));
+        Assert.assertEquals((long) retrievedStatus.getAccountCount(), 20L);
     }
 
 }

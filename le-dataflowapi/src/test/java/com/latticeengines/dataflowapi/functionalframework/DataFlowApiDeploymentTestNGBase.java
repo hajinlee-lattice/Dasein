@@ -27,7 +27,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
@@ -114,7 +113,7 @@ public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContext
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         for (AbstractMap.SimpleEntry<String, String> e : copyEntries) {
-            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getKey())) {
+            for (String pattern : e.getKey().split(",")) {
                 for (Resource res : resolver.getResources(pattern)) {
                     Path destinationPath = getDestinationPath(e.getValue(), res);
                     FSDataOutputStream os = fs.create(destinationPath);

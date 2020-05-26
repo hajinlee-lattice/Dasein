@@ -194,9 +194,9 @@ public class ModelingServiceExecutor {
                 && MapUtils.isNotEmpty(samplingConfig.getCounterGroupResultMap())) {
             Long totalCount = samplingConfig.getCounterGroupResultMap().values() //
                     .stream() //
-                    .reduce((x, y) -> x + y).get();
+                    .reduce(Long::sum).orElse(0L);
             if (builder.maxRowsLimit < totalCount) {
-                int samplingRate = (new Double((100L * (1.0d * builder.maxRowsLimit) / totalCount))).intValue();
+                int samplingRate = Double.valueOf(100. * builder.maxRowsLimit / totalCount).intValue();
                 log.info(String.format("Setting sampling rate as %d as totalCount = %d and maxRowsLimit = %d",
                         samplingRate, totalCount, builder.maxRowsLimit));
                 samplingConfig.setSamplingRate(samplingRate);

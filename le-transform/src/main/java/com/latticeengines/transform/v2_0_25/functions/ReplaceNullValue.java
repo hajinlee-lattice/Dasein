@@ -71,7 +71,7 @@ public class ReplaceNullValue implements RealTimeTransform {
                     Double value = Double.parseDouble(matcherKeyAndValue.group(4));
                     lookupMap.put(key, value);
                     dictionaryString = matcherKeyAndValue.group(6);
-                    if (!dictionaryString.equals("")) {
+                    if (!"".equals(dictionaryString)) {
                         dictionaryString = dictionaryString.substring(2);
                     } else {
                         break;

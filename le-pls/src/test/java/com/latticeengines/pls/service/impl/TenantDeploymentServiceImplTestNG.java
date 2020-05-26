@@ -33,7 +33,7 @@ public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBaseDe
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
         if (deployment != null) {
             tenantDeploymentEntityMgr.deleteByTenantId(deployment.getTenantId());
         }
@@ -51,7 +51,7 @@ public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBaseDe
         TenantDeployment retrivedDeployment = tenantDeploymentEntityMgr.findByTenantId(tenantId);
         Assert.assertEquals(retrivedDeployment.getStep(), TenantDeploymentStep.BUILD_MODEL);
         Assert.assertEquals(retrivedDeployment.getStatus(), TenantDeploymentStatus.SUCCESS);
-        Assert.assertEquals(retrivedDeployment.getCurrentLaunchId(), new Long(789));
+        Assert.assertEquals(retrivedDeployment.getCurrentLaunchId(), Long.valueOf(789));
         Assert.assertEquals(retrivedDeployment.getModelId(), "modelid");
     }
 

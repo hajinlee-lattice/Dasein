@@ -113,7 +113,7 @@ public class FeatureImportanceAggregator implements FileAggregator {
                 }
 
                 String name = file.getPath().getName();
-                return name.equals("diagnostics.json");
+                return "diagnostics.json".equals(name);
             }
 
         };

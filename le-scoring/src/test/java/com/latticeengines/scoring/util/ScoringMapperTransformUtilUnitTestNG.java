@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.util;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.BufferedWriter;
@@ -11,6 +12,7 @@ import java.io.LineNumberReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -180,8 +182,8 @@ public class ScoringMapperTransformUtilUnitTestNG {
             throws JsonProcessingException, IOException, DecoderException {
 
         JsonNode j = new ObjectMapper().readTree(transformedString);
-        String recordId = new String(Hex.decodeHex(j.get("key").asText().toCharArray()), "UTF8");
-        assertTrue(recordId.equals("837394"));
+        String recordId = new String(Hex.decodeHex(j.get("key").asText().toCharArray()), StandardCharsets.UTF_8);
+        assertEquals(recordId, "837394");
         ArrayNode arr = (ArrayNode) j.get("value");
         return (arr.size() == 194 && containsRightContents(arr));
     }
@@ -226,12 +228,11 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
     @Test(groups = "unit")
     public void testProcessBitValue() {
-
-        assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "true").equals("1"));
-        assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "false").equals("0"));
-        assertTrue(ScoringMapperTransformUtil.processBitValue("Float", "2").equals("2"));
-        assertTrue(ScoringMapperTransformUtil.processBitValue("String", "true").equals("true"));
-        assertTrue(ScoringMapperTransformUtil.processBitValue("String", "false").equals("false"));
+        assertEquals(ScoringMapperTransformUtil.processBitValue("Float", "true"), "1");
+        assertEquals(ScoringMapperTransformUtil.processBitValue("Float", "false"), "0");
+        assertEquals(ScoringMapperTransformUtil.processBitValue("Float", "2"), "2");
+        assertEquals(ScoringMapperTransformUtil.processBitValue("String", "true"), "true");
+        assertEquals(ScoringMapperTransformUtil.processBitValue("String", "false"), "false");
     }
 
     @Test(groups = "unit")

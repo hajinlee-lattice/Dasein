@@ -51,6 +51,7 @@ public final class AlgorithmFactory extends ModelFactory {
                 case DECISIONTREE:
                     algorithm = createDT(modelAlgo);
                     break;
+                default:
             }
         } else
             algorithm = getDefaultAlgorithm(runTimeParams);

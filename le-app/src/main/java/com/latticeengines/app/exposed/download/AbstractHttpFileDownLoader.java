@@ -113,6 +113,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             case "application/csv":
                 response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", //
                         StringUtils.substringBeforeLast(getFileName(), ".") + ".csv"));
+                // falls through
             default:
                 StringBuilder sb = new StringBuilder();
                 FileCopyUtils.copy(processInputStreamBasedOnMode(getFileInputStream(), mode, sb),

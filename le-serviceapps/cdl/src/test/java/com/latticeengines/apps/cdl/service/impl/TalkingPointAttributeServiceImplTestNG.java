@@ -5,10 +5,7 @@ import static org.mockito.Mockito.spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -24,15 +21,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.StoreFilter;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.ParallelFlux;
 
 public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -46,78 +35,7 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
         setupTestEnvironment();
         String tenantName = CustomerSpace.parse(mainCustomerSpace).getTenantId();
 
-        ServingStoreService spiedServingStoreService = spy(new ServingStoreService() {
-            @Override
-            public ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity,
-                    DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
-                    DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, Version version, StoreFilter filter, String attributeSetName) {
-                return null;
-            }
-
-            @Override
-            public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
-                return null;
-            }
-
-            @Override
-            public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
-                    DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
-                    DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getAttrsCanBeEnabledForModeling(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version, Boolean allCustomerAttrs) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getAttrsEnabledForModeling(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public Map<String, Boolean> getAttributesUsage(String customerSpace, BusinessEntity entity,
-                    Set<String> attributes, Predefined group, Version version) {
-                return null;
-            }
-
-        });
+        ServingStoreService spiedServingStoreService = spy(new DummyServingStoreService());
         ((TalkingPointAttributeServiceImpl) talkingPointAttributeService)
                 .setServingStoreService(spiedServingStoreService);
 

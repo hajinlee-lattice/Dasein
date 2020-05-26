@@ -315,31 +315,31 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     }
 
     private void verifyAccountMapping(String field0, String field1, String field2, String field3) {
-        if (field2.equals("AccountId")) {
+        if ("AccountId".equals(field2)) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, "ID");
             Assert.assertEquals(field3, UserDefinedType.TEXT.name());
-        } else if (field2.equals("CustomerAccountId")) {
+        } else if ("CustomerAccountId".equals(field2)) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, "ID");
             Assert.assertEquals(field3, UserDefinedType.TEXT.name());
-        } else if (field2.equals("Type")) {
+        } else if ("Type".equals(field2)) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, "Type");
             Assert.assertEquals(field3, UserDefinedType.TEXT.name());
-        } else if (field2.equalsIgnoreCase("user_TestDate1")) {
+        } else if ("user_TestDate1".equalsIgnoreCase(field2)) {
             Assert.assertEquals(field0, CUSTOM);
             Assert.assertEquals(field1, "TestDate1");
             Assert.assertEquals(field3, "MM/DD/YYYY America/New_York");
-        } else if (field2.equalsIgnoreCase("user_TestDate2")) {
+        } else if ("user_TestDate2".equalsIgnoreCase(field2)) {
             Assert.assertEquals(field0, CUSTOM);
             Assert.assertEquals(field1, "TestDate2");
             Assert.assertEquals(field3, "MM.DD.YY 00:00:00 12H Asia/Shanghai");
-        } else if (field2.equalsIgnoreCase("user_TestDate3")) {
+        } else if ("user_TestDate3".equalsIgnoreCase(field2)) {
             Assert.assertEquals(field0, CUSTOM);
             Assert.assertEquals(field1, "TestDate3");
             Assert.assertEquals(field3, "YYYY-MMM-DD 00:00 12H " + TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
-        } else if (field2.equals("LastModifiedDate")) {
+        } else if ("LastModifiedDate".equals(field2)) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, UNMAPPED);
             Assert.assertEquals(field3, UserDefinedType.DATE.name());

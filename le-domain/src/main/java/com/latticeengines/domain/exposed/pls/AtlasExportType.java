@@ -111,6 +111,7 @@ public enum AtlasExportType {
                 attrs.add(new ImmutablePair<>(InterfaceName.PhoneNumber, "Contact Phone"));
                 attrs.add(new ImmutablePair<>(InterfaceName.AccountId, "Account Id"));
                 attrs.add(new ImmutablePair<>(InterfaceName.CustomerAccountId, "Customer Account Id"));
+                break;
             default:
         }
         return attrs;

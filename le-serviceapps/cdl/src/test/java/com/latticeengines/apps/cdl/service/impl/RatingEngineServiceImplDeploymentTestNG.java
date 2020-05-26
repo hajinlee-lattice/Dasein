@@ -288,6 +288,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
             rm = ratingModels.get(0);
             Assert.assertTrue(rm instanceof AIModel);
             break;
+        default:
         }
 
         log.info("Rating Engine after findById is " + ratingEngine.toString());

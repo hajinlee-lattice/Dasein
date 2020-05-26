@@ -65,9 +65,9 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
     }
 
     private void createTable(String table, String columnName) {
-        if (dataSourceDBType.equals("MySQL")) {
+        if ("MySQL".equals(dataSourceDBType)) {
             jdbcTemplate.execute("Create table `" + table + "` ( `" + columnName + "` bigint)");
-        } else if (dataSourceDBType.equals("SQLServer")) {
+        } else if ("SQLServer".equals(dataSourceDBType)) {
             jdbcTemplate.execute("Create table [" + table + "] ( [" + columnName + "] bigint)");
         }
     }

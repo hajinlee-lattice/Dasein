@@ -76,9 +76,9 @@ public enum FieldType {
         try {
             switch (fieldtype) {
                 case BOOLEAN:
-                    if (rawvalue.equals("1") || rawvalue.equalsIgnoreCase("true")) {
+                    if ("1".equals(rawvalue) || "true".equalsIgnoreCase(rawvalue)) {
                         return Boolean.TRUE;
-                    } else if (rawvalue.equals("0") || rawvalue.equalsIgnoreCase("false")) {
+                    } else if ("0".equals(rawvalue) || "false".equalsIgnoreCase(rawvalue)) {
                         return Boolean.FALSE;
                     } else {
                         throw new RuntimeException("Invalid value for BOOLEAN " + rawvalue);

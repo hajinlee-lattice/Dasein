@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.dataflow.transformation.source;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;

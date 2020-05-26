@@ -24,12 +24,12 @@ public class Path implements Serializable {
                     "Path " + rawPath + " is invalid.  Paths must start with a /.");
         }
 
-        if (!rawPath.equals("/") && !rawPath.matches("^(/[\\w\\-.]+)+$")) {
+        if (!"/".equals(rawPath) && !rawPath.matches("^(/[\\w\\-.]+)+$")) {
             throw new IllegalArgumentException("Path " + rawPath
                     + " is invalid.  A path must contain only word characters or .'s");
         }
 
-        if (rawPath.equals("/")) {
+        if ("/".equals(rawPath)) {
             parts = new ArrayList<>();
         } else {
             String path = rawPath.substring(1);

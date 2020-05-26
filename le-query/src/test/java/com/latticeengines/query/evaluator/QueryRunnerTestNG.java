@@ -363,7 +363,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
             offset += pageSize;
         } while (results.size() > 0);
         Assert.assertEquals(totalResults, countInRedshift);
-        Assert.assertEquals(totalRuns, (int) (Math.ceil(new Long(countInRedshift).doubleValue() / pageSize) + 1));
+        Assert.assertEquals(totalRuns, (int) (Math.ceil(Long.valueOf(countInRedshift).doubleValue() / pageSize) + 1));
     }
 
     @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts", enabled = false)

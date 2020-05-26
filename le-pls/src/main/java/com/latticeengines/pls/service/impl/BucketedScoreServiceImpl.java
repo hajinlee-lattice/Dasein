@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.hadoop.conf.Configuration;
@@ -63,7 +63,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-    
+
     @Inject
     private BatonService batonService;
 
@@ -123,7 +123,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
         return bucketedScoreProxy.getABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
-    
+
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
         List<BucketMetadata> metadata = bucketedScoreProxy.getModelABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
@@ -145,7 +145,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     public List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId) {
         return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
-    
+
     @Override
     public void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas) {
         log.info(String.format("Creating BucketMetadata for RatingEngine %s, Model %s", ratingEngineId, modelId));

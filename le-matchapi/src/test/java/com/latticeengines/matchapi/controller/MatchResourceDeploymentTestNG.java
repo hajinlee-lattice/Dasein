@@ -21,7 +21,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -156,7 +155,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         int idx = 0;
         for (Object res : output.getResult().get(0).getOutput()) {
             String field = output.getOutputFields().get(idx++);
-            if (!StringUtils.isEmpty(res)) {
+            if (res != null) {
                 log.info(field + " = " + res + ", ");
             }
         }
@@ -339,7 +338,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
-        Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(101));
+        Assert.assertEquals(finalStatus.getRowsMatched(), Integer.valueOf(101));
 
         List<GenericRecord> matchResults = AvroUtils.getDataFromGlob(
                 yarnConfiguration, new Path(finalStatus.getResultLocation() + "/" + "*.avro").toString());
@@ -379,10 +378,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
         Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
+        Assert.assertEquals(matchCommand.getRowsMatched(), Integer.valueOf(100));
     }
 
-    @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "recentApprovedVersions")
     public void testMultiBlockBulkMatch(String version) throws InterruptedException {
         // Skip default version testing as it's already covered in other test
         if (version == null) {

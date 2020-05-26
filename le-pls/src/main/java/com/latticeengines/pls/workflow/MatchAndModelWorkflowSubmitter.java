@@ -68,7 +68,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         TransformationGroup transformationGroup;
         String originalTransformationGroup = getTransformationGroupNameForModelSummary(modelSummary);
-        if (parameters.enableTransformation() && originalTransformationGroup.equals("none")) {
+        if (parameters.enableTransformation() && "none".equals(originalTransformationGroup)) {
             transformationGroup = plsFeatureFlagService.getTransformationGroupFromZK();
         } else if (parameters.enableTransformation()) {
             transformationGroup = TransformationGroup.fromName(originalTransformationGroup);

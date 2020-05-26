@@ -98,7 +98,7 @@ public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends Wo
                 return false;
             }
             String name1 = file.getPath().getName();
-            return name1.equals("modelsummary.json");
+            return "modelsummary.json".equals(name1);
         };
 
         try {

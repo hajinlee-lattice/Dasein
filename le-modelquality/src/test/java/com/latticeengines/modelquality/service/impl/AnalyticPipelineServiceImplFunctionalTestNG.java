@@ -26,18 +26,16 @@ public class AnalyticPipelineServiceImplFunctionalTestNG extends ModelQualityFun
 
             ap = spiedAnalyticPipelineService.createLatestProductionAnalyticPipeline();
             Assert.assertNotNull(ap);
-            Assert.assertEquals(new Integer(initialVersion + 1), ap.getVersion());
+            Assert.assertEquals(Integer.valueOf(initialVersion + 1), ap.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", ap.getName());
             Assert.assertNotNull(analyticPipelineEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
             doReturn("z/9.9.9-SNAPSHOT").when(spiedAnalyticPipelineService).getLedsVersion();
             ap = spiedAnalyticPipelineService.createLatestProductionAnalyticPipeline();
             Assert.assertNotNull(ap);
-            Assert.assertEquals(new Integer(initialVersion + 2), ap.getVersion());
+            Assert.assertEquals(Integer.valueOf(initialVersion + 2), ap.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", ap.getName());
             Assert.assertNotNull(analyticPipelineEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
-        } catch (Exception e) {
-            throw e;
         } finally {
             AnalyticPipeline ap = analyticPipelineEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT");
             if (ap != null) {

@@ -49,9 +49,23 @@
         <module name="CovariantEquals"/>
         <module name="DefaultComesLast"/>
         <module name="EmptyStatement"/>
+        <module name="EqualsAvoidNull">
+            <property name="ignoreEqualsIgnoreCase" value="true"/>
+        </module>
+        <module name="FallThrough">
+            <property name="reliefPattern" value="falls? ?thr(u|ough)"/>
+        </module>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean"/>
+            <property name="classes" value="java.lang.Integer"/>
+            <property name="classes" value="java.lang.Long"/>
+            <property name="classes" value="java.lang.Float"/>
+            <property name="classes" value="java.lang.Double"/>
+        </module>
         <module name="IllegalToken">
             <property name="tokens" value="LITERAL_NATIVE"/>
         </module>
+        <module name="MissingSwitchDefault"/>
         <module name="NoClone"/>
         <module name="SuperClone"/>
         <module name="NoFinalizer"/>
@@ -62,13 +76,6 @@
         <!-- Design -->
         <module name="HideUtilityClassConstructor"/>
         <module name="OneTopLevelClass"/>
-
-        <!-- Miscellaneous -->
-        <module name="OuterTypeFilename"/>
-
-        <!-- Modifiers -->
-        <module name="ModifierOrder"/>
-        <module name="RedundantModifier"/>
 
         <!-- Imports -->
         <module name="AvoidStarImport"/>
@@ -82,6 +89,22 @@
         </module>
         <module name="ImportControl">
             <property name="file" value="le-parent/checkstyle/import-control-error.xml"/>
+        </module>
+
+        <!-- Miscellaneous -->
+        <module name="OuterTypeFilename"/>
+
+        <!-- Modifiers -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Naming -->
+        <module name="PackageName"/>
+        <module name="TypeName"/>
+
+        <!-- Sizes -->
+        <module name="AnonInnerLength">
+            <property name="max" value="50"/>
         </module>
 
     </module>

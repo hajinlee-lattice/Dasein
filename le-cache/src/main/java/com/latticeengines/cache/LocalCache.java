@@ -156,11 +156,11 @@ public class LocalCache<K, V> implements Cache {
         final String keyPattern = updateSignal.replace(String.format("%s|%s|%s|", timestamp, opStr, mode), "");
         List<K> keysToReturn = new ArrayList<>();
         existingKeys.forEach(key -> {
-            if (mode.equals("key")) {
+            if ("key".equals(mode)) {
                 if (key.toString().equals(keyPattern)) {
                     keysToReturn.add(key);
                 }
-            } else if (mode.equals("all")) {
+            } else if ("all".equals(mode)) {
                 if (key.toString().startsWith(keyPattern)) {
                     keysToReturn.add(key);
                 }

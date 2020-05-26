@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.hadoop.util.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,7 +45,7 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         enrichProp.setCustomValue(Boolean.TRUE);
         for (int i = 0; i < exportLimit; i++) {
             AttrConfig config = new AttrConfig();
-            config.setAttrName(StringUtils.format("Attr%d", i));
+            config.setAttrName(String.format("Attr%d", i));
             config.setEntity(BusinessEntity.Account);
             config.putProperty(ColumnSelection.Predefined.Enrichment.name(), enrichProp);
             attrConfigs.add(config);

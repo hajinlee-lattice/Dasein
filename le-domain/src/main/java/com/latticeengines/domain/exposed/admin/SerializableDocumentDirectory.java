@@ -359,7 +359,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
         public Node(DocumentDirectory.Node documentNode) {
             this.node = documentNode.getPath().getSuffix();
             this.data = documentNode.getDocument().getData();
-            if (this.data.equals("") && documentNode.getChildren() != null
+            if ("".equals(this.data) && documentNode.getChildren() != null
                     && !documentNode.getChildren().isEmpty()) {
                 this.data = null;
             }

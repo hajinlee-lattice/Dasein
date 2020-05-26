@@ -66,6 +66,7 @@ public class SqlPublishService extends AbstractPublishService implements Publish
             break;
         case APPEND:
             break;
+        default:
         }
 
         String avroDir = getAvroDir(progress);
@@ -133,6 +134,7 @@ public class SqlPublishService extends AbstractPublishService implements Publish
                 avroDir = hdfsPathBuilder
                         .constructIngestionDir(publication.getSourceName(), progress.getSourceVersion()).toString();
                 break;
+            default:
         }
         return avroDir;
     }

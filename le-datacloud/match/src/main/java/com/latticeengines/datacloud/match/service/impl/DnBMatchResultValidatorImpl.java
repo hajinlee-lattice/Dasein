@@ -31,7 +31,7 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
     public void loadMatchCriteria() {
 
         try {
-            if (!matchCriteriaJson.equals("default")) {
+            if (!"default".equals(matchCriteriaJson)) {
                 matchCriteria = JsonUtils.deserialize(matchCriteriaJson, DnBMatchCriteria.class);
             }
         } catch (Exception e) {
@@ -245,16 +245,12 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
         }
 
         private boolean accept(String rule, String grade) {
-             if (rule.equals("*")) {
+             if ("*".equals(rule)) {
                  return true;
              } else {
                  grade = (grade == null) ? "Z" : grade;
-                 if (rule.contains(grade)) {
-                     return true;
-
-                 }
+                 return rule.contains(grade);
              }
-             return false;
         }
     }
 

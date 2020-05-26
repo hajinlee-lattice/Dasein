@@ -103,11 +103,11 @@ public class DefaultModelEvaluator implements ModelEvaluator {
                 value = DEFAULT_DOUBLE_VALUE;
             }
             if (value instanceof Boolean) {
-                Boolean booleanValue = ((Boolean) value).booleanValue();
+                Boolean booleanValue = (Boolean) value;
                 if (booleanValue)
-                    value = new Double("1.0");
+                    value = 1.;
                 else
-                    value = new Double("0.0");
+                    value = 0.;
             }
             if (value instanceof BigInteger) {
                 value = ((BigInteger) value).doubleValue();

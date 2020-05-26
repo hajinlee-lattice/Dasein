@@ -30,7 +30,7 @@ public class RecordTransformer {
 
         Map<String, Object> result = new HashMap<>(record.size() + definitions.size());
         result.putAll(record);
-        
+
         for (Map.Entry<String, Object> entry : result.entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Double) {
                 entry.setValue(PrecisionUtils.setPlatformStandardPrecision((Double) entry.getValue()));
@@ -43,22 +43,19 @@ public class RecordTransformer {
                 RealTimeTransform transform = transformRetriever.getTransform(id);
                 Object value = transform.transform(entry.arguments, result);
 
-                if (value == null) {
-                    value = null;
-                } else if (entry.type.type() == Double.class) {
+                if (value != null && Double.class.equals(entry.type.type())) {
                     try {
                         if (value.toString().toLowerCase().equals("true")) {
                             value = entry.type.type().cast(Double.valueOf("1.0"));
                         } else if (value.toString().toLowerCase().equals("false")) {
                             value = entry.type.type().cast(Double.valueOf("0.0"));
                         } else if (!value.toString().equals("null") && !value.toString().equals("None")) {
-                            value = new Double(
-                                    PrecisionUtils.setPlatformStandardPrecision(Double.valueOf(value.toString())));
+                            value = PrecisionUtils.setPlatformStandardPrecision(Double.parseDouble(value.toString()));
                         } else {
                             value = null;
                         }
                     } catch (Exception e) {
-                        log.warn(String.format("Problem casting Transform value to Java Double"));
+                        log.warn("Problem casting Transform value to Java Double");
                     }
                 }
 

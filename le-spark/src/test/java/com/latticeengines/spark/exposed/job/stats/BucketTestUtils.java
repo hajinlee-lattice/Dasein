@@ -313,6 +313,7 @@ public final class BucketTestUtils {
             case "Value3":
                 bucket = 3;
                 break;
+            default:
             }
         }
         return BitCodecUtils.setBits(result, lowestBit.get(ATTR_CAT_STR), numBits.get(ATTR_CAT_STR), bucket);
@@ -331,6 +332,7 @@ public final class BucketTestUtils {
             case '3':
                 bucket = 3;
                 break;
+            default:
             }
         }
         return BitCodecUtils.setBits(result, lowestBit.get(ATTR_CAT_MAP_STR), numBits.get(ATTR_CAT_MAP_STR), bucket);

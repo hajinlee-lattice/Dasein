@@ -22,7 +22,7 @@ public class DeriveAttributeFunction extends BaseOperation implements Function {
     public DeriveAttributeFunction(Fields fieldDeclaration,
             List<DeriveAttributeConfig.DeriveFunc> deriveFuncs) {
         super(fieldDeclaration);
-        this.attrPositions = new ArrayList<List<Integer>>();
+        this.attrPositions = new ArrayList<>();
         this.numNewAttrs = fieldDeclaration.size();
         this.deriveFuncs = deriveFuncs;
         this.attrPositions = null;
@@ -32,12 +32,12 @@ public class DeriveAttributeFunction extends BaseOperation implements Function {
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         if (attrPositions == null) {
-            List<List<Integer>> positions = new ArrayList<List<Integer>>();
+            List<List<Integer>> positions = new ArrayList<>();
             Fields inputFields = arguments.getFields();
             for (DeriveAttributeConfig.DeriveFunc func : deriveFuncs) {
-                List<Integer> attrPosList = new ArrayList<Integer>();
+                List<Integer> attrPosList = new ArrayList<>();
                 for (String attr : func.getAttributes()) {
-                    attrPosList.add(new Integer(inputFields.getPos(attr)));
+                    attrPosList.add(inputFields.getPos(attr));
                 }
                 positions.add(attrPosList);
             }
@@ -60,7 +60,7 @@ public class DeriveAttributeFunction extends BaseOperation implements Function {
             for (Integer position : positions) {
                 sum += data.getLong(position);
             }
-            return new Long(sum);
+            return sum;
         } else {
             return null;
         }

@@ -48,7 +48,7 @@ public class StatsCubeUtilsUnitTestNG {
         Assert.assertNotNull(cube);
         AttributeStats stats = cube.getStatistics().get("LatticeAccountId");
         long maxCount = stats.getNonNullCount();
-        Assert.assertEquals(cube.getCount(), new Long(maxCount));
+        Assert.assertEquals(cube.getCount(), Long.valueOf(maxCount));
 
         cube.getStatistics().forEach((attrName, attrStats) -> //
         Assert.assertTrue(attrStats.getNonNullCount() <= maxCount, //

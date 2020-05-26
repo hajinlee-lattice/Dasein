@@ -339,10 +339,10 @@ public class AMCleanerTestNG extends PipelineTransformationTestNGBase {
         List<String> strAttrs = new ArrayList<>();
         for (Field field : amfields) {
             String schemaType = field.schema().getTypes().get(0).getType().name();
-            if (schemaType.equals("INT")) {
+            if ("INT".equals(schemaType)) {
                 schemaType = "INTEGER";
             }
-            if (schemaType.equals("STRING")) { // adding all string attributes to set
+            if ("STRING".equals(schemaType)) { // adding all string attributes to set
                 strAttrs.add(field.name());
             }
             mapFieldType.put(field.name(), schemaType);

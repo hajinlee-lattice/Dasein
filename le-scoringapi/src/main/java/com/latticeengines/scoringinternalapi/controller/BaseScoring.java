@@ -281,8 +281,8 @@ public abstract class BaseScoring extends CommonBase {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
-                            new Integer(MAX_ALLOWED_RECORDS).toString(),
-                            new Integer(scoreRequests.getRecords().size()).toString() });
+                            Integer.toString(MAX_ALLOWED_RECORDS),
+                            Integer.toString(scoreRequests.getRecords().size())});
         }
 
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
@@ -472,7 +472,7 @@ public abstract class BaseScoring extends CommonBase {
 
             for (String timeKey : originalStopWatchSplits.keySet()) {
                 int totalTimeTaken = Integer.parseInt(originalStopWatchSplits.get(timeKey));
-                int avgTimeTaken = new Float(totalTimeTaken * 1.0 / responseList.size()).intValue();
+                int avgTimeTaken = Double.valueOf(totalTimeTaken * 1.0 / responseList.size()).intValue();
 
                 stopWatchSplits.put(timeKey, String.valueOf(avgTimeTaken));
                 totalDurationStopWatchSplits.put(TOTAL_TIME_PREFIX + timeKey, String.valueOf(totalTimeTaken));

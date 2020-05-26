@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -36,7 +37,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
-@SuppressWarnings("unused")
+
 public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelStepRetrieveMetadataProcessorImplTestNG.class);
@@ -90,7 +91,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         }
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
-        assertTrue(content.equals("Contents"));
+        assertEquals(content, "Contents");
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
 
         try {
@@ -101,7 +102,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
             Assert.fail("Should have thrown exception.");
         } catch (Exception e) {
             assertTrue(e instanceof LedpException);
-            assertTrue(((LedpException) e).getCode() == LedpCode.LEDP_16009);
+            assertSame(((LedpException) e).getCode(), LedpCode.LEDP_16009);
         }
     }
 

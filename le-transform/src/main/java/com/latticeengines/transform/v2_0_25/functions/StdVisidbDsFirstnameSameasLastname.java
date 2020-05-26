@@ -30,14 +30,14 @@ public class StdVisidbDsFirstnameSameasLastname implements RealTimeTransform {
         String firstName = column1 == null ? null : String.valueOf(record.get(column1));
         String lastName = column2 == null ? null : String.valueOf(record.get(column2));
 
-        if (firstName.equals("null") || lastName.equals("null"))
+        if ("null".equals(firstName) || "null".equals(lastName))
             return false;
 
         return calcualteStdVisidbDsFirstnameSameasLastname(firstName, lastName);
     }
 
     public static boolean calcualteStdVisidbDsFirstnameSameasLastname(String firstName, String lastName) {
-        if (firstName.equals("null") || lastName.equals("null"))
+        if ("null".equals(firstName) || "null".equals(lastName))
             return false;
 
         if (StringUtils.isEmpty(firstName) || StringUtils.isEmpty(lastName))
@@ -46,10 +46,7 @@ public class StdVisidbDsFirstnameSameasLastname implements RealTimeTransform {
         firstName = firstName.trim().toLowerCase();
         lastName = lastName.trim().toLowerCase();
 
-        if (firstName.equals(lastName))
-            return true;
-
-        return false;
+        return firstName.equals(lastName);
     }
 
     @Override

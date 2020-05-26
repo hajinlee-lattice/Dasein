@@ -43,15 +43,15 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         String phone = column4 == null ? null : String.valueOf(record.get(column4));
         String companyName = column5 == null ? null : String.valueOf(record.get(column5));
 
-        if (firstName.equals("null"))
+        if ("null".equals(firstName))
             firstName = "";
-        if (lastName.equals("null"))
+        if ("null".equals(lastName))
             lastName = "";
-        if (title.equals("null"))
+        if ("null".equals(title))
             title = "";
-        if (phone.equals("null"))
+        if ("null".equals(phone))
             phone = "";
-        if (companyName.equals("null"))
+        if ("null".equals(companyName))
             companyName = "";
 
         return calculateStdVisidbDsSpamindicator(firstName, lastName, title, phone, companyName);

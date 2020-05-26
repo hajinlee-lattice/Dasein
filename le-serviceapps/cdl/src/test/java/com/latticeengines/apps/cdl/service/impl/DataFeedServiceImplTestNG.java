@@ -233,7 +233,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         assertEquals(exec1.getPid(), df.getActiveExecution().getPid());
-        assertEquals(exec1.getPid(), new Long(exec0.getPid() + 1L));
+        assertEquals(exec1.getPid(), Long.valueOf(exec0.getPid() + 1L));
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
     }
 

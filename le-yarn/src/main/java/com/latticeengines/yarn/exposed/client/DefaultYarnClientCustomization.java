@@ -388,10 +388,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @Override
     public int getMaxAppAttempts(Properties appMasterProperties) {
         String maxAppAttempts = appMasterProperties.getProperty(AppMasterProperty.MAX_APP_ATTEMPTS.name(), "-1");
-        if (maxAppAttempts.equals("-1")) {
+        if ("-1".equals(maxAppAttempts)) {
             return yarnConfiguration.getInt("yarn.resourcemanager.am.max-attempts", 2);
         }
-        return Integer.valueOf(maxAppAttempts);
+        return Integer.parseInt(maxAppAttempts);
     }
 
 }

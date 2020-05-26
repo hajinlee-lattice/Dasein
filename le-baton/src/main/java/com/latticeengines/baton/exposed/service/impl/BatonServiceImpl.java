@@ -60,8 +60,7 @@ import com.latticeengines.domain.exposed.security.TenantType;
 
 public class BatonServiceImpl implements BatonService {
 
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
+    private static final Logger log = LoggerFactory.getLogger(BatonServiceImpl.class);
 
     private static final int MAX_RETRY_TIMES = 3;
 
@@ -128,7 +127,7 @@ public class BatonServiceImpl implements BatonService {
             String podId = CamilleEnvironment.getPodId();
 
             // handle case where we want root pod directory
-            if (destination.equals("")) {
+            if ("".equals(destination)) {
                 rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
             } else {
                 rawPath = String.format("/Pods/%s/%s", podId, destination);

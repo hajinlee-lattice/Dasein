@@ -81,7 +81,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             }
 
             String name = file.getPath().getName();
-            return name.equals("modelsummary.json");
+            return "modelsummary.json".equals(name);
         };
 
         HdfsUtils.HdfsFileFilter folderFilter = file -> {

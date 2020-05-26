@@ -59,6 +59,7 @@ public final class CDLExternalSystemUtils {
                     case OTHER:
                         otherIds.add(externalAttrName);
                         break;
+                    default:
                 }
                 // at generating table step, the Attribute name for other field definitions should begin with "user_"
                 definition.setFieldName(externalAttrName);

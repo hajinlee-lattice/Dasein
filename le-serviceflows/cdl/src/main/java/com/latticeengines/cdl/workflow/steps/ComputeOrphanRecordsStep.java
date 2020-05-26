@@ -98,6 +98,7 @@ public class ComputeOrphanRecordsStep extends RunDataFlow<ComputeOrphanRecordsSt
             ((UnmatchedAccountExportParameters) parameters).setAccountTable(config.getAccountTableName());
             ((UnmatchedAccountExportParameters) parameters).setValidatedColumns(config.getValidatedColumns());
             break;
+        default:
         }
 
         return parameters;

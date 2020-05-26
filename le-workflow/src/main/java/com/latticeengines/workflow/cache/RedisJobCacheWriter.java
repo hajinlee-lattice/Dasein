@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +25,6 @@ import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -277,7 +277,7 @@ public class RedisJobCacheWriter implements JobCacheWriter {
         }
         params.add(id);
         Collections.addAll(params, suffixStrs);
-        return StringUtils.collectionToDelimitedString(params, DELIMITER);
+        return StringUtils.join(params, DELIMITER);
     }
 
     /*

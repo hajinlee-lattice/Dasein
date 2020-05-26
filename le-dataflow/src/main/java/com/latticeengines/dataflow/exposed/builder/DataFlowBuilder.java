@@ -145,7 +145,7 @@ public abstract class DataFlowBuilder {
                 String k = entry.getKey();
                 String v = entry.getValue();
 
-                if (k.equals("uuid")) {
+                if ("uuid".equals(k)) {
                     continue;
                 }
                 fieldBuilder = fieldBuilder.prop(k, v);
@@ -176,6 +176,7 @@ public abstract class DataFlowBuilder {
                 break;
             case ARRAY:
                 fieldAssembler = fieldBuilder.type().array().items(fm.getListElementSchema()).noDefault();
+                break;
             default:
                 break;
             }

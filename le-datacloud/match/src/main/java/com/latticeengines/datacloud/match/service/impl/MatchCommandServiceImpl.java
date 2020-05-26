@@ -193,8 +193,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                         break;
                     case KILLED:
                         matchStatus = MatchStatus.ABORTED;
-                    default:
                         break;
+                    default:
                     }
                     update(rootOperationUid).status(matchStatus).commit();
                     command = matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);

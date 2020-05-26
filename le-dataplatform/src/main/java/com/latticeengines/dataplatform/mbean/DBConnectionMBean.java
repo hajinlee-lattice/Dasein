@@ -44,9 +44,9 @@ public class DBConnectionMBean {
     @ManagedOperation(description = "Check ledp Connection ")
     public String checkLedpConnection() {
         String url = "";
-        if (daoType.equals("MySQL")) {
+        if ("MySQL".equals(daoType)) {
             url = constructMySQLURL(daoURL, daoUser, daoPasswd);
-        } else if (daoType.equals("SQLServer")) {
+        } else if ("SQLServer".equals(daoType)) {
             url = constructSQLServerURL(daoURL, daoUser, daoPasswd);
         }
         return getConnectionStatus(url);
@@ -56,9 +56,9 @@ public class DBConnectionMBean {
     @ManagedOperation(description = "Check LeadScoringDB Connection")
     public String checkLeadScoringDBConnection() {
         String url = "";
-        if (dataSourceType.equals("MySQL")) {
+        if ("MySQL".equals(dataSourceType)) {
             url = constructMySQLURL(dataSourceURL, dataSourceUser, dataSourcePasswd);
-        } else if (dataSourceType.equals("SQLServer")) {
+        } else if ("SQLServer".equals(dataSourceType)) {
             url = constructSQLServerURL(dataSourceURL, dataSourceUser, dataSourcePasswd);
         }
         return getConnectionStatus(url);

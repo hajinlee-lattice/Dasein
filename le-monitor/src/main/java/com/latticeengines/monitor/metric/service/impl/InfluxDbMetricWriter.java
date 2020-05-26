@@ -314,7 +314,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
     }
 
     private String getAdvertiseName() {
-        if (hostname == null || hostname.equals("unknown")) {
+        if (hostname == null || "unknown".equals(hostname)) {
             try {
                 String advertiseName = System.getenv(METRIC_ADVERTISE_NAME);
                 if (StringUtils.isBlank(advertiseName)) {

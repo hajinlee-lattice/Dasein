@@ -60,9 +60,9 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
             return updateMarketoConfig(crmType, tenantId, crmCredential);
         case CrmConstants.CRM_ELOQUA:
             return updateEloquaConfig(crmType, tenantId, crmCredential);
+        default:
+            return new CrmCredential();
         }
-
-        return new CrmCredential();
     }
 
     private CrmCredential updateSfdcConfig(String crmType, String tenantId, Boolean isProduction,

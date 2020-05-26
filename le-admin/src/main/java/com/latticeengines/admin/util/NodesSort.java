@@ -2,6 +2,7 @@ package com.latticeengines.admin.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,18 +22,16 @@ public final class NodesSort {
             return;
         }
 
-        if (serviceName.equals("PLS")) {
+        if ("PLS".equals(serviceName)) {
             List<Node> emailNodes = collections.stream().filter(node -> node.getNode().contains("Emails"))
-                    .collect(Collectors.toList());
-            emailNodes.sort((n1, n2) -> n1.getNode().compareTo(n2.getNode()));
+                    .sorted(Comparator.comparing(Node::getNode)).collect(Collectors.toList());
             List<Node> otherNodes = collections.stream().filter(node -> !node.getNode().contains("Emails"))
-                    .collect(Collectors.toList());
-            otherNodes.sort((n1, n2) -> n1.getNode().compareTo(n2.getNode()));
+                    .sorted(Comparator.comparing(Node::getNode)).collect(Collectors.toList());
             sortedNodes.addAll(emailNodes);
             sortedNodes.addAll(otherNodes);
         } else {
             sortedNodes.addAll(collections);
-            sortedNodes.sort((n1, n2) -> n1.getNode().compareTo(n2.getNode()));
+            sortedNodes.sort(Comparator.comparing(Node::getNode));
         }
         dir.setNodes(sortedNodes);
     }

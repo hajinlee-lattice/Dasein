@@ -385,7 +385,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob5.setWorkflowId(5L);
         workflowJobEntityMgr.registerWorkflowId(workflowJob5);
         workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
-        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getWorkflowId(), Long.valueOf(5L));
 
         JobStatus yarnJobStatus = new JobStatus();
         yarnJobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
@@ -393,7 +393,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob5.setWorkflowId(null);
         workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
         workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
-        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getWorkflowId(), Long.valueOf(5L));
         assertEquals(workflowJob5.getStatus(), com.latticeengines.domain.exposed.workflow.JobStatus.PENDING.name());
 
         yarnJobStatus.setStatus(FinalApplicationStatus.FAILED);
@@ -402,9 +402,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob5.setWorkflowId(null);
         workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
         workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
-        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getWorkflowId(), Long.valueOf(5L));
         assertEquals(workflowJob5.getStatus(), com.latticeengines.domain.exposed.workflow.JobStatus.FAILED.name());
-        assertEquals(workflowJob5.getStartTimeInMillis(), new Long(10000L));
+        assertEquals(workflowJob5.getStartTimeInMillis(), Long.valueOf(10000L));
 
         yarnJobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
         yarnJobStatus.setState(YarnApplicationState.RUNNING);
@@ -412,9 +412,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob5.setWorkflowId(null);
         workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
         workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
-        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getWorkflowId(), Long.valueOf(5L));
         assertEquals(workflowJob5.getStatus(), com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name());
-        assertEquals(workflowJob5.getStartTimeInMillis(), new Long(20000L));
+        assertEquals(workflowJob5.getStartTimeInMillis(), Long.valueOf(20000L));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
@@ -618,7 +618,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         };
     }
 
-    private class ClusterIdQuery {
+    private static class ClusterIdQuery {
         String clusterId;
         List<String> types;
         List<String> statuses;

@@ -44,7 +44,7 @@ public class AddTitleAttributes implements RealTimeTransform {
         if (title == null || missingValues.contains(title))
             return imputationMap.get(titleLengthColumn);
 
-        return new Double(Math.min(title.length(), maxTitleLen));
+        return Integer.valueOf(Math.min(title.length(), maxTitleLen)).doubleValue();
     }
 
     @Override

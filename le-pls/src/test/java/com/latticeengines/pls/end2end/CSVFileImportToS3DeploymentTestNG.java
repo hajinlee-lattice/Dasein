@@ -65,8 +65,8 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
                 case ENTITY_CONTACT:
                 case ENTITY_TRANSACTION:
                     Assert.assertEquals(fileLists.size(), 1);
-                default:
                     break;
+                default:
 
             }
         }

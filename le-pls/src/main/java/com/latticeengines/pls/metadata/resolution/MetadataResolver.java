@@ -245,6 +245,7 @@ public class MetadataResolver {
                             case OTHER:
                                 otherIds.add(externalAttrName);
                                 break;
+                            default:
                         }
                     }
                 } else {

@@ -10,15 +10,13 @@ import com.latticeengines.domain.exposed.db.PropertyBag;
 public class ModelSummaryProvenance
         extends PropertyBag<ModelSummaryProvenanceProperty, ProvenancePropertyName> {
 
-    @SuppressWarnings("unchecked")
     public ModelSummaryProvenance(
             List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties) {
-        super(List.class.cast(modelSummaryProvenanceProperties));
+        super(modelSummaryProvenanceProperties);
     }
 
-    @SuppressWarnings("unchecked")
     public ModelSummaryProvenance() {
-        super(List.class.cast(new ArrayList<ModelSummaryProvenanceProperty>()));
+        super(new ArrayList<>());
     }
 
     @JsonProperty
@@ -59,13 +57,14 @@ public class ModelSummaryProvenance
                 case "class java.lang.Double":
                     ret = ret.concat(
                             String.format(fmtString, name.getName(), this.getDouble(name, 0)));
+                    break;
                 case "class java.lang.Long":
                     ret = ret.concat(
                             String.format(fmtString, name.getName(), this.getLong(name, 0)));
+                    break;
                 default:
                     ret = ret.concat(
                             String.format(fmtString, name.getName(), this.getString(name, "")));
-                    break;
             }
         }
 
