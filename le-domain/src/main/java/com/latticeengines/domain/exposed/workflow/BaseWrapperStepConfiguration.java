@@ -10,6 +10,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.CleanupByUploadWrapperConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.RenameAndMatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteByUploadStepConfiguration;
@@ -22,7 +23,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteBy
         @Type(value = ConvertBatchStoreStepConfiguration.class, name = "ConvertBatchStoreStepConfiguration"),
         @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"),
         @Type(value = LegacyDeleteByUploadStepConfiguration.class, name = "LegacyDeleteByUploadStepConfiguration"),
-        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration") })
+        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration"),
+        @Type(value = RenameAndMatchStepConfiguration.class, name = "RenameAndMatchStepConfiguration") })
 public class BaseWrapperStepConfiguration extends BaseStepConfiguration {
 
     @NotNull

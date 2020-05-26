@@ -30,6 +30,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -81,7 +83,8 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         intializeConfiguration();
 
         PipelineTransformationRequest request = generateRequest();
-        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request,
+                configuration.getPodId());
     }
 
     @Override
@@ -99,11 +102,11 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
 
         deleteEntityType = configuration.getDeleteEntityType();
         idSystem = configuration.getIdSystem();
-        customerSpace = configuration.getCustomerSpace();
         systemIdColumn = getSystemIdColumn(idEntity, idSystem);
         log.info("RenameAndMatchStep, systemIdColumn is " + systemIdColumn.toString());
 
-        Table sourceTable = metadataProxy.getTable(customerSpace.toString(), configuration.getTableName());
+        Table sourceTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getTableName());
         sourceTableColumns = sourceTable.getAttributes().stream().map(attr -> attr.toString())
                 .collect(Collectors.toList());
         log.info("RenameAndMatchStep, source table {}, table columns {} ", sourceTable.getName(), sourceTableColumns);
@@ -113,7 +116,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("RenameAndMatchStep");
-            request.setSubmitter(customerSpace.getTenantId());
+            request.setSubmitter(configuration.getCustomerSpace().getTenantId());
             request.setKeepTemp(false);
             request.setEnableSlack(false);
 
@@ -125,7 +128,10 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
             TransformationStepConfig match = match(steps.size() - 1);
             renameAndMatchTablePrefix = "DeleteWith_" + idSystem + "_" + idEntity.name() + "_";
             log.info("RenameAndMatchStep, renameAndMatchTablePrefix: " + renameAndMatchTablePrefix);
-            setTargetTable(match, renameAndMatchTablePrefix);
+            TargetTable targetTable = new TargetTable();
+            targetTable.setCustomerSpace(configuration.getCustomerSpace());
+            targetTable.setNamePrefix(renameAndMatchTablePrefix);
+            match.setTargetTable(targetTable);
             steps.add(match);
 
             request.setSteps(steps);
@@ -143,11 +149,17 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         TransformationStepConfig step = new TransformationStepConfig();
 
         step.setTransformer(TRANSFORMER_COPY_TXMFR);
-        step.setBaseSources(Collections.singletonList(configuration.getTableName()));
+        String sourceTableName = configuration.getTableName();
+        SourceTable sourceTable = new SourceTable(sourceTableName, configuration.getCustomerSpace());
+        List<String> baseSources = Collections.singletonList(sourceTableName);
+        step.setBaseSources(baseSources);
+
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(sourceTableName, sourceTable);
+        step.setBaseTables(baseTables);
 
         CopyConfig config = new CopyConfig();
         Map<String, String> renameAttrs = new HashMap<>();
-
         renameAttrs.put(sourceTableColumns.get(0), systemIdColumn);
         log.info("RenameAndMatchStep, renameAttrs: " + renameAttrs);
         config.setRenameAttrs(renameAttrs);
@@ -170,8 +182,9 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
     private String getMatchConfig() {
         MatchTransformerConfig config = new MatchTransformerConfig();
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
+        matchInput.setTenant(new Tenant(configuration.getCustomerSpace().getTenantId()));
         matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
+        matchInput.setApplicationId(getApplicationId());
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         matchInput.setAllocateId(false);
         matchInput.setExcludePublicDomain(false);
@@ -218,7 +231,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
     }
 
     private String getSystemIdColumn(BusinessEntity idEntity, String idSystem) {
-        S3ImportSystem system = cdlProxy.getS3ImportSystem(customerSpace.toString(), idSystem);
+        S3ImportSystem system = cdlProxy.getS3ImportSystem(configuration.getCustomerSpace().toString(), idSystem);
         if (system == null) {
             throw new RuntimeException("RenameAndMatchStep, System " + idSystem + " doesn't exist...");
         }

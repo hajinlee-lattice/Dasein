@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.RegisterDeleteDataListener;
 import com.latticeengines.cdl.workflow.steps.maintenance.DeleteFileUploadStep;
-import com.latticeengines.cdl.workflow.steps.maintenance.RenameAndMatchStep;
+import com.latticeengines.cdl.workflow.steps.maintenance.RenameAndMatchStepWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RegisterDeleteDataWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportDataFeedImportToS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -27,7 +27,7 @@ public class RegisterDeleteDataWorkflow extends AbstractWorkflow<RegisterDeleteD
     // When system IDs are used, go through this step to convert system IDs into
     // Lattice account/contact Id
     @Inject
-    private RenameAndMatchStep renameAndMatchStep;
+    private RenameAndMatchStepWrapper renameAndMatchStepWrapper;
 
     @Inject
     private ExportDataFeedImportToS3 exportDataFeedImportToS3;
@@ -40,7 +40,7 @@ public class RegisterDeleteDataWorkflow extends AbstractWorkflow<RegisterDeleteD
 
         return new WorkflowBuilder(name(), workflowConfig) //
                 .next(deleteFileUploadStep) //
-                .next(renameAndMatchStep) //
+                .next(renameAndMatchStepWrapper) //
                 .next(exportDataFeedImportToS3) //
                 .listener(registerDeleteDataListener) //
                 .build();
