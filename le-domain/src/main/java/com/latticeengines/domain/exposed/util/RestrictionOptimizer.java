@@ -127,6 +127,7 @@ public final class RestrictionOptimizer {
         }
     }
 
+    // grouping depivoted metrics together to reduce full table scans
     public static Restriction groupMetrics(Restriction restriction) {
         Restriction optimized = restriction;
         if (restriction instanceof ConcreteRestriction || restriction instanceof BucketRestriction) {

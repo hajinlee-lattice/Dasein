@@ -121,6 +121,18 @@ public final class MetricTranslator {
                 case LESS_THAN:
                     containsZero = val > 0;
                     break;
+                case EQUAL:
+                    containsZero = val == 0;
+                    break;
+                case NOT_EQUAL:
+                    containsZero = val != 0;
+                    break;
+                case IN_COLLECTION:
+                    containsZero = vals.stream().anyMatch(obj -> toDouble(obj) == 0.);
+                    break;
+                case NOT_IN_COLLECTION:
+                    containsZero = vals.stream().noneMatch(obj -> toDouble(obj) == 0.);
+                    break;
                 default:
                     break;
             }
