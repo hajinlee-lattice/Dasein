@@ -510,7 +510,8 @@ public final class StatsCubeUtils {
         // Also hide all system attributes.
         return (cm.isDateAttribute() && !(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
                 || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory())
-                || Category.CURATED_ACCOUNT_ATTRIBUTES.equals(cm.getCategory())))
+                || Category.CURATED_ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                || Category.CURATED_CONTACT_ATTRIBUTES.equals(cm.getCategory())))
                 || isSystemAttribute(entity, cm, entityMatchEnabled);
     }
 
