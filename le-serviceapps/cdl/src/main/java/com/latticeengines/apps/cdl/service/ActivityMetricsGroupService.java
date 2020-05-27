@@ -16,4 +16,6 @@ public interface ActivityMetricsGroupService {
     ActivityMetricsGroup setUpDefaultOpportunityProfile(String customerSpace, String streamName);
 
     List<ActivityMetricsGroup> setupDefaultMarketingProfile(String customerSpace, String streamName);
+
+    List<ActivityMetricsGroup> setupDefaultDnbIntentDataProfile(String customerSpace, String streamName);
 }

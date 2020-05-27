@@ -1,0 +1,100 @@
+{
+  "systemObject": "Dnb IntentData",
+  "fieldDefinitionsRecordsMap": {
+    "General": [
+      {
+        "fieldName": "DUNS",
+        "fieldType": "TEXT",
+        "screenName": "DUNS",
+        "columnName": "DUNS",
+        "matchingColumnNames": [
+          "DUNS",
+          "DUNS NUMBER"
+        ],
+        "required": true,
+        "nullable": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "ModelName",
+        "fieldType": "TEXT",
+        "columnName": "Model Name",
+        "screenName": "Model Name",
+        "matchingColumnNames": [
+          "Model Name",
+          "ModelName",
+          "MODEL NAME"
+        ],
+        "required": true,
+        "nullable": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "LastModifiedDate",
+        "fieldType": "DATE",
+        "columnName": "Date",
+        "screenName": "Date",
+        "matchingColumnNames": [
+          "Date",
+          "DATE"
+        ],
+        "required": true,
+        "nullable": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "logicalDataType": "Date",
+        "fundamentalType": "DATE"
+      },
+      {
+        "fieldName": "IntentScore",
+        "fieldType": "NUMBER",
+        "columnName": "Intent Score",
+        "screenName": "Intent Score",
+        "matchingColumnNames": [
+          "Intent Score"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "NUMERIC"
+      },
+      {
+        "fieldName": "BuyingScore",
+        "fieldType": "NUMBER",
+        "columnName": "Buying Score",
+        "screenName": "Buying Score",
+        "matchingColumnNames": [
+          "Buying Score"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "NUMERIC"
+      },
+      {
+        "fieldName": "SiteType",
+        "fieldType": "TEXT",
+        "columnName": "Site type",
+        "screenName": "Site type",
+        "matchingColumnNames": [
+          "Site type"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Custom Fields": []
+  }
+}

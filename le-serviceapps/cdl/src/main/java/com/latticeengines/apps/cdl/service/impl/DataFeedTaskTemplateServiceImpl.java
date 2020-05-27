@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityTypeId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelNameId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
 
 import java.io.IOException;
@@ -53,6 +54,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
@@ -448,6 +450,64 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
+    public boolean createDefaultDnbIntentDataTemplate(String customerSpace) {
+        String systemName = S3ImportSystem.SystemType.Other.getDefaultSystemName();
+        S3ImportSystem.SystemType systemType = S3ImportSystem.SystemType.Other;
+        EntityType entityType = EntityType.CustomIntent;
+        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                systemName);
+        if (importSystem != null) {
+            DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, "File",
+                    EntityTypeUtils.generateFullFeedType(systemName, entityType));
+            if (dataFeedTask != null) {
+                throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
+            }
+        } else {
+            importSystem = createS3ImportSystem(customerSpace, systemName, systemType);
+            log.debug("Successfully created S3ImportSystem for entity type {}:\n{}", entityType,
+                    JsonUtils.pprint(importSystem));
+        }
+        log.info("importSystem is {}.", JsonUtils.serialize(importSystem));
+        log.info("setup dnb Intent data for tenant {}, systemName {}.", customerSpace, importSystem.getName());
+        DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
+                entityType, null);
+        log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
+        String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
+        createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
+        return true;
+    }
+
+    @Override
+    public boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType, SimpleTemplateMetadata simpleTemplateMetadata) {
+        if (!EntityType.CustomIntent.equals(entityType)) {
+            throw new IllegalArgumentException(String.format("createDnbIntentDataTemplate cannot support entityType " +
+                    "%s.", entityType));
+        }
+        String systemName = S3ImportSystem.SystemType.Other.getDefaultSystemName();
+        S3ImportSystem.SystemType systemType = S3ImportSystem.SystemType.Other;
+        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                systemName);
+        if (importSystem != null) {
+            DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, "File",
+                    EntityTypeUtils.generateFullFeedType(systemName, entityType));
+            if (dataFeedTask != null) {
+                throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
+            }
+        } else {
+            importSystem = createS3ImportSystem(customerSpace, systemName, systemType);
+            log.debug("Successfully created S3ImportSystem for entity type {}:\n{}", entityType,
+                    JsonUtils.pprint(importSystem));
+        }
+        log.info("setup dnb Intent data for tenant {}, systemName {}.", customerSpace, importSystem.getName());
+        DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
+                entityType, simpleTemplateMetadata);
+        log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
+        String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
+        createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
+        return true;
+    }
+
+    @Override
     public boolean validateGAEnabled(String customerSpace, boolean enableGA) {
         CustomerSpace customerSpace1 = MultiTenantContext.getCustomerSpace();
         return (batonService.isEntityMatchEnabled(customerSpace1) && !batonService.onlyEntityMatchGAEnabled(customerSpace1)) || (enableGA && batonService.onlyEntityMatchGAEnabled(customerSpace1));
@@ -461,8 +521,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
                     " tenant %s.", systemName, customerSpace));
         }
-        createDropFolder(customerSpace, systemName, EntityType.Opportunity);
-        createDropFolder(customerSpace, systemName, EntityType.OpportunityStageName);
+        createDropFolder(customerSpace, systemName, entityType);
         ImportWorkflowSpec spec;
         try {
             String fileSystemType = "allsystem";
@@ -492,8 +551,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
                     " tenant %s.", systemName, customerSpace));
         }
-        createDropFolder(customerSpace, systemName, EntityType.MarketingActivity);
-        createDropFolder(customerSpace, systemName, EntityType.MarketingActivityType);
+        createDropFolder(customerSpace, systemName, entityType);
         ImportWorkflowSpec spec;
         try {
             String filesystemType = systemType;
@@ -511,6 +569,32 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (EntityType.MarketingActivity.equals(entityType)) {
             processMatchContactId(importSystem, spec);
         }
+        Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);
+
+        return setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, importSystem,
+                standardTable);
+    }
+
+    private DataFeedTask createDnbIntentDataTemplateOnly(String customerSpace, String systemName, EntityType entityType,
+                                                       SimpleTemplateMetadata simpleTemplateMetadata) {
+        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                systemName);
+        if (importSystem == null) {
+            throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
+                    " tenant %s.", systemName, customerSpace));
+        }
+        createDropFolder(customerSpace, systemName, entityType);
+        ImportWorkflowSpec spec;
+        try {
+            String fileSystemType = "allsystem";
+            spec = importWorkflowSpecService.loadSpecFromS3(fileSystemType, entityType.getDisplayName());
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Could not create template for tenant %s, system type %s, and system object %s " +
+                                    "because the Spec failed to load", customerSpace, importSystem.getSystemType().name(),
+                            entityType.getDisplayName()), e);
+        }
+        log.info("entityType is {}", entityType);
         Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);
 
         return setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, importSystem,
@@ -686,7 +770,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         s3ImportSystem.setTenant(tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString()));
         s3ImportSystemService.createS3ImportSystem(customerSpace, s3ImportSystem);
         dropBoxService.createFolder(customerSpace, systemName, null, null);
-        return s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
+        return s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
     }
 
     private void createOpportunityMetadata(String customerSpace, String opportunityAtlasStreamName,
@@ -738,6 +822,27 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (CollectionUtils.isEmpty(defaultGroups)) {
             throw new IllegalStateException(String.format(
                     "Failed to setup marketing metric groups for tenant %s", customerSpace));
+        }
+    }
+
+    private void createDnbIntentDataMetadata(String customerSpace, String streamName, DataFeedTask task) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        AtlasStream stream =
+                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(task).withStreamType(AtlasStream.StreamType.DnbIntentData)
+                        .withName(streamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
+                        .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
+                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
+        stream.setStreamId(AtlasStream.generateId());
+        streamEntityMgr.create(stream);
+        log.info("DbIntentData AtlasStream is {}.", JsonUtils.serialize(stream));
+        StreamDimension modelDimension = createDnbIntentDataModelDimension(stream);
+        dimensionEntityMgr.create(modelDimension);
+        log.info("DnbIntentData ModelDimension is {}.", JsonUtils.serialize(modelDimension));
+        List<ActivityMetricsGroup> defaultGroups =
+                activityMetricsGroupService.setupDefaultDnbIntentDataProfile(customerSpace, stream.getName());
+        if (CollectionUtils.isEmpty(defaultGroups)) {
+            throw new IllegalStateException(String.format(
+                    "Failed to setup DnbIntentData metric groups for tenant %s", customerSpace));
         }
     }
 
@@ -904,6 +1009,28 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
         return dim;
+    }
+
+    private StreamDimension createDnbIntentDataModelDimension(@NotNull AtlasStream stream) {
+        StreamDimension modelDimension = new StreamDimension();
+        modelDimension.setName(ModelNameId.name());
+        modelDimension.setDisplayName(modelDimension.getName());
+        modelDimension.setTenant(stream.getTenant());
+        modelDimension.setStream(stream);
+        modelDimension.addUsages(StreamDimension.Usage.Pivot);
+        modelDimension.setShouldReplace(false);
+
+        DimensionGenerator generator = new DimensionGenerator();
+        generator.setFromCatalog(false);
+        generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
+        generator.setAttribute(InterfaceName.ModelName.name());
+        modelDimension.setGenerator(generator);
+
+        DimensionCalculator calculator = new DimensionCalculator();
+        calculator.setAttribute(InterfaceName.ModelName.name());
+        calculator.setName(InterfaceName.ModelName.name());
+        modelDimension.setCalculator(calculator);
+        return modelDimension;
     }
 
     private ActivityRowReducer prepareReducer() {

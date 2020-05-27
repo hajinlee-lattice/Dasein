@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
@@ -43,10 +44,13 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     private static final String OPPORTUNITY_STAGE_GROUPNAME = "Opportunity By Stage";
     private static final String MARKETING_TYPE_ACCOUNT_GROUPNAME = "Marketing By ActivityType And AccountID";
     private static final String MARKETING_TYPE_CONTACT_GROUPNAME = "Marketing By ActivityType And ContactID";
+    private static final String INTENTDATA_INTENT_GROUPAME = "IntentData by Intent";
+    private static final String INTENTDATA_MODEL_GROUPNAME = "IntentData by ModelName";
     private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
     private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
     private static final String DIM_NAME_STAGE = InterfaceName.StageNameId.name();
     private static final String DIM_NAME_ACTIVITYTYPE = InterfaceName.ActivityTypeId.name();
+    private static final String DIM_NAME_DNBINTENT = InterfaceName.ModelNameId.name();
 
     private static Map<String, StringTemplate> templateCache = new HashMap<>();
 
@@ -104,6 +108,17 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         activityMetricsGroupEntityMgr.create(accountActivityType);
         activityMetricsGroupEntityMgr.create(contactActivityType);
         return Arrays.asList(accountActivityType, contactActivityType);
+    }
+
+    @Override
+    public List<ActivityMetricsGroup> setupDefaultDnbIntentDataProfile(String customerSpace, String streamName) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
+        ActivityMetricsGroup intentGroup = setDnbIntentDataIntentGroup(tenant, stream);
+        ActivityMetricsGroup modelGroup = setDnbIntentDataModelGroup(tenant, stream);
+        activityMetricsGroupEntityMgr.create(intentGroup);
+        activityMetricsGroupEntityMgr.create(modelGroup);
+        return Arrays.asList(intentGroup, modelGroup);
     }
 
     private ActivityMetricsGroup setupDefaultTotalVisitGroup(Tenant tenant, AtlasStream stream) {
@@ -193,6 +208,49 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         return marketingType;
     }
 
+    private ActivityMetricsGroup setDnbIntentDataIntentGroup(Tenant tenant, AtlasStream atlasStream) {
+        ActivityMetricsGroup intentGroup = new ActivityMetricsGroup();
+        intentGroup.setTenant(tenant);
+        intentGroup.setStream(atlasStream);
+        intentGroup.setGroupId(getGroupId(INTENTDATA_INTENT_GROUPAME));
+        intentGroup.setGroupName(INTENTDATA_INTENT_GROUPAME);
+        intentGroup.setJavaClass(Boolean.class.getSimpleName());
+        intentGroup.setEntity(BusinessEntity.Account);
+        intentGroup.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER,
+                Collections.singleton(PeriodStrategy.Template.Week.name()), null));
+        intentGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
+        intentGroup.setAggregation(createAttributeDeriver(Collections.EMPTY_LIST, InterfaceName.HasIntent.name(),
+                StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
+        intentGroup.setCategory(Category.DNBINTENTDATA_INTENT_PROFILE);
+        intentGroup.setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_DISPLAYNAME));
+        intentGroup.setDescriptionTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_DESCRIPTION));
+        intentGroup.setSubCategoryTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_SUBCATEGORY));
+        intentGroup.setNullImputation(NullMetricsImputation.FALSE);
+        intentGroup.setUseLatestVersion(true);
+        return intentGroup;
+    }
+
+    private ActivityMetricsGroup setDnbIntentDataModelGroup(Tenant tenant, AtlasStream atlasStream) {
+        ActivityMetricsGroup modelGroup = new ActivityMetricsGroup();
+        modelGroup.setTenant(tenant);
+        modelGroup.setStream(atlasStream);
+        modelGroup.setGroupId(getGroupId(INTENTDATA_MODEL_GROUPNAME));
+        modelGroup.setGroupName(INTENTDATA_MODEL_GROUPNAME);
+        modelGroup.setJavaClass(Boolean.class.getSimpleName());
+        modelGroup.setEntity(BusinessEntity.Account);
+        modelGroup.setActivityTimeRange(ActivityStoreUtils.defaultTimeRange());
+        modelGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
+        modelGroup.setAggregation(createAttributeDeriver(Collections.EMPTY_LIST, InterfaceName.HasIntent.name(),
+                StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
+        modelGroup.setCategory(Category.DNBINTENTDATA_MODEL_PROFILE);
+        modelGroup.setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DISPLAYNAME));
+        modelGroup.setDescriptionTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DESCRIPTION));
+        modelGroup.setSubCategoryTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_SUBCATEGORY));
+        modelGroup.setNullImputation(NullMetricsImputation.FALSE);
+        modelGroup.setUseLatestVersion(false);
+        return modelGroup;
+    }
+
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
         reducer.setGroupByFields(Collections.singletonList(InterfaceName.OpportunityId.name()));
@@ -208,10 +266,17 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
 
     private StreamAttributeDeriver createAttributeDeriver(List<String> sourceAttrs, String targetAttr,
                                                           StreamAttributeDeriver.Calculation calculation) {
+        return createAttributeDeriver(sourceAttrs, targetAttr, calculation, FundamentalType.NUMERIC);
+    }
+
+    private StreamAttributeDeriver createAttributeDeriver(List<String> sourceAttrs, String targetAttr,
+                                                          StreamAttributeDeriver.Calculation calculation,
+                                                          FundamentalType type) {
         StreamAttributeDeriver deriver = new StreamAttributeDeriver();
         deriver.setSourceAttributes(sourceAttrs);
         deriver.setTargetAttribute(targetAttr);
         deriver.setCalculation(calculation);
+        deriver.setTargetFundamentalType(type);
         return deriver;
     }
 
