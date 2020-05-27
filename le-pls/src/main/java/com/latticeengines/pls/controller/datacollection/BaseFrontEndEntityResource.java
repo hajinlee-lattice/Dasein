@@ -361,14 +361,23 @@ public abstract class BaseFrontEndEntityResource {
 
         List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(queryEntity).stream() //
                 .filter(attributeLookup -> searchEntity.equals(attributeLookup.getEntity())) //
-                .filter(attributeLookup -> columnAttrNames.contains(attributeLookup.getAttribute())) //
                 .filter(attributeLookup -> {
+                    String attrName = attributeLookup.getAttribute();
+                    if (InterfaceName.AccountId.name().equals(attrName) && isEntityMatchGA()) {
+                        // for entity match GA, always add AccountId to free-text search
+                        return true;
+                    } else {
+                        return columnAttrNames.contains(attributeLookup.getAttribute());
+                    }
+                }) //
+                .filter(attributeLookup -> {
+                    String attrName = attributeLookup.getAttribute();
                     BusinessEntity entity = attributeLookup.getEntity();
                     if (!servingStoreAttrs.containsKey(entity)) {
                         servingStoreAttrs.put(entity,
                                 servingStoreProxy.getServingStoreColumnsFromCache(tenantId, entity));
                     }
-                    return servingStoreAttrs.get(entity).contains(attributeLookup.getAttribute());
+                    return servingStoreAttrs.get(entity).contains(attrName);
                 }) //
                 .collect(Collectors.toList());
 
@@ -388,8 +397,8 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    private boolean isEntityMatchEnabled() {
-        return tenantConfigService.isEntityMatchEnabled();
+    private boolean isEntityMatchGA() {
+        return tenantConfigService.onlyEntityMatchGAEnabled();
     }
 
     private List<AttributeLookup> getFreeTextSearchAttrs(BusinessEntity queryEntity) {
