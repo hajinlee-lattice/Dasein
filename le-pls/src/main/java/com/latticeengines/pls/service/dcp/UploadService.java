@@ -21,5 +21,5 @@ public interface UploadService {
 
     UploadDetails startImport(DCPImportRequest importRequest);
 
-    ApplicationId submitSourceImport(DCPImportRequest importRequest);
+    ApplicationId submitImportRequest(DCPImportRequest importRequest);
 }

@@ -2,12 +2,12 @@ package com.latticeengines.pls.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,7 +62,7 @@ public class FileUploadResource {
     public SourceFileInfo uploadFile(
             @PathVariable String fileName,
             @RequestParam("file") MultipartFile file) {
-        return fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv", fileName, false, null, file);
+        return fileUploadService.uploadFile("file_" + Instant.now().toEpochMilli() + ".csv", fileName, false, null, file);
     }
 
 }

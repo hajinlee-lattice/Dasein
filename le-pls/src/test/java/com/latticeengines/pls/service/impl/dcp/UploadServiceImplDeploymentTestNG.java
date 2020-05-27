@@ -114,7 +114,7 @@ public class UploadServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         dcpImportRequest.setProjectId(projectDetails.getProjectId());
         dcpImportRequest.setSourceId(source.getSourceId());
         dcpImportRequest.setFileImportId(sourceFileInfo.getFileImportId());
-        ApplicationId applicationId = uploadService.submitSourceImport(dcpImportRequest);
+        ApplicationId applicationId = uploadService.submitImportRequest(dcpImportRequest);
 
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);

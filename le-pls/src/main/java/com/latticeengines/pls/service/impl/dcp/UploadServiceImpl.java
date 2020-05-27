@@ -202,7 +202,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public UploadDetails startImport(DCPImportRequest importRequest) {
-        ApplicationId appId = submitSourceImport(importRequest);
+        ApplicationId appId = submitImportRequest(importRequest);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
         String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
@@ -210,7 +210,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     }
 
     @Override
-    public ApplicationId submitSourceImport(DCPImportRequest importRequest) {
+    public ApplicationId submitImportRequest(DCPImportRequest importRequest) {
         return uploadProxy.startImport(MultiTenantContext.getShortTenantId(), importRequest);
     }
 }

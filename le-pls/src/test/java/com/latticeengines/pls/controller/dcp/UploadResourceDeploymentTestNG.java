@@ -103,5 +103,8 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadDetails uploadDetailsCheck = testUploadProxy.getUpload(uploadDetails.getUploadId());
         Assert.assertNotNull(uploadDetailsCheck);
         Assert.assertEquals(uploadDetailsCheck.getUploadId(), uploadDetails.getUploadId());
+
+        String token = testUploadProxy.getToken(uploadDetails.getUploadId());
+        Assert.assertNotNull(token);
     }
 }

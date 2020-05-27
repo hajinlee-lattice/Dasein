@@ -53,7 +53,7 @@ public class S3ImportServiceImpl implements S3ImportService {
     private DataFeedProxy dataFeedProxy;
 
     @Inject
-    private SourceProxy  sourceProxy;
+    private SourceProxy sourceProxy;
 
     @Override
     public boolean saveImportMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
