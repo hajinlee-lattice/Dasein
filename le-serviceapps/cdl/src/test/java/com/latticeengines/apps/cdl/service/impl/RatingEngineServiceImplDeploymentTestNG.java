@@ -101,7 +101,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         // Test Rulebased Rating Engine
         rbRatingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
         Assert.assertEquals(rbRatingEngine.getType(), RatingEngineType.RULE_BASED);
-        Assert.assertEquals(rbRatingEngine.getTeamId(), TeamUtils.GLOBAL_TEAM_ID);
+        Assert.assertNull(rbRatingEngine.getTeamId());
         assertRatingEngine(rbRatingEngine);
         rbRatingEngineId = rbRatingEngine.getId();
         // Only mock the Rulebased Rating data in Redshift to test the filtering

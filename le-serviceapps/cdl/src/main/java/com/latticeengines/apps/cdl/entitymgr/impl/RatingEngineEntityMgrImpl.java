@@ -388,9 +388,7 @@ public class RatingEngineEntityMgrImpl //
             ratingEngineNote.setId(UUID.randomUUID().toString());
             ratingEngine.addRatingEngineNote(ratingEngineNote);
         }
-        if (StringUtils.isEmpty(ratingEngine.getTeamId())) {
-            ratingEngine.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
-        }
+        ratingEngine.setTeamId(TeamUtils.isGlobalTeam(ratingEngine.getTeamId()) ? null : ratingEngine.getTeamId());
         AdvancedModelingConfig advancedModelingConfig = null;
         AdvancedRatingConfig advancedRatingConfig = ratingEngine.getAdvancedRatingConfig();
         switch (type) {
@@ -506,9 +504,7 @@ public class RatingEngineEntityMgrImpl //
     }
 
     private void updateTeamId(RatingEngine ratingEngine, String teamId) {
-        if (StringUtils.isNotEmpty(teamId)) {
-            ratingEngine.setTeamId(teamId);
-        }
+        ratingEngine.setTeamId(TeamUtils.isGlobalTeam(teamId) ? null : teamId);
     }
 
     @SuppressWarnings("deprecation")

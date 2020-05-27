@@ -5,11 +5,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.auth.HasTeamId;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.security.exposed.service.TeamService;
 
@@ -30,6 +33,12 @@ public final class TeamInfoUtils {
         }
     }
 
+    public static void fillTeamId(HasTeamId hasTeamId) {
+        if (StringUtils.isEmpty(hasTeamId.getTeamId())) {
+            hasTeamId.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
+        }
+    }
+
     public static void fillTeamsForList(List<? extends HasTeamInfo> hasTeamInfos, BatonService batonService,
                                         TeamService teamService) {
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
@@ -38,6 +47,7 @@ public final class TeamInfoUtils {
                     .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
             Set<String> teamIds = teamService.getTeamIdsInContext();
             for (HasTeamInfo hasTeamInfo : hasTeamInfos) {
+                fillTeamId(hasTeamInfo);
                 fillTeams(hasTeamInfo, globalTeamMap.get(hasTeamInfo.getTeamId()), teamIds);
             }
         }
@@ -46,6 +56,7 @@ public final class TeamInfoUtils {
     public static void fillTeams(HasTeamInfo hasTeamInfo, BatonService batonService, TeamService teamService) {
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         if (teamFeatureEnabled) {
+            fillTeamId(hasTeamInfo);
             fillTeams(hasTeamInfo, teamService.getTeamInContext(hasTeamInfo.getTeamId()), teamService.getTeamIdsInContext());
         }
     }

@@ -103,6 +103,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         Tenant tenant = MultiTenantContext.getTenant();
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
         ratingEngine.setViewOnly(!TeamUtils.isMyTeam(ratingEngine.getTeamId()));
+        TeamInfoUtils.fillTeamId(ratingEngine);
         return ratingEngine;
     }
 
