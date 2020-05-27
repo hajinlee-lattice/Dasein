@@ -136,6 +136,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public GlobalTeam getDefaultGlobalTeam() {
         GlobalTeam globalTeam = new GlobalTeam();
+        globalTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
         globalTeam.setTeamName(TeamUtils.GLOBAL_TEAM);
         globalTeam.setTeamMembers(new ArrayList<>());
         return globalTeam;
@@ -274,7 +275,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public GlobalTeam getTeamInContext(String teamId) {
-        if (StringUtils.isNotEmpty(teamId)) {
+        if (!TeamUtils.isGlobalTeam(teamId)) {
             return getTeamByTeamId(teamId, MultiTenantContext.getUser());
         } else {
             return getDefaultGlobalTeam();

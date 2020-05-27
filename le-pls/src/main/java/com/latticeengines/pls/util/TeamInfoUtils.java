@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -26,7 +27,7 @@ public final class TeamInfoUtils {
         }
         hasTeamInfo.setTeam(globalTeam);
         String teamId = hasTeamInfo.getTeamId();
-        if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
+        if (!TeamUtils.isGlobalTeam(teamId) && !teamIds.contains(teamId)) {
             hasTeamInfo.setViewOnly(true);
         }
     }
