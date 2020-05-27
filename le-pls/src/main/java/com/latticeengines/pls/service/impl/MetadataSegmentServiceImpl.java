@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -87,8 +86,10 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                     if (filter) {
                         globalTeamMap = teamService.getTeamsFromSession(false, true)
                                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-                        return backendSegments.stream().filter(segment -> StringUtils.isEmpty(segment.getTeamId()) || globalTeamMap.containsKey(segment.getTeamId())) //
-                                .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
+                        return backendSegments.stream().filter(segment -> {
+                            TeamInfoUtils.fillTeamId(segment);
+                            return globalTeamMap.containsKey(segment.getTeamId());
+                        }).map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
                                 .sorted((seg1, seg2) -> Boolean.compare( //
                                         Boolean.TRUE.equals(seg1.getMasterSegment()), //
                                         Boolean.TRUE.equals(seg2.getMasterSegment()) //
@@ -101,7 +102,10 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                     globalTeamMap = new HashMap<>();
                 }
                 return backendSegments.stream() //
-                        .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
+                        .map(segment -> {
+                            TeamInfoUtils.fillTeamId(segment);
+                            return translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds);
+                        })
                         .sorted((seg1, seg2) -> Boolean.compare( //
                                 Boolean.TRUE.equals(seg1.getMasterSegment()), //
                                 Boolean.TRUE.equals(seg2.getMasterSegment()) //
@@ -127,6 +131,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
             if (shouldTranslateForFrontend && segment != null) {
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
+                TeamInfoUtils.fillTeamId(segment);
                 segment = translateForFrontend(segment, teamFeatureEnabled ?
                         teamService.getTeamInContext(segment.getTeamId()) : null, teamService.getTeamIdsInContext());
             }

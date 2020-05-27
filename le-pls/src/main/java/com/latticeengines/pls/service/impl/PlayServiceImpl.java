@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayService;
+import com.latticeengines.pls.util.TeamInfoUtils;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.service.TeamService;
 
@@ -54,6 +56,7 @@ public class PlayServiceImpl implements PlayService {
                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam)) : new HashMap<>();
         GlobalTeam defaultGlobalTeam = teamFeatureEnabled ? teamService.getDefaultGlobalTeam() : null;
         for (Play play : plays) {
+            TeamInfoUtils.fillTeamId(play.getTargetSegment());
             inflateSegment(play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(),
                     defaultGlobalTeam), teamService.getTeamIdsInContext());
         }
@@ -66,6 +69,7 @@ public class PlayServiceImpl implements PlayService {
         Play play = playProxy.getPlay(tenant.getId(), playName);
         if (play != null) {
             boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
+            TeamInfoUtils.fillTeamId(play.getTargetSegment());
             inflateSegment(play, teamFeatureEnabled ? teamService.getTeamInContext(play.getTargetSegment().getTeamId()) : null
                     , teamService.getTeamIdsInContext());
         }
@@ -73,13 +77,13 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private void inflateSegment(Play play, GlobalTeam globalTeam, Set<String> teamIds) {
-        MetadataSegment metadataSegment = play.getTargetSegment();
         if (globalTeam == null) {
             return;
         }
+        MetadataSegment metadataSegment = play.getTargetSegment();
         metadataSegment.setTeam(globalTeam);
         String teamId = metadataSegment.getTeamId();
-        if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
+        if (!TeamUtils.isGlobalTeam(teamId) && !teamIds.contains(teamId)) {
             play.setViewOnly(true);
             metadataSegment.setViewOnly(true);
         }
