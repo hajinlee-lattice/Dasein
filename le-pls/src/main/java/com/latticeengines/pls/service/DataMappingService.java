@@ -10,12 +10,13 @@ public interface DataMappingService {
     FetchFieldDefinitionsResponse fetchFieldDefinitions(String systemName, String systemType, String systemObject,
                                                         String importFile) throws Exception;
 
+    ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
+                                                              String systemObject, String importFile,
+                                                              ValidateFieldDefinitionsRequest validateRequest) throws Exception;
+
     FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
                                                   String importFile, boolean runImport,
                                                   FieldDefinitionsRecord commitRequest)
             throws LedpException, IllegalArgumentException ;
 
-    ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
-                                                              String systemObject, String importFile,
-                                                              ValidateFieldDefinitionsRequest validateRequest) throws Exception;
 }

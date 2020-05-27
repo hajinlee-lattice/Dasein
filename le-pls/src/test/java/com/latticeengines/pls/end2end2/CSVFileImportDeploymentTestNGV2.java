@@ -57,6 +57,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsRespo
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionSectionName;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -144,6 +146,31 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
         Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "testExternalSystem")
+    public void testFetchValidateCommitWithoutFile() throws Exception {
+        String systemName = "ExternalSystem";
+        FetchFieldDefinitionsResponse fetchResponse =
+                dataMappingService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
+                        EntityType.Accounts.getDisplayName(), null);
+
+        ValidateFieldDefinitionsRequest validateRequest = new ValidateFieldDefinitionsRequest();
+        validateRequest.setCurrentFieldDefinitionsRecord(fetchResponse.getCurrentFieldDefinitionsRecord());
+        validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
+        validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
+        validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
+        validateRequest.setOtherTemplateDataMap(fetchResponse.getOtherTemplateDataMap());
+
+        ValidateFieldDefinitionsResponse validateResponse = dataMappingService.validateFieldDefinitions(systemName,
+                DEFAULT_SYSTEM_TYPE,
+                EntityType.Accounts.getDisplayName(), null, validateRequest);
+        Assert.assertNotEquals(validateResponse.getValidationResult(),
+                ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+
+        FieldDefinitionsRecord fieldRecord = dataMappingService.commitFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
+                EntityType.Accounts.getDisplayName(), null, false,
+                validateRequest.getCurrentFieldDefinitionsRecord());
+        Assert.assertNotNull(fieldRecord);
+    }
 
     // the test case failed because the field name for ID is CustomerAccountId while not AccountId
     @Test(groups = "deployment", enabled = false)

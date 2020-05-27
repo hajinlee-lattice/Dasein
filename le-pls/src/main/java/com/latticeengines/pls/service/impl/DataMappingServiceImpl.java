@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
@@ -83,12 +82,12 @@ public class DataMappingServiceImpl implements DataMappingService {
     @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
+    private static final String TEMPLATE_NAME = "%s_%s_Template";
+
     @Override
     public FetchFieldDefinitionsResponse fetchFieldDefinitions(String systemName, String systemType,
                                                                String systemObject, String importFile)
             throws Exception {
-
-        log.info("JAW ------ BEGIN Real Fetch Field Definition -----");
 
         // 1. Validate HTTP request parameters.
         validateFieldDefinitionRequestParameters("Fetch", systemName, systemType, systemObject, importFile);
@@ -96,10 +95,8 @@ public class DataMappingServiceImpl implements DataMappingService {
         // 2. Generate extra fields from older parameters to interact with proxies and services.
         // systemObject ==> entityType
         // systemName + entityType ==> feedType
-        // "File" ==> source   [hard coded for now, since options are File or VisiDB, which doesn't need to be
-        //                      supported.  Confirm this!]
+        // "File" ==> source   [hard coded for since only File is needed]
         // importFile ==> sourceFile
-        // entityType + sourceFile ==> schemaInterpretation
         // ==> customerSpace
 
         // 2a. Convert systemObject to entity.
@@ -114,10 +111,10 @@ public class DataMappingServiceImpl implements DataMappingService {
         // 2d. Generate sourceFile object.
         SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
 
-        // 2f. Generate customerSpace.
+        // 2e. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
-        log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
+        log.debug(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
                         "   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
                 feedType, source, customerSpace.toString()));
 
@@ -133,7 +130,6 @@ public class DataMappingServiceImpl implements DataMappingService {
         //    b. Spec for this system.
         //    c. Existing field definitions from DataFeedTask.
         //    d. Columns and autodetection results from the sourceFile.
-        //    e. Other System Templates matching this System Object (TODO).
         //    f. Batch Store (TODO)
 
         // 4a. Setup up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
@@ -180,134 +176,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         // 5. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
 
-        log.info("JAW ------ END Real Fetch Field Definition -----");
-
         return fetchFieldDefinitionsResponse;
-    }
-
-    // TODO(jwinter): Steps being left for validation:
-    //   1. Make sure the new metadata table has all the required attributes from the Spec.
-    //   2. Get the set of existing templates for all system types that match this entity.
-    //      a. If the existing templates have lower cased attributes names, lower case the new table’s attribute
-    //         names.
-    //      b. Make sure the physical types of attributes in the new table match those of the existing templates.
-    //   3. Check that the new metadata table hasn't changed physicalDataTypes of attributes compared to the
-    //      existing template, if DataFeed state is not DataFeed.Status.Initing.
-    //   4. Final checks against Spec:
-    //      a. All required attributes are there.
-    //      b. Physical types may differ for special cases.  (this may no longer be applicable)
-    //      c. Verify Spec field are not changed.
-
-
-
-    @Override
-    public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
-                                                         String importFile, boolean runImport,
-                                                         FieldDefinitionsRecord commitRequest)
-            throws LedpException, IllegalArgumentException {
-
-        log.info("JAW ------ BEGIN Real Commit Field Definition -----");
-
-        // 1a. Validate HTTP request parameters.
-        validateFieldDefinitionRequestParameters("Commit", systemName, systemType, systemObject, importFile);
-
-        // 1b. Validate Commit Request.
-        validateFieldDefinitionsRequestBody("Commit", commitRequest);
-
-        // 2. Generate extra fields from older parameters to interact with proxies and services.
-        // systemObject ==> entityType
-        // systemName + entityType ==> feedType
-        // "File" ==> source   [hard coded for now, since options are File or VisiDB, which doesn't need to be
-        //                      supported.  Confirm this!]
-        // importFile ==> sourceFile
-        // entityType + sourceFile ==> schemaInterpretation
-        // ==> customerSpace
-
-        // 2a. Convert systemObject to entity.
-        EntityType entityType = EntityType.fromDisplayNameToEntityType(systemObject);
-
-        // 2b. Convert systemName and entityType to feedType.
-        String feedType = EntityTypeUtils.generateFullFeedType(systemName, entityType);
-
-        // 2c. Generate source string.
-        String source = "File";
-
-        // 2d. Generate sourceFile object.
-        SourceFile sourceFile = getSourceFile(importFile);
-
-        // 2e. Update schema interpretation.
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entityType.getEntity().name());
-        if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
-            sourceFile.setSchemaInterpretation(schemaInterpretation);
-            sourceFileService.update(sourceFile);
-        }
-
-        // 2f. Generate customerSpace.
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-
-        log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
-                        "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
-                feedType, source, sourceFile.getName(), customerSpace.toString()));
-
-        // 3. Process System IDs.  For now, this is only supported for entity types Accounts, Contacts, and Leads.
-        if (EntityType.Accounts.equals(entityType) || EntityType.Contacts.equals(entityType) ||
-                EntityType.Leads.equals(entityType)) {
-            SystemIdsUtils.processSystemIds(customerSpace, systemName, systemType, entityType, commitRequest,
-                    cdlService);
-        }
-
-        // 4. Update the CDL External System data structures.
-        // Set external system column name, this step will reset the field name(appending "_ID"), so the step
-        // should be before generating table
-        if (BusinessEntity.Account.equals(entityType.getEntity()) ||
-                BusinessEntity.Contact.equals(entityType.getEntity())) {
-            CDLExternalSystem cdlExternalSystem = CDLExternalSystemUtils.processOtherID(entityType, commitRequest);
-            CDLExternalSystemUtils.setCDLExternalSystem(cdlExternalSystem, entityType.getEntity(),
-                    cdlExternalSystemProxy);
-        }
-
-        // 5. Generate new table from FieldDefinitionsRecord.
-        String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
-        Table newTable = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(newTableName, false, commitRequest);
-        printTableAttributes("New Table", newTable);
-
-        // 6. Delete old table associated with the source file from the database if it exists.
-        if (sourceFile.getTableName() != null) {
-            metadataProxy.deleteTable(customerSpace.toString(), sourceFile.getTableName());
-        }
-
-        // 7. Associate the new table with the source file and add new table to the database.
-        metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
-        sourceFile.setTableName(newTable.getName());
-        sourceFileService.update(sourceFile);
-
-
-
-        // 8. Create or Update the DataFeedTask
-        String taskId = createOrUpdateDataFeedTask(newTable, customerSpace, source, feedType, entityType);
-
-        // 9. Additional Steps
-        // a. Update Attribute Configs.
-        // b. Send email about S3 update.
-        // TODO(jwinter): Do we need to add code to update the Attr Configs?
-        // TODO(jwinter): Add code to send email about S3 Template change.
-
-
-        // 10. If requested, submit a workflow import job for this new template.
-        if (runImport) {
-            log.info("Running import workflow job for CustomerSpace {} and task ID {} on file {}",
-                    customerSpace.toString(), taskId, importFile);
-            cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, importFile);
-        }
-
-        // 11. Setup the Commit Response for this request.
-        // Should the FieldDefinitionsRecord reflect any changes when new table is merged with
-        // existing table?
-        FieldDefinitionsRecord commitResponse = new FieldDefinitionsRecord();
-        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
-        log.info("JAW ------ END Real Commit Field Definition -----");
-
-        return commitResponse;
     }
 
     /**
@@ -359,6 +228,119 @@ public class DataMappingServiceImpl implements DataMappingService {
         return response;
     }
 
+    // TODO(jwinter): Steps being left for validation:
+    //   1. Make sure the new metadata table has all the required attributes from the Spec.
+    //   2. Get the set of existing templates for all system types that match this entity.
+    //      a. If the existing templates have lower cased attributes names, lower case the new table’s attribute
+    //         names.
+    //      b. Make sure the physical types of attributes in the new table match those of the existing templates.
+    //   3. Check that the new metadata table hasn't changed physicalDataTypes of attributes compared to the
+    //      existing template, if DataFeed state is not DataFeed.Status.Initing.
+    //   4. Final checks against Spec:
+    //      a. All required attributes are there.
+    //      b. Physical types may differ for special cases.  (this may no longer be applicable)
+    //      c. Verify Spec field are not changed.
+    @Override
+    public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
+                                                         String importFile, boolean runImport,
+                                                         FieldDefinitionsRecord commitRequest)
+            throws LedpException, IllegalArgumentException {
+
+        // 1a. Validate HTTP request parameters.
+        validateFieldDefinitionRequestParameters("Commit", systemName, systemType, systemObject, importFile);
+
+        // 1b. Validate Commit Request.
+        validateFieldDefinitionsRequestBody("Commit", commitRequest);
+
+        // 2. Generate extra fields from older parameters to interact with proxies and services.
+        // systemObject ==> entityType
+        // systemName + entityType ==> feedType
+        // "File" ==> source   [hard coded since only File is needed]
+        // importFile ==> sourceFile
+        // ==> customerSpace
+
+        // 2a. Convert systemObject to entity.
+        EntityType entityType = EntityType.fromDisplayNameToEntityType(systemObject);
+
+        // 2b. Convert systemName and entityType to feedType.
+        String feedType = EntityTypeUtils.generateFullFeedType(systemName, entityType);
+
+        // 2c. Generate source string.
+        String source = "File";
+
+        // 2d. Generate sourceFile object.
+        SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
+
+        // 2e. Generate customerSpace.
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+
+        log.debug(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
+                        "   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
+                feedType, source, customerSpace.toString()));
+
+        // 3. Process System IDs.  For now, this is only supported for entity types Accounts, Contacts, and Leads.
+        if (EntityType.Accounts.equals(entityType) || EntityType.Contacts.equals(entityType) ||
+                EntityType.Leads.equals(entityType)) {
+            SystemIdsUtils.processSystemIds(customerSpace, systemName, systemType, entityType, commitRequest,
+                    cdlService);
+        }
+
+        // 4. Update the CDL External System data structures.
+        // Set external system column name, this step will reset the field name(appending "_ID"), so the step
+        // should be before generating table
+        if (BusinessEntity.Account.equals(entityType.getEntity()) ||
+                BusinessEntity.Contact.equals(entityType.getEntity())) {
+            CDLExternalSystem cdlExternalSystem = CDLExternalSystemUtils.processOtherID(entityType, commitRequest);
+            CDLExternalSystemUtils.setCDLExternalSystem(cdlExternalSystem, entityType.getEntity(),
+                    cdlExternalSystemProxy);
+        }
+
+        // 5. Generate new table from FieldDefinitionsRecord.
+        String newTableName;
+        if (sourceFile != null) {
+            newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
+        } else {
+            newTableName = String.format(TEMPLATE_NAME, systemObject, System.currentTimeMillis());
+        }
+        Table newTable = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(newTableName, false, commitRequest);
+
+        // 6. Delete old table associated with the source file from the database if it exists.
+        if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getTableName())) {
+            metadataProxy.deleteTable(customerSpace.toString(), sourceFile.getTableName());
+        }
+
+        // 7. Associate the new table with the source file and add new table to the database.
+        metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
+        if (sourceFile != null) {
+            sourceFile.setTableName(newTable.getName());
+            sourceFileService.update(sourceFile);
+        }
+        // 8. Create or Update the DataFeedTask
+        String taskId = createOrUpdateDataFeedTask(newTable, customerSpace, source, feedType, entityType);
+
+        // 9. Additional Steps
+        // a. Update Attribute Configs.
+        // b. Send email about S3 update.
+        // TODO(jwinter): Do we need to add code to update the Attr Configs?
+        // TODO(jwinter): Add code to send email about S3 Template change.
+
+
+        // 10. If requested, submit a workflow import job for this new template.
+        if (runImport && StringUtils.isNotBlank(importFile)) {
+            log.info("Running import workflow job for CustomerSpace {} and task ID {} on file {}",
+                    customerSpace.toString(), taskId, importFile);
+            cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, importFile);
+        }
+
+        // 11. Setup the Commit Response for this request.
+        // Should the FieldDefinitionsRecord reflect any changes when new table is merged with
+        // existing table?
+        FieldDefinitionsRecord commitResponse = new FieldDefinitionsRecord();
+        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
+
+        return commitResponse;
+    }
+
     private SourceFile getSourceFile(String sourceFileName) {
         SourceFile sourceFile = sourceFileService.findByName(sourceFileName);
         if (sourceFile == null) {
@@ -370,11 +352,6 @@ public class DataMappingServiceImpl implements DataMappingService {
     private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
                                                  boolean cdlResolve) {
         return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, null);
-    }
-
-    private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
-                                                 boolean cdlResolve, Table schemaTable) {
-        return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, schemaTable);
     }
 
     private static void printDataFeedTask(String tableType, DataFeedTask dataFeedTask) {
@@ -423,7 +400,6 @@ public class DataMappingServiceImpl implements DataMappingService {
                 entityType.getEntity().name());
         if (dataFeedTask != null) {
             log.info("Found existing DataFeedTask template: {}", dataFeedTask.getTemplateDisplayName());
-            printTableAttributes("DataFeedTask", dataFeedTask.getImportTemplate());
             Table existingTable = dataFeedTask.getImportTemplate();
             if (!TableUtils.compareMetadataTables(existingTable, newTable)) {
                 Table mergedTable = TableUtils.mergeMetadataTables(existingTable, newTable);

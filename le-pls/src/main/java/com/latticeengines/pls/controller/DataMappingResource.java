@@ -34,7 +34,7 @@ public class DataMappingResource {
     @Inject
     private DataMappingService dataMappingService;
 
-    // Real API for Import Workflow 2.0 Fetch Field Definitions.
+    // API for Import Workflow 2.0 Fetch Field Definitions.
     // Parameters:
     //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
     //   systemType: The type of system for which a template is being created, eg. Salesforce
@@ -47,10 +47,10 @@ public class DataMappingResource {
             @RequestParam(value = "systemName") String systemName, //
             @RequestParam(value = "systemType") String systemType, //
             @RequestParam(value = "systemObject") String systemObject, //
-            @RequestParam(value = "importFile", required = false) String importFile) {
+            @RequestParam(value = "fileImportId", required = false) String fileImportId) {
         try {
             FetchFieldDefinitionsResponse fetchResponse = dataMappingService.fetchFieldDefinitions(
-                    systemName, systemType, systemObject, importFile);
+                    systemName, systemType, systemObject, fileImportId);
             return ResponseDocument.successResponse(fetchResponse);
         } catch (Exception e) {
             log.error("Fetch Field Definition Failed with Exception: ", e);
@@ -58,7 +58,7 @@ public class DataMappingResource {
         }
     }
 
-    // Real API for Import Workflow 2.0 Fetch Field Definitions.
+    // API for Import Workflow 2.0 Fetch Field Definitions.
     // Parameters:
     //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
     //   systemType: The type of system for which a template is being created, eg. Salesforce
@@ -73,19 +73,19 @@ public class DataMappingResource {
             @RequestParam(value = "systemName") String systemName, //
             @RequestParam(value = "systemType") String systemType, //
             @RequestParam(value = "systemObject") String systemObject, //
-            @RequestParam(value = "importFile", required = false) String importFile, //
+            @RequestParam(value = "fileImportId", required = false) String fileImportId, //
             @RequestBody(required = true) ValidateFieldDefinitionsRequest validateRequest) {
         ValidateFieldDefinitionsResponse validateFieldDefinitionsResponse = null;
         try {
             validateFieldDefinitionsResponse = dataMappingService.validateFieldDefinitions(systemName,
-                    systemType, systemObject, importFile, validateRequest);
+                    systemType, systemObject, fileImportId, validateRequest);
         } catch (Exception e) {
             return ResponseDocument.failedResponse(e);
         }
         return ResponseDocument.successResponse(validateFieldDefinitionsResponse);
     }
 
-    // Real API for Import Workflow 2.0 Commit Field Definitions.
+    // API for Import Workflow 2.0 Commit Field Definitions.
     // Parameters:
     //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
     //   systemType: The type of system for which a template is being created, eg. Salesforce
@@ -101,15 +101,15 @@ public class DataMappingResource {
             @RequestParam(value = "systemName") String systemName, //
             @RequestParam(value = "systemType") String systemType, //
             @RequestParam(value = "systemObject") String systemObject, //
-            @RequestParam(value = "importFile") String importFile, //
+            @RequestParam(value = "fileImportId", required = false) String fileImportId, //
             @RequestParam(value = "runImport", required = false, defaultValue = "false") boolean runImport, //
             @RequestBody(required = true) FieldDefinitionsRecord commitRequest) {
         try {
             FieldDefinitionsRecord commitResponse = dataMappingService.commitFieldDefinitions(
-                    systemName, systemType, systemObject, importFile, runImport, commitRequest);
+                    systemName, systemType, systemObject, fileImportId, runImport, commitRequest);
             return ResponseDocument.successResponse(commitResponse);
         } catch (Exception e) {
-            log.error("Real Commit Failed with Exception: ", e);
+            log.error("Commit Failed with Exception: ", e);
             return ResponseDocument.failedResponse(e);
         }
     }
