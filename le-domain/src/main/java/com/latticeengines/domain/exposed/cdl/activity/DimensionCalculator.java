@@ -10,8 +10,7 @@ import com.google.common.base.Objects;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DimensionCalculator.class, name = "DimensionCalculator"),
-        @JsonSubTypes.Type(value = DimensionCalculatorRegexMode.class, name = "DimensionCalculatorRegexMode"),
-        @JsonSubTypes.Type(value = DimensionCalculatorExistence.class, name = "DimensionCalculatorExistence")
+        @JsonSubTypes.Type(value = DimensionCalculatorRegexMode.class, name = "DimensionCalculatorRegexMode")
 })
 public class DimensionCalculator implements Serializable {
 

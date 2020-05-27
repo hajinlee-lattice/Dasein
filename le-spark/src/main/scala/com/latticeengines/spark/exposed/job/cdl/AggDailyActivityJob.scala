@@ -95,13 +95,20 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
         case SUM => sum(deriver.getSourceAttributes.get(0))
         case MAX => max(deriver.getSourceAttributes.get(0))
         case MIN => min(deriver.getSourceAttributes.get(0))
+        case TRUE => lit(true).cast(BooleanType)
         case _ => throw new UnsupportedOperationException(s"Calculation ${deriver.getCalculation} is not supported")
       }
       col.as(deriver.getTargetAttribute)
+    } :+ max(DeriveAttrsUtils.VERSION_COL).as(DeriveAttrsUtils.VERSION_COL)
+    val dailyStoreBatchWithVersion: DataFrame = {
+      if (!dailyStoreBatch.columns.contains(DeriveAttrsUtils.VERSION_COL)) {
+        DeriveAttrsUtils.appendVersionStamp(dailyStoreBatch, 0L)
+      } else {
+        dailyStoreBatch
+      }
     }
-
-    val affected: DataFrame = dailyStoreBatch.filter(col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate))
-    val notAffected: DataFrame = dailyStoreBatch.filter(!col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate))
+    val affected: DataFrame = dailyStoreBatchWithVersion.filter(col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate))
+    val notAffected: DataFrame = dailyStoreBatchWithVersion.filter(!col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate))
     val updatedDelta: DataFrame = {
       if (lattice.config.streamReducerMap.containsKey(streamId)) {
         val reducer = lattice.config.streamReducerMap.get(streamId)
@@ -149,6 +156,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     val hashDimensionMap = lattice.config.hashDimensionMap.asScala.mapValues(_.asScala.toSet)
     val dimValueIdMap = lattice.config.dimensionValueIdMap.asScala
     val streamReducerMap = lattice.config.streamReducerMap.asScala
+    val version: Long = lattice.config.currentEpochMilli
 
     val metadataInStream = metadataMap(streamId)
     val dateAttr = dateAttrs(streamId)
@@ -173,16 +181,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
 
     // aggregation: all dimension name + entityIds + stream date & dateId
     val dimAttrs = attrs.toSeq ++ additionalDimCols :+ __StreamDate.name :+ __StreamDateId.name
-    val aggFns = attrDeriverMap.getOrElse(streamId, Nil).map { deriver =>
-      val col = deriver.getCalculation match {
-        case COUNT => count("*")
-        case SUM => sum(deriver.getSourceAttributes.get(0))
-        case MAX => max(deriver.getSourceAttributes.get(0))
-        case MIN => min(deriver.getSourceAttributes.get(0))
-        case _ => throw new UnsupportedOperationException(s"Calculation ${deriver.getCalculation} is not supported")
-      }
-      col.as(deriver.getTargetAttribute)
-    }
+    val aggFns = attrDeriverMap.getOrElse(streamId, Nil).map(DeriveAttrsUtils.getAggr(df, _))
 
     // always generate row count agg
     val aggDf: DataFrame = {
@@ -196,7 +195,11 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
             max(LastActivityDate.name).as(LastActivityDate.name) :: aggFns: _*)
       }
     }
-    aggDf
+    if (!aggDf.columns.contains(DeriveAttrsUtils.VERSION_COL)) {
+      DeriveAttrsUtils.appendVersionStamp(aggDf, version)
+    } else {
+      aggDf
+    }
   }
 
   private def addLastActivityDateColIfNotExist(df: DataFrame, dateAttr: String): DataFrame = {
@@ -231,8 +234,6 @@ object DimensionValueHelper extends Serializable {
     calculator match {
       case regexCalculator: DimensionCalculatorRegexMode =>
         DimensionValueHelper.matchRegexDimensionValue(df, dimensionName, dimValues, regexCalculator, getValueFn)
-      case existenceCalculator: DimensionCalculatorExistence =>
-        df.withColumn(dimensionName, lit(existenceCalculator.getTargetBoolean).cast(BooleanType))
       case _ =>
         // non-regex can only have one match (exact match)
         val calDimValue = udf {

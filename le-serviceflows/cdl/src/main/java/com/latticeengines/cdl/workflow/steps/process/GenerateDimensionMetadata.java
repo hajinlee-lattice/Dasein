@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -127,6 +128,7 @@ public class GenerateDimensionMetadata
         });
         removeSkippedStreamMetadata(dimensionMetadataMap);
         allocateDimensionIdsAndOverrideMap(dimensionMetadataMap);
+        mergeMetadata(dimensionMetadataMap);
         saveDimensionMetadataMap(dimensionMetadataMap);
     }
 
@@ -167,7 +169,7 @@ public class GenerateDimensionMetadata
 
         log.info("DimensionValueIdMap = {}", valueIdMap);
 
-        // update metadata
+        // update metadata - replace dimension name with short ID
         dimensionMetadataMap.forEach((streamId, dims) -> {
             dims.forEach((dimName, metadata) -> {
                 if (CollectionUtils.isEmpty(metadata.getDimensionValues())) {
@@ -183,6 +185,54 @@ public class GenerateDimensionMetadata
                 });
             });
         });
+    }
+
+    private void mergeMetadata(Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        dimensionMetadataMap.forEach((streamId, dimensions) -> {
+            AtlasStream stream = configuration.getActivityStreamMap().get(streamId);
+            stream.getDimensions().forEach(dimension -> {
+                if (BooleanUtils.isFalse(dimension.getShouldReplace())) {
+                    Map<String, DimensionMetadata> activeDimensionMetadata = getStreamActiveDimensionMetadata(stream);
+                    String dimName = dimension.getName();
+                    log.info("Merging dimension dimension {} in stream {}. Active={}, New={}",
+                            dimension.getName(),
+                            stream.getStreamId(),
+                            JsonUtils.serialize(activeDimensionMetadata),
+                            dimName);
+                    DimensionMetadata merged = mergeDimensionMetadata(dimName, dimensionMetadataMap.get(streamId).get(dimName), activeDimensionMetadata.get(dimName));
+                    dimensionMetadataMap.get(streamId).put(dimName, merged);
+                }
+            });
+        });
+    }
+
+    // TODO - maybe put this in an util and write unit test?
+    private DimensionMetadata mergeDimensionMetadata(String dimName, DimensionMetadata newMetadata, DimensionMetadata activeMetadata) {
+        if (activeMetadata == null) {
+            return newMetadata;
+        }
+        // active <dimName value> -> <dim object map>
+        Map<String, Map<String, Object>> activeDimMap = activeMetadata.getDimensionValues().stream()
+                .map(dimObj -> Pair.of(dimObj.get(dimName).toString(), dimObj))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        DimensionMetadata merged = new DimensionMetadata();
+        merged.setDimensionValues(new ArrayList<>(activeMetadata.getDimensionValues()));
+        merged.getDimensionValues().addAll(newMetadata.getDimensionValues().stream()
+                .filter(dimObj -> !activeDimMap.containsKey(dimObj.get(dimName).toString())) // fetch dimObject with names not in active dimension metadata
+                .collect(Collectors.toList()));
+        merged.setCardinality(merged.getDimensionValues().size());
+        return merged;
+    }
+
+    private Map<String, DimensionMetadata> getStreamActiveDimensionMetadata(AtlasStream stream) {
+        Map<String, DimensionMetadata> dimensionMetadataMap = new HashMap<>();
+        try {
+            dimensionMetadataMap = activityStoreProxy.getDimensionMetadataInStream(customerSpace.toString(), stream.getName(), null);
+            log.info("Stream {} configured to merge dimension metadata. Found active metadata {}", stream.getStreamId(), JsonUtils.serialize(dimensionMetadataMap));
+        } catch (Exception e) {
+            log.info("Stream {} configured to merge dimension metadata. Failed to retrive active metadata. {}", stream.getStreamId(), e);
+        }
+        return dimensionMetadataMap;
     }
 
     private void saveDimensionMetadataSignature(@NotNull String signature) {
@@ -204,7 +254,7 @@ public class GenerateDimensionMetadata
     }
 
     private Map<String, ProcessDimensionConfig.Dimension> buildDimensions(Map<String, AtlasStream> streams,
-            Map<String, Table> catalogTables, Map<String, Table> rawStreamTables) {
+                                                                          Map<String, Table> catalogTables, Map<String, Table> rawStreamTables) {
         if (MapUtils.isEmpty(streams)) {
             return Collections.emptyMap();
         }
@@ -233,7 +283,7 @@ public class GenerateDimensionMetadata
      * TODO need to handle other usages?
      */
     private Stream<Pair<String, ProcessDimensionConfig.Dimension>> getDimensionConfigs(String streamId,
-            List<StreamDimension> dimensions, Map<String, Table> catalogTables, Map<String, Table> rawStreamTables) {
+                                                                                       List<StreamDimension> dimensions, Map<String, Table> catalogTables, Map<String, Table> rawStreamTables) {
         return dimensions.stream().filter(this::isPivotDimension).map(dimension -> {
             if (dimension.getGenerator().getOption() == BOOLEAN) {
                 return null;
@@ -283,6 +333,7 @@ public class GenerateDimensionMetadata
         }).filter(Objects::nonNull);
     }
 
+    // streamId -> {dimId -> dimMetadata}
     private Map<String, Map<String, DimensionMetadata>> getDimensionMetadataMap(SparkJobResult result) {
         Map<?, ?> rawMetadataMap = JsonUtils.deserialize(result.getOutput(), Map.class);
         // dimId -> metadata
@@ -319,7 +370,7 @@ public class GenerateDimensionMetadata
 
     // add metadata for Usage=Pivot & GeneratorOption=BOOLEAN
     private void addBooleanPivotMetadata(@NotNull Map<String, Map<String, DimensionMetadata>> metadataMap,
-            @NotNull Map<String, AtlasStream> streamMap) {
+                                         @NotNull Map<String, AtlasStream> streamMap) {
         streamMap.values().stream() //
                 .filter(Objects::nonNull) //
                 .filter(stream -> CollectionUtils.isNotEmpty(stream.getDimensions())) //

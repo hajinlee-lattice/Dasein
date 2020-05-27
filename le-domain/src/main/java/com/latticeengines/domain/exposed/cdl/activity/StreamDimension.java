@@ -108,7 +108,7 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
     @JsonProperty("shouldReplace")
     @Column(name="SHOULD_REPLACE")
     // if false, newly generated dimension map will be merged into the active version
-    private Boolean shouldReplace;
+    private Boolean shouldReplace = true;
 
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
