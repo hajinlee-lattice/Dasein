@@ -173,7 +173,6 @@
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
