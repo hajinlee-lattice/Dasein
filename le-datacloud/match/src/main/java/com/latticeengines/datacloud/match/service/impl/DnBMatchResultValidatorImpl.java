@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 
-@Component("dnbMatchResultValidatorImpl")
+@Component("dnbMatchResultValidator")
 public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
 
     private static final Logger log = LoggerFactory.getLogger(DnBMatchResultValidatorImpl.class);

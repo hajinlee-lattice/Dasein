@@ -125,7 +125,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroGlob);
+        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
         while (records.hasNext()) {
             GenericRecord record = records.next();
             for (int i = 0; i < record.getSchema().getFields().size(); i++) {
@@ -140,7 +140,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     }
 
     @Test(groups = "functional")
-    public void testSegment() throws Exception {
+    public void testSegment() {
         String fileName = "BulkMatchInput_WithIds.avro";
         cleanupAvroDir(avroDir);
         updateAvroFile(avroDir, fileName);
@@ -164,10 +164,10 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroGlob);
-        Long count = 0L;
-        Long notNullLdcDomain = 0L;
-        Long notNullLdcName = 0L;
+        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
+        long count = 0L;
+        long notNullLdcDomain = 0L;
+        long notNullLdcName = 0L;
         while (records.hasNext()) {
             GenericRecord record = records.next();
             count++;
@@ -180,10 +180,10 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
                 notNullLdcDomain++;
             }
         }
-        Assert.assertTrue(notNullLdcDomain.doubleValue() / count.doubleValue() > 0.70, String.format(
-                "Only %.2f %% records has LDC_Domain", 100 * notNullLdcDomain.doubleValue() / count.doubleValue()));
-        Assert.assertTrue(notNullLdcName.doubleValue() / count.doubleValue() > 0.70, String
-                .format("Only %.2f %% records has LDC_Name", 100 * notNullLdcName.doubleValue() / count.doubleValue()));
+        Assert.assertTrue((double) notNullLdcDomain / (double) count > 0.60, String.format(
+                "Only %.2f %% records has LDC_Domain", 100 * (double) notNullLdcDomain / (double) count));
+        Assert.assertTrue((double) notNullLdcName / (double) count > 0.60, String
+                .format("Only %.2f %% records has LDC_Name", 100 * (double) notNullLdcName / (double) count));
     }
 
     private void verifyDedupeHelpers(DataCloudJobConfiguration jobConfiguration) {

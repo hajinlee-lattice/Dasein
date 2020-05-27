@@ -111,17 +111,20 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     public List<SoftwarePackage> getInstalledPackages(String module) {
         List<SoftwarePackage> packages = new ArrayList<>();
         try {
-            List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, //
-                    String.format("%s/%s", topLevelPath, module), //
-                    file -> file.getPath().toString().endsWith(".json"));
-
-            for (String file : files) {
-                try {
-                    packages.add(JsonUtils.deserialize(HdfsUtils.getHdfsFileContents(yarnConfiguration, file),
-                            SoftwarePackage.class));
-                } catch (Exception e) {
-                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_27003, new String[] { file }));
+            String modulePath = String.format("%s/%s", topLevelPath, module);
+            if (HdfsUtils.fileExists(yarnConfiguration, modulePath)) {
+                List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, //
+                        modulePath, file -> file.getPath().toString().endsWith(".json"));
+                for (String file : files) {
+                    try {
+                        packages.add(JsonUtils.deserialize(HdfsUtils.getHdfsFileContents(yarnConfiguration, file),
+                                SoftwarePackage.class));
+                    } catch (Exception e) {
+                        log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_27003, new String[] { file }));
+                    }
                 }
+            } else {
+                log.info("No packages installed for module {}", module);
             }
         } catch (FileNotFoundException e) {
             log.warn(e.getMessage(), e);

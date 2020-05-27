@@ -37,6 +37,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
@@ -55,8 +56,12 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 
 @Component("dnbLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {
@@ -110,6 +115,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.bulk.redirect.realtime.threshold:100}")
     private int bulkToRealtimeThreshold;
 
+    @Value("${datacloud.dnb.direct.plus.batch.redirect.realtime.threshold}")
+    private int dplusBulkToRealtimeThreshold;
+
     @Resource(name = "dnbRealTimeLookupService")
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
@@ -137,14 +145,20 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Inject
     private DnBCacheService dnbCacheService;
 
-    @Inject
+    @Resource(name = "dnbMatchResultValidator")
     private DnBMatchResultValidator dnbMatchResultValidator;
+
+    @Resource(name = "dplusMatchResultValidator")
+    private DnBMatchResultValidator dplusMatchValidator;
 
     @Inject
     private NameLocationService nameLocationService;
 
     @Inject
     private DnbMatchCommandService dnbMatchCommandService;
+
+    @Inject
+    private CountryCodeService countryCodeService;
 
     @Inject
     @Lazy
@@ -272,6 +286,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
         context.setUseDirectPlus(traveler.getMatchInput().getUseDirectPlus());
+        setMatchRule(context, traveler.getMatchInput().getDplusMatchConfig());
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             context = dnbRealtimeLookup(context);
             readyToReturn = true;
@@ -312,10 +327,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setLogDnBBulkResult(traveler.getMatchInput().isLogDnBBulkResult());
         context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
+        boolean isDirectPlus = Boolean.TRUE.equals(traveler.getMatchInput().getUseDirectPlus());
+        if (isDirectPlus) {
+            setMatchRule(context, traveler.getMatchInput().getDplusMatchConfig());
+        }
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             saveReq(lookupRequestId, returnAddress, request);
             // Bucket single contexts to batched contexts in unsubmittedReqs
-            boolean isDirectPlus = Boolean.TRUE.equals(traveler.getMatchInput().getUseDirectPlus());
             synchronized (unsubmittedBatches) {
                 // If unsubmittedBatches is empty, or last unsubmitted batch is sealed,
                 // or last unsubmitted batch size is 10K, create a new batch
@@ -357,31 +375,23 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         }
 
         context.setResponseTime(new Date());
-        validateDuns(context);
-        dnbMatchResultValidator.validate(context);
-        // Sync write to DnB cache for realtime service for 2 reasons:
-        // 1. Performance will not degrade much
-        // 2. Patch service needs it
-        DnBCache dnBCache = dnbCacheService.addCache(context, true);
-        if (dnBCache != null) {
-            context.setCacheId(dnBCache.getId());
-        }
-        return context;
-    }
 
-    private void dnbBatchRedirectToRealtime(DnBBatchMatchContext batchContext) {
-        log.info(String.format("Batch request %s, size=%d, smaller than threshold %d, redirecting to realtime lookup..",
-                batchContext.getRootOperationUid(), batchContext.getContexts().size(), bulkToRealtimeThreshold));
-        long duration = 0;
-        for (DnBMatchContext context : batchContext.getContexts().values()) {
-            context.setUseDirectPlus(batchContext.isUserDirectPlus()); // somehow this flag is null in context
-            dnbRealtimeLookup(context);
-            duration += context.getDuration() != null ? context.getDuration() : 0;
+        DplusMatchRule matchRule = context.getMatchRule();
+        if (matchRule == null) { // the lattice way
+            validateDuns(context);
+            dnbMatchResultValidator.validate(context);
+            // Sync write to DnB cache for realtime service for 2 reasons:
+            // 1. Performance will not degrade much
+            // 2. Patch service needs it
+            DnBCache dnBCache = dnbCacheService.addCache(context, true);
+            if (dnBCache != null) {
+                context.setCacheId(dnBCache.getId());
+            }
+        } else { // the dcp way
+            dplusMatchValidator.validate(context);
         }
-        batchContext.setDuration(duration == 0 ? null : duration);
-        batchContext.setDnbCode(DnBReturnCode.OK);
-        log.info(String.format("Batch request %s finished using realtime lookup", batchContext.getRootOperationUid()));
-        processBulkMatchResult(batchContext, true, false);
+
+        return context;
     }
 
     private void dnbBatchDispatchRequest() {
@@ -422,8 +432,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
             // Dispatch batch requests
             for (DnBBatchMatchContext batchContext : batchesToSubmit) {
-                if (batchContext.getContexts().size() <= bulkToRealtimeThreshold) {
-                    Runnable task = createBatchToRealtimeRunnable(batchContext);
+                int threshold = batchContext.isUserDirectPlus() ? //
+                        dplusBulkToRealtimeThreshold : bulkToRealtimeThreshold;
+                if (batchContext.getContexts().size() <= threshold) {
+                    Runnable task = createBatchToRealtimeRunnable(batchContext, threshold);
                     dnbDataSourceServiceExecutor.execute(task);
                     continue;
                 }
@@ -631,9 +643,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 if (!success) {
                     context.setDnbCode(batchContext.getDnbCode());
                 } else {
-                    validateDuns(context);
-                    dnbMatchResultValidator.validate(context);
-                    dnbCacheService.addCache(context, false);
+                    DplusMatchRule matchRule = context.getMatchRule();
+                    if (matchRule == null) { // the lattice way
+                        validateDuns(context);
+                        dnbMatchResultValidator.validate(context);
+                        dnbCacheService.addCache(context, false);
+                    } else { // the dcp way
+                        dplusMatchValidator.validate(context);
+                    }
                 }
             }
             removeReq(lookupRequestId);
@@ -702,8 +719,21 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         };
     }
 
-    private Runnable createBatchToRealtimeRunnable(final DnBBatchMatchContext batchContext) {
-        return () -> dnbBatchRedirectToRealtime(batchContext);
+    private Runnable createBatchToRealtimeRunnable(final DnBBatchMatchContext batchContext, int bulkToRealtimeThreshold) {
+        return () -> {
+            log.info(String.format("Batch request %s, size=%d, smaller than threshold %d, redirecting to realtime lookup..",
+                    batchContext.getRootOperationUid(), batchContext.getContexts().size(), bulkToRealtimeThreshold));
+            long duration = 0;
+            for (DnBMatchContext context : batchContext.getContexts().values()) {
+                context.setUseDirectPlus(batchContext.isUserDirectPlus()); // somehow this flag is null in context
+                dnbRealtimeLookup(context);
+                duration += context.getDuration() != null ? context.getDuration() : 0;
+            }
+            batchContext.setDuration(duration == 0 ? null : duration);
+            batchContext.setDnbCode(DnBReturnCode.OK);
+            log.info(String.format("Batch request %s finished using realtime lookup", batchContext.getRootOperationUid()));
+            processBulkMatchResult(batchContext, true, false);
+        };
     }
 
     /************************ DnB Lookup Service Status ************************/
@@ -761,6 +791,29 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private boolean isMultiCandidates(DataSourceLookupRequest request) {
         return OperationalMode.MULTI_CANDIDATES.equals(request.getMatchTravelerContext().getOperationalMode());
+    }
+
+    private void setMatchRule(DnBMatchContext context, DplusMatchConfig config) {
+        if (config != null) {
+            NameLocation nl = context.getInputNameLocation();
+            if (nl != null && CollectionUtils.isNotEmpty(config.getSpecialRules())) {
+                String inputCode = nl.getCountryCode();
+                DplusMatchRule matchRule = config.getSpecialRules().stream().filter(sr -> {
+                    if (MatchKey.Country.equals(sr.getMatchKey())) {
+                        return sr.getAllowedValues().stream().anyMatch(v -> {
+                            String filterCode = countryCodeService.getCountryCode(v);
+                            return inputCode.equalsIgnoreCase(filterCode);
+                        });
+                    } else {
+                        log.warn("Unsupported filtering match key {}", sr.getMatchKey());
+                    }
+                    return false;
+                }).map(DplusMatchConfig.SpeicalRule::getSpecialRule).findFirst().orElse(config.getBaseRule());
+                context.setMatchRule(matchRule);
+            } else {
+                context.setMatchRule(config.getBaseRule());
+            }
+        }
     }
 
     private int maxBatchSize(boolean isDirectPlus) {

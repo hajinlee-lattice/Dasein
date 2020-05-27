@@ -47,7 +47,6 @@ public enum SoftwareLibrary {
 
         CDL.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
         DCP.modules = ImmutableSet.of(Module.workflowapi);
-        DCP.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
     }
 
     private final String name;

@@ -16,6 +16,8 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -122,6 +124,12 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     @JsonProperty("candidates")
     private List<DnBMatchCandidate> candidates;
+
+    @JsonProperty("dplusConfig")
+    private DplusMatchConfig dplusConfig;
+
+    @JsonProperty("matchRule")
+    private DplusMatchRule matchRule;
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
@@ -525,6 +533,22 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     public void setCandidates(List<DnBMatchCandidate> candidates) {
         this.candidates = candidates;
+    }
+
+    public DplusMatchConfig getDplusConfig() {
+        return dplusConfig;
+    }
+
+    public void setDplusConfig(DplusMatchConfig dplusConfig) {
+        this.dplusConfig = dplusConfig;
+    }
+
+    public DplusMatchRule getMatchRule() {
+        return matchRule;
+    }
+
+    public void setMatchRule(DplusMatchRule matchRule) {
+        this.matchRule = matchRule;
     }
 
     public enum DnBMatchStrategy {
