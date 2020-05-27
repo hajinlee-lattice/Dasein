@@ -504,7 +504,9 @@ public class RatingEngineEntityMgrImpl //
     }
 
     private void updateTeamId(RatingEngine ratingEngine, String teamId) {
-        ratingEngine.setTeamId(TeamUtils.isGlobalTeam(teamId) ? null : teamId);
+        if (StringUtils.isNotEmpty(teamId)) {
+            ratingEngine.setTeamId(TeamUtils.isGlobalTeam(teamId) ? null : teamId);
+        }
     }
 
     @SuppressWarnings("deprecation")
