@@ -94,7 +94,7 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
       if (config.getCodeBookLookup == null) Map() else config.getCodeBookLookup.asScala.toMap
     val codeBookMap: Map[String, BitCodeBook] = //
       if (config.getCodeBookMap == null) Map() else config.getCodeBookMap.asScala.toMap
-    if (!codeBookLookup.isEmpty && !codeBookMap.isEmpty) {
+    if (codeBookLookup.nonEmpty && codeBookMap.nonEmpty) {
       BitEncodeUtils.decode(input, cols, codeBookLookup, codeBookMap)
     } else {
       input
@@ -178,13 +178,13 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
           case bkt: DiscreteBucket =>
             val dVal = value.asInstanceOf[Number].doubleValue
             val catList = bkt.getValues.asScala.map(_.doubleValue)
-            catList.foldLeft(0)((idx, bnd) => {
-              if (dVal == bnd) {
-                idx + 1
-              } else {
-                idx
-              }
-            })
+            val idx = catList.indexWhere(cat => dVal == cat)
+            if (idx >= 0) {
+              idx + 1
+            } else {
+              val msg = catList.map(cat => s"$dVal == $cat: ${dVal == cat}").mkString(",")
+              throw new RuntimeException(s"Cannot find value $value in given discrete list ${bkt.getValues}: $msg")
+            }
           case bkt: CategoricalBucket =>
             val catList = bkt.getCategories.asScala.map(_.toLowerCase).toList
             val strV = value match {
