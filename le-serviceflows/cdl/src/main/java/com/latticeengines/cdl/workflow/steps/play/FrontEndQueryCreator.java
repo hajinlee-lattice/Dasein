@@ -72,7 +72,10 @@ public class FrontEndQueryCreator {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    private Set<String> firstAndLastName = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name())
+    private Set<String> additionalContactAttrs = Arrays
+            .asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
+                    InterfaceName.Address_Street_2.name(),
+                    InterfaceName.DoNotMail.name(), InterfaceName.DoNotCall.name())
             .stream().collect(Collectors.toSet());
 
     @PostConstruct
@@ -155,7 +158,7 @@ public class FrontEndQueryCreator {
         if (cs != null) {
             log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, firstAndLastName, null);
+                    Predefined.Enrichment, additionalContactAttrs, null);
             log.info("attrsUsage for firstName & lastName=" + map);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> contactAttrs.add(key));
             log.info("temContactLookupFields=" + temContactLookupFields);

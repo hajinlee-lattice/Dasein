@@ -83,8 +83,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    private Set<String> firstAndLastName = new HashSet<>(
-            Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name()));
+    private Set<String> additionalContactAttr = new HashSet<>(Arrays.asList(InterfaceName.FirstName.name(),
+            InterfaceName.LastName.name(), InterfaceName.Address_Street_2.name(), InterfaceName.DoNotCall.name(),
+            InterfaceName.DoNotMail.name()));
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -396,7 +397,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             CustomerSpace cs = configuration.getCustomerSpace();
             log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, firstAndLastName, null);
+                    Predefined.Enrichment, additionalContactAttr, null);
             log.info("attrsUsage for firstName & lastName=" + map);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> set.add(key));
             log.info("set=" + set);

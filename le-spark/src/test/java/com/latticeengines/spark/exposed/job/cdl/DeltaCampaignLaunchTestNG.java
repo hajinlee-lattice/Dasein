@@ -345,6 +345,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.Title.name(), String.class), //
                 Pair.of(InterfaceName.FirstName.name(), String.class), //
                 Pair.of(InterfaceName.LastName.name(), String.class), //
+                Pair.of(InterfaceName.DoNotCall.name(), String.class), //
+                Pair.of(InterfaceName.DoNotMail.name(), String.class), //
                 Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
 

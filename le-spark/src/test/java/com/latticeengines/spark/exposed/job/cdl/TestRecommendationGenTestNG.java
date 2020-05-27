@@ -213,6 +213,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.Title.name(), String.class), //
                 Pair.of(InterfaceName.FirstName.name(), String.class), //
                 Pair.of(InterfaceName.LastName.name(), String.class), //
+                Pair.of(InterfaceName.DoNotCall.name(), String.class), //
+                Pair.of(InterfaceName.DoNotMail.name(), String.class), //
                 Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
 
@@ -365,10 +367,12 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     }
 
     private List<String> standardRecommendationContactColumns() {
-        return Arrays.asList(PlaymakerConstants.Email, PlaymakerConstants.Address, PlaymakerConstants.Phone,
+        return Arrays.asList(PlaymakerConstants.Email, PlaymakerConstants.Address, PlaymakerConstants.Address2,
+                PlaymakerConstants.Phone,
                 PlaymakerConstants.State, PlaymakerConstants.ZipCode, PlaymakerConstants.Country,
                 PlaymakerConstants.SfdcContactID, PlaymakerConstants.City, PlaymakerConstants.ContactID,
-                PlaymakerConstants.Name, PlaymakerConstants.FirstName, PlaymakerConstants.LastName);
+                PlaymakerConstants.Name, PlaymakerConstants.FirstName, PlaymakerConstants.LastName,
+                PlaymakerConstants.Title, PlaymakerConstants.DoNotCall, PlaymakerConstants.DoNotMail);
     }
 
     private PlayLaunchSparkContext generateMarketoPlayLaunchSparkContext() {

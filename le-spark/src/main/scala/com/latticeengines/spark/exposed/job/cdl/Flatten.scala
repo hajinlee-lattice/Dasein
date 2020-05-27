@@ -46,6 +46,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
     } else {
       ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
       			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
+      			  PlaymakerConstants.Address2 -> getInputValue(input, InterfaceName.Address_Street_2.name()), //
       			  PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
       			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
       			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
@@ -55,7 +56,11 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
       			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
       			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
       			  PlaymakerConstants.FirstName -> getInputValue(input, InterfaceName.FirstName.name()), //
-      			  PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()))
+      			  PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()), //
+      			  PlaymakerConstants.Title -> getInputValue(input, InterfaceName.Title.name()), //
+      			  PlaymakerConstants.DoNotCall -> getInputValue(input, InterfaceName.DoNotCall.name()), //
+      			  PlaymakerConstants.DoNotMail -> getInputValue(input, InterfaceName.DoNotMail.name()))
+
     } 
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     buffer(0) = cur :+ ele  
