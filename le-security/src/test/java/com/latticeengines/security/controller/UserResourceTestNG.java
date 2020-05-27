@@ -124,11 +124,11 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         testConflictingUserOutsideTenant();
     }
 
-    @Test(groups = {"functional", "deployment"})
+    @Test(groups = {"functional", "deployment"}, enabled = false)
     public void registerDCPUser() {
         switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@test.com");
-        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@dnb.com");
+        testDCPUserCreate("testDcp@test.com");
+        testDCPUserCreate("testDcp@lattice-engines.com");
     }
 
     private void testDCPUserCreate(String email) {

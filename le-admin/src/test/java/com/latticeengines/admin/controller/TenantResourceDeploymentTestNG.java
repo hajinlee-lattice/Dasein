@@ -98,17 +98,15 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertTrue(result);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testVboRequest() {
         String fullTenantId = "LETest" + System.currentTimeMillis();
         String url = getRestHostPort() + "/admin/tenants/vboadmin";
 
         VboRequest req = new VboRequest();
         VboRequest.Product pro = new VboRequest.Product();
-        VboRequest.User internalUser = constructVBOUser(String.format("test%s@lattice-engines.com",
-                System.currentTimeMillis()));
-        VboRequest.User externalUser = constructVBOUser(String.format("test%s@163.com",
-                System.currentTimeMillis()));
+        VboRequest.User internalUser = constructVBOUser("testDCP@lattice-engines.com");
+        VboRequest.User externalUser = constructVBOUser("testDCP@163.com");
 
         pro.setUsers(Arrays.asList(internalUser, externalUser));
         req.setProduct(pro);
