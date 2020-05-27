@@ -18,6 +18,9 @@ public class RenameAndMatchStepConfiguration extends BaseWrapperStepConfiguratio
     @JsonProperty("IdSystem")
     private String idSystem;
 
+    @JsonProperty("DeleteActionPid")
+    private String deleteActionPid;
+
     public String getTableName() {
         return tableName;
     }
@@ -48,5 +51,13 @@ public class RenameAndMatchStepConfiguration extends BaseWrapperStepConfiguratio
 
     public void setIdSystem(String idSystem) {
         this.idSystem = idSystem;
+    }
+
+    public String getDeleteActionPid() {
+        return deleteActionPid;
+    }
+
+    public void setDeleteActionPid(String deleteActionPid) {
+        this.deleteActionPid = deleteActionPid;
     }
 }

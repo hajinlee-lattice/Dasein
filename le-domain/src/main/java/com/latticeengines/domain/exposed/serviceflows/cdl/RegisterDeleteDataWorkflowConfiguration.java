@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.Dele
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.RenameAndMatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 public class RegisterDeleteDataWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -91,6 +92,9 @@ public class RegisterDeleteDataWorkflowConfiguration extends BaseCDLWorkflowConf
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            // pass in the delete action pid as well
+            renameAndMatchStepConfiguration
+                    .setDeleteActionPid(inputProperties.get(WorkflowContextConstants.Inputs.ACTION_ID));
             return this;
         }
 
