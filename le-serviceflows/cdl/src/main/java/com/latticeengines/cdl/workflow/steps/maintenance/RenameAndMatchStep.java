@@ -34,6 +34,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -43,6 +45,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -63,6 +66,9 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     private Table masterTable;
 
@@ -91,7 +97,29 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
     protected void onPostTransformationCompleted() {
         String outputTableName = getOutputTableName();
         log.info("RenameAndMatchStep, output table name {}", outputTableName);
+        // Save output table for downstream steps
         saveOutputValue(WorkflowContextConstants.Outputs.RENAME_AND_MATCH_TABLE, outputTableName);
+
+        // Update Action with new DeleteDataTable
+        String actionPid = configuration.getDeleteActionPid();
+        if (actionPid != null) {
+            Long pid = Long.parseLong(actionPid);
+            log.info("RenameAndMatchStep, action pid {}", pid);
+            Action action = actionProxy
+                    .getActionsByPids(configuration.getCustomerSpace().toString(), Collections.singletonList(pid))
+                    .get(0);
+            if (action != null) {
+                DeleteActionConfiguration actionConfiguration = (DeleteActionConfiguration) action
+                        .getActionConfiguration();
+                actionConfiguration.setDeleteDataTable(outputTableName);
+                action.setActionConfiguration(actionConfiguration);
+                actionProxy.updateAction(configuration.getCustomerSpace().toString(), action);
+            } else {
+                log.warn(String.format("Action with pid=%d cannot be found", pid));
+            }
+        } else {
+            log.warn("ActionPid is not passed in");
+        }
     }
 
     protected void intializeConfiguration() {
