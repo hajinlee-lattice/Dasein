@@ -136,7 +136,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         collectAvroFilesForEntity(BusinessEntity.Catalog);
     }
 
-    @Test(groups = "manual", enabled = true)
+    @Test(groups = "manual", enabled = false)
     private void importMarketingData() throws Exception {
         ensureEmptyDirs();
         String systemName = "Default_Marketo_System";
@@ -162,7 +162,30 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         downloadData();
         collectAvroFilesForEntity(BusinessEntity.ActivityStream);
         collectAvroFilesForEntity(BusinessEntity.Catalog);
+    }
 
+    @Test(groups = "manual")
+    private void importIntentActivityData() throws Exception {
+        ensureEmptyDirs();
+        String systemName = S3ImportSystem.SystemType.Other.getDefaultSystemName();
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(mainTestTenant);
+        system.setName(systemName);
+        system.setDisplayName(systemName);
+        system.setSystemType(S3ImportSystem.SystemType.Other);
+        system.setPriority(2);
+        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, systemName, null, null);
+
+        cdlProxy.createDefaultDnbIntentDataTemplate(mainCustomerSpace);
+        log.info("Finished creating default Intent Data template.");
+
+        String templateFeedType = EntityTypeUtils.generateFullFeedType(systemName, EntityType.CustomIntent);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, "File", templateFeedType);
+
+        importOnlyDataFromS3(BusinessEntity.ActivityStream, "intent_activity_data.csv", dataFeedTask);
+        downloadData();
+        collectAvroFilesForEntity(BusinessEntity.ActivityStream);
     }
 
     private void ensureEmptyDirs() throws Exception {

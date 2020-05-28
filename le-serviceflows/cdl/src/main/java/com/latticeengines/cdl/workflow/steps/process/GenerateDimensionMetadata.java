@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
@@ -406,7 +407,7 @@ public class GenerateDimensionMetadata
     private int addTableAndGetDataUnitIdx(String id, Map<String, Table> tables, String unitAliasPrefix) {
         if (!unitIdxMap.containsKey(id)) {
             unitIdxMap.put(id, units.size());
-            units.add(tables.get(id).toHdfsDataUnit(unitAliasPrefix + id));
+            units.add(tables.get(id).partitionedToHdfsDataUnit(unitAliasPrefix + id, Collections.singletonList(InterfaceName.__StreamDateId.name())));
         }
         return unitIdxMap.get(id);
     }

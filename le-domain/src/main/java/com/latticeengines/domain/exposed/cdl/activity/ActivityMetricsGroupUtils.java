@@ -189,6 +189,23 @@ public final class ActivityMetricsGroupUtils {
         return TemplateUtils.renderByMap(descTemplate, map);
     }
 
+    public static String timeRangeTmplToPeriodOnly(String timeRange, int offset) { // only support single param operator
+        String descTemplate = StringTemplateConstants.ACTIVITY_METRICS_GROUP_PERIOD_ONLY;
+        String[] fragments = timeRange.split("_");
+        String periodLetter = fragments[fragments.length - 1];
+        String[] params = ArrayUtils.subarray(fragments, 1, fragments.length - 1);
+        if (params.length != 1) { // "within" is only single param use case so far
+            throw new UnsupportedOperationException(String.format("time range %s is not single param.", timeRange));
+        }
+        Map<String, Object> map = new HashMap<>();
+        int param = Integer.parseInt(params[0]) + offset;
+        String period = getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase();
+        map.put("period", period);
+        map.put("params", Collections.singletonList(param));
+        checkPlural(map, params);
+        return TemplateUtils.renderByMap(descTemplate, map);
+    }
+
     private static Object getValueFromBiMap(BiMap<?, ?> map, Object key) {
         Object value = map.get(key);
         if (value == null) {

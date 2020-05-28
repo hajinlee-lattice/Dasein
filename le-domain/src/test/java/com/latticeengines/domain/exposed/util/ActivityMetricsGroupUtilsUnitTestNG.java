@@ -72,6 +72,12 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
         Assert.assertEquals(generated, expected);
     }
 
+    @Test(groups = "unit", dataProvider = "timeRangeToPeriodOnlyProvider")
+    public void testTimeRangeToPeriodOnlyProvider(String timeRange, int offset, String expected) {
+        String generated = ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, offset);
+        Assert.assertEquals(generated, expected);
+    }
+
     @Test(groups = "unit", dataProvider = "timeRangeToTimeFilterProvider", dependsOnMethods = "testTimeFilterToTimeRangeTmpl")
     public void testTimeRangeToTimeFilter(String timeRange, TimeFilter expected) {
         TimeFilter generated = ActivityMetricsGroupUtils.timeRangeTmplToTimeFilter(timeRange);
@@ -120,9 +126,19 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     @DataProvider(name = "timeRangeDescriptionProvider")
     public Object[][] timeFilterDescriptionProvider() {
         return new Object[][]{
+                {"w_1_w", "Last 1 week"},
                 {"w_2_w", "Last 2 weeks"},
                 {"b_2_4_w", "Between 2 and 4 weeks"},
                 {"ev_w", ""} // all periods filters don't need description
+        };
+    }
+
+    @DataProvider(name = "timeRangeToPeriodOnlyProvider")
+    public Object[][] timeRangeToPeriodOnlyProvider() {
+        return new Object[][]{
+                {"w_1_w", 0, "1 week"},
+                {"w_10_w", 1, "11 weeks"},
+                {"w_3_w", 9, "12 weeks"}
         };
     }
 
