@@ -56,6 +56,7 @@ public enum TableRoleInCollection {
     OpportunityProfile, //
     AccountMarketingActivityProfile, //
     ContactMarketingActivityProfile, //
+    CustomIntentProfile,
     PeriodStores, //
     MetricsGroup, //
 
@@ -149,6 +150,11 @@ public enum TableRoleInCollection {
         AccountMarketingActivityProfile.partitionKey = InterfaceName.AccountId;
         AccountMarketingActivityProfile.distKey = InterfaceName.AccountId;
         AccountMarketingActivityProfile.hasSignature = true;
+
+        CustomIntentProfile.primaryKey = InterfaceName.AccountId;
+        CustomIntentProfile.partitionKey = InterfaceName.AccountId;
+        CustomIntentProfile.distKey = InterfaceName.AccountId;
+        CustomIntentProfile.hasSignature = true;
 
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;

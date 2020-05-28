@@ -73,7 +73,7 @@ public enum BusinessEntity implements GraphNode {
     Catalog, //
 
     // Activity Stream Serving Entities
-    WebVisitProfile, Opportunity, AccountMarketingActivity, ContactMarketingActivity;
+    WebVisitProfile, Opportunity, AccountMarketingActivity, ContactMarketingActivity, CustomIntent;
 
     public static final Set<BusinessEntity> SEGMENT_ENTITIES = ImmutableSet.of(
             Account, //
@@ -85,7 +85,8 @@ public enum BusinessEntity implements GraphNode {
             WebVisitProfile, //
             Opportunity, //
             AccountMarketingActivity, //
-            ContactMarketingActivity //
+            ContactMarketingActivity, //
+            CustomIntent
     );
     public static final Set<BusinessEntity> EXPORT_ACCOUNT_ENTITIES = ImmutableSet.of( //
             Account, //
@@ -94,7 +95,8 @@ public enum BusinessEntity implements GraphNode {
             CuratedAccount, //
             WebVisitProfile, //
             Opportunity, //
-            AccountMarketingActivity //
+            AccountMarketingActivity, //
+            CustomIntent
     );
     public static final Set<BusinessEntity> EXPORT_CONTACT_ENTITIES = ImmutableSet.of( //
             Contact, //
@@ -109,7 +111,8 @@ public enum BusinessEntity implements GraphNode {
             WebVisitProfile, //
             Opportunity, //
             AccountMarketingActivity, //
-            ContactMarketingActivity //
+            ContactMarketingActivity, //
+            CustomIntent
     );
     public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = TALKING_POINT_ACCOUNT_ENTITIES;
     public static final Set<BusinessEntity> ACCOUNT_MATCH_ENTITIES = ImmutableSet.of( //
@@ -120,7 +123,8 @@ public enum BusinessEntity implements GraphNode {
             WebVisitProfile, //
             Opportunity, //
             AccountMarketingActivity, //
-            ContactMarketingActivity //
+            ContactMarketingActivity, //
+            CustomIntent
     );
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
@@ -128,7 +132,8 @@ public enum BusinessEntity implements GraphNode {
             WebVisitProfile, //
             Opportunity, //
             AccountMarketingActivity, //
-            ContactMarketingActivity //
+            ContactMarketingActivity, //
+            CustomIntent
     );
     public static final Set<BusinessEntity> CAN_REPALCE_ENTITIES = ImmutableSet.of( //
             Account, //
@@ -188,6 +193,8 @@ public enum BusinessEntity implements GraphNode {
         AccountMarketingActivity.setServingStore(TableRoleInCollection.AccountMarketingActivityProfile);
         ContactMarketingActivity.setServingStore(TableRoleInCollection.ContactMarketingActivityProfile);
 
+        CustomIntent.setServingStore(TableRoleInCollection.CustomIntentProfile);
+
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
@@ -198,6 +205,7 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(WebVisitProfile, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
         Account.addRelationship(Opportunity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
         Account.addRelationship(AccountMarketingActivity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
+        Account.addRelationship(CustomIntent, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Contact.addRelationship(CuratedContact, Cardinality.ONE_TO_ONE, InterfaceName.ContactId);
@@ -317,6 +325,7 @@ public enum BusinessEntity implements GraphNode {
         case WebVisitProfile:
         case Opportunity:
         case AccountMarketingActivity:
+        case CustomIntent:
             return Account;
         case LatticeAccount:
             return LatticeAccount;
