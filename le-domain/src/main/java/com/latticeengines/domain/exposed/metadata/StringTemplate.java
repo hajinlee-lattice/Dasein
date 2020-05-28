@@ -33,7 +33,7 @@ public class StringTemplate implements HasPid, Serializable {
     private String name;
 
     @JsonProperty("template")
-    @Column(name = "TEMPLATE", nullable = false)
+    @Column(name = "TEMPLATE", length = 1000, nullable = false)
     private String template;
 
     @Override
