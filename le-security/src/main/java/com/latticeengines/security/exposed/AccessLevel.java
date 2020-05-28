@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 
 public enum AccessLevel implements GrantedAuthority {
@@ -258,6 +259,9 @@ public enum AccessLevel implements GrantedAuthority {
 
     public static AccessLevel findAccessLevel(String right) {
         try {
+            if (StringUtils.isEmpty(right)) {
+                return null;
+            }
             return AccessLevel.valueOf(right);
         } catch (IllegalArgumentException e) {
             return null;
