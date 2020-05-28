@@ -76,6 +76,7 @@ public final class CategoryUtils {
                 break;
             case CustomIntent:
                 category = Category.DNBINTENTDATA_PROFILE;
+                break;
             default:
                 category = Category.DEFAULT;
         }
