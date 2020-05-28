@@ -378,4 +378,47 @@ public class DataFeedTaskController {
             return ResponseDocument.failedResponse(e);
         }
     }
+
+    @PostMapping(value = "/setup/defaultDnbIntentData")
+    @ResponseBody
+    @ApiOperation(value = "Create a default DnbIntentData template")
+    public ResponseDocument<Boolean> createDefaultDnbIntentDataTemplate(@PathVariable String customerSpace,
+                                                                      @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create DnbIntentData template."));
+        }
+        try {
+            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace);
+            return ResponseDocument.successResponse(result);
+        } catch (Exception e) {
+            log.error("Create Default DnbIntentData template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/setup/dnbIntentData")
+    @ResponseBody
+    @ApiOperation(value = "Create a DnbIntentData template")
+    public ResponseDocument<Boolean> createDnbIntentDataTemplate(@PathVariable String customerSpace,
+                                                               @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
+                                                               @RequestParam(value = "enableGA", required =
+                                                                       false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create DnbIntentData template."));
+        }
+        Preconditions.checkNotNull(simpleTemplateMetadata);
+        try {
+            return ResponseDocument.successResponse(dataFeedTaskTemplateService.createDnbIntentDataTemplate(customerSpace,
+                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata));
+        } catch (Exception e) {
+            log.error("Create DnbIntentData template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
 }

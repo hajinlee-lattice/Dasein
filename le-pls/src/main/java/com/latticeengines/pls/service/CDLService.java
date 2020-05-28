@@ -89,6 +89,8 @@ public interface CDLService {
 
     boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType);
 
+    boolean createDefaultDnbIntentDataTemplate(String customerSpace);
+
     /**
      *
      * @param customerSpace Identify current tenant

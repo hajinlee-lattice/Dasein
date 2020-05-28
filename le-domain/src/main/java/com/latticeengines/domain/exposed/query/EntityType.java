@@ -28,13 +28,15 @@ public enum EntityType {
     MarketingActivity(BusinessEntity.ActivityStream, SubType.MarketingActivity, "Marketing Activity", "MarketingActivityData",
             SchemaInterpretation.MarketingActivity),
     MarketingActivityType(BusinessEntity.Catalog, SubType.MarketingActivityType, "Marketing ActivityType", "MarketingActivityType",
-            SchemaInterpretation.MarketingActivityType);
+            SchemaInterpretation.MarketingActivityType),
+    CustomIntent(BusinessEntity.ActivityStream, SubType.DnbIntentData, "Dnb IntentData", "DnbIntentData",
+            SchemaInterpretation.DnbIntentData);
 
     private static final Set<EntityType> STANDARD_ENTITY_TYPES =
             ImmutableSet.of(Accounts, Contacts, Leads, ProductPurchases, ProductBundles, ProductHierarchy);
     private static final Set<EntityType> STREAM_ENTITY_TYPES =
             ImmutableSet.of(WebVisit, WebVisitPathPattern, WebVisitSourceMedium, Opportunity, OpportunityStageName,
-                    MarketingActivity, MarketingActivityType);
+                    MarketingActivity, MarketingActivityType, CustomIntent);
 
 
     private BusinessEntity entity;

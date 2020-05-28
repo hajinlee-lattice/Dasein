@@ -629,6 +629,17 @@ public class CDLResource {
         return cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType);
     }
 
+    @PostMapping(value = "/s3import/template/create/dnbIntentData")
+    @ResponseBody
+    @ApiOperation("Create DnbIntentData template")
+    public boolean createDefaultDnbIntentData() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return cdlService.createDefaultDnbIntentDataTemplate(customerSpace.toString());
+    }
+
     @GetMapping(value = "/bundle/upload")
     @ResponseBody
     @ApiOperation("")

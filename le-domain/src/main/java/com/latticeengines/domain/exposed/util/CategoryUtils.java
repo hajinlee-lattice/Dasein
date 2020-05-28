@@ -33,6 +33,8 @@ public final class CategoryUtils {
                 return Collections.singletonList(BusinessEntity.AccountMarketingActivity);
             case CONTACT_MARKETING_ACTIVITY_PROFILE:
                 return Collections.singletonList(BusinessEntity.ContactMarketingActivity);
+            case DNBINTENTDATA_PROFILE:
+                return Collections.singletonList(BusinessEntity.CustomIntent);
             default:
                 return Collections.singletonList(BusinessEntity.Account);
         }
@@ -72,6 +74,8 @@ public final class CategoryUtils {
             case ContactMarketingActivity:
                 category = Category.CONTACT_MARKETING_ACTIVITY_PROFILE;
                 break;
+            case CustomIntent:
+                category = Category.DNBINTENTDATA_PROFILE;
             default:
                 category = Category.DEFAULT;
         }

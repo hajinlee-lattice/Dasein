@@ -155,6 +155,8 @@ public enum InterfaceName {
 
     OpportunityId,
 
+    ModelName, ModelNameId, HasIntent,
+
     // Internal
     __Row_Count__, // total row count in activity store aggregation
     __Composite_Key__; // primary key for internal use

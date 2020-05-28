@@ -101,6 +101,22 @@ public interface DataFeedTaskTemplateService {
 
     /**
      *
+     * @param customerSpace target tenant
+     * @return true if success
+     */
+    boolean createDefaultDnbIntentDataTemplate(String customerSpace);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param entityType using to create Template
+     * @param simpleTemplateMetadata EntityType.DnbIntentData Template description.
+     * @return true if success
+     */
+    boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType, SimpleTemplateMetadata simpleTemplateMetadata);
+
+    /**
+     *
      * @param enableGA if true, GA tenant can use setup API to create activity store template
      * @return true if success
      */

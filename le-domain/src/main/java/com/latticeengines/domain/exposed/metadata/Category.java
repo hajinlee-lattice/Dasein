@@ -86,7 +86,8 @@ public enum Category {
         public String getSecondaryDisplayName() {
             return ActivityStoreUtils.defaultTimeFilterDisplayName();
         }
-    }; //
+    },
+    DNBINTENTDATA_PROFILE("D&B Custom Intent", 20); //
 
 
 
