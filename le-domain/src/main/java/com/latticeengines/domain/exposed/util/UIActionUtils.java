@@ -28,7 +28,9 @@ public final class UIActionUtils {
     public static UIActionException handleExceptionForCreateOrUpdate(Exception ex) {
         UIAction uiAction;
         LedpCode code;
-        if (ex instanceof LedpException) {
+        if (ex instanceof UIActionException) {
+            return (UIActionException) ex;
+        } else if (ex instanceof LedpException) {
             code = ((LedpException) ex).getCode();
         } else {
             code = LedpCode.LEDP_00002;

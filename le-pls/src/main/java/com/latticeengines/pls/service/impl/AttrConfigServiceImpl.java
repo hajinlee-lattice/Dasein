@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -387,7 +388,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @VisibleForTesting
     AttrConfigRequest generateAttrConfigRequestForActivation(String categoryName, AttrConfigSelectionRequest request) {
-        Category category = resolveCategory(categoryName);
+        Category category = CategoryUtils.resolveCategory(categoryName);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
@@ -628,7 +629,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @VisibleForTesting
     AttrConfigRequest generateAttrConfigRequestForUsage(String categoryName, String property,
                                                         AttrConfigSelectionRequest request) {
-        Category category = resolveCategory(categoryName);
+        Category category = CategoryUtils.resolveCategory(categoryName);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
@@ -647,7 +648,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @VisibleForTesting
     AttrConfigRequest generateAttrConfigRequestForName(String categoryName, SubcategoryDetail request) {
-        Category category = resolveCategory(categoryName);
+        Category category = CategoryUtils.resolveCategory(categoryName);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
@@ -913,14 +914,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         return defaultDescription;
     }
 
-    private Category resolveCategory(String categoryName) {
-        Category category = Category.fromName(categoryName);
-        if (category == null) {
-            throw new IllegalArgumentException("Cannot parse category " + categoryName);
-        }
-        return category;
-    }
-
     <T extends Serializable> Object getActualValue(AttrConfigProp<T> configProp) {
         if (configProp.isAllowCustomization()) {
             if (configProp.getCustomValue() != null) {
@@ -940,7 +933,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Override
     public Map<String, AttributeStats> getStats(String categoryName, @PathVariable String subcatName) {
-        Category cat = resolveCategory(categoryName);
+        Category cat = CategoryUtils.resolveCategory(categoryName);
         List<BusinessEntity> entities = CategoryUtils.getEntity(cat);
 
         Map<String, StatsCube> cubes = dataLakeService.getStatsCubes();
@@ -1029,7 +1022,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         setAttributeSetFields(attributeSet);
         log.info("Update attribute set with name {} in tenant {}.",
                 attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
-        return cdlAttrConfigProxy.updateAttributeSet(tenant.getId(), attributeSet);
+        AttributeSetResponse attributeSetResponse = cdlAttrConfigProxy.updateAttributeSet(tenant.getId(), attributeSet);
+        processUpdateResponse(attributeSetResponse.getAttrConfigRequest(), new AttrConfigSelectionRequest(), true);
+        return attributeSetResponse.getAttributeSet();
     }
 
     @Override
@@ -1038,14 +1033,16 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         setAttributeSetFields(attributeSet);
         log.info("Create attribute set with name {} in tenant {}.",
                 attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
-        return cdlAttrConfigProxy.createAttributeSet(tenant.getId(), attributeSet);
+        AttributeSetResponse attributeSetResponse = cdlAttrConfigProxy.createAttributeSet(tenant.getId(), attributeSet);
+        processUpdateResponse(attributeSetResponse.getAttrConfigRequest(), new AttrConfigSelectionRequest(), true);
+        return attributeSetResponse.getAttributeSet();
     }
 
     private void setAttributeSetFields(AttributeSet attributeSet) {
         Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
         if (MapUtils.isNotEmpty(attributesMap)) {
             Map<String, Set<String>> convertedMap = attributesMap.entrySet().stream()
-                    .collect(Collectors.toMap(e -> resolveCategory(e.getKey()).name(), Map.Entry::getValue));
+                    .collect(Collectors.toMap(e -> CategoryUtils.resolveCategory(e.getKey()).name(), Map.Entry::getValue));
             attributeSet.setAttributesMap(convertedMap);
         }
         String email = MultiTenantContext.getEmailAddress();

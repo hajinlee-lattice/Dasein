@@ -75,7 +75,7 @@ public class CDLImpactValidator extends AttrValidator {
 
     private List<Runnable> generateParallelJob(AttrConfig attrConfig, String customerSpace, List<String> attributes) {
         List<Runnable> threads = new ArrayList<>();
-        if (isToBeDisabledForSegment(attrConfig)) {
+        if (isToBeDisabledForGroup(attrConfig, ColumnSelection.Predefined.Segment.name())) {
             Runnable segmentRunnable = () -> {
                 List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace,
                         attributes);
@@ -97,7 +97,7 @@ public class CDLImpactValidator extends AttrValidator {
             threads.add(ratingEngineRunnable);
 
         }
-        if (isToBeDisabledForTalkingPoint(attrConfig)) {
+        if (isToBeDisabledForGroup(attrConfig, ColumnSelection.Predefined.TalkingPoint.name())) {
             Runnable playRunnable = () -> {
                 List<String> impactPlayDisplayNames = cdlDependenciesProxy.getDependantPlayDisplayNames(customerSpace,
                         attributes);
@@ -110,14 +110,14 @@ public class CDLImpactValidator extends AttrValidator {
         }
         return threads;
     }
-    private boolean isToBeDisabledForSegment(AttrConfig attrConfig) {
-        return !Boolean.TRUE
-                .equals(attrConfig.getPropertyFinalValue(ColumnSelection.Predefined.Segment.name(), Boolean.class));
-    }
 
-    private boolean isToBeDisabledForTalkingPoint(AttrConfig attrConfig) {
-        return !Boolean.TRUE.equals(
-                attrConfig.getPropertyFinalValue(ColumnSelection.Predefined.TalkingPoint.name(), Boolean.class));
+    private boolean isToBeDisabledForGroup(AttrConfig attrConfig, String groupName) {
+        AttrConfigProp<?> prop = attrConfig.getProperty(groupName);
+        if (prop != null && Boolean.TRUE.equals(prop.isAllowCustomization()) && prop.getCustomValue() != null) {
+            return !Boolean.class.cast(prop.getCustomValue());
+        } else {
+            return false;
+        }
     }
 
     private List<String> getImpactSegmentNames(List<MetadataSegment> impactSegments) {
