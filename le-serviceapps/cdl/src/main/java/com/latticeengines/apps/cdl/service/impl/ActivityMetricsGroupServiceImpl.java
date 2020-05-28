@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.util.WebVisitUtils.TOTAL_VISIT_G
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -221,7 +222,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         intentGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
         intentGroup.setAggregation(createAttributeDeriver(Collections.EMPTY_LIST, InterfaceName.HasIntent.name(),
                 StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
-        intentGroup.setCategory(Category.DNBINTENTDATA_INTENT_PROFILE);
+        intentGroup.setCategory(Category.DNBINTENTDATA_PROFILE);
         intentGroup.setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_DISPLAYNAME));
         intentGroup.setDescriptionTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_DESCRIPTION));
         intentGroup.setSubCategoryTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_SUBCATEGORY));
@@ -238,11 +239,18 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         modelGroup.setGroupName(INTENTDATA_MODEL_GROUPNAME);
         modelGroup.setJavaClass(Boolean.class.getSimpleName());
         modelGroup.setEntity(BusinessEntity.Account);
-        modelGroup.setActivityTimeRange(ActivityStoreUtils.defaultTimeRange());
+        Set<List<Integer>> paramSet = new HashSet<>();
+        paramSet.add(Collections.singletonList(1));
+        paramSet.add(Collections.singletonList(2));
+        paramSet.add(Collections.singletonList(4));
+        paramSet.add(Collections.singletonList(8));
+        paramSet.add(Collections.singletonList(12));
+        modelGroup.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
+                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
         modelGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
         modelGroup.setAggregation(createAttributeDeriver(Collections.EMPTY_LIST, InterfaceName.HasIntent.name(),
                 StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
-        modelGroup.setCategory(Category.DNBINTENTDATA_MODEL_PROFILE);
+        modelGroup.setCategory(Category.DNBINTENTDATA_PROFILE);
         modelGroup.setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DISPLAYNAME));
         modelGroup.setDescriptionTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DESCRIPTION));
         modelGroup.setSubCategoryTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_SUBCATEGORY));
