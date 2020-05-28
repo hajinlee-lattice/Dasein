@@ -362,4 +362,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public Map<String, String> getTimelineVersionMap() {
         return this.detail.getTimelineVersionMap();
     }
+
+    @JsonProperty("TransactionRebuilt")
+    public Boolean getTransactionRebuilt() {
+        return this.detail.getTransactionRebuilt();
+    }
+
+    @JsonProperty("TransactionRebuilt")
+    public void setTransactionRebuilt(Boolean transactionRebuilt) {
+        this.detail.setTransactionRebuilt(transactionRebuilt);
+    }
 }

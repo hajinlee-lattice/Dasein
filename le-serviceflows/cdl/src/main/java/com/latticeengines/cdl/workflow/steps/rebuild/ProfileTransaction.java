@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -261,6 +263,17 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         finishing();
     }
 
+    private void setTransactionRebuiltFlag() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
+            log.info("Rebuild transaction finished, set TransactionRebuilt=true in data collection status");
+            status.setTransactionRebuilt(true);
+            putObjectInContext(CDL_COLLECTION_STATUS, status);
+        } else {
+            log.info("TransactionRebuilt flag already set to true");
+        }
+    }
+
     private void finishing() {
         dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
                 BusinessEntity.Transaction.getServingStore(), inactive);
@@ -269,6 +282,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         dataCollectionProxy.upsertTable(customerSpace.toString(), sortedPeriodTableName,
                 BusinessEntity.PeriodTransaction.getServingStore(), inactive);
         exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
+        setTransactionRebuiltFlag();
     }
 
     @Override
@@ -380,14 +394,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         List<String> groupByFields = new ArrayList<>();
-        if (entityMatchEnabled) {
-            // In the future, Transaction could have more account fields, need
-            // to consider:
-            // 1. Are they needed in transaction store
-            // 2. How to properly and efficiently retain them -- Keeping adding
-            // in group fields could have performance concern; Add a join?
-            groupByFields.add(InterfaceName.CustomerAccountId.name());
-        }
         groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
@@ -460,14 +466,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         List<String> groupByFields = new ArrayList<>();
-        if (entityMatchEnabled) {
-            // In the future, Transaction could have more account fields, need
-            // to consider:
-            // 1. Are they needed in transaction store
-            // 2. How to properly and efficiently retain them -- Keeping adding
-            // in group fields could have performance concern; Add a join?
-            groupByFields.add(InterfaceName.CustomerAccountId.name());
-        }
         groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //

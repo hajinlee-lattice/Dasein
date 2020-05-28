@@ -249,6 +249,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_LARGE_TENANT_EXEMPTION_LIST);
     }
 
+    public static Path buildSkipForceTxnRebuildListPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SKIP_FORCE_TXN_REBUILD_TENANT_LIST);
+    }
+
     public static Path buildSchedulerConfigPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULER_CONFIG);
     }

@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -38,6 +39,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -162,7 +164,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RATING_ITERATION_RESULT_TABLE_NAME = "RATING_ITERATION_RESULT_TABLE_NAME";
     public static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
-    protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
+    public static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
     protected static final String PA_TIMESTAMP = WorkflowContextConstants.Inputs.PA_TIMESTAMP;
     protected static final String NEW_RECORD_CUT_OFF_TIME = "NEW_RECORD_CUT_OFF_TIME";
@@ -699,6 +701,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             return retry.execute(ctx -> metadataProxy.getTableSummary(customer, tableName));
         }
         return null;
+    }
+
+    /*-
+     * temp flag to track whether a tenant's transaction store has been migrated off CustomerAccountId
+     * TODO remove after all tenants are rebuilt
+     */
+    protected boolean isTransactionRebuilt() {
+        DataCollectionStatus status = getObjectFromContext(BaseWorkflowStep.CDL_COLLECTION_STATUS,
+                DataCollectionStatus.class);
+        return status != null && BooleanUtils.isTrue(status.getTransactionRebuilt());
     }
 
     protected Set<String> getTableNamesForPaRetry() {

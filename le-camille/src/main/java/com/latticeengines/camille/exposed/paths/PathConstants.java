@@ -47,6 +47,13 @@ public final class PathConstants {
 
     public static final String ERROR_CATEGORY_FILE = "error-category.json";
 
+    /*-
+     * list of tenant that will NOT be force rebuild txn (on the first PA)
+     * to migrate off CustomerAccountId
+     * TODO remove after all tenants are migrated
+     */
+    public static final String SKIP_FORCE_TXN_REBUILD_TENANT_LIST = "skipForceTransactionRebuildList";
+
     public static final String SCHEDULING_GROUP_FILE = "schedulingGroup.json";
     public static final String SCHEDULING_PA_FLAG_FILE = "schedulingPAFlag.json";
     // list of tenants will NOT be considered as large tenant (faster queue time)

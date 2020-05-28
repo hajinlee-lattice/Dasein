@@ -12,14 +12,17 @@ import java.util.TreeSet;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteTransaction;
@@ -30,6 +33,7 @@ import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -43,6 +47,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
@@ -77,10 +82,15 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Inject
     private YarnConfiguration yarnConfiguration;
 
+    @Value("${cdl.processAnalyze.maximum.priority.large.transaction.count}")
+    private long largeTransactionCountLimit;
+
     private boolean hasRawStore = false;
     private boolean hasProducts = false;
     private boolean hasAccounts = false;
     private boolean isBusinessCalenderChanged = false;
+    private boolean needRebuildForCustomerAccountId = false;
+    private boolean entityMatchEnabled = false;
 
     @Override
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -90,6 +100,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
         super.doInitialize(step);
+        checkEntityMatchEnabled(step);
+        checkRebuildForCustomerAccountId(step);
         checkBusinessCalendarChanged(step);
     }
 
@@ -149,6 +161,41 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             log.info("Found product batch store.");
         } else {
             log.info("No product batch store.");
+        }
+    }
+
+    /*-
+     * temp flag to track whether a tenant's transaction store has been migrated off CustomerAccountId
+     * if not, need to do a rebuild to eliminate
+     * TODO remove after all tenants are rebuilt
+     */
+    private void checkRebuildForCustomerAccountId(AbstractStep<? extends BaseStepConfiguration> step) {
+        DataCollectionStatus status = step.getObjectFromContext(BaseWorkflowStep.CDL_COLLECTION_STATUS,
+                DataCollectionStatus.class);
+        ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
+        Preconditions.checkNotNull(status, "DataCollectionStatus in context should not be null");
+        if (entityMatchEnabled && BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
+            if (status.getTransactionCount() != null && status.getTransactionCount() >= largeTransactionCountLimit) {
+                log.info("TransactionRebuilt flag in data collection status is not true, "
+                        + "but not forcing rebuild because existing number of transaction ({}) exceeds limit ({})",
+                        status.getTransactionCount(), largeTransactionCountLimit);
+            } else if (context != null && context.isSkipForceRebuildTxn()) {
+                log.info("TransactionRebuilt flag in data collection status is not true, "
+                        + "but not forcing rebuild because tenant in the skip list");
+            } else {
+                log.info(
+                        "TransactionRebuilt flag in data collection status is not true, need to rebuild transaction (no. txn = {})",
+                        status.getTransactionCount());
+                needRebuildForCustomerAccountId = true;
+            }
+        }
+    }
+
+    private void checkEntityMatchEnabled(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
+        if (context != null && context.isEntityMatchEnabled()) {
+            log.info("entity match enabled for current tenant");
+            entityMatchEnabled = true;
         }
     }
 
@@ -228,6 +275,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 should = true;
             } else if (isBusinessCalenderChanged) {
                 log.info("Need to rebuild " + mainEntity() + " due to business calendar changed.");
+                should = true;
+            } else if (hasRawStore && needRebuildForCustomerAccountId) {
+                log.info("Transaction store has not been migrated off CustomerAccountId yet, need to rebuild {}",
+                        mainEntity());
                 should = true;
             }
         } else if (!hasProducts && !shouldSoftDelete(step)) {

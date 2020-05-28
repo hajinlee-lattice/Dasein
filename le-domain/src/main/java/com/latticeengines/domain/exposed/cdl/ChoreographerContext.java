@@ -62,6 +62,13 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean alwaysRebuildServingStores;
 
+    /*-
+     * temp flag for tenants to skip force rebuild PA to migrate off CustomerAccountId
+     * TODO remove after all tenants are migrated off CustomerAccountId
+     */
+    @JsonProperty
+    private boolean skipForceRebuildTxn;
+
     public Set<BusinessEntity> getEntitiesRebuildDueToActions() {
         return entitiesRebuildDueToActions;
     }
@@ -188,5 +195,13 @@ public class ChoreographerContext {
 
     public void setAlwaysRebuildServingStores(boolean alwaysRebuildServingStores) {
         this.alwaysRebuildServingStores = alwaysRebuildServingStores;
+    }
+
+    public boolean isSkipForceRebuildTxn() {
+        return skipForceRebuildTxn;
+    }
+
+    public void setSkipForceRebuildTxn(boolean skipForceRebuildTxn) {
+        this.skipForceRebuildTxn = skipForceRebuildTxn;
     }
 }
