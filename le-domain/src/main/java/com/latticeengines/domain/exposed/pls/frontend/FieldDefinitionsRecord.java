@@ -145,9 +145,7 @@ public class FieldDefinitionsRecord {
         while (fieldDefinitionIter.hasNext()) {
             FieldDefinition fieldDefinition = fieldDefinitionIter.next();
             if ((StringUtils.isNotBlank(fieldDefinition.getFieldName()) &&
-                    StringUtils.equals(fieldDefinition.getFieldName(), addDefinition.getFieldName())) ||
-                    (StringUtils.isNotBlank(fieldDefinition.getColumnName()) &&
-                            StringUtils.equals(fieldDefinition.getColumnName(), addDefinition.getColumnName()))) {
+                    StringUtils.equals(fieldDefinition.getFieldName(), addDefinition.getFieldName()))) {
                 if (replaceExisting) {
                     fieldDefinitionIter.set(addDefinition);
                     return true;
