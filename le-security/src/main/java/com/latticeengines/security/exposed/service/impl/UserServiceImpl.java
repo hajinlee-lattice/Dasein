@@ -424,7 +424,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean inTenant(String tenantId, String username) {
-        return !globalUserManagementService.getRight(username, tenantId).isEmpty();
+        return !StringUtils.isEmpty(globalUserManagementService.getRight(username, tenantId));
     }
 
     @Override
@@ -616,18 +616,6 @@ public class UserServiceImpl implements UserService {
             if (StringUtils.isNotEmpty(right)) {
                 success = globalUserManagementService.revokeRight(right, tenantId, username);
             }
-//            if (!rights.isEmpty()) {
-//                for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-//                    try {
-//                        if (rights.contains(right.getAuthority())) {
-//                            success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId,
-//                                    username);
-//                        }
-//                    } catch (Exception ignore) {
-//                        // right already revoked
-//                    }
-//                }
-//            }
             Long userId = findIdByUsername(username);
             clearSession(tenantId, Collections.singletonList(userId));
             return success;
