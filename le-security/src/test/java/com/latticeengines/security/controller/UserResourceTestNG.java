@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.security.UserLanguage;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -239,7 +238,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
-        user.setLanguage(UserLanguage.English);
         user.setPhoneNumber("650-555-5555");
         user.setTitle("Silly Tester");
         if (level != null && level.length == 1) {
