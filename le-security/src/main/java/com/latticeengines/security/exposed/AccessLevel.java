@@ -115,6 +115,12 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SPEC
     ) //
     ), //
+    BUSINESS_ANALYST(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
+            )), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_CAMPAIGNS, //
@@ -223,6 +229,7 @@ public enum AccessLevel implements GrantedAuthority {
         return name();
     }
 
+    @Deprecated
     public static AccessLevel maxAccessLevel(List<GrantedRight> hadRights) {
         AccessLevel maxLevel = null;
         for (AccessLevel accessLevel : AccessLevel.values()) {
@@ -233,6 +240,7 @@ public enum AccessLevel implements GrantedAuthority {
         return maxLevel;
     }
 
+    // The only use case should be Saml.
     public static AccessLevel findAccessLevel(List<String> rights) {
         AccessLevel maxLevel = null;
         for (String right : rights) {
@@ -246,6 +254,14 @@ public enum AccessLevel implements GrantedAuthority {
             }
         }
         return maxLevel;
+    }
+
+    public static AccessLevel findAccessLevel(String right) {
+        try {
+            return AccessLevel.valueOf(right);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public static List<AccessLevel> getInternalAccessLevel() {

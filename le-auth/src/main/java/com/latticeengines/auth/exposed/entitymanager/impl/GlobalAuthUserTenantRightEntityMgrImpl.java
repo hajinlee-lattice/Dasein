@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,20 +31,18 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId) {
+    public GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId) {
         return gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate) {
-        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
-        if (inflate && CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
-            for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
-                inflateUserTenantRight(globalAuthUserTenantRight);
-            }
+    public GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate) {
+        GlobalAuthUserTenantRight globalAuthUserTenantRight = gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
+        if (inflate && globalAuthUserTenantRight != null) {
+            inflateUserTenantRight(globalAuthUserTenantRight);
         }
-        return globalAuthUserTenantRights;
+        return globalAuthUserTenantRight;
     }
 
     @Override

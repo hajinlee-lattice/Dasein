@@ -1,11 +1,9 @@
 package com.latticeengines.security.exposed.service.impl;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -15,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
@@ -219,7 +217,7 @@ public class UserServiceImpl implements UserService {
             LOGGER.info("Creating new User: {} for Tenant: {}", samlLoginResp.getUserId(), tenantDeploymentId);
             globalUserManagementService.registerExternalIntegrationUser(userName, userInfoFromSaml);
         }
-        List<String> gaUserRights = globalUserManagementService.getRights(userInfoFromSaml.getEmail(),
+        String gaUserRights = globalUserManagementService.getRight(userInfoFromSaml.getEmail(),
                 tenantDeploymentId);
 
         AccessLevel grantAccessLevel = null;
@@ -231,8 +229,7 @@ public class UserServiceImpl implements UserService {
             // If there is any change in user configurations between login
             // attempts, update the access level
             AccessLevel existingAccessLevel = AccessLevel.findAccessLevel(gaUserRights);
-            AccessLevel samlResponseAccessLevel = AccessLevel
-                    .findAccessLevel(Collections.singletonList(userInfoFromSaml.getAccessLevel()));
+            AccessLevel samlResponseAccessLevel = AccessLevel.findAccessLevel(userInfoFromSaml.getAccessLevel());
 
             if (samlResponseAccessLevel != existingAccessLevel) {
                 assignAccessLevel(samlResponseAccessLevel, tenantDeploymentId, userInfoFromSaml.getEmail());
@@ -273,8 +270,8 @@ public class UserServiceImpl implements UserService {
         // remove comparing user with same access level to tenant in different
         // update times as user with same access level can be expiration date
 
-        List<String> rights = globalUserManagementService.getRights(createdByUser, tenantId);
-        if (!rights.contains(AccessLevel.SUPER_ADMIN.name())) {
+        String right = globalUserManagementService.getRight(createdByUser, tenantId);
+        if (!AccessLevel.SUPER_ADMIN.name().equals(right)) {
             // only super admin user can add expire after data when creating user, other
             // wise expire after data should be null
             if (createUser) {
@@ -286,15 +283,15 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        List<GlobalAuthUserTenantRight> rightsData = globalUserManagementService.getUserRightsByUsername(username, tenantId, true);
-        List<String> originalRights = globalUserManagementService.getRights(rightsData);
+        GlobalAuthUserTenantRight rightsData = globalUserManagementService.getUserRightsByUsername(username, tenantId, true);
+        String originalRights = globalUserManagementService.getRight(rightsData);
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
                 List<String> userTeamIds =
-                        userTeams == null ? new ArrayList() : userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
-                if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
-                    globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
+                        userTeams == null ? new ArrayList<>() : userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+                if (userTeams == null && rightsData != null) {
+                    globalAuthTeams = rightsData.getGlobalAuthTeams();
                 } else if (CollectionUtils.isNotEmpty(userTeams)) {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
@@ -307,7 +304,8 @@ public class UserServiceImpl implements UserService {
                         clearSession(tenantId, Collections.singletonList(userId));
                     } else {
                         if (userTeams != null) {
-                            List<String> orgTeamIds = globalUserManagementService.getTeamIds(rightsData);
+                            List<String> orgTeamIds =
+                                    globalUserManagementService.getTeamIds(Collections.singletonList(rightsData));
                             if (teamIdsChanged(userTeamIds, orgTeamIds)) {
                                 clearSession(false, tenantId, Collections.singletonList(userId));
                             }
@@ -328,10 +326,7 @@ public class UserServiceImpl implements UserService {
         Set<String> newIds = new HashSet<>(newTeamIds);
         Set<String> diffIds1 = newIds.stream().filter(teamId -> !oldIds.contains(teamId)).collect(Collectors.toSet());
         Set<String> diffIds2 = oldIds.stream().filter(teamId -> !newIds.contains(teamId)).collect(Collectors.toSet());
-        if (!diffIds1.isEmpty() || !diffIds2.isEmpty()) {
-            return true;
-        }
-        return false;
+        return !diffIds1.isEmpty() || !diffIds2.isEmpty();
     }
 
     @Override
@@ -341,32 +336,28 @@ public class UserServiceImpl implements UserService {
                 null);
     }
 
-    private boolean resignAccessLevel(String tenantId, String username, List<String> rights) {
+    private boolean resignAccessLevel(String tenantId, String username, String right) {
         boolean success = true;
-        for (AccessLevel accessLevel : AccessLevel.values()) {
-            try {
-                if (rights.contains(accessLevel.name())) {
-                    success = success
-                            && globalUserManagementService.revokeRight(accessLevel.name(), tenantId, username);
-                }
-            } catch (Exception e) {
-                LOGGER.warn(
-                        String.format("Error resigning access level %s from user %s.", accessLevel.name(), username));
-            }
+        try {
+            AccessLevel level = AccessLevel.valueOf(right);
+            success = globalUserManagementService.revokeRight(level.name(), tenantId, username);
+        } catch (Exception e) {
+            LOGGER.warn(
+                    String.format("Error resigning access level %s from user %s.", right, username));
         }
         return success;
     }
 
     @Override
     public boolean resignAccessLevel(String tenantId, String username) {
-        List<String> rights = globalUserManagementService.getRights(username, tenantId);
-        return resignAccessLevel(tenantId, username, rights);
+        String right = globalUserManagementService.getRight(username, tenantId);
+        return resignAccessLevel(tenantId, username, right);
     }
 
     @Override
     public AccessLevel getAccessLevel(String tenantId, String username) {
-        List<String> rights = globalUserManagementService.getRights(username, tenantId);
-        return AccessLevel.findAccessLevel(rights);
+        String right = globalUserManagementService.getRight(username, tenantId);
+        return AccessLevel.findAccessLevel(right);
     }
 
     @Override
@@ -391,9 +382,8 @@ public class UserServiceImpl implements UserService {
     public List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam) {
         List<User> users = new ArrayList<>();
         try {
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
-                    .getAllUsersOfTenant(tenantId, emails, withTeam);
-            for (Map.Entry<User, List<String>> userRights : userRightsList) {
+            List<Pair<User, String>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId, emails, withTeam);
+            for (Pair<User, String> userRights : userRightsList) {
                 User user = userRights.getKey();
                 AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
                 if (accessLevel != null) {
@@ -434,7 +424,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean inTenant(String tenantId, String username) {
-        return !globalUserManagementService.getRights(username, tenantId).isEmpty();
+        return !globalUserManagementService.getRight(username, tenantId).isEmpty();
     }
 
     @Override
@@ -622,19 +612,22 @@ public class UserServiceImpl implements UserService {
     private boolean softDelete(String tenantId, String username) {
         if (resignAccessLevel(tenantId, username)) {
             boolean success = true;
-            List<String> rights = globalUserManagementService.getRights(username, tenantId);
-            if (!rights.isEmpty()) {
-                for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-                    try {
-                        if (rights.contains(right.getAuthority())) {
-                            success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId,
-                                    username);
-                        }
-                    } catch (Exception ignore) {
-                        // right already revoked
-                    }
-                }
+            String right = globalUserManagementService.getRight(username, tenantId);
+            if (StringUtils.isNotEmpty(right)) {
+                success = globalUserManagementService.revokeRight(right, tenantId, username);
             }
+//            if (!rights.isEmpty()) {
+//                for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
+//                    try {
+//                        if (rights.contains(right.getAuthority())) {
+//                            success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId,
+//                                    username);
+//                        }
+//                    } catch (Exception ignore) {
+//                        // right already revoked
+//                    }
+//                }
+//            }
             Long userId = findIdByUsername(username);
             clearSession(tenantId, Collections.singletonList(userId));
             return success;

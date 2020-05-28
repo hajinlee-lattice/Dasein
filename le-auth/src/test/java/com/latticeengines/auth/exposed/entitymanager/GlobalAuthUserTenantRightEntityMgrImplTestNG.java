@@ -23,6 +23,11 @@ public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctional
         user = gaUserEntityMgr.findByField("First_Name", user.getFirstName());
         Assert.assertNotNull(user);
 
+        GlobalAuthUser user2 = createGlobalAuthUser();
+        Thread.sleep(200);
+        user2 = gaUserEntityMgr.findByField("First_Name", user2.getFirstName());
+        Assert.assertNotNull(user2);
+
         GlobalAuthTenant tenant = createGlobalAuthTenant();
         Thread.sleep(200);
         Assert.assertNotNull(tenant);
@@ -36,30 +41,31 @@ public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctional
         tenantRight.setOperationName("EXTERNAL_USER");
         globalAuthUserTenantRightEntityMgr.create(tenantRight);
 
+        // This won't success if using the same user, we have unique constraint.
         GlobalAuthUserTenantRight tenantRight2 = new GlobalAuthUserTenantRight();
         tenantRight2.setGlobalAuthTenant(tenant);
-        tenantRight2.setGlobalAuthUser(user);
+        tenantRight2.setGlobalAuthUser(user2);
         tenantRight2.setOperationName("EXTERNAL_USER");
         tenantRight2.setExpirationDate(System.currentTimeMillis());
         globalAuthUserTenantRightEntityMgr.create(tenantRight2);
 
         List<GlobalAuthUserTenantRight> rights = globalAuthUserTenantRightEntityMgr.findByNonNullExpirationDate();
-        Assert.assertEquals(rights.size() >= 1, true);
+        Assert.assertTrue(rights.size() >= 1);
         for (GlobalAuthUserTenantRight right : rights) {
             Assert.assertNotNull(right.getExpirationDate());
             Assert.assertNotNull(right.getGlobalAuthUser());
             Assert.assertNotNull(right.getGlobalAuthTenant());
         }
 
-        rights = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
-        Assert.assertEquals(rights.size(), 2);
+        GlobalAuthUserTenantRight right = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
+        Assert.assertNotNull(right);
         Boolean delete = globalAuthUserTenantRightEntityMgr.deleteByUserId(user.getPid());
         Assert.assertTrue(delete);
-        rights = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
-        Assert.assertNull(rights);
+        right = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
+        Assert.assertNull(right);
         gaUserEntityMgr.delete(user);
+        gaUserEntityMgr.delete(user2);
         gaTenantEntityMgr.delete(tenant);
-
 
     }
 

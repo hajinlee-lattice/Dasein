@@ -1,8 +1,9 @@
 package com.latticeengines.security.exposed.globalauth;
 
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -27,7 +28,7 @@ public interface GlobalUserManagementService {
 
     Boolean revokeRight(String right, String tenant, String username);
 
-    List<String> getRights(String username, String tenantId);
+    String getRight(String username, String tenantId);
 
     Boolean forgotLatticeCredentials(String username);
 
@@ -47,9 +48,9 @@ public interface GlobalUserManagementService {
 
     void checkRedundant(String username);
 
-    List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId);
+    List<Pair<User, String>> getAllUsersOfTenant(String tenantId);
 
-    List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, boolean withTeam);
+    List<Pair<User, String>> getAllUsersOfTenant(String tenantId, boolean withTeam);
 
     String deactiveUserStatus(String userName, String emails);
 
@@ -63,11 +64,11 @@ public interface GlobalUserManagementService {
 
     Long getIdByUsername(String username);
 
-    List<GlobalAuthUserTenantRight> getUserRightsByUsername(String username, String tenantId, boolean inflate);
+    GlobalAuthUserTenantRight getUserRightsByUsername(String username, String tenantId, boolean inflate);
 
-    List<String> getRights(List<GlobalAuthUserTenantRight> rightsData);
+    String getRight(GlobalAuthUserTenantRight rightsData);
 
-    List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, Set<String> emails, boolean withTeam);
+    List<Pair<User, String>> getAllUsersOfTenant(String tenantId, Set<String> emails, boolean withTeam);
 
     List<String> getTeamIds(List<GlobalAuthUserTenantRight> globalAuthUserTenantRights);
 }
