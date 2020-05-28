@@ -422,7 +422,11 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public SourceInfo getSourceBySourceId(String customerSpace, String sourceId) {
-        return dataFeedTaskEntityMgr.getSourceBySourceId(sourceId);
+        DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
+        if (dataFeed == null) {
+            return null;
+        }
+        return dataFeedTaskEntityMgr.getSourceBySourceIdAndDataFeed(sourceId, dataFeed);
     }
 
     private String getSystemNameFromFeedType(String feedType) {
