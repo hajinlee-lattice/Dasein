@@ -518,8 +518,8 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public SourceInfo getSourceBySourceId(String sourceId) {
-        List<Object[]> result = datafeedTaskRepository.findBySourceId(sourceId);
+    public SourceInfo getSourceBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed) {
+        List<Object[]> result = datafeedTaskRepository.findBySourceIdAndDataFeed(sourceId, dataFeed);
         if (CollectionUtils.isEmpty(result)) {
             return null;
         } else {

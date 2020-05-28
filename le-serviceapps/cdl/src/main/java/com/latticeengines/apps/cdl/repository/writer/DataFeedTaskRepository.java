@@ -32,7 +32,7 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
     List<Object[]> findSourceInfoBySystemPid(Long systemPid);
 
     @Query("select dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
-            "from DataFeedTask as dft where dft.sourceId = ?1")
-    List<Object[]> findBySourceId(String sourceId);
+            "from DataFeedTask as dft where dft.sourceId = ?1 and dft.dataFeed = ?2")
+    List<Object[]> findBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
 
 }

@@ -67,6 +67,6 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     List<SourceInfo> getSourcesBySystemPid(Long systemPid);
 
-    SourceInfo getSourceBySourceId(String sourceId);
+    SourceInfo getSourceBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
 
 }
