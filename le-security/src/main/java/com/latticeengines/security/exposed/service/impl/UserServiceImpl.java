@@ -704,18 +704,12 @@ public class UserServiceImpl implements UserService {
             iDaasuser.setEmailAddress(email);
             iDaasuser.setLastName(user.getLastName());
             iDaasuser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : user.getUsername());
-            iDaasuser.setPhoneNumber(user.getPhoneNumber());
-            iDaasuser.setLanguage(user.getLanguage() == null ? null : user.getLanguage().name());
             Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
                     "Last name is required");
             Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
                     "Email is required");
             Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getUserName()),
                     "User name is required");
-            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLanguage()),
-                    "Language is required");
-            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getPhoneNumber()),
-                    "Phone number is required");
             LOGGER.info("begin creating IDaaS user for {}", email);
             iDaaSService.createIDaaSUser(iDaasuser);
         } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {

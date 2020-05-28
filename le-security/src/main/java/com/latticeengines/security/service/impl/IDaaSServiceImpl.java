@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.domain.exposed.security.UserLanguage;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -97,7 +96,6 @@ public class IDaaSServiceImpl implements IDaaSService {
                 }
                 IDaaSExternalSession externalSession = new IDaaSExternalSession();
                 externalSession.setIssuer("IDaaS");
-                externalSession.setLanguage(UserLanguage.fromName(iDaaSUser.getLanguage()));
                 Ticket ticket = null;
                 try {
                     ticket = sessionService.authenticateSamlUser(email, externalSession);
