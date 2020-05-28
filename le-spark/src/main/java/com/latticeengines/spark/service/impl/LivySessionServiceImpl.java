@@ -121,8 +121,11 @@ public class LivySessionServiceImpl implements LivySessionService {
                 } else if (e.getCause() instanceof HttpHostConnectException) {
                     log.warn("Encountered connection exception when killing the livy session: {}", url, e);
                 } else {
-                    throw e;
+                    log.error("Encountered ResourceAccessException caused by unknown error: {}", //
+                            e.getCause().getClass().getCanonicalName());
                 }
+            } catch (Exception e) {
+                log.error("Encountered unknown exception: {}", e.getCause().getClass().getCanonicalName());
             }
             log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
