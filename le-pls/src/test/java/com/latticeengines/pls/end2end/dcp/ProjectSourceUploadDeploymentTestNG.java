@@ -28,6 +28,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -181,6 +182,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         // soft delete project
         projectService.deleteProject(customerSpace, PROJECT_ID);
+        SleepUtils.sleep(500);
         projects = projectService.getAllProjects(customerSpace);
         Assert.assertFalse(CollectionUtils.isEmpty(projects));
         details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
