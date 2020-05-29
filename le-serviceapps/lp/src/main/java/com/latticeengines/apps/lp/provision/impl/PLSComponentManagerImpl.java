@@ -2,7 +2,10 @@ package com.latticeengines.apps.lp.provision.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -126,7 +129,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         tenant.setContract(contract);
         log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is " + tenant.getTenantType());
 
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
+                null, userName);
     }
 
     private void setTenantInfo(Tenant tenant, List<LatticeProduct> products) {
@@ -151,7 +155,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @VisibleForTesting
     void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
-                         List<String> externalAdminEmails, List<String> thirdPartyEmails, String userName) {
+                         List<String> externalAdminEmails, List<String> thirdPartyEmails, List<IDaaSUser> iDaaSUsers,
+                         String userName) {
         if (tenantService.hasTenantId(tenant.getId())) {
             log.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
             try {
@@ -170,13 +175,16 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         // wait for replication lag
         SleepUtils.sleep(500);
-        assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
-        assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId());
+        assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId(), null);
+        assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId(), iDaaSUsers);
+        assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId(), iDaaSUsers);
+        assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId(), null);
     }
 
-    private void assignAccessLevelByEmails(String userName, Collection<String> emails, AccessLevel accessLevel, String tenantId) {
+    private void assignAccessLevelByEmails(String userName, Collection<String> emails, AccessLevel accessLevel,
+                                           String tenantId, List<IDaaSUser> iDaaSUsers) {
+        Map<String, IDaaSUser> emailToIDaaSUser = iDaaSUsers == null ? new HashMap<>() :
+                iDaaSUsers.stream().collect(Collectors.toMap(IDaaSUser::getEmailAddress, Function.identity()));
         for (String email : emails) {
             User user;
             try {
@@ -186,7 +194,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                         e);
             }
             if (user == null) {
-                UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
+                IDaaSUser iDaaSUser = emailToIDaaSUser.get(email);
+                UserRegistration uReg = createAdminUserRegistration(email, accessLevel, iDaaSUser);
                 try {
                     userService.createUser(userName, uReg);
                     Thread.sleep(500);
@@ -208,12 +217,17 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
     }
 
-    private UserRegistration createAdminUserRegistration(String username, AccessLevel accessLevel) {
+    private UserRegistration createAdminUserRegistration(String username, AccessLevel accessLevel, IDaaSUser iDaaSUser) {
         // construct User
         User adminUser = new User();
+        if (iDaaSUser != null) {
+            adminUser.setFirstName(iDaaSUser.getFirstName());
+            adminUser.setLastName(iDaaSUser.getLastName());
+        } else {
+            adminUser.setFirstName("Lattice");
+            adminUser.setLastName("User");
+        }
         adminUser.setUsername(username);
-        adminUser.setFirstName("Lattice");
-        adminUser.setLastName("User");
         adminUser.setAccessLevel(accessLevel.name());
         adminUser.setActive(true);
         adminUser.setTitle("Lattice User");
@@ -343,7 +357,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("IDaaS users are: " + usersInJson);
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
-        OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails);
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails);
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
             tenant = tenantService.findByTenantId(PLSTenantId);
@@ -377,7 +391,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } catch (Exception e) {
             log.info("no node exist {}.", e.getMessage());
         }
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
+                retrievedUsers, userName);
     }
 
 
@@ -393,9 +408,10 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
     }
 
-    private void OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
+    private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
                                    List<String> externalAdminEmails) {
         log.info("Operating IDaaS users");
+        List<IDaaSUser> retrievedUsers = new ArrayList<>();
         for (IDaaSUser user : iDaaSUsers) {
             String email = user.getEmailAddress();
             IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
@@ -416,7 +432,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             } else {
                 externalAdminEmails.add(email.toLowerCase());
             }
+            retrievedUsers.add(retrievedUser == null ? user : retrievedUser);
         }
+        return retrievedUsers;
     }
 
 }
