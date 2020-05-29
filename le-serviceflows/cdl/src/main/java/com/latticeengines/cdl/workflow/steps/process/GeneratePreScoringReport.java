@@ -107,13 +107,13 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        cloneInactiveServingStores();
+        cloneInactiveServingStoresAndBatchStore();
         updateStreamCounts();
         registerReport();
         registerCollectionTables();
     }
 
-    private void cloneInactiveServingStores() {
+    private void cloneInactiveServingStoresAndBatchStore() {
         cloneTableService.setActiveVersion(active);
         cloneTableService.setCustomerSpace(customerSpace);
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
@@ -122,6 +122,14 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                 TableRoleInCollection servingStore = entity.getServingStore();
                 if (servingStore != null) {
                     cloneTableService.linkInactiveTable(servingStore);
+                }
+                TableRoleInCollection batchStore = entity.getBatchStore();
+                if (batchStore != null) {
+                    cloneTableService.linkInactiveTable(batchStore);
+                }
+                TableRoleInCollection systemStore = entity.getSystemBatchStore();
+                if (systemStore != null) {
+                    cloneTableService.linkInactiveTable(systemStore);
                 }
             }
         });
@@ -256,7 +264,7 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private long countOrphanTransactionsInHdfs() {
-        long result = 0l;
+        long result = 0L;
         List<TableRoleInCollection> tableRoles = Lists.newArrayList(TableRoleInCollection.ConsolidatedRawTransaction,
                 TableRoleInCollection.ConsolidatedAccount, TableRoleInCollection.ConsolidatedProduct);
         boolean valid = true;
