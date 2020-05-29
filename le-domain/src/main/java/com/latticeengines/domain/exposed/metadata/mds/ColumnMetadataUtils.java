@@ -59,10 +59,6 @@ public final class ColumnMetadataUtils {
             overwritee.setAttrState(overwriter.getAttrState());
         }
 
-        if (overwriter.getShouldDeprecate() != null) {
-            overwritee.setShouldDeprecate(overwriter.getShouldDeprecate());
-        }
-
         // can change flags
         if (overwriter.getCanSegment() != null) {
             overwritee.setCanSegment(overwriter.getCanSegment());

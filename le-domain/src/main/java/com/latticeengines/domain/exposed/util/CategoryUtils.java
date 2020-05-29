@@ -83,4 +83,13 @@ public final class CategoryUtils {
         return category;
     }
 
+
+    public static Category resolveCategory(String categoryName) {
+        Category category = Category.fromName(categoryName);
+        if (category == null) {
+            throw new IllegalArgumentException("Cannot parse category " + categoryName);
+        }
+        return category;
+    }
+
 }

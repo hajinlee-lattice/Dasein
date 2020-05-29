@@ -28,6 +28,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -142,7 +143,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     public void testCrudAttributeSet() {
         String displayName = "TestAttributeSet";
         AttributeSet attributeSet = createAttributeSet(displayName);
-        attributeSet = attrConfigService.createAttributeSet(attributeSet);
+        AttributeSetResponse attributeSetResponse = attrConfigService.createAttributeSet(attributeSet);
+        attributeSet = attributeSetResponse.getAttributeSet();
         String generatedName = attributeSet.getName();
         log.info("Attribute set name {}", generatedName);
         AtomicReference<AttributeSet> attributeSetAtom = new AtomicReference<>();

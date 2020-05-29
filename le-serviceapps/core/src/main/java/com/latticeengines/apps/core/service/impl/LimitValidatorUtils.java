@@ -2,15 +2,18 @@ package com.latticeengines.apps.core.service.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 
@@ -21,17 +24,22 @@ public final class LimitValidatorUtils {
     }
 
     public static void checkAmbiguityInFieldNames(List<AttrConfig> attrConfigs) {
-        Set<String> attrSet = new HashSet<>();
+        Map<BusinessEntity, Set<String>> attrMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(attrConfigs)) {
             for (AttrConfig config : attrConfigs) {
                 String attrName = config.getAttrName();
-                if (attrSet.contains(attrName)) {
-                    throw new LedpException(LedpCode.LEDP_18113, new String[] { attrName });
+                Set<String> attrSet = attrMap.get(config.getEntity());
+                if (attrSet == null) {
+                    attrSet = Sets.newHashSet(attrName);
+                    attrMap.put(config.getEntity(), attrSet);
+                } else {
+                    if (attrSet.contains(attrName)) {
+                        throw new LedpException(LedpCode.LEDP_18113, new String[]{attrName});
+                    }
+                    attrSet.add(attrName);
                 }
-                attrSet.add(attrName);
             }
         }
-
     }
 
     public static <T extends Serializable> List<AttrConfig> returnPropertyConfigs(List<AttrConfig> attrConfigs,

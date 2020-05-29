@@ -55,7 +55,7 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
         Assert.assertTrue(lDCNonPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.IMPACTED_PLAYS));
 
         AttrConfig lDCPremium = AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true);
-        lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(), Boolean.class).setCustomValue(false);
+        lDCPremium.getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(), Boolean.class).setCustomValue(false);
         cdlImpactValidator.validate(new ArrayList<>(), Collections.singletonList(lDCPremium), new AttrValidation());
 
         Assert.assertNotNull(lDCPremium.getImpactWarnings());

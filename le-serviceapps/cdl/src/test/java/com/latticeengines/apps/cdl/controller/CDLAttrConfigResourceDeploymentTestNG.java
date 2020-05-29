@@ -46,7 +46,6 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final String UPDATED_BY = "lattice@lattice-engines.com";
     private final boolean shouldCreateActionWithRatingEngine1 = true;
-    private final boolean shouldCreateActionWithRatingEngine2 = false;
     @Inject
     private RatingEngineProxy ratingEngineProxy;
     @Inject

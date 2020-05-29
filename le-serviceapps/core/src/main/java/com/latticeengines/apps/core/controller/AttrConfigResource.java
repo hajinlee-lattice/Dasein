@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
+import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,7 +66,7 @@ public class AttrConfigResource {
     public AttrConfigRequest getAttrConfigByCategory(@PathVariable String customerSpace,
             @PathVariable String categoryName, @RequestParam(value = "attributeSetName", required = false) String attributeSetName) {
         AttrConfigRequest request = new AttrConfigRequest();
-        Category category = resolveCategory(categoryName);
+        Category category = CategoryUtils.resolveCategory(categoryName);
         List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category, attributeSetName);
         request.setAttrConfigs(attrConfigs);
         return request;
@@ -90,7 +92,7 @@ public class AttrConfigResource {
                                                                             @RequestParam(value = "attributeSetName", required = false) String attributeSetName,
                                                                             @RequestBody List<String> propertyNames) {
         List<Category> categories = categoryNames != null
-                ? categoryNames.stream().map(this::resolveCategory).collect(Collectors.toList())
+                ? categoryNames.stream().map(categoryName -> CategoryUtils.resolveCategory(categoryName)).collect(Collectors.toList())
                 : Arrays.stream(Category.values()).filter(category -> !category.isHiddenFromUi())
                 .collect(Collectors.toList());
         return attrConfigService.getAttrConfigOverview(categories, propertyNames, activeOnly, attributeSetName);
@@ -130,14 +132,6 @@ public class AttrConfigResource {
         return attrConfigService.validateRequest(request, mode);
     }
 
-    private Category resolveCategory(String categoryName) {
-        Category category = Category.fromName(categoryName);
-        if (category == null) {
-            throw new IllegalArgumentException("Cannot parse category " + categoryName);
-        }
-        return category;
-    }
-
     @GetMapping(value = "/attributeset/name/{name}")
     @ApiOperation(value = "Get attribute set by name")
     public AttributeSet getAttributeSet(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
@@ -153,20 +147,20 @@ public class AttrConfigResource {
     @PostMapping(value = "/attributeset/clone")
     @ApiOperation(value = "clone attribute attribute set based on an existing attribute set")
     public AttributeSet cloneAttributeSet(@PathVariable String customerSpace,
-                                          @RequestParam(value = "attributeSetName") String attributeSetName,
-                                          @RequestBody AttributeSet attributeSet) {
+                                                  @RequestParam(value = "attributeSetName") String attributeSetName,
+                                                  @RequestBody AttributeSet attributeSet) {
         return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
     }
 
     @PostMapping(value = "/attributeset")
     @ApiOperation(value = "create new attribute set")
-    public AttributeSet createAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
+    public AttributeSetResponse createAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
         return attrConfigService.createAttributeSet(attributeSet);
     }
 
     @PutMapping(value = "/attributeset")
     @ApiOperation(value = "update attribute set")
-    public AttributeSet updateAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
+    public AttributeSetResponse updateAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
         return attrConfigService.updateAttributeSet(attributeSet);
     }
 

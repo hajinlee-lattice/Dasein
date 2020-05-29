@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -54,17 +55,21 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
     }
 
     @Override
-    public AttributeSet updateAttributeSet(String customerSpace, AttributeSet attributeSet) {
+    public AttributeSetResponse updateAttributeSet(String customerSpace, AttributeSet attributeSet) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
                 shortenCustomerSpace(customerSpace));
-        return put("update attribute set", url, attributeSet, AttributeSet.class);
+        AttributeSetResponse attributeSetResponse = put("update attribute set", url, attributeSet, AttributeSetResponse.class);
+        attributeSetResponse.getAttrConfigRequest().fixJsonDeserialization();
+        return attributeSetResponse;
     }
 
     @Override
-    public AttributeSet createAttributeSet(String customerSpace, AttributeSet attributeSet) {
+    public AttributeSetResponse createAttributeSet(String customerSpace, AttributeSet attributeSet) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
                 shortenCustomerSpace(customerSpace));
-        return post("create attribute set", url, attributeSet, AttributeSet.class);
+        AttributeSetResponse attributeSetResponse = post("create attribute set", url, attributeSet, AttributeSetResponse.class);
+        attributeSetResponse.getAttrConfigRequest().fixJsonDeserialization();
+        return attributeSetResponse;
     }
 
     @Override

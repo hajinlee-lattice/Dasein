@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -382,11 +383,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode) {
+        return validateRequest(request, mode, null);
+    }
+
+    @Override
+    public AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode, Map<BusinessEntity, Set<String>> entitySetMap) {
         String tenantId = MultiTenantContext.getShortTenantId();
         try (PerformanceTimer timer = new PerformanceTimer()) {
             boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
-                    new ArrayList<>(), entityMatchEnabled);
+                    new ArrayList<>(), entityMatchEnabled, entitySetMap == null);
             List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
                 if (CollectionUtils.isNotEmpty(list)) {
                     return list.stream();
@@ -397,7 +403,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             request.setAttrConfigs(renderedList);
             // Render the system metadata decorated by existing custom data
             List<AttrConfig> existingAttrConfigs = Collections.synchronizedList(new ArrayList<>());
-
             final Tenant tenant = MultiTenantContext.getTenant();
             List<Runnable> runnables = new ArrayList<>();
             BusinessEntity.SEGMENT_ENTITIES.stream().forEach(entity -> {
@@ -406,7 +411,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     List<ColumnMetadata> systemMetadataCols = getSystemMetadata(entity);
                     List<AttrConfig> existingCustomConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId,
                             entity);
-                    existingAttrConfigs.addAll(render(systemMetadataCols, existingCustomConfig, entityMatchEnabled));
+                    existingAttrConfigs.addAll(render(systemMetadataCols, existingCustomConfig, entityMatchEnabled,
+                            getAttributesInEntity(entitySetMap, entity)));
                 };
                 runnables.add(runnable);
             });
@@ -420,6 +426,18 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             timer.setTimerMessage(msg);
         }
         return request;
+    }
+
+    private Set<String> getAttributesInEntity(Map<BusinessEntity, Set<String>> entitySetMap, BusinessEntity entity) {
+        if (entitySetMap != null) {
+            Set<String> attributes = entitySetMap.get(entity);
+            if (attributes == null) {
+                attributes = new HashSet<>();
+            }
+            return attributes;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -481,8 +499,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
         List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
         boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
-        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, toDeleteEntities,
-                entityMatchEnabled);
+        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, toDeleteEntities, entityMatchEnabled, true);
         if (MapUtils.isEmpty(attrConfigGrpsForTrim)) {
             toReturn = request;
         } else {
@@ -573,7 +590,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
      * split configs by entity, then distribute thread to render separately
      */
     private Map<BusinessEntity, List<AttrConfig>> renderConfigs(List<AttrConfig> attrConfigs,
-            List<AttrConfigEntity> toDeleteEntities, boolean entityMatchEnabled) {
+            List<AttrConfigEntity> toDeleteEntities, boolean entityMatchEnabled, boolean mergeUsageGroupProps) {
         // split by entity
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
         if (CollectionUtils.isEmpty(attrConfigs)) {
@@ -591,8 +608,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             return attrConfigGrps;
         } else {
             String tenantId = MultiTenantContext.getShortTenantId();
-            mergeConfigWithExisting(tenantId, attrConfigGrps, toDeleteEntities);
-
+            mergeConfigWithExisting(tenantId, attrConfigGrps, toDeleteEntities, mergeUsageGroupProps);
             ConcurrentMap<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new ConcurrentHashMap<>();
 
             if (attrConfigGrps.size() == 1) {
@@ -625,7 +641,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
      * Merge with existing configs in Document DB
      */
     private void mergeConfigWithExisting(String tenantId, Map<BusinessEntity, List<AttrConfig>> attrConfigGrps,
-            List<AttrConfigEntity> toDeleteEntities) {
+            List<AttrConfigEntity> toDeleteEntities, boolean mergeUsageGroupProps) {
 
         attrConfigGrps.forEach((entity, configList) -> {
             List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
@@ -640,6 +656,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     existingEntityMap.put(config.getAttrName(), configEntity);
                 }
             });
+            Set<String> groupNames = Arrays.stream(ColumnSelection.Predefined.values()).map(group -> group.name()).collect(Collectors.toSet());
             for (AttrConfig config : configList) {
                 String attrName = config.getAttrName();
                 AttrConfig existingConfig = existingMap.get(attrName);
@@ -647,7 +664,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     // write user changed prop
                     existingConfig.getAttrProps().forEach((propName, propValue) -> {
                         if (!config.getAttrProps().containsKey(propName)) {
-                            config.getAttrProps().put(propName, propValue);
+                            if (mergeUsageGroupProps || !groupNames.contains(propName)) {
+                                config.getAttrProps().put(propName, propValue);
+                            }
                         }
                     });
 
@@ -840,7 +859,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             new AttrConfigProp<Boolean>());
                     usageProp.setSystemValue(metadata.isEnabledFor(group));
                     usageProp.setAllowCustomization(attrSpec == null || attrSpec.allowChange(group));
-                    if (attributesInSet != null && ColumnSelection.Predefined.Enrichment.equals(group)) {
+                    if (usageProp.isAllowCustomization() && attributesInSet != null
+                            && ColumnSelection.Predefined.Enrichment.equals(group)) {
                         if (attributesInSet.contains(metadata.getAttrName())) {
                             usageProp.setCustomValue(Boolean.TRUE);
                         } else {
@@ -970,12 +990,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public AttributeSet createAttributeSet(AttributeSet attributeSet) {
+    public AttributeSetResponse createAttributeSet(AttributeSet attributeSet) {
         return null;
     }
 
     @Override
-    public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
+    public AttributeSetResponse updateAttributeSet(AttributeSet attributeSet) {
         return null;
     }
 

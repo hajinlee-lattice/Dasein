@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
@@ -45,9 +46,9 @@ public interface CDLAttrConfigProxy {
 
     AttributeSet cloneAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet);
 
-    AttributeSet updateAttributeSet(String customerSpace, AttributeSet attributeSet);
+    AttributeSetResponse updateAttributeSet(String customerSpace, AttributeSet attributeSet);
 
-    AttributeSet createAttributeSet(String customerSpace, AttributeSet attributeSet);
+    AttributeSetResponse createAttributeSet(String customerSpace, AttributeSet attributeSet);
 
     void deleteAttributeSet(String customerSpace, String name);
 
