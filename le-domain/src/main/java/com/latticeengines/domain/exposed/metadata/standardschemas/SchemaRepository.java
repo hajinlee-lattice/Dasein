@@ -1609,6 +1609,11 @@ public class SchemaRepository {
             schemaTable = createTable(SchemaInterpretation.MarketingActivityType);
             schemaTable.setAttributes(attrs);
             break;
+        case CustomIntent:
+            attrs = new ArrayList<>(Arrays.asList(attrOpportunityDate(), attrDUNS(), attrModelName()));
+            schemaTable = createTable(SchemaInterpretation.DnbIntentData);
+            schemaTable.setAttributes(attrs);
+            break;
         default:
         }
         return schemaTable;
@@ -1808,6 +1813,16 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PathPatternName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .required().notNull().build();
+    }
+
+    private Attribute attrModelName() {
+        return attr(InterfaceName.ModelName.name())
+                .allowedDisplayNames(Arrays.asList("ModelName", "Model Name", "MODEL_NAME"))
+                .physicalDataType(Schema.Type.STRING)
+                .interfaceName(InterfaceName.ModelName)
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE)
+                .fundamentalType(ModelingMetadata.FT_ALPHA)
                 .required().notNull().build();
     }
 }

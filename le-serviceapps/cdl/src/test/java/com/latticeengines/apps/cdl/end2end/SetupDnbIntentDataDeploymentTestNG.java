@@ -25,7 +25,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 public class SetupDnbIntentDataDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SetupDnbIntentDataDeploymentTestNG.class);
-    private static final String OTHER_SYSTEM = "Default_System";
+    private static final String DNBINTENT_SYSTEM = "Default_DnbIntent_System";
 
     @Inject
     private CDLProxy cdlProxy;
@@ -44,10 +44,10 @@ public class SetupDnbIntentDataDeploymentTestNG extends CDLEnd2EndDeploymentTest
     protected void test() {
         boolean created = cdlProxy.createDefaultDnbIntentDataTemplate(mainCustomerSpace);
         Assert.assertTrue(created, "Failed to create DnbIntentData template");
-        String templateFeedType = EntityTypeUtils.generateFullFeedType(OTHER_SYSTEM, EntityType.CustomIntent);
-        S3ImportSystem importSystem = cdlProxy.getS3ImportSystem(mainCustomerSpace, OTHER_SYSTEM);
+        String templateFeedType = EntityTypeUtils.generateFullFeedType(DNBINTENT_SYSTEM, EntityType.CustomIntent);
+        S3ImportSystem importSystem = cdlProxy.getS3ImportSystem(mainCustomerSpace, DNBINTENT_SYSTEM);
         Assert.assertNotNull(importSystem,
-                String.format("Should exist a DnbIntentData system. systemName=%s", OTHER_SYSTEM));
+                String.format("Should exist a DnbIntentData system. systemName=%s", DNBINTENT_SYSTEM));
         // verification
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, "File", templateFeedType);
         Assert.assertNotNull(dataFeedTask);
