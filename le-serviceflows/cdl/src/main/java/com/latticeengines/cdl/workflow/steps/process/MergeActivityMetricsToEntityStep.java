@@ -24,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -389,6 +390,23 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse time range for attribute " + attrName, e);
         }
+
+        try {
+            String nextTimeRangePeriodOnly = ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 1);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_NEXT_RANGE_PERIOD_ONLY_TOKEN, nextTimeRangePeriodOnly);
+        } catch (Exception e) {
+            // Do nothing for now
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_NEXT_RANGE_PERIOD_ONLY_TOKEN, Strings.EMPTY);
+        }
+
+        try {
+            String timeRangePeriodOnly = ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 0);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_PERIOD_ONLY_TOKEN, timeRangePeriodOnly);
+        } catch (Exception e) {
+            // Do nothing for now
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_PERIOD_ONLY_TOKEN, Strings.EMPTY);
+        }
+
         return params;
     }
 

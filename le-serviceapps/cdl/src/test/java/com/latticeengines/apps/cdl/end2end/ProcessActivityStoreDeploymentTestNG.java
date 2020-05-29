@@ -48,8 +48,10 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     private static final String SKIP_WEB_VISIT = "SKIP_WEB_VISIT";
     private static final String SKIP_OPPORTUNITY = "SKIP_OPPORTUNITY";
     private static final String SKIP_MARKETING = "SKIP_MARKETING";
+    private static final String SKIP_INTENT = "SKIP_INTENT";
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
+    private static final String INTENT_SYSTEM = "Default_System";
     private static final String MARKETO_SYSTEM = "Default_Marketo_System";
     private static final String ELOQUA_SYSTEM = "Default_Eloqua_System";
     protected static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
@@ -76,6 +78,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     @Test(groups = "end2end")
     protected void test() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
+        // TODO - simplify skipping logic
         if (!Boolean.parseBoolean(System.getenv(SKIP_WEB_VISIT))) {
             setupWebVisit();
         } else {
@@ -91,8 +94,13 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         } else {
             log.info("Skip marketing setup. {}={}", SKIP_MARKETING, System.getenv(SKIP_MARKETING));
         }
+        if (!Boolean.parseBoolean(System.getenv(SKIP_INTENT))) {
+            setupIntentTemplates();
+        } else {
+            log.info("Skip intent setup. {}={}", SKIP_INTENT, System.getenv(SKIP_INTENT));
+        }
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
-        setupTimeline();
+//        setupTimeline();
         if (isLocalEnvironment()) {
             // run PA with fake current time
             processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
@@ -184,6 +192,19 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         Thread.sleep(2000);
     }
 
+    private void setupIntentTemplates() throws Exception {
+        createIntentSystem();
+        Thread.sleep(2000L);
+        Assert.assertTrue(createS3Folder(INTENT_SYSTEM, Collections.singletonList(EntityType.CustomIntent)));
+
+        Assert.assertTrue(cdlProxy.createDefaultDnbIntentDataTemplate(mainCustomerSpace),
+                String.format("Failed to create intent template in system %s", INTENT_SYSTEM));
+
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 5,
+                generateFullFeedType(INTENT_SYSTEM, EntityType.CustomIntent));
+        Thread.sleep(2000);
+    }
+
     /*-
      * create a dummy system for opportunity templates to attach to
      * NOTE that account import for this system might not work (not fully setup)
@@ -205,6 +226,18 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     private void createMarketingActivitySystems() {
         createMarketingActivitySystem(MARKETO_SYSTEM);
 //        createMarketingActivitySystem(ELOQUA_SYSTEM);
+    }
+
+    private void createIntentSystem() {
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(mainTestTenant);
+        system.setName(INTENT_SYSTEM);
+        system.setDisplayName(INTENT_SYSTEM);
+        system.setSystemType(S3ImportSystem.SystemType.Other);
+        system.setPriority(2);
+        system.setAccountSystemId(String.format("user_%s_dlugenoz_AcountId", INTENT_SYSTEM));
+        system.setMapToLatticeAccount(true);
+        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
     }
 
     private void createMarketingActivitySystem(String systemName) {

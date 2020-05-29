@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -252,6 +253,22 @@ public class ActivityMetricDecorator implements Decorator {
             params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse time range for attribute " + attrName, e);
+        }
+
+        try {
+            String nextTimeRangePeriodOnly = ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 1);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_NEXT_RANGE_PERIOD_ONLY_TOKEN, nextTimeRangePeriodOnly);
+        } catch (Exception e) {
+            // Do nothing for now
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_NEXT_RANGE_PERIOD_ONLY_TOKEN, Strings.EMPTY);
+        }
+
+        try {
+            String timeRangePeriodOnly = ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 0);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_PERIOD_ONLY_TOKEN, timeRangePeriodOnly);
+        } catch (Exception e) {
+            // Do nothing for now
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_PERIOD_ONLY_TOKEN, Strings.EMPTY);
         }
 
         return params;
