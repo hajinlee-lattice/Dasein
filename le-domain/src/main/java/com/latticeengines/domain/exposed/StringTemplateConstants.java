@@ -9,7 +9,7 @@ public final class StringTemplateConstants {
     // Template tokens/values
     public static final String ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN = "TimeRange";
     public static final String ACTIVITY_METRICS_GROUP_TIME_RANGE_PERIOD_ONLY_TOKEN = "PeriodOnly";
-    public static final String ACTIVITY_METRICS_GROUP_NEXT_RANGE_PERIOD_ONLY_TOKEN = "NextPeriodONLY"; // only compatible with single param time filter
+    public static final String ACTIVITY_METRICS_GROUP_NEXT_RANGE_PERIOD_ONLY_TOKEN = "NextPeriodOnly"; // only compatible with single param time filter
     public static final String ACTIVITY_METRICS_GROUP_TIME_RANGE = "${operator}_${params?join(\"_\")}_${period}";
     public static final String ACTIVITY_METRICS_GROUP_TIME_RANGE_NO_VAL = "${operator}_${period}";
     public static final String SINGLE_VAL_TIME_RANGE_DESC = "${operator} ${params?join(\"_\")} ${period}";
