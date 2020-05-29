@@ -371,6 +371,16 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
                 return "Default_DCP_System";
             }
         },
+        DnbIntent {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Collections.singletonList(EntityType.CustomIntent);
+            }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_DnbIntent_System";
+            }
+        },
         Other;
 
         public Collection<EntityType> getEntityTypes() {

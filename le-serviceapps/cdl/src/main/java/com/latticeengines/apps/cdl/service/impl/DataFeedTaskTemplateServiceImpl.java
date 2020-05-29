@@ -451,22 +451,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     @Override
     public boolean createDefaultDnbIntentDataTemplate(String customerSpace) {
-        String systemName = S3ImportSystem.SystemType.Other.getDefaultSystemName();
-        S3ImportSystem.SystemType systemType = S3ImportSystem.SystemType.Other;
         EntityType entityType = EntityType.CustomIntent;
-        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
-                systemName);
-        if (importSystem != null) {
-            DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, "File",
-                    EntityTypeUtils.generateFullFeedType(systemName, entityType));
-            if (dataFeedTask != null) {
-                throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
-            }
-        } else {
-            importSystem = createS3ImportSystem(customerSpace, systemName, systemType);
-            log.debug("Successfully created S3ImportSystem for entity type {}:\n{}", entityType,
-                    JsonUtils.pprint(importSystem));
-        }
+        S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.DnbIntent,
+                S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName());
         log.info("importSystem is {}.", JsonUtils.serialize(importSystem));
         log.info("setup dnb Intent data for tenant {}, systemName {}.", customerSpace, importSystem.getName());
         DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
@@ -483,21 +470,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             throw new IllegalArgumentException(String.format("createDnbIntentDataTemplate cannot support entityType " +
                     "%s.", entityType));
         }
-        String systemName = S3ImportSystem.SystemType.Other.getDefaultSystemName();
-        S3ImportSystem.SystemType systemType = S3ImportSystem.SystemType.Other;
-        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
-                systemName);
-        if (importSystem != null) {
-            DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, "File",
-                    EntityTypeUtils.generateFullFeedType(systemName, entityType));
-            if (dataFeedTask != null) {
-                throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
-            }
-        } else {
-            importSystem = createS3ImportSystem(customerSpace, systemName, systemType);
-            log.debug("Successfully created S3ImportSystem for entity type {}:\n{}", entityType,
-                    JsonUtils.pprint(importSystem));
-        }
+        S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.DnbIntent,
+                S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName());
         log.info("setup dnb Intent data for tenant {}, systemName {}.", customerSpace, importSystem.getName());
         DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
                 entityType, simpleTemplateMetadata);
