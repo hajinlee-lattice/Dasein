@@ -27,6 +27,14 @@ public class SoftDeleteConfig extends SparkJobConfig {
     @JsonProperty("NeedPartitionOutput")
     private Boolean needPartitionOutput;
 
+    // time column in source
+    @JsonProperty("EventTimeColumn")
+    private String eventTimeColumn;
+
+    // column that contains list of time ranges that should be deleted
+    @JsonProperty("TimeRangesColumn")
+    private String timeRangesColumn;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -75,5 +83,21 @@ public class SoftDeleteConfig extends SparkJobConfig {
 
     public void setNeedPartitionOutput(Boolean needPartitionOutput) {
         this.needPartitionOutput = needPartitionOutput;
+    }
+
+    public String getEventTimeColumn() {
+        return eventTimeColumn;
+    }
+
+    public void setEventTimeColumn(String eventTimeColumn) {
+        this.eventTimeColumn = eventTimeColumn;
+    }
+
+    public String getTimeRangesColumn() {
+        return timeRangesColumn;
+    }
+
+    public void setTimeRangesColumn(String timeRangesColumn) {
+        this.timeRangesColumn = timeRangesColumn;
     }
 }
