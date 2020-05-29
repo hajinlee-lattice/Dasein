@@ -221,6 +221,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         // construct User
         User adminUser = new User();
         if (iDaaSUser != null) {
+            log.info("create ga user {} using IDaaS info", username);
             adminUser.setFirstName(iDaaSUser.getFirstName());
             adminUser.setLastName(iDaaSUser.getLastName());
         } else {
