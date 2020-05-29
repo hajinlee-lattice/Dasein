@@ -128,6 +128,8 @@ public enum InterfaceName {
     Type, //
     AnnualRevenueCurrency, SpendAnalyticsSegment, RepresentativeAccounts, CustomerParentAccountID, DoNotCall, LeadStatus, LeadType, Cost, TotalCost, //
 
+    TimeRanges, // [start time,end time] tuple
+
     // These values are for Curated Attributes.
     NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate, EntityCreatedSource, EntityCreatedType,
 
