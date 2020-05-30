@@ -96,19 +96,24 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected TransformationStepConfig profile(String masterTableName) {
+        return profile(masterTableName, false);
+    }
+
+    protected TransformationStepConfig profile(String masterTableName, boolean detectDiscrete) {
         TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
-        return configureProfileStep(step);
+        return configureProfileStep(step, detectDiscrete);
     }
 
     protected TransformationStepConfig profile(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
-        return configureProfileStep(step);
+        return configureProfileStep(step, false);
     }
 
-    private TransformationStepConfig configureProfileStep(TransformationStepConfig step) {
+    private TransformationStepConfig configureProfileStep(TransformationStepConfig step, boolean detectDiscrete) {
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
         ProfileJobConfig conf = new ProfileJobConfig();
+        conf.setAutoDetectDiscrete(detectDiscrete);
         conf.setEncAttrPrefix(CEAttr);
         if (evaluationDateAsTimestamp != null) {
             conf.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);

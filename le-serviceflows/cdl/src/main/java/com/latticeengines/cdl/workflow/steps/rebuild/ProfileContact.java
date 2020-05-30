@@ -94,7 +94,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         int bucketStep = 1;
         int removeOrphanStep = 2;
 
-        TransformationStepConfig profile = profile(masterTableName);
+        TransformationStepConfig profile = profile(masterTableName, true);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName, servingStoreTablePrefix);
         TransformationStepConfig removeOrphan = removeOrphan(bucketStep);
         TransformationStepConfig calc = calcStats(profileStep, masterTableName, statsTablePrefix);

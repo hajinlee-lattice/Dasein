@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class ProfileJobTestNG extends SparkJobFunctionalTestNGBase {
+public class AdvancedProfileJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
@@ -124,6 +124,7 @@ public class ProfileJobTestNG extends SparkJobFunctionalTestNGBase {
                 "Intent1", "Intent2", "EmptyInt" //
         ), encodedAttrs));
         config.setCatAttrs(getCatAttrs(Arrays.asList("Categorical", "FreeText", "EmptyStr")));
+        config.setAutoDetectDiscrete(true);
         config.setNumBucketEqualSized(false);
         config.setBucketNum(4);
         config.setMinBucketSize(2);

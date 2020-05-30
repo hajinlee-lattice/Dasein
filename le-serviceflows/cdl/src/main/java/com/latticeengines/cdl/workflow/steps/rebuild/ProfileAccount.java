@@ -204,6 +204,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
 
         ProfileJobConfig conf = new ProfileJobConfig();
+        conf.setAutoDetectDiscrete(true);
         conf.setEncAttrPrefix(CEAttr);
         // Pass current timestamp as a configuration parameter to the profile
         // step.

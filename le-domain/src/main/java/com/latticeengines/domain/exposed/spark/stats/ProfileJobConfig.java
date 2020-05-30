@@ -26,8 +26,7 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
-    // false: decide bucket upon
-    // distribution
+    // false: decide bucket upon distribution
 
     @JsonProperty("BucketNum")
     private int bucketNum = 5;// roughly bucket number (might not be exactly
@@ -35,6 +34,11 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     @JsonProperty("MinBucketSize")
     private int minBucketSize = 10; // only for numBucketEqualSized = false
+
+    // automatically detect discrete
+    // when false, all numerical attrs are interval
+    @JsonProperty("AutoDetectDiscrete")
+    private boolean autoDetectDiscrete;
 
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real
@@ -138,6 +142,14 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     public void setMinBucketSize(int minBucketSize) {
         this.minBucketSize = minBucketSize;
+    }
+
+    public boolean isAutoDetectDiscrete() {
+        return autoDetectDiscrete;
+    }
+
+    public void setAutoDetectDiscrete(boolean autoDetectDiscrete) {
+        this.autoDetectDiscrete = autoDetectDiscrete;
     }
 
     public Long getRandSeed() {

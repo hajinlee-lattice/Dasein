@@ -10,9 +10,13 @@ private[spark] class NumericProfiler[T](vals: Seq[T], numBuckets: Int, minBucket
   private val RANDOM = new Random(randomSeed)
 
   def findBoundaries(): List[Double] = {
-    val dVals = transform(vals.toList).sorted
-    val bndIdx = findBoundaryIdx(dVals)
-    toBoundaries(dVals, bndIdx)
+    if (vals.isEmpty) {
+      List(0.0)
+    } else {
+      val dVals = transform(vals.toList).sorted
+      val bndIdx = findBoundaryIdx(dVals)
+      toBoundaries(dVals, bndIdx)
+    }
   }
 
   private def toBoundaries(dVals: Seq[Double], bndIdx: Seq[Int]): List[Double] = {
