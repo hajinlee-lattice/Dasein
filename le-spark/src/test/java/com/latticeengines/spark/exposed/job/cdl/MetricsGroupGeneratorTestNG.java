@@ -129,6 +129,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = constructInputMetadata(WEB_VISIT_STREAM, Collections.singletonList(BusinessEntity.Account));
         config.evaluationDate = EVAL_DATE;
         config.streamMetadataMap = constructWebActivityStreamMetadata();
+        config.currentVersionStamp = CURRENT_VERSION;
         WEB_ACTIVITY_ATTR_COUNT = calculateWebActivityAttrsCount(config.streamMetadataMap, group) + 1; // +1 entity Id column
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore), getWorkspace());
         ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
@@ -146,6 +147,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = constructInputMetadata(OPPORTUNITY_STREAM, Collections.singletonList(BusinessEntity.Account));
         config.evaluationDate = EVAL_DATE;
         config.streamMetadataMap = constructOpportunityStreamMetadata();
+        config.currentVersionStamp = CURRENT_VERSION;
         OPPORTUNITY_ATTR_COUNT = calculateOpportunityAttrsCount(config.streamMetadataMap, group) + 1;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore), getWorkspace());
         ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
@@ -164,6 +166,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = constructInputMetadata(MARKETING_STREAM, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
         config.evaluationDate = EVAL_DATE;
         config.streamMetadataMap = constructMarketingStreamMetadata();
+        config.currentVersionStamp = CURRENT_VERSION;
         MARKETING_ATTR_COUNT = calculateMarketingAttrsCount(config.streamMetadataMap, group) + 1;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore, contactBatchStore), getWorkspace());
         ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
