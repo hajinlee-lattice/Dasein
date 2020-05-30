@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaArtifa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.PublishTableRoleStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportListOfEntitiesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchConfiguration;
@@ -61,6 +62,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = EntityMatchMigrateStepConfiguration.class, name = "EntityMatchMigrateStepConfiguration"),
         @Type(value = ImportTemplateMigrateStepConfiguration.class, name = "ImportTemplateMigrateStepConfiguration"),
         @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"),
+        @Type(value = PublishTableRoleStepConfiguration.class, name = "PublishTableRoleStepConfiguration"),
         @Type(value = ImportSourceStepConfiguration.class, name = "ImportSourceStepConfiguration"),
         @Type(value = ImportDeltaArtifactsFromS3Configuration.class, name = "ImportDeltaArtifactsFromS3Configuration") })
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {

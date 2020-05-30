@@ -68,9 +68,6 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
     @Value("${eai.export.dynamo.signature}")
     protected String signature;
 
-    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
-    private boolean skipPublication;
-
     @Override
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
@@ -93,12 +90,8 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
         List<Exporter> exporters = new ArrayList<>();
         configs.forEach(config -> {
             if (!Boolean.TRUE.equals(config.getRelink()) || !relinkDynamo(config)) {
-                if (skipPublication) {
-                    log.info("Skip exporting {} to DynamoDB, due to property flag.", config.getTableName());
-                } else {
-                    Exporter exporter = new Exporter(config);
-                    exporters.add(exporter);
-                }
+                Exporter exporter = new Exporter(config);
+                exporters.add(exporter);
             }
         });
         return exporters;

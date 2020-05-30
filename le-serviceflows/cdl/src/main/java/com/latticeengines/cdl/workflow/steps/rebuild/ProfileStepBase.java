@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
@@ -79,6 +80,9 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     private BatonService batonService;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     protected abstract BusinessEntity getEntity();
 
@@ -299,16 +303,18 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
-        String inputPath = getInputPath(tableName);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tableName);
-        config.setInputPath(inputPath);
-        config.setPartitionKey(partitionKey);
-        if (StringUtils.isNotBlank(sortKey)) {
-            config.setSortKey(sortKey);
-        }
+        if (!skipPublishDynamo) {
+            String inputPath = getInputPath(tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(inputPath);
+            config.setPartitionKey(partitionKey);
+            if (StringUtils.isNotBlank(sortKey)) {
+                config.setSortKey(sortKey);
+            }
 
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
     }
 
     private String getInputPath(String tableName) {

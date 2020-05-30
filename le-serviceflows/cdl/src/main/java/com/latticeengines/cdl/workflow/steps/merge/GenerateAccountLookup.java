@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,9 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     @Override
     protected Class<? extends AbstractSparkJob<GenerateAccountLookupConfig>> getJobClz() {
@@ -128,12 +132,14 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
     }
 
     private void exportToDynamo(String tableName) {
-        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tableName);
-        config.setInputPath(PathUtils.toAvroGlob(inputPath));
-        config.setPartitionKey(TABLE_ROLE.getPartitionKey());
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        if (!skipPublishDynamo) {
+            String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(PathUtils.toAvroGlob(inputPath));
+            config.setPartitionKey(TABLE_ROLE.getPartitionKey());
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
     }
 
 }

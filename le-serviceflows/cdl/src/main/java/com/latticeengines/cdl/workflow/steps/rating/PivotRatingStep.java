@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -56,6 +57,9 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     @Override
     protected Class<PivotRatings> getJobClz() {
@@ -187,11 +191,13 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
     }
 
     private void exportToDynamo(String tableName, String avroDir) {
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tableName);
-        config.setInputPath(avroDir);
-        config.setPartitionKey(InterfaceName.AccountId.name());
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        if (!skipPublishDynamo) {
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(avroDir);
+            config.setPartitionKey(InterfaceName.AccountId.name());
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
     }
 
     private void cleanupTemporaryTables() {
