@@ -132,17 +132,35 @@ public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
      */
     private void classifyAttrs(Source baseSrc, String baseVer, ProfileJobConfig jobConfig) {
         String dataCloudVersion = findDCVersionToProfile(jobConfig);
-        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
+        Map<String, ProfileParameters.Attribute> declaredAttrsConfig = parseDeclaredAttrs(jobConfig);
+        Map<String, ProfileArgument> amAttrsConfig;
+        if (Boolean.TRUE.equals(jobConfig.getConsiderAMAttrs())) {
+            amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
+        } else {
+            amAttrsConfig = new HashMap<>();
+        }
         Schema schema = findSchema(baseSrc, baseVer);
         List<ColumnMetadata> cms = schema.getFields().stream() //
                 .map(field -> MetadataConverter.getAttribute(field).getColumnMetadata()).collect(Collectors.toList());
         log.info("Classifying attributes...");
         try {
-            classifier = new AttrClassifier(jobConfig, amAttrsConfig, encodeBits, maxAttrs);
+            classifier = new AttrClassifier(jobConfig, amAttrsConfig, declaredAttrsConfig, encodeBits, maxAttrs);
             classifier.classifyAttrs(cms);
         } catch (Exception ex) {
             throw new RuntimeException("Fail to classify attributes", ex);
         }
+    }
+
+    private Map<String, ProfileParameters.Attribute> parseDeclaredAttrs(ProfileJobConfig jobConfig) {
+        Map<String, ProfileParameters.Attribute> profileArgMap = new HashMap<>();
+        List<ProfileParameters.Attribute> declaredAttrs = jobConfig.getDeclaredAttrs();
+        if (CollectionUtils.isNotEmpty(declaredAttrs)) {
+            declaredAttrs.forEach(attr -> {
+                String attrName = attr.getAttr();
+                profileArgMap.put(attrName, attr);
+            });
+        }
+        return profileArgMap;
     }
 
     /**
@@ -236,7 +254,12 @@ public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
         }
         // Move numerical & categorical attrs to encode attrs
         String dataCloudVersion = findDCVersionToProfile(jobConfig);
-        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
+        Map<String, ProfileArgument> amAttrsConfig;
+        if (Boolean.TRUE.equals(jobConfig.getConsiderAMAttrs())) {
+            amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
+        } else {
+            amAttrsConfig = new HashMap<>();
+        }
         for (ProfileParameters.Attribute numAttr : jobConfig.getNumericAttrs()) {
             if (amAttrsConfig.containsKey(numAttr.getAttr())) {
                 jobConfig.getAmAttrsToEnc().add(numAttr);

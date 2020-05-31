@@ -18,6 +18,10 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("Stage")
     private String stage;
 
+    // not always need to consider am attrs
+    @JsonProperty("ConsiderAMAttrs")
+    private Boolean considerAMAttrs;
+
     @JsonProperty("EvaluationDateAsTimestamp")
     private long evaluationDateAsTimestamp = -1; // Timestamp the PA job is run for use for Date Attribute profiling.
 
@@ -66,6 +70,10 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("IDAttr")
     private String idAttr;
 
+    // attributes with declared profile strategy
+    @JsonProperty("DeclaredAttrs")
+    private List<ProfileParameters.Attribute> declaredAttrs;
+
     @JsonProperty("NumericAttrs")
     private List<ProfileParameters.Attribute> numericAttrs;
 
@@ -91,6 +99,14 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("Name")
     public String getName() {
         return NAME;
+    }
+
+    public Boolean getConsiderAMAttrs() {
+        return considerAMAttrs;
+    }
+
+    public void setConsiderAMAttrs(Boolean considerAMAttrs) {
+        this.considerAMAttrs = considerAMAttrs;
     }
 
     public String getStage() {
@@ -198,6 +214,14 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     public void setIdAttr(String idAttr) {
         this.idAttr = idAttr;
+    }
+
+    public List<ProfileParameters.Attribute> getDeclaredAttrs() {
+        return declaredAttrs;
+    }
+
+    public void setDeclaredAttrs(List<ProfileParameters.Attribute> declaredAttrs) {
+        this.declaredAttrs = declaredAttrs;
     }
 
     public List<ProfileParameters.Attribute> getNumericAttrs() {

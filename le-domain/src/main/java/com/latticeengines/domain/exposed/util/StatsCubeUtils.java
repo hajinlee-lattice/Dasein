@@ -123,9 +123,9 @@ public final class StatsCubeUtils {
                 String[] tokens = bktSerialized.split("\\|");
                 for (String token : tokens) {
                     String[] parts = token.split(":");
-                    int bktId = Integer.valueOf(parts[0]);
+                    int bktId = Integer.parseInt(parts[0]);
                     if (bktId > 0) {
-                        long bktCnt = Long.valueOf(parts[1]);
+                        long bktCnt = Long.parseLong(parts[1]);
                         bktCounts.put(bktId, bktCnt);
                     }
                 }
@@ -361,7 +361,7 @@ public final class StatsCubeUtils {
         List<Object> absVals = new ArrayList<>();
         switch (bucket.getComparisonType()) {
         case LESS_THAN:
-            Double val = valObjToDouble(bucket.getValues().get(0));
+            double val = valObjToDouble(bucket.getValues().get(0));
             if (val <= 0) {
                 chg.setDirection(Bucket.Change.Direction.DEC);
                 chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
@@ -394,8 +394,8 @@ public final class StatsCubeUtils {
             absVals.add(Math.abs(val));
             break;
         case GTE_AND_LT:
-            Double val1 = valObjToDouble(bucket.getValues().get(0));
-            Double val2 = valObjToDouble(bucket.getValues().get(1));
+            double val1 = valObjToDouble(bucket.getValues().get(0));
+            double val2 = valObjToDouble(bucket.getValues().get(1));
             if (val2 > 0) {
                 chg.setDirection(Bucket.Change.Direction.INC);
                 absVals.add(Math.abs(val1));
@@ -483,7 +483,7 @@ public final class StatsCubeUtils {
     }
 
     private static Double valObjToDouble(Object obj, boolean neg) {
-        Double dbl = valObjToDouble(obj);
+        double dbl = valObjToDouble(obj);
         if (neg && dbl != 0.0) {
             dbl = -dbl;
         }
@@ -925,9 +925,9 @@ public final class StatsCubeUtils {
         return (o1, o2) -> {
             String attr1 = o1.getAttribute();
             String attr2 = o2.getAttribute();
-            Long count1 = (o1.getTopBkt() == null || o1.getTopBkt().getCount() == null) ? 0L
+            long count1 = (o1.getTopBkt() == null || o1.getTopBkt().getCount() == null) ? 0L
                     : o1.getTopBkt().getCount();
-            Long count2 = (o2.getTopBkt() == null || o2.getTopBkt().getCount() == null) ? 0L
+            long count2 = (o2.getTopBkt() == null || o2.getTopBkt().getCount() == null) ? 0L
                     : o2.getTopBkt().getCount();
             int countCmp = Long.compare(count2, count1);
             if (countCmp == 0) {

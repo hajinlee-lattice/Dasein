@@ -52,6 +52,9 @@ public class AttrClassifier {
     // the Profile data flow.
     private final List<ProfileParameters.Attribute> attrsToRetain = new ArrayList<>();
 
+    // List of Attributes with declared profile, excluding those not in the input or to be encoded
+    private final List<ProfileParameters.Attribute> declaredAttrs = new ArrayList<>();
+
     // encoded attr -> [decoded attrs] (Enabled in profiling)
     private final Map<String, List<ProfileParameters.Attribute>> encAttrsMap = new HashMap<>();
 
@@ -69,6 +72,7 @@ public class AttrClassifier {
     private final String stage;
     private final long evaluationTime;
     private final Map<String, ProfileArgument> amAttrConfig;
+    private final Map<String, ProfileParameters.Attribute> declaredAttrConfig;
     private final String encAttrPrefix;
     private final int encodeBits;
     private final int maxAttrs;
@@ -76,6 +80,7 @@ public class AttrClassifier {
     private String idAttr;
 
     public AttrClassifier(ProfileJobConfig jobConfig, Map<String, ProfileArgument> amAttrConfig,
+                          Map<String, ProfileParameters.Attribute> declaredAttrConfig,
                           int encodeBits, int maxAttrs) {
         this.useSpark = true;
         this.params = null;
@@ -91,6 +96,7 @@ public class AttrClassifier {
         }
         this.evaluationTime = jobConfig.getEvaluationDateAsTimestamp();
         this.amAttrConfig = amAttrConfig;
+        this.declaredAttrConfig = declaredAttrConfig;
         this.encAttrPrefix = jobConfig.getEncAttrPrefix();
         this.idAttr = jobConfig.getIdAttr();
         this.encodeBits = encodeBits;
@@ -114,6 +120,7 @@ public class AttrClassifier {
         this.evaluationTime = config.getEvaluationDateAsTimestamp();
         this.amAttrConfig = amAttrConfig;
         this.encAttrPrefix = config.getEncAttrPrefix();
+        this.declaredAttrConfig = new HashMap<>();
         this.idAttr = params.getIdAttr();
         this.encodeBits = encodeBits;
         this.maxAttrs = maxAttrs;
@@ -159,11 +166,13 @@ public class AttrClassifier {
     public void classifyAttrs(List<ColumnMetadata> cms) {
         scanIdAttr(cms);
         parseEncodedAttrsConfig();
-
         // Parse flat attrs in the profiled source
         for (ColumnMetadata cm : cms) {
             boolean readyForNext;
             readyForNext = isIdAttr(cm);
+            if (!readyForNext) {
+                readyForNext = isDeclaredAttr(cm);
+            }
             if (!readyForNext) {
                 readyForNext = isAttrToDiscard(cm);
             }
@@ -195,6 +204,20 @@ public class AttrClassifier {
         return column.getAttrName().equals(idAttr);
     }
 
+    private boolean isDeclaredAttr(ColumnMetadata column) {
+        boolean declared = false;
+        if (declaredAttrConfig.containsKey(column.getAttrName())) {
+            ProfileParameters.Attribute declaredAttr = declaredAttrConfig.get(column.getAttrName());
+            if (declaredAttr.getAlgo() == null) {
+                attrsToRetain.add(declaredAttr);
+            } if (declaredAttr.getAlgo() instanceof CategoricalBucket) {
+                declaredAttrs.add(declaredAttr);
+            }
+            declared = true;
+        }
+        return declared;
+    }
+
     private boolean isAttrToDiscard(ColumnMetadata column) {
         boolean discard = false;
         if (amAttrConfig.containsKey(column.getAttrName()) &&
@@ -210,10 +233,8 @@ public class AttrClassifier {
         if (!amAttrConfig.containsKey(column.getAttrName())) {
             // always bucket non AM attrs
             noBucket = false;
-        } else if (Boolean.FALSE.equals(amAttrConfig.get(column.getAttrName()).isNoBucket())) {
-            return false;
         } else {
-            noBucket = true;
+            noBucket = !Boolean.FALSE.equals(amAttrConfig.get(column.getAttrName()).isNoBucket());
         }
         if (noBucket) {
             log.debug(String.format("Retained attr: %s (unencode)", column.getAttrName()));
@@ -224,7 +245,6 @@ public class AttrClassifier {
 
     private boolean isPreknownAttr(ColumnMetadata column) {
         boolean known = false;
-
         if (encAttrsMap.containsKey(column.getAttrName())) {
             // Preknown attributes which are encoded (usually for Enrichment use
             // case, since profiled source is AM)
@@ -251,21 +271,8 @@ public class AttrClassifier {
         if (NUM_CLASSES.contains(column.getJavaClass().toLowerCase())) {
             if (!LogicalDataType.Date.equals(column.getLogicalDataType())) {
                 // Skip numerical attributes that are actually Date timestamps since they are processed separately.
-                switch (stage) {
-                    case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                        log.debug(String.format("Interval bucketed attr %s (type %s unencode)", column.getAttrName(),
-                                column.getJavaClass()));
-                        break;
-                    case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                        log.debug(
-                                String.format("Interval bucketed attr %s (type %s encode)", column.getAttrName(),
-                                        column.getJavaClass()));
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unrecognized stage " + stage);
-                }
+                isNumeric = true;
             }
-            isNumeric = true;
         }
         if (isNumeric) {
             getNumericAttrs()
@@ -368,8 +375,8 @@ public class AttrClassifier {
                 encAttrsMap.put(encAttr, new ArrayList<>());
             }
             validateEncodedSrcAttrArg(amAttrConfig.getKey(), amAttrConfig.getValue());
-            BucketAlgorithm bktAlgo = parseBucketAlgo(amAttrConfig.getValue().getBktAlgo(),
-                    decodeStrategy.getValueDict());
+            ProfileArgument profileArg = amAttrConfig.getValue();
+            BucketAlgorithm bktAlgo = parseBucketAlgo(profileArg.getBktAlgo(), decodeStrategy.getValueDict());
             Integer numBits = amAttrConfig.getValue().getNumBits() != null ? amAttrConfig.getValue().getNumBits()
                     : decideBitNumFromBucketAlgo(bktAlgo);
             ProfileParameters.Attribute attr = new ProfileParameters.Attribute(amAttrConfig.getKey(), numBits,
@@ -482,6 +489,9 @@ public class AttrClassifier {
         }
         for (ProfileParameters.Attribute attr : attrsToRetain) {
             result.add(ProfileUtils.profileAttrToRetain(attr));
+        }
+        for (ProfileParameters.Attribute attr : declaredAttrs) {
+            result.add(ProfileUtils.profileDeclared(attr));
         }
         Map<String, List<ProfileParameters.Attribute>> amAttrsToEnc = groupAttrsToEnc(getAmAttrsToEnc(),
                 DataCloudConstants.EAttr);

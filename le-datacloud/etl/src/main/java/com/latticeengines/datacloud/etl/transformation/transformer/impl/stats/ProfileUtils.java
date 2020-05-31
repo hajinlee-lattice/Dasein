@@ -242,6 +242,20 @@ public final class ProfileUtils {
 
     // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,
     // BktAlgo
+    static Object[] profileDeclared(ProfileParameters.Attribute attr) {
+        Object[] data = new Object[7];
+        data[0] = attr.getAttr();
+        data[1] = attr.getAttr();
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        data[6] = attr.getAlgo() == null ? null : JsonUtils.serialize(attr.getAlgo());
+        return data;
+    }
+
+    // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,
+    // BktAlgo
     static Object[] profileAttrToEnc(ProfileParameters.Attribute attr, String encodedAttr, int lowestBit) {
         Object[] data = new Object[7];
         data[0] = attr.getAttr();
