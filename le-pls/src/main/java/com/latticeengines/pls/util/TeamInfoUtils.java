@@ -45,7 +45,7 @@ public final class TeamInfoUtils {
         if (teamFeatureEnabled) {
             Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false, true)
                     .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-            Set<String> teamIds = teamService.getTeamIdsInContext();
+            Set<String> teamIds = teamService.getMyTeamIds();
             for (HasTeamInfo hasTeamInfo : hasTeamInfos) {
                 fillTeamId(hasTeamInfo);
                 fillTeams(hasTeamInfo, globalTeamMap.get(hasTeamInfo.getTeamId()), teamIds);
@@ -57,7 +57,7 @@ public final class TeamInfoUtils {
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         if (teamFeatureEnabled) {
             fillTeamId(hasTeamInfo);
-            fillTeams(hasTeamInfo, teamService.getTeamInContext(hasTeamInfo.getTeamId()), teamService.getTeamIdsInContext());
+            fillTeams(hasTeamInfo, teamService.getTeamInContext(hasTeamInfo.getTeamId()), teamService.getMyTeamIds());
         }
     }
 }

@@ -54,7 +54,7 @@ public class TeamResource {
     public List<GlobalTeam> getTeamsFromSession(
             @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember,
             @RequestParam(value = "appendDefaultGlobalTeam", required = false, defaultValue = "true") boolean appendDefaultGlobalTeam) {
-        List<GlobalTeam> globalTeams = teamService.getTeamsFromSession(withTeamMember, appendDefaultGlobalTeam);
+        List<GlobalTeam> globalTeams = teamService.getMyTeams(withTeamMember, appendDefaultGlobalTeam);
         return globalTeams;
     }
 

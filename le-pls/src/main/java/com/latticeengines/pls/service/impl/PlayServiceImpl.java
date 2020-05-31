@@ -58,7 +58,7 @@ public class PlayServiceImpl implements PlayService {
         for (Play play : plays) {
             TeamInfoUtils.fillTeamId(play.getTargetSegment());
             inflateSegment(play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(),
-                    defaultGlobalTeam), teamService.getTeamIdsInContext());
+                    defaultGlobalTeam), teamService.getMyTeamIds());
         }
         return plays;
     }
@@ -71,7 +71,7 @@ public class PlayServiceImpl implements PlayService {
             boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
             TeamInfoUtils.fillTeamId(play.getTargetSegment());
             inflateSegment(play, teamFeatureEnabled ? teamService.getTeamInContext(play.getTargetSegment().getTeamId()) : null
-                    , teamService.getTeamIdsInContext());
+                    , teamService.getMyTeamIds());
         }
         return play;
     }

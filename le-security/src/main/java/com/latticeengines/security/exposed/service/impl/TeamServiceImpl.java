@@ -85,7 +85,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<GlobalTeam> getTeamsFromSession(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
+    public List<GlobalTeam> getMyTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
         try (PerformanceTimer timer = new PerformanceTimer("Get teams in session context.")) {
             List<GlobalTeam> globalTeams = new ArrayList<>();
             Session session = MultiTenantContext.getSession();
@@ -282,7 +282,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Set<String> getTeamIdsInContext() {
+    public Set<String> getMyTeamIds() {
         Session session = MultiTenantContext.getSession();
         if (session != null) {
             return session.getTeamIds().stream().collect(Collectors.toSet());
