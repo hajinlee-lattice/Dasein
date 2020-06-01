@@ -14,7 +14,7 @@ public interface TeamService {
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember);
 
-    List<GlobalTeam> getTeamsFromSession(boolean withTeamMember, boolean appendDefaultGlobalTeam);
+    List<GlobalTeam> getMyTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam);
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser);
 
@@ -36,7 +36,7 @@ public interface TeamService {
 
     GlobalTeam getTeamByTeamId(String teamId, User loginUser, boolean withTeamMember);
 
-    Set<String> getTeamIdsInContext();
+    Set<String> getMyTeamIds();
 
     GlobalTeam getDefaultGlobalTeam();
 

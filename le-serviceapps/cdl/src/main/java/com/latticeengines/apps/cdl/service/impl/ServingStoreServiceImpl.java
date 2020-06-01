@@ -136,9 +136,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
             return Collections.<String, Boolean> emptyMap();
         }
 
-        Map<String, Boolean> result = attributes.stream().collect(Collectors.toMap(Function.identity(), attr -> {
-            return false;
-        }));
+        Map<String, Boolean> result = attributes.stream().collect(Collectors.toMap(Function.identity(), attr -> false));
 
         List<String> cms = getDecoratedMetadata(customerSpace, entity, version, Collections.singletonList(group))
                 .map(attr -> attr.getAttrName()).collectList().block();

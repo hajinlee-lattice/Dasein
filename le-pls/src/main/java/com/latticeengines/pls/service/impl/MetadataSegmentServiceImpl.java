@@ -80,11 +80,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 return backendSegments;
             } else {
                 Map<String, GlobalTeam> globalTeamMap;
-                Set<String> teamIds = teamService.getTeamIdsInContext();
+                Set<String> teamIds = teamService.getMyTeamIds();
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
                 if (teamFeatureEnabled) {
                     if (filter) {
-                        globalTeamMap = teamService.getTeamsFromSession(false, true)
+                        globalTeamMap = teamService.getMyTeams(false, true)
                                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
                         return backendSegments.stream().filter(segment -> {
                             TeamInfoUtils.fillTeamId(segment);
@@ -133,7 +133,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
                 TeamInfoUtils.fillTeamId(segment);
                 segment = translateForFrontend(segment, teamFeatureEnabled ?
-                        teamService.getTeamInContext(segment.getTeamId()) : null, teamService.getTeamIdsInContext());
+                        teamService.getTeamInContext(segment.getTeamId()) : null, teamService.getMyTeamIds());
             }
             return segment;
         }
@@ -178,7 +178,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         }
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment, teamFeatureEnabled ?
-                teamService.getTeamInContext(metadataSegment.getTeamId()) : null, teamService.getTeamIdsInContext());
+                teamService.getTeamInContext(metadataSegment.getTeamId()) : null, teamService.getMyTeamIds());
         clearRatingCache();
         return createdOrUpdatedSegment;
     }
