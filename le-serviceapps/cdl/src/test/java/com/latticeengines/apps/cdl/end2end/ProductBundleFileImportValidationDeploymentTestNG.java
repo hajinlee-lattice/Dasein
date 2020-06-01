@@ -89,12 +89,12 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @Override
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
-        log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
-        setupEnd2EndTestEnvironment();
+        log.info("Running setup with ENABLE_ENTITY_MATCH disabled!");
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
     }
 
-    @Test(groups = "end2end")
+    @Test(groups = "end2end", enabled = false)
     public void testDownloadCurrentBundleFile() throws Exception {
         // get current bundle before PA
         try {
@@ -138,7 +138,6 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
 
     @Test(groups = "end2end")
     public void testProductBundle() throws Exception {
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         // create bundle related segment
         createTestSegmentProductBundle();
 
@@ -169,8 +168,9 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);
-        Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 4 errors : 3 missing product bundles" +
-                " in use (this import will completely replace the previous one), 2 product bundle has different product SKUs. Dependant models will need to be remodelled to get accurate scores. error when validating with input file, please reference error.csv for details.");
+        Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 7 errors : 3 missing product bundles" +
+                " in use (this import will completely replace the previous one), 4 product bundle has different " +
+                "product SKUs. Dependant models will need to be remodelled to get accurate scores. error when validating with input file, please reference error.csv for details.");
         RestTemplate template = testBed.getRestTemplate();
         List<?> list = template.getForObject(deployedHostPort + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
@@ -182,8 +182,8 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         ProductValidationSummary productValidationSummary = JsonUtils.getOrDefault(node.get("product_summary"),
                 ProductValidationSummary.class, null);
         Assert.assertNotNull(productValidationSummary);
-        Assert.assertEquals(productValidationSummary.getErrorLineNumber(), 4L);
-        Assert.assertEquals(productValidationSummary.getDifferentSKU(), 2);
+        Assert.assertEquals(productValidationSummary.getErrorLineNumber(), 7L);
+        Assert.assertEquals(productValidationSummary.getDifferentSKU(), 4);
         Assert.assertEquals(productValidationSummary.getMissingBundleInUse(), 3);
         Assert.assertNotNull(productValidationSummary.getMissingBundles());
         Assert.assertNotNull(productValidationSummary.getProcessedBundles());

@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SplitSystemBatchStoreConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ValidateProductConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
@@ -122,7 +123,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CalcStatsConfig.class, name = CalcStatsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME), //
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
-        @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME) //
+        @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
+        @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 
