@@ -61,7 +61,6 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         log.info("Setup Complete!");
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Override
