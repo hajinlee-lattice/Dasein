@@ -187,6 +187,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertFalse(CollectionUtils.isEmpty(projects));
         details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
         Assert.assertNotNull(details);
+        log.info("retrieved details : " + JsonUtils.serialize(details));
         Assert.assertTrue(details.getDeleted());
 
         // check source
