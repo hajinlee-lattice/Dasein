@@ -205,6 +205,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
         ProfileJobConfig conf = new ProfileJobConfig();
         conf.setAutoDetectDiscrete(true);
+        conf.setAutoDetectCategorical(true);
         conf.setConsiderAMAttrs(true);
         conf.setEncAttrPrefix(CEAttr);
         // Pass current timestamp as a configuration parameter to the profile

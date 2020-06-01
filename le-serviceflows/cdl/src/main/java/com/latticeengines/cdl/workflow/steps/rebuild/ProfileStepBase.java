@@ -97,32 +97,33 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected TransformationStepConfig profile(String masterTableName) {
-        return profile(masterTableName, false);
+        return profile(masterTableName, false, false);
     }
 
     protected TransformationStepConfig profile(String masterTableName, List<ProfileParameters.Attribute> declaredAttrs) {
         TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
-        return configureProfileStep(step, declaredAttrs, false);
+        return configureProfileStep(step, declaredAttrs, false, false);
     }
 
-    protected TransformationStepConfig profile(String masterTableName, boolean detectDiscrete) {
+    protected TransformationStepConfig profile(String masterTableName, boolean detectDiscrete, boolean detectCategorical) {
         TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
-        return configureProfileStep(step, null, detectDiscrete);
+        return configureProfileStep(step, null, detectDiscrete, detectCategorical);
     }
 
     protected TransformationStepConfig profile(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
-        return configureProfileStep(step, null, false);
+        return configureProfileStep(step, null, false, false);
     }
 
     private TransformationStepConfig configureProfileStep(TransformationStepConfig step,
                                                           List<ProfileParameters.Attribute> declaredAttrs,
-                                                          boolean detectDiscrete) {
+                                                          boolean detectDiscrete, boolean detectCategorical) {
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
         ProfileJobConfig conf = new ProfileJobConfig();
         conf.setDeclaredAttrs(declaredAttrs);
         conf.setAutoDetectDiscrete(detectDiscrete);
+        conf.setAutoDetectCategorical(detectCategorical);
         conf.setEncAttrPrefix(CEAttr);
         if (evaluationDateAsTimestamp != null) {
             conf.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);

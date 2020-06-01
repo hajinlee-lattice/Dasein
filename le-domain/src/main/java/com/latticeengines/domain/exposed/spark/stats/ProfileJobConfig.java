@@ -44,6 +44,11 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("AutoDetectDiscrete")
     private boolean autoDetectDiscrete;
 
+    // automatically detect categorical
+    // when false, all string attributes are free text
+    @JsonProperty("AutoDetectCategorical")
+    private boolean autoDetectCategorical;
+
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real
     // use case
@@ -166,6 +171,14 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     public void setAutoDetectDiscrete(boolean autoDetectDiscrete) {
         this.autoDetectDiscrete = autoDetectDiscrete;
+    }
+
+    public boolean isAutoDetectCategorical() {
+        return autoDetectCategorical;
+    }
+
+    public void setAutoDetectCategorical(boolean autoDetectCategorical) {
+        this.autoDetectCategorical = autoDetectCategorical;
     }
 
     public Long getRandSeed() {

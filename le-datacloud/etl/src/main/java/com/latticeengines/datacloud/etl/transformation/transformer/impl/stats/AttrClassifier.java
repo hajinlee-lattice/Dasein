@@ -73,6 +73,7 @@ public class AttrClassifier {
     private final long evaluationTime;
     private final Map<String, ProfileArgument> amAttrConfig;
     private final Map<String, ProfileParameters.Attribute> declaredAttrConfig;
+    private final boolean detectCategorical;
     private final String encAttrPrefix;
     private final int encodeBits;
     private final int maxAttrs;
@@ -85,6 +86,7 @@ public class AttrClassifier {
         this.useSpark = true;
         this.params = null;
         this.jobConfig = jobConfig;
+        this.detectCategorical = jobConfig.isAutoDetectCategorical();
 
         this.stage = jobConfig.getStage();
         if (jobConfig.getEvaluationDateAsTimestamp() == -1) {
@@ -106,6 +108,7 @@ public class AttrClassifier {
     public AttrClassifier(ProfileParameters params, ProfileConfig config, Map<String, ProfileArgument> amAttrConfig,
             int encodeBits, int maxAttrs) {
         this.useSpark = false;
+        this.detectCategorical = true;
         this.params = params;
         this.jobConfig = null;
 
@@ -301,19 +304,7 @@ public class AttrClassifier {
     }
 
     private boolean isCategoricalAttr(ColumnMetadata column) {
-        if (CAT_CLASSES.contains(column.getJavaClass().toLowerCase())) {
-            switch (stage) {
-                case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                    log.debug(String.format("Categorical bucketed attr %s (type %s unencode)", column.getAttrName(),
-                            column.getJavaClass()));
-                    break;
-                case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                    log.debug(String.format("Categorical bucketed attr %s (type %s encode)", column.getAttrName(),
-                            column.getJavaClass()));
-                    break;
-                default:
-                    throw new RuntimeException("Unrecognized stage " + stage);
-            }
+        if (detectCategorical && CAT_CLASSES.contains(column.getJavaClass().toLowerCase())) {
             getCatAttrs()
                     .add(new ProfileParameters.Attribute(column.getAttrName(), null, null,
                             new CategoricalBucket()));
