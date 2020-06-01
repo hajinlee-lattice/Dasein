@@ -198,11 +198,11 @@ public final class ActivityMetricsGroupUtils {
             throw new UnsupportedOperationException(String.format("time range %s is not single param.", timeRange));
         }
         Map<String, Object> map = new HashMap<>();
-        int param = Integer.parseInt(params[0]) + offset;
+        Integer param = Integer.parseInt(params[0]) + offset;
         String period = getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase();
         map.put("period", period);
         map.put("params", Collections.singletonList(param));
-        checkPlural(map, params);
+        checkPlural(map, new String[]{param.toString()});
         return TemplateUtils.renderByMap(descTemplate, map);
     }
 

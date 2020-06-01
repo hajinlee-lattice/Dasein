@@ -138,7 +138,8 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
         return new Object[][]{
                 {"w_1_w", 0, "1 week"},
                 {"w_10_w", 1, "11 weeks"},
-                {"w_3_w", 9, "12 weeks"}
+                {"w_3_w", 9, "12 weeks"},
+                {"w_1_w", 1, "2 weeks"}
         };
     }
 
