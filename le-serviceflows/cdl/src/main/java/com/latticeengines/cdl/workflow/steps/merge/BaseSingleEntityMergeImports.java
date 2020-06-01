@@ -19,6 +19,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
@@ -60,6 +61,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected String systemBatchTableName;
     private List<BusinessEntity> businessEntities = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
             BusinessEntity.Product, BusinessEntity.Transaction);
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -491,15 +495,17 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
-        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tableName);
-        config.setInputPath(PathUtils.toAvroGlob(inputPath));
-        config.setPartitionKey(partitionKey);
-        if (StringUtils.isNotBlank(sortKey)) {
-            config.setSortKey(sortKey);
+        if (!skipPublishDynamo) {
+            String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(PathUtils.toAvroGlob(inputPath));
+            config.setPartitionKey(partitionKey);
+            if (StringUtils.isNotBlank(sortKey)) {
+                config.setSortKey(sortKey);
+            }
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
         }
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     protected void enrichSystemBatchTableSchema(Table table) {

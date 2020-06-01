@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTransactionDeploymentTestNG {
     private static final Logger log = LoggerFactory.getLogger(UpdateTransactionWithAdvancedMatchDeploymentTestNG.class);
 
-    static final String CHECK_POINT = "entitymatch_update2";
+    public static final String CHECK_POINT = "entitymatch_update2";
 
     @BeforeClass(groups = "end2end")
     @Override

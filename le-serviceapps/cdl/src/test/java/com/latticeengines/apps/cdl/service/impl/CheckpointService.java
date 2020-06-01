@@ -146,12 +146,15 @@ public class CheckpointService extends CheckpointServiceBase {
         Iterator<JsonNode> iter = arrNode.elements();
         while (iter.hasNext()) {
             JsonNode json = iter.next();
+            String tableName = json.get("name").asText();
             String hdfsPath = json.get("extracts_directory").asText();
             if (StringUtils.isBlank(hdfsPath)) {
                 hdfsPath = json.get("extracts").get(0).get("path").asText();
                 if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
                     hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 }
+            } else {
+                hdfsPath = hdfsPath.replaceAll("\\$\\$TABLE_DATA_DIR\\$\\$", tableName);
             }
             log.info("Parse extract path {}.", hdfsPath);
             Pattern pattern = Pattern.compile(PATH_PATTERN);
@@ -171,17 +174,20 @@ public class CheckpointService extends CheckpointServiceBase {
                 String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
                 if (hdfsPathSegment2.contains(tenantNames[0])) {
-                    String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
+                    String hdfsPathIntermediate = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
                             + "/$$TABLE_DATA_DIR$$";
+                    String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
+                            + "/\\$\\$TABLE_DATA_DIR\\$\\$";
                     String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
-                    str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
+                    str = str.replaceAll(hdfsPath, hdfsPathIntermediate);
                     str = str.replaceAll(tenantNames[0], testTenant);
                     str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
                 } else {
                     str = str.replaceAll(tenantNames[0], testTenant);
                 }
             }
-            tables.add(JsonUtils.deserialize(str, Table.class));
+            Table table = JsonUtils.deserialize(str, Table.class);
+            tables.add(table);
         }
 
         return tables;

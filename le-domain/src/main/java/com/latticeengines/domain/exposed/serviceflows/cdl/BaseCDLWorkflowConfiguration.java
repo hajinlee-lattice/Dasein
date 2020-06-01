@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatch
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ContactImportsMigrateWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ConvertBatchStoreToImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.MigrateDynamoWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.PublishDynamoWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.TransactionImportsMigrateWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ConvertBatchStoreToDataTableWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
@@ -108,6 +109,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = LegacyDeleteTransactionWorkFlowConfiguration.class, name = "LegacyDeleteTransactionWorkFlowConfiguration"),
 
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration"),
+        @Type(value = PublishDynamoWorkflowConfiguration.class, name = "PublishDynamoWorkflowConfiguration"),
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration")})
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 

@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -75,6 +76,9 @@ public class CuratedContactAttributes
 
     @Inject
     private CloneTableService cloneTableService;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     private DataCollection.Version inactive;
     private DataCollection.Version active;
@@ -251,15 +255,17 @@ public class CuratedContactAttributes
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
-        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tableName);
-        config.setInputPath(PathUtils.toAvroGlob(inputPath));
-        config.setPartitionKey(partitionKey);
-        if (StringUtils.isNotBlank(sortKey)) {
-            config.setSortKey(sortKey);
+        if (!skipPublishDynamo) {
+            String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(PathUtils.toAvroGlob(inputPath));
+            config.setPartitionKey(partitionKey);
+            if (StringUtils.isNotBlank(sortKey)) {
+                config.setSortKey(sortKey);
+            }
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
         }
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     private boolean shouldResetCuratedAttributesContext() {
