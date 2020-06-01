@@ -363,6 +363,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
 
         // others
+        conf.put("spark.sql.autoBroadcastJoinThreshold", "-1");
         conf.put("spark.sql.crossJoin.enabled", "true");
         conf.put("spark.driver.maxResultSize", "4g");
         conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
