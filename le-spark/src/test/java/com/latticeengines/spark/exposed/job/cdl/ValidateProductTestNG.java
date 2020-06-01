@@ -49,7 +49,7 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
         ValidateProductConfig config = new ValidateProductConfig();
         SparkJobResult result = runSparkJob(ValidateProduct.class, config, inputs, getWorkspace());
 
-        verify(result, Arrays.asList(this::verifyFirstTarget, this::verifySecondTarget, this:: verifyThirdTarget));
+        verify(result, Arrays.asList(this::verifyFirstTarget, this::verifySecondTarget));
     }
 
     private List<String> uploadBundleTestData() {
@@ -167,10 +167,4 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
         return true;
     }
 
-    private Boolean verifyThirdTarget(HdfsDataUnit tgt) {
-        verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            System.out.println(record);
-        });
-        return true;
-    }
 }

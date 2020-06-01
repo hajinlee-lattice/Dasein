@@ -19,7 +19,7 @@ public class ValidateProductConfig extends SparkJobConfig implements Serializabl
 
     @Override
     public int getNumTargets() {
-        return 3;
+        return 2;
     }
 
     @JsonProperty("CheckProductName")

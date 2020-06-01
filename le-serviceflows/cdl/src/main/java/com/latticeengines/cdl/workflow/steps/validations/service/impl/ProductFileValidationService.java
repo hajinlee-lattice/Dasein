@@ -118,7 +118,7 @@ public class ProductFileValidationService
 
     private static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
             List<String> productTypes, List<String> productStatuses) {
-        filePath = ProductUtils.getPath(filePath);
+        filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
         Map<String, Product> productMap = new HashMap<>();
 
