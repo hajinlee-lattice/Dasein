@@ -3,7 +3,10 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -478,7 +483,7 @@ public class CDLResource {
             log.info("2. Get System list");
             List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
             log.info("3. Update Match Id field");
-            updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
+            Set<String> systemIds = updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
             Map<String, String> standardNameMapping =
                     standardTable.getAttributes()
                             .stream()
@@ -489,7 +494,7 @@ public class CDLResource {
                     preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
                 } else if (standardNameMapping.containsKey(preview.getNameInTemplate())) {
                     preview.setDisplayName(standardNameMapping.get(preview.getNameInTemplate()));
-                } else {
+                } else if (!systemIds.contains(preview.getNameInTemplate())) {
                     preview.setDisplayName(preview.getNameFromFile());
                 }
             });
@@ -500,43 +505,89 @@ public class CDLResource {
         }
     }
 
-    private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
-        if (CollectionUtils.isEmpty(s3ImportSystem) || entityType == null) {
-            return;
+    private Set<String> updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews,
+                                                    List<S3ImportSystem> s3ImportSystems, EntityType entityType) {
+        if (CollectionUtils.isEmpty(s3ImportSystems) || entityType == null) {
+            return Collections.emptySet();
         }
         log.info("Update UniqueId Preview.");
-        Set<String> accountSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getAccountSystemId)
-                .collect(Collectors.toSet());
-        Set<String> contactSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getContactSystemId)
-                .collect(Collectors.toSet());
-        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
-            switch (entityType) {
-                case Accounts:
-                    if (accountSystemIdList.contains(fieldPreview.getNameInTemplate())) {
-                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+        Map<String, Pair<S3ImportSystem, EntityType>> accountSystemIdMap = new HashMap<>();
+        Map<String, Pair<S3ImportSystem, EntityType>> contactSystemIdMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(s3ImportSystems)) {
+            s3ImportSystems.forEach(s3ImportSystem -> {
+                accountSystemIdMap.put(s3ImportSystem.getAccountSystemId(), Pair.of(s3ImportSystem,
+                        s3ImportSystem.getSystemType().getPrimaryAccount()));
+                if (s3ImportSystem.getSecondaryAccountIds() != null) {
+                    for (Map.Entry<String, EntityType> entry :
+                            s3ImportSystem.getSecondaryAccountIds().getSecondaryIdToEntityTypeMap().entrySet()) {
+                        accountSystemIdMap.put(entry.getKey(), Pair.of(s3ImportSystem, entry.getValue()));
                     }
-                    break;
-                case Contacts:
-                    if (contactSystemIdList.contains(fieldPreview.getNameInTemplate())) {
-                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                }
+                contactSystemIdMap.put(s3ImportSystem.getContactSystemId(), Pair.of(s3ImportSystem,
+                        s3ImportSystem.getSystemType().getPrimaryContact()));
+                if (s3ImportSystem.getSecondaryContactIds() != null) {
+                    for (Map.Entry<String, EntityType> entry :
+                            s3ImportSystem.getSecondaryContactIds().getSecondaryIdToEntityTypeMap().entrySet()) {
+                        contactSystemIdMap.put(entry.getKey(), Pair.of(s3ImportSystem, entry.getValue()));
                     }
-                    if (accountSystemIdList.contains(fieldPreview.getNameInTemplate())) {
-                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
-                    }
-                    break;
-                default:
+                }
+            });
+        }
+        if (!(MapUtils.isEmpty(accountSystemIdMap) && MapUtils.isEmpty(contactSystemIdMap))) {
+            for (TemplateFieldPreview fieldPreview : fieldPreviews) {
+                switch (entityType) {
+                    case Accounts:
+                        if (accountSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
+                            fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                            Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(fieldPreview.getNameInTemplate());
+                            fieldPreview.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+                        }
+                        break;
+                    case Contacts:
+                        if (contactSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
+                            fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                            Pair<S3ImportSystem, EntityType> attrInfoPair = contactSystemIdMap.get(fieldPreview.getNameInTemplate());
+                            fieldPreview.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+                        }
+                        if (accountSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
+                            fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                            Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(fieldPreview.getNameInTemplate());
+                            fieldPreview.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+                        }
+                        break;
+                    default:
+                }
             }
         }
-        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
-                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
-        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
-                .collect(Collectors.toSet());
-        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
-            if (latticeFieldNameFromFileList.contains(fieldPreview.getNameFromFile())) {
-                fieldPreview.setFieldCategory(FieldCategory.LatticeField);
-            }
+        Set<String> systemIds = new HashSet<>();
+        if (MapUtils.isNotEmpty(accountSystemIdMap)) {
+            systemIds.addAll(accountSystemIdMap.keySet());
         }
+        if (MapUtils.isNotEmpty(contactSystemIdMap)) {
+            systemIds.addAll(contactSystemIdMap.keySet());
+        }
+        return systemIds;
+        //????
+//        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
+//                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
+//        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
+//                .collect(Collectors.toSet());
+//        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
+//            if (latticeFieldNameFromFileList.contains(fieldPreview.getNameFromFile())) {
+//                fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+//            }
+//        }
 
+    }
+
+    private String convertPluralToSingular(String displayName) {
+        if (StringUtils.isNotEmpty(displayName) && displayName.endsWith("s")) {
+            return displayName.substring(0, displayName.length() - 1);
+        }
+        return displayName;
     }
 
     private DataFeedTask getDataFeedTask(CustomerSpace customerSpace, String source, S3ImportTemplateDisplay templateDisplay) {

@@ -729,9 +729,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
-        // 1. set system related mapping //only apply to Account / Contact
+        // 1. set system related mapping //only apply to Account / Contact / Transaction
         Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity) || BusinessEntity.Transaction.equals(entity)) {
             removeDuplicateSystemIdMapping(fieldMappingDocument, systemIdSet);
             List<FieldMapping> customerLatticeIdList = new ArrayList<>();
             Iterator<FieldMapping> iterator = fieldMappingDocument.getFieldMappings().iterator();
@@ -849,57 +849,87 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (FieldMapping.IdType.Contact.equals(fieldMapping.getIdType()) && EntityType.Leads.equals(entityType)) {
                 fieldMapping.setIdType(FieldMapping.IdType.Lead);
             }
-            setSelfSystemId(customerSpace, customerLatticeIdList, fieldMapping, systemName, entityType);
+            if (idTypeMatchEntityType(fieldMapping, entityType)) {
+                setSelfSystemId(customerSpace, customerLatticeIdList, fieldMapping, systemName, entityType);
+            } else {
+                setMappingSystemId(customerSpace, customerLatticeIdList, fieldMapping);
+            }
         } else if (systemName.equals(fieldMapping.getSystemName())) {
             // Map System Id for it's own.
             // We will use straightforward info to identify primary & secondary system instead of combination of inputs.
             // Primary system: IdType Account / Contact
             // Secondary system: IdType Lead
-            setSelfSystemId(customerSpace, customerLatticeIdList, fieldMapping, systemName, entityType);
+            if (idTypeMatchEntityType(fieldMapping, entityType)) {
+                setSelfSystemId(customerSpace, customerLatticeIdList, fieldMapping, systemName, entityType);
+            } else {
+                setMappingSystemId(customerSpace, customerLatticeIdList, fieldMapping);
+            }
         } else { // Map current field to another system.
-            S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
-                    fieldMapping.getSystemName());
-            if (importSystem == null) {
-                throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
-            }
-            switch (fieldMapping.getIdType()) {
-                case Account:
-                    if (StringUtils.isEmpty(importSystem.getAccountSystemId())) {
-                        throw new IllegalArgumentException(String.format("System %s does not have system " +
-                                "account id!", importSystem.getDisplayName()));
-                    }
-                    fieldMapping.setFieldType(UserDefinedType.TEXT);
-                    fieldMapping.setMappedField(importSystem.getAccountSystemId());
-                    fieldMapping.setMappedToLatticeField(false);
-                    if (importSystem.isMapToLatticeAccount()) {
-                        FieldMapping customerLatticeId = new FieldMapping();
-                        customerLatticeId.setUserField(fieldMapping.getUserField());
-                        customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
-                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
-                        customerLatticeIdList.add(customerLatticeId);
-                    }
-                    break;
-                case Contact:
-                    if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
-                        throw new IllegalArgumentException(String.format("System %s does not have system " +
-                                "contact id!", importSystem.getDisplayName()));
-                    }
-                    fieldMapping.setFieldType(UserDefinedType.TEXT);
-                    fieldMapping.setMappedField(importSystem.getContactSystemId());
-                    fieldMapping.setMappedToLatticeField(false);
-                    if (importSystem.isMapToLatticeContact()) {
-                        FieldMapping customerLatticeId = new FieldMapping();
-                        customerLatticeId.setUserField(fieldMapping.getUserField());
-                        customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
-                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
-                        customerLatticeIdList.add(customerLatticeId);
-                    }
-                    break;
-                case Lead:
-                    throw new IllegalArgumentException("Cannot map Id to Lead template.");
-                default:
-                    throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
-            }
+            setMappingSystemId(customerSpace, customerLatticeIdList, fieldMapping);
+        }
+    }
+
+    private boolean idTypeMatchEntityType(FieldMapping fieldMapping, EntityType currentEntity) {
+        Preconditions.checkNotNull(fieldMapping);
+        Preconditions.checkNotNull(fieldMapping.getIdType());
+        boolean match = false;
+        switch (fieldMapping.getIdType()) {
+            case Account:
+                match = EntityType.Accounts.equals(currentEntity);
+                break;
+            case Contact:
+                match = EntityType.Contacts.equals(currentEntity);
+                break;
+            case Lead:
+                match = EntityType.Leads.equals(currentEntity);
+                break;
+        }
+        return match;
+    }
+
+    private void setMappingSystemId(CustomerSpace customerSpace, List<FieldMapping> customerLatticeIdList, FieldMapping fieldMapping) {
+        S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
+                fieldMapping.getSystemName());
+        if (importSystem == null) {
+            throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
+        }
+        switch (fieldMapping.getIdType()) {
+            case Account:
+                if (StringUtils.isEmpty(importSystem.getAccountSystemId())) {
+                    throw new IllegalArgumentException(String.format("System %s does not have system " +
+                            "account id!", importSystem.getDisplayName()));
+                }
+                fieldMapping.setFieldType(UserDefinedType.TEXT);
+                fieldMapping.setMappedField(importSystem.getAccountSystemId());
+                fieldMapping.setMappedToLatticeField(false);
+                if (importSystem.isMapToLatticeAccount()) {
+                    FieldMapping customerLatticeId = new FieldMapping();
+                    customerLatticeId.setUserField(fieldMapping.getUserField());
+                    customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
+                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                    customerLatticeIdList.add(customerLatticeId);
+                }
+                break;
+            case Contact:
+                if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
+                    throw new IllegalArgumentException(String.format("System %s does not have system " +
+                            "contact id!", importSystem.getDisplayName()));
+                }
+                fieldMapping.setFieldType(UserDefinedType.TEXT);
+                fieldMapping.setMappedField(importSystem.getContactSystemId());
+                fieldMapping.setMappedToLatticeField(false);
+                if (importSystem.isMapToLatticeContact()) {
+                    FieldMapping customerLatticeId = new FieldMapping();
+                    customerLatticeId.setUserField(fieldMapping.getUserField());
+                    customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
+                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                    customerLatticeIdList.add(customerLatticeId);
+                }
+                break;
+            case Lead:
+                throw new IllegalArgumentException("Cannot map Id to Lead template.");
+            default:
+                throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
         }
     }
 

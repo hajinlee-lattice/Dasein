@@ -129,7 +129,7 @@ public class SchemaRepository {
     }
 
     public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {
-        Table table = null;
+        Table table;
         switch (entity) {
         case Account:
             table = getAccountSchema(cdlSchema, false, enableEntityMatch);
@@ -174,7 +174,7 @@ public class SchemaRepository {
 
     public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps, boolean withoutId,
             boolean enableEntityMatch) {
-        Table table = null;
+        Table table;
         switch (schema) {
         case SalesforceAccount:
             table = getSalesforceAccountSchema();
@@ -951,7 +951,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(
                         Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                 .physicalDataType(Schema.Type.STRING) //
-                .defaultValueStr("") //
                 .interfaceName(contactId) //
                 .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
