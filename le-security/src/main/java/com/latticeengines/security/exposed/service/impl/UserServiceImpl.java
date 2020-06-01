@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
@@ -390,6 +391,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam) {
         List<User> users = new ArrayList<>();
+        LOGGER.info("UserFilter is {}, emails is {}, withTeam is {}, customerSpace is {}.", JsonUtils.serialize(filter),
+                emails, withTeam, tenantId);
         try {
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
                     .getAllUsersOfTenant(tenantId, emails, withTeam);
@@ -399,7 +402,6 @@ public class UserServiceImpl implements UserService {
                 if (accessLevel != null) {
                     user.setAccessLevel(accessLevel.name());
                 }
-                LOGGER.info("access is {}, filter visible is {}", accessLevel, filter.visible(user));
                 if (filter.visible(user))
                     users.add(user);
             }
