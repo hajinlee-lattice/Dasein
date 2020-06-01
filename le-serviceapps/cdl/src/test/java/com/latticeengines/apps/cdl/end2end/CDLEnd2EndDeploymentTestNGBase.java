@@ -1891,8 +1891,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(dailyFileContainingTargetDay);
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
         GenericRecord verifyRecord = null;
-        String aidFld = isEntityMatchEnabled() ? InterfaceName.CustomerAccountId.name()
-                : InterfaceName.AccountId.name();
+        String aidFld = InterfaceName.AccountId.name();
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(aidFld).toString())
