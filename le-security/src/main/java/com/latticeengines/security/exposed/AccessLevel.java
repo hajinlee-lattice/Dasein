@@ -13,6 +13,12 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED //
     ) //
     ), //
+    BUSINESS_ANALYST(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
+    )), //
     EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_CAMPAIGNS, //
             GrantedRight.EDIT_PLS_CAMPAIGNS, //
@@ -116,12 +122,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SPEC
     ) //
     ), //
-    BUSINESS_ANALYST(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
-            GrantedRight.VIEW_PLS_JOBS, //
-            GrantedRight.EDIT_PLS_JOBS, //
-            GrantedRight.VIEW_DCP_PROJECTS, //
-            GrantedRight.EDIT_DCP_PROJECTS //
-            )), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_CAMPAIGNS, //
