@@ -381,6 +381,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam) {
         List<User> users = new ArrayList<>();
+        LOGGER.info("emails is {}, withTeam is {}, customerSpace is {}.", emails, withTeam, tenantId);
         try {
             List<Pair<User, String>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId, emails, withTeam);
             for (Pair<User, String> userRights : userRightsList) {
@@ -389,7 +390,6 @@ public class UserServiceImpl implements UserService {
                 if (accessLevel != null) {
                     user.setAccessLevel(accessLevel.name());
                 }
-                LOGGER.info("access is {}, filter visible is {}", accessLevel, filter.visible(user));
                 if (filter.visible(user))
                     users.add(user);
             }
