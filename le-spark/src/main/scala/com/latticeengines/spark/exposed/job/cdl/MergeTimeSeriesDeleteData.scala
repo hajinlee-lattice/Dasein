@@ -22,14 +22,14 @@ class MergeTimeSeriesDeleteData extends AbstractSparkJob[MergeTimeSeriesDeleteDa
       ranges: mutable.WrappedArray[mutable.WrappedArray[Long]] =>
         DeleteUtils.serializeTimeRanges(ranges)
     }
-    val mergedDeleteData = (0 until config.numberOfDeleteInputs)
-      .map(idx => {
-        val df = lattice.input(idx).select(config.joinKey)
+    val mergedDeleteData = lattice.input.zipWithIndex.map {
+      case (df, idx) =>
         // use [ long.min, long.max ] to replace null for easier processing
         val range = timeRanges.getOrElse(idx, Array(Long.MinValue, Long.MaxValue))
-        df.filter(df(config.joinKey).isNotNull)
+        df.select(config.joinKey)
+          .filter(df(config.joinKey).isNotNull)
           .withColumn(TIME_RANGE_TEMP_COL, lit(range))
-      })
+    }
       .reduce((accDf, df) => accDf.unionByName(df))
       .groupBy(config.joinKey)
       .agg(collect_set(TIME_RANGE_TEMP_COL).as(TimeRanges.name))

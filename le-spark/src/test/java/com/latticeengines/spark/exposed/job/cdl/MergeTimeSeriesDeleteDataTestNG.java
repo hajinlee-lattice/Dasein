@@ -44,7 +44,6 @@ public class MergeTimeSeriesDeleteDataTestNG extends SparkJobFunctionalTestNGBas
 
         MergeTimeSeriesDeleteDataConfig config = new MergeTimeSeriesDeleteDataConfig();
         config.joinKey = AccountId.name();
-        config.numberOfDeleteInputs = 3;
         config.timeRanges.put(0, asList(123L, 234L));
         config.timeRanges.put(2, asList(220L, 1000L));
 

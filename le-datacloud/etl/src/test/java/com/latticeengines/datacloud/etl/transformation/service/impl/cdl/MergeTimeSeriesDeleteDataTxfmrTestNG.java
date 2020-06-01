@@ -67,7 +67,6 @@ public class MergeTimeSeriesDeleteDataTxfmrTestNG extends PipelineTransformation
         step1.setTransformer(MergeTimeSeriesDeleteDataTxfmr.TRANSFORMER_NAME);
         MergeTimeSeriesDeleteDataConfig config = new MergeTimeSeriesDeleteDataConfig();
         config.joinKey = InterfaceName.AccountId.name();
-        config.numberOfDeleteInputs = 1;
         config.timeRanges.put(0, Arrays.asList(15L, 100L));
         step1.setConfiguration(JsonUtils.serialize(config));
 
@@ -84,6 +83,7 @@ public class MergeTimeSeriesDeleteDataTxfmrTestNG extends PipelineTransformation
         jobConfig.setDeleteSourceIdx(0);
         jobConfig.setTimeRangesColumn(InterfaceName.TimeRanges.name());
         jobConfig.setEventTimeColumn(InterfaceName.TransactionTime.name());
+        jobConfig.setTimeRangesToDelete(Collections.singleton(Arrays.asList(10L, 11L)));
         step2.setConfiguration(JsonUtils.serialize(jobConfig));
 
         // -----------
@@ -118,7 +118,7 @@ public class MergeTimeSeriesDeleteDataTxfmrTestNG extends PipelineTransformation
     // account id -> Name column of that record
     private Map<String, Set<String>> getExpectedRecordNames() {
         Map<String, Set<String>> expectedNames = new HashMap<>();
-        expectedNames.put("A1", Sets.newHashSet("a", "b"));
+        expectedNames.put("A1", Sets.newHashSet("a"));
         expectedNames.put("A2", Sets.newHashSet("e"));
         expectedNames.put("A5", Sets.newHashSet("h"));
         expectedNames.put("A6", Sets.newHashSet("i"));
@@ -142,7 +142,7 @@ public class MergeTimeSeriesDeleteDataTxfmrTestNG extends PipelineTransformation
         baseColumns.add(Pair.of(InterfaceName.CompanyName.name(), String.class));
         uploadBaseSourceData(BaseSrc.getSourceName(), baseSourceVersion, baseColumns, new Object[][] { //
                 { "A1", 1L, "a", "DnB" }, // out of range, not deleted
-                { "A1", 10L, "b", "DnB" }, // out of range, not deleted
+                { "A1", 10L, "b", "DnB" }, // delete by global time range
                 { "A1", 15L, "c", "DnB" }, //
                 { "A2", 100L, "d", "DnB" }, //
                 { "A2", 14L, "e", "DnB" }, // out of range, not deleted
@@ -150,6 +150,7 @@ public class MergeTimeSeriesDeleteDataTxfmrTestNG extends PipelineTransformation
                 { "A5", 55L, "g", "DnB" }, //
                 { "A5", 101L, "h", "DnB" }, // out of range, not deleted
                 { "A6", 100L, "i", "DnB" }, // not in ID list
+                { "A6", 11L, "j", "DnB" }, // not in ID list, but delete by global time range
         });
     }
 }

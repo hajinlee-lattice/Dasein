@@ -15,10 +15,6 @@ public class MergeTimeSeriesDeleteDataConfig extends SparkJobConfig {
     @JsonProperty("JoinKey")
     public String joinKey;
 
-    // input[0..numberOfDeleteInputs)
-    @JsonProperty("NumberOfDeleteInputs")
-    public int numberOfDeleteInputs;
-
     // input idx -> [ start time, end time ] (time could be epoch timestamp or day
     // period)
     @JsonProperty("TimeRanges")
