@@ -9,7 +9,7 @@ public class ValidateProductConfig extends SparkJobConfig implements Serializabl
 
     public static final String NAME = "validateProduct";
 
-    private Boolean checkProductName;
+    private boolean checkProductName;
 
     @Override
     @JsonProperty("Name")
@@ -23,12 +23,12 @@ public class ValidateProductConfig extends SparkJobConfig implements Serializabl
     }
 
     @JsonProperty("CheckProductName")
-    public Boolean getCheckProductName() {
+    public boolean getCheckProductName() {
         return checkProductName;
     }
 
     @JsonProperty("CheckProductName")
-    public void setCheckProductName(Boolean checkProductName) {
+    public void setCheckProductName(boolean checkProductName) {
         this.checkProductName = checkProductName;
     }
 }
