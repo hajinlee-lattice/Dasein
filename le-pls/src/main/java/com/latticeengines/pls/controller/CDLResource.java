@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -73,7 +74,7 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "cdl consolidate and profile", description = "REST resource for cdl")
+@Api(value = "cdl consolidate and profile")
 @RestController
 @RequestMapping("/cdl")
 @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
@@ -111,6 +112,7 @@ public class CDLResource {
     @ApiOperation(value = "Start Consolidate And Profile job")
     public ResponseDocument<String> startConsolidateAndProfileJob() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         ApplicationId result = cdlJobProxy.createConsolidateJob(customerSpace.toString());
         return ResponseDocument.successResponse(result.toString());
     }
@@ -123,6 +125,7 @@ public class CDLResource {
             return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18182));
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         if (request == null) {
             request = new ProcessAnalyzeRequest();
         }
@@ -152,6 +155,7 @@ public class CDLResource {
                                                    @RequestParam(value = "entity") String entity, //
                                                    @RequestParam(value = "feedType") String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName,
                     dataFileName, source, entity, feedType);
@@ -186,7 +190,7 @@ public class CDLResource {
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName, source, entity,
                     feedType, subType, templateDisplay.getTemplateName());
 
-            UIAction uiAction = null;
+            UIAction uiAction;
             if (importData) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
@@ -196,7 +200,6 @@ public class CDLResource {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
                             String.format(createS3TemplateAndImportMsg, entity));
                 }
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
@@ -205,8 +208,8 @@ public class CDLResource {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
                             String.format(createS3TemplateMsg, entity));
                 }
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             }
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error(String.format("Failed to create template for S3 import: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"S3CreateTemplateAndImport", e.getMessage()});
@@ -220,6 +223,7 @@ public class CDLResource {
                                                   @RequestParam(value = "subType", required = false) String subType,
                                                   @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
@@ -242,6 +246,7 @@ public class CDLResource {
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
             @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
@@ -263,6 +268,7 @@ public class CDLResource {
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
             @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
@@ -295,6 +301,7 @@ public class CDLResource {
                                          @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
                                          @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         UIAction uiAction = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
@@ -305,6 +312,7 @@ public class CDLResource {
                                                    @RequestParam(value = "endTime") String endTime,
                                                    @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             ApplicationId applicationId = cdlService.cleanupByTimeRange(customerSpace.toString(), startTime, endTime,
                     schemaInterpretation);
@@ -320,6 +328,7 @@ public class CDLResource {
     public ResponseDocument<String> cleanupAll(
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             cdlService.replaceData(customerSpace.toString(), schemaInterpretation);
             return ResponseDocument.successResponse("");
@@ -333,6 +342,7 @@ public class CDLResource {
     @ApiOperation(value = "create Replace Action to replace data")
     public ResponseDocument<String> replaceData(@RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             cdlService.replaceData(customerSpace.toString(), schemaInterpretation);
             return ResponseDocument.successResponse("");
@@ -360,6 +370,7 @@ public class CDLResource {
     @ApiOperation("get file list under s3Path")
     public List<FileProperty> getFileList(@RequestParam String s3Path) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path, "csv");
     }
 
@@ -570,17 +581,6 @@ public class CDLResource {
             systemIds.addAll(contactSystemIdMap.keySet());
         }
         return systemIds;
-        //????
-//        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
-//                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
-//        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
-//                .collect(Collectors.toSet());
-//        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
-//            if (latticeFieldNameFromFileList.contains(fieldPreview.getNameFromFile())) {
-//                fieldPreview.setFieldCategory(FieldCategory.LatticeField);
-//            }
-//        }
-
     }
 
     private String convertPluralToSingular(String displayName) {
@@ -747,6 +747,7 @@ public class CDLResource {
     @ApiOperation(value = "Get all import files")
     public List<ImportFileInfo> getAllImportFiles() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         return cdlService.getAllImportFiles(customerSpace.toString());
     }
 }
