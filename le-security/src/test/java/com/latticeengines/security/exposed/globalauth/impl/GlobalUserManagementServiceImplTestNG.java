@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -14,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -155,20 +156,19 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             userService.assignAccessLevel(randomAccessLevel, testTenantId, username);
         }
         try {
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
-                    .getAllUsersOfTenant(testTenantId);
+            List<Pair<User, String>> userRightsList = globalUserManagementService.getAllUsersOfTenant(testTenantId);
             // this assertion may fail if multiple developers are testing
             // against the same database simultaneously.
             assertEquals(userRightsList.size() - originalNumber, 10);
-            for (AbstractMap.SimpleEntry<User, List<String>> userRight : userRightsList) {
+            for (Pair<User, String> userRight : userRightsList) {
                 User user = userRight.getKey();
                 if (user.getUsername().contains(prefix)) {
                     assertTrue(user.getEmail().endsWith("@xyz.com"));
                     assertEquals(user.getFirstName(), firstName);
                     assertEquals(user.getLastName(), lastName);
-                    List<String> rights = userRight.getValue();
-                    assertEquals(rights.size(), 1);
-                    assertEquals(AccessLevel.valueOf(rights.get(0)), randomAccessLevel);
+                    String right = userRight.getValue();
+                    Assert.assertFalse(StringUtils.isEmpty(right));
+                    assertEquals(AccessLevel.valueOf(right), randomAccessLevel);
                 }
             }
         } finally {

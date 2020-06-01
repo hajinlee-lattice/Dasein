@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -95,7 +96,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         }
 
         Date now = new Date(System.currentTimeMillis());
-        Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
+        long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
         if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketInactivityTimeoutInMinute) {
             throw new Exception("The requested ticket has expired.");
         }
@@ -122,16 +123,17 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             throw new Exception("Unable to find the tenant requested.");
         }
 
-        List<GlobalAuthUserTenantRight> userTenantRightData = gaUserTenantRightEntityMgr
+        GlobalAuthUserTenantRight userTenantRightData = gaUserTenantRightEntityMgr
                 .findByUserIdAndTenantId(userData.getPid(), sessionData.getTenantId(), true);
 
-        if (userTenantRightData == null || userTenantRightData.size() == 0) {
+        if (userTenantRightData == null) {
             throw new Exception("Unable to find the rights for the user-tenant requested.");
         }
 
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
-        Session session = new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
+        Session session = new SessionBuilder().build(ticketData, userData, sessionData, tenantData,
+                Collections.singletonList(userTenantRightData));
         session.setExternalSession(ticketData.getExternalSession());
         return session;
     }
@@ -208,7 +210,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         }
 
         Date now = new Date(System.currentTimeMillis());
-        Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
+        long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
         if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketInactivityTimeoutInMinute) {
             LOGGER.warn("The requested ticket has expired.");
             return null;
@@ -223,9 +225,9 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             throw new Exception("The user is inactive!");
         }
 
-        List<GlobalAuthUserTenantRight> userTenantRightData = gaUserTenantRightEntityMgr
+        GlobalAuthUserTenantRight userTenantRightData = gaUserTenantRightEntityMgr
                 .findByUserIdAndTenantId(userData.getPid(), tenantData.getPid(), true);
-        if (userTenantRightData == null || userTenantRightData.size() == 0) {
+        if (userTenantRightData == null) {
             throw new Exception("Unable to find the rights for the user-tenant requested.");
         }
 
@@ -233,8 +235,9 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
         if (sessionData != null) {
-            if (sessionData.getTenantId() == tenantData.getPid()) {
-                return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
+            if (sessionData.getTenantId().equals(tenantData.getPid())) {
+                return new SessionBuilder().build(ticketData, userData, sessionData, tenantData,
+                        Collections.singletonList(userTenantRightData));
             } else {
                 gaSessionEntityMgr.delete(sessionData);
             }
@@ -246,7 +249,8 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         sessionData.setTicketId(ticketData.getPid());
         gaSessionEntityMgr.create(sessionData);
 
-        return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
+        return new SessionBuilder().build(ticketData, userData, sessionData, tenantData,
+                Collections.singletonList(userTenantRightData));
     }
 
     static class SessionBuilder {
@@ -257,7 +261,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             Tenant tenant = new Tenant();
             tenant.setId(tenantData.getId());
             tenant.setName(tenantData.getName());
-            List<String> rights = new ArrayList<String>();
+            List<String> rights = new ArrayList<>();
             List<String> teamIds = new ArrayList<>();
             for (GlobalAuthUserTenantRight userTenantRight : userTenantRightData) {
                 rights.add(userTenantRight.getOperationName());
@@ -278,9 +282,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             session.setTenant(new TenantBuilder().build(tenantData));
             session.setTeamIds(teamIds);
             session.setTicketCreationTime(ticketData.getCreationDate().getTime());
-            if (session == null) {
-                throw new RuntimeException("Failed to attach ticket against GA.");
-            }
             interpretGARights(session);
 
             return session;
@@ -289,7 +290,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         private void interpretGARights(Session session) {
             List<String> GARights = session.getRights();
             try {
-                AccessLevel level = AccessLevel.findAccessLevel(GARights);
+                AccessLevel level = AccessLevel.findAccessLevel(GARights.get(0));
                 session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
                 session.setAccessLevel(level.name());
             } catch (NullPointerException e) {

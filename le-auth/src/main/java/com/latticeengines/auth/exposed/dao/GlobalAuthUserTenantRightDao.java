@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 public interface GlobalAuthUserTenantRightDao extends BaseDao<GlobalAuthUserTenantRight> {
 
-    List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId);
+    GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId);
 
     List<GlobalAuthUser> findUsersByTenantId(Long tenantId);
 

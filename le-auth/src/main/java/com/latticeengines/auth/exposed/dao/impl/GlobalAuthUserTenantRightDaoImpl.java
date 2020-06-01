@@ -25,7 +25,7 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId) {
+    public GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId) {
         try {
             Session session = sessionFactory.getCurrentSession();
             Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
@@ -33,22 +33,11 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
                     userId, tenantId);
             Query query = session.createQuery(queryStr);
             List list = query.list();
-            List<GlobalAuthUserTenantRight> userTenantRightDataList = new ArrayList<GlobalAuthUserTenantRight>();
             if (list.size() == 0) {
                 return null;
             } else {
-                for (int i = 0; i < list.size(); i++) {
-                    GlobalAuthUserTenantRight gaTenantRight = (GlobalAuthUserTenantRight) list.get(i);
-                    if (gaTenantRight.getGlobalAuthUser() != null
-                            && gaTenantRight.getGlobalAuthUser().getPid().equals(userId)) {
-                        if (gaTenantRight.getGlobalAuthTenant() != null
-                                && gaTenantRight.getGlobalAuthTenant().getPid().equals(tenantId)) {
-                            userTenantRightDataList.add(gaTenantRight);
-                        }
-                    }
-                }
+                return (GlobalAuthUserTenantRight) list.get(0);
             }
-            return userTenantRightDataList;
         } catch (Exception e) {
             log.error(String.format("Find tenant right by userId: %d, tenantId: %d failed.", userId, tenantId));
             throw e;
@@ -66,7 +55,7 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
                 tenantId);
         Query query = session.createQuery(queryStr);
         List list = query.list();
-        List<GlobalAuthUser> users = new ArrayList<GlobalAuthUser>();
+        List<GlobalAuthUser> users = new ArrayList<>();
         if (list.size() == 0) {
             return null;
         } else {

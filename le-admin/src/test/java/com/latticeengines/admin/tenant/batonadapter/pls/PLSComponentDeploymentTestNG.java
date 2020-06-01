@@ -98,8 +98,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         SpaceConfiguration spaceConfiguration = tenantDocument.getSpaceConfig();
         List<LatticeProduct> products = spaceConfiguration.getProducts();
         Assert.assertTrue(products.contains(LatticeProduct.LPA));
-        List<String> rights = globalUserManagementService.getRights(testAdminUsername, PLSTenantId);
-        Assert.assertEquals(AccessLevel.findAccessLevel(rights), AccessLevel.SUPER_ADMIN);
+        String right = globalUserManagementService.getRight(testAdminUsername, PLSTenantId);
+        Assert.assertEquals(AccessLevel.findAccessLevel(right), AccessLevel.SUPER_ADMIN);
 
         changeStatus(contractId, tenantId);
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));

@@ -10,9 +10,9 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 public interface GlobalAuthUserTenantRightEntityMgr extends
         BaseEntityMgr<GlobalAuthUserTenantRight> {
 
-    List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId);
+    GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId);
 
-    List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate);
+    GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate);
 
     List<GlobalAuthUser> findUsersByTenantId(Long tenantId);
 
