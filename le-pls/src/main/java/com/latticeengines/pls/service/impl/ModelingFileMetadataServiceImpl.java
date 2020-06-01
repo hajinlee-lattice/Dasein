@@ -140,6 +140,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                                                   String feedType) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s", customerSpace.toString(),
                 entity, source, feedType));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
@@ -349,6 +350,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public FieldValidationResult validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
                                                        String entity, String source, String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
 
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
@@ -453,10 +455,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         Table templateWithStandard = mergeTable(templateTable, standardTable);
-        Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
         // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
-        while (iter.hasNext()) {
-            Attribute latticeAttr = iter.next();
+        for (Attribute latticeAttr : templateWithStandard.getAttributes()) {
             String attrName = latticeAttr.getName();
             if (!mappedFields.contains(attrName)) {
                 // check lattice field can be mapped by user field, while not mapped by user
@@ -507,7 +507,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> inactiveNames = configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
                 .map(AttrConfig::getAttrName).collect(Collectors.toSet());
         // needs to convert AccountId or ContactId mapping
-        Boolean convertName = enableEntityMatchGA && !enableEntityMatch;
+        boolean convertName = enableEntityMatchGA && !enableEntityMatch;
         for (Attribute attribute : generatedTemplate.getAttributes()) {
             if (convertName) {
                 if (InterfaceName.AccountId.name().equals(attribute.getName())) {
@@ -601,6 +601,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table, schemaTable;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
@@ -638,6 +639,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table, schemaTable;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
@@ -883,6 +885,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             case Lead:
                 match = EntityType.Leads.equals(currentEntity);
                 break;
+            default:
+                break;
         }
         return match;
     }
@@ -1035,6 +1039,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         resolver.calculateBasedOnFieldMappingDocument(table);
 
+        Preconditions.checkNotNull(MultiTenantContext.getCustomerSpace());
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
 
         if (sourceFile.getTableName() != null) {
@@ -1122,6 +1127,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public List<LatticeSchemaField> getSchemaToLatticeSchemaFields(String entity, String source, String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
             boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
