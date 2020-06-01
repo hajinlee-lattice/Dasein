@@ -20,6 +20,9 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     @JsonProperty("ContactsData")
     private DataUnit contactsData;
 
+    @JsonProperty("TargetSegmentsContactsData")
+    private DataUnit targetSegmentsContactsData;
+
     @JsonProperty("MainEntity")
     private BusinessEntity mainEntity;
 
@@ -29,14 +32,16 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     public GenerateLaunchArtifactsJobConfig() {
     }
 
-    public GenerateLaunchArtifactsJobConfig(DataUnit accountsData, DataUnit contactsData, DataUnit negativeDelta,
-            DataUnit positiveDelta, BusinessEntity mainEntity, boolean includeAccountsWithoutContacts,
-            String workSpace) {
+    public GenerateLaunchArtifactsJobConfig(DataUnit accountsData, //
+            DataUnit contactsData, DataUnit targetSegmentsContactsData, //
+            DataUnit negativeDelta, DataUnit positiveDelta, //
+            BusinessEntity mainEntity, boolean includeAccountsWithoutContacts, String workSpace) {
         this.setWorkspace(workSpace);
         this.negativeDelta = negativeDelta;
         this.positiveDelta = positiveDelta;
         this.accountsData = accountsData;
         this.contactsData = contactsData;
+        this.targetSegmentsContactsData = targetSegmentsContactsData;
         this.mainEntity = mainEntity;
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
     }
@@ -52,27 +57,57 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
         return mainEntity == BusinessEntity.Account ? 3 : 5;
     }
 
-    public DataUnit getPositiveDelta() { return positiveDelta; }
+    public DataUnit getPositiveDelta() {
+        return positiveDelta;
+    }
 
-    public void setPositiveDelta(DataUnit positiveDelta) { this.positiveDelta = positiveDelta; }
+    public void setPositiveDelta(DataUnit positiveDelta) {
+        this.positiveDelta = positiveDelta;
+    }
 
-    public DataUnit getNegativeDelta() { return negativeDelta; }
+    public DataUnit getNegativeDelta() {
+        return negativeDelta;
+    }
 
-    public void setNegativeDelta(DataUnit negativeDelta) { this.negativeDelta = negativeDelta; }
+    public void setNegativeDelta(DataUnit negativeDelta) {
+        this.negativeDelta = negativeDelta;
+    }
 
-    public DataUnit getAccountsData() { return accountsData; }
+    public DataUnit getAccountsData() {
+        return accountsData;
+    }
 
-    public void setAccountsData(DataUnit accountsData) { this.accountsData = accountsData; }
+    public void setAccountsData(DataUnit accountsData) {
+        this.accountsData = accountsData;
+    }
 
-    public DataUnit getContactsData() { return contactsData; }
+    public DataUnit getContactsData() {
+        return contactsData;
+    }
 
-    public void setContactsData(DataUnit contactsData) { this.contactsData = contactsData; }
+    public DataUnit getTargetSegmentsContactsData() {
+        return targetSegmentsContactsData;
+    }
 
-    public BusinessEntity getMainEntity() { return mainEntity; }
+    public void setTargetSegmentsContactsData(DataUnit targetSegmentsContactsData) {
+        this.targetSegmentsContactsData = targetSegmentsContactsData;
+    }
 
-    public void setMainEntity(BusinessEntity mainEntity) { this.mainEntity = mainEntity; }
+    public void setContactsData(DataUnit contactsData) {
+        this.contactsData = contactsData;
+    }
 
-    public boolean isIncludeAccountsWithoutContacts() { return includeAccountsWithoutContacts; }
+    public BusinessEntity getMainEntity() {
+        return mainEntity;
+    }
+
+    public void setMainEntity(BusinessEntity mainEntity) {
+        this.mainEntity = mainEntity;
+    }
+
+    public boolean isIncludeAccountsWithoutContacts() {
+        return includeAccountsWithoutContacts;
+    }
 
     public void setIncludeAccountsWithoutContacts(boolean includeAccountsWithoutContacts) {
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;

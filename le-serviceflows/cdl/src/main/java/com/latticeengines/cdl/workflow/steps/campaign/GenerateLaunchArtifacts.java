@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -159,8 +160,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 getRemoveDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT,
                 HdfsDataUnit.class);
 
-        SparkJobResult sparkJobResult = executeSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit,
-                negativeDeltaDataUnit,
+        SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
+                positiveDeltaDataUnit, negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
                 contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts());
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
@@ -176,9 +177,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
     }
 
-    private SparkJobResult executeSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups,
-            HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity,
-            boolean contactsDataExists, boolean suppressAccountsWithoutContacts) {
+    private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,
+            Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
+            BusinessEntity mainEntity, boolean contactsDataExists, boolean suppressAccountsWithoutContacts) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -195,18 +196,25 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 query.setMainEntity(BusinessEntity.Account);
                 HdfsDataUnit accountDataUnit = getEntityQueryData(query);
 
-                HdfsDataUnit contactDataUnit = null;
+                HdfsDataUnit contactDataUnit = null, targetContactsDataUnit = null;
                 if (contactsDataExists) {
                     query.setLookups(new ArrayList<>(contactLookups));
                     query.setMainEntity(BusinessEntity.Contact);
                     contactDataUnit = getEntityQueryData(query);
+
+                    FrontEndQuery targetContactsQuery = FrontEndQuery.fromSegment(targetSegment);
+                    query.setLookups(new ArrayList<>(contactLookups));
+                    query.setMainEntity(BusinessEntity.Contact);
+                    targetContactsDataUnit = getEntityQueryData(targetContactsQuery);
                 } else {
                     log.info("Ignoring Contact lookups since no contact data found in the Attribute Repo");
                 }
 
-                GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
-                        contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity,
-                        !suppressAccountsWithoutContacts, getRandomWorkspace());
+                GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit, //
+                        contactDataUnit, targetContactsDataUnit, //
+                        negativeDeltaDataUnit, positiveDeltaDataUnit, //
+                        mainEntity, !suppressAccountsWithoutContacts, //
+                        getRandomWorkspace());
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
