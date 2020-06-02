@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
@@ -492,12 +494,19 @@ public final class StatsCubeUtils {
 
     // cast first value in bucket to double if possible, null if not
     private static Double firstValObjToDouble(@NotNull Bucket bkt) {
-        if (CollectionUtils.isEmpty(bkt.getValues())) {
+        return firstValObjToDouble(bkt.getValues());
+    }
+
+    private static Double firstValObjToDouble(@NotNull TimeFilter filter) {
+        return firstValObjToDouble(filter.getValues());
+    }
+
+    private static Double firstValObjToDouble(@NotNull List<Object> values) {
+        if (CollectionUtils.isEmpty(values)) {
             return null;
         }
-
         try {
-            Object obj = bkt.getValues().get(0);
+            Object obj = values.get(0);
             return obj == null ? null : valObjToDouble(obj);
         } catch (NumberFormatException e) {
             return null;
@@ -762,6 +771,8 @@ public final class StatsCubeUtils {
         case ACCOUNT_MARKETING_ACTIVITY_PROFILE:
         case CONTACT_MARKETING_ACTIVITY_PROFILE:
             return firstNumValueTopBktComparator();
+        case DNBINTENTDATA_PROFILE:
+            return dnbCustomIntentBktComparator();
         case RATING:
             return ratingTopBktComparator();
         case PRODUCT_SPEND:
@@ -805,6 +816,78 @@ public final class StatsCubeUtils {
             return Integer.compare(valSize2, valSize1);
         };
         return Comparator.nullsLast(cmp.thenComparing(defaultTopBktComparator()));
+    }
+
+    /*-
+     * Currently all boolean attrs, just sort by ID
+     */
+    private static Comparator<Bucket> dnbCustomIntentBktComparator() {
+        return Comparator.nullsLast(Comparator.comparing(Bucket::getId));
+    }
+
+    /*-
+     * Parse attribute name into TimeFilter and sort
+     */
+    private static Comparator<TopAttribute> activityMetricTimeFilterComparator() {
+        Comparator<TopAttribute> cmp = (a1, a2) -> {
+            TimeFilter f1 = getTimeFilter(a1.getAttribute());
+            TimeFilter f2 = getTimeFilter(a2.getAttribute());
+            if (f1 == null && f2 == null) {
+                return 0;
+            } else if (f1 == null) {
+                return 1;
+            } else if (f2 == null) {
+                return -1;
+            }
+
+            return compareTimeFilter(f1, f2);
+        };
+        return Comparator.nullsLast(cmp.thenComparing(defaultTopAttrComparator()));
+    }
+
+    /*-
+     * EVER comes first, others sort by the first value ASC for now.
+     * E.g., Last 2 Weeks -> Last 4 Weeks -> etc
+     */
+    private static int compareTimeFilter(@NotNull TimeFilter f1, @NotNull TimeFilter f2) {
+        if (f1.getRelation() != f2.getRelation()) {
+            // ever go first, other "random" for now
+            if (f1.getRelation() == ComparisonType.EVER) {
+                return -1;
+            } else if (f2.getRelation() == ComparisonType.EVER) {
+                return 1;
+            }
+            return ObjectUtils.compare(f1.getRelation(), f2.getRelation());
+        }
+
+        int s1 = CollectionUtils.size(f1.getValues());
+        int s2 = CollectionUtils.size(f2.getValues());
+        if (s1 != s2 || s1 == 0) {
+            // diff size or empty
+            return Integer.compare(s1, s2);
+        }
+
+        Double v1 = firstValObjToDouble(f1);
+        Double v2 = firstValObjToDouble(f2);
+        return Double.compare(v1, v2);
+    }
+
+    private static TimeFilter getTimeFilter(String attrName) {
+        if (StringUtils.isBlank(attrName)) {
+            return null;
+        }
+
+        try {
+            List<String> tokens = ActivityMetricsGroupUtils.parseAttrName(attrName);
+            if (CollectionUtils.size(tokens) < 3) {
+                return null;
+            }
+
+            String timeRange = tokens.get(2);
+            return ActivityMetricsGroupUtils.timeRangeTmplToTimeFilter(timeRange);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static Comparator<Bucket> intentTopBktComparator() {
@@ -913,6 +996,8 @@ public final class StatsCubeUtils {
         case ACCOUNT_MARKETING_ACTIVITY_PROFILE:
         case CONTACT_MARKETING_ACTIVITY_PROFILE:
             return firstNumValueTopAttrComparator();
+        case DNBINTENTDATA_PROFILE:
+            return activityMetricTimeFilterComparator();
         case RATING:
             return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());
         case PRODUCT_SPEND:
