@@ -203,8 +203,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     contactDataUnit = getEntityQueryData(query);
 
                     FrontEndQuery targetContactsQuery = FrontEndQuery.fromSegment(targetSegment);
-                    query.setLookups(new ArrayList<>(contactLookups));
-                    query.setMainEntity(BusinessEntity.Contact);
+                    targetContactsQuery.setLookups(new ArrayList<>(contactLookups));
+                    targetContactsQuery.setMainEntity(BusinessEntity.Contact);
                     targetContactsDataUnit = getEntityQueryData(targetContactsQuery);
                 } else {
                     log.info("Ignoring Contact lookups since no contact data found in the Attribute Repo");
