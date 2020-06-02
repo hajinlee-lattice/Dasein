@@ -79,7 +79,7 @@ public class ProductFileValidationService
     private DataFeedProxy dataFeedProxy;
 
     // this record the product index for vdb
-    private int index = 0;
+    private static int INDEX = 0;
 
 
     @Override
@@ -124,7 +124,7 @@ public class ProductFileValidationService
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
-            index++;
+            INDEX++;
             GenericRecord record = iter.next();
             Product product = new Product();
             String productId = getFieldValue(record, InterfaceName.Id.name());
@@ -154,7 +154,7 @@ public class ProductFileValidationService
             if (StringUtils.isNotEmpty(lineId)) {
                 productMap.put(lineId, product);
             } else {
-                productMap.put(String.valueOf(index), product);
+                productMap.put(String.valueOf(INDEX), product);
             }
         }
         return productMap;
