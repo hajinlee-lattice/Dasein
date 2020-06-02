@@ -107,12 +107,13 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @DataProvider(name="authTableProvider")
     private static Object[][] authTableProvider() {
         return new Object[][] { //
-                { AccessLevel.SUPER_ADMIN, new Boolean[] {true, true, true, true, true, true} },
-                { AccessLevel.INTERNAL_ADMIN, new Boolean[] {true, true, true, true, true, false} },
-                { AccessLevel.INTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
-                { AccessLevel.EXTERNAL_ADMIN, new Boolean[] {true, true, true, false, false, false} },
-                { AccessLevel.EXTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
-                { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false} },
+                { AccessLevel.SUPER_ADMIN, new Boolean[] {true, true, true, true, true, true, true} },
+                { AccessLevel.INTERNAL_ADMIN, new Boolean[] {true, true, true, true, true, true, false} },
+                { AccessLevel.INTERNAL_USER, new Boolean[] {false, false, false, false, false, false, false} },
+                { AccessLevel.EXTERNAL_ADMIN, new Boolean[] {true, true, true, true, false, false, false} },
+                { AccessLevel.EXTERNAL_USER, new Boolean[] {false, false, false, false, false, false, false} },
+                { AccessLevel.BUSINESS_ANALYST, new Boolean[] {false, false, false, false, false, false, false} },
+                { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false, false} },
         };
     }
 
@@ -181,8 +182,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @DataProvider(name="getAllUsersProvider")
     public static Object[][] getAllUsersProvider() {
         return new Object[][] {
-                { AccessLevel.SUPER_ADMIN, true, 6 },
-                { AccessLevel.INTERNAL_ADMIN, true, 6 },
+                { AccessLevel.SUPER_ADMIN, true, 7 },
+                { AccessLevel.INTERNAL_ADMIN, true, 7 },
                 { AccessLevel.INTERNAL_USER, false, 0 },
                 { AccessLevel.EXTERNAL_ADMIN, true, 2 },
                 { AccessLevel.EXTERNAL_USER, false, 0 },
@@ -454,7 +455,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         ResponseDocument<List<?>> usersResponse = restTemplate.getForObject(usersApi, ResponseDocument.class);
         assertNotNull(usersResponse);
         List<User> users = JsonUtils.convertList(usersResponse.getResult(), User.class);
-        List<String> names = users.stream().map(user -> user.getUsername()).collect(Collectors.toList());
+        List<String> names = users.stream().map(User::getUsername).collect(Collectors.toList());
         // ensure existing exists in returned list
         Assert.assertTrue(names.contains(existingUser.getUsername()));
 
@@ -482,7 +483,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         ResponseDocument<List<?>> usersResponse = restTemplate.getForObject(usersApi, ResponseDocument.class);
         assertNotNull(usersResponse);
         List<User> users = JsonUtils.convertList(usersResponse.getResult(), User.class);
-        List<String> names = users.stream().map(user -> user.getUsername()).collect(Collectors.toList());
+        List<String> names = users.stream().map(User::getUsername).collect(Collectors.toList());
         // ensure existing user not exist in returned users
         Assert.assertEquals(names.contains(existingUser.getUsername()), exists);
     }
