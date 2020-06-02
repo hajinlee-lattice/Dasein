@@ -195,11 +195,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Attribute otherSystemAccountIdAttr = otherSystemTxnTable.getAttribute(otherSystem.getAccountSystemId());
         Assert.assertNotNull(otherSystemAccountIdAttr);
         Assert.assertEquals(otherSystemAccountIdAttr.getDisplayName(), "Account_ID");
-
-        Attribute otherSystemContactIdAttr = otherSystemTxnTable.getAttribute(otherSystem.getContactSystemId());
-        Assert.assertNotNull(otherSystemContactIdAttr);
-        Assert.assertEquals(otherSystemContactIdAttr.getDisplayName(), "ID");
-
     }
 
     private String createOtherContactTemplateAndVerify(String sfSystemName, String otherSystemName) {
@@ -241,10 +236,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
             if (fieldMapping.getUserField().equals("Account_ID")) {
                 fieldMapping.setSystemName(otherSystemName);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
-            }
-            if (fieldMapping.getUserField().equals("ID")) {
-                fieldMapping.setSystemName(otherSystemName);
-                fieldMapping.setIdType(FieldMapping.IdType.Contact);
             }
         }
         modelingFileMetadataService.resolveMetadata(otherTransactionFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION,
