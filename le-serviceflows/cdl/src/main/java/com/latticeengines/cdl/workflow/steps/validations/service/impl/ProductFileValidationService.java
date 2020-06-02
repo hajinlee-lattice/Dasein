@@ -78,6 +78,10 @@ public class ProductFileValidationService
     @Inject
     private DataFeedProxy dataFeedProxy;
 
+    // this record the product index for vdb
+    private int index = 0;
+
+
     @Override
     public EntityValidationSummary validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
                                             List<String> processedRecords) {
@@ -119,7 +123,6 @@ public class ProductFileValidationService
         Map<String, Product> productMap = new HashMap<>();
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
-        int index = 0;
         while (iter.hasNext()) {
             index++;
             GenericRecord record = iter.next();
