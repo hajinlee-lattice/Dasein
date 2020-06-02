@@ -6,8 +6,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -52,6 +54,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private static final String DB_CACHE_KEY = "InfluxDB";
     private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
+    private static final Set<String> warnedQueries = new HashSet<>();
 
     @Value("${monitor.influxdb.enabled:false}")
     private String enableInflux;
@@ -261,20 +264,28 @@ public class InfluxDbMetricWriter implements MetricWriter {
         String queryString = String.format(
                 "CREATE RETENTION POLICY \"%s\" ON \"%s\" DURATION %s REPLICATION %d",
                 policy.getName(), db.getDbName(), policy.getDuration(), policy.getReplication());
-        JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
-        if (jsonNode.get("results").get(0).has("error")) {
-            throw new RuntimeException("Failed to create retention policy: "
-                    + jsonNode.get("results").get(0).get("error"));
+        if (!warnedQueries.contains(queryString)) {
+            log.warn("Should have created the retention policy by: {}", queryString);
         }
+        disable();
+//        JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
+//        if (jsonNode.get("results").get(0).has("error")) {
+//            throw new RuntimeException("Failed to create retention policy: "
+//                    + jsonNode.get("results").get(0).get("error"));
+//        }
     }
 
     private void createDatabaseIfNotExists(MetricDB db) {
         String queryString = String.format("CREATE DATABASE \"%s\"", db.getDbName());
-        JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
-        if (jsonNode.get("results").get(0).has("error")) {
-            throw new RuntimeException(
-                    "Failed to create database: " + jsonNode.get("results").get(0).get("error"));
+        if (!warnedQueries.contains(queryString)) {
+            log.warn("Should have created the database by: {}", queryString);
         }
+        disable();
+//        JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
+//        if (jsonNode.get("results").get(0).has("error")) {
+//            throw new RuntimeException(
+//                    "Failed to create database: " + jsonNode.get("results").get(0).get("error"));
+//        }
     }
 
     @VisibleForTesting
