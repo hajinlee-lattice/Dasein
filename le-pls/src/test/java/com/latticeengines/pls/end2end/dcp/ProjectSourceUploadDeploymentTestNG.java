@@ -182,7 +182,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         // soft delete project
         projectService.deleteProject(customerSpace, PROJECT_ID);
-        SleepUtils.sleep(500);
+        SleepUtils.sleep(1000);
         projects = projectService.getAllProjects(customerSpace);
         Assert.assertFalse(CollectionUtils.isEmpty(projects));
         details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
