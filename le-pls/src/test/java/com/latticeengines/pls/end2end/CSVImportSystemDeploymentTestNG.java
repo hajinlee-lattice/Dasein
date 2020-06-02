@@ -631,10 +631,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 fieldMapping.setMapToLatticeId(false);
                 fieldMapping.setMappedToLatticeField(true);
             }
-            if (fieldMapping.getUserField().equals("Account_ID")) {
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-                fieldMapping.setMappedToLatticeField(false);
-            }
         }
         modelingFileMetadataService.resolveMetadata(mktSourceFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
                 mktLeadFeedType);
