@@ -5,14 +5,17 @@ import static org.testng.Assert.assertNotNull;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -49,11 +52,15 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testSave")
     public void testRetrieve() {
-        String url = getRestAPIHostPort() + String
-                .format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, propertyName);
-        String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
-        assertNotNull(retrieved);
-        assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), propertyValue);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            String url = getRestAPIHostPort() + String
+                    .format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, propertyName);
+            String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
+            assertNotNull(retrieved);
+            assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), propertyValue);
+            return true;
+        });
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testRetrieve")
@@ -69,19 +76,25 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testSaveMultiple")
     public void testRetrieveAfterSaveMultiple() {
-        String url = getRestAPIHostPort() + String
-                .format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "hidden");
-        String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
-        assertNotNull(retrieved);
-        assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"),
-                Boolean.TRUE.toString());
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
 
-        url = getRestAPIHostPort() + String.format("/pls/attributes/flags/%s/CompanyProfile/%s",
-                attributeName, "highlighted");
-        retrieved = testBed.getRestTemplate().getForObject(url, String.class);
-        assertNotNull(retrieved);
-        assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"),
-                Boolean.TRUE.toString());
+        retry.execute(ctx -> {
+            String url = getRestAPIHostPort() + String
+                    .format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "hidden");
+            String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
+            assertNotNull(retrieved);
+            assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.TRUE.toString());
+            return true;
+        });
+
+        retry.execute(ctx -> {
+            String url = getRestAPIHostPort() + String.format("/pls/attributes/flags/%s/CompanyProfile/%s",
+                    attributeName, "highlighted");
+            String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
+            assertNotNull(retrieved);
+            assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.TRUE.toString());
+            return true;
+        });
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testRetrieveAfterSaveMultiple")
@@ -97,19 +110,25 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testSaveCategoryMultiple")
     public void testRetrieveAfterSaveCategoryMultiple() {
-        String url = getRestAPIHostPort() + String
-                .format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "hidden");
-        String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
-        assertNotNull(retrieved);
-        assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"),
-                Boolean.TRUE.toString());
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
 
-        url = getRestAPIHostPort() + String.format("/pls/attributes/flags/%s/CompanyProfile/%s",
-                attributeName, "highlighted");
-        retrieved = testBed.getRestTemplate().getForObject(url, String.class);
-        assertNotNull(retrieved);
-        assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"),
-                Boolean.FALSE.toString());
+        retry.execute(ctx -> {
+            String url = getRestAPIHostPort() + String
+                    .format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "hidden");
+            String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
+            assertNotNull(retrieved);
+            assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.TRUE.toString());
+            return true;
+        });
+
+        retry.execute(ctx -> {
+            String url = getRestAPIHostPort() + String.format("/pls/attributes/flags/%s/CompanyProfile/%s",
+                    attributeName, "highlighted");
+            String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
+            assertNotNull(retrieved);
+            assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.FALSE.toString());
+            return true;
+        });
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testRetrieveAfterSaveCategoryMultiple")
