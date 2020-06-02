@@ -36,8 +36,8 @@ class ValidateProduct extends AbstractSparkJob[ValidateProductConfig] {
     val (newSpendings, err5) = mergeSpendings(newProdsWithHierarchyIds, oldProdsOpt)
 
     val newRecords = finalizeAnalytic(newAnalytic).persist(StorageLevel.DISK_ONLY)
-    val errs = (err1 union err3 union err5).persist(StorageLevel.DISK_ONLY)
-    val errsAndWarnings = (errs union  err2 union err4).persist(StorageLevel.DISK_ONLY)
+    val errs = err1.persist(StorageLevel.DISK_ONLY)
+    val errsAndWarnings = (errs union  err2 union  err3 union err4 union err5).persist(StorageLevel.DISK_ONLY)
     val productSummary = new ProductValidationSummary
     productSummary.setErrorLineNumber(errs.count())
 

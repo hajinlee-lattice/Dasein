@@ -90,6 +90,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH disabled!");
+        setupEnd2EndTestEnvironment();
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
     }
@@ -168,7 +169,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);
-        Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 7 errors : 3 missing product bundles" +
+        Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 4 errors : 3 missing product bundles" +
                 " in use (this import will completely replace the previous one), 4 product bundle has different " +
                 "product SKUs. Dependant models will need to be remodelled to get accurate scores. error when validating with input file, please reference error.csv for details.");
         RestTemplate template = testBed.getRestTemplate();

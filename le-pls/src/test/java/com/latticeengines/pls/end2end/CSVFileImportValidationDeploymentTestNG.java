@@ -147,7 +147,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Report pathPatternReport = reports.get(4);
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
-        verifyReport(productReport, 0L, 2L, 0L);
+        verifyReport(productReport, 0L, 3L, 0L);
         verifyReport(webVisitReport, 103L, 103L, 197L);
         verifyReport(pathPatternReport, 0L,29L, 0L);
     }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -33,23 +34,80 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
 
 
     @Test(groups = "functional")
-    private void testBundle() {
-        runTest(uploadBundleTestData());
-    }
-    @Test(groups = "functional")
-    private void testVDB() {
-        runTest(uploadVDBTestData());
-    }
-    @Test(groups = "functional")
-    private void testHierarchy() {
-        runTest(uploadHierarchyTestData());
-    }
-
-    private void runTest(List<String> inputs) {
+    private void testLegalBundleInput() {
+        List<String> inputs = uploadBundleTestData();
         ValidateProductConfig config = new ValidateProductConfig();
         SparkJobResult result = runSparkJob(ValidateProduct.class, config, inputs, getWorkspace());
 
-        verify(result, Arrays.asList(this::verifyFirstTarget, this::verifySecondTarget));
+        verify(result, Arrays.asList(
+                (HdfsDataUnit unit) -> { Assert.assertTrue(unit.getCount() > 0 );return true;},
+                (HdfsDataUnit unit) -> {
+                    verifyMessage(unit, null, 0);
+                    return true;
+                }));
+    }
+
+    @Test(groups = "functional")
+    private void testInvalidVDB() {
+        List<String> inputs = uploadInvalidVDBTestData();
+
+        ValidateProductConfig config = new ValidateProductConfig();
+        SparkJobResult result = runSparkJob(ValidateProduct.class, config, inputs, getWorkspace());
+
+        verify(result, Arrays.asList(
+                (HdfsDataUnit unit) -> { Assert.assertEquals(unit.getCount(), Long.valueOf(0));return true;},
+                (HdfsDataUnit unit) -> {
+                    verifyMessage(unit, "VDB product must provide a valid product name", 2);
+                    return true;
+                }
+        ));
+    }
+
+    @Test(groups = "functional")
+    private void testInvalidHierarchy() {
+        List<String> inputs = uploadInvalidHierarchyTestData();
+
+        ValidateProductConfig config = new ValidateProductConfig();
+        SparkJobResult result = runSparkJob(ValidateProduct.class, config, inputs, getWorkspace());
+
+        verify(result, Arrays.asList(
+                (HdfsDataUnit unit) -> { Assert.assertEquals(unit.getCount(), Long.valueOf(0));return true;},
+                (HdfsDataUnit unit) -> {
+                    verifyMessage(unit, "Must provide product", 1);
+                    return true;
+                }
+        ));
+    }
+
+
+    @Test(groups = "functional")
+    private void testInvalidProduct() {
+        List<String> inputs = uploadInvalidProductTestData();
+
+        ValidateProductConfig config = new ValidateProductConfig();
+        SparkJobResult result = runSparkJob(ValidateProduct.class, config, inputs, getWorkspace());
+
+        verify(result, Arrays.asList(
+                (HdfsDataUnit unit) -> { Assert.assertEquals(unit.getCount(), Long.valueOf(0));return true;},
+                (HdfsDataUnit unit) -> {
+                    verifyMessage(unit, "Id cannot be null", 2);
+                    return true;
+                }
+        ));
+    }
+
+    @Test(groups = "functional")
+    private void testDuplicatedHierarchy() {
+        List<String> inputs = uploadDuplicatedHierarchyTestData();
+        ValidateProductConfig config = new ValidateProductConfig();
+        SparkJobResult result = runSparkJob(ValidateProduct.class, config, inputs, getWorkspace());
+        verify(result, Arrays.asList(
+                (HdfsDataUnit unit) -> { Assert.assertEquals(unit.getCount(), Long.valueOf(0));return true;},
+                (HdfsDataUnit unit) -> {
+                    verifyMessage(unit, "Duplicated sku in hierarchy data", 3);
+                    return true;
+                }
+        ));
     }
 
     private List<String> uploadBundleTestData() {
@@ -57,7 +115,7 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
         List<String> inputs = new ArrayList<>();
         Object[][] upload1 = new Object[][]{ //
                 {null, "product_3", null, "Product 3 Description", null, "CMT3: Spectroscopy", null, null, null, null, null, null, null, null},
-                {null, "product_4", null, "Product 4 Description", null, "CMT3: Spectroscopy", null, null, null, null, null, null, null, null},
+                {null, "product_4", null, "Product 4 Description", null, "CMT4: Spectroscopy", null, null, null, null, null, null, null, null},
                 {null, "product_5", null, "Product 5 Description", null, "CMT4: Plastic Vials", null, null, null, null, null, null, null, null},
                 {null, "product_6", null, "Product 6 Description", null, "WebDataCMT3: Inorganic Chemicals", null, null, null, null, null, null, null, null}
         };
@@ -66,7 +124,7 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
         return inputs;
     }
 
-    private List<String> uploadHierarchyTestData() {
+    private List<String> uploadDuplicatedHierarchyTestData() {
         List<String> inputs = new ArrayList<>();
         Object[][] upload1 = new Object[][] {
             // new lines/families/categories
@@ -89,14 +147,6 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
             { "product_33", null, null, "Product 33 Description", null, null, null, null, "c1", null, null, null, null, null },
             { "product_33", null, null, "Product 33 Description", null, null, null, null, "c2", null, null, null, null, null },
 
-            // invalid ids
-            { null, null, null, null, null, null, "l1", null, "c1", null, null, null, null, null },
-            { null, null, null, null, null, null, "l2", null, "c2", null, null, null, null, null },
-
-            // invalid vdb (no bundle, no category)
-            { null, "1", null, null, null, null, "l1", "f1", null, null, null, null, null, null },
-            { null, "2", null, null, null, null, "l2", null, null, null, null, null, null, null },
-
             // same line different family
             { "product_41", null, null, "Product 41 Description", null, null, "l9", "f1", "c1", null, null, null, null, null },
             { "product_42", null, null, "Product 42 Description", null, null, "l9", "f2", "c2", null, null, null, null, null },
@@ -110,18 +160,41 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
         return inputs;
     }
 
-    private List<String> uploadVDBTestData() {
+    private List<String> uploadInvalidVDBTestData() {
         List<String> inputs = new ArrayList<>();
         Object[][] upload1 = new Object[][]{ //
-                // new vdb
-                {null, "1", "sku_g3p1", null, null, null, null, null, null, null, null, null, null, null},
-                {null, "2", "sku_g3p2", null, null, null, null, null, null, null, null, null, null, null},
-                {null, "3", "sku_g3p3", null, null, null, null, null, null, null, null, null, null, null},
-                {null, "2", "sku_g3p2", null, null, null, null, null, null, null, null, null, null, null},
-                {null, "3", "sku_g3p3", null, null, null, null, null, null, null, null, null, null, null},
+                // invalid vdb (no bundle, no category)
+                { null, "1", null, null, null, null, null,  null, null, null, null, null, null, null },
+                { null, "2", null, null, null, null, null, null, null, null, null, null, null, null },
+
         };
         inputs.add(uploadHdfsDataUnit(upload1, fields));
         inputs.add(uploadOldProducts());
+        return inputs;
+    }
+
+
+    private List<String> uploadInvalidHierarchyTestData() {
+        List<String> inputs = new ArrayList<>();
+        Object[][] upload1 = new Object[][]{ //
+                // invalid hierarchy
+                { null, "1", "hierarchy 1", null, null, null, "l1", "f1", "c1", null, null, null, null, null },
+                { null, "2", "hierarchy 2", null, null, null, "l2", null, "c2", null, null, null, null, null },
+
+        };
+        inputs.add(uploadHdfsDataUnit(upload1, fields));
+        inputs.add(uploadOldProducts());
+        return inputs;
+    }
+
+    private List<String>  uploadInvalidProductTestData() {
+        List<String> inputs = new ArrayList<>();
+        Object[][] upload1 = new Object[][]{ //
+                // invalid ids
+                { null, null, null, null, null, null, "l1", null, "c1", null, null, null, null, null },
+                { null, null, null, null, null, null, "l2", null, "c2", null, null, null, null, null },
+        };
+        inputs.add(uploadHdfsDataUnit(upload1, fields));
         return inputs;
     }
 
@@ -153,18 +226,14 @@ public class ValidateProductTestNG extends SparkJobFunctionalTestNGBase {
         return uploadHdfsDataUnit(oldProducts, fields);
     }
 
-    private Boolean verifyFirstTarget(HdfsDataUnit tgt) {
-        verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            System.out.println(record);
+    private void verifyMessage(HdfsDataUnit unit, String message, int count) {
+        Assert.assertEquals(unit.getCount(), Long.valueOf(count));
+        if (count == 0) {
+            return ;
+        }
+        verifyAndReadTarget(unit).forEachRemaining(record -> {
+           String.valueOf(record.get("Message")).startsWith(message);
         });
-        return true;
-    }
-
-    private Boolean verifySecondTarget(HdfsDataUnit tgt) {
-        verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            System.out.println(record);
-        });
-        return true;
     }
 
 }
