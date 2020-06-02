@@ -1,12 +1,11 @@
 package com.latticeengines.pls.controller.dcp;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.datanucleus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
@@ -60,7 +59,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testUploadFile() throws IOException {
+    public void testUploadFile() {
         Resource csvResource = new ClassPathResource(PATH,
                 Thread.currentThread().getContextClassLoader());
         SourceFileInfo sourceFileInfo = fileUploadProxy.uploadFile(fileName, csvResource);
@@ -71,7 +70,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testSubmitImport() throws IOException {
+    public void testSubmitImport() {
         // Create Project & Source
         ProjectDetails projectDetails = testProjectProxy.createProjectWithOutProjectId("ImportEnd2EndProject",
                 Project.ProjectType.Type1);
