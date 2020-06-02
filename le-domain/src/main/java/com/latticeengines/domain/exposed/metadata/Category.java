@@ -54,8 +54,8 @@ public enum Category {
             return ActivityStoreUtils.defaultTimeFilterDisplayName();
         }
     }, //
-    OPPORTUNITY_PROFILE("My Opportunities", 17),
-    ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 18) {
+    OPPORTUNITY_PROFILE("My Opportunities", 18), //
+    ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 19) {
         @Override
         public FilterOptions getFilterOptions() {
             return ActivityStoreUtils.attrFilterOptions();
@@ -71,7 +71,7 @@ public enum Category {
             return ActivityStoreUtils.defaultTimeFilterDisplayName();
         }
     }, //
-    CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 19) {
+    CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 20) {
         @Override
         public FilterOptions getFilterOptions() {
             return ActivityStoreUtils.attrFilterOptions();
@@ -87,7 +87,7 @@ public enum Category {
             return ActivityStoreUtils.defaultTimeFilterDisplayName();
         }
     },
-    DNBINTENTDATA_PROFILE("D&B Custom Intent", 20); //
+    DNBINTENTDATA_PROFILE("D&B Custom Intent", 21); //
 
 
 
