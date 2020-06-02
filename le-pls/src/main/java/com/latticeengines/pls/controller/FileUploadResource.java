@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
@@ -9,11 +10,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -49,6 +54,15 @@ public class FileUploadResource {
     @ApiOperation(value = "Retrieve metadata for a source file")
     public Table getMetadataForSourceFile(@PathVariable String fileName) {
         return fileUploadService.getMetadata(fileName);
+    }
+
+    @PostMapping(value = "/{fileName:.+}")
+    @ResponseBody
+    @ApiOperation(value = "Upload a file")
+    public SourceFileInfo uploadFile(
+            @PathVariable String fileName,
+            @RequestParam("file") MultipartFile file) {
+        return fileUploadService.uploadFile("file_" + Instant.now().toEpochMilli() + ".csv", fileName, false, null, file);
     }
 
 }

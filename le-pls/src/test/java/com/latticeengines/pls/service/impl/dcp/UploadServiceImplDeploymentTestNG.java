@@ -37,19 +37,19 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
+import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.dcp.ProjectService;
-import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
-public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
+public class UploadServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private SourceFileProxy sourceFileProxy;
 
     @Inject
-    private SourceFileUploadService sourceFileUploadService;
+    private FileUploadService fileUploadService;
 
     @Inject
     private ProjectService projectService;
@@ -74,14 +74,14 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
     public void testUploadFile() throws IOException {
         MultipartFile multipartFile = new MockMultipartFile("TestFileName.csv",
                 "Test Content = Hello World!".getBytes());
-        SourceFileInfo sourceFileInfo = sourceFileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
+        SourceFileInfo sourceFileInfo = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
                 ".csv", "TestFileName.csv", false, null, multipartFile);
 
         Assert.assertNotNull(sourceFileInfo);
-        Assert.assertFalse(StringUtils.isEmpty(sourceFileInfo.getName()));
+        Assert.assertFalse(StringUtils.isEmpty(sourceFileInfo.getFileImportId()));
         Assert.assertEquals(sourceFileInfo.getDisplayName(), "TestFileName.csv");
 
-        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileInfo.getName());
+        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileInfo.getFileImportId());
         Assert.assertNotNull(sourceFile);
         Assert.assertFalse(StringUtils.isEmpty(sourceFile.getPath()));
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, sourceFile.getPath()));
@@ -107,14 +107,14 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
 
         InputStream dataStream = testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE);
         MultipartFile multipartFile = new MockMultipartFile("TestFileName.csv", dataStream);
-        SourceFileInfo sourceFileInfo = sourceFileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
+        SourceFileInfo sourceFileInfo = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
                 ".csv", "TestFileName.csv", false, null, multipartFile);
 
         DCPImportRequest dcpImportRequest = new DCPImportRequest();
         dcpImportRequest.setProjectId(projectDetails.getProjectId());
         dcpImportRequest.setSourceId(source.getSourceId());
-        dcpImportRequest.setSourceFileName(sourceFileInfo.getName());
-        ApplicationId applicationId = sourceFileUploadService.submitSourceImport(dcpImportRequest);
+        dcpImportRequest.setFileImportId(sourceFileInfo.getFileImportId());
+        ApplicationId applicationId = uploadService.submitImportRequest(dcpImportRequest);
 
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);

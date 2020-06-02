@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflo
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -69,9 +68,6 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Inject
     private EmailService emailService;
-
-    @Inject
-    private SourceFileUploadService sourceFileUploadService;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -206,11 +202,15 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public UploadDetails startImport(DCPImportRequest importRequest) {
-        ApplicationId appId = sourceFileUploadService.submitSourceImport(importRequest);
+        ApplicationId appId = submitImportRequest(importRequest);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
         String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
         return uploadProxy.getUploadByUploadId(customerSpace, uploadId);
     }
 
+    @Override
+    public ApplicationId submitImportRequest(DCPImportRequest importRequest) {
+        return uploadProxy.startImport(MultiTenantContext.getShortTenantId(), importRequest);
+    }
 }

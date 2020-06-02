@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRe
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
-import com.latticeengines.testframework.exposed.proxy.pls.ImportFileProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.FileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
 
@@ -46,7 +46,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SourceResourceDeploymentTestNG.class);
 
     @Inject
-    private ImportFileProxy importFileProxy;
+    private FileUploadProxy fileUploadProxy;
 
     @Inject
     private TestProjectProxy testProjectProxy;
@@ -63,7 +63,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         MultiTenantContext.setTenant(mainTestTenant);
         attachProtectedProxy(testProjectProxy);
         attachProtectedProxy(testSourceProxy);
-        attachProtectedProxy(importFileProxy);
+        attachProtectedProxy(fileUploadProxy);
     }
 
     @Test(groups = "deployment")
@@ -125,16 +125,16 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testFieldDefinitions() {
         Resource csvResource = new MultipartFileResource(testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR,
                 TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE), TEST_ACCOUNT_DATA_FILE);
-        SourceFileInfo testSourceFile = importFileProxy.uploadFile(TEST_ACCOUNT_DATA_FILE, csvResource);
+        SourceFileInfo testSourceFile = fileUploadProxy.uploadFile(TEST_ACCOUNT_DATA_FILE, csvResource);
         FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.fetchDefinitions(null,
                 EntityType.Accounts.name(),
-                testSourceFile.getName());
+                testSourceFile.getFileImportId());
 
         Assert.assertTrue(MapUtils.isEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
         fetchResponse = testSourceProxy.fetchDefinitions(sourceId,
                 EntityType.Accounts.name(),
-                testSourceFile.getName());
+                testSourceFile.getFileImportId());
         Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
         ValidateFieldDefinitionsRequest validateRequest = new ValidateFieldDefinitionsRequest();
@@ -143,7 +143,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
         validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
 
-        ValidateFieldDefinitionsResponse response = testSourceProxy.validateFieldDefinitions(testSourceFile.getName(),
+        ValidateFieldDefinitionsResponse response = testSourceProxy.validateFieldDefinitions(testSourceFile.getFileImportId(),
                 validateRequest);
 
         Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
@@ -155,7 +155,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
         updateSourceRequest.setDisplayName("testSourceAfterUpdate");
         updateSourceRequest.setFieldDefinitionsRecord(validateRequest.getCurrentFieldDefinitionsRecord());
-        updateSourceRequest.setImportFile(testSourceFile.getName());
+        updateSourceRequest.setImportFile(testSourceFile.getFileImportId());
         updateSourceRequest.setSourceId(sourceId);
         Source retrievedSource = testSourceProxy.updateSource(updateSourceRequest);
         Assert.assertNotNull(retrievedSource);

@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 
-public class ProjectDeploymentTestNG extends DCPDeploymentTestNGBase {
+public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final String DISPLAY_NAME = "testProject";
     private static final String PROJECT_ID = "testProject";

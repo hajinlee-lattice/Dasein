@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SourceFileInfo {
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("file_import_id")
+    private String fileImportId;
 
     @JsonProperty("display_name")
     private String displayName;
@@ -19,12 +19,12 @@ public class SourceFileInfo {
     @JsonProperty("file_rows")
     private Long fileRows;
 
-    public String getName() {
-        return name;
+    public String getFileImportId() {
+        return fileImportId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFileImportId(String fileImportId) {
+        this.fileImportId = fileImportId;
     }
 
     public String getDisplayName() {

@@ -33,7 +33,7 @@ public class UploadResource {
 
     @GetMapping(value = "/sourceId/{sourceId}")
     @ResponseBody
-    @ApiOperation("Get sources by sourceId")
+    @ApiOperation("Get uploads by sourceId")
     public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status) {
         return uploadService.getAllBySourceId(sourceId, status);
     }
@@ -56,7 +56,7 @@ public class UploadResource {
         return uploadService.generateToken(uploadId);
     }
 
-    @PostMapping("/import")
+    @PostMapping("/startimport")
     @ResponseBody
     @ApiOperation(value = "Invoke DCP import workflow. Returns the upload details.")
     public UploadDetails startImport(@RequestBody DCPImportRequest importRequest) {
