@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 
-public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
+public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
     private static final String CUSTOM = "Custom";

@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
-public class CSVFileImportValidationDeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
+public class CSVFileImportValidationDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
 
     // one line with empty ID, two line with illegal char
     private static final String ACCOUNT_SOURCE_FILE = "Account_With_Invalid_Char.csv";

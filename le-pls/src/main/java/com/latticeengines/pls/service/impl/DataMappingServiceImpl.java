@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -118,30 +117,24 @@ public class DataMappingServiceImpl implements DataMappingService {
                         "   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
                 feedType, source, customerSpace.toString()));
 
-        // 3. Get flags relevant to import workflow.
-        // TODO(jwinter): Figure out how to incorporate all the system flags for entity match.
-        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
-
         // TODO(jwinter): Need to incorporate Batch Store into initial generation of FetchFieldDefinitionsResponse.
-        // 4. Generate FetchFieldMappingResponse by combining:
+        // 3. Generate FetchFieldMappingResponse by combining:
         //    a. A FieldDefinitionRecord to hold the current field definitions.
         //    b. Spec for this system.
         //    c. Existing field definitions from DataFeedTask.
         //    d. Columns and autodetection results from the sourceFile.
         //    f. Batch Store (TODO)
 
-        // 4a. Setup up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
+        // 3a. Setup up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
         fetchFieldDefinitionsResponse.setCurrentFieldDefinitionsRecord(
                 new FieldDefinitionsRecord(systemName, systemType, systemObject));
 
-        // 4b. Retrieve Spec for given systemType and systemObject.
+        // 3b. Retrieve Spec for given systemType and systemObject.
         fetchFieldDefinitionsResponse.setImportWorkflowSpec(
                 importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(), systemType, systemObject));
 
-        // 4c. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
+        // 3c. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
         // exists.
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
                 entityType.getEntity().name());
@@ -154,14 +147,14 @@ public class DataMappingServiceImpl implements DataMappingService {
                     ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTable));
         }
 
-        // 4d. Create a MetadataResolver using the sourceFile if sourceFile exists.
+        // 3d. Create a MetadataResolver using the sourceFile if sourceFile exists.
         if (sourceFile != null) {
             MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
             fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
                     ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
         }
 
-        // 4e. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
+        // 3e. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
         // the fieldTypes used for each field.
         List<DataFeedTask> tasks =
                 dataFeedProxy.getDataFeedTaskWithSameEntityExcludeOne(customerSpace.toString(),
@@ -170,10 +163,10 @@ public class DataMappingServiceImpl implements DataMappingService {
             fetchFieldDefinitionsResponse.setOtherTemplateDataMap(ImportWorkflowUtils.generateOtherTemplateDataMap(tasks));
         }
 
-        // 4f. Get the Metadata Attribute data from the Batch Store and get the fieldTypes set there.
+        // 3f. Get the Metadata Attribute data from the Batch Store and get the fieldTypes set there.
         // TODO(jwinter):  Implement Batch Store extractions.
 
-        // 5. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
+        // 4. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
 
         return fetchFieldDefinitionsResponse;

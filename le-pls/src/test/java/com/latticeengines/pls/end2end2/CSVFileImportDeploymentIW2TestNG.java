@@ -68,8 +68,8 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
-public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
-    private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNGV2.class);
+public class CSVFileImportDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentIW2TestNG.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

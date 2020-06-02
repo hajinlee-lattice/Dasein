@@ -36,7 +36,7 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentTestNGBase {
+public abstract class CSVFileImportDeploymentIW2TestNGBase extends CDLDeploymentTestNGBase {
 
     protected static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
     protected static final String SOURCE = "File";

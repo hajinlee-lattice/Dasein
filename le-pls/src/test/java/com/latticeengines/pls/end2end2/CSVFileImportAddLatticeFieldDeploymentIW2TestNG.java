@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 
-public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
+public class CSVFileImportAddLatticeFieldDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
 
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
