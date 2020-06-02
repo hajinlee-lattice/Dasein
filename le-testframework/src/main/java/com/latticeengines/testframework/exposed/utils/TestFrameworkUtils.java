@@ -61,6 +61,7 @@ public final class TestFrameworkUtils {
         case EXTERNAL_ADMIN:
             return TestFrameworkUtils.EXTERNAL_ADMIN_USERNAME;
         case EXTERNAL_USER:
+        case BUSINESS_ANALYST:
             return TestFrameworkUtils.EXTERNAL_USER_USERNAME;
         case THIRD_PARTY_USER:
             return TestFrameworkUtils.THIRD_PARTY_USER_USERNAME;
