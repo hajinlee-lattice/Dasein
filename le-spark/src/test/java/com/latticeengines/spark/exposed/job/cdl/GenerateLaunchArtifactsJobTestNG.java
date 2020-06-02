@@ -182,6 +182,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
         config.setContactsData(contactData);
+        config.setTargetSegmentsContactsData(contactData);
         config.setPositiveDelta(positiveAccounts);
         config.setNegativeDelta(negativeAccounts);
         config.setMainEntity(BusinessEntity.Account);
@@ -222,6 +223,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
         config.setContactsData(contactData);
+        config.setTargetSegmentsContactsData(contactData);
         config.setPositiveDelta(positiveAccounts);
         config.setNegativeDelta(negativeExtraAccounts);
         config.setMainEntity(BusinessEntity.Account);
@@ -242,6 +244,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
         config.setContactsData(contactData);
+        config.setTargetSegmentsContactsData(contactData);
         config.setPositiveDelta(positiveContacts);
         config.setNegativeDelta(negativeContacts);
         config.setMainEntity(BusinessEntity.Contact);
@@ -264,6 +267,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
         config.setContactsData(contactData);
+        config.setTargetSegmentsContactsData(contactData);
         config.setPositiveDelta(positiveContacts);
         config.setNegativeDelta(negativeExtraContacts);
         config.setMainEntity(BusinessEntity.Contact);
@@ -286,6 +290,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
         config.setContactsData(contactData);
+        config.setTargetSegmentsContactsData(contactData);
         config.setPositiveDelta(nullPositiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
         config.setIncludeAccountsWithoutContacts(true);
