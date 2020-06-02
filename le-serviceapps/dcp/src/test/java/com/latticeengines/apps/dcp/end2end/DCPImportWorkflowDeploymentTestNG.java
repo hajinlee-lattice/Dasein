@@ -127,16 +127,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 2);
         UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
-        Assert.assertEquals(upload.getStatus(), Upload.Status.ERROR);
+        Assert.assertEquals(upload.getUploadStatus().getStatus(), Upload.Status.ERROR);
     }
 
     private void verifyImport() {
         UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId);
         log.info(JsonUtils.serialize(upload));
         Assert.assertNotNull(upload);
-        Assert.assertNotNull(upload.getStatus());
+        Assert.assertNotNull(upload.getUploadStatus().getStatus());
 
-        Assert.assertEquals(upload.getStatus(), Upload.Status.FINISHED);
+        Assert.assertEquals(upload.getUploadStatus().getStatus(), Upload.Status.FINISHED);
 
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));

@@ -92,7 +92,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
         UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
-        Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
+        Assert.assertEquals(upload.getUploadStatus().getStatus(), Upload.Status.NEW);
         UploadConfig returnedConfig = upload.getUploadConfig();
         Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertNull(returnedConfig.getUploadImportedFilePath());
@@ -118,7 +118,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         retrievedUpload = uploads.get(0);
-        Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
+        Assert.assertEquals(retrievedUpload.getUploadStatus().getStatus(), Upload.Status.MATCH_STARTED);
 
         // create another upload
         UploadConfig config2 = new UploadConfig();
@@ -135,7 +135,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails upload = uploads.get(0);
-        Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
+        Assert.assertEquals(upload.getUploadStatus().getStatus(), Upload.Status.MATCH_STARTED);
 
         StringInputStream sis = new StringInputStream("file1");
 

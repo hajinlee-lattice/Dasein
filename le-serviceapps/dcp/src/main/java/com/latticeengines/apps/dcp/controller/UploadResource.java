@@ -120,7 +120,7 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "Get upload record by pid")
     public UploadDetails setLatestStats(@PathVariable String customerSpace, @PathVariable String uploadId, @PathVariable Long statsId) {
-        return uploadService.setLatestStatistics(uploadId, statsId);
+        return uploadService.setLatestStatistics(customerSpace, uploadId, statsId);
     }
 
     @PostMapping("/startimport")

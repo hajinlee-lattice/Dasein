@@ -1,8 +1,5 @@
 package com.latticeengines.domain.exposed.dcp;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,9 +16,8 @@ public class UploadDetails {
     @JsonProperty("source_id")
     private String sourceId;
 
-    @JsonProperty("status")
-    @Enumerated(EnumType.STRING)
-    private Upload.Status status;
+    @JsonProperty("upload_status")
+    private UploadStatus uploadStatus;
 
     @JsonProperty("upload_config")
     private UploadConfig uploadConfig;
@@ -45,12 +41,12 @@ public class UploadDetails {
         this.sourceId = sourceId;
     }
 
-    public Upload.Status getStatus() {
-        return status;
+    public UploadStatus getUploadStatus() {
+        return uploadStatus;
     }
 
-    public void setStatus(Upload.Status status) {
-        this.status = status;
+    public void setUploadStatus(UploadStatus uploadStatus) {
+        this.uploadStatus = uploadStatus;
     }
 
     public UploadConfig getUploadConfig() {
