@@ -8,11 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RegisterDeleteDataWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -20,11 +23,13 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteByDateRangeActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -147,6 +152,13 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     @Override
     public ApplicationId registerDeleteData(String customerSpace, DeleteRequest request) {
         String sourceFileName = request.getFilename();
+        if (StringUtils.isBlank(sourceFileName)) {
+            // TODO check time range exists
+            Action action = createTimeRangeDeleteAction(CustomerSpace.parse(customerSpace), request);
+            log.info("Delete by time range action created successfully = {}", JsonUtils.serialize(action));
+            // TODO maybe figure out a better fake ID
+            return new FakeApplicationId(-1L);
+        }
         SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
         if (sourceFile == null) {
             log.error("Cannot find SourceFile with name: {}", sourceFileName);
@@ -158,6 +170,25 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         }
         request.setSourceFile(sourceFile);
         return registerDeleteDataWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), request, new WorkflowPidWrapper(-1L));
+    }
+
+    private Action createTimeRangeDeleteAction(@NotNull CustomerSpace customerSpace, @NotNull DeleteRequest request) {
+        Action action = new Action();
+        action.setType(ActionType.SOFT_DELETE);
+        action.setActionInitiator(request.getUser());
+        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
+        MultiTenantContext.setTenant(tenant);
+        Preconditions.checkNotNull(tenant,
+                String.format("Tenant with id=%s cannot be found", customerSpace.toString()));
+        DeleteActionConfiguration deleteConfig = new DeleteActionConfiguration();
+        deleteConfig.setDeleteEntities(request.getDeleteEntities());
+        deleteConfig.setDeleteStreamIds(request.getDeleteStreamIds());
+        deleteConfig.setDeleteEntityType(request.getDeleteEntityType());
+        deleteConfig.setFromDate(request.getFromDate());
+        deleteConfig.setToDate(request.getToDate());
+        action.setActionConfiguration(deleteConfig);
+        action.setTenant(tenant);
+        return actionService.create(action);
     }
 
     private void verifyCleanupByDataRangeConfiguration(

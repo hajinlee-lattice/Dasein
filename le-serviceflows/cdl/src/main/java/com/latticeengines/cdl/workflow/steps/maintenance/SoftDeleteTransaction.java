@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -135,6 +136,8 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
             boolean deleteByAccId = BusinessEntity.Account.equals(config.getIdEntity());
             boolean deleteByTimeRange = StringUtils.isNotBlank(config.getFromDate())
                     && StringUtils.isNotBlank(config.getToDate());
+            log.info("Action config = {}, deleteByAccId = {}, deleteByTimeRange = {}, hasEntity({}) = {}",
+                    JsonUtils.serialize(config), deleteByAccId, deleteByTimeRange, entity, config.hasEntity(entity));
             return config.hasEntity(entity) && (deleteByAccId || deleteByTimeRange);
         }).collect(Collectors.toList());
     }

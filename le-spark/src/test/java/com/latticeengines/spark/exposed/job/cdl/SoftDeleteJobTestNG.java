@@ -58,6 +58,10 @@ public class SoftDeleteJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setEventTimeColumn(WebVisitDate.name());
         config.setTimeRangesColumn(TimeRanges.name());
 
+        Set<List<Long>> globalTimeRanges = new HashSet<>();
+        globalTimeRanges.add(Arrays.asList(2L, 5L));
+        config.setTimeRangesToDelete(globalTimeRanges);
+
         SparkJobResult result = runSparkJob(SoftDeleteJob.class, config);
         verifyResult(result);
     }
@@ -86,7 +90,7 @@ public class SoftDeleteJobTestNG extends SparkJobFunctionalTestNGBase {
         // account id -> visit time
         Map<String, Set<Long>> visitTimes = new HashMap<>();
         visitTimes.put("A1", Collections.singleton(1L));
-        visitTimes.put("A2", Sets.newHashSet(1L, 2L, 100L));
+        visitTimes.put("A2", Sets.newHashSet(1L, 100L));
         return visitTimes;
     }
 
@@ -98,7 +102,7 @@ public class SoftDeleteJobTestNG extends SparkJobFunctionalTestNGBase {
                  * A2 are not in ID list, not deleted
                  */
                 { "A2", "Facebook", 1L, "https://dnb.com", "u3" }, //
-                { "A2", "Facebook", 2L, "https://dnb.com", "u3" }, //
+                { "A2", "Facebook", 2L, "https://dnb.com", "u3" }, // deleted by global range
                 { "A2", "Facebook", 100L, "https://dnb.com", "u3" }, //
                 { "A3", "Netflix", 5000L, "https://dnb.com", "u4" }, //
         };

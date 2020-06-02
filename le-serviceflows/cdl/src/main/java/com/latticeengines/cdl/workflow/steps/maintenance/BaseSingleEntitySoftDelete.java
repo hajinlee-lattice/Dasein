@@ -232,6 +232,10 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         for (int i = 0; i < softDeleteActions.size(); i++) {
             Action action = softDeleteActions.get(i);
             DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
+            if (config.getDeleteDataTable() == null) {
+                // delete by only time range, skip here
+                continue;
+            }
             addBaseTables(step, config.getDeleteDataTable());
             if (StringUtils.isNotBlank(config.getFromDate()) && StringUtils.isNotBlank(config.getToDate())) {
                 timeRanges.put(i, parseTimeRange(config));

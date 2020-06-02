@@ -1,5 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
+import static com.latticeengines.domain.exposed.pls.ActionType.HARD_DELETE;
+import static com.latticeengines.domain.exposed.pls.ActionType.SOFT_DELETE;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -575,11 +579,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
                 job.setDescription(action.getDescription());
-                if (!ActionType.getNonWorkflowActions().contains(action.getType())) {
-                    if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW == action.getType() && action.getActionStatus() == ActionStatus.CANCELED)
+                if (isTimeRangeOnlyDeleteAction(action)) {
+                    job.setJobStatus(JobStatus.COMPLETED);
+                } else if (!ActionType.getNonWorkflowActions().contains(action.getType())) {
+                    if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW == action.getType()
+                            && action.getActionStatus() == ActionStatus.CANCELED) {
                         job.setJobStatus(JobStatus.CANCELLED);
-                    else
+                    } else {
                         job.setJobStatus(JobStatus.RUNNING);
+                    }
                 } else {
                     job.setJobStatus(JobStatus.COMPLETED);
                 }
@@ -613,6 +621,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             jobList.addAll(workflowJobs);
         }
         return jobList;
+    }
+
+    private boolean isTimeRangeOnlyDeleteAction(Action action) {
+        if (action == null || (action.getType() != SOFT_DELETE && action.getType() != HARD_DELETE)) {
+            return false;
+        }
+
+        try {
+            DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
+            if (config == null) {
+                return false;
+            }
+
+            return action.getTrackingPid() == null && StringUtils.isNotBlank(config.getFromDate())
+                    && StringUtils.isNotBlank(config.getToDate());
+        } catch (Exception e) {
+            log.warn("Failed to evaluate whether action {} is time range only delete action or not", action.getPid());
+            return false;
+        }
     }
 
     private void updateStepDisplayNameAndNumSteps(Job job) {
