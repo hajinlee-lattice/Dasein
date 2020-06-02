@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 
-public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
+public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
     private static final String CUSTOM = "Custom";
@@ -68,7 +68,7 @@ public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDepl
         }
         Assert.assertTrue(createdDate);
         Assert.assertTrue(lastModifiedDate);
-        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = modelingFileMetadataService.fetchFieldDefinitions(
+        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = dataMappingService.fetchFieldDefinitions(
                 DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE, EntityType.Contacts.getDisplayName(), baseContactFile.getName());
 
         FieldDefinitionsRecord fieldDefinitionsRecord =
@@ -82,7 +82,7 @@ public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDepl
                 Assert.assertEquals(definition.getDateFormat(), "MM/DD/YYYY");
             }
         }
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
                 EntityType.Contacts.getDisplayName(), baseContactFile.getName(), false, fieldDefinitionsRecord);
         baseContactFile = sourceFileService.findByName(baseContactFile.getName());
 
@@ -110,7 +110,7 @@ public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDepl
         SourceFile newContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 EntityType.Contacts.getSchemaInterpretation(), EntityType.Contacts.getEntity().name(), CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
-        fetchFieldDefinitionsResponse = modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+        fetchFieldDefinitionsResponse = dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                 DEFAULT_SYSTEM_TYPE, EntityType.Contacts.getDisplayName(), newContactFile.getName());
         fieldDefinitionsRecord =
                 fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
@@ -197,7 +197,7 @@ public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDepl
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE_FROMATDATE));
 
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+                dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                         DEFAULT_SYSTEM_TYPE, EntityType.Accounts.getDisplayName(), accountDateSF.getName());
         FieldDefinitionsRecord currentRecord = fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
         for (FieldDefinition definition :
@@ -220,14 +220,14 @@ public class CSVFileImportDateFormatDeploymentTestNGV2 extends CSVFileImportDepl
                 definition.setTimeZone(timezone2);
             }
         }
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
                 EntityType.Accounts.getDisplayName(), accountDateSF.getName(), false, currentRecord);
         accountDateSF = sourceFileService.findByName(accountDateSF.getName());
 
         String dfIdExtra = cdlService.createS3Template(customerSpace, accountDateSF.getName(),
                 SOURCE, EntityType.Accounts.getEntity().name(), feedType, null, feedType);
 
-        fetchFieldDefinitionsResponse = modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+        fetchFieldDefinitionsResponse = dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                 DEFAULT_SYSTEM_TYPE, EntityType.Accounts.getDisplayName(), accountDateSF.getName());
         currentRecord = fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
         for (FieldDefinition fieldDefinition :

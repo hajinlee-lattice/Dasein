@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
-public class CSVFileImportForS3DeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
+public class CSVFileImportForS3DeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
 
     @Inject
     private DropBoxProxy dropBoxProxy;

@@ -1,8 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import static com.latticeengines.pls.util.ImportWorkflowUtils.validateFieldDefinitionRequestParameters;
-import static com.latticeengines.pls.util.ImportWorkflowUtils.validateFieldDefinitionsRequestBody;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -13,7 +10,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -34,7 +30,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.GzipUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -51,17 +46,11 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
-import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
-import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
@@ -311,280 +300,6 @@ public class ModelingFileUploadResource {
                                                     @RequestParam(value = "entity") String entity) {
         return ResponseDocument.successResponse(
                 uploadFileFromS3(csvFile, entity));
-    }
-
-    // Mock API for Import Workflow 2.0 Fetch Field Definitions.
-    // Parameters:
-    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
-    //   systemType: The type of system for which a template is being created, eg. Salesforce
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    @RequestMapping(value = "fielddefinition/mockfetch", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public ResponseDocument<FieldDefinitionsRecord> mockFetchFieldDefinitions(
-            @RequestParam(value = "systemName", required = true) String systemName, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
-            @RequestParam(value = "importFile", required = true) String importFile) {
-        //log.error("JAW ------ BEGIN Mock Fetch Field Definition -----");
-
-        try {
-            validateFieldDefinitionRequestParameters("Fetch", systemName, systemType, systemObject, importFile);
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        }
-
-        // For mock, decide on returned fetchResponse based on request's Template State's system name.
-        String fetchResponseFile = null;
-        if (systemObject.toLowerCase().contains("account")) {
-            fetchResponseFile =
-                    "com/latticeengines/pls/controller/internal/account-fetch-field-definition-response.json";
-        } else if (systemObject.toLowerCase().contains("contact") || systemObject.toLowerCase().contains("lead")) {
-            fetchResponseFile =
-                    "com/latticeengines/pls/controller/internal/contact-fetch-field-definition-response.json";
-        }
-
-        String fetchResponseJson = "{ \"Result\": \"ERROR: Response processing failure\" }";
-        FieldDefinitionsRecord fetchResponse = new FieldDefinitionsRecord();
-
-        try {
-            InputStream fetchResponseInputStream = getClass().getClassLoader().getResourceAsStream(fetchResponseFile);
-            if (fetchResponseInputStream != null) {
-                fetchResponseJson = IOUtils.toString(fetchResponseInputStream, "UTF-8");
-                log.error("FetchFieldDefinitionsResponse is:\n" + fetchResponseJson);
-            } else {
-                log.error("Loading Fetch Response failed.");
-                return ResponseDocument.failedResponse(new IOException(
-                        "Mock Fetch API failed to load mock response from Resource File."));
-            }
-        } catch (IOException e) {
-            log.error("Fetch Response load method threw IOException error:", e);
-            return ResponseDocument.failedResponse(e);
-            //log.error("Could not load mock response from resource");
-        } catch (Exception e2) {
-            log.error("Fetch Response load method threw Exception " + e2.toString(), e2);
-            return ResponseDocument.failedResponse(e2);
-        }
-
-        if (fetchResponseJson != null) {
-            try {
-                fetchResponse = JsonUtils.deserialize(fetchResponseJson, FieldDefinitionsRecord.class);
-            } catch (Exception e) {
-                log.error("JSON deserialization step failed with error:", e);
-                ResponseDocument.failedResponse(e);
-            }
-        } else {
-            log.error("===> fetchResponseJson was null!!!");
-        }
-
-        //log.error("JAW ------ END Mock Fetch Field Definition -----");
-
-        return ResponseDocument.successResponse(fetchResponse);
-    }
-
-    // Mock API for Import Workflow 2.0 Validate Field Definitions.
-    // Parameters:
-    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
-    //   systemType: The type of system for which a template is being created, eg. Salesforce
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    // Body:
-    //    The ValidationFieldDefinitionsRequest representing the current field mappings for this template and the
-    //    requested changes.
-    @RequestMapping(value = "fielddefinition/mockvalidate", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public ResponseDocument<ValidateFieldDefinitionsResponse> mockValidateFieldDefinitions(
-            @RequestParam(value = "systemName", required = true) String systemName, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
-            @RequestParam(value = "importFile", required = true) String importFile, //
-            @RequestBody(required = true) ValidateFieldDefinitionsRequest validateRequest) {
-        //log.error("JAW ------ BEGIN Mock Validate Field Definition -----");
-        //log.error("validateRequest is:\n" + validateRequest.toString());
-
-        try {
-            validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject, importFile);
-            validateFieldDefinitionsRequestBody("Validate", validateRequest.getCurrentFieldDefinitionsRecord());
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        }
-
-        ValidateFieldDefinitionsResponse validateResponse = new ValidateFieldDefinitionsResponse();
-
-        Map<String, List<FieldDefinition>> recordsMap =
-                validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap();
-        // Decide how to handle the Validation Request for mock.  For now, provide either PASS, WARNING, or ERROR
-        // response depending on Template State page number.
-        int modulo = systemName.length() % 3;
-        if (modulo == 0) {
-            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.PASS);
-        } else if (modulo == 1) {
-            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
-
-            for (Map.Entry<String, List<FieldDefinition>> changeEntry : recordsMap.entrySet()) {
-                List<FieldValidationMessage> warningList = new ArrayList<>();
-                for (FieldDefinition definition : changeEntry.getValue()) {
-                    FieldValidationMessage message = new FieldValidationMessage(definition.getFieldName(),
-                            definition.getColumnName(), definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
-                            definition.getFieldName(), FieldValidationMessage.MessageLevel.WARNING);
-                    warningList.add(message);
-                }
-                validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningList, true);
-            }
-
-        } else {
-            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
-
-            int count = 0;
-            for (Map.Entry<String, List<FieldDefinition>> changeEntry : recordsMap.entrySet()) {
-                List<FieldValidationMessage> warningErrorList = new ArrayList<>();
-                for (FieldDefinition definition : changeEntry.getValue()) {
-                    FieldValidationMessage message = new FieldValidationMessage(definition.getFieldName(),
-                            definition.getColumnName(), null, null);
-                    if (count++ % 2 == 0) {
-                        message.setMessageLevel(FieldValidationMessage.MessageLevel.ERROR);
-                        message.setMessage(definition.getColumnName() + " has OH BOY major problem when mapped to " +
-                                definition.getFieldName());
-                    } else {
-                        message.setMessageLevel(FieldValidationMessage.MessageLevel.WARNING);
-                        message.setMessage(definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
-                                definition.getFieldName());
-                    }
-                    warningErrorList.add(message);
-                }
-                validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningErrorList, true);
-            }
-        }
-
-        // For now, set fieldDefinitionsRecordsMap and fieldDefinitionsChangesMap to the values provided at input.
-        validateResponse.setFieldDefinitionsRecordsMap(validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap());
-        //log.error("JAW ------ END Mock Validate Field Definition -----");
-
-        return ResponseDocument.successResponse(validateResponse);
-    }
-
-    // Mock API for Import Workflow 2.0 Commit Field Definitions.
-    // Parameters:
-    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
-    //   systemType: The type of system for which a template is being created, eg. Salesforce
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
-    // Body:
-    //    The FieldDefinitionsRecord representing the field mappings for this template.
-    @RequestMapping(value = "fielddefinition/mockcommit", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public ResponseDocument<FieldDefinitionsRecord> mockCommitFieldDefinitions(
-            @RequestParam(value = "systemName", required = true) String systemName, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
-            @RequestParam(value = "importFile", required = true) String importFile, //
-            @RequestParam(value = "runImport", required = false, defaultValue = "false") boolean runImport, //
-            @RequestBody(required = true) FieldDefinitionsRecord commitRequest) {
-        //log.error("JAW ------ BEGIN Mock Commit Field Definition -----");
-        //log.error("commitRequest is: " + commitRequest.toString());
-
-        try {
-            validateFieldDefinitionRequestParameters("Commit", systemName, systemType, systemObject, importFile);
-            // Make sure that the commit request has field definition records section.
-            validateFieldDefinitionsRequestBody("Commit", commitRequest);
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        }
-
-        FieldDefinitionsRecord commitResponse = new FieldDefinitionsRecord();
-        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
-
-        //log.error("JAW ------ END Mock Commit Field Definition -----");
-        return ResponseDocument.successResponse(commitResponse);
-    }
-
-    // Real API for Import Workflow 2.0 Fetch Field Definitions.
-    // Parameters:
-    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
-    //   systemType: The type of system for which a template is being created, eg. Salesforce
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    @RequestMapping(value = "fielddefinition/fetch", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public ResponseDocument<FetchFieldDefinitionsResponse> fetchFieldDefinitions(
-            @RequestParam(value = "systemName", required = true) String systemName, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
-            @RequestParam(value = "importFile", required = true) String importFile) {
-        try {
-            FetchFieldDefinitionsResponse fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
-                    systemName, systemType, systemObject, importFile);
-            // TODO(jwinter): Determine if we need to handle a null fetchResponse.
-            return ResponseDocument.successResponse(fetchResponse);
-        } catch (Exception e) {
-            log.error("Fetch Field Definition Failed with Exception: ", e);
-            return ResponseDocument.failedResponse(e);
-        }
-    }
-
-    // Real API for Import Workflow 2.0 Fetch Field Definitions.
-    // Parameters:
-    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
-    //   systemType: The type of system for which a template is being created, eg. Salesforce
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    // Body:
-    // ValidateFieldDefinitionsRequest representing field definition changes/records
-    @RequestMapping(value = "fielddefinition/validate", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Provide validation result and merged field definition to front end")
-    public ResponseDocument<ValidateFieldDefinitionsResponse> validateFieldDefinitions(
-            @RequestParam(value = "systemName", required = true) String systemName, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
-            @RequestParam(value = "importFile", required = true) String importFile, //
-            @RequestBody(required = true) ValidateFieldDefinitionsRequest validateRequest) {
-        ValidateFieldDefinitionsResponse validateFieldDefinitionsResponse = null;
-        try {
-            validateFieldDefinitionsResponse = modelingFileMetadataService.validateFieldDefinitions(systemName,
-                    systemType, systemObject, importFile, validateRequest);
-        } catch (Exception e) {
-            return ResponseDocument.failedResponse(e);
-        }
-        return ResponseDocument.successResponse(validateFieldDefinitionsResponse);
-    }
-
-    // Real API for Import Workflow 2.0 Commit Field Definitions.
-    // Parameters:
-    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
-    //   systemType: The type of system for which a template is being created, eg. Salesforce
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
-    // Body:
-    //    The FieldDefinitionsRecord representing the field mappings for this template.
-    @RequestMapping(value = "fielddefinition/commit", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public ResponseDocument<FieldDefinitionsRecord> CommitFieldDefinitions(
-            @RequestParam(value = "systemName", required = true) String systemName, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
-            @RequestParam(value = "importFile", required = true) String importFile, //
-            @RequestParam(value = "runImport", required = false, defaultValue = "false") boolean runImport, //
-            @RequestBody(required = true) FieldDefinitionsRecord commitRequest) {
-        ///log.error("JAW ------ BEGIN Real Commit Field Definition -----");
-        //log.error("commitRequest is: " + commitRequest.toString());
-
-        try {
-            FieldDefinitionsRecord commitResponse = modelingFileMetadataService.commitFieldDefinitions(
-                    systemName, systemType, systemObject, importFile, runImport, commitRequest);
-            // TODO(jwinter): Determine if we need to handle a null fetchResponse.
-            return ResponseDocument.successResponse(commitResponse);
-        } catch (Exception e) {
-            log.error("Real Commit Failed with Exception: ", e);
-            return ResponseDocument.failedResponse(e);
-        }
     }
 
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
