@@ -117,15 +117,14 @@ public class LivySessionServiceImpl implements LivySessionService {
                 restTemplate.delete(url);
             } catch (ResourceAccessException e) {
                 if (e.getCause() instanceof SocketTimeoutException) {
-                    log.warn("Encountered socket time out error when killing the livy session: {}", url, e);
+                    log.warn("Encountered socket time out error when killing the livy session: {}", url, e.getCause());
                 } else if (e.getCause() instanceof HttpHostConnectException) {
-                    log.warn("Encountered connection exception when killing the livy session: {}", url, e);
+                    log.warn("Encountered connection exception when killing the livy session: {}", url, e.getCause());
                 } else {
-                    log.error("Encountered ResourceAccessException caused by unknown error: {}", //
-                            e.getCause().getClass().getCanonicalName());
+                    log.error("Encountered ResourceAccessException when killing the livy session: {}", url, e.getCause());
                 }
             } catch (Exception e) {
-                log.error("Encountered unknown exception: {}", e.getCause().getClass().getCanonicalName());
+                log.warn("Encountered exception when killing the livy session: {}", url, e);
             }
             log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
@@ -137,13 +136,25 @@ public class LivySessionServiceImpl implements LivySessionService {
         if (sessionId != null) {
             String url = session.getSessionUrl();
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-            info = retry.execute(ctx -> {
-                try {
-                    return restTemplate.getForObject(url, String.class);
-                } catch (HttpClientErrorException.NotFound e) {
-                    return "";
+            try {
+                info = retry.execute(ctx -> {
+                    try {
+                        return restTemplate.getForObject(url, String.class);
+                    } catch (HttpClientErrorException.NotFound e) {
+                        return "";
+                    }
+                });
+            } catch (ResourceAccessException e) {
+                if (e.getCause() instanceof SocketTimeoutException) {
+                    log.warn("Encountered socket time out error when fetching the livy session: {}", url, e.getCause());
+                } else if (e.getCause() instanceof HttpHostConnectException) {
+                    log.warn("Encountered connection exception when fetching the livy session: {}", url, e.getCause());
+                } else {
+                    log.warn("Encountered ResourceAccessException when fetching the livy session: {}", url, e.getCause());
                 }
-            });
+            } catch (Exception e) {
+                log.warn("Encountered exception when fetching the livy session: {}", url, e);
+            }
         }
         return info;
     }
