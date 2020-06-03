@@ -21,7 +21,7 @@ public class DeleteActionConfiguration extends ActionConfiguration {
     @JsonProperty("id_entity")
     private BusinessEntity idEntity;
 
-    @JsonProperty("DeleteEntityType")
+    @JsonProperty("delete_entity_type")
     private EntityType deleteEntityType;
 
     // if empty, means all entities
@@ -32,13 +32,13 @@ public class DeleteActionConfiguration extends ActionConfiguration {
     @JsonProperty("delete_stream_ids")
     private List<String> deleteStreamIds;
 
-    @JsonProperty("IdSystem")
+    @JsonProperty("id_system")
     private String idSystem;
 
-    @JsonProperty("FromDate")
+    @JsonProperty("from_date")
     private String fromDate;
 
-    @JsonProperty("ToDate")
+    @JsonProperty("to_date")
     private String toDate;
 
     public String getDeleteDataTable() {
