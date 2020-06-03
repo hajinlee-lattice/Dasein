@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.workflow.PublishTableRoleWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.PublishTableRoleRequest;
 

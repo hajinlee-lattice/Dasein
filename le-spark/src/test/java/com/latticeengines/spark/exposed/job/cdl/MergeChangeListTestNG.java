@@ -150,6 +150,7 @@ public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertNull(age, record.toString());
                 Assert.assertEquals(age2, "44", record.toString());
                 break;
+            default:
             }
             rows++;
         }
@@ -193,6 +194,7 @@ public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertNull(age, record.toString());
                 Assert.assertEquals(age2, "44", record.toString());
                 break;
+            default:
             }
             rows++;
         }
