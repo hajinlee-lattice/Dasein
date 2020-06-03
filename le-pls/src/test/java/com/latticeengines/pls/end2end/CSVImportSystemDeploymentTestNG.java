@@ -98,6 +98,11 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
         verifySystemAfterCreateContactTemplate(sfSystem, otherSystem, sfContactDFId, otherContactDFId);
 
+        // test with Transaction
+        String otherTxnDFId = createOtherTransactionTemplateAndVerify(otherSystemName);
+
+        verifySystemAfterCreateTxnTemplate(otherSystem, otherTxnDFId);
+
         // check upload file again and can get system name this time
         verifyEditTemplate(otherSystemName, sfSystem);
 
@@ -182,6 +187,16 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), InterfaceName.CustomerAccountId.name());
     }
 
+    private void verifySystemAfterCreateTxnTemplate(S3ImportSystem otherSystem, String otherTxnDFId) {
+        Assert.assertNotNull(otherSystem.getAccountSystemId());
+        Table otherSystemTxnTable =
+                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), otherTxnDFId).getImportTemplate();
+        Assert.assertNotNull(otherSystemTxnTable);
+        Attribute otherSystemAccountIdAttr = otherSystemTxnTable.getAttribute(otherSystem.getAccountSystemId());
+        Assert.assertNotNull(otherSystemAccountIdAttr);
+        Assert.assertEquals(otherSystemAccountIdAttr.getDisplayName(), "Account_ID");
+    }
+
     private String createOtherContactTemplateAndVerify(String sfSystemName, String otherSystemName) {
         SourceFile otherContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
@@ -208,6 +223,30 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNotNull(otherContactFile);
         Assert.assertNotNull(otherContactDFId);
         return otherContactDFId;
+    }
+
+    private String createOtherTransactionTemplateAndVerify(String otherSystemName) {
+        SourceFile otherTransactionFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + TRANSACTION_SOURCE_FILE));
+        String otherTransactionFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_TRANSACTION);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(otherTransactionFile.getName(), ENTITY_TRANSACTION, SOURCE, otherTransactionFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("Account_ID")) {
+                fieldMapping.setSystemName(otherSystemName);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(otherTransactionFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION,
+                SOURCE, otherTransactionFeedType);
+        otherTransactionFile = sourceFileService.findByName(otherTransactionFile.getName());
+
+        String otherTransactionDFId = cdlService.createS3Template(customerSpace, otherTransactionFile.getName(),
+                SOURCE, ENTITY_TRANSACTION, otherTransactionFeedType, null, ENTITY_TRANSACTION + "Data");
+        Assert.assertNotNull(otherTransactionFile);
+        Assert.assertNotNull(otherTransactionDFId);
+        return otherTransactionDFId;
     }
 
     private String createSFContactTemplateAndVerify(String sfSystemName) {
@@ -591,10 +630,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 fieldMapping.setIdType(FieldMapping.IdType.Lead);
                 fieldMapping.setMapToLatticeId(false);
                 fieldMapping.setMappedToLatticeField(true);
-            }
-            if (fieldMapping.getUserField().equals("Account_ID")) {
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-                fieldMapping.setMappedToLatticeField(false);
             }
         }
         modelingFileMetadataService.resolveMetadata(mktSourceFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,

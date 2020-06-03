@@ -3,7 +3,10 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -68,7 +74,7 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "cdl consolidate and profile", description = "REST resource for cdl")
+@Api(value = "cdl consolidate and profile")
 @RestController
 @RequestMapping("/cdl")
 @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
@@ -106,6 +112,7 @@ public class CDLResource {
     @ApiOperation(value = "Start Consolidate And Profile job")
     public ResponseDocument<String> startConsolidateAndProfileJob() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         ApplicationId result = cdlJobProxy.createConsolidateJob(customerSpace.toString());
         return ResponseDocument.successResponse(result.toString());
     }
@@ -118,6 +125,7 @@ public class CDLResource {
             return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18182));
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         if (request == null) {
             request = new ProcessAnalyzeRequest();
         }
@@ -147,6 +155,7 @@ public class CDLResource {
                                                    @RequestParam(value = "entity") String entity, //
                                                    @RequestParam(value = "feedType") String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName,
                     dataFileName, source, entity, feedType);
@@ -181,7 +190,7 @@ public class CDLResource {
             String taskId = cdlService.createS3Template(customerSpace.toString(), templateFileName, source, entity,
                     feedType, subType, templateDisplay.getTemplateName());
 
-            UIAction uiAction = null;
+            UIAction uiAction;
             if (importData) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
@@ -191,7 +200,6 @@ public class CDLResource {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
                             String.format(createS3TemplateAndImportMsg, entity));
                 }
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
@@ -200,8 +208,8 @@ public class CDLResource {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
                             String.format(createS3TemplateMsg, entity));
                 }
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             }
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error(String.format("Failed to create template for S3 import: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"S3CreateTemplateAndImport", e.getMessage()});
@@ -215,6 +223,7 @@ public class CDLResource {
                                                   @RequestParam(value = "subType", required = false) String subType,
                                                   @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
@@ -237,6 +246,7 @@ public class CDLResource {
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
             @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
@@ -258,6 +268,7 @@ public class CDLResource {
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
             @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
                     templateDisplay.getFeedType());
@@ -290,6 +301,7 @@ public class CDLResource {
                                          @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
                                          @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         UIAction uiAction = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
@@ -300,6 +312,7 @@ public class CDLResource {
                                                    @RequestParam(value = "endTime") String endTime,
                                                    @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             ApplicationId applicationId = cdlService.cleanupByTimeRange(customerSpace.toString(), startTime, endTime,
                     schemaInterpretation);
@@ -315,6 +328,7 @@ public class CDLResource {
     public ResponseDocument<String> cleanupAll(
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             cdlService.replaceData(customerSpace.toString(), schemaInterpretation);
             return ResponseDocument.successResponse("");
@@ -328,6 +342,7 @@ public class CDLResource {
     @ApiOperation(value = "create Replace Action to replace data")
     public ResponseDocument<String> replaceData(@RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         try {
             cdlService.replaceData(customerSpace.toString(), schemaInterpretation);
             return ResponseDocument.successResponse("");
@@ -355,6 +370,7 @@ public class CDLResource {
     @ApiOperation("get file list under s3Path")
     public List<FileProperty> getFileList(@RequestParam String s3Path) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path, "csv");
     }
 
@@ -478,7 +494,7 @@ public class CDLResource {
             log.info("2. Get System list");
             List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
             log.info("3. Update Match Id field");
-            updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
+            Set<String> systemIds = updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
             Map<String, String> standardNameMapping =
                     standardTable.getAttributes()
                             .stream()
@@ -489,7 +505,7 @@ public class CDLResource {
                     preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
                 } else if (standardNameMapping.containsKey(preview.getNameInTemplate())) {
                     preview.setDisplayName(standardNameMapping.get(preview.getNameInTemplate()));
-                } else {
+                } else if (!systemIds.contains(preview.getNameInTemplate())) {
                     preview.setDisplayName(preview.getNameFromFile());
                 }
             });
@@ -500,43 +516,78 @@ public class CDLResource {
         }
     }
 
-    private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
-        if (CollectionUtils.isEmpty(s3ImportSystem) || entityType == null) {
-            return;
+    private Set<String> updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews,
+                                                    List<S3ImportSystem> s3ImportSystems, EntityType entityType) {
+        if (CollectionUtils.isEmpty(s3ImportSystems) || entityType == null) {
+            return Collections.emptySet();
         }
         log.info("Update UniqueId Preview.");
-        Set<String> accountSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getAccountSystemId)
-                .collect(Collectors.toSet());
-        Set<String> contactSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getContactSystemId)
-                .collect(Collectors.toSet());
-        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
-            switch (entityType) {
-                case Accounts:
-                    if (accountSystemIdList.contains(fieldPreview.getNameInTemplate())) {
-                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+        Map<String, Pair<S3ImportSystem, EntityType>> accountSystemIdMap = new HashMap<>();
+        Map<String, Pair<S3ImportSystem, EntityType>> contactSystemIdMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(s3ImportSystems)) {
+            s3ImportSystems.forEach(s3ImportSystem -> {
+                accountSystemIdMap.put(s3ImportSystem.getAccountSystemId(), Pair.of(s3ImportSystem,
+                        s3ImportSystem.getSystemType().getPrimaryAccount()));
+                if (s3ImportSystem.getSecondaryAccountIds() != null) {
+                    for (Map.Entry<String, EntityType> entry :
+                            s3ImportSystem.getSecondaryAccountIds().getSecondaryIdToEntityTypeMap().entrySet()) {
+                        accountSystemIdMap.put(entry.getKey(), Pair.of(s3ImportSystem, entry.getValue()));
                     }
-                    break;
-                case Contacts:
-                    if (contactSystemIdList.contains(fieldPreview.getNameInTemplate())) {
-                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                }
+                contactSystemIdMap.put(s3ImportSystem.getContactSystemId(), Pair.of(s3ImportSystem,
+                        s3ImportSystem.getSystemType().getPrimaryContact()));
+                if (s3ImportSystem.getSecondaryContactIds() != null) {
+                    for (Map.Entry<String, EntityType> entry :
+                            s3ImportSystem.getSecondaryContactIds().getSecondaryIdToEntityTypeMap().entrySet()) {
+                        contactSystemIdMap.put(entry.getKey(), Pair.of(s3ImportSystem, entry.getValue()));
                     }
-                    if (accountSystemIdList.contains(fieldPreview.getNameInTemplate())) {
-                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
-                    }
-                    break;
-                default:
+                }
+            });
+        }
+        if (!(MapUtils.isEmpty(accountSystemIdMap) && MapUtils.isEmpty(contactSystemIdMap))) {
+            for (TemplateFieldPreview fieldPreview : fieldPreviews) {
+                switch (entityType) {
+                    case Accounts:
+                        if (accountSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
+                            fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                            Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(fieldPreview.getNameInTemplate());
+                            fieldPreview.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+                        }
+                        break;
+                    case Contacts:
+                        if (contactSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
+                            fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                            Pair<S3ImportSystem, EntityType> attrInfoPair = contactSystemIdMap.get(fieldPreview.getNameInTemplate());
+                            fieldPreview.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+                        }
+                        if (accountSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
+                            fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                            Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(fieldPreview.getNameInTemplate());
+                            fieldPreview.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+                        }
+                        break;
+                    default:
+                }
             }
         }
-        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
-                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
-        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
-                .collect(Collectors.toSet());
-        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
-            if (latticeFieldNameFromFileList.contains(fieldPreview.getNameFromFile())) {
-                fieldPreview.setFieldCategory(FieldCategory.LatticeField);
-            }
+        Set<String> systemIds = new HashSet<>();
+        if (MapUtils.isNotEmpty(accountSystemIdMap)) {
+            systemIds.addAll(accountSystemIdMap.keySet());
         }
+        if (MapUtils.isNotEmpty(contactSystemIdMap)) {
+            systemIds.addAll(contactSystemIdMap.keySet());
+        }
+        return systemIds;
+    }
 
+    private String convertPluralToSingular(String displayName) {
+        if (StringUtils.isNotEmpty(displayName) && displayName.endsWith("s")) {
+            return displayName.substring(0, displayName.length() - 1);
+        }
+        return displayName;
     }
 
     private DataFeedTask getDataFeedTask(CustomerSpace customerSpace, String source, S3ImportTemplateDisplay templateDisplay) {
@@ -696,6 +747,7 @@ public class CDLResource {
     @ApiOperation(value = "Get all import files")
     public List<ImportFileInfo> getAllImportFiles() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
         return cdlService.getAllImportFiles(customerSpace.toString());
     }
 }
