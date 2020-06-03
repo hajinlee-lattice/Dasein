@@ -117,7 +117,11 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
             activeBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
         }
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), TABLE_ROLE, active);
-        return StringUtils.isBlank(activeTableName) && StringUtils.isNotBlank(activeBatchStoreName);
+        boolean missingLookupTable = StringUtils.isBlank(activeTableName) && StringUtils.isNotBlank(activeBatchStoreName);
+        if (missingLookupTable) {
+            log.info("Missing Accountlookup table, going to generate one.");
+        }
+        return missingLookupTable;
     }
 
     private boolean hasNewBatchStore() {
@@ -128,7 +132,12 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
         if (StringUtils.isBlank(inactiveBatchStoreName)) {
             inactiveBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
         }
-        return StringUtils.isNotBlank(inactiveBatchStoreName) && !inactiveBatchStoreName.equals(activeBatchStoreName);
+        boolean hasNewStore = StringUtils.isNotBlank(inactiveBatchStoreName) && !inactiveBatchStoreName.equals(activeBatchStoreName);
+        if (hasNewStore) {
+            log.info("inactiveBatchStoreName={}, activeBatchStoreName={}: has new batch store", //
+                    inactiveBatchStoreName, activeBatchStoreName);
+        }
+        return hasNewStore;
     }
 
     private void exportToDynamo(String tableName) {

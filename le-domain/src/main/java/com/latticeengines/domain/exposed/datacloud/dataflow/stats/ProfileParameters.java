@@ -213,6 +213,10 @@ public class ProfileParameters extends TransformationFlowParameters {
             this.algo = algo;
         }
 
+        public static Attribute nonBktAttr(String attrName) {
+            return new Attribute(attrName, null, null, null);
+        }
+
         public String getAttr() {
             return attr;
         }

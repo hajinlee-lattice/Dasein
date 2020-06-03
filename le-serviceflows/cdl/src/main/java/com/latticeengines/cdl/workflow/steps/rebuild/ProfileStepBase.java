@@ -29,6 +29,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -100,19 +101,33 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected TransformationStepConfig profile(String masterTableName) {
+        return profile(masterTableName, false, false);
+    }
+
+    protected TransformationStepConfig profile(String masterTableName, List<ProfileParameters.Attribute> declaredAttrs) {
         TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
-        return configureProfileStep(step);
+        return configureProfileStep(step, declaredAttrs, false, false);
+    }
+
+    protected TransformationStepConfig profile(String masterTableName, boolean detectDiscrete, boolean detectCategorical) {
+        TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
+        return configureProfileStep(step, null, detectDiscrete, detectCategorical);
     }
 
     protected TransformationStepConfig profile(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
-        return configureProfileStep(step);
+        return configureProfileStep(step, null, false, false);
     }
 
-    private TransformationStepConfig configureProfileStep(TransformationStepConfig step) {
+    private TransformationStepConfig configureProfileStep(TransformationStepConfig step,
+                                                          List<ProfileParameters.Attribute> declaredAttrs,
+                                                          boolean detectDiscrete, boolean detectCategorical) {
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
         ProfileJobConfig conf = new ProfileJobConfig();
+        conf.setDeclaredAttrs(declaredAttrs);
+        conf.setAutoDetectDiscrete(detectDiscrete);
+        conf.setAutoDetectCategorical(detectCategorical);
         conf.setEncAttrPrefix(CEAttr);
         if (evaluationDateAsTimestamp != null) {
             conf.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);

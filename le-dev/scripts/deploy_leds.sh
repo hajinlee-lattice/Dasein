@@ -77,9 +77,28 @@ for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scorin
         pushd ${ARTIFACT_DIR}
         unzip ${artifact}-${LEDS_VERSION}.zip
         if [[ ${artifact} == "dpconda" ]]; then
-            pushd dpconda
-            bash setupenv_conda.sh
-            popd
+            if [[ ${LEDS_VERSION} < "1.6" ]]; then
+              # the original conda install script does not work now, because libraries are removed from conda
+              # use pre-build zip instead
+              if [[ -d "/opt/conda/envs/lattice" ]]; then
+                rm -rf /opt/conda/envs/lattice
+              fi
+              if [[ $(uname) == "Darwin" ]]; then
+                aws s3 cp s3://latticeengines-test-artifacts/artifacts/conda/lattice.zip .
+                unzip -q lattice.zip -d /opt/conda/envs/
+              else
+                aws s3 cp s3://latticeengines-dev-chef/conda/lattice_20181019.zip .
+                if [[ -d "/opt/conda/envs/lattice_20181019" ]]; then
+                  rm -rf /opt/conda/envs/lattice_20181019
+                fi
+                unzip -q lattice_20181019.zip -d /opt/conda/envs/
+                mv /opt/conda/envs/lattice_20181019 /opt/conda/envs/lattice
+              fi
+            else
+              pushd dpconda
+              bash setupenv_conda.sh
+              popd
+            fi
         else
             hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
             hdfs dfs -mkdir -p ${DS_ROOT}/${dir1}

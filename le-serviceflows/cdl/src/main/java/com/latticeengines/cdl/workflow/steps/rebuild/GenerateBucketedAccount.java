@@ -192,6 +192,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         step.setInputSteps(Collections.singletonList(filterStep));
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
         ProfileJobConfig conf = new ProfileJobConfig();
+        conf.setAutoDetectDiscrete(true);
+        conf.setAutoDetectCategorical(true);
+        conf.setConsiderAMAttrs(true);
         conf.setEncAttrPrefix(CEAttr);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
