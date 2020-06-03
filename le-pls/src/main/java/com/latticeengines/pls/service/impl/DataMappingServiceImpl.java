@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import static com.latticeengines.pls.util.ImportWorkflowUtils.validateFieldDefinitionRequestParameters;
 import static com.latticeengines.pls.util.ImportWorkflowUtils.validateFieldDefinitionsRequestBody;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class DataMappingServiceImpl implements DataMappingService {
     @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
-    private static final String TEMPLATE_NAME = "%s_%s_Template";
+    private static final String TEMPLATE_NAME = "%s_%d_Template";
 
     @Override
     public FetchFieldDefinitionsResponse fetchFieldDefinitions(String systemName, String systemType,
@@ -293,7 +294,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         if (sourceFile != null) {
             newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
         } else {
-            newTableName = String.format(TEMPLATE_NAME, systemObject, System.currentTimeMillis());
+            newTableName = String.format(TEMPLATE_NAME, systemObject, Instant.now().toEpochMilli());
         }
         Table newTable = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(newTableName, false, commitRequest);
 
