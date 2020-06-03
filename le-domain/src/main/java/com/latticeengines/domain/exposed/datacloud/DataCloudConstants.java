@@ -153,6 +153,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_COPY_TXMFR = "CopyTxmfr";
     public static final String TRANSFORMER_SOFT_DELETE_TXFMR = "SoftDeleteTxfmr";
     public static final String TRANSFORMER_LEGACY_DELETE_TXFMR = "LegacyDeleteTxfmr";
+    public static final String TRANSFORMER_MERGE_TS_DELETE_TXFMR = "MergeTimeSeriesDeleteDataTxfmr";
     public static final String TRANSFORMER_SELECT_BY_COLUMN_TXFMR = "SelectByColumnTxfmr";
     public static final String TRANSFORMER_REPARTITION_TXMFR = "RepartitionTxmfr";
     public static final String TRANSFORMER_UPSERT_TXMFR = "UpsertTxmfr";

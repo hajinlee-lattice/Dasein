@@ -1,12 +1,15 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_TS_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,7 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -29,6 +35,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
+import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -218,8 +225,49 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         return step;
     }
 
+    TransformationStepConfig mergeTimeSeriesSoftDelete(List<Action> softDeleteActions, String idColumn) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MERGE_TS_DELETE_TXFMR);
+        Map<Integer, List<Long>> timeRanges = new HashMap<>();
+        for (int i = 0; i < softDeleteActions.size(); i++) {
+            Action action = softDeleteActions.get(i);
+            DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
+            if (config.getDeleteDataTable() == null) {
+                // delete by only time range, skip here
+                continue;
+            }
+            addBaseTables(step, config.getDeleteDataTable());
+            if (StringUtils.isNotBlank(config.getFromDate()) && StringUtils.isNotBlank(config.getToDate())) {
+                timeRanges.put(i, parseTimeRange(config));
+            }
+        }
+
+        MergeTimeSeriesDeleteDataConfig config = new MergeTimeSeriesDeleteDataConfig();
+        config.joinKey = idColumn;
+        config.timeRanges.putAll(timeRanges);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    // return [ start day period, end day period ]
+    List<Long> parseTimeRange(@NotNull DeleteActionConfiguration config) {
+        // TODO assume format is yyyy-MM-dd for now, handle different format in the
+        // future
+        Integer startDayPeriod = DateTimeUtils.dateToDayPeriod(config.getFromDate());
+        Integer endDayPeriod = DateTimeUtils.dateToDayPeriod(config.getToDate());
+        Preconditions.checkNotNull(startDayPeriod,
+                String.format("Failed to parse delete from date string %s", config.getFromDate()));
+        Preconditions.checkNotNull(endDayPeriod,
+                String.format("Failed to parse delete to date string %s", config.getToDate()));
+        return Arrays.asList(startDayPeriod.longValue(), endDayPeriod.longValue());
+    }
+
     TransformationStepConfig softDelete(int mergeSoftDeleteStep) {
         return softDelete(mergeSoftDeleteStep, masterTable, null);
+    }
+
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, String timeColumn, Set<List<Long>> timeRanges) {
+        return softDelete(mergeSoftDeleteStep, masterTable, getJoinColumn(), null, timeColumn, timeRanges);
     }
 
     TransformationStepConfig softDeleteSystemBatchStore(int mergeSoftDeleteStep) {
@@ -228,7 +276,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
 
     TransformationStepConfig softDeleteSystemBatchStoreByContact(int mergeSoftDeleteStep) {
         return softDelete(mergeSoftDeleteStep, systemMasterTable, InterfaceName.ContactId.name(),
-                InterfaceName.EntityId.name());
+                InterfaceName.EntityId.name(), null, null);
     }
 
     boolean hasSystemStore() {
@@ -240,14 +288,13 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
     }
 
     private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String sourceIdColumn) {
-        return softDelete(mergeSoftDeleteStep, masterTable, getJoinColumn(), sourceIdColumn);
+        return softDelete(mergeSoftDeleteStep, masterTable, getJoinColumn(), sourceIdColumn, null, null);
     }
 
     private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String joinColumn,
-                                                String sourceIdColumn) {
+            String sourceIdColumn, String timeColumn, Set<List<Long>> timeRanges) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
-        step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
         if (masterTable != null) {
             log.info("Add masterTable=" + masterTable.getName());
             addBaseTables(step, masterTable.getName());
@@ -255,10 +302,18 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
             throw new IllegalArgumentException("The master table is empty for soft delete!");
         }
         SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
-        softDeleteConfig.setDeleteSourceIdx(0);
+        if (mergeSoftDeleteStep >= 0) {
+            step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+            softDeleteConfig.setDeleteSourceIdx(0);
+        }
         softDeleteConfig.setIdColumn(joinColumn);
         if (StringUtils.isNotEmpty(sourceIdColumn)) {
             softDeleteConfig.setSourceIdColumn(sourceIdColumn);
+        }
+        if (StringUtils.isNotBlank(timeColumn)) {
+            softDeleteConfig.setEventTimeColumn(timeColumn);
+            softDeleteConfig.setTimeRangesColumn(InterfaceName.TimeRanges.name());
+            softDeleteConfig.setTimeRangesToDelete(timeRanges);
         }
         step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         return step;

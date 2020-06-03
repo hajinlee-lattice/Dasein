@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
-
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,6 +26,18 @@ public class SoftDeleteConfig extends SparkJobConfig {
 
     @JsonProperty("NeedPartitionOutput")
     private Boolean needPartitionOutput;
+
+    // time column in source
+    @JsonProperty("EventTimeColumn")
+    private String eventTimeColumn;
+
+    // column that contains list of time ranges that should be deleted
+    @JsonProperty("TimeRangesColumn")
+    private String timeRangesColumn;
+
+    // global time ranges to apply to every record for deletion evaluation
+    @JsonProperty("TimeRangesToDelete")
+    private Set<List<Long>> timeRangesToDelete;
 
     @Override
     @JsonProperty("Name")
@@ -75,5 +87,29 @@ public class SoftDeleteConfig extends SparkJobConfig {
 
     public void setNeedPartitionOutput(Boolean needPartitionOutput) {
         this.needPartitionOutput = needPartitionOutput;
+    }
+
+    public String getEventTimeColumn() {
+        return eventTimeColumn;
+    }
+
+    public void setEventTimeColumn(String eventTimeColumn) {
+        this.eventTimeColumn = eventTimeColumn;
+    }
+
+    public String getTimeRangesColumn() {
+        return timeRangesColumn;
+    }
+
+    public void setTimeRangesColumn(String timeRangesColumn) {
+        this.timeRangesColumn = timeRangesColumn;
+    }
+
+    public Set<List<Long>> getTimeRangesToDelete() {
+        return timeRangesToDelete;
+    }
+
+    public void setTimeRangesToDelete(Set<List<Long>> timeRangesToDelete) {
+        this.timeRangesToDelete = timeRangesToDelete;
     }
 }

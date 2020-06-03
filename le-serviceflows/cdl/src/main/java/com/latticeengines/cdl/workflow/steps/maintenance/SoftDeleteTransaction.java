@@ -3,18 +3,24 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -27,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -46,6 +53,9 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
 
     private Table rawTable;
 
+    // global time ranges to apply to delete time series data
+    private Set<List<Long>> deleteTimeRanges = new HashSet<>();
+
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
@@ -57,7 +67,7 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
     @Override
     protected PipelineTransformationRequest getConsolidateRequest() {
 
-        List<Action> actions = filterSoftDeleteActions(softDeleteActions, BusinessEntity.Account);
+        List<Action> actions = getValidTxnSoftDeleteActions(softDeleteActions);
         if (CollectionUtils.isEmpty(actions)) {
             log.info("No suitable delete actions for Transaction. Skip this step.");
             return null;
@@ -67,19 +77,32 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
 
             List<TransformationStepConfig> steps = new ArrayList<>();
 
+            List<Action> deleteActionsToMerge = processDeleteTimeSeriesActions(actions);
+
             int softDeleteMergeStep = 0;
-            int softDeleteStep = softDeleteMergeStep + 1;
+            int softDeleteStep = 0; // might not have merge step
+
+            // need to merge delete data
+            if (CollectionUtils.isNotEmpty(deleteActionsToMerge)) {
+                TransformationStepConfig softDeleteMerge = mergeTimeSeriesSoftDelete(actions,
+                        InterfaceName.AccountId.name());
+                steps.add(softDeleteMerge);
+                softDeleteStep = softDeleteMergeStep + 1;
+            } else {
+                softDeleteMergeStep = -1;
+            }
+
             int collectRawStep = softDeleteStep + 1;
             int cleanupRawStep = collectRawStep + 1;
             int dayPeriodStep = cleanupRawStep + 1;
 
-            TransformationStepConfig softDeleteMerge = mergeSoftDelete(actions, InterfaceName.AccountId.name());
-            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep);
+            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep,
+                    InterfaceName.TransactionDayPeriod.name(), deleteTimeRanges);
             TransformationStepConfig collectRaw = collectRaw();
             TransformationStepConfig cleanupRaw = cleanupRaw(rawTable, collectRawStep);
             TransformationStepConfig dayPeriods = collectDays(softDeleteStep);
             TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, softDeleteStep);
-            steps.add(softDeleteMerge);
+
             steps.add(softDelete);
             steps.add(collectRaw);
             steps.add(cleanupRaw);
@@ -100,6 +123,40 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
     String getJoinColumn() {
         // delete by account id
         return InterfaceName.AccountId.name();
+    }
+
+    // get all valid soft delete txn actions
+    private List<Action> getValidTxnSoftDeleteActions(List<Action> softDeleteActions) {
+        if (CollectionUtils.isEmpty(softDeleteActions)) {
+            return Collections.emptyList();
+        }
+
+        return softDeleteActions.stream().filter(action -> {
+            DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
+            boolean deleteByAccId = BusinessEntity.Account.equals(config.getIdEntity());
+            boolean deleteByTimeRange = StringUtils.isNotBlank(config.getFromDate())
+                    && StringUtils.isNotBlank(config.getToDate());
+            log.info("Action config = {}, deleteByAccId = {}, deleteByTimeRange = {}, hasEntity({}) = {}",
+                    JsonUtils.serialize(config), deleteByAccId, deleteByTimeRange, entity, config.hasEntity(entity));
+            return config.hasEntity(entity) && (deleteByAccId || deleteByTimeRange);
+        }).collect(Collectors.toList());
+    }
+
+    private List<Action> processDeleteTimeSeriesActions(List<Action> actions) {
+        List<Action> deleteDataToMerge = new ArrayList<>();
+        for (Action action : actions) {
+            DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
+            if (StringUtils.isNotBlank(config.getDeleteDataTable())) {
+                deleteDataToMerge.add(action);
+            } else {
+                Preconditions.checkArgument(StringUtils.isNotBlank(config.getFromDate()),
+                        "Delete action need to have either delete data or time range. Missing FromDate in time range");
+                Preconditions.checkArgument(StringUtils.isNotBlank(config.getToDate()),
+                        "Delete action need to have either delete data or time range. Missing ToDate in time range");
+                deleteTimeRanges.add(parseTimeRange(config));
+            }
+        }
+        return deleteDataToMerge;
     }
 
     private TransformationStepConfig partitionDaily(int dayPeriodStep, int softDeleteStep) {
