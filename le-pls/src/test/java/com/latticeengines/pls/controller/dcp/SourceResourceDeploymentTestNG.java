@@ -148,8 +148,10 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
-        FieldDefinitionsRecord record = testSourceProxy.getSourceMappings(sourceId);
-        Assert.assertNotNull(record);
+        // get source mappings for source
+        fetchResponse = testSourceProxy.fetchDefinitions(sourceId, null, null);
+        FieldDefinitionsRecord record = fetchResponse.getCurrentFieldDefinitionsRecord();
+        Assert.assertNotNull(fetchResponse.getCurrentFieldDefinitionsRecord());
         log.info("test get mappings ");
 
         UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
@@ -161,7 +163,8 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(retrievedSource);
 
         log.info("test get mappings after updates");
-        FieldDefinitionsRecord updatedRecord = testSourceProxy.getSourceMappings(sourceId);
+        fetchResponse = testSourceProxy.fetchDefinitions(sourceId, null, null);
+        FieldDefinitionsRecord updatedRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
         for (String  fieldSection : record.getFieldDefinitionsRecordsMap().keySet()) {
             List<FieldDefinition> definitions = record.getFieldDefinitionsRecords(fieldSection);
             List<FieldDefinition> updatedDefinitions = updatedRecord.getFieldDefinitionsRecords(fieldSection);

@@ -114,12 +114,17 @@ public class SourceServiceImpl implements SourceService {
                                                                String importFile)
             throws Exception {
 
+        Preconditions.checkState(StringUtils.isAllBlank(sourceId, importFile),
+                "provide one parameter at least : sourceId or import file id");
+
         // 1a. Convert systemObject to entity.
         EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
                 EntityType.valueOf(entityType) : EntityType.Accounts;
+        Preconditions.checkState(EntityType.Accounts.equals(entityTypeObj), String.format("illegal entity type %s",
+                entityTypeObj));
 
         // 1b. Generate sourceFile object.
-        SourceFile sourceFile = getSourceFile(importFile);
+        SourceFile sourceFile = sourceFileService.findByName(importFile);
 
         // 1c. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -129,7 +134,7 @@ public class SourceServiceImpl implements SourceService {
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
                         "   Source File: %s\n   Customer Space: %s", entityTypeObj.getEntity(),
                 entityTypeObj.getSubType(),
-                sourceFile.getName(), customerSpace.toString()));
+                sourceFile == null ? "empty" : sourceFile.getName(), customerSpace.toString()));
 
         // 2a. Set up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
@@ -148,10 +153,11 @@ public class SourceServiceImpl implements SourceService {
         setExistingFieldDefinitionsFromSource(customerSpace, fetchFieldDefinitionsResponse, sourceId);
 
         // 2d. Create a MetadataResolver using the sourceFile.
-        MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
-        fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
-                ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
-
+        if (sourceFile != null) {
+            MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
+            fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
+                    ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
+        }
 
         // 3. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file.
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
@@ -205,40 +211,6 @@ public class SourceServiceImpl implements SourceService {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return sourceProxy.updateSource(customerSpace.toString(), updateSourceRequest);
-    }
-
-    @Override
-    public FieldDefinitionsRecord getSourceMappings(String sourceId) {
-        // 1a. default entity type.
-        EntityType entityTypeObj = EntityType.Accounts;
-
-        // 1b. Generate customerSpace.
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
-        }
-        log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
-                        "   Customer Space: %s", entityTypeObj.getEntity(),
-                entityTypeObj.getSubType(), customerSpace.toString()));
-
-        // 2a. Set up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
-        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
-        fetchFieldDefinitionsResponse.setCurrentFieldDefinitionsRecord(
-                new FieldDefinitionsRecord(S3ImportSystem.SystemType.DCP.getDefaultSystemName(),
-                        S3ImportSystem.SystemType.DCP.name(),
-                        entityTypeObj.getDisplayName()));
-
-        // 2b. Retrieve Spec for given systemType and systemObject.
-        fetchFieldDefinitionsResponse.setImportWorkflowSpec(
-                importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(),
-                        S3ImportSystem.SystemType.DCP.name(),
-                        entityTypeObj.getDisplayName()));
-
-        // 2c. Find previously saved template matching this customerSpace, sourceId, if it exists.
-        setExistingFieldDefinitionsFromSource(customerSpace, fetchFieldDefinitionsResponse, sourceId);
-
-        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
-        return fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
     }
 
     private void setExistingFieldDefinitionsFromSource(CustomerSpace customerSpace,

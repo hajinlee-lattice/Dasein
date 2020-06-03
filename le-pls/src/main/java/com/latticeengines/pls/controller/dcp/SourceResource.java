@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
@@ -96,13 +95,6 @@ public class SourceResource {
         return sourceService.getSource(sourceId);
     }
 
-    @GetMapping(value = "/sourceId/{sourceId}/mappings")
-    @ResponseBody
-    @ApiOperation("Get source mappings")
-    public FieldDefinitionsRecord getSourceMappings(@PathVariable String sourceId) {
-        return sourceService.getSourceMappings(sourceId);
-    }
-
     @DeleteMapping(value = "/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Delete source by sourceId")
@@ -135,9 +127,9 @@ public class SourceResource {
     public FetchFieldDefinitionsResponse fetchFieldDefinitions(
             @RequestParam(value = "sourceId", required = false) String sourceId, //
             @RequestParam(value = "entityType", required = false, defaultValue = "Accounts") String entityType, //
-            @RequestParam(value = "importFile") String importFile) {
+            @RequestParam(value = "fileImportId", required = false) String fileImportId) {
         try {
-            return sourceService.fetchFieldDefinitions(sourceId, entityType, importFile);
+            return sourceService.fetchFieldDefinitions(sourceId, entityType, fileImportId);
         } catch (Exception e) {
             log.error("Fetch Field Definition Failed with Exception.", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
