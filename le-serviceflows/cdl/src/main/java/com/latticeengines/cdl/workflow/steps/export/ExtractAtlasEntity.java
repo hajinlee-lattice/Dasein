@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -370,7 +371,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         entitySet.addAll(BusinessEntity.EXPORT_CONTACT_ENTITIES);
         for (BusinessEntity entity : entitySet) {
             List<ColumnMetadata> cms;
-            if (StringUtils.isNotEmpty(atlasExport.getAttributeSetName())) {
+            if (StringUtils.isNotEmpty(atlasExport.getAttributeSetName())
+                    && !AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME.equals(atlasExport.getSegmentName())) {
                 cms = servingStoreProxy.getDecoratedMetadata(customerSpace.toString(), entity, groups,
                         version, atlasExport.getAttributeSetName()).collectList().block();
                 if (CollectionUtils.isNotEmpty(cms)) {
