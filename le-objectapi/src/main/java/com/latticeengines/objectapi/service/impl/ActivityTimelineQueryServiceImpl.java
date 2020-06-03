@@ -78,7 +78,6 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
                             activityTimelineQuery.getMainEntity().name(), customerSpace) });
         }
 
-        // TODO: switch with timeline version when available
         String timeLineVersion = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, version).getDetail()
                 .getTimelineVersionMap().getOrDefault(timeline.getTimelineId(), null);
 

@@ -27,4 +27,9 @@ public class TimeLineProxy extends MicroserviceRestApiProxy implements ProxyInte
         post("create timeline", url, timeLine);
     }
 
+    public void createDefaultTimeLine(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/createDefault", shortenCustomerSpace(customerSpace));
+        post("create default timeline", url, null);
+    }
+
 }

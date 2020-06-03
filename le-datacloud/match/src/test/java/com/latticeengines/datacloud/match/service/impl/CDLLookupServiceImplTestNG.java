@@ -16,12 +16,14 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 
 public class CDLLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CDLLookupServiceImplTestNG.class);
@@ -35,10 +37,22 @@ public class CDLLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBa
     @Inject
     private FabricDataService dataService;
 
+    @Inject
+    private DynamoItemService dynamoItemService;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         // Add few records of data in dynamo
         // register a data unit
+    }
+
+    @Test(groups = "manual", enabled = false)
+    public void testLookupInternalAccountId() {
+        DynamoDataUnit du = new DynamoDataUnit();
+        du.setSignature("20180425");
+        du.setTenant("LETest1590612472260");
+        du.setName("testtable");
+        String s = ((CDLLookupServiceImpl) cdlLookupService).lookupInternalAccountId(du, null, "60qbq7b2sb2gq6or");
     }
 
     @Test(groups = "functional", enabled = false)

@@ -83,6 +83,68 @@ public class ActivityTimelineResource {
                 getOrgInfo(authToken));
     }
 
+    @GetMapping(value = "/accounts/{accountId:.+}/reports/contacts", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve activity report aggregated by contacts")
+    @SuppressWarnings("ConstantConditions")
+    public DataPage getAccountAggregationReportByContact(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId, //
+            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+        }
+        log.info(String.format(
+                "Retrieving activity report aggregated by contacts for accountId(ID: %s) for %s period, ( tenantId: %s )",
+                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
+                customerSpace.getTenantId()));
+        return activityTimelineService.getAccountAggregationReportByContact(accountId, timelinePeriod,
+                getOrgInfo(authToken));
+    }
+
+    @GetMapping(value = "/accounts/{accountId:.+}/reports/product-interest", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve activity report aggregated by  product interest")
+    @SuppressWarnings("ConstantConditions")
+    public DataPage getAccountAggregationReportByProductInterest(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId, //
+            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+        }
+        log.info(String.format(
+                "Retrieving activity report aggregated by product interest accountId(ID: %s) for %s period, ( tenantId: %s )",
+                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
+                customerSpace.getTenantId()));
+        return activityTimelineService.getAccountAggregationReportByProductInterest(accountId, timelinePeriod,
+                getOrgInfo(authToken));
+    }
+
+    @GetMapping(value = "/accounts/{accountId:.+}/reports/event-type", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve activity report aggregated by event type")
+    @SuppressWarnings("ConstantConditions")
+    public DataPage getAccountAggregationReportByEventType(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId, //
+            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+        }
+        log.info(String.format(
+                "Retrieving activity report aggregated by event type accountId(ID: %s) for %s period, ( tenantId: %s )",
+                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
+                customerSpace.getTenantId()));
+
+        return activityTimelineService.getAccountAggregationReportByEventType(accountId, timelinePeriod,
+                getOrgInfo(authToken));
+    }
+
     private Map<String, String> getOrgInfo(String token) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
