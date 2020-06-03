@@ -51,7 +51,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     @Inject
     private S3Service s3Service;
 
-    @Value("${aws.test.s3.bucket}")
+    @Value("${aws.s3.data.stage.bucket}")
     private String s3Bucket;
 
     @Value("${common.le.stack}")

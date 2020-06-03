@@ -51,7 +51,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @Value("${common.le.environment}")
     private String leEnvironment;
 
-    @Value("${aws.test.s3.bucket}")
+    @Value("${aws.s3.data.stage.bucket}")
     private String s3Bucket;
 
     @Inject
