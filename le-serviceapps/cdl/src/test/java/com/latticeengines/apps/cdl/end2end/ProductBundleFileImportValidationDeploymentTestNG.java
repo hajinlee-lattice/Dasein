@@ -183,7 +183,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         ProductValidationSummary productValidationSummary = JsonUtils.getOrDefault(node.get("product_summary"),
                 ProductValidationSummary.class, null);
         Assert.assertNotNull(productValidationSummary);
-        Assert.assertEquals(productValidationSummary.getErrorLineNumber(), 7L);
+        Assert.assertEquals(productValidationSummary.getErrorLineNumber(), 4L);
         Assert.assertEquals(productValidationSummary.getDifferentSKU(), 4);
         Assert.assertEquals(productValidationSummary.getMissingBundleInUse(), 3);
         Assert.assertNotNull(productValidationSummary.getMissingBundles());
