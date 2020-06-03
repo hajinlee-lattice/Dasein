@@ -2,8 +2,12 @@ package com.latticeengines.domain.exposed.pls;
 
 public enum DataLicense {
 
-    HG("HG", "technology"), BOMBORA("Bombora", "Intent"), WEBSITEKEYWORDS("WebsiteKeywords",
-            "Website Keywords"), ACCOUNT("Account", "My attributes"), CONTACT("Contact", "Contact attributes");
+    HG("HG", "technology"), //
+    BOMBORA("Bombora", "Intent"), //
+    WEBSITEKEYWORDS("WebsiteKeywords", "Website Keywords"), //
+    ACCOUNT("Account", "My attributes"), //
+    CONTACT("Contact", "Contact attributes"), //
+    GROWTHTRENDS("GrowthTrends", "Growth Trends");
 
     private String dataLicense;
     private String description;

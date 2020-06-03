@@ -16,7 +16,8 @@
         { "Node": "CompanyProfile", "Data": 200},
         { "Node": "Enrichment", "Data": 1000},
         { "Node": "Account", "Data": 500},
-        { "Node": "Contact", "Data": 500}
+        { "Node": "Contact", "Data": 500},
+        { "Node": "GrowthTrends", "Data": 16}
       ]
     },
     {"Node": "workflowThrottlingConfig", "Data": ""}

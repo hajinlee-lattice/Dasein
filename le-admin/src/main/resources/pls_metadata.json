@@ -12,7 +12,8 @@
         { "Node": "CompanyProfile", "Data": {"Type": "number", "Required": false}},
         { "Node": "Enrichment", "Data": {"Type": "number", "Required": false}},
         { "Node": "Account", "Data": {"Type": "number", "Required": false}},
-        { "Node": "Contact", "Data": {"Type": "number", "Required": false}}
+        { "Node": "Contact", "Data": {"Type": "number", "Required": false}},
+        { "Node": "GrowthTrends", "Data": {"Type": "number", "Required": false}}
       ]
     },
     { "Node": "workflowThrottlingConfig", "Data": {"Type": "string", "Required":  false}}

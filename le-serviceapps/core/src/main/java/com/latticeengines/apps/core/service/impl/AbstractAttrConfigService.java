@@ -198,8 +198,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 // updated for all tenants
                 long accounts = DEFAULT_LIMIT;
                 try {
-                    accounts =
-                            zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+                    accounts = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                            MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
                 } catch (Exception e) {
                     log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
                 }
@@ -208,12 +208,22 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             case CONTACT_ATTRIBUTES:
                 long contacts = DEFAULT_LIMIT;
                 try {
-                    contacts =
-                            zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+                    contacts = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                            MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
                 } catch (Exception e) {
                     log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
                 }
                 overview.setLimit(contacts);
+                break;
+            case GROWTH_TRENDS:
+                long trends = DEFAULT_LIMIT;
+                try {
+                    trends = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                            MultiTenantContext.getShortTenantId(), DataLicense.GROWTHTRENDS.getDataLicense());
+                } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
+                }
+                overview.setLimit(trends);
                 break;
             default:
                 log.warn("Unsupported" + category);
@@ -230,18 +240,17 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
                 if (attrProps != null) {
                     /*
-                     * DP-6630 For Activate/Deactivate page, hide attributes
-                     * that are: Inactive and AllowCustomization=FALSE
+                     * DP-6630 For Activate/Deactivate page, hide attributes that are: Inactive and
+                     * AllowCustomization=FALSE
                      *
-                     * For Enable/Disable page, hide attributes that are:
-                     * disabled and AllowCustomization=FALSE.
+                     * For Enable/Disable page, hide attributes that are: disabled and
+                     * AllowCustomization=FALSE.
                      *
-                     * PLS-11145 For Enable/Disable page, hide attributes that
-                     * are: disabled and Deprecated
+                     * PLS-11145 For Enable/Disable page, hide attributes that are: disabled and
+                     * Deprecated
                      *
-                     * 'onlyActivateAttrs=false' indicates it is
-                     * Activate/Deactivate page, otherwise it is Usage
-                     * Enable/Disable page
+                     * 'onlyActivateAttrs=false' indicates it is Activate/Deactivate page, otherwise
+                     * it is Usage Enable/Disable page
                      */
                     boolean includeCurrentAttr = true;
                     AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
@@ -291,11 +300,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             }
 
                             /*
-                             * For Enable/Disable page, hide attributes that
-                             * are: disabled and AllowCustomization=FALSE.
+                             * For Enable/Disable page, hide attributes that are: disabled and
+                             * AllowCustomization=FALSE.
                              *
-                             * For Enable/Disable page, hide attributes that
-                             * are: disabled and Deprecated
+                             * For Enable/Disable page, hide attributes that are: disabled and Deprecated
                              */
                             totalAttrs++;
                             if (onlyActiveAttrs) {
