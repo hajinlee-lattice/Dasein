@@ -167,8 +167,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                 return null;
             }
         } catch (Exception e) {
-            log.error("Tenant override found but unable to read: ", e);
-            throw new RuntimeException("Failed to read tenant override");
+            log.warn("Tenant override found but unable to read: ", e);
+            return null;
         }
     }
 
@@ -183,7 +183,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         log.info("Imported {} new records", importedCount);
 
         long totalLimit = defaultQuota;
-        if (tenantOverride != null && tenantOverride.containsKey(streamId)) {
+        if (MapUtils.isNotEmpty(tenantOverride) && tenantOverride.containsKey(streamId)) {
             totalLimit = tenantOverride.get(streamId);
             log.info("Found tenant override quota for stream: {}", totalLimit);
         }
