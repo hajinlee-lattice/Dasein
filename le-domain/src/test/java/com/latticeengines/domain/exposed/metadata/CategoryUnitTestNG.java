@@ -1,5 +1,10 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,6 +17,22 @@ public class CategoryUnitTestNG {
         Assert.assertTrue(Category.CONTACT_ATTRIBUTES.isPremium());
         Assert.assertTrue(Category.TECHNOLOGY_PROFILE.isPremium());
         Assert.assertFalse(Category.FIRMOGRAPHICS.isPremium());
+    }
+
+    @Test(groups = "unit")
+    private void testNoDuplicateOrder() {
+        Map<Integer, Set<Category>> orderCategories = new HashMap<>();
+        for (Category category : Category.values()) {
+            Integer order = category.getOrder();
+            Assert.assertNotNull(order, String.format("%s have null order", category));
+
+            orderCategories.putIfAbsent(order, new HashSet<>());
+            orderCategories.get(order).add(category);
+        }
+
+        // no two categories should have the same order
+        orderCategories.forEach((order, categories) -> Assert.assertEquals(categories.size(), 1,
+                String.format("%s have duplicate order %d", categories, order)));
     }
 
 }
