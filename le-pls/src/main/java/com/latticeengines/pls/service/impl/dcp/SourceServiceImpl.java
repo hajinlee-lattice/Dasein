@@ -114,8 +114,8 @@ public class SourceServiceImpl implements SourceService {
                                                                String importFile)
             throws Exception {
 
-        Preconditions.checkState(StringUtils.isAllBlank(sourceId, importFile),
-                "provide one parameter at least : sourceId or import file id");
+        Preconditions.checkState(!StringUtils.isAllBlank(sourceId, importFile),
+                "provide one parameter at least : source Id or import file Id");
 
         // 1a. Convert systemObject to entity.
         EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
