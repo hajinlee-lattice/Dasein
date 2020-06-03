@@ -76,7 +76,7 @@ class CreateChangeListJob extends AbstractSparkJob[ChangeListConfig] {
 
     val deletedCols = Helper.buildDeletedColumnList(deletedColNames.toList)
     val deletedColList = spark.createDataFrame(spark.sparkContext.parallelize(deletedCols), params.outputSchema)
-    val joined = MergeUtils.joinWithMarkers(fromTable, toTable, Seq(joinKey))
+    val joined = MergeUtils.joinWithMarkers(fromTable, toTable, Seq(joinKey), "outer")
     val (fromColPos, toColPos) = MergeUtils.getColPosOnBothSides(joined)
     val (fromMarker, toMarker) = MergeUtils.getJoinMarkers()
     

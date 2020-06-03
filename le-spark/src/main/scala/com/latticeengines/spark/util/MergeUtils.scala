@@ -50,7 +50,7 @@ private[spark] object MergeUtils {
       // need to compute row by row
 
       val outputSchema = getOutputSchema(lhs, rhs, joinKeys)
-      val join = joinWithMarkers(lhs, rhs, joinKeys)
+      val join = joinWithMarkers(lhs, rhs, joinKeys, "outer")
       val (lhsColPos, rhsColPos) = getColPosOnBothSides(join)
       join.map(row => {
         val inLhs = row.getAs(lhsMarker) != null
@@ -139,10 +139,10 @@ private[spark] object MergeUtils {
     }
   }
 
-  def joinWithMarkers(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): DataFrame = {
+  def joinWithMarkers(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], joinType: String): DataFrame = {
     val lhsWithMarker = lhs.withColumn(lhsMarker, lit(true))
     val rhsWithMarker = rhs.withColumn(rhsMarker, lit(true))
-    lhsWithMarker.join(rhsWithMarker, joinKeys, "outer")
+    lhsWithMarker.join(rhsWithMarker, joinKeys, joinType)
   }
 
   def getJoinMarkers(): (String, String) = {
