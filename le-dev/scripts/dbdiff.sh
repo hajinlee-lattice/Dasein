@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 
-ENV=$1
+# usage: ./dbdiff.sh <PASSWORD> <ENV> <DB>
+
+PASSWORD=$1
+
+ENV=$2
 ENV=${ENV:=qa}
 
-DB=$2
+DB=$3
 DB=${DB:=PLS_MultiTenant}
+
+if [ -z "$PASSWORD" ]
+  then
+    echo "MySQL password is not supplied"
+    exit 1
+fi
 
 if [ "${ENV}" = "prod" ]; then
     AURORA_URL="lpi-encrypted-cluster.cluster-c6q8lwiagbkt.us-east-1.rds.amazonaws.com"
-    PASSWORD="3e!P@i8v|1"
 elif [ "${ENV}" = "qa" ]; then
     AURORA_URL="lpi-encrypted-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com"
-    PASSWORD="Lattice123"
 fi
 
 echo 'regenerate ddl'
