@@ -1,20 +1,29 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.CustomIntent;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.WebVisitProfile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
@@ -27,13 +36,21 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 public class StatsCubeUtilsSortUnitTestNG {
 
+    private static final Logger log = LoggerFactory.getLogger(StatsCubeUtilsSortUnitTestNG.class);
+
     private static final String TEST_SUB_CATEGORY = "test-subcategory";
+    private static final long YES_ID = 1L;
+    private static final long NO_ID = 2L;
+    private static final String TEST_DNB_MODEL = "Model 1";
+
     Map<String, Integer> idSeqMap = new HashMap<>();
 
     @Test(groups = "unit")
@@ -320,6 +337,85 @@ public class StatsCubeUtilsSortUnitTestNG {
         }
     }
 
+    @Test(groups = "unit")
+    private void testSortDnbCustomIntentAttrs() {
+        List<ColumnMetadata> cms = new ArrayList<>();
+        Map<String, AttributeStats> stats = new HashMap<>();
+        addColumnMetadata(timeFilter(ComparisonType.WITHIN, Collections.singletonList(12L)), cms, stats, 10, 100);
+        addColumnMetadata(timeFilter(ComparisonType.WITHIN, Collections.singletonList(4L)), cms, stats, 100, 10);
+        addColumnMetadata(timeFilter(ComparisonType.EVER, Collections.emptyList()), cms, stats, 0, 100);
+        addColumnMetadata(timeFilter(ComparisonType.WITHIN, Collections.singletonList(1L)), cms, stats, 5, 5);
+        addColumnMetadata(timeFilter(ComparisonType.WITHIN, Collections.singletonList(8L)), cms, stats, 95, 0);
+        addColumnMetadata(timeFilter(ComparisonType.WITHIN, Collections.singletonList(2L)), cms, stats, 3, 0);
+
+        // expected order EVER (HasIntent) -> Last 1 Week -> Last 2 Weeks -> Last 4
+        // Weeks ... etc
+        List<String> expectedAttrOrders = Arrays.asList( //
+                attr(timeFilter(ComparisonType.EVER, Collections.emptyList())), //
+                attr(timeFilter(ComparisonType.WITHIN, Collections.singletonList(1L))), //
+                attr(timeFilter(ComparisonType.WITHIN, Collections.singletonList(2L))), //
+                attr(timeFilter(ComparisonType.WITHIN, Collections.singletonList(4L))), //
+                attr(timeFilter(ComparisonType.WITHIN, Collections.singletonList(8L))), //
+                attr(timeFilter(ComparisonType.WITHIN, Collections.singletonList(12L))) //
+        );
+        // [ bkt id, bkt count ] for TopBucket
+        List<Pair<Long, Long>> expectedTopBkts = Arrays.asList( //
+                Pair.of(NO_ID, 100L), // from EVER, since there's no YES pick NO
+                Pair.of(YES_ID, 5L), // last 1 week
+                Pair.of(YES_ID, 3L), // last 2 weeks
+                Pair.of(YES_ID, 100L), // last 4 weeks
+                Pair.of(YES_ID, 95L), // last 8 weeks
+                Pair.of(YES_ID, 10L) // last 12 weeks
+        );
+
+        StatsCube cube = new StatsCube();
+        cube.setCount(1000L);
+        cube.setStatistics(stats);
+
+        log.info("Input cube = {}, column metadata list = {}, Category = {}", JsonUtils.serialize(cube),
+                JsonUtils.serialize(cms), Category.DNBINTENTDATA_PROFILE);
+        TopNTree topNTree = StatsCubeUtils.constructTopNTree(ImmutableMap.of(CustomIntent.name(), cube),
+                ImmutableMap.of(CustomIntent.name(), cms), true, ColumnSelection.Predefined.Segment, true);
+        log.info("Result TopNTree = {}", JsonUtils.serialize(topNTree));
+        Assert.assertNotNull(topNTree);
+        Assert.assertTrue(topNTree.hasCategory(Category.DNBINTENTDATA_PROFILE),
+                String.format("Resulting TopNTree should have category %s", Category.DNBINTENTDATA_PROFILE));
+        CategoryTopNTree categoryTopNTree = topNTree.getCategory(Category.DNBINTENTDATA_PROFILE);
+        Assert.assertNotNull(categoryTopNTree);
+        Assert.assertTrue(categoryTopNTree.hasSubcategory(TEST_DNB_MODEL), String.format(
+                "Category %s should have model %s as subcategory", Category.DNBINTENTDATA_PROFILE, TEST_DNB_MODEL));
+        List<TopAttribute> topAttrs = categoryTopNTree.getSubcategory(TEST_DNB_MODEL);
+        List<String> attrs = topAttrs.stream().map(TopAttribute::getAttribute).collect(Collectors.toList());
+        // [ bkt id, bkt count ] for TopBucket
+        List<Pair<Long, Long>> topBkts = topAttrs.stream()
+                .map(attr -> Pair.of(attr.getTopBkt().getId(), attr.getTopBkt().getCount()))
+                .collect(Collectors.toList());
+        Assert.assertEquals(attrs, expectedAttrOrders);
+        Assert.assertEquals(topBkts, expectedTopBkts);
+    }
+
+    private void addColumnMetadata(TimeFilter filter, List<ColumnMetadata> cms, Map<String, AttributeStats> stats,
+            int nYes, int nNo) {
+        ColumnMetadata cm = columnMetadata(filter);
+        cms.add(cm);
+        stats.put(cm.getAttrName(), testBooleanStats(nYes, nNo));
+    }
+
+    private TimeFilter timeFilter(ComparisonType type, List<Object> vals) {
+        TimeFilter tf = new TimeFilter(type, vals);
+        tf.setPeriod(PeriodStrategy.Template.Week.name());
+        return tf;
+    }
+
+    private ColumnMetadata columnMetadata(TimeFilter filter) {
+        ColumnMetadata metadata = new ColumnMetadata();
+        metadata.setCategory(Category.DNBINTENTDATA_PROFILE);
+        metadata.setSubcategory(TEST_DNB_MODEL);
+        metadata.setAttrName(attr(filter));
+        metadata.enableGroup(ColumnSelection.Predefined.Segment);
+        return metadata;
+    }
+
     @DataProvider(name = "sortActivityMetrics")
     private Object[][] sortActivityMetricsTestData() {
         return new Object[][] { //
@@ -369,6 +465,35 @@ public class StatsCubeUtilsSortUnitTestNG {
                         new long[][] { { 200, 90 }, { 150, 5 }, { 70, 150 }, { 30, 100 }, { 30, 10 } }, //
                 }, //
         }; //
+    }
+
+    private String attr(@NotNull TimeFilter filter) {
+        return String.format("am_abc__1__%s", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(filter));
+    }
+
+    private AttributeStats testBooleanStats(int nYes, int nNo) {
+        AttributeStats stats = new AttributeStats();
+        stats.setNonNullCount((long) (nYes + nNo));
+        Buckets bkts = new Buckets();
+        bkts.setType(BucketType.Boolean);
+
+        List<Bucket> list = new ArrayList<>();
+        if (nYes > 0) {
+            Bucket yesBkt = Bucket.valueBkt("YES");
+            yesBkt.setId(YES_ID);
+            yesBkt.setCount((long) nYes);
+            list.add(yesBkt);
+        }
+        if (nNo > 0) {
+            Bucket noBkt = Bucket.valueBkt("NO");
+            noBkt.setId(NO_ID);
+            noBkt.setCount((long) nNo);
+            list.add(noBkt);
+        }
+
+        bkts.setBucketList(list);
+        stats.setBuckets(bkts);
+        return stats;
     }
 
     private AttributeStats testStats(long[][] valCnts) {

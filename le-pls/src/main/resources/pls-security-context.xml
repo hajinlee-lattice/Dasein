@@ -555,6 +555,16 @@
         <security:intercept-url pattern="/pls/importfile/**" access="hasRole('View_DCP_Projects')"/>
     </security:http>
 
+    <security:http use-expressions="true"
+                   pattern="/pls/datamapping/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="/pls/datamapping/**" access="hasRole('View_PLS_Data')"/>
+    </security:http>
+
 </beans>
 
 

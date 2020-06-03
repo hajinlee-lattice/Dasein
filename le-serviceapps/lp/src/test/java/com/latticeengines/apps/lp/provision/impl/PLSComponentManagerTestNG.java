@@ -39,7 +39,7 @@ public class PLSComponentManagerTestNG extends LPFunctionalTestNGBase {
         List<String> externalAdmins = Collections.singletonList("latticeengines8@gmail.com");
         List<String> thirdPartyUsers = Collections.singletonList("thirdPartyUser1@gmail.com");
         componentManager.provisionTenant(tenant, superAdmins, latticeAdmins, externalAdmins,
-                thirdPartyUsers, "PLSComponentManagerTest");
+                thirdPartyUsers, null, "PLSComponentManagerTest");
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         Tenant newTenant = tenantService.findByTenantId(tenant.getId());
@@ -67,7 +67,7 @@ public class PLSComponentManagerTestNG extends LPFunctionalTestNGBase {
         tenant = createTestTenant();
         tenant.setName("new name");
         componentManager.provisionTenant(tenant, Collections.emptyList(), Collections.emptyList(),
-                Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyList(), Collections.emptyList(), null,
                 "PLSComponentManagerTest");
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 

@@ -53,7 +53,7 @@ public class ExportToRedshift extends BaseWorkflowStep<ExportToRedshiftStepConfi
     @Inject
     private JobService jobService;
 
-    @Value("${aws.s3.bucket}")
+    @Value("${aws.s3.data.stage.bucket}")
     private String s3Bucket;
 
     @Override

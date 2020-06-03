@@ -18,6 +18,10 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("Stage")
     private String stage;
 
+    // not always need to consider am attrs
+    @JsonProperty("ConsiderAMAttrs")
+    private Boolean considerAMAttrs;
+
     @JsonProperty("EvaluationDateAsTimestamp")
     private long evaluationDateAsTimestamp = -1; // Timestamp the PA job is run for use for Date Attribute profiling.
 
@@ -26,8 +30,7 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
-    // false: decide bucket upon
-    // distribution
+    // false: decide bucket upon distribution
 
     @JsonProperty("BucketNum")
     private int bucketNum = 5;// roughly bucket number (might not be exactly
@@ -35,6 +38,16 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     @JsonProperty("MinBucketSize")
     private int minBucketSize = 10; // only for numBucketEqualSized = false
+
+    // automatically detect discrete
+    // when false, all numerical attrs are interval
+    @JsonProperty("AutoDetectDiscrete")
+    private boolean autoDetectDiscrete;
+
+    // automatically detect categorical
+    // when false, all string attributes are free text
+    @JsonProperty("AutoDetectCategorical")
+    private boolean autoDetectCategorical;
 
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real
@@ -62,6 +75,10 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("IDAttr")
     private String idAttr;
 
+    // attributes with declared profile strategy
+    @JsonProperty("DeclaredAttrs")
+    private List<ProfileParameters.Attribute> declaredAttrs;
+
     @JsonProperty("NumericAttrs")
     private List<ProfileParameters.Attribute> numericAttrs;
 
@@ -87,6 +104,14 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("Name")
     public String getName() {
         return NAME;
+    }
+
+    public Boolean getConsiderAMAttrs() {
+        return considerAMAttrs;
+    }
+
+    public void setConsiderAMAttrs(Boolean considerAMAttrs) {
+        this.considerAMAttrs = considerAMAttrs;
     }
 
     public String getStage() {
@@ -140,6 +165,22 @@ public class ProfileJobConfig extends SparkJobConfig {
         this.minBucketSize = minBucketSize;
     }
 
+    public boolean isAutoDetectDiscrete() {
+        return autoDetectDiscrete;
+    }
+
+    public void setAutoDetectDiscrete(boolean autoDetectDiscrete) {
+        this.autoDetectDiscrete = autoDetectDiscrete;
+    }
+
+    public boolean isAutoDetectCategorical() {
+        return autoDetectCategorical;
+    }
+
+    public void setAutoDetectCategorical(boolean autoDetectCategorical) {
+        this.autoDetectCategorical = autoDetectCategorical;
+    }
+
     public Long getRandSeed() {
         return randSeed;
     }
@@ -186,6 +227,14 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     public void setIdAttr(String idAttr) {
         this.idAttr = idAttr;
+    }
+
+    public List<ProfileParameters.Attribute> getDeclaredAttrs() {
+        return declaredAttrs;
+    }
+
+    public void setDeclaredAttrs(List<ProfileParameters.Attribute> declaredAttrs) {
+        this.declaredAttrs = declaredAttrs;
     }
 
     public List<ProfileParameters.Attribute> getNumericAttrs() {

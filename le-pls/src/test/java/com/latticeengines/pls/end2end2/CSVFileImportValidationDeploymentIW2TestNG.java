@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
-public class CSVFileImportValidationDeploymentTestNGV2 extends CSVFileImportDeploymentTestNGBaseV2 {
+public class CSVFileImportValidationDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
 
     // one line with empty ID, two line with illegal char
     private static final String ACCOUNT_SOURCE_FILE = "Account_With_Invalid_Char.csv";
@@ -167,11 +167,11 @@ public class CSVFileImportValidationDeploymentTestNGV2 extends CSVFileImportDepl
 
         String feedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.ProductBundles);
         FetchFieldDefinitionsResponse fieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+                dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                         DEFAULT_SYSTEM_TYPE, EntityType.ProductBundles.getDisplayName(), PRODUCT_SOURCE_FILE);
         FieldDefinitionsRecord currentRecord = fieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
 
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
                 EntityType.ProductBundles.getDisplayName(), sourceFile.getName(), false, currentRecord);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),

@@ -11,7 +11,7 @@ import org.apache.spark.sql.types.{StructField, _}
 import scala.collection.JavaConverters._
 import scala.util.Random
 
-private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long) extends UserDefinedAggregateFunction {
+private[spark] class NumberProfileAggregation(fields: Seq[StructField], detectDiscrete: Boolean, maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long) extends UserDefinedAggregateFunction {
 
   private val NUM_SAMPLES: Int = 10000
   private val RANDOM = new Random(randomSeed)
@@ -105,7 +105,11 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
         case DoubleType => buffer.getList[Double](idx).asScala.distinct.toList.sorted
         case _ => throw new UnsupportedOperationException(s"Non numeric type ${field.dataType}")
       }
-      if (distinctVals.size > maxDiscrete) {
+      if (detectDiscrete && distinctVals.size <= maxDiscrete) {
+        val bkt = new DiscreteBucket
+        bkt.setValues(distinctVals.asJava.asInstanceOf[java.util.List[Number]])
+        Row.fromSeq(List(attr, JsonUtils.serialize(bkt)))
+      } else {
         val profiler = field.dataType match {
           case IntegerType => new NumericProfiler[Int](buffer.getSeq[Int](idx), numBuckets, minBucketSize, randomSeed)
           case LongType => new NumericProfiler[Long](buffer.getSeq[Long](idx), numBuckets, minBucketSize, randomSeed)
@@ -122,10 +126,6 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
           case DoubleType => bkt.setBoundaries(bnds.asJava.asInstanceOf[java.util.List[Number]])
           case _ => throw new UnsupportedOperationException(s"Non numeric type ${field.dataType}")
         }
-        Row.fromSeq(List(attr, JsonUtils.serialize(bkt)))
-      } else {
-        val bkt = new DiscreteBucket
-        bkt.setValues(distinctVals.asJava.asInstanceOf[java.util.List[Number]])
         Row.fromSeq(List(attr, JsonUtils.serialize(bkt)))
       }
     })

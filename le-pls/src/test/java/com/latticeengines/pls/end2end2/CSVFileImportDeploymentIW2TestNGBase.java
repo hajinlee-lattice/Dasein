@@ -29,13 +29,14 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
+import com.latticeengines.pls.service.DataMappingService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentTestNGBase {
+public abstract class CSVFileImportDeploymentIW2TestNGBase extends CDLDeploymentTestNGBase {
 
     protected static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
     protected static final String SOURCE = "File";
@@ -58,6 +59,9 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
 
     @Inject
     protected SourceFileService sourceFileService;
+
+    @Inject
+    protected DataMappingService dataMappingService;
 
     @Inject
     protected ModelingFileMetadataService modelingFileMetadataService;
@@ -152,11 +156,11 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
         }
         String fileName = sourceFile.getName();
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(systemName, systemType, entityType.getDisplayName(),
+                dataMappingService.fetchFieldDefinitions(systemName, systemType, entityType.getDisplayName(),
                         fileName);
 
         FieldDefinitionsRecord fieldDefinitionRecord = fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
-        modelingFileMetadataService.commitFieldDefinitions(systemName, systemType,
+        dataMappingService.commitFieldDefinitions(systemName, systemType,
                 entityType.getDisplayName(), fileName, false, fieldDefinitionRecord);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
 
