@@ -5,8 +5,15 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.E
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTemplate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.City;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Email;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Website;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
@@ -67,26 +74,33 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
 
     // Entity -> Required fields from embedded entity table (Configurable
     // EntityId fields are not included)
-    private static final Map<String, List<String>> REQUIRED_FLDS = new HashMap<>();
+    private static final Map<String, List<String>> REQUIRED_INPUT_FLDS = new HashMap<>();
 
     // Entity -> Optional fields from embedded entity table (Configurable
     // SystemId fields are not included)
-    private static final Map<String, List<String>> OPTIONAL_FLDS = new HashMap<>();
+    private static final Map<String, List<String>> OPTIONAL_INPUT_FLDS = new HashMap<>();
+
+    // Entity -> Required fields in output embedded entity table (fill null if not
+    // exist)
+    private static final Map<String, List<String>> REQUIRED_OUTPUT_FLDS = new HashMap<>();
 
     static {
         // account fields
-        REQUIRED_FLDS.put(Account.name(), Collections.singletonList(LatticeAccountId.name()));
-        OPTIONAL_FLDS.put(Account.name(), new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values()));
+        REQUIRED_INPUT_FLDS.put(Account.name(), Collections.singletonList(LatticeAccountId.name()));
+        OPTIONAL_INPUT_FLDS.put(Account.name(), new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values()));
+        REQUIRED_OUTPUT_FLDS.put(Account.name(),
+                Arrays.asList(CompanyName.name(), Website.name(), Country.name(), State.name(), City.name()));
 
         // contact fields
-        REQUIRED_FLDS.put(Contact.name(), Arrays.asList(AccountId.name(), LatticeAccountId.name()));
+        REQUIRED_INPUT_FLDS.put(Contact.name(), Arrays.asList(AccountId.name(), LatticeAccountId.name()));
         List<String> ctkOptFields = new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values());
-        ctkOptFields.add(InterfaceName.Email.name());
-        ctkOptFields.add(InterfaceName.ContactName.name());
+        ctkOptFields.add(Email.name());
+        ctkOptFields.add(ContactName.name());
         ctkOptFields.add(InterfaceName.FirstName.name());
         ctkOptFields.add(InterfaceName.LastName.name());
         ctkOptFields.add(InterfaceName.PhoneNumber.name());
-        OPTIONAL_FLDS.put(Contact.name(), ctkOptFields);
+        OPTIONAL_INPUT_FLDS.put(Contact.name(), ctkOptFields);
+        REQUIRED_OUTPUT_FLDS.put(Contact.name(), Arrays.asList(ContactName.name(), CompanyName.name(), Email.name()));
     }
 
     private static final String ENTITYID_JOIN = "EntityId_Join";
@@ -174,8 +188,8 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
      * @return
      */
     private Node validatePrepareEmbeddedEntitiesNode(Node embeddedEntities) {
-        List<String> requiredFlds = REQUIRED_FLDS.get(config.getEntity());
-        List<String> optionalFlds = OPTIONAL_FLDS.get(config.getEntity());
+        List<String> requiredFlds = REQUIRED_INPUT_FLDS.get(config.getEntity());
+        List<String> optionalFlds = OPTIONAL_INPUT_FLDS.get(config.getEntity());
         // Validation
         final Node origin = embeddedEntities;
         requiredFlds.forEach(field -> {
@@ -199,6 +213,13 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
 
         embeddedEntities = embeddedEntities.rename(new FieldList(config.getEntityIdFld()),
                 new FieldList(ENTITYID_JOIN));
+
+        // add required output fields that doesn't exist in input embedded entity table
+        for (String field : REQUIRED_OUTPUT_FLDS.getOrDefault(config.getEntity(), new ArrayList<>())) {
+            if (embeddedEntities.getSchema(field) == null) {
+                embeddedEntities = embeddedEntities.addColumnWithFixedValue(field, null, String.class);
+            }
+        }
         // To solve column mis-alignment issue after rename operation
         return embeddedEntities.retain(new FieldList(embeddedEntities.getFieldNames()));
     }

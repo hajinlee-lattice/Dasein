@@ -153,25 +153,27 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
             // Matched Account LatticeAccountId
             LatticeAccountId.name(),
             // Account match key fields
-            Website.name(), DUNS.name()
+            Website.name(), DUNS.name(),
+            // Required output fields not exist in embedded input table (fill with null)
+            CompanyName.name(), Country.name(), State.name(), City.name()
     };
 
     // Schema: EntityId, ContactId, AccountId, LatticeAccountId, Website, DUNS
     private Object[][] embeddedAcctTableData1 = new Object[][] { //
-            { "C01", "C01", "A01", "LDC01", "dom1.com", "duns1" }, //
+            { "C01", "C01", "A01", "LDC01", "dom1.com", "duns1", null, null, null }, //
             { "C02", "C02", "A01", "LDC02", null, "duns1" }, //
-            { "C03", "C03", "A01", "LDC03", "dom1.com", null }, //
-            { "C04", "C04", "A01", "LDC04", null, null }, //
-            { "C05", "C05", "A02", "LDC05", "dom2.com", "duns2" }, //
-            { "C06", "C06", "A03", "LDC06", null, "duns3" }, //
-            { "C07", "C07", "A04", "LDC07", "dom4.com", null }, //
-            { "C08", "C08", "A05", "LDC08", null, null }, //
+            { "C03", "C03", "A01", "LDC03", "dom1.com", null, null, null, null }, //
+            { "C04", "C04", "A01", "LDC04", null, null, null, null, null }, //
+            { "C05", "C05", "A02", "LDC05", "dom2.com", "duns2", null, null, null }, //
+            { "C06", "C06", "A03", "LDC06", null, "duns3", null, null, null }, //
+            { "C07", "C07", "A04", "LDC07", "dom4.com", null, null, null, null }, //
+            { "C08", "C08", "A05", "LDC08", null, null, null, null, null }, //
             // Account EntityId not existed in EntityIds table, thus not
             // expected to show up in target source
-            { "C09", "C09", "A01_NonExist", "LDC09", "dom1.com", "duns1" }, //
-            { "C10", "C10", "A02_NonExist", "LDC10", "dom2.com", null }, //
-            { "C11", "C11", "A03_NonExist", "LDC11", null, "duns3" }, //
-            { "C12", "C12", "A04_NonExist", "LDC12", null, null }, //
+            { "C09", "C09", "A01_NonExist", "LDC09", "dom1.com", "duns1", null, null, null }, //
+            { "C10", "C10", "A02_NonExist", "LDC10", "dom2.com", null, null, null, null }, //
+            { "C11", "C11", "A03_NonExist", "LDC11", null, "duns3", null, null, null }, //
+            { "C12", "C12", "A04_NonExist", "LDC12", null, null, null, null, null }, //
     };
 
     // Based on PA use case, this table is actually match result of Contact
@@ -263,8 +265,13 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
         Collections.sort(expectedSchema);
         // Expected field name -> Index of the field in INPUT data
         Map<String, Integer> schemaIdxes = expectedSchema.stream()
-                .collect(Collectors.toMap(field -> field,
-                        field -> inputSchema.indexOf(EntityId.name().equals(field) ? AccountId.name() : field)));
+                .collect(Collectors.toMap(field -> field, field -> {
+                    int inputIdx = inputSchema.indexOf(EntityId.name().equals(field) ? AccountId.name() : field);
+                    if (inputIdx >= 0) {
+                        return inputIdx;
+                    }
+                    return expectedSchema.indexOf(field);
+                }));
 
         Set<String> expectedAIDs = ImmutableSet.of("A01", "A02", "A03", "A04", "A05");
         // RecordId (Use LatticeAccountId which is designed to be unique in test
@@ -277,15 +284,19 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
             GenericRecord record = records.next();
             log.info(record.toString());
             // Verify schema
-            List<String> schema = record.getSchema().getFields().stream().map(Schema.Field::name)
+            List<String> schema = record.getSchema().getFields().stream().map(Schema.Field::name).sorted()
                     .collect(Collectors.toList());
-            Collections.sort(schema);
             Assert.assertEquals(schema, expectedSchema);
             // Verify data
             String recordId = record.get(LatticeAccountId.name()).toString();
             Assert.assertTrue(expectedData.containsKey(recordId));
-            schemaIdxes.entrySet().forEach(ent -> {
-                isObjEquals(record.get(ent.getKey()), expectedData.get(recordId)[ent.getValue()]);
+            schemaIdxes.forEach((key, value) -> {
+                if (value >= inputSchema.size()) {
+                    // field missing in input should be filled with null value;
+                    Assert.assertNull(record.get(key));
+                } else {
+                    isObjEquals(record.get(key), expectedData.get(recordId)[value]);
+                }
             });
             expectedData.remove(recordId);
         }
