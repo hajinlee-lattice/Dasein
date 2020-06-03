@@ -29,15 +29,14 @@ public class PublishTableRoleWorkflowSubmitter extends WorkflowSubmitter {
     private DataCollectionService dataCollectionService;
 
     @WithWorkflowJobPid
-    public ApplicationId submitPublishDynamo(@NotNull Collection<TableRoleInCollection> tableRoles,
-                                             DataCollection.Version version,
-                                             @NotNull WorkflowPidWrapper pidWrapper) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+    public ApplicationId submitPublishDynamo(@NotNull String customerSpace,
+            @NotNull Collection<TableRoleInCollection> tableRoles, DataCollection.Version version,
+            @NotNull WorkflowPidWrapper pidWrapper) {
         if (version == null) {
-            version = dataCollectionService.getActiveVersion(customerSpace.toString());
+            version = dataCollectionService.getActiveVersion(customerSpace);
         }
         PublishDynamoWorkflowConfiguration configuration = new PublishDynamoWorkflowConfiguration.Builder() //
-                .customer(customerSpace) //
+                .customer(CustomerSpace.parse(customerSpace)) //
                 .tableRoles(tableRoles) //
                 .version(version) //
                 .dynamoSignature(signature) //
