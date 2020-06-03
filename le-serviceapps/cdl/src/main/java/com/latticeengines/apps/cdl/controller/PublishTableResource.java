@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.workflow.PublishTableRoleWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.PublishTableRoleRequest;
 
@@ -30,7 +31,8 @@ public class PublishTableResource {
     public ResponseDocument<String> publishDynamo(@PathVariable String customerSpace, //
                                                   @RequestBody PublishTableRoleRequest request) {
         try {
-            ApplicationId appId = workflowSubmitter.submitPublishDynamo(request.getTableRoles(), request.getVersion(),
+            ApplicationId appId = workflowSubmitter.submitPublishDynamo(customerSpace, //
+                    request.getTableRoles(), request.getVersion(),
                     new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
