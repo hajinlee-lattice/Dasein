@@ -55,6 +55,11 @@ public final class AttrConfigServiceImplTestUtils {
     public static final Long activeForWebsiteKeyword = 5000L;
     public static final Long inactiveForWebsiteKeyword = 4000L;
     public static final Long totalWebsiteKeywordAttrs = 90000L;
+    public static final Long growthTrendsLimit = 16L;
+    public static final Long activeForGrowthTrends = 16L;
+    public static final Long inactiveForGrowthTrends = 0L;
+    public static final Long totalGrowthTrendsAttrs = 16L;
+
 
     public static AttrConfig getAttr1(Category category, boolean enableThisAttr) {
         return getAttr1(category, enableThisAttr, false);
@@ -824,6 +829,17 @@ public final class AttrConfigServiceImplTestUtils {
         websiteKeywordCategoryAttrConfigOverview.setTotalAttrs(totalWebsiteKeywordAttrs);
         propSummary = new HashMap<>();
         websiteKeywordCategoryAttrConfigOverview.setPropSummary(propSummary);
+        valueCountMap = new HashMap<>();
+        valueCountMap.put(AttrState.Active, activeForWebsiteKeyword);
+        valueCountMap.put(AttrState.Inactive, inactiveForWebsiteKeyword);
+        propSummary.put(ColumnMetadataKey.State, valueCountMap);
+
+        AttrConfigCategoryOverview<AttrState> growthTrendsCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
+        map.put(Category.GROWTH_TRENDS.getName(), growthTrendsCategoryAttrConfigOverview);
+        growthTrendsCategoryAttrConfigOverview.setLimit(websiteKeywordLimit);
+        growthTrendsCategoryAttrConfigOverview.setTotalAttrs(totalWebsiteKeywordAttrs);
+        propSummary = new HashMap<>();
+        growthTrendsCategoryAttrConfigOverview.setPropSummary(propSummary);
         valueCountMap = new HashMap<>();
         valueCountMap.put(AttrState.Active, activeForWebsiteKeyword);
         valueCountMap.put(AttrState.Inactive, inactiveForWebsiteKeyword);
