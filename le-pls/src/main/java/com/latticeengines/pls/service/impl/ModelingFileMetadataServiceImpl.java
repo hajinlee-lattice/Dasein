@@ -181,12 +181,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
                 if (s3ImportSystem != null) {
                     for (FieldMapping fieldMapping : fieldMappingFromTemplate.getFieldMappings()) {
-                        if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
+                        if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())
+                                && s3ImportSystem.getAccountSystemId().equals(fieldMapping.getMappedField())) {
                             if (Boolean.TRUE.equals(s3ImportSystem.isMapToLatticeAccount())) {
                                 fieldMapping.setMapToLatticeId(true);
                             }
                         }
-                        if (InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
+                        if (StringUtils.isNotEmpty(s3ImportSystem.getContactSystemId())
+                                && s3ImportSystem.getContactSystemId().equals(fieldMapping.getMappedField())) {
                             if (Boolean.TRUE.equals(s3ImportSystem.isMapToLatticeContact())) {
                                 fieldMapping.setMapToLatticeId(true);
                             }
