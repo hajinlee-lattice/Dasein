@@ -51,7 +51,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     private static final String SKIP_INTENT = "SKIP_INTENT";
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
-    private static final String INTENT_SYSTEM = "Default_System";
+    private static final String INTENT_SYSTEM = "Default_DnbIntent_System";
     private static final String MARKETO_SYSTEM = "Default_Marketo_System";
     private static final String ELOQUA_SYSTEM = "Default_Eloqua_System";
     protected static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
@@ -193,10 +193,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     }
 
     private void setupIntentTemplates() throws Exception {
-        createIntentSystem();
         Thread.sleep(2000L);
-        Assert.assertTrue(createS3Folder(INTENT_SYSTEM, Collections.singletonList(EntityType.CustomIntent)));
-
         Assert.assertTrue(cdlProxy.createDefaultDnbIntentDataTemplate(mainCustomerSpace),
                 String.format("Failed to create intent template in system %s", INTENT_SYSTEM));
 
@@ -226,18 +223,6 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     private void createMarketingActivitySystems() {
         createMarketingActivitySystem(MARKETO_SYSTEM);
 //        createMarketingActivitySystem(ELOQUA_SYSTEM);
-    }
-
-    private void createIntentSystem() {
-        S3ImportSystem system = new S3ImportSystem();
-        system.setTenant(mainTestTenant);
-        system.setName(INTENT_SYSTEM);
-        system.setDisplayName(INTENT_SYSTEM);
-        system.setSystemType(S3ImportSystem.SystemType.Other);
-        system.setPriority(2);
-        system.setAccountSystemId(String.format("user_%s_dlugenoz_AcountId", INTENT_SYSTEM));
-        system.setMapToLatticeAccount(true);
-        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
     }
 
     private void createMarketingActivitySystem(String systemName) {
