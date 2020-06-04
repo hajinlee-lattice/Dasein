@@ -18,6 +18,8 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     private static final Logger log = LoggerFactory.getLogger(MarketoExportFieldMetadataServiceImpl.class);
 
+    private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
+
     protected MarketoExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Marketo);
     }
@@ -43,6 +45,14 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo, accountAttributesMap,
                     contactAttributesMap);
+        }
+
+        String lookupId = channel.getLookupIdMap().getAccountId();
+        log.info("Marketo lookupId " + lookupId);
+        if (lookupId != null && accountAttributesMap.containsKey(lookupId)) {
+            ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
+            lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(lookupIdColumnMetadata);
         }
 
         return exportColumnMetadataList;
