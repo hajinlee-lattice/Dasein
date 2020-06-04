@@ -25,6 +25,7 @@ import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -190,11 +191,24 @@ public class TenantResource {
     @PostMapping("/{tenantId}/featureflags")
     @ResponseBody
     @ApiOperation(value = "Set feature flags for a tenant")
-    public FeatureFlagValueMap setFlag(@PathVariable String tenantId, @RequestBody FeatureFlagValueMap flags) {
+    public FeatureFlagValueMap setFlag(@PathVariable String tenantId,
+                                       @RequestBody FeatureFlagValueMap flags) {
         for (Map.Entry<String, Boolean> flag : flags.entrySet()) {
             featureFlagService.setFlag(tenantId, flag.getKey(), flag.getValue());
         }
         return featureFlagService.getFlags(tenantId);
+    }
+
+    @PutMapping("/{tenantId}/modules")
+    @ResponseBody
+    @ApiOperation(value = "Set feature flags for a tenant")
+    public List<LatticeModule> setModules(@PathVariable String tenantId,
+                                          @RequestParam(value = "contractId") String contractId,
+                                          @RequestBody List<LatticeModule> modules) {
+        if (StringUtils.isBlank(contractId)) {
+            contractId = tenantId;
+        }
+        return tenantService.updateModules(contractId, tenantId, modules);
     }
 
     @DeleteMapping("/{tenantId}/featureflags/{flagId}")

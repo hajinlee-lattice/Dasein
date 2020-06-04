@@ -57,6 +57,7 @@ import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
@@ -570,6 +571,22 @@ public class TenantServiceImpl implements TenantService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public List<LatticeModule> updateModules(String contractId, String tenantId, Collection<LatticeModule> modules) {
+        TenantDocument tenantDocument = getTenant(contractId, tenantId);
+        if (tenantDocument == null) {
+            throw new IllegalArgumentException("Tenant not exist: contractId=" + contractId + ", tenantId=" + tenantId);
+        }
+        SpaceConfiguration spaceConfiguration = tenantDocument.getSpaceConfig();
+        if (spaceConfiguration == null) {
+            spaceConfiguration = getDefaultSpaceConfig();
+        }
+        spaceConfiguration.setModules(new ArrayList<>(modules));
+        setupSpaceConfiguration(contractId, tenantId, spaceConfiguration);
+        tenantDocument = getTenant(contractId, tenantId);
+        return tenantDocument.getSpaceConfig().getModules();
     }
 
     public boolean updateTenantInfo(final String contractId, final String tenantId, TenantInfo tenantInfo) {

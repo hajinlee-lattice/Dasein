@@ -142,7 +142,6 @@ public enum TableRoleInCollection {
         OpportunityProfile.hasSignature = true;
 
         ContactMarketingActivityProfile.primaryKey = InterfaceName.ContactId;
-        ContactMarketingActivityProfile.partitionKey = InterfaceName.ContactId;
         ContactMarketingActivityProfile.distKey = InterfaceName.ContactId;
         ContactMarketingActivityProfile.hasSignature = true;
 

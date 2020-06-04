@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -76,6 +78,9 @@ public class CuratedContactAttributes
 
     @Inject
     private CloneTableService cloneTableService;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     private boolean skipPublishDynamo;
@@ -255,7 +260,7 @@ public class CuratedContactAttributes
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
-        if (!skipPublishDynamo) {
+        if (shouldPublishDynamo()) {
             String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
             DynamoExportConfig config = new DynamoExportConfig();
             config.setTableName(tableName);
@@ -310,4 +315,10 @@ public class CuratedContactAttributes
         }
         return tableName;
     }
+
+    private boolean shouldPublishDynamo() {
+        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
+        return !skipPublishDynamo && hasAccount360;
+    }
+
 }

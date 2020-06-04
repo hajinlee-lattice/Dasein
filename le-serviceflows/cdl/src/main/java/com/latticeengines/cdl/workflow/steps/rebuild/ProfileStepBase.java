@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXMFR;
@@ -318,7 +319,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
-        if (!skipPublishDynamo) {
+        if (shouldPublishDynamo()) {
             String inputPath = getInputPath(tableName);
             DynamoExportConfig config = new DynamoExportConfig();
             config.setTableName(tableName);
@@ -375,6 +376,11 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     protected boolean shouldExcludeDataCloudAttrs() {
         String tenantId = configuration.getCustomerSpace().getTenantId();
         return batonService.shouldExcludeDataCloudAttrs(tenantId);
+    }
+
+    protected boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
+        return !skipPublishDynamo && enableTp;
     }
 
 }

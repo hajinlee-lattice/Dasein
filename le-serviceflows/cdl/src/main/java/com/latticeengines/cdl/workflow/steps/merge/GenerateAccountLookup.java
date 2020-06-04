@@ -1,5 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
+import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -54,6 +58,9 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     private boolean skipPublishDynamo;
@@ -142,7 +149,7 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
     }
 
     private void exportToDynamo(String tableName) {
-        if (!skipPublishDynamo) {
+        if (shouldPublishDynamo()) {
             String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
             DynamoExportConfig config = new DynamoExportConfig();
             config.setTableName(tableName);
@@ -151,6 +158,12 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
             log.info("Queued for DynamoExport with config : " + JsonUtils.serialize(config));
             addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
         }
+    }
+
+    private boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
+        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
+        return !skipPublishDynamo && (hasAccount360 || enableTp);
     }
 
 }

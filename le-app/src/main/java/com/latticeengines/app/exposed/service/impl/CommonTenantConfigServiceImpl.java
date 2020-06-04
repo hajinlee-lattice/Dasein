@@ -18,6 +18,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -46,6 +47,16 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
         try {
             SpaceConfiguration spaceConfiguration = getSpaceConfiguration(tenantId);
             return spaceConfiguration.getProducts();
+        } catch (Exception e) {
+            log.error("Failed to get product list of tenant " + tenantId, e);
+            return new ArrayList<>();
+        }
+    }
+
+    public List<LatticeModule> getModules(String tenantId) {
+        try {
+            SpaceConfiguration spaceConfiguration = getSpaceConfiguration(tenantId);
+            return spaceConfiguration.getModules();
         } catch (Exception e) {
             log.error("Failed to get product list of tenant " + tenantId, e);
             return new ArrayList<>();
@@ -164,12 +175,10 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
     public TenantConfiguration getTenantConfiguration() {
         Tenant tenant = MultiTenantContext.getTenant();
         FeatureFlagValueMap featureFlagValueMap = getFeatureFlags(tenant.getId());
-        List<LatticeProduct> products = getProducts(tenant.getId());
-
         TenantConfiguration tenantConfiguration = new TenantConfiguration();
         tenantConfiguration.setFeatureFlagValueMap(featureFlagValueMap);
-        tenantConfiguration.setProducts(products);
-
+        tenantConfiguration.setProducts(getProducts(tenant.getId()));
+        tenantConfiguration.setModules(getModules(tenant.getId()));
         return tenantConfiguration;
     }
 

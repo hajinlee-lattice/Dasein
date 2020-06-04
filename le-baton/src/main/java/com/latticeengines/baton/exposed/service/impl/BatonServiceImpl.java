@@ -42,6 +42,7 @@ import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -587,6 +588,26 @@ public class BatonServiceImpl implements BatonService {
                 String data = CamilleEnvironment.getCamille().get(productsPath).getData();
                 List<String> productStrs = JsonUtils.convertList(JsonUtils.deserialize(data, List.class), String.class);
                 return productStrs != null && productStrs.stream().anyMatch(product.getName()::equals);
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get products for customer " + tenantId, e);
+        }
+    }
+
+    @Override
+    public boolean hasModule(CustomerSpace customerSpace, LatticeModule module) {
+        String contractId = customerSpace.getContractId();
+        String tenantId = customerSpace.getTenantId();
+        Path modulesPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).append("SpaceConfiguration").append("Modules");
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            if (camille.exists(modulesPath)) {
+                String data = CamilleEnvironment.getCamille().get(modulesPath).getData();
+                List<String> modulesStrs = JsonUtils.convertList(JsonUtils.deserialize(data, List.class), String.class);
+                return modulesStrs != null && modulesStrs.stream().anyMatch(module.getName()::equals);
             } else {
                 return false;
             }
