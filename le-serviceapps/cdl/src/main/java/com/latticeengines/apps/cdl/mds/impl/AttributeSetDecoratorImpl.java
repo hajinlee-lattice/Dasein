@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,6 +30,7 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace3;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 @Component
@@ -50,7 +50,7 @@ public class AttributeSetDecoratorImpl implements AttributeSetDecoratorFac {
         final Tenant tenant = MultiTenantContext.getTenant();
         final BusinessEntity entity = namespace.getCoord2();
         final String attributeSetName = namespace.getCoord3();
-        if (StringUtils.isEmpty(attributeSetName)) {
+        if (AttributeUtils.isDefaultAttributeSet(attributeSetName)) {
             return new DummyDecorator();
         } else {
             return new MapDecorator("AttrSet") {
