@@ -363,8 +363,8 @@ public abstract class BaseFrontEndEntityResource {
                 .filter(attributeLookup -> searchEntity.equals(attributeLookup.getEntity())) //
                 .filter(attributeLookup -> {
                     String attrName = attributeLookup.getAttribute();
-                    if (InterfaceName.AccountId.name().equals(attrName) && isEntityMatchGA()) {
-                        // for entity match GA, always add AccountId to free-text search
+                    if (InterfaceName.AccountId.name().equals(attrName)) {
+                        // no matter what kind of tenant, always add AccountId to free-text search
                         return true;
                     } else {
                         return columnAttrNames.contains(attributeLookup.getAttribute());
@@ -395,10 +395,6 @@ public abstract class BaseFrontEndEntityResource {
         } else {
             return Restriction.builder().or(searchRestrictions).build();
         }
-    }
-
-    private boolean isEntityMatchGA() {
-        return tenantConfigService.onlyEntityMatchGAEnabled();
     }
 
     private List<AttributeLookup> getFreeTextSearchAttrs(BusinessEntity queryEntity) {
