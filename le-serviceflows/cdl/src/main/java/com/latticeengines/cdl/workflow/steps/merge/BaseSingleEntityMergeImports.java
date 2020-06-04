@@ -384,6 +384,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         config.setTemplates(templates);
         config.setMinColumns(Collections.singletonList(InterfaceName.CDLCreatedTime.name()));
         config.setMaxColumns(Collections.singletonList(InterfaceName.CDLUpdatedTime.name()));
+        config.setIdColumn(entity.equals(BusinessEntity.Account) ? InterfaceName.AccountId.toString()
+                : InterfaceName.ContactId.toString());
+
         return config;
     }
 

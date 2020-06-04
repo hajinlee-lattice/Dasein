@@ -29,6 +29,9 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
     @JsonProperty("MaxColumns")
     private List<String> maxColumns; // increasing priority
 
+    @JsonProperty("IdColumn")
+    private String idColumn;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -36,7 +39,7 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
     }
 
     public static MergeSystemBatchConfig joinBy(String joinKey) {
-        MergeSystemBatchConfig config =  new MergeSystemBatchConfig();
+        MergeSystemBatchConfig config = new MergeSystemBatchConfig();
         config.setJoinKey(joinKey);
         return config;
     }
@@ -89,4 +92,7 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
         this.maxColumns = maxColumns;
     }
 
+    public String getIdColumn() { return idColumn; }
+
+    public void setIdColumn(String idColumn) { this.idColumn = idColumn; }
 }
