@@ -31,10 +31,11 @@ public final class AttrConfigServiceImplTestUtils {
     protected AttrConfigServiceImplTestUtils() {
         throw new UnsupportedOperationException();
     }
+
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImplTestUtils.class);
 
-    public static final String[] select = { "attr1", "attr2", "attr3" };
-    public static final String[] deselect = { "attr4", "attr5", "attr6" };
+    public static final String[] select = {"attr1", "attr2", "attr3"};
+    public static final String[] deselect = {"attr4", "attr5", "attr6"};
     public static final Long intentLimit = 500L;
     public static final Long activeForIntent = 5000L;
     public static final Long inactiveForIntent = 4000L;
@@ -836,13 +837,13 @@ public final class AttrConfigServiceImplTestUtils {
 
         AttrConfigCategoryOverview<AttrState> growthTrendsCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
         map.put(Category.GROWTH_TRENDS.getName(), growthTrendsCategoryAttrConfigOverview);
-        growthTrendsCategoryAttrConfigOverview.setLimit(websiteKeywordLimit);
-        growthTrendsCategoryAttrConfigOverview.setTotalAttrs(totalWebsiteKeywordAttrs);
+        growthTrendsCategoryAttrConfigOverview.setLimit(growthTrendsLimit);
+        growthTrendsCategoryAttrConfigOverview.setTotalAttrs(totalGrowthTrendsAttrs);
         propSummary = new HashMap<>();
         growthTrendsCategoryAttrConfigOverview.setPropSummary(propSummary);
         valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForWebsiteKeyword);
-        valueCountMap.put(AttrState.Inactive, inactiveForWebsiteKeyword);
+        valueCountMap.put(AttrState.Active, activeForGrowthTrends);
+        valueCountMap.put(AttrState.Inactive, inactiveForGrowthTrends);
         propSummary.put(ColumnMetadataKey.State, valueCountMap);
 
         log.info("map is " + map);
@@ -902,7 +903,7 @@ public final class AttrConfigServiceImplTestUtils {
         ValidationErrors validationErrors1 = new ValidationErrors();
         validation1.setValidationErrors(validationErrors1);
         validations.add(validation1);
-        validationErrors1.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>> builder()
+        validationErrors1.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>>builder()
                 .put(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT, Arrays.asList("You are trying to enable 500 Account " +
                         "attributes, Please not choose more than the limit 400")) //
                 .put(ValidationErrors.Type.EXCEED_USAGE_LIMIT, Arrays.asList("You are trying to enable 500 Company " +
@@ -920,7 +921,7 @@ public final class AttrConfigServiceImplTestUtils {
         ValidationErrors validationErrors2 = new ValidationErrors();
         validation2.setValidationErrors(validationErrors2);
         validations.add(validation2);
-        validationErrors2.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>> builder()
+        validationErrors2.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>>builder()
                 .put(ValidationErrors.Type.EXCEED_DATA_LICENSE, Arrays.asList("You are trying to enable 100 Intent " +
                         "attributes, Please not choose more than the limit 80")) //
                 .put(ValidationErrors.Type.INVALID_PROP_CHANGE, Arrays.asList("Property State does not allow " +
