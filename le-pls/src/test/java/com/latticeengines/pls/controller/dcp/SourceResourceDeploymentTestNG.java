@@ -126,13 +126,13 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Resource csvResource = new MultipartFileResource(testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR,
                 TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE), TEST_ACCOUNT_DATA_FILE);
         SourceFileInfo testSourceFile = fileUploadProxy.uploadFile(TEST_ACCOUNT_DATA_FILE, csvResource);
-        FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.fetchDefinitions(null,
+        FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.getSourceMappings(null,
                 EntityType.Accounts.name(),
                 testSourceFile.getFileImportId());
 
         Assert.assertTrue(MapUtils.isEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
-        fetchResponse = testSourceProxy.fetchDefinitions(sourceId,
+        fetchResponse = testSourceProxy.getSourceMappings(sourceId,
                 EntityType.Accounts.name(),
                 testSourceFile.getFileImportId());
         Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
@@ -143,13 +143,14 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
         validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
 
-        ValidateFieldDefinitionsResponse response = testSourceProxy.validateFieldDefinitions(testSourceFile.getFileImportId(),
-                validateRequest);
+        ValidateFieldDefinitionsResponse response =
+                testSourceProxy.validateSourceDefinitions(testSourceFile.getFileImportId(),
+               null, validateRequest);
 
         Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
         // get source mappings for source
-        fetchResponse = testSourceProxy.fetchDefinitions(sourceId, null, null);
+        fetchResponse = testSourceProxy.getSourceMappings(sourceId, null, null);
         FieldDefinitionsRecord record = fetchResponse.getCurrentFieldDefinitionsRecord();
         Assert.assertNotNull(fetchResponse.getCurrentFieldDefinitionsRecord());
         log.info("test get mappings ");
@@ -163,7 +164,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(retrievedSource);
 
         log.info("test get mappings after updates");
-        fetchResponse = testSourceProxy.fetchDefinitions(sourceId, null, null);
+        fetchResponse = testSourceProxy.getSourceMappings(sourceId, null, null);
         FieldDefinitionsRecord updatedRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
         for (String  fieldSection : record.getFieldDefinitionsRecordsMap().keySet()) {
             List<FieldDefinition> definitions = record.getFieldDefinitionsRecords(fieldSection);

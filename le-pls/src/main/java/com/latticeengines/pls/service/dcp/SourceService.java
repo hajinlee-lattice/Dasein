@@ -26,7 +26,9 @@ public interface SourceService {
     FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String entityType,
                                                         String importFile) throws Exception;
 
-    ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
-                                                              ValidateFieldDefinitionsRequest validateRequest);
+    ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile, String entityType,
+                                                              ValidateFieldDefinitionsRequest validateRequest)
+            throws Exception ;
+
     Boolean reactivateSource(String sourceId);
 }
