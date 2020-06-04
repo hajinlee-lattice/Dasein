@@ -40,9 +40,8 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
     if (lhsDf.columns.contains(batchSourceName)) {
       lhsDf = lhsDf.drop(batchSourceName)
     }
-    // filter out __ANONYMOUS__ AccountId/ContactId
-    val filtered = if (lhsDf.columns.contains(InterfaceName.AccountId.name)) lhsDf.filter(lhsDf(InterfaceName.AccountId.name) =!= DataCloudConstants.ENTITY_ANONYMOUS_ID) else lhsDf
-    val retDf = if (filtered.columns.contains(InterfaceName.ContactId.name)) filtered.filter(filtered(InterfaceName.ContactId.name) =!= DataCloudConstants.ENTITY_ANONYMOUS_ID) else filtered
+    // filter out __ANONYMOUS__ ids
+    val retDf = if (lhsDf.columns.contains(config.getIdColumn)) lhsDf.filter(lhsDf(config.getIdColumn) =!= DataCloudConstants.ENTITY_ANONYMOUS_ID) else lhsDf
     lattice.output = retDf :: Nil
   }
 
