@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -73,6 +74,8 @@ public interface BatonService {
     void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value);
 
     boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product);
+
+    boolean hasModule(CustomerSpace customerSpace, LatticeModule module);
 
     FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace);
 

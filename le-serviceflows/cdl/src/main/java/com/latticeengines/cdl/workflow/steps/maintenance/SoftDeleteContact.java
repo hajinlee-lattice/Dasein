@@ -1,19 +1,24 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SELECT_BY_COLUMN_TXFMR;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -30,6 +35,12 @@ public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContact
     private static final Logger log = LoggerFactory.getLogger(SoftDeleteContact.class);
 
     static final String BEAN_NAME = "softDeleteContact";
+
+    @Inject
+    private BatonService batonService;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     @Override
     protected PipelineTransformationRequest getConsolidateRequest() {
@@ -104,4 +115,10 @@ public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContact
     protected boolean processSystemBatchStore() {
         return true;
     }
+
+    protected boolean shouldPublishDynamo() {
+        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
+        return !skipPublishDynamo && hasAccount360;
+    }
+
 }

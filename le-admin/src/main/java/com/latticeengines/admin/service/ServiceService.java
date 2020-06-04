@@ -1,8 +1,10 @@
 package com.latticeengines.admin.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
@@ -15,6 +17,8 @@ public interface ServiceService {
     Set<String> getRegisteredServices();
 
     Map<String, Set<LatticeProduct>> getRegisteredServicesWithProducts();
+
+    List<LatticeModule> getRegisteredModules();
 
     SerializableDocumentDirectory getDefaultServiceConfig(String serviceName);
 

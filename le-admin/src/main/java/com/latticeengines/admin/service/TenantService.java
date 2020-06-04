@@ -1,8 +1,10 @@
 package com.latticeengines.admin.service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -46,6 +48,8 @@ public interface TenantService {
     boolean danteIsEnabled(String contracId, String tenantId);
 
     boolean updateTenantInfo(String contractId, String tenantId, TenantInfo tenantInfo);
+
+    List<LatticeModule> updateModules(String contractId, String tenantId, Collection<LatticeModule> modules);
 
     VboResponse createVboTenant(VboRequest vboRequest, String userName);
 }

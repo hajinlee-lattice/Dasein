@@ -1,25 +1,29 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 
 @Lazy
 @Component(SoftDeleteAccount.BEAN_NAME)
@@ -29,6 +33,12 @@ public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<ProcessAccount
     private static final Logger log = LoggerFactory.getLogger(SoftDeleteAccount.class);
 
     static final String BEAN_NAME = "softDeleteAccount";
+
+    @Inject
+    private BatonService batonService;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     @Override
     protected PipelineTransformationRequest getConsolidateRequest() {
@@ -67,25 +77,13 @@ public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<ProcessAccount
     }
 
     @Override
-    protected void onPostTransformationCompleted() {
-        super.onPostTransformationCompleted();
-        String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
-        relinkDynamo(batchStoreTableName);
-    }
-
-    private void relinkDynamo(String tableName) {
-        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(getBatchStoreName());
-        config.setLinkTableName(masterTable.getName());
-        config.setRelink(Boolean.TRUE);
-        config.setPartitionKey(InterfaceName.AccountId.name());
-        config.setInputPath(PathUtils.toAvroGlob(inputPath));
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
-    }
-
-    @Override
     protected boolean processSystemBatchStore() {
         return true;
     }
+
+    protected boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
+        return !skipPublishDynamo || enableTp;
+    }
+
 }

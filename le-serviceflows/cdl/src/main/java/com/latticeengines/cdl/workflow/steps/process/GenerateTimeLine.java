@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.time.Instant;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -65,6 +68,12 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private BatonService batonService;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     private DataCollection.Version inactive;
     private DataCollection.Version active;
@@ -165,13 +174,15 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     }
 
     private void exportToDynamo(String tableName) {
-        String inputPath = metadataProxy.getAvroDir(configuration.getCustomer(), tableName);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tableName);
-        config.setInputPath(PathUtils.toAvroGlob(inputPath));
-        config.setPartitionKey(PARTITION_KEY_NAME);
-        config.setSortKey(SORT_KEY_NAME);
-        addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        if (shouldPublishDynamo()) {
+            String inputPath = metadataProxy.getAvroDir(configuration.getCustomer(), tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(PathUtils.toAvroGlob(inputPath));
+            config.setPartitionKey(PARTITION_KEY_NAME);
+            config.setSortKey(SORT_KEY_NAME);
+            addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
     }
 
     private Table getContactTable() {
@@ -355,5 +366,10 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 String.class, String.class);
         log.info("timeline raw table names = {}", timelineRawTableNames);
         return allTablesExist(timelineRawTableNames);
+    }
+
+    private boolean shouldPublishDynamo() {
+        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
+        return !skipPublishDynamo && hasAccount360;
     }
 }

@@ -1,15 +1,18 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -54,5 +57,14 @@ public class TenantServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertEquals(anotherTenantInfo.properties.tenantType, TenantType.POC.name());
         Assert.assertEquals(anotherTenantInfo.properties.status, TenantStatus.INACTIVE.name());
         Assert.assertTrue(true);
+    }
+
+    @Test(groups = "functional")
+    public void testUpdateModules() {
+        TenantDocument tenantDoc = tenantService.getTenant(TestContractId, TestTenantId);
+        Assert.assertTrue(CollectionUtils.isEmpty(tenantDoc.getSpaceConfig().getModules()));
+        tenantService.updateModules(TestContractId, TestTenantId, Collections.singleton(LatticeModule.TalkingPoint));
+        tenantDoc = tenantService.getTenant(TestContractId, TestTenantId);
+        Assert.assertEquals(CollectionUtils.size(tenantDoc.getSpaceConfig().getModules()), 1);
     }
 }

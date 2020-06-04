@@ -19,6 +19,7 @@ public class SpaceConfiguration {
     private static ObjectMapper mapper = new ObjectMapper();
     private LatticeProduct product;
     private List<LatticeProduct> products = Collections.emptyList();
+    private List<LatticeModule> modules = Collections.emptyList();
     private CRMTopology topology;
     private String dlAddress;
 
@@ -53,6 +54,18 @@ public class SpaceConfiguration {
                     throw new RuntimeException(e);
                 }
             }
+            if (node.getPath().toString().equals("/Modules")) {
+                try {
+                    List<String> modules = mapper.readValue(node.getDocument().getData(),
+                            List.class);
+                    this.modules = new ArrayList<>();
+                    for (String module : modules) {
+                        this.modules.add(LatticeModule.fromName(module));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             if (node.getPath().toString().equals("/Topology")) {
                 this.topology = CRMTopology.fromName(node.getDocument().getData());
             }
@@ -77,6 +90,7 @@ public class SpaceConfiguration {
                 dir.add("/Product", this.product.getName());
             }
             dir.add("/Products", mapper.writeValueAsString(this.products));
+            dir.add("/Modules", mapper.writeValueAsString(this.modules));
             if (this.topology != null) {
                 dir.add("/Topology", this.topology.getName());
             }
@@ -118,6 +132,16 @@ public class SpaceConfiguration {
     @JsonProperty("Products")
     public void setProducts(List<LatticeProduct> products) {
         this.products = products;
+    }
+
+    @JsonProperty("Modules")
+    public List<LatticeModule> getModules() {
+        return modules;
+    }
+
+    @JsonProperty("Modules")
+    public void setModules(List<LatticeModule> modules) {
+        this.modules = modules;
     }
 
     @JsonProperty("Topology")

@@ -23,6 +23,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
@@ -63,6 +64,11 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public Map<String, Set<LatticeProduct>> getRegisteredServicesWithProducts() {
         return orchestrator.getServiceNamesWithProducts();
+    }
+
+    @Override
+    public List<LatticeModule> getRegisteredModules() {
+        return Arrays.asList(LatticeModule.values());
     }
 
     @Override

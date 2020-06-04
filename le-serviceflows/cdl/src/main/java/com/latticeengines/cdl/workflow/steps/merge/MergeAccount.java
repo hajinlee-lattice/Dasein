@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -315,6 +317,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
         return getExtractNewEntitiesStepFactory(BusinessEntity.Account, InterfaceName.AccountId, systemIds)
                 .apply(newAccountTable, matchTargetTable);
+    }
+
+    @Override
+    protected boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
+        return !skipPublishDynamo && enableTp;
     }
 
 }

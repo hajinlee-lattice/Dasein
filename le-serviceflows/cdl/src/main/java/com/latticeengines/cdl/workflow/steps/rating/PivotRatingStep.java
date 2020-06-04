@@ -18,8 +18,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -57,6 +59,9 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     private boolean skipPublishDynamo;
@@ -191,7 +196,7 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
     }
 
     private void exportToDynamo(String tableName, String avroDir) {
-        if (!skipPublishDynamo) {
+        if (shouldPublishDynamo()) {
             DynamoExportConfig config = new DynamoExportConfig();
             config.setTableName(tableName);
             config.setInputPath(avroDir);
@@ -232,6 +237,11 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
             log.info("Update Rating attrs in attr repo.");
             attrRepo.appendServingStore(BusinessEntity.Rating, ratingTable);
         }
+    }
+
+    private boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(customerSpace, LatticeModule.TalkingPoint);
+        return !skipPublishDynamo && enableTp;
     }
 
 }

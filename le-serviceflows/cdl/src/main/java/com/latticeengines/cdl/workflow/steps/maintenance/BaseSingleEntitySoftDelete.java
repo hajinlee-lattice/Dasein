@@ -33,12 +33,14 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
@@ -55,6 +57,9 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Inject
     private LivySessionService sessionService;
@@ -165,6 +170,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
             } else {
                 enrichTableSchema(table, masterTable);
                 dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
+                relinkDynamo(table.getName());
             }
         }
         if (processSystemBatchStore()) {
@@ -337,7 +343,25 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         return result;
     }
 
+    private void relinkDynamo(String tableName) {
+        if (shouldPublishDynamo()) {
+            String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(getBatchStoreName());
+            config.setLinkTableName(masterTable.getName());
+            config.setRelink(Boolean.TRUE);
+            config.setPartitionKey(batchStore.getPartitionKey());
+            config.setSortKey(batchStore.getRangeKey());
+            config.setInputPath(PathUtils.toAvroGlob(inputPath));
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
+    }
+
     protected boolean processSystemBatchStore() {
+        return false;
+    }
+
+    protected boolean shouldPublishDynamo() {
         return false;
     }
 

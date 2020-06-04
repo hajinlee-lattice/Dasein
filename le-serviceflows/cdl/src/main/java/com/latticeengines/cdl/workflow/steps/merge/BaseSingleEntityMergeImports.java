@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
@@ -63,8 +66,11 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     private List<BusinessEntity> businessEntities = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
             BusinessEntity.Product, BusinessEntity.Transaction);
 
+    @Inject
+    protected BatonService batonService;
+
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
-    private boolean skipPublishDynamo;
+    protected boolean skipPublishDynamo;
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -496,7 +502,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
-        if (!skipPublishDynamo) {
+        if (shouldPublishDynamo()) {
             String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
             DynamoExportConfig config = new DynamoExportConfig();
             config.setTableName(tableName);
@@ -534,5 +540,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     protected String getReportChangeListTableName() {
         return TableUtils.getFullTableName(reportChangeListTablePrefix, pipelineVersion);
+    }
+
+    protected boolean shouldPublishDynamo() {
+        return !skipPublishDynamo;
     }
 }
