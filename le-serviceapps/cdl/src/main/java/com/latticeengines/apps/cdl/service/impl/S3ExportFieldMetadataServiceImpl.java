@@ -20,6 +20,8 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
 
     private static final Logger log = LoggerFactory.getLogger(S3ExportFieldMetadataServiceImpl.class);
 
+    private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
+
     protected S3ExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.AWS_S3);
     }
@@ -38,6 +40,14 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
                 accountAttributesMap, contactAttributesMap);
 
         S3ChannelConfig channelConfig = (S3ChannelConfig) channel.getChannelConfig();
+
+        String lookupId = channel.getLookupIdMap().getAccountId();
+        log.info("S3 lookupId " + lookupId);
+        if (lookupId != null && accountAttributesMap.containsKey(lookupId)) {
+            ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
+            lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(lookupIdColumnMetadata);
+        }
 
         if (channelConfig.isIncludeExportAttributes()) {
             exportColumnMetadataList.addAll(accountAttributesMap.values());
