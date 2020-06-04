@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.validations;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.File;
@@ -38,7 +39,6 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -66,7 +66,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.Prod
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ValidateProductConfig;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -140,7 +139,7 @@ public class ValidateProductSpark extends RunSparkJob<ProductFileConfiguration, 
             int index = path.indexOf("/Pods/");
             path = index > 0 ? path.substring(index) : path;
             return path;
-        }).collect(Collectors.toList());
+        }).collect(toList());
 
         if (CollectionUtils.isEmpty(pathList)) {
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
@@ -149,14 +148,13 @@ public class ValidateProductSpark extends RunSparkJob<ProductFileConfiguration, 
 
         productPathList = pathList;
 
-        HdfsDataUnit newInput = getNewProducts(productPathList);
         HdfsDataUnit oldInput = getOldProducts();
-        List<DataUnit> inputList = new ArrayList<>();
-        inputList.add(newInput);
+        List<DataUnit> inputList = pathList.stream().map(HdfsDataUnit::fromPath).collect(toList());
         if (oldInput != null) {
             inputList.add(oldInput);
         }
         ValidateProductConfig validateConfig = new ValidateProductConfig();
+        validateConfig.setInputPathNum(pathList.size());
         validateConfig.setCheckProductName(checkExistProductNameInTemplate(configuration.getCustomerSpace(),
                 configuration.getDataFeedTaskId()));
 
@@ -280,12 +278,12 @@ public class ValidateProductSpark extends RunSparkJob<ProductFileConfiguration, 
         List<RatingEngineSummary> xSellSummaries = ratingEngines
                 .stream()
                 .filter(ratingEngine -> RatingEngineType.CROSS_SELL.equals(ratingEngine.getType()))
-                .collect(Collectors.toList());
+                .collect(toList());
 
         List<RatingEngineSummary> activeXSellModel = xSellSummaries
                 .stream()
                 .filter(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus()))
-                .collect(Collectors.toList());
+                .collect(toList());
         log.info("bundle that will be removed " + JsonUtils.serialize(bundleToBeRemoved));
         // error out all bundle to be removed if existing active c-shell
         // generate warning for product list directly referenced by C-Sell model
@@ -441,14 +439,6 @@ public class ValidateProductSpark extends RunSparkJob<ProductFileConfiguration, 
             }
         }
         return bundleWithDiffSku;
-    }
-
-    private HdfsDataUnit getNewProducts(List<String> pathList) {
-        String[] avroPaths = new String[pathList.size()];
-        avroPaths = pathList.toArray(avroPaths);
-        String tabName = NamingUtils.uuid("productValidation");
-        Table inputTable = MetaDataTableUtils.createTable(yarnConfiguration, tabName, avroPaths, null);
-        return inputTable.toHdfsDataUnit("new");
     }
 
     private HdfsDataUnit getOldProducts() {

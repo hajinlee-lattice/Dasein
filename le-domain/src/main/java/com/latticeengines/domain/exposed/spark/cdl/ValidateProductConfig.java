@@ -9,6 +9,9 @@ public class ValidateProductConfig extends SparkJobConfig implements Serializabl
 
     public static final String NAME = "validateProduct";
 
+    // this is path number for user uploaded file, defaults to 1, for vdb, larger than 1
+    private int inputPathNum = 1;
+
     private boolean checkProductName;
 
     @Override
@@ -20,6 +23,16 @@ public class ValidateProductConfig extends SparkJobConfig implements Serializabl
     @Override
     public int getNumTargets() {
         return 2;
+    }
+
+    @JsonProperty("InputPathNum")
+    public int getInputPathNum() {
+        return inputPathNum;
+    }
+
+    @JsonProperty("InputPathNum")
+    public void setInputPathNum(int inputPathNum) {
+        this.inputPathNum = inputPathNum;
     }
 
     @JsonProperty("CheckProductName")

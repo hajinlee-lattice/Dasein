@@ -12,9 +12,14 @@ import org.apache.spark.storage.StorageLevel
 class ValidateProduct extends AbstractSparkJob[ValidateProductConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[ValidateProductConfig]): Unit = {
-    val newProds = lattice.input.head
-    val oldProdsOpt: Option[DataFrame] = lattice.input.lift(1)
     val config = lattice.config
+    val num = config.getInputPathNum
+    val (newProds, oldProdsOpt: Option[DataFrame]) =
+      if (num > 1)
+        (lattice.input.take(num).reduce((x, y) => x union y), lattice.input.lift(num))
+      else
+        (lattice.input.head, lattice.input.lift(1))
+
 
     val (validNew, err1) = validate(newProds, config.getCheckProductName)
     val validVdb = extractVdbBundleMembers(validNew)
