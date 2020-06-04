@@ -10,4 +10,12 @@ public interface ActivityTimelineService {
 
     DataPage getContactActivities(String accountId, String contactId, String timelinePeriod,
             Map<String, String> orgInfo);
+
+    DataPage getAccountAggregationReportByContact(String accountId, String timelinePeriod, Map<String, String> orgInfo);
+
+    DataPage getAccountAggregationReportByProductInterest(String accountId, String timelinePeriod,
+            Map<String, String> orgInfo);
+
+    DataPage getAccountAggregationReportByEventType(String accountId, String timelinePeriod,
+                                                    Map<String, String> orgInfo);
 }

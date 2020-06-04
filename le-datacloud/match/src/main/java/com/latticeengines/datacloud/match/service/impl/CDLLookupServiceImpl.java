@@ -274,7 +274,8 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return data;
     }
 
-    private String lookupInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
+    @VisibleForTesting
+    String lookupInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
         if (lookupDataUnit != null) {
             String signature = lookupDataUnit.getSignature();
             GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(signature);

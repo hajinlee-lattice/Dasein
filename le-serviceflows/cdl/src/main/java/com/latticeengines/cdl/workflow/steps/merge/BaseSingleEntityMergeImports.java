@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
@@ -381,8 +382,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         templates.add(SystemBatchTemplateName.Embedded.name());
         templates.addAll(templatesInOrder);
         config.setTemplates(templates);
-        config.setMinColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name()));
-        config.setMaxColumns(Arrays.asList(InterfaceName.CDLUpdatedTime.name()));
+        config.setMinColumns(Collections.singletonList(InterfaceName.CDLCreatedTime.name()));
+        config.setMaxColumns(Collections.singletonList(InterfaceName.CDLUpdatedTime.name()));
         return config;
     }
 
@@ -504,6 +505,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             if (StringUtils.isNotBlank(sortKey)) {
                 config.setSortKey(sortKey);
             }
+            log.info("Queued for DynamoExport with config : " + JsonUtils.serialize(config));
             addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
         }
     }

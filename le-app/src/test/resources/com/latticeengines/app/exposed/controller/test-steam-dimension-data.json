@@ -1,0 +1,102 @@
+{
+  "PathPatternId": {
+    "dimension_values": [
+      {
+        "PathPatternId": "4",
+        "PathPattern": "*/products-and-industries/*",
+        "PathPatternName": "Products and industries"
+      },
+      {
+        "PathPatternId": "2",
+        "PathPattern": "*/carecreations/.*/BRL",
+        "PathPatternName": "Product Page"
+      },
+      {
+        "PathPatternId": "8",
+        "PathPattern": "*/care/Article/.*",
+        "PathPatternName": "All Articles"
+      },
+      {
+        "PathPatternId": "6",
+        "PathPattern": "https://www.shop.basf.com.br/care/orders",
+        "PathPatternName": "Orders"
+      },
+      {
+        "PathPatternId": "30",
+        "PathPattern": "*/literature-library/.*",
+        "PathPatternName": "Library"
+      },
+      {
+        "PathPatternId": "15",
+        "PathPattern": "https://www.shop.basf.com.br/care/Testing/my-account/*",
+        "PathPatternName": "My Account"
+      },
+      {
+        "PathPatternId": "18",
+        "PathPattern": "*/care/Application/.*",
+        "PathPatternName": "All Applications"
+      },
+      {
+        "PathPatternId": "7",
+        "PathPattern": "https://catalysts.basf.com",
+        "PathPatternName": "Home"
+      },
+      {
+        "PathPatternId": "27",
+        "PathPattern": "*/register",
+        "PathPatternName": "Register"
+      },
+      {
+        "PathPatternId": "28",
+        "PathPattern": "*/care/about-us",
+        "PathPatternName": "About-us"
+      }
+    ],
+    "cardinality": 10
+  },
+  "SourceMediumId": {
+    "dimension_values": [
+      {
+        "SourceMediumId": "29",
+        "SourceMedium": "Google/Paid"
+      },
+      {
+        "SourceMediumId": "21",
+        "SourceMedium": "Google/Organic"
+      },
+      {
+        "SourceMediumId": "20",
+        "SourceMedium": "Facebook/Paid"
+      },
+      {
+        "SourceMediumId": "22",
+        "SourceMedium": "newsletter9-2014/Email"
+      },
+      {
+        "SourceMediumId": "19",
+        "SourceMedium": "Baidu/Organic"
+      },
+      {
+        "SourceMediumId": "23",
+        "SourceMedium": "Facebook/Organic"
+      },
+      {
+        "SourceMediumId": "3",
+        "SourceMedium": "Google/Empty"
+      },
+      {
+        "SourceMediumId": "14",
+        "SourceMedium": "Baidu/Search"
+      },
+      {
+        "SourceMediumId": "5",
+        "SourceMedium": "Baidu/Paid"
+      },
+      {
+        "SourceMediumId": "16",
+        "SourceMedium": "example.com/Referral"
+      }
+    ],
+    "cardinality": 10
+  }
+}

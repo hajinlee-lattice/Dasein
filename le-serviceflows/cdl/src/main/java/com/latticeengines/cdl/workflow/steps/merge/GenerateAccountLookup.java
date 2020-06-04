@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -147,6 +148,7 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
             config.setTableName(tableName);
             config.setInputPath(PathUtils.toAvroGlob(inputPath));
             config.setPartitionKey(TABLE_ROLE.getPartitionKey());
+            log.info("Queued for DynamoExport with config : " + JsonUtils.serialize(config));
             addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
         }
     }
