@@ -20,14 +20,13 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
-import com.latticeengines.domain.exposed.dcp.UploadStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -53,13 +52,13 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
-        return uploads.stream().map(upload -> getUploadDetails(customerSpace, upload)).collect(Collectors.toList());
+        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
     }
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
-        return uploads.stream().map(upload -> getUploadDetails(customerSpace, upload)).collect(Collectors.toList());
+        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
     }
 
     @Override
@@ -76,7 +75,7 @@ public class UploadServiceImpl implements UploadService {
         upload.setUploadConfig(uploadConfig);
         uploadEntityMgr.create(upload);
 
-        return getUploadDetails(customerSpace, upload);
+        return getUploadDetails(upload);
     }
 
     @Override
@@ -118,12 +117,15 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status) {
+    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status, UploadDiagnostics uploadDiagnostics) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         upload.setStatus(status);
+        if(uploadDiagnostics != null) {
+            upload.setUploadDiagnostics(uploadDiagnostics);
+        }
         uploadEntityMgr.update(upload);
     }
 
@@ -152,7 +154,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public UploadDetails setLatestStatistics(String customerSpace, String uploadId, Long statsId) {
+    public UploadDetails setLatestStatistics(String uploadId, Long statsId) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
@@ -169,13 +171,13 @@ public class UploadServiceImpl implements UploadService {
         }
         statisticsEntityMgr.setAsLatest(container);
         upload.setStatistics(container.getStatistics());
-        return getUploadDetails(customerSpace, upload);
+        return getUploadDetails(upload);
     }
 
     @Override
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
-        return getUploadDetails(customerSpace, upload);
+        return getUploadDetails(upload);
     }
 
     @Override
@@ -218,20 +220,16 @@ public class UploadServiceImpl implements UploadService {
         return randomUploadId;
     }
 
-    private UploadDetails getUploadDetails(String customerSpace, Upload upload) {
+    private UploadDetails getUploadDetails(Upload upload) {
         UploadDetails details = new UploadDetails();
         details.setUploadId(upload.getUploadId());
         details.setStatistics(upload.getStatistics());
-        UploadStatus status = new UploadStatus();
-        status.setStatus(upload.getStatus());
-        UploadStatsContainer container = statisticsEntityMgr.findIsLatest(upload);
-        if (container != null) {
-            Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, container.getWorkflowPid());
-            status.setApplicationId(job.getApplicationId());
-            status.setLastErrorMessage(job.getErrorMsg());
+        details.setStatus(upload.getStatus());
+        if(upload.getUploadDiagnostics() != null) {
+            details.setUploadDiagnostics(upload.getUploadDiagnostics());
+        } else {
+            details.setUploadDiagnostics(new UploadDiagnostics());
         }
-
-        details.setUploadStatus(status);
         details.setUploadConfig(upload.getUploadConfig());
         details.setSourceId(upload.getSourceId());
         return details;

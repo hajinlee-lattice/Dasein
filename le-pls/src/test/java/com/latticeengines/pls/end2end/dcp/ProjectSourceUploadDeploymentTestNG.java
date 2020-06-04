@@ -129,7 +129,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
         UploadDetails uploadDetail = testUploadProxy.startImport( request);
-        JobStatus completedStatus = waitForWorkflowStatus(uploadDetail.getUploadStatus().getApplicationId(), false);
+        JobStatus completedStatus = waitForWorkflowStatus(uploadDetail.getUploadDiagnostics().getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         List<UploadDetails> uploadDetails = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
         Assert.assertNotNull(uploadDetails);

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -64,15 +65,18 @@ public class SourceImportListener extends LEJobListener {
         ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId);
 
         BatchStatus jobStatus = jobExecution.getStatus();
+        UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();
+        uploadDiagnostics.setApplicationId(job.getApplicationId());
         if (BatchStatus.COMPLETED.equals(jobStatus)) {
-            uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED);
+            uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED, uploadDiagnostics);
         } else {
             if (jobStatus.isUnsuccessful()) {
                 log.info("SourceImport workflow job {} failed with status {}", jobExecution.getId(), jobStatus);
             } else {
                 log.error("SourceImport workflow job {} failed with unknown status {}", jobExecution.getId(), jobStatus);
             }
-            uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR);
+            uploadDiagnostics.setLastErrorMessage(job.getErrorDetails().getErrorMsg());
+            uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR, uploadDiagnostics);
         }
 
         UploadEmailInfo uploadEmailInfo = new UploadEmailInfo();

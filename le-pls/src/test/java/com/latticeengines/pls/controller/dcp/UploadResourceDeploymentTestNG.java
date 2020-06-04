@@ -98,7 +98,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         dcpImportRequest.setFileImportId(sourceFileInfo.getFileImportId());
         UploadDetails uploadDetails = testUploadProxy.startImport(dcpImportRequest);
 
-        JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadStatus().getApplicationId(), false);
+        JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadDiagnostics().getApplicationId(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
         List<UploadDetails> uploadDetailsList = testUploadProxy.getAllBySourceId(source.getSourceId(),

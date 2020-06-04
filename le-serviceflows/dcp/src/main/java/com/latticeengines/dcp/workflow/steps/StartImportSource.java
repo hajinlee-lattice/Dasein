@@ -66,7 +66,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
     public void execute() {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_STARTED);
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_STARTED, null);
         UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId);
         if (upload == null || upload.getUploadConfig() == null || StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath())) {
             throw new RuntimeException("Cannot start DCP import job due to lack of import info!");

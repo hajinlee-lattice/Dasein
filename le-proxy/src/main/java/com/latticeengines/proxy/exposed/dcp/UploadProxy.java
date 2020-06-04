@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -65,11 +66,16 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         put("update Upload config", url, uploadConfig);
     }
 
-    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status) {
+    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status, UploadDiagnostics uploadDiagnostics) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/status/{status}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, status);
         log.info("Update status for Upload " + uploadId + " to " + status);
-        put("update Upload status", url);
+        if(uploadDiagnostics != null) {
+            put("update Upload status", url, uploadDiagnostics);
+        } else {
+            put("update Upload status", url);
+        }
+
     }
 
     public void updateStatsContent(String customerSpace, String uploadId, long statsPid, UploadStats uploadStats) {

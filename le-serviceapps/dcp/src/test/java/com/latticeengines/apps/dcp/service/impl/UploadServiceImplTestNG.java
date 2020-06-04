@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -79,19 +80,20 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertEquals(uploads.size(), 2);
         uploads.forEach(upload -> {
             Assert.assertNull(upload.getUploadConfig());
-            Assert.assertEquals(upload.getUploadStatus().getStatus(), Upload.Status.NEW);
+            Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
         });
         UploadConfig uploadConfig = new UploadConfig();
         uploadConfig.setDropFilePath("DummyPath");
         uploadService.updateUploadConfig(mainCustomerSpace, upload1.getUploadId(), uploadConfig);
-        uploadService.updateUploadStatus(mainCustomerSpace, upload2.getUploadId(), Upload.Status.IMPORT_STARTED);
+        UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();
+        uploadService.updateUploadStatus(mainCustomerSpace, upload2.getUploadId(), Upload.Status.IMPORT_STARTED, uploadDiagnostics);
         uploads = uploadService.getUploads(mainCustomerSpace, sourceId1);
         Assert.assertEquals(uploads.size(), 2);
         uploads.forEach(upload -> {
             if (upload.getUploadId().equals(upload1.getUploadId())) {
                 Assert.assertNotNull(upload.getUploadConfig());
             } else {
-                Assert.assertEquals(upload.getUploadStatus().getStatus(), Upload.Status.IMPORT_STARTED);
+                Assert.assertEquals(upload.getStatus(), Upload.Status.IMPORT_STARTED);
             }
         });
         return Arrays.asList(upload1, upload2);
@@ -140,7 +142,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         UploadDetails upload2 = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
         Assert.assertNull(upload2.getStatistics());
 
-        upload2 = uploadService.setLatestStatistics(mainCustomerSpace, upload.getUploadId(), container.getPid());
+        upload2 = uploadService.setLatestStatistics(upload.getUploadId(), container.getPid());
         Assert.assertNotNull(upload2.getStatistics());
         RetryTemplate retry = RetryUtils.getRetryTemplate(5,
                 Collections.singleton(AssertionError.class), null);
@@ -162,7 +164,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         container1.setStatistics(stats);
         uploadService.appendStatistics(upload.getUploadId(), container1);
         Assert.assertNotEquals(container1.getPid(), container.getPid());
-        UploadDetails upload4 = uploadService.setLatestStatistics(mainCustomerSpace, upload.getUploadId(), container1.getPid());
+        UploadDetails upload4 = uploadService.setLatestStatistics(upload.getUploadId(), container1.getPid());
         Assert.assertEquals(upload4.getStatistics().getImportStats().getErrorCnt(), Long.valueOf(3));
         retry.execute(ctx -> {
             UploadDetails u = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
