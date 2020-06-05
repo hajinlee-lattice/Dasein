@@ -1,7 +1,9 @@
 package com.latticeengines.pls.end2end;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -10,6 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -27,7 +30,10 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNG extends CSVFileImportD
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
@@ -101,6 +107,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNG extends CSVFileImportD
         for (LatticeSchemaField schemaField : latticeSchema) {
             if (schemaField.getName().equals("CreatedDate")) {
                 createdDate = true;
+                break;
             }
         }
         Assert.assertTrue(createdDate);
