@@ -64,6 +64,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private static final String TIMELINE_TABLE_PREFIX = "Timeline_%s";
     private static final String PARTITION_KEY_NAME = "partitionKey";
     private static final String SORT_KEY_NAME = "sortKey";
+    private static final String SUFFIX = "_TABLE_ROLE";
     static final String BEAN_NAME = "generateTimeline";
 
     @Inject
@@ -81,6 +82,11 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private boolean needRebuild = false;
     //timelineId -> version
     private Map<String, String> timelineVersionMap;
+
+    //timelineId -> tableRoleTableName
+    private Map<String, String> timelineRoleTableNameMap;
+
+    private DataCollectionStatus dcStatus;
 
     @Override
     protected Class<? extends AbstractSparkJob<TimeLineJobConfig>> getJobClz() {
@@ -100,8 +106,10 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = inactive.complement();
-        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
+        timelineRoleTableNameMap = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
+                TableRoleInCollection.TimelineProfile, active, null);
         checkRebuild();
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
@@ -110,6 +118,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         TimeLineJobConfig config = new TimeLineJobConfig();
         config.partitionKey = PARTITION_KEY_NAME;
         config.sortKey = SORT_KEY_NAME;
+        config.needRebuild = needRebuild;
+        config.tableRoleSuffix = SUFFIX;
 
         //no atlasStreamTable, will skip
         // streamId -> table name
@@ -125,7 +135,17 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         config.templateToSystemTypeMap =
                 configuration.getTemplateToSystemTypeMap().entrySet().stream().map(entry -> Pair.of(entry.getKey(),
                         entry.getValue().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        //timelineId -> (BusinessEntity, streamTableName list)
+        config.timelineRelatedStreamTables =
+                getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
+        if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables) && MapUtils.isNotEmpty(timelineRoleTableNameMap)) {
+            config.timelineRelatedRoleTables =
+                    timelineRoleTableNameMap.entrySet().stream().filter(entry -> config.timelineRelatedRoleTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        } else {
+            config.timelineRelatedRoleTables = new HashMap<>();
+        }
         toDataUnits(new ArrayList<>(sourceTables.values()), config.rawStreamInputIdx, inputs);
+        toDataUnits(new ArrayList<>(config.timelineRelatedRoleTables.values()), config.roleTableInputIdx, inputs);
         config.setInput(inputs);
         Table contactTable = getContactTable();
         if (contactTable != null) {
@@ -138,9 +158,6 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                         .filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && configuration.getActivityStreamMap().get(entry.getKey()).getStreamType() != null))
                         .map(entry -> Pair.of(entry.getValue(),
                                 configuration.getActivityStreamMap().get(entry.getKey()).getStreamType().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-        //timelineId -> (BusinessEntity, streamTableName list)
-        config.timelineRelatedStreamTables =
-                getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
         config.timelineVersionMap = timelineVersionMap;
         return config;
     }
@@ -155,6 +172,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         // timeline -> timeline rawstream table name
         Map<String, String> tableNames = new HashMap<>();
         Map<String, Table> tables = new HashMap<>();
+        Map<String, String> mergedRoleTableNames = new HashMap<>();
         timelineOutputIdx.forEach((timelineId, outputIdx) -> {
             // create table
             String key = String.format(TIMELINE_TABLE_PREFIX, timelineId);
@@ -162,16 +180,35 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                     HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
             Table table = toTable(name, result.getTargets().get(outputIdx));
             metadataProxy.createTable(configuration.getCustomer(), name, table);
-            tableNames.put(timelineId, name);
-            tables.put(timelineId, table);
+            if (timelineId.endsWith(SUFFIX)) {
+                int lastIndex = timelineId.lastIndexOf(SUFFIX);
+                timelineId = timelineId.substring(0, lastIndex - 1);
+                mergedRoleTableNames.put(timelineId, name);
+                exportToS3(table);
+            } else {
+                tableNames.put(timelineId, name);
+                tables.put(timelineId, table);
+            }
         });
+        if (!needRebuild) {
+            timelineRoleTableNameMap = timelineRoleTableNameMap.entrySet().stream().map(entry -> {
+                if (mergedRoleTableNames.keySet().contains(entry.getKey())) {
+                    return Pair.of(entry.getKey(), mergedRoleTableNames.get(entry.getKey()));
+                } else {
+                    return Pair.of(entry.getKey(), entry.getValue());
+                }
+            }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        } else {
+            timelineRoleTableNameMap = mergedRoleTableNames;
+        }
+        log.info("merged timelineRoleTable names = {}.", mergedRoleTableNames);
         log.info("timeline rawStream table names = {}", tableNames);
         exportToS3AndAddToContext(tables, TIMELINE_RAWTABLE_NAME);
         tableNames.values().forEach(name -> {
             exportToDynamo(name);
             addToListInContext(TEMPORARY_CDL_TABLES, name, String.class);
         });
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), tableNames,
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineRoleTableNameMap,
                 TableRoleInCollection.TimelineProfile, inactive);
     }
 
@@ -368,10 +405,6 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 String.class, String.class);
         log.info("timeline raw table names = {}", timelineRawTableNames);
         boolean isShortCutMode = allTablesExist(timelineRawTableNames);
-        if (isShortCutMode) {
-            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineRawTableNames,
-                    TableRoleInCollection.TimelineProfile, inactive);
-        }
         return isShortCutMode;
     }
 

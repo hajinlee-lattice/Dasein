@@ -29,6 +29,10 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val timelineVersionMap = config.timelineVersionMap.asScala
     val partitionKey: String = config.partitionKey
     val sortKey: String = config.sortKey
+    val needRebuild: Boolean = config.needRebuild
+    val roleTableInputIdx = config.roleTableInputIdx.asScala
+    val timelineRelatedRoleTables = config.timelineRelatedRoleTables.asScala
+    val suffix: String = config.tableRoleSuffix
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
         lattice.input(config.contactTableIdx)
@@ -96,15 +100,24 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
             .col(recordIdColumn)))
           (timelineId, timelineRawStreamTable)
       }.toSeq: _*)
-    val outputs = timelineRawStreamTableMap.toList
+    val timelineRoleTableMap = if (!needRebuild) {
+      immutable.Map(timelineRawStreamTableMap.map {
+        case (timelineId, timelineRawStreamTable) =>
+          val roleTableName = timelineRelatedRoleTables.getOrElse(timelineId, "")
+          val idx: Integer = roleTableInputIdx.getOrElse(roleTableName, -1)
+          val RoleTable: DataFrame = lattice.input(idx)
+          val mergedRoleTable = MergeUtils.concat2(RoleTable, timelineRawStreamTable)
+          val roleTimelineId = timelineId + suffix
+          (roleTimelineId, mergedRoleTable)
+      }.toSeq: _*)
+    } else {
+      timelineRawStreamTableMap
+    }
+    val outputs = (timelineRawStreamTableMap++ timelineRoleTableMap).toList
     //output
     lattice.output = outputs.map(_._2)
     // timelineId -> corresponding output index
     lattice.outputStr = Serialization.write(outputs.zipWithIndex.map(t => (t._1._1, t._2)).toMap)(org.json4s.DefaultFormats)
-  }
-
-  def getSource(row: Row, template: String): String = {
-    null
   }
 
   def createTimelineRawStreamTable(entityTableMap: immutable.Map[String, util.Set[String]], streamTables: immutable

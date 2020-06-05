@@ -24,7 +24,18 @@ public class TimeLineJobConfig extends SparkJobConfig implements Serializable {
     @JsonProperty
     public Map<String, Integer> rawStreamInputIdx = new HashMap<>();
 
-    //timelineObject -> (BusinessEntity, streamTableName)
+    //tableRoleTableName -> inputIdx
+    @JsonProperty
+    public Map<String, Integer> roleTableInputIdx = new HashMap<>();
+
+    //timelineId -> RoleTableName
+    @JsonProperty
+    public Map<String, String> timelineRelatedRoleTables;
+
+    @JsonProperty
+    public boolean needRebuild;
+
+    //timelineId -> (BusinessEntity, streamTableName)
     @JsonProperty
     public Map<String, Map<String, Set<String>>> timelineRelatedStreamTables;
 
@@ -46,13 +57,16 @@ public class TimeLineJobConfig extends SparkJobConfig implements Serializable {
     @JsonProperty
     public String sortKey;
 
+    @JsonProperty
+    public String tableRoleSuffix;
+
     //templateName -> s3ImportSystemType
     @JsonProperty
     public Map<String, String> templateToSystemTypeMap;
 
     @Override
     public int getNumTargets() {
-        return MapUtils.isEmpty(timelineRelatedStreamTables) ? 0 : timelineRelatedStreamTables.size();
+        return MapUtils.isEmpty(timelineRelatedStreamTables) ? 0 : timelineRelatedStreamTables.size() * 2;
     }
 
     @Override
