@@ -62,7 +62,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
 
     @Override
     protected int expectedUserTestDateCntsBeforePA() {
-        return 0;
+        // 3 accounts created by contact won't have date attribute
+        return 3;
     }
 
     @Override
