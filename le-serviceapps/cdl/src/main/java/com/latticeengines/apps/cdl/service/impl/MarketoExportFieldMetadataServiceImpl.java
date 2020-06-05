@@ -18,7 +18,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     private static final Logger log = LoggerFactory.getLogger(MarketoExportFieldMetadataServiceImpl.class);
 
-    private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
+    private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC ID";
 
     protected MarketoExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Marketo);
