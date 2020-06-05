@@ -64,22 +64,12 @@ public class SourceProxy extends MicroserviceRestApiProxy implements ProxyInterf
     public Boolean pauseSource(String customerSpace, String sourceId) {
         String baseUrl = "/customerspaces/{customerSpace}/source/sourceId/{sourceId}/pause";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), sourceId);
-        try {
-            put("pause source", url);
-            return Boolean.TRUE;
-        } catch (RuntimeException e) {
-            return Boolean.FALSE;
-        }
+        return put("pause source", url, null, Boolean.class);
     }
 
     public Boolean reactivateSource(String customerSpace, String sourceId) {
         String baseUrl = "/customerspaces/{customerSpace}/source/sourceId/{sourceId}/reactivate";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), sourceId);
-        try {
-            put("reactivate source", url);
-            return Boolean.TRUE;
-        } catch (RuntimeException e) {
-            return Boolean.FALSE;
-        }
+        return put("reactivate source", url, null, Boolean.class);
     }
 }
