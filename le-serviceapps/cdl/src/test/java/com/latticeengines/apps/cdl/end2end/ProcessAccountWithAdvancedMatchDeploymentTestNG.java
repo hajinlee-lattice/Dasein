@@ -56,9 +56,9 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @BeforeClass(groups = "end2end" )
     @Override
     public void setup() throws Exception {
-        log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
+        log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         log.info("Setup Complete!");
     }
@@ -215,32 +215,32 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ACCOUNT_PA_EMGA, //
-                BusinessEntity.Contact, CONTACT_PA_EMGA //
+                BusinessEntity.Account, ACCOUNT_PA_EM, //
+                BusinessEntity.Contact, CONTACT_PA_EM //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PA_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Account, ACCOUNT_PA_EM);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         return map;
     }
 
     @Override
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
         return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EMGA, //
-                TableRoleInCollection.AccountExport, ACCOUNT_PA_EMGA //
+                TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EM, //
+                TableRoleInCollection.AccountExport, ACCOUNT_PA_EM //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ACCOUNT_PA_EMGA, //
-                BusinessEntity.Contact, CONTACT_PA_EMGA //
+                BusinessEntity.Account, ACCOUNT_PA_EM, //
+                BusinessEntity.Contact, CONTACT_PA_EM //
         );
     }
 
