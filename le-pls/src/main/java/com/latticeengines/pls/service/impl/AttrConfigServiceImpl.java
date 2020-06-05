@@ -535,7 +535,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             html.append(p(UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG).render());
             html.append(ul().with( //
                     each(warnings.get(Type.USAGE_ENABLED), entity -> //
-                            li(mapUsageToDisplayName(entity)))) //
+                            li(mapUsageToDisplayName2(entity)))) //
                     .render());
         }
         return html.toString();
@@ -925,6 +925,15 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     static String mapUsageToDisplayName(String usageName) {
         return usageToDisplayName.get(usageName);
+    }
+
+    static String mapUsageToDisplayName2(String usageName) {
+        String usage = usageToDisplayName.get(usageName);
+        if (StringUtils.isEmpty(usage)) {
+            return usageName;
+        } else {
+            return usage;
+        }
     }
 
     static String mapDisplayNameToUsage(String usageDisplayName) {
