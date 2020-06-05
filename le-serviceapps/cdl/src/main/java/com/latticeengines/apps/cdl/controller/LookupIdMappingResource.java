@@ -21,6 +21,8 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
+import com.latticeengines.remote.exposed.service.tray.TrayService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +35,9 @@ public class LookupIdMappingResource {
 
     @Inject
     private LookupIdMappingService lookupIdMappingService;
+
+    @Inject
+    private TrayService trayService;
 
     @GetMapping(value = "")
     @ResponseBody
@@ -82,6 +87,16 @@ public class LookupIdMappingResource {
     @ApiOperation(value = "Delete mapped configuration for given config id")
     public void deleteLookupIdMap(@PathVariable String customerSpace, @PathVariable String id) {
         lookupIdMappingService.deleteLookupIdMap(id);
+    }
+
+    @PutMapping(value = "/delete-connection/{lookupIdMapId}")
+    @ResponseBody
+    @ApiOperation(value = "Delete Tray solution instance, authentication, and lookupidmap")
+    public void deleteConnection(@PathVariable String customerSpace, @PathVariable String lookupIdMapId,
+            @RequestBody TraySettings traySettings) {
+        trayService.removeSolutionInstance(traySettings);
+        trayService.removeAuthentication(traySettings);
+        lookupIdMappingService.deleteLookupIdMap(lookupIdMapId);
     }
 
     @GetMapping(value = "/available-lookup-ids")

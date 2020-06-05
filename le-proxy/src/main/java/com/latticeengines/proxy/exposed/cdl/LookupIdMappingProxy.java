@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -80,6 +81,13 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
     public void deleteLookupIdMap(String customerSpace, String id) {
         String url = constructUrl(URL_PREFIX + "/config/{id}", shortenCustomerSpace(customerSpace), id);
         delete("getLookupIdMap", url);
+    }
+
+    public void deleteConnection(String customerSpace, TraySettings settings, String lookupIdMapId) {
+        String url = constructUrl(URL_PREFIX + "/delete-connection/{lookupIdMapId}",
+                shortenCustomerSpace(customerSpace),
+                lookupIdMapId);
+        put("connection", url, settings, TraySettings.class);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
