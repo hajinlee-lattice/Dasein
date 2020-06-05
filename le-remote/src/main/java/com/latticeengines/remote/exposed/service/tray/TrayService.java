@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 public interface TrayService {
 
     Object removeSolutionInstance(TraySettings settings);
+
+    Object removeAuthentication(TraySettings settings);
 }

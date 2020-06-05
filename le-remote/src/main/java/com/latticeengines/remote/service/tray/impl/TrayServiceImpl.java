@@ -59,4 +59,28 @@ public class TrayServiceImpl implements TrayService {
         return returnObj;
     }
 
+    @Override
+    public Object removeAuthentication(TraySettings settings) {
+        Object returnObj = null;
+        try {
+            log.info(String.format("Trying to delete authentication with settings %s",
+                    JsonUtils.serialize(settings)));
+
+            String query = String.format(
+                    "{\"query\":\"mutation ($authenticationId: ID!){\n  removeAuthentication(input: { authenticationId: $authenticationId }) {\n    clientMutationId\n  }\n}\",\"variables\":{\"authenticationId\":\"%s\"}}",
+                    settings.getAuthenticationId());
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+            headers.put("Authorization", String.format("bearer %s", settings.getUserToken()));
+
+            returnObj = trayClient.postWithHeaders(trayGraphQLurl, query, headers, Object.class);
+            log.info(String.format("Returned object is %s", returnObj));
+        } catch (Exception e) {
+            log.error("Failed to remove Tray solution instance", e);
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
+        return returnObj;
+    }
+
+
 }

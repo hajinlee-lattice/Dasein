@@ -6,11 +6,14 @@ public class TraySettings {
 
     private String solutionInstanceId;
 
+    private String authenticationId;
+
     private String clientMutationId;
 
-    public TraySettings(String userToken, String solutionInstanceId, String clientMutationId) {
+    public TraySettings(String userToken, String solutionInstanceId, String authenticationId, String clientMutationId) {
         this.userToken = userToken;
         this.solutionInstanceId = solutionInstanceId;
+        this.authenticationId = authenticationId;
         this.clientMutationId = clientMutationId;
     }
 
@@ -30,6 +33,14 @@ public class TraySettings {
         return this.solutionInstanceId;
     }
 
+    public void setAuthenticationId(String authenticationId) {
+        this.authenticationId = authenticationId;
+    }
+
+    public String getAuthenticationId() {
+        return this.authenticationId;
+    }
+
     public void setClientMutationId(String clientMutationId) {
         this.clientMutationId = clientMutationId;
     }
@@ -44,6 +55,8 @@ public class TraySettings {
 
         private String solutionInstanceId;
 
+        private String authenticationId;
+
         private String clientMutationId;
 
         public TraySettingsBuilder userToken(String userToken) {
@@ -56,13 +69,19 @@ public class TraySettings {
             return this;
         }
 
+        public TraySettingsBuilder authenticationId(String authenticationId) {
+            this.authenticationId = authenticationId;
+            return this;
+        }
+
         public TraySettingsBuilder clientMutationId(String clientMutationId) {
             this.clientMutationId = clientMutationId;
             return this;
         }
 
         public TraySettings build() {
-            return new TraySettings(this.userToken, this.solutionInstanceId, this.clientMutationId);
+            return new TraySettings(this.userToken, this.solutionInstanceId, this.authenticationId,
+                    this.clientMutationId);
         }
 
     }

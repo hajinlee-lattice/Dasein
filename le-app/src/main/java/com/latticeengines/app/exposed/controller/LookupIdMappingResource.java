@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 import com.latticeengines.domain.exposed.util.UIActionUtils;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
@@ -144,6 +145,14 @@ public class LookupIdMappingResource {
     @ApiOperation(value = "Delete mapped configuration for given config id")
     public void deleteLookupIdMap(HttpServletRequest request, @PathVariable String id) {
         lookupIdMappingProxy.deleteLookupIdMap(MultiTenantContext.getTenant().getId(), id);
+    }
+
+    @RequestMapping(value = "/delete-connection/{lookupIdMapId}", method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation(value = "Delete Tray solution instance, authentication, and lookupidmap")
+    public void deleteConnection(HttpServletRequest request, //
+            @PathVariable String lookupIdMapId, @RequestBody TraySettings traySettings) {
+        lookupIdMappingProxy.deleteConnection(MultiTenantContext.getTenant().getId(), traySettings, lookupIdMapId);
     }
 
     @RequestMapping(value = "/available-lookup-ids", method = RequestMethod.GET)
