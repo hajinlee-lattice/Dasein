@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -10,6 +12,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.end2end.ProcessAccountWithAdvancedMatchDeploymentTestNG;
+import com.latticeengines.apps.cdl.service.impl.CheckpointAutoService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -21,13 +24,18 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
 
     private static final Logger log = LoggerFactory.getLogger(EntityExportWorkflowWithEMDeploymentTestNG.class);
 
+    @Inject
+    protected CheckpointAutoService checkpointAutoService;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
-        checkpointService.resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT, CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
+        checkpointAutoService.setMainTestTenant(mainTestTenant);
+        checkpointAutoService.resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT,
+                CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
         log.info("Setup Complete!");
         configExportAttrs();
         saveCsvToLocal = false;
