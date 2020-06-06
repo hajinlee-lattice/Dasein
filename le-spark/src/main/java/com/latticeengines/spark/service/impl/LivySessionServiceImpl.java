@@ -174,8 +174,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             }
             String appId = json.get("appId").asText();
             String state = json.get("state").asText();
-            String driverLogUrl = json.get("appInfo").get("driverLogUrl").asText();
-            String sparkUiUrl = json.get("appInfo").get("sparkUiUrl").asText();
+            JsonNode driverLogUrlNode = json.get("appInfo").get("driverLogUrl");
+            JsonNode sparkUiUrlNode = json.get("appInfo").get("sparkUiUrl");
+            String driverLogUrl = driverLogUrlNode.isNull() ? null : driverLogUrlNode.asText();
+            String sparkUiUrl = sparkUiUrlNode.isNull() ? null : sparkUiUrlNode.asText();
             session.setState(state);
             session.setAppId(appId);
             session.setDriverLogUrl(driverLogUrl);

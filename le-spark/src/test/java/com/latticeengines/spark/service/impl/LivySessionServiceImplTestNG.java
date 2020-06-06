@@ -44,13 +44,16 @@ public class LivySessionServiceImplTestNG extends SparkFunctionalTestNGBase {
         LivySession retrieved = sessionService.getSession(new LivySession(livyHost, sessionId));
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getSessionId(), session.getSessionId());
-        Assert.assertEquals(retrieved.getDriverLogUrl(), session.getDriverLogUrl());
-        Assert.assertEquals(retrieved.getSparkUiUrl(), session.getSparkUiUrl());
+        if (session.getDriverLogUrl() != null) {
+            Assert.assertEquals(retrieved.getDriverLogUrl(), session.getDriverLogUrl());
+        }
+        if (session.getSparkUiUrl() != null) {
+            Assert.assertEquals(retrieved.getSparkUiUrl(), session.getSparkUiUrl());
+        }
 
         sessionService.stopSession(session);
 
         retrieved = sessionService.getSession(new LivySession(livyHost, sessionId));
         Assert.assertNull(retrieved);
     }
-
 }
