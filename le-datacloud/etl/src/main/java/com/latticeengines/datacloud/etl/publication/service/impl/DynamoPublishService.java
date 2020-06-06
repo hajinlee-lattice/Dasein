@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.publication.service.PublishService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.DynamoDestination;
-import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -95,17 +95,13 @@ public class DynamoPublishService extends AbstractPublishService
             createTable(dynamoService, tableName, configuration);
             log.info("Table " + tableName + " is created");
             progress = progressService.update(progress).destination(destination).progress(0.3f).commit();
+            progress = uploadData(progress, dynamoService, configuration, tableName);
             break;
         case APPEND:
-            if (PublicationConfiguration.PublicationStrategy.APPEND.equals(configuration.getPublicationStrategy())) {
-                long readCapacity = configuration.getLoadingReadCapacity();
-                long writeCapacity = configuration.getLoadingWriteCapacity();
-                updateThroughput(dynamoService, tableName, readCapacity, writeCapacity);
-            }
-            String sourceVersion = progress.getSourceVersion();
-            String sourceName = progress.getPublication().getSourceName();
-            uploadData(dynamoService, tableName, sourceName, sourceVersion, configuration);
-            progress = progressService.update(progress).destination(progress.getDestination()).progress(0.9f).commit();
+            long readCapacity = configuration.getLoadingReadCapacity();
+            long writeCapacity = configuration.getLoadingWriteCapacity();
+            updateThroughput(dynamoService, tableName, readCapacity, writeCapacity);
+            progress = uploadData(progress, dynamoService, configuration, tableName);
             break;
         default:
             throw new UnsupportedOperationException(configuration.getPublicationStrategy() + " is not supported");
@@ -119,6 +115,14 @@ public class DynamoPublishService extends AbstractPublishService
                 .status(ProgressStatus.FINISHED) //
                 .commit();
         return progress;
+    }
+
+    private PublicationProgress uploadData(@NotNull PublicationProgress progress, @NotNull DynamoService dynamoService,
+            @NotNull PublishToDynamoConfiguration configuration, @NotNull String tableName) {
+        String sourceVersion = progress.getSourceVersion();
+        String sourceName = progress.getPublication().getSourceName();
+        uploadData(dynamoService, tableName, sourceName, sourceVersion, configuration);
+        return progressService.update(progress).destination(progress.getDestination()).progress(0.9f).commit();
     }
 
     private String getTableName(PublishToDynamoConfiguration configuration) {
