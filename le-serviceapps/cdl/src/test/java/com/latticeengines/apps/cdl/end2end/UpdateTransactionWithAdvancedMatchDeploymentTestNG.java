@@ -52,7 +52,8 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
 
     @Override
     protected void verifyCheckPoint() {
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_PT_EMGA);
+        // FIXME update expected no. after process txn e2e is updated to multi template
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_PA_EMGA);
         Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_PA_EM);
         verifyTxnDailyStore(DAILY_TXN_DAYS_PT, MIN_TXN_DATE_PT, MAX_TXN_DATE_PT, //
                 VERIFY_DAILYTXN_AMOUNT_PT, //
