@@ -1,7 +1,7 @@
 package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +54,6 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
 
         Table accountTemplate = accountDataFeedTask.getImportTemplate();
         Assert.assertNull(accountTemplate.getAttribute(InterfaceName.AccountId));
-        Table transactionTemplate = transactionDataFeedTask.getImportTemplate();
-        Assert.assertNotNull(transactionTemplate.getAttribute(InterfaceName.CustomerAccountId));
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -83,7 +81,8 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
 
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
-        Collections.sort(reports, (one, two) -> one.getCreated().compareTo(two.getCreated()));
+        Assert.assertNotNull(reports);
+        reports.sort(Comparator.comparing(Report::getCreated));
         Assert.assertEquals(reports.size(), 3);
         Report accountReport = reports.get(0);
         Report contactReport = reports.get(1);

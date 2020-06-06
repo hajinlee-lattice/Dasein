@@ -164,30 +164,37 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String timeFormatString4 = "00:00:00 24H";
         String timezone4 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE;
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
-            if (mapping.getUserField().equals("TestDate1")) {
-                mapping.setFieldType(UserDefinedType.DATE);
-                mapping.setMappedToLatticeField(false);
-                mapping.setDateFormatString(dateFormatString1);
-                mapping.setTimeFormatString(timeFormatString1);
-                mapping.setTimezone(timezone1);
-            } else if (mapping.getUserField().equals("TestDate2")) {
-                mapping.setFieldType(UserDefinedType.DATE);
-                mapping.setMappedToLatticeField(false);
-                mapping.setDateFormatString(dateFormatString2);
-                mapping.setTimeFormatString(timeFormatString2);
-                mapping.setTimezone(timezone2);
-            } else if (mapping.getUserField().equals("TestDate3")) {
-                mapping.setFieldType(UserDefinedType.DATE);
-                mapping.setMappedToLatticeField(false);
-                mapping.setDateFormatString(dateFormatString3);
-                mapping.setTimeFormatString(timeFormatString3);
-                mapping.setTimezone(timezone3);
-            } else if (mapping.getUserField().equals("TestTZDate")) {
-                // this verify the TZ date can be validated through import workflow
-                Assert.assertEquals(UserDefinedType.DATE, mapping.getFieldType());
-                Assert.assertEquals(dateFormatString4, mapping.getDateFormatString());
-                Assert.assertEquals(timeFormatString4, mapping.getTimeFormatString());
-                Assert.assertEquals(timezone4, mapping.getTimezone());
+            switch (mapping.getUserField()) {
+                case "TestDate1":
+                    mapping.setFieldType(UserDefinedType.DATE);
+                    mapping.setMappedToLatticeField(false);
+                    mapping.setDateFormatString(dateFormatString1);
+                    mapping.setTimeFormatString(timeFormatString1);
+                    mapping.setTimezone(timezone1);
+                    break;
+                case "TestDate2":
+                    mapping.setFieldType(UserDefinedType.DATE);
+                    mapping.setMappedToLatticeField(false);
+                    mapping.setDateFormatString(dateFormatString2);
+                    mapping.setTimeFormatString(timeFormatString2);
+                    mapping.setTimezone(timezone2);
+                    break;
+                case "TestDate3":
+                    mapping.setFieldType(UserDefinedType.DATE);
+                    mapping.setMappedToLatticeField(false);
+                    mapping.setDateFormatString(dateFormatString3);
+                    mapping.setTimeFormatString(timeFormatString3);
+                    mapping.setTimezone(timezone3);
+                    break;
+                case "TestTZDate":
+                    // this verify the TZ date can be validated through import workflow
+                    Assert.assertEquals(UserDefinedType.DATE, mapping.getFieldType());
+                    Assert.assertEquals(dateFormatString4, mapping.getDateFormatString());
+                    Assert.assertEquals(timeFormatString4, mapping.getTimeFormatString());
+                    Assert.assertEquals(timezone4, mapping.getTimezone());
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -525,16 +532,12 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(contactDataFeedTask);
         Table accountTemplate = accountDataFeedTask.getImportTemplate();
         Table contactTemplate = contactDataFeedTask.getImportTemplate();
-        Table transactionTemplate = transactionDataFeedTask.getImportTemplate();
         Set<String> accountHeaders = getHeaderFields(
                 ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
         Table accountSourceTable = metadataProxy.getTable(customerSpace, baseAccountFile.getTableName());
         compare(accountSourceTable, accountHeaders);
         Assert.assertEquals(accountTemplate.getAttributes().size(), accountSourceTable.getAttributes().size());
         Assert.assertNotNull(contactTemplate.getAttribute(InterfaceName.PhoneNumber));
-        boolean containsContact =
-                transactionTemplate.getAttribute(InterfaceName.ContactId) != null ^ transactionTemplate.getAttribute(InterfaceName.CustomerContactId) != null;
-        Assert.assertTrue(containsContact);
         List<Action> importActions = actionProxy.getActions(customerSpace).stream()
                 .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
