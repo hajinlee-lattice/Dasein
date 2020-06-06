@@ -76,7 +76,7 @@ public class TrayServiceImpl implements TrayService {
             returnObj = trayClient.postWithHeaders(trayGraphQLurl, query, headers, Object.class);
             log.info(String.format("Returned object is %s", returnObj));
         } catch (Exception e) {
-            log.error("Failed to remove Tray solution instance", e);
+            log.error("Failed to remove Tray Authentication", e);
             log.error(ExceptionUtils.getStackTrace(e));
         }
         return returnObj;
