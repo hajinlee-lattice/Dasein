@@ -49,6 +49,12 @@
             <version>${project.version}</version>
         </dependency>
 
+		<dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
@@ -114,6 +120,13 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
