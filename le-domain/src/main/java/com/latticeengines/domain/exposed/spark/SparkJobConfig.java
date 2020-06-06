@@ -58,6 +58,7 @@ import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
+import com.latticeengines.domain.exposed.spark.stats.AdvancedCalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
@@ -121,6 +122,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CalculateLastActivityDateConfig.class, name = CalculateLastActivityDateConfig.NAME), //
         @JsonSubTypes.Type(value = BucketEncodeConfig.class, name = BucketEncodeConfig.NAME), //
         @JsonSubTypes.Type(value = CalcStatsConfig.class, name = CalcStatsConfig.NAME), //
+        @JsonSubTypes.Type(value = AdvancedCalcStatsConfig.class, name = AdvancedCalcStatsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME), //
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //

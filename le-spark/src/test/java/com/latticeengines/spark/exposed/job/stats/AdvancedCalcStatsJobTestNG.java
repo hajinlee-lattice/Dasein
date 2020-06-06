@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
+import com.latticeengines.domain.exposed.spark.stats.AdvancedCalcStatsConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 import com.latticeengines.spark.utils.BucketEncodeUtils;
 
@@ -35,7 +35,7 @@ public class AdvancedCalcStatsJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {
         uploadTestData();
-        CalcStatsConfig config = new CalcStatsConfig();
+        AdvancedCalcStatsConfig config = new AdvancedCalcStatsConfig();
         SparkJobResult result = runSparkJob(CalcStatsJob.class, config);
         targetVerifier = this::verifyFirstTarget;
         verifyResult(result);
