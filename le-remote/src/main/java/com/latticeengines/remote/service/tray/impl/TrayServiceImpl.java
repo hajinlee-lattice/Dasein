@@ -3,14 +3,15 @@ package com.latticeengines.remote.service.tray.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -29,12 +30,7 @@ public class TrayServiceImpl implements TrayService {
     @Inject
     private ApplicationContext applicationContext;
 
-    private RestApiClient trayClient;
-
-    @PostConstruct
-    public void initialize() throws Exception {
-        trayClient = RestApiClient.newExternalClient(applicationContext);
-    }
+    private volatile RestApiClient trayClient;
 
     @Override
     public Object removeSolutionInstance(TraySettings settings) {
@@ -47,10 +43,10 @@ public class TrayServiceImpl implements TrayService {
                     "{\"query\":\"mutation($solutionInstanceId: ID!) { removeSolutionInstance(input: {    solutionInstanceId: $solutionInstanceId\\n  }) {  clientMutationId\\n }}\",\"variables\":{\"solutionInstanceId\":\"%s\"}}",
                     settings.getSolutionInstanceId());
             Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/json");
-            headers.put("Authorization", String.format("bearer %s", settings.getUserToken()));
+            headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            headers.put(HttpHeaders.AUTHORIZATION, String.format("bearer %s", settings.getUserToken()));
 
-            returnObj = trayClient.postWithHeaders(trayGraphQLurl, query, headers, Object.class);
+            returnObj = getTrayClient().postWithHeaders(trayGraphQLurl, query, headers, Object.class);
             log.info(String.format("Returned object is %s", returnObj));
         } catch (Exception e) {
             log.error("Failed to remove Tray solution instance", e);
@@ -70,10 +66,10 @@ public class TrayServiceImpl implements TrayService {
                     "{\"query\":\"mutation ($authenticationId: ID!){\n  removeAuthentication(input: { authenticationId: $authenticationId }) {\n    clientMutationId\n  }\n}\",\"variables\":{\"authenticationId\":\"%s\"}}",
                     settings.getAuthenticationId());
             Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/json");
-            headers.put("Authorization", String.format("bearer %s", settings.getUserToken()));
+            headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            headers.put(HttpHeaders.AUTHORIZATION, String.format("bearer %s", settings.getUserToken()));
 
-            returnObj = trayClient.postWithHeaders(trayGraphQLurl, query, headers, Object.class);
+            returnObj = getTrayClient().postWithHeaders(trayGraphQLurl, query, headers, Object.class);
             log.info(String.format("Returned object is %s", returnObj));
         } catch (Exception e) {
             log.error("Failed to remove Tray Authentication", e);
@@ -82,5 +78,17 @@ public class TrayServiceImpl implements TrayService {
         return returnObj;
     }
 
+    private RestApiClient getTrayClient() {
+        if (trayClient == null) {
+            constructClient();
+        }
+        return trayClient;
+    }
+
+    private synchronized void constructClient() {
+        if (trayClient == null) {
+            trayClient = RestApiClient.newExternalClient(applicationContext);
+        }
+    }
 
 }
