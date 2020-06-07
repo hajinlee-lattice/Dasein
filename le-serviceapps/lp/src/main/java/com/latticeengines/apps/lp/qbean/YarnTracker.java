@@ -140,6 +140,13 @@ class YarnTracker {
                                 hasSqoopMrApp = true;
                                 break;
                             }
+                        } else if ("YARN".equalsIgnoreCase(app.getApplicationType())) {
+                            String appName = app.getName();
+                            if (appName.contains("ATT~") && appName.contains("~processAnalyzeWorkflow")) {
+                                log.info("Found an ATT PA: " + app.getApplicationId());
+                                hasSqoopMrApp = true;
+                                break;
+                            }
                         }
                     }
                 } catch (IOException | YarnException e) {
