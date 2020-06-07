@@ -341,7 +341,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         putObjectInContext(contextKey, tableNames);
     }
 
-    protected void exportTableToS3(String tableName, String contextKey) {
+    private void exportTableToS3(String tableName, String contextKey) {
         boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
         if (!shouldSkip) {
             HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
@@ -358,7 +358,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
             }
             HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
                     customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
-            exporter.run();
+            new Thread(exporter).start();
         } else {
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }

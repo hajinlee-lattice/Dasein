@@ -326,7 +326,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             } else {
                 // get table by glob
                 table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(),
-                        tableSource.getLastModifiedKey());
+                        tableSource.getLastModifiedKey(), count != null);
             }
             try {
                 boolean avscExists = HdfsUtils.fileExists(yarnConfiguration, avscPath);

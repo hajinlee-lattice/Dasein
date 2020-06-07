@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -29,6 +32,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private static final Logger log = LoggerFactory.getLogger(MatchAccount.class);
 
     static final String BEAN_NAME = "matchAccount";
+
+    @Inject
+    private BatonService batonService;
 
     private String matchTargetTablePrefix = null;
 
@@ -72,13 +78,20 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 steps.add(filterImports);
             }
         } else {
-            TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
-            steps.add(merge);
+            if (batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
+                TransformationStepConfig merge = concatTablesAndSave(InterfaceName.AccountId.name(), matchTargetTablePrefix);
+                steps.add(merge);
+            } else {
+                TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
+                steps.add(merge);
+            }
         }
 
-        TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
-                convertedRematchTableNames);
-        steps.add(match);
+        if (!batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
+            TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
+                    convertedRematchTableNames);
+            steps.add(match);
+        }
 
         log.info("steps are {}.", steps);
         request.setSteps(steps);

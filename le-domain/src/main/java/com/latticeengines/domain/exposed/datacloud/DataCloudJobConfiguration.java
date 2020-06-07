@@ -47,6 +47,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private String matchInputPath;
 
     private Schema inputAvroSchema;
+    @JsonIgnore
+    private boolean readyToProcess;
 
     public String getHdfsPodId() {
         return hdfsPodId;
@@ -183,6 +185,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
     public void setMatchInputPath(String matchInputPath) {
         this.matchInputPath = matchInputPath;
+    }
+
+    public boolean isReadyToProcess() {
+        return readyToProcess;
+    }
+
+    public void setReadyToProcess(boolean readyToProcess) {
+        this.readyToProcess = readyToProcess;
     }
 
     @Override

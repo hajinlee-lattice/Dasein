@@ -79,12 +79,24 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
         }
       }).toList
     }
+    val stageInputCnts: List[Long] = if (CollectionUtils.isEmpty(jobConfig.getInput)) {
+      List()
+    } else {
+      jobConfig.getInput.asScala.map(dataUnit => {
+        val cnt: Long = if (dataUnit == null) {
+          -1
+        } else {
+          if (dataUnit.getCount == null) -1 else dataUnit.getCount
+        }
+        cnt
+      }).toList
+    }
     val stageTargets: List[HdfsDataUnit] = if (CollectionUtils.isEmpty(jobConfig.getTargets)) {
       List()
     } else {
       jobConfig.getTargets.asScala.toList
     }
-    val latticeCtx = new LatticeContext[C](stageInput, jobConfig, stageTargets)
+    val latticeCtx = new LatticeContext[C](stageInput, stageInputCnts, jobConfig, stageTargets)
     (spark, latticeCtx)
   }
 

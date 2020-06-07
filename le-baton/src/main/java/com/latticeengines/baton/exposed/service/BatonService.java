@@ -82,4 +82,7 @@ public interface BatonService {
     //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
     boolean shouldExcludeDataCloudAttrs(String tenantId);
 
+    //FIXME: a hotfix for M36. ATT crisis
+    boolean shouldSkipFuzzyMatchInPA(String tenantId);
+
 }

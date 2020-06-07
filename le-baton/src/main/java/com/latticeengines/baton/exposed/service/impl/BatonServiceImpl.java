@@ -685,6 +685,7 @@ public class BatonServiceImpl implements BatonService {
     public boolean shouldExcludeDataCloudAttrs(String tenantId) {
         boolean shouldExclude = false;
         if (StringUtils.isNotBlank(tenantId)) {
+            tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
             Camille camille = CamilleEnvironment.getCamille();
             String podId = CamilleEnvironment.getPodId();
             Path node = PathBuilder.buildPodPath(podId).append("SprintHotFixTargets");
@@ -692,10 +693,36 @@ public class BatonServiceImpl implements BatonService {
                 if (camille.exists(node)) {
                     List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
                     if (targets.contains(tenantId)) {
-                        log.info("{} is a hotfix target.", tenantId);
+                        log.info("{} is a Sprint hotfix target.", tenantId);
                         shouldExclude = true;
                     } else {
-                        log.info("{} is not a hotfix target", tenantId);
+                        log.info("{} is not a Sprint hotfix target", tenantId);
+                        shouldExclude = false;
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to retrieve hotfix targets from ZK.", e);
+            }
+        }
+        return shouldExclude;
+    }
+
+    @Override
+    public boolean shouldSkipFuzzyMatchInPA(String tenantId) {
+        boolean shouldExclude = false;
+        if (StringUtils.isNotBlank(tenantId)) {
+            tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            Path node = PathBuilder.buildPodPath(podId).append("ATTHotFixTargets");
+            try {
+                if (camille.exists(node)) {
+                    List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
+                    if (targets.contains(tenantId)) {
+                        log.info("{} is an ATT hotfix target.", tenantId);
+                        shouldExclude = true;
+                    } else {
+                        log.info("{} is not an ATT hotfix target", tenantId);
                         shouldExclude = false;
                     }
                 }

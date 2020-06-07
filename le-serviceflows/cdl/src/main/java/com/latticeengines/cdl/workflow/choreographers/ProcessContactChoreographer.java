@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.RebuildContactWorkflow;
 import com.latticeengines.cdl.workflow.UpdateContactWorkflow;
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteContact;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -54,6 +56,9 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private RebuildContactWorkflow rebuildContactWorkflow;
+
+    @Inject
+    private BatonService batonService;
 
     private boolean hasAttrLifeCycleChange = false;
     private boolean hasAccounts = false;
@@ -127,7 +132,19 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
             } else {
                 shouldRebuild = super.shouldRebuild(step);
                 if (!shouldRebuild && !reset) {
-                    if (accountChoreographer.hasNonTrivialChange()) {
+                    boolean attHotFix = false;
+                    if (step.getConfiguration() instanceof BaseProcessEntityStepConfiguration) {
+                        BaseProcessEntityStepConfiguration stepConfig = (BaseProcessEntityStepConfiguration) step.getConfiguration();
+                        String tenantId = stepConfig.getCustomerSpace().getTenantId();
+                        attHotFix = batonService.shouldSkipFuzzyMatchInPA(tenantId);
+                        if (attHotFix) {
+                            log.info("ATT hotfix, ignoring non-trivial account change.");
+                        }
+                    }
+                    if (accountChoreographer.hasDelete()) {
+                        log.info("Should rebuild, since account has delete");
+                        shouldRebuild = true;
+                    } else if (accountChoreographer.hasNonTrivialChange() && !attHotFix) {
                         log.info("Should rebuild, since account has non-trivial change");
                         shouldRebuild = true;
                     } else if (hasAttrLifeCycleChange) {

@@ -1,6 +1,7 @@
 
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE;
@@ -62,14 +63,12 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Inject
     private ProfileAccount profileAccount;
 
-    @Inject
-    private BatonService batonService;
-
     protected boolean rebuildNotForDataCloudChange = false;
     protected boolean dataCloudChanged = false;
     private boolean hasAttrLifeCycleChange = false;
     private boolean shouldRematch = false;
     private boolean hasEmbeddedAccount = false;
+    private boolean hasLegacyDelete = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -219,6 +218,10 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return rebuild || update;
     }
 
+    boolean hasDelete() {
+        return hasLegacyDelete || hasSoftDelete;
+    }
+
     @Override
     protected boolean hasEmbeddedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
         if (step == null) {
@@ -241,6 +244,11 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
             return configuration.hasEntity(BusinessEntity.Account);
         });
+    }
+
+    private boolean hasLegacyDeleteActions(AbstractStep<? extends BaseStepConfiguration> step) {
+        Set<Action> actions = step.getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
+        return CollectionUtils.isNotEmpty(actions);
     }
 
 }

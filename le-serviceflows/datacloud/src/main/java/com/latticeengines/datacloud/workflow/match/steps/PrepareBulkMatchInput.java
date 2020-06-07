@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -31,6 +32,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -266,24 +268,30 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private List<DataCloudJobConfiguration> readAndSplitInputAvro(Integer[] blocks) {
-        Iterator<GenericRecord> iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlobs);
+        final Iterator<GenericRecord> iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlobs);
         List<DataCloudJobConfiguration> configurations = new ArrayList<>();
+        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("block-splitter", 1);
 
         int blockIdx = 0;
         for (Integer blockSize : blocks) {
             blockIdx++;
             String blockOperationUid = UUID.randomUUID().toString().toUpperCase();
 
-            DataCloudJobConfiguration jobConfiguration = generateJobConfiguration();
+            final DataCloudJobConfiguration jobConfiguration = generateJobConfiguration();
             jobConfiguration.setBlockSize(blockSize);
             jobConfiguration.setBlockOperationUid(blockOperationUid);
             if (blocks.length == 1) {
                 jobConfiguration.setAvroPath(avroGlobs);
+                jobConfiguration.setReadyToProcess(true);
             } else {
                 String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
                         jobConfiguration.getBlockOperationUid()).toString();
                 jobConfiguration.setAvroPath(targetFile);
-                writeBlock(iterator, blockSize, targetFile);
+                jobConfiguration.setReadyToProcess(false);
+                tp.submit(() -> {
+                    writeBlock(iterator, blockSize, targetFile);
+                    jobConfiguration.setReadyToProcess(true);
+                });
             }
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())

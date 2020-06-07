@@ -52,7 +52,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean initialized = false;
     private boolean hasBatchStore = false;
     private boolean hasSystemStore = false;
-    private boolean hasSoftDelete = false;
+    boolean hasSoftDelete = false;
     private boolean hasHardDelete = false;
     float diffRate = 0;
     long diffCount = 0;
@@ -256,7 +256,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         if (hasHardDelete) {
             log.info(String.format("Found %d hard delete actions", hardDeletes.size()));
         }
-        hasSoftDelete = CollectionUtils.isNotEmpty(softDeletes);
+        hasSoftDelete = hasValidSoftDeleteActions(softDeletes);
         if (hasSoftDelete) {
             log.info(String.format("Found %d soft delete actions", softDeletes.size()));
         }
