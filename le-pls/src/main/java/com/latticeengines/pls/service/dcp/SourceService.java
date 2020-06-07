@@ -23,10 +23,10 @@ public interface SourceService {
 
     Boolean pauseSource(String sourceId);
 
-    FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String entityType,
+    FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
                                                         String importFile) throws Exception;
 
-    ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile, String entityType,
+    ValidateFieldDefinitionsResponse validateSourceMappings(String importFile, String entityType,
                                                               ValidateFieldDefinitionsRequest validateRequest)
             throws Exception ;
 

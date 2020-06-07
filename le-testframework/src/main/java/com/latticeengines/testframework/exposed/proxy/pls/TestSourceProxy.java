@@ -61,10 +61,10 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         if (StringUtils.isNotBlank(entityType)) {
             url += isFirst ? "?entityType=" + entityType : "&entityType=" + entityType;
         }
-        return get("get definitions", url, FetchFieldDefinitionsResponse.class);
+        return get("get source mappings", url, FetchFieldDefinitionsResponse.class);
     }
 
-    public ValidateFieldDefinitionsResponse validateSourceDefinitions(String fileImportId, String entityType,
+    public ValidateFieldDefinitionsResponse validateSourceMappings(String fileImportId, String entityType,
                                                                      ValidateFieldDefinitionsRequest validateRequest) {
         String url = constructUrl("/validate/");
         boolean isFirst = true;
@@ -75,7 +75,7 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         if (StringUtils.isNotBlank(entityType)) {
             url += isFirst ? "?entityType=" + entityType : "&entityType=" + entityType;
         }
-        return post("validate definitions", url, validateRequest, ValidateFieldDefinitionsResponse.class);
+        return post("validate mappings", url, validateRequest, ValidateFieldDefinitionsResponse.class);
     }
 
     public Source updateSource(UpdateSourceRequest updateSourceRequest) {

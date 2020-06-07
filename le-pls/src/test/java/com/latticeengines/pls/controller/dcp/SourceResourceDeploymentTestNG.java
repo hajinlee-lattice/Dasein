@@ -144,7 +144,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
 
         ValidateFieldDefinitionsResponse response =
-                testSourceProxy.validateSourceDefinitions(testSourceFile.getFileImportId(),
+                testSourceProxy.validateSourceMappings(testSourceFile.getFileImportId(),
                null, validateRequest);
 
         Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);

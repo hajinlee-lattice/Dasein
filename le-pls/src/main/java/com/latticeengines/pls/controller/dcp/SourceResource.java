@@ -129,7 +129,7 @@ public class SourceResource {
             @RequestParam(value = "entityType", required = false, defaultValue = "Accounts") String entityType, //
             @RequestParam(value = "fileImportId", required = false) String fileImportId) {
         try {
-            return sourceService.fetchFieldDefinitions(sourceId, entityType, fileImportId);
+            return sourceService.getSourceMappings(sourceId, entityType, fileImportId);
         } catch (Exception e) {
             log.error("Fetch Field Definition Failed with Exception.", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -151,7 +151,7 @@ public class SourceResource {
             @RequestBody ValidateFieldDefinitionsRequest validateRequest) {
         ValidateFieldDefinitionsResponse validateFieldDefinitionsResponse = null;
         try {
-            validateFieldDefinitionsResponse = sourceService.validateFieldDefinitions(fileImportId,
+            validateFieldDefinitionsResponse = sourceService.validateSourceMappings(fileImportId,
                     entityType, validateRequest);
             return validateFieldDefinitionsResponse;
         } catch (Exception e) {

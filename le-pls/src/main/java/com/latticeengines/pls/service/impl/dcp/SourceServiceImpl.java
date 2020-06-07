@@ -110,7 +110,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String entityType,
+    public FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
                                                                String importFile)
             throws Exception {
 
@@ -166,7 +166,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile, String entityType,
+    public ValidateFieldDefinitionsResponse validateSourceMappings(String importFile, String entityType,
                                                               ValidateFieldDefinitionsRequest validateRequest) throws Exception {
         EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
                 EntityType.valueOf(entityType) : EntityType.Accounts;
