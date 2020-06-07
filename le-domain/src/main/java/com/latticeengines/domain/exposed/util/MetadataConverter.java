@@ -99,9 +99,8 @@ public final class MetadataConverter {
         try {
             @SuppressWarnings("deprecation")
             Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, avscPath));
-            List<Extract> extracts = convertToExtracts(configuration, avroPath, false);
-            Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, true);
-            return table;
+            List<Extract> extracts = convertToExtracts(configuration, avroPath, true);
+            return getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, true);
         } catch (Exception e) {
             throw new RuntimeException(String.format(
                     "Failed to parse metadata for avro file located at %s, using avsc at %s",
