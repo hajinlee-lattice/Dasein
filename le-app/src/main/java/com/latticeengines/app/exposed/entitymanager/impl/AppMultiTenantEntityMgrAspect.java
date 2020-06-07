@@ -19,7 +19,8 @@ public class AppMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.app.exposed.entitymanager.impl.*.find*(..))")
+    @Before("execution(* com.latticeengines.app.exposed.entitymanager.impl.*.*(..)) && "
+            + "!execution(*  com.latticeengines.app.exposed.entitymanager.impl.FileDownloadEntityMgrImpl.getByToken(..))")
     public void allEntityMgrMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
