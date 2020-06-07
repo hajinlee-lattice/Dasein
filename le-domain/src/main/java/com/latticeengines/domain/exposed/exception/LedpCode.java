@@ -876,6 +876,7 @@ public enum LedpCode {
     LEDP_40084("Failed to add attribute group, exceed size limitation: {0}."), //
     LEDP_40085("Display name of attribute group can't be empty."), //
     LEDP_40086("Attribute group name \"{0}\" already exists."), //
+    LEDP_40087("Can't delete attribute group \"{0}\"."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //

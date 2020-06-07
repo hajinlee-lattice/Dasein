@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 @Service("cdlAttrConfigService")
@@ -273,6 +274,9 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public void deleteAttributeSetByName(String name) {
+        if (AttributeUtils.isDefaultAttributeSet(name)) {
+            throw new LedpException(LedpCode.LEDP_40087, new String[]{AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME});
+        }
         attributeSetEntityMgr.deleteByName(name);
     }
 
