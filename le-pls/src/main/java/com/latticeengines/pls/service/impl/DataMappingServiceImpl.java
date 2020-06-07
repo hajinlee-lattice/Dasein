@@ -97,7 +97,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         // systemName + entityType ==> feedType
         // "File" ==> source   [hard coded for since only File is needed]
         // importFile ==> sourceFile
-        // ==> customerSpace
+        // MultiTenantContext ==> customerSpace
 
         // 2a. Convert systemObject to entity.
         EntityType entityType = EntityType.fromDisplayNameToEntityType(systemObject);
@@ -188,19 +188,27 @@ public class DataMappingServiceImpl implements DataMappingService {
     public ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
                                                                      String systemObject, String importFile,
                                                                      ValidateFieldDefinitionsRequest validateRequest) {
-
+        // 1. Validate HTTP request parameters.
         validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject, importFile);
 
-        // get default spec from s3
-        if (validateRequest.getImportWorkflowSpec() == null || MapUtils.isEmpty(validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap())) {
+        // 2. Verify the request has a valid Import Workflow Spec.
+        if (validateRequest.getImportWorkflowSpec() == null ||
+                MapUtils.isEmpty(validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap())) {
             throw new RuntimeException(String.format("no spec info for system type %s and system object %s",
                     systemType, systemObject));
         }
 
-        if (validateRequest.getCurrentFieldDefinitionsRecord() == null || MapUtils.isEmpty(validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap())) {
+        // 3. Verify that the request has a valid FieldDefinitionsRecord with the Data Mapping to validate.
+        if (validateRequest.getCurrentFieldDefinitionsRecord() == null ||
+                MapUtils.isEmpty(validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap())) {
             throw new RuntimeException("no field definition records");
         }
 
+        // 4. Generate source file and metadata resolver.
+        SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
+        MetadataResolver resolver = sourceFile == null ? null : getMetadataResolver(sourceFile, null, true);
+
+        // 5. Break up sections of ValidateFieldDefinitionsRequest.
         Map<String, FieldDefinition> autoDetectionResultsMap = validateRequest.getAutodetectionResultsMap();
         Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap =
                 validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap();
@@ -209,31 +217,19 @@ public class DataMappingServiceImpl implements DataMappingService {
         Map<String, FieldDefinition> existingFieldDefinitionMap = validateRequest.getExistingFieldDefinitionsMap();
         Map<String, OtherTemplateData> otherTemplateDataMap = validateRequest.getOtherTemplateDataMap();
 
-        // 1 Generate source file and resolver
-        SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
-        MetadataResolver resolver = sourceFile == null ? null : getMetadataResolver(sourceFile, null, true);
-
-        // 2. generate validation message
+        // 6. Run validation.
         ValidateFieldDefinitionsResponse response =
                 ImportWorkflowUtils.generateValidationResponse(fieldDefinitionsRecordsMap, autoDetectionResultsMap,
                         specFieldDefinitionsRecordsMap, existingFieldDefinitionMap, otherTemplateDataMap, resolver);
-        // set field definition records map for ui
+
+        // 7. Fill in fields of ValidateFieldDefinitionsResponse.
         response.setFieldDefinitionsRecordsMap(fieldDefinitionsRecordsMap);
+        response.setSystemName(validateRequest.getCurrentFieldDefinitionsRecord().getSystemName());
+        response.setSystemType(validateRequest.getCurrentFieldDefinitionsRecord().getSystemType());
+        response.setSystemObject(validateRequest.getCurrentFieldDefinitionsRecord().getSystemObject());
         return response;
     }
 
-    // TODO(jwinter): Steps being left for validation:
-    //   1. Make sure the new metadata table has all the required attributes from the Spec.
-    //   2. Get the set of existing templates for all system types that match this entity.
-    //      a. If the existing templates have lower cased attributes names, lower case the new table’s attribute
-    //         names.
-    //      b. Make sure the physical types of attributes in the new table match those of the existing templates.
-    //   3. Check that the new metadata table hasn't changed physicalDataTypes of attributes compared to the
-    //      existing template, if DataFeed state is not DataFeed.Status.Initing.
-    //   4. Final checks against Spec:
-    //      a. All required attributes are there.
-    //      b. Physical types may differ for special cases.  (this may no longer be applicable)
-    //      c. Verify Spec field are not changed.
     @Override
     public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
                                                          String importFile, boolean runImport,
@@ -251,7 +247,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         // systemName + entityType ==> feedType
         // "File" ==> source   [hard coded since only File is needed]
         // importFile ==> sourceFile
-        // ==> customerSpace
+        // MultiTenantContext ==> customerSpace
 
         // 2a. Convert systemObject to entity.
         EntityType entityType = EntityType.fromDisplayNameToEntityType(systemObject);
@@ -326,13 +322,8 @@ public class DataMappingServiceImpl implements DataMappingService {
             cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, importFile);
         }
 
-        // 11. Setup the Commit Response for this request.
-        // Should the FieldDefinitionsRecord reflect any changes when new table is merged with
-        // existing table?
-        FieldDefinitionsRecord commitResponse = new FieldDefinitionsRecord();
-        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
-
-        return commitResponse;
+        // 11. Setup the Commit Response for this request.  For now, we just return the Commit Request.
+        return commitRequest;
     }
 
     private SourceFile getSourceFile(String sourceFileName) {

@@ -795,12 +795,13 @@ public final class ImportWorkflowUtils {
         return fieldDefinitionsRecord;
     }
 
-    public static ValidateFieldDefinitionsResponse generateValidationResponse(Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap,
-                                                                              Map<String, FieldDefinition> autoDetectionResultsMap,
-                                                                              Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap,
-                                                                              Map<String, FieldDefinition> existingFieldDefinitionMap,
-                                                                              Map<String, OtherTemplateData> otherTemplateDataMap,
-                                                                              MetadataResolver resolver) {
+    public static ValidateFieldDefinitionsResponse generateValidationResponse(
+            Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap,
+            Map<String, FieldDefinition> autoDetectionResultsMap,
+            Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap,
+            Map<String, FieldDefinition> existingFieldDefinitionMap,
+            Map<String, OtherTemplateData> otherTemplateDataMap,
+            MetadataResolver resolver) {
 
         boolean skipAutoDetectionCheck = resolver == null || MapUtils.isEmpty(autoDetectionResultsMap);
                 existingFieldDefinitionMap = existingFieldDefinitionMap == null ? new HashMap<>() : existingFieldDefinitionMap;

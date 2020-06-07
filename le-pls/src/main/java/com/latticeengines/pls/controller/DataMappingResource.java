@@ -40,9 +40,9 @@ public class DataMappingResource {
     //   systemType: The type of system for which a template is being created, eg. Salesforce
     //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
     //   importFile: The name of the CSV file this template is being generated for.
-    @GetMapping(value = "fielddefinition/fetch")
+    @GetMapping(value = "")
     @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    @ApiOperation(value = "Get Data Mapping for a System Object")
     public ResponseDocument<FetchFieldDefinitionsResponse> fetchFieldDefinitions(
             @RequestParam(value = "systemName") String systemName, //
             @RequestParam(value = "systemType") String systemType, //
@@ -66,9 +66,9 @@ public class DataMappingResource {
     //   importFile: The name of the CSV file this template is being generated for.
     // Body:
     // ValidateFieldDefinitionsRequest representing field definition changes/records
-    @PostMapping(value = "fielddefinition/validate")
+    @PostMapping(value = "/validate")
     @ResponseBody
-    @ApiOperation(value = "Provide validation result and merged field definition to front end")
+    @ApiOperation(value = "Validate Data Mapping for a System Object")
     public ResponseDocument<ValidateFieldDefinitionsResponse> validateFieldDefinitions(
             @RequestParam(value = "systemName") String systemName, //
             @RequestParam(value = "systemType") String systemType, //
@@ -94,9 +94,9 @@ public class DataMappingResource {
     //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
     // Body:
     //    The FieldDefinitionsRecord representing the field mappings for this template.
-    @PostMapping(value = "fielddefinition/commit")
+    @PostMapping(value = "")
     @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    @ApiOperation(value = "Set Data Mapping for a System Object")
     public ResponseDocument<FieldDefinitionsRecord> CommitFieldDefinitions(
             @RequestParam(value = "systemName") String systemName, //
             @RequestParam(value = "systemType") String systemType, //
