@@ -100,19 +100,20 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
             .col(recordIdColumn)))
           (timelineId, timelineRawStreamTable)
       }.toSeq: _*)
-    val timelineRoleTableMap = if (!needRebuild) {
+    val timelineRoleTableMap =
       immutable.Map(timelineRawStreamTableMap.map {
         case (timelineId, timelineRawStreamTable) =>
-          val roleTableName = timelineRelatedRoleTables.getOrElse(timelineId, "")
-          val idx: Integer = roleTableInputIdx.getOrElse(roleTableName, -1)
-          val RoleTable: DataFrame = lattice.input(idx)
-          val mergedRoleTable = MergeUtils.concat2(RoleTable, timelineRawStreamTable)
           val roleTimelineId = timelineId + suffix
-          (roleTimelineId, mergedRoleTable)
+          if (!needRebuild) {
+            val roleTableName = timelineRelatedRoleTables.getOrElse(timelineId, "")
+            val idx: Integer = roleTableInputIdx.getOrElse(roleTableName, -1)
+            val RoleTable: DataFrame = lattice.input(idx)
+            val mergedRoleTable = MergeUtils.concat2(RoleTable, timelineRawStreamTable)
+            (roleTimelineId, mergedRoleTable)
+          }else {
+            (roleTimelineId, timelineRawStreamTable)
+          }
       }.toSeq: _*)
-    } else {
-      timelineRawStreamTableMap
-    }
     val outputs = (timelineRawStreamTableMap++ timelineRoleTableMap).toList
     //output
     lattice.output = outputs.map(_._2)
