@@ -166,7 +166,6 @@ public enum InterfaceName {
     __Composite_Key__, // primary key for internal use
 
     // DCP
-    NationalID,
     StreetAddress1,
     StreetAddress2;
 

@@ -17,7 +17,7 @@ public final class TestMatchInputUtils {
     }
 
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
-        List<String> inputFields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country", "NationalID", "StreetAddress1", "StreetAddress2");
+        List<String> inputFields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country", "StreetAddress1", "StreetAddress2");
         return prepareSimpleMatchInput(mockData, inputFields, resolveKeyMap);
     }
 

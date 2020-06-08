@@ -156,11 +156,6 @@ public final class MatchKeyUtils {
             case "entityid":
                 keyMap.put(MatchKey.EntityId, Collections.singletonList(field));
                     break;
-                case "nationalid":
-                case "national_id":
-                case "national":
-                    keyMap.put(MatchKey.NationalID, Collections.singletonList(field));
-                    break;
                 case "street_address_1":
                 case "streetaddress1":
                 case "streetaddress_1":

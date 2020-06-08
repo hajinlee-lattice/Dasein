@@ -24,7 +24,6 @@ public enum MatchKey {
     EntityId, // for entity match, internal id for quicker lookup in entity seed
     PreferredEntityId, // preferred ID if we need to allocate new entity
 
-    NationalID, // for DCP
     StreetAddress1, // for DCP
     StreetAddress2; // for DCP
 
@@ -37,7 +36,6 @@ public enum MatchKey {
             .put(Zipcode, InterfaceName.PostalCode.name()) //
             .put(PhoneNumber, InterfaceName.PhoneNumber.name()) //
             .put(DUNS, InterfaceName.DUNS.name()) //
-            .put(NationalID, InterfaceName.NationalID.name()) //
             .put(StreetAddress1, InterfaceName.StreetAddress1.name()) //
             .put(StreetAddress2, InterfaceName.StreetAddress2.name()) //
             .build();

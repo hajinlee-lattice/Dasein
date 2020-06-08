@@ -72,7 +72,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
         input.setSkipKeyResolution(true);
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS",
-                "CustomerAccountId", "SfdcId", "MktoId", "NationalID", "StreetAddress1", "StreetAddress2"));
+                "CustomerAccountId", "SfdcId", "MktoId", "StreetAddress1", "StreetAddress2"));
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setAllocateId(false);
         input.setTargetEntity(BusinessEntity.Account.name());
@@ -85,7 +85,6 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
         keyMap.put(MatchKey.SystemId, Arrays.asList("CustomerAccountId", "MktoId", "SfdcId"));
-        keyMap.put(MatchKey.NationalID, Collections.singletonList("NationalID"));
         keyMap.put(MatchKey.StreetAddress1, Collections.singletonList("StreetAddress1"));
         keyMap.put(MatchKey.StreetAddress2, Collections.singletonList("StreetAddress2"));
         entityKeyMap.setKeyMap(keyMap);

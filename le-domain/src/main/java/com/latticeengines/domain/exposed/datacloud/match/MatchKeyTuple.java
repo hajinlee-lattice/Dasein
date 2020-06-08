@@ -52,9 +52,6 @@ public class MatchKeyTuple implements Fact {
     @JsonProperty("Email")
     private String email;
 
-    @JsonProperty("NationalID")
-    private String nationalID;
-
     @JsonProperty("StreetAddress1")
     private String streetAddress1;
 
@@ -179,16 +176,6 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
-    @MetricField(name = MatchConstants.NATIONAL_ID_FIELD)
-    public String getNationalID() {
-        return nationalID;
-    }
-
-    public void setNationalID(String nationalID) {
-        this.nationalID = nationalID;
-        refreshCachedStrings();
-    }
-
     @MetricField(name = MatchConstants.STREET_ADDRESS1_FIELD)
     public String getStreetAddress1() {
         return streetAddress1;
@@ -261,10 +248,6 @@ public class MatchKeyTuple implements Fact {
 
     public boolean hasEmail() {
         return StringUtils.isNotEmpty(email);
-    }
-
-    public boolean hasNationalID() {
-        return StringUtils.isNotEmpty(nationalID);
     }
 
     public boolean hasStreetAddress1() {
@@ -363,9 +346,6 @@ public class MatchKeyTuple implements Fact {
         if (CollectionUtils.isNotEmpty(systemIds)) {
             sb.append(String.format("%s=%s, ", MatchKey.SystemId.name(), systemIds.toString()));
         }
-        if (StringUtils.isNotEmpty(nationalID)) {
-            sb.append(String.format("%s=%s, ", MatchConstants.NATIONAL_ID_FIELD, nationalID));
-        }
         if (StringUtils.isNotEmpty(streetAddress1)) {
             sb.append(String.format("%s=%s, ", MatchConstants.STREET_ADDRESS1_FIELD, streetAddress1));
         }
@@ -413,9 +393,6 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(email)) {
             appendKey(sb, MatchKey.Email.name());
         }
-        if (StringUtils.isNotEmpty(nationalID)) {
-            appendKey(sb, MatchKey.NationalID.name());
-        }
         if (StringUtils.isNotEmpty(streetAddress1)) {
             appendKey(sb, MatchKey.StreetAddress1.name());
         }
@@ -458,9 +435,6 @@ public class MatchKeyTuple implements Fact {
         }
         if (StringUtils.isNotEmpty(email)) {
             appendKeyValue(sb, MatchKey.Email.name(), email);
-        }
-        if (StringUtils.isNotEmpty(nationalID)) {
-            appendKeyValue(sb, MatchKey.NationalID.name(), nationalID);
         }
         if (StringUtils.isNotEmpty(streetAddress1)) {
             appendKeyValue(sb, MatchKey.StreetAddress1.name(), streetAddress1);
@@ -547,11 +521,6 @@ public class MatchKeyTuple implements Fact {
 
         public Builder withSystemIds(List<Pair<String, String>> systemIds) {
             matchKeyTuple.setSystemIds(systemIds);
-            return this;
-        }
-
-        public Builder withNationalID(String nationalID) {
-            matchKeyTuple.setNationalID(nationalID);
             return this;
         }
 

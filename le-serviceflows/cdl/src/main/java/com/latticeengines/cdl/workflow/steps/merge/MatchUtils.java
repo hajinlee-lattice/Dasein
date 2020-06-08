@@ -159,7 +159,6 @@ public final class MatchUtils {
         } else {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.CustomerAccountId.name());
         }
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.NationalID, InterfaceName.NationalID.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress1, InterfaceName.StreetAddress1.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress2, InterfaceName.StreetAddress2.name());
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Account);
@@ -179,7 +178,6 @@ public final class MatchUtils {
         } else {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.CustomerContactId.name());
         }
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.NationalID, InterfaceName.NationalID.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress1, InterfaceName.StreetAddress1.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress2, InterfaceName.StreetAddress2.name());
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Contact);

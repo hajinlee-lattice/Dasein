@@ -14,7 +14,6 @@ public class InterpretedFields {
     private String phoneNumber;
     private String duns;
     private String latticeAccountId;
-    private String nationalId;
     private String streetAddress1;
     private String streetAddress2;
 
@@ -112,14 +111,6 @@ public class InterpretedFields {
 
     public void setLatticeAccountId(String latticeAccountId) {
         this.latticeAccountId = latticeAccountId;
-    }
-
-    public String getNationalId() {
-        return nationalId;
-    }
-
-    public void setNationalId(String nationalId) {
-        this.nationalId = nationalId;
     }
 
     public String getStreetAddress1() {
