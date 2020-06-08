@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -33,12 +34,12 @@ import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 
 @Component("catalogFileValidationService")
 @Lazy(value = false)
-public class CatalogFileValidationService extends InputFileValidationService<CatalogFileValidationConfiguration>{
+public class CatalogFileValidationService extends InputFileValidationService<CatalogFileValidationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(CatalogFileValidationService.class);
 
     @Override
     public EntityValidationSummary validate(CatalogFileValidationConfiguration catalogFileValidationServiceConfiguration,
-                         List<String> processedRecords) {
+                                            List<String> processedRecords) {
         List<String> pathList = catalogFileValidationServiceConfiguration.getPathList();
         // copy error file if file exists
         String errorFile = getPath(pathList.get(0)) + PATH_SEPARATOR + ImportProperty.ERROR_FILE;
@@ -49,6 +50,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
             skipCheck = true;
         }
         InterfaceName pathPattern = InterfaceName.PathPattern;
+        //Detect duplicates. There can only be one value per Name field in the input
+        InterfaceName name = InterfaceName.Name;
+        List<String> nameList = new ArrayList<>();
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             // iterate through all files, remove all illegal record row
@@ -69,6 +73,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                          new DataFileWriter<>(new GenericDatumWriter<>())) {
                                 dataFileWriter.create(schema, new File(avroFileName));
                                 // iterate through all records in avro files
+                                if (!fileReader.hasNext()) {
+                                    throw new IOException("We could not find any data in the input. Please check and try again.");
+                                }
                                 for (GenericRecord record : fileReader) {
                                     boolean rowError = false;
                                     String lineId = getFieldValue(record, InterfaceName.InternalId.name());
@@ -80,12 +87,29 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                             if (!isValidRegex(regexStr)) {
                                                 rowError = true;
                                                 fileError = true;
-                                                errorInPath++;
-                                                errorLine++;
                                                 csvFilePrinter.printRecord(lineId, "", String.format(
                                                         "invalid pattern \"%s\" found (expanded into regex \"%s\"",
                                                         pathStr, regexStr));
                                             }
+                                        }
+                                        String nameStr = getFieldValue(record, name.name());
+                                        if (StringUtils.isBlank(nameStr)) {
+                                            rowError = true;
+                                            fileError = true;
+                                            csvFilePrinter.printRecord(lineId, "", "Name field contains empty values" +
+                                                    ". Please correct and try again");
+                                        } else {
+                                            if (nameList.size() > 0 && nameList.contains(nameStr)) {
+                                                rowError = true;
+                                                fileError = true;
+                                                csvFilePrinter.printRecord(lineId, "", "We found multiple entries for the same Name field. Please correct and try again.");
+                                            }else {
+                                                nameList.add(nameStr);
+                                            }
+                                        }
+                                        if (rowError) {
+                                            errorInPath++;
+                                            errorLine++;
                                         }
                                     } else {
                                         csvFilePrinter.printRecord(lineId, "", "invalid row as its file size exceeds " +
