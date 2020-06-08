@@ -48,9 +48,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWor
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
@@ -83,7 +83,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
     private S3ImportSystemService s3importSerice;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private SourceFileProxy sourceFileProxy;
 
     @Inject
     private DataCollectionService dataCollectionService;
@@ -97,17 +97,17 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
 
     public ApplicationId submit(String customerSpace, ModelingParameters parameters) {
 
-        SourceFile sourceFile = plsInternalProxy.findSourceFileByName(parameters.getFilename(), customerSpace);
+        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, parameters.getFilename());
 
         if (sourceFile == null) {
-            throw new LedpException(LedpCode.LEDP_18084, new String[] { parameters.getFilename() });
+            throw new LedpException(LedpCode.LEDP_18084, new String[]{parameters.getFilename()});
         }
         CustomEventModelingWorkflowConfiguration configuration = generateConfiguration(parameters, sourceFile);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         Job job = workflowJobService.findByApplicationId(applicationId.toString());
         sourceFile.setWorkflowPid(job.getPid());
         sourceFile.setApplicationId(applicationId.toString());
-        plsInternalProxy.updateSourceFile(sourceFile, customerSpace);
+        sourceFileProxy.update(customerSpace, sourceFile);
         return applicationId;
     }
 

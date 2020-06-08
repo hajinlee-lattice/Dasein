@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.lp;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,8 +11,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -253,6 +256,20 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
         return put("update predictors of a sourceModelSummary for the use of BuyerInsights", url, attrMap, Boolean.class);
     }
 
+    @Override
+    public List<ModelNote> getAllByModelSummaryId(String customerSpace, String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
+        StringBuffer url = new StringBuffer();
+        url.append(constructUrl("/customerspaces/{customerSpace}/modelsummaries/modelnote/{modelSummaryId}", customerSpace, modelId));
+        List<String> params = new ArrayList<>();
+        params.add("relational=" + returnRelational);
+        params.add("returnDocument=" + returnDocument);
+        params.add("validOnly=" + validOnly);
+        url.append("?");
+        url.append(StringUtils.join(params, "&"));
+        List<?> res = get("get model notes by model id", url.toString(), List.class);
+        return JsonUtils.convertList(res, ModelNote.class);
+    }
+
     /** Internal */
     @Override
     public ModelSummary getByModelId(String modelId) {
@@ -290,6 +307,35 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
 
         List<?> res = get("get model summaries updated within time frame", url, List.class);
         return JsonUtils.convertList(res, ModelSummary.class);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        String url = constructUrl("/modelsummaries/internal/modelnote/{modelSummaryId}", id);
+        delete("create model notes by model id", url);
+    }
+
+    @Override
+    public void updateById(String id, NoteParams noteParams) {
+        String url = constructUrl("/modelsummaries/internal/modelnote/{modelSummaryId}", id);
+        put("create model notes by model id", url, noteParams);
+    }
+
+    @Override
+    public void create(String modelSummaryId, NoteParams noteParams) {
+        String url = constructUrl("/modelsummaries/internal/modelnote/{modelSummaryId}", modelSummaryId);
+        post("create model notes by model id", url, noteParams);
+    }
+
+    @Override
+    public void copyNotes(String sourceModelSummaryId, String targetModelSummaryId) {
+        StringBuffer url = new StringBuffer();
+        url.append(constructUrl("/modelsummaries/internal/modelnote/copy/{modelSummaryId}", sourceModelSummaryId));
+        List<String> params = new ArrayList<>();
+        params.add("targetModelSummaryId=" + targetModelSummaryId);
+        url.append("?");
+        url.append(StringUtils.join(params, "&"));
+        post("copy model notes", url.toString(), null);
     }
 
     private String parseOptionalParameter(String baseUrl, String parameterName, String parameterValue) {

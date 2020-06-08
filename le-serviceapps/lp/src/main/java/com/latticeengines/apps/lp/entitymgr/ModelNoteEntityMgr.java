@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.apps.lp.entitymgr;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ public interface ModelNoteEntityMgr extends BaseEntityMgr<ModelNote> {
 
     List<ModelNote> getAllByModelSummaryId(String modelSummaryId);
 
-    ModelNote findByNoteId(String noteId);
+    ModelNote getByNoteId(String noteId);
 
-    void deleteById(String id);
+    void removeById(String id);
 
 }

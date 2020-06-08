@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -421,6 +422,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Autowired
     protected PlsInternalProxy plsInternalProxy;
 
+    @Autowired
+    protected SourceFileProxy sourceFileProxy;
+
     @Inject
     protected MetadataProxy metadataProxy;
 
@@ -499,7 +503,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         if (name == null) {
             return null;
         }
-        return plsInternalProxy.findSourceFileByName(name, space.toString());
+        return sourceFileProxy.findByName(space.toString(), name);
     }
 
     protected void registerReport(CustomerSpace customerSpace, Report report) {

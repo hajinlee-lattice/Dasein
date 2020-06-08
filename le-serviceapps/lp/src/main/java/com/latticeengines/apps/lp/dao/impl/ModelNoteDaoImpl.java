@@ -1,4 +1,4 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.apps.lp.dao.impl;
 
 import java.util.List;
 
@@ -6,9 +6,9 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.lp.dao.ModelNoteDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelNote;
-import com.latticeengines.pls.dao.ModelNoteDao;
 
 @Component("modelNotesDao")
 public class ModelNoteDaoImpl extends BaseDaoImpl<ModelNote> implements ModelNoteDao {

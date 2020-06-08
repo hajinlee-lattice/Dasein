@@ -33,7 +33,6 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String webhookResource;
 
-
     @Override
     public void createScoringRequestConfig(ScoringRequestConfig scoringRequestConfig) {
         validateAndProcessScoringRequestConfig(scoringRequestConfig, false);

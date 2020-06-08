@@ -30,6 +30,7 @@ import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
@@ -75,6 +76,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Inject
     private TableEntityMgr tableEntityMgr;
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     public void create(PlayLaunch playLaunch) {
