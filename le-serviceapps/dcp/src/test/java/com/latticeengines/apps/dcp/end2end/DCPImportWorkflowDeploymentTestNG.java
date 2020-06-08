@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.MatchKeyFill;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -211,6 +213,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertEquals(Long.valueOf(matchStats.getAcceptedCnt() + //
                 matchStats.getPendingReviewCnt() + matchStats.getRejectedCnt()), importStats.getSuccessCnt());
+
+        List<MatchKeyFill> fills = uploadStats.getMatchKeyFills();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(fills));
+        fills.forEach(e -> Assert.assertTrue(e.getFillRate() >= 0));
     }
 
     private void verifyMatchResult(UploadDetails upload) {

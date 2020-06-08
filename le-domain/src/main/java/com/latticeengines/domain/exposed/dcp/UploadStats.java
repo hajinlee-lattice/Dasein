@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,6 +15,9 @@ public class UploadStats {
     @JsonProperty("import")
     private ImportStats importStats;
 
+    @JsonProperty("match_key_fills")
+    private List<MatchKeyFill> matchKeyFills;
+
     @JsonProperty("match")
     private MatchStats matchStats;
 
@@ -22,6 +27,14 @@ public class UploadStats {
 
     public void setImportStats(ImportStats importStats) {
         this.importStats = importStats;
+    }
+
+    public List<MatchKeyFill> getMatchKeyFills() {
+        return matchKeyFills;
+    }
+
+    public void setMatchKeyFills(List<MatchKeyFill> matchKeyFills) {
+        this.matchKeyFills = matchKeyFills;
     }
 
     public MatchStats getMatchStats() {
