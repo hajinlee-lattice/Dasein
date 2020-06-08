@@ -388,6 +388,11 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
             return this;
         }
 
+        public Builder withAttributeDerivers(List<StreamAttributeDeriver> derivers) {
+            atlasStream.setAttributeDerivers(derivers);
+            return this;
+        }
+
         public AtlasStream build() {
             return atlasStream;
         }
