@@ -842,7 +842,30 @@ public final class StatsCubeUtils {
 
             return compareTimeFilter(f1, f2);
         };
-        return Comparator.nullsLast(cmp.thenComparing(defaultTopAttrComparator()));
+        return Comparator.nullsLast(cmp //
+                .thenComparing(booleanTrueFirstComparator()) //
+                .thenComparing(defaultTopAttrComparator()));
+    }
+
+    /*-
+     * Attribute with true as top bucket value goes first
+     */
+    private static Comparator<TopAttribute> booleanTrueFirstComparator() {
+        return (a1, a2) -> {
+            Bucket b1 = a1.getTopBkt();
+            Bucket b2 = a2.getTopBkt();
+            int bktTypeCmp = Boolean.compare(isBooleanBkt(b1), isBooleanBkt(b2));
+            if (bktTypeCmp != 0) {
+                return bktTypeCmp;
+            } else if (!isBooleanBkt(b1)) {
+                return 0;
+            }
+
+            boolean v1 = getBooleanBktValue(b1);
+            boolean v2 = getBooleanBktValue(b2);
+            // normal boolean compare false is first, so reverse
+            return Boolean.compare(v2, v1);
+        };
     }
 
     /*-
@@ -914,6 +937,10 @@ public final class StatsCubeUtils {
                 return Comparator.comparing(Bucket::getCount).reversed().compare(o1, o2);
             }
         };
+    }
+
+    private static boolean getBooleanBktValue(Bucket bkt) {
+        return "yes".equalsIgnoreCase(bkt.getLabel());
     }
 
     private static boolean isBooleanBkt(Bucket bkt) {
