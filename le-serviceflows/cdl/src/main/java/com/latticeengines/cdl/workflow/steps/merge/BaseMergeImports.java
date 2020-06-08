@@ -284,6 +284,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
     }
 
+    TransformationStepConfig concatTablesAndSave(String joinKey, String targetTablePrefix) {
+        TransformationStepConfig step = dedupAndConcatTables(joinKey, false, inputTableNames);
+        setTargetTable(step, targetTablePrefix);
+        return step;
+    }
+
     TransformationStepConfig dedupAndConcatImports(String joinKey) {
         return dedupAndConcatTables(joinKey, true, inputTableNames);
     }

@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConfigurableSparkJobTxfmr;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.spark.exposed.job.cdl.MergeImportsJob;
@@ -26,6 +27,11 @@ public class MergeImportsTxfmr extends ConfigurableSparkJobTxfmr<MergeImportsCon
     @Override
     protected Class<MergeImportsConfig> getJobConfigClz() {
         return MergeImportsConfig.class;
+    }
+
+    @Override
+    protected void preSparkJobProcessing(TransformStep step, String workflowDir, MergeImportsConfig sparkJobConfig) {
+        partitionMultiplier = 8;
     }
 
 }

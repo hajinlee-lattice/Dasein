@@ -138,6 +138,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     }
 
     protected boolean exportToS3(Table table) {
+        return exportToS3(table, true);
+    }
+
+    private boolean exportToS3(Table table, boolean sync) {
         String tableName = table.getName();
         boolean shouldSkip = Boolean.TRUE.equals(getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class));
         if (!shouldSkip) {
@@ -154,7 +158,11 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             }
             HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
                     customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
-            exporter.run();
+            if (sync) {
+                exporter.run();
+            } else {
+                new Thread(exporter).start();
+            }
         }
         return shouldSkip;
     }
@@ -165,7 +173,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
                 .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName())) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         for (Map.Entry<String, Table> entry : tables.entrySet()) {
-            boolean skipped = exportToS3(entry.getValue());
+            boolean skipped = exportToS3(entry.getValue(), false);
             if (skipped) {
                 log.info("Skip publish {} ({}) to S3.", contextKey, tables.keySet());
                 break;
@@ -177,7 +185,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected void exportToS3AndAddToContext(Table table, String contextKey) {
         String tableName = table.getName();
-        boolean skipped = exportToS3(table);
+        boolean skipped = exportToS3(table, false);
         if (skipped) {
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }

@@ -165,6 +165,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         }
         while ((remainingJobs.size() > 0) && (applicationIds.size() < maxConcurrentBlocks)) {
             DataCloudJobConfiguration jobConfiguration = remainingJobs.remove(0);
+            while(!jobConfiguration.isReadyToProcess()) {
+                log.info("Match block {} is not ready for processing.", jobConfiguration.getBlockOperationUid());
+                SleepUtils.sleep(60000);
+            }
             ApplicationId appId = ApplicationIdUtils //
                     .toApplicationIdObj(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());

@@ -22,7 +22,8 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     val srcId = config.getSrcId
     val templates: List[String] = if (config.getTemplates == null) List() else  config.getTemplates.asScala.toList
     hasSystem = config.isHasSystem
-    var processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
+    val sortedInputs: Seq[DataFrame] = inputDfs.zip(lattice.inputCnts).sortBy(_._2).map(_._1)
+    var processedInputs = sortedInputs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
         config.getRenameSrcFields, config.getCloneSrcFields, hasSystem) }
     println("----- BEGIN SCRIPT OUTPUT -----")
     println(s"templates is: $templates")
