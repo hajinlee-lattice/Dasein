@@ -1,5 +1,12 @@
 package com.latticeengines.apps.cdl.tray.entitymgr;
 
-public interface TrayConnectorTestEntityMgr {
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
+import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTest;
+
+public interface TrayConnectorTestEntityMgr extends BaseEntityMgrRepository<TrayConnectorTest, Long> {
+
+    void deleteByWorkflowRequestId(String workflowRequestId);
+
+    TrayConnectorTest findByWorkflowRequestId(String workflowRequestId);
 
 }

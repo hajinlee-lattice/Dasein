@@ -26,12 +26,14 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -61,7 +63,7 @@ public class TrayConnectorTest implements HasPid, HasTenant {
     @JsonProperty("testState")
     @Column(name = "TEST_STATE", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TestState testState;
+    private DataIntegrationEventType testState;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -85,6 +87,10 @@ public class TrayConnectorTest implements HasPid, HasTenant {
     @Column(name = "END_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date endTime;
+
+    @Column(name = "ERROR_DETAILS")
+    @Type(type = "text")
+    private String errorDetails;
 
     public CDLExternalSystemName getExternalSystemName() {
         return this.externalSystemName;
@@ -132,6 +138,14 @@ public class TrayConnectorTest implements HasPid, HasTenant {
 
     public void setEventStartedTime(Date eventEndedTime) {
         this.endTime = eventEndedTime;
+    }
+
+    public String getErrorDetails() {
+        return this.errorDetails;
+    }
+
+    public void setErrorDetails(String errorDetails) {
+        this.errorDetails = errorDetails;
     }
 
     @Override

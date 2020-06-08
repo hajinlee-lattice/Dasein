@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "tray", description = "REST resource for Tray Connectors")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/tray")
+@RequestMapping("/customerspaces/{customerSpace}/tray/test")
 public class TrayConnectorTestResource {
 
     @Inject
@@ -26,12 +26,19 @@ public class TrayConnectorTestResource {
      * @param externalSystemName
      * @param testScenario
      */
-    @PostMapping("/connectors/{externalSystemName}/tests/{testScenario}")
-    @ApiOperation(value = "Create Tray Connector Test.")
+    @PostMapping("trigger/connectors/{externalSystemName}/tests/{testScenario}")
+    @ApiOperation(value = "Trigger Tray Connector Test.")
     @NoCustomerSpace
-    public void createTrayConnectorTest(@PathVariable CDLExternalSystemName externalSystemName, //
+    public void triggerTrayConnectorTest(@PathVariable CDLExternalSystemName externalSystemName, //
             @PathVariable String testScenario) {
-        trayConnectorTestService.createTrayConnectorTest(externalSystemName, testScenario);
+        trayConnectorTestService.triggerTrayConnectorTest(externalSystemName, testScenario);
+    }
+
+    @PostMapping("verify")
+    @ApiOperation(value = "Verify Tray Connector Test.")
+    @NoCustomerSpace
+    public void verifyTrayConnectorTest() {
+
     }
 
 }
