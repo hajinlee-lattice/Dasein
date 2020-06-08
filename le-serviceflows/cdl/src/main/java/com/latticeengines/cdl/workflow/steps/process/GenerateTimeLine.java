@@ -62,8 +62,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private static Logger log = LoggerFactory.getLogger(GenerateTimeLine.class);
     private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
     private static final String TIMELINE_TABLE_PREFIX = "Timeline_%s";
-    private static final String PARTITION_KEY_NAME = "partitionKey";
-    private static final String SORT_KEY_NAME = "sortKey";
+    private static final String PARTITION_KEY_NAME = InterfaceName.PartitionKey.name();
+    private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();
     private static final String SUFFIX = "_TABLE_ROLE";
     static final String BEAN_NAME = "generateTimeline";
 

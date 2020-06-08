@@ -159,6 +159,8 @@ public enum InterfaceName {
 
     ModelName, ModelNameId, HasIntent,
 
+    PartitionKey, SortKey,
+
     // Internal
     __Row_Count__, // total row count in activity store aggregation
     __Composite_Key__; // primary key for internal use

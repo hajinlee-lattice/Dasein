@@ -155,6 +155,9 @@ public enum TableRoleInCollection {
         CustomIntentProfile.distKey = InterfaceName.AccountId;
         CustomIntentProfile.hasSignature = true;
 
+        TimelineProfile.partitionKey = InterfaceName.PartitionKey;
+        TimelineProfile.rangeKey = InterfaceName.SortKey;
+
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
         TimelineProfile.hasSignature = true;

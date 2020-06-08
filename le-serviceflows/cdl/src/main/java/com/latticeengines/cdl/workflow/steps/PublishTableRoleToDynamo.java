@@ -36,7 +36,7 @@ public class PublishTableRoleToDynamo extends BaseImportExportS3<PublishTableRol
     private static final Logger log = LoggerFactory.getLogger(PublishTableRoleToDynamo.class);
 
     private String customerSpace;
-    private Map<TableRoleInCollection, Table> tables;
+    private Map<TableRoleInCollection, List<Table>> tables;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -48,11 +48,14 @@ public class PublishTableRoleToDynamo extends BaseImportExportS3<PublishTableRol
             customerSpace = configuration.getCustomerSpace().toString();
             DataCollection.Version version = configuration.getVersion();
             configuration.getTableRoles().forEach(tableRole -> {
-                Table table = dataCollectionProxy.getTable(customerSpace, tableRole, version);
-                if (table != null && tableRoleHasDynamoStore(tableRole)) {
-                    addTableToRequestForImport(table, requests);
-                    tables.put(tableRole, table);
-                } else if (table == null) {
+                List<Table> tableLists = dataCollectionProxy.getTables(customerSpace, tableRole, version);
+                if (CollectionUtils.isNotEmpty(tableLists) && tableRoleHasDynamoStore(tableRole)) {
+                    tableLists.forEach(table -> {
+                        addTableToRequestForImport(table, requests);
+                    });
+
+                    tables.put(tableRole, tableLists);
+                } else if (CollectionUtils.isEmpty(tableLists)) {
                     String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
                     log.info("There is no table for {} of version {} in tenant {}", tableRole, version, tenantId);
                 } else {
@@ -66,24 +69,26 @@ public class PublishTableRoleToDynamo extends BaseImportExportS3<PublishTableRol
 
     @Override
     protected void handleImportResult() {
-        tables.forEach((tableRole, table) -> {
-            String hdfsPath = pathBuilder.getFullPath(table.getExtracts().get(0).getPath());
-            try {
-                if (HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
-                    String tableName = table.getName();
-                    DataUnit oldDataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, //
-                            DataUnit.StorageType.Dynamo);
-                    if (oldDataUnit != null) {
-                        dataUnitProxy.delete(customerSpace, oldDataUnit);
+        tables.forEach((tableRole, tableLists) -> {
+            tableLists.forEach(table -> {
+                String hdfsPath = pathBuilder.getFullPath(table.getExtracts().get(0).getPath());
+                try {
+                    if (HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
+                        String tableName = table.getName();
+                        DataUnit oldDataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, //
+                                DataUnit.StorageType.Dynamo);
+                        if (oldDataUnit != null) {
+                            dataUnitProxy.delete(customerSpace, oldDataUnit);
+                        }
+                        exportToDynamo(tableName, tableRole, hdfsPath);
+                    } else {
+                        // file still not on HDFS after import, so just update its signature
+                        throw new IllegalStateException("No file imported to hdfs");
                     }
-                    exportToDynamo(tableName, tableRole, hdfsPath);
-                } else {
-                    // file still not on HDFS after import, so just update its signature
-                    throw new IllegalStateException("No file imported to hdfs");
+                } catch (IOException e) {
+                    throw new IllegalStateException("Failed to import fless to hdfs", e);
                 }
-            } catch (IOException e) {
-                throw new IllegalStateException("Failed to import fless to hdfs", e);
-            }
+            });
         });
     }
 
@@ -99,7 +104,11 @@ public class PublishTableRoleToDynamo extends BaseImportExportS3<PublishTableRol
         if (StringUtils.isNotBlank(tableRole.getRangeKey())) {
             config.setSortKey(tableRole.getRangeKey());
         }
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        if (TableRoleInCollection.TimelineProfile.equals(tableRole)) {
+            addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        } else {
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
     }
 
 
