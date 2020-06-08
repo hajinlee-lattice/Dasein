@@ -53,13 +53,17 @@ public class AttributeSetDecoratorImpl implements AttributeSetDecoratorFac {
         if (AttributeUtils.isDefaultAttributeSet(attributeSetName)) {
             return new DummyDecorator();
         } else {
+            AttributeSet attributeSet = attributeSetEntityMgr.findByName(attributeSetName);
+            if (attributeSet == null) {
+                log.info("Attribute set can't be found, so default attribute set will be used.");
+                return new DummyDecorator();
+            }
             return new MapDecorator("AttrSet") {
                 @Override
                 protected Collection<ColumnMetadata> loadInternal() {
                     log.info("Load attribute set by name {}.", attributeSetName);
                     MultiTenantContext.setTenant(tenant);
-                    AttributeSet attributeSet = attributeSetEntityMgr.findByName(attributeSetName);
-                    if (attributeSet != null && MapUtils.isNotEmpty(attributeSet.getAttributesMap())) {
+                    if (MapUtils.isNotEmpty(attributeSet.getAttributesMap())) {
                         Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
                         Category category = CategoryUtils.getEntityCategory(entity);
                         Set<String> attributes = new HashSet<>();
