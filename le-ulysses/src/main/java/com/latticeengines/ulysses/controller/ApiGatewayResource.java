@@ -25,7 +25,7 @@ public class ApiGatewayResource {
     @Inject
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
-    @GetMapping(value = "/tenant-config", headers = "Accept=application/json")
+    @GetMapping("/tenant-config")
     public GatewayPolicyConfiguration getGatewayPolicyConfiguration(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
         String tenantName = oauth2RestApiProxy.getTenantNameFromOAuthRequest(bearerToken);

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "datacleanup", description = "REST resource for cleanup CDL data")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/datacleanup")
+@RequestMapping("/customerspaces/{customerSpace}/datacleanup")
 public class CDLDataCleanupResource {
     private static final Logger log = LoggerFactory.getLogger(CDLDataCleanupResource.class);
     private final CDLDataCleanupService cdlDataCleanupService;
@@ -40,7 +39,7 @@ public class CDLDataCleanupResource {
         this.tenantCleanupService = tenantCleanupService;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Clean up data")
     public ResponseDocument<String> cleanup(@PathVariable String customerSpace,
@@ -54,7 +53,7 @@ public class CDLDataCleanupResource {
         }
     }
 
-    @PostMapping(value = "/registerDeleteData")
+    @PostMapping("/registerDeleteData")
     @ResponseBody
     @ApiOperation(value = "Register delete data table")
     public ResponseDocument<String> registerDeleteData(@PathVariable String customerSpace,
@@ -83,7 +82,7 @@ public class CDLDataCleanupResource {
         }
     }
 
-    @RequestMapping(value = "/replaceAction", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/replaceAction")
     @ResponseBody
     @ApiOperation(value = "create clean up data action")
     public void createReplaceAction(@PathVariable String customerSpace,
@@ -96,7 +95,7 @@ public class CDLDataCleanupResource {
         }
     }
 
-    @RequestMapping(value = "/tenantcleanup", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/tenantcleanup")
     @ResponseBody
     @ApiOperation(value = "clean metadata and redshift of tenant")
     public void tenantCleanup(@PathVariable String customerSpace) {
@@ -110,7 +109,7 @@ public class CDLDataCleanupResource {
 //        }
     }
 
-    @PostMapping(value = "/legacyDeleteByUploadAction", headers = "Accept=application/json")
+    @PostMapping("/legacyDeleteByUploadAction")
     @ResponseBody
     @ApiOperation(value = "create legacyDelete data action")
     public ResponseDocument<String> createLegacyDeleteByUploadAction(@PathVariable String customerSpace,
@@ -123,7 +122,7 @@ public class CDLDataCleanupResource {
         }
     }
 
-    @PostMapping(value = "/legacyDeleteByDateRangeAction", headers = "Accept=application/json")
+    @PostMapping("/legacyDeleteByDateRangeAction")
     @ResponseBody
     @ApiOperation(value = "create legacyDelete data action")
     public void createLegacyDeleteByDateRangeAction(@PathVariable String customerSpace,

@@ -29,7 +29,7 @@ public class DataFeedResource {
     @Inject
     private DataFeedService datafeedService;
 
-    @PostMapping(value = "/{datafeedName}/jobtype/{jobType}startexecution", headers = "Accept=application/json")
+    @PostMapping("/{datafeedName}/jobtype/{jobType}startexecution")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
@@ -39,7 +39,7 @@ public class DataFeedResource {
         return datafeedService.startExecution(customerSpace, datafeedName, jobType, jobId);
     }
 
-    @PostMapping(value = "/{datafeedName}/jobtype/{jobType}/restartexecution", headers = "Accept=application/json")
+    @PostMapping("/{datafeedName}/jobtype/{jobType}/restartexecution")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
     public Long restartExecution(@PathVariable String customerSpace, //
@@ -48,7 +48,7 @@ public class DataFeedResource {
         return datafeedService.restartExecution(customerSpace, datafeedName, jobType);
     }
 
-    @PostMapping(value = "/{datafeedName}/jobtype/{jobType}/lockexecution", headers = "Accept=application/json")
+    @PostMapping("/{datafeedName}/jobtype/{jobType}/lockexecution")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
     public ResponseDocument<Long> lockExecution(@PathVariable String customerSpace, //
@@ -57,14 +57,14 @@ public class DataFeedResource {
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, datafeedName, jobType));
     }
 
-    @GetMapping(value = "/{datafeedName}", headers = "Accept=application/json")
+    @GetMapping("/{datafeedName}")
     @ResponseBody
     @ApiOperation(value = "find data feed by name")
     public DataFeed findDataFeedByName(@PathVariable String customerSpace, @PathVariable String datafeedName) {
         return datafeedService.findDataFeedByName(customerSpace, datafeedName);
     }
 
-    @PutMapping(value = "/{datafeedName}/status/{status}", headers = "Accept=application/json")
+    @PutMapping("/{datafeedName}/status/{status}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedStatus(@PathVariable String customerSpace, @PathVariable String datafeedName,
@@ -72,8 +72,7 @@ public class DataFeedResource {
         datafeedService.updateDataFeed(customerSpace, datafeedName, status);
     }
 
-    @PostMapping(value = "/{datafeedName}/status/{initialDataFeedStatus}/finishexecution",
-            headers = "Accept=application/json")
+    @PostMapping("/{datafeedName}/status/{initialDataFeedStatus}/finishexecution")
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
     public DataFeedExecution finishExecution(@PathVariable String customerSpace, //
@@ -87,8 +86,7 @@ public class DataFeedResource {
         }
     }
 
-    @PostMapping(value = "/{datafeedName}/status/{initialDataFeedStatus}/failexecution",
-            headers = "Accept=application/json")
+    @PostMapping("/{datafeedName}/status/{initialDataFeedStatus}/failexecution")
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
     public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String datafeedName,
@@ -101,7 +99,7 @@ public class DataFeedResource {
         }
     }
 
-    @PostMapping(value = "/{datafeedName}/execution/workflow/{workflowId}", headers = "Accept=application/json")
+    @PostMapping("/{datafeedName}/execution/workflow/{workflowId}")
     @ResponseBody
     @ApiOperation(value = "update data feed execution")
     public DataFeedExecution updateExecutionWorkflowId(@PathVariable String customerSpace,
@@ -109,7 +107,7 @@ public class DataFeedResource {
         return datafeedService.updateExecutionWorkflowId(customerSpace, datafeedName, workflowId);
     }
 
-    @PostMapping(value = "/unblock/workflow/{workflowId}", headers = "Accept=application/json")
+    @PostMapping("/unblock/workflow/{workflowId}")
     @ResponseBody
     @ApiOperation(value = "unblock P&A job from submitting")
     public Boolean unblock(@PathVariable String customerSpace, @PathVariable Long workflowId) {

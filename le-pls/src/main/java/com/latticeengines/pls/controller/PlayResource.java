@@ -42,7 +42,7 @@ public class PlayResource {
     // -----
     // Plays
     // -----
-    @GetMapping(value = "", headers = "Accept=application/json")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get all full plays for a tenant")
     public List<Play> getPlays(@RequestParam(value = "shouldLoadCoverage", required = false) Boolean shouldLoadCoverage, //
@@ -50,14 +50,14 @@ public class PlayResource {
         return playService.getPlays(shouldLoadCoverage, ratingEngineId);
     }
 
-    @GetMapping(value = "/{playName}", headers = "Accept=application/json")
+    @GetMapping("/{playName}")
     @ResponseBody
     @ApiOperation(value = "Get full play for a specific tenant based on playName")
     public Play getPlay(@PathVariable String playName) {
         return playService.getPlay(playName);
     }
 
-    @PostMapping(value = "", consumes = { KryoHttpMessageConverter.KRYO_VALUE, MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(consumes = { KryoHttpMessageConverter.KRYO_VALUE, MediaType.APPLICATION_JSON_VALUE,
             "application/x-kryo;charset=UTF-8" })
     @ResponseBody
     @ApiOperation(value = "Register a play")
@@ -66,7 +66,7 @@ public class PlayResource {
         return playService.createOrUpdate(play);
     }
 
-    @DeleteMapping(value = "/{playName}", headers = "Accept=application/json")
+    @DeleteMapping("/{playName}")
     @ResponseBody
     @ApiOperation(value = "Delete a play")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
@@ -83,7 +83,7 @@ public class PlayResource {
     // Channels
     // --------
 
-    @GetMapping(value = "/{playName}/channels")
+    @GetMapping("/{playName}/channels")
     @ResponseBody
     @ApiOperation(value = "For the given play, get a list of play launch channels")
     public List<PlayLaunchChannel> getPlayLaunchChannels(@PathVariable("playName") String playName, //
@@ -91,7 +91,7 @@ public class PlayResource {
         return playService.getPlayLaunchChannels(playName, includeUnlaunchedChannels);
     }
 
-    @PostMapping(value = "/{playName}/channels", headers = "Accept=application/json")
+    @PostMapping("/{playName}/channels")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')") // ask later
     @ApiOperation(value = "Create play launch channel for a given play")
@@ -102,7 +102,7 @@ public class PlayResource {
         return playService.createPlayLaunchChannel(playName, playLaunchChannel, launchNow);
     }
 
-    @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @PutMapping("/{playName}/channels/{channelId}")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Update play launch channel for a given play")
@@ -121,7 +121,7 @@ public class PlayResource {
     // Launches
     // --------
 
-    @GetMapping(value = "/launches/dashboard", headers = "Accept=application/json")
+    @GetMapping("/launches/dashboard")
     @ResponseBody
     @ApiOperation(value = "Play launch dashboard for a tenant")
     public PlayLaunchDashboard getPlayLaunchDashboard(HttpServletRequest request, //
@@ -152,7 +152,7 @@ public class PlayResource {
                 externalSysType, launchStates, startTimestamp, offset, max, sortby, descending, endTimestamp);
     }
 
-    @GetMapping(value = "/launches/dashboard/count", headers = "Accept=application/json")
+    @GetMapping("/launches/dashboard/count")
     @ResponseBody
     @ApiOperation(value = "Play entries count for launch dashboard for a tenant")
     public Long getPlayLaunchDashboardEntriesCount(HttpServletRequest request, //
@@ -174,7 +174,7 @@ public class PlayResource {
         return playService.getPlayLaunchDashboardEntriesCount(playName, orgId, externalSysType, launchStates, startTimestamp, endTimestamp);
     }
 
-    @PostMapping(value = "/{playName}/launches", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Create play launch for a given play")
@@ -184,7 +184,7 @@ public class PlayResource {
         return playService.createPlayLaunch(playName, playLaunch);
     }
 
-    @PostMapping(value = "/{playName}/launches/{launchId}", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Update play launch for a given play")
@@ -196,7 +196,7 @@ public class PlayResource {
         return playService.updatePlayLaunch(playName, launchId, playLaunch);
     }
 
-    @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches/{launchId}/launch")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Launch a given play")
@@ -206,7 +206,7 @@ public class PlayResource {
         return playService.launchPlay(playName, launchId);
     }
 
-    @GetMapping(value = "/{playName}/launches")
+    @GetMapping("/{playName}/launches")
     @ResponseBody
     @ApiOperation(value = "Get list of launches for a given play")
     public List<PlayLaunch> getPlayLaunches(@PathVariable("playName") String playName, //
@@ -214,7 +214,7 @@ public class PlayResource {
         return playService.getPlayLaunches(playName, launchStates);
     }
 
-    @GetMapping(value = "/{playName}/launches/{launchId}")
+    @GetMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Get play launch for a given play and launch id")
     public PlayLaunch getPlayLaunch(@PathVariable("playName") String playName, //
@@ -222,8 +222,7 @@ public class PlayResource {
         return playService.getPlayLaunch(playName, launchId);
     }
 
-    @PutMapping(value = "/{playName}/launches/{launchId}/{action}", //
-            headers = "Accept=application/json")
+    @PutMapping("/{playName}/launches/{launchId}/{action}")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Update play launch for a given play and launch id with given action")
@@ -233,7 +232,7 @@ public class PlayResource {
         return playService.updatePlayLaunch(playName, launchId, action);
     }
 
-    @DeleteMapping(value = "/{playName}/launches/{launchId}")
+    @DeleteMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Delete play launch for a given play and launch id")

@@ -99,7 +99,7 @@ public class DataLakeAccountResource {
         InstrumentRegistry.register(INSTRUMENT_CL, new AppInstrument(true));
     }
 
-    @GetMapping(value = "/{accountId:.+}/{attributeGroup}")
+    @GetMapping("/{accountId:.+}/{attributeGroup}")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "talkingpoint", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -110,7 +110,7 @@ public class DataLakeAccountResource {
         return getAccountById(authToken, accountId, attributeGroup, null);
     }
 
-    @GetMapping(value = "/{accountId:.+}/{attributeGroup}/danteformat")
+    @GetMapping("/{accountId:.+}/{attributeGroup}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -142,7 +142,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/{accountId:.+}/{attributeGroup}/danteformat/aslist")
+    @GetMapping("/{accountId:.+}/{attributeGroup}/danteformat/aslist")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante-list", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -176,7 +176,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/spendanalyticssegments/danteformat")
+    @GetMapping("/spendanalyticssegments/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     public FrontEndResponse<List<String>> getAccountSegmentsInDanteFormat() {
@@ -196,7 +196,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/{accountId}/plays/{playId}/talkingpoints/danteformat")
+    @GetMapping("/{accountId}/plays/{playId}/talkingpoints/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "customlist-dante", measurment = "ulysses", instrument = INSTRUMENT_CL)
@@ -242,7 +242,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/{accountId:.+}/contacts")
+    @GetMapping("/{accountId:.+}/contacts")
     @ResponseBody
     @ApiOperation(value = "Get all contacts for the given account by id")
     public DataPage getAllContactsByAccountId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
@@ -251,7 +251,7 @@ public class DataLakeAccountResource {
         return dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
     }
 
-    @GetMapping(value = "/{accountId:.+}/contacts/{contactId:.+}")
+    @GetMapping("/{accountId:.+}/contacts/{contactId:.+}")
     @ResponseBody
     @ApiOperation(value = "Get contact by given accountid and contactId")
     public DataPage getContactByAccountIdContactId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //

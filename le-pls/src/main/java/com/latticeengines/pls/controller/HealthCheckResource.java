@@ -41,7 +41,7 @@ public class HealthCheckResource {
     @Value("${pls.current.stack:}")
     private String currentStack;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
@@ -50,7 +50,7 @@ public class HealthCheckResource {
         return StatusDocument.online();
     }
 
-    @GetMapping(value = "/systemstatus")
+    @GetMapping("/systemstatus")
     @ResponseBody
     @ApiOperation(value = "System check")
     @NoMetricsLog
@@ -60,7 +60,7 @@ public class HealthCheckResource {
         return status;
     }
 
-    @GetMapping(value = "/stackinfo")
+    @GetMapping("/stackinfo")
     @ResponseBody
     @ApiOperation(value = "Get current active stack")
     @NoMetricsLog

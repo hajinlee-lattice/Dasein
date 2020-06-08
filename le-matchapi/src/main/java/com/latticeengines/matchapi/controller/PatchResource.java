@@ -12,10 +12,11 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,14 +68,14 @@ public class PatchResource {
     private static final String MIN_PID = "MIN";
     private static final String MAX_PID = "MAX";
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Batch update a list of lookup entries", response = LookupUpdateResponse.class)
     public LookupUpdateResponse patch(@RequestBody List<LookupUpdateRequest> requests) {
         return patchService.patch(requests);
     }
 
-    @RequestMapping(value = "/validate/{patchBookType}", method = RequestMethod.POST)
+    @PostMapping("/validate/{patchBookType}")
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type with pagination and sort by field", response = PatchValidationResponse.class)
     public PatchValidationResponse validatePatchBook(@PathVariable String patchBookType,
@@ -88,7 +89,7 @@ public class PatchResource {
         return validate(books, type, request);
     }
 
-    @RequestMapping(value = "/validatePagination/{patchBookType}", method = RequestMethod.POST)
+    @PostMapping("/validatePagination/{patchBookType}")
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type with pagination and no sort", response = PatchValidationResponse.class)
     public PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType,
@@ -102,7 +103,7 @@ public class PatchResource {
         return validate(books, type, request);
     }
 
-    @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.GET)
+    @GetMapping("/findMinMaxPid/{patchBookType}")
     @ResponseBody
     @ApiOperation(value = "Find min and max pid in the patch book table", response = PatchValidationResponse.class)
     public PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
@@ -121,7 +122,7 @@ public class PatchResource {
         return configMinMaxPidResponse(pids, type, request);
     }
 
-    @RequestMapping(value = "/lookup", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/lookup")
     @ResponseBody
     @ApiOperation(value = "Patch all patch book entries with lookup type", response = LookupPatchResponse.class)
     public LookupPatchResponse lookupPatch(@RequestBody LookupPatchRequest request) {

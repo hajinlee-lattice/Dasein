@@ -5,9 +5,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "external", description = "REST resource for external Score Requests")
 @RestController
-@RequestMapping(value = "/external")
+@RequestMapping("/external")
 public class ScoreExternalResource extends BaseScoring {
 
     @Inject
@@ -37,7 +37,7 @@ public class ScoreExternalResource extends BaseScoring {
     @Inject
     private ScoreRequestConfigProcessor srcProcessor;
 
-    @RequestMapping(value = "/record/{configId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/record/{configId}")
     @ApiOperation(value = "Score a record from External System")
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, @PathVariable(name="configId") String configId,
             @RequestBody ScoreRequest scoreRequest) {

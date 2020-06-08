@@ -31,7 +31,7 @@ public class PlayGroupResource {
     @Inject
     private PlayProxy playProxy;
 
-    @GetMapping(value = "", headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get all playgroups for a tenant")
     public List<PlayGroup> getPlayGroups() {
@@ -39,7 +39,7 @@ public class PlayGroupResource {
         return playProxy.getPlayGroups(tenant.getId());
     }
 
-    @PostMapping(value = "", headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create new Playgroup")
     public PlayGroup createPlayGroup(@RequestBody PlayGroup playGroup) {
@@ -50,7 +50,7 @@ public class PlayGroupResource {
         return playProxy.createPlayGroup(tenant.getId(), playGroup);
     }
 
-    @GetMapping(value = "/{playGroupId}", headers = "Accept=application/json")
+    @GetMapping("/{playGroupId}")
     @ResponseBody
     @ApiOperation(value = "Get a playGroup for a tenant given its ID")
     public PlayGroup getPlayGroupById(@PathVariable String playGroupId) {
@@ -58,7 +58,7 @@ public class PlayGroupResource {
         return playProxy.getPlayGroupById(tenant.getId(), playGroupId);
     }
 
-    @PostMapping(value = "/{playGroupId}", headers = "Accept=application/json")
+    @PostMapping("/{playGroupId}")
     @ResponseBody
     @ApiOperation(value = "Update a playGroup given its ID")
     public void updatePlayGroup(@PathVariable String playGroupId, @RequestBody PlayGroup playGroup) {
@@ -68,7 +68,7 @@ public class PlayGroupResource {
         playProxy.updatePlayGroup(tenant.getId(), playGroupId, playGroup);
     }
 
-    @DeleteMapping(value = "/{playGroupId}", headers = "Accept=application/json")
+    @DeleteMapping("/{playGroupId}")
     @ResponseBody
     @ApiOperation(value = "Delete a playGroup given its ID")
     public void deletePlayGroup(@PathVariable String playGroupId) {

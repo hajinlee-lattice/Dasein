@@ -2,9 +2,10 @@ package com.latticeengines.matchapi.controller;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,7 @@ public class AMStatsResource {
     @Inject
     private AccountMasterStatisticsService accountMasterStatisticsService;
 
-    @RequestMapping(value = "/cubes", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/cubes")
     @ResponseBody
     @ApiOperation(value = "Get account master statistics cube", response = AccountMasterCube.class)
     public AccountMasterCube getCube(@RequestBody AccountMasterFactQuery query,
@@ -34,7 +35,7 @@ public class AMStatsResource {
         return accountMasterStatisticsService.query(query, considerOnlyEnrichments);
     }
 
-    @RequestMapping(value = "/topattrs", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/topattrs")
     @ResponseBody
     @ApiOperation(value = "Get categorical attribute tree", response = TopNAttributeTree.class)
     public TopNAttributeTree getTopAttrTree() {

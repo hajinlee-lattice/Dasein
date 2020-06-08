@@ -8,9 +8,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +42,7 @@ public class SchedulingPAQueueResource {
     @Inject
     private CDLJobService cdlJobService;
 
-    @RequestMapping(value = "/getQueueInfo", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/getQueueInfo")
     @ResponseBody
     @ApiOperation(value = "getQueueInfo")
     @NoMetricsLog
@@ -51,7 +52,7 @@ public class SchedulingPAQueueResource {
         return schedulingPAService.showQueue(schedulerName);
     }
 
-    @RequestMapping(value = "/getPosition", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/getPosition")
     @ResponseBody
     @ApiOperation(value = "getPosition")
     @NoMetricsLog
@@ -61,7 +62,7 @@ public class SchedulingPAQueueResource {
         return schedulingPAService.getPositionFromQueue(schedulerName, tenantName);
     }
 
-    @RequestMapping(value = "/triggerSchedulingPA/{schedulerName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/triggerSchedulingPA/{schedulerName}")
     @ResponseBody
     @ApiOperation(value = "Trigger Scheduling PA for given scheduler")
     @NoMetricsLog
@@ -72,7 +73,7 @@ public class SchedulingPAQueueResource {
         cdlJobService.schedulePAJob(schedulerName, dryRun);
     }
 
-    @RequestMapping(value = "/isActivityBasedPA/{schedulerName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/isActivityBasedPA/{schedulerName}")
     @ResponseBody
     @ApiOperation(value = "get ActivityBasedPA Flag for a specific scheduler")
     @NoMetricsLog
@@ -82,7 +83,7 @@ public class SchedulingPAQueueResource {
         return schedulingPAService.isSchedulerEnabled(schedulerName);
     }
 
-    @RequestMapping(value = "/isActivityBasedPA", method = RequestMethod.GET)
+    @GetMapping("/isActivityBasedPA")
     @ResponseBody
     @ApiOperation(value = "get ActivityBasedPA Flag for current stack")
     @NoCustomerSpace
@@ -92,7 +93,7 @@ public class SchedulingPAQueueResource {
                 .isSchedulerEnabled(isActive ? ACTIVE_STACK_SCHEDULER_NAME : INACTIVE_STACK_SCHEDULER_NAME);
     }
 
-    @RequestMapping(value = "/status/{customerSpace}", method = RequestMethod.GET)
+    @GetMapping("/status/{customerSpace}")
     @ResponseBody
     @ApiOperation("Retrieve all scheduler-related information for a specific tenant")
     public SchedulingStatus getSchedulingStatus(@PathVariable String customerSpace) {

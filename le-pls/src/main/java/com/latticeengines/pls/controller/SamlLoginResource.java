@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,8 +75,8 @@ public class SamlLoginResource {
     @Value("${pls.saml.local.redirection.allowed:false}")
     private boolean isLocalRedirectionAllowed;
 
-    @RequestMapping(value = "/login/"
-            + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/login/" + InternalResource.TENANT_ID_PATH,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     @ApiOperation(value = "Login via SAML Authentication")
     public RedirectView authenticateSamlUserAndAttachTenant(@PathVariable("tenantId") String tenantDeploymentId,
@@ -176,8 +176,8 @@ public class SamlLoginResource {
         return result;
     }
 
-    @RequestMapping(value = "/logout/"
-            + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/logout/" + InternalResource.TENANT_ID_PATH,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     @ApiOperation(value = "Logout the user at GA and SAML IDP")
     public SimpleBooleanResponse logoutFromSpAndIDP(HttpServletRequest request,
@@ -222,7 +222,7 @@ public class SamlLoginResource {
         }
     }
 
-    @RequestMapping(value = "/splogin", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/splogin")
     @ResponseBody
     @ApiOperation(value = "Lattice initiated SAML Authentication and Login")
     public Map<String, SpSamlLoginResponse> spInitiateLoginRequest(@RequestBody SpSamlLoginRequest spLoginRequest) {

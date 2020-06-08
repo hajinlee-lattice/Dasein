@@ -44,7 +44,7 @@ public class ActivityTimelineResource {
     @Inject
     private BatonService batonService;
 
-    @GetMapping(value = "/accounts/{accountId:.+}", headers = "Accept=application/json")
+    @GetMapping("/accounts/{accountId:.+}")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity timeline data for an account")
     @SuppressWarnings("ConstantConditions")
@@ -62,7 +62,7 @@ public class ActivityTimelineResource {
         return activityTimelineService.getAccountActivities(accountId, timelinePeriod, getOrgInfo(authToken));
     }
 
-    @GetMapping(value = "/accounts/{accountId:.+}/contacts/{contactId:.+}", headers = "Accept=application/json")
+    @GetMapping("/accounts/{accountId:.+}/contacts/{contactId:.+}")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity timeline data for a contact")
     @SuppressWarnings("ConstantConditions")
@@ -83,7 +83,7 @@ public class ActivityTimelineResource {
                 getOrgInfo(authToken));
     }
 
-    @GetMapping(value = "/accounts/{accountId:.+}/reports/contacts", headers = "Accept=application/json")
+    @GetMapping("/accounts/{accountId:.+}/reports/contacts")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity report aggregated by contacts")
     @SuppressWarnings("ConstantConditions")
@@ -103,7 +103,7 @@ public class ActivityTimelineResource {
                 getOrgInfo(authToken));
     }
 
-    @GetMapping(value = "/accounts/{accountId:.+}/reports/product-interest", headers = "Accept=application/json")
+    @GetMapping("/accounts/{accountId:.+}/reports/product-interest")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity report aggregated by  product interest")
     @SuppressWarnings("ConstantConditions")
@@ -124,7 +124,7 @@ public class ActivityTimelineResource {
                 getOrgInfo(authToken));
     }
 
-    @GetMapping(value = "/accounts/{accountId:.+}/reports/event-type", headers = "Accept=application/json")
+    @GetMapping("/accounts/{accountId:.+}/reports/event-type")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity report aggregated by event type")
     @SuppressWarnings("ConstantConditions")

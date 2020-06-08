@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "vdb-metadata")
 @RestController
-@RequestMapping(value = "/vdbmetadata")
+@RequestMapping("/vdbmetadata")
 public class VdbMetadataResource {
 
     @GetMapping("/options")

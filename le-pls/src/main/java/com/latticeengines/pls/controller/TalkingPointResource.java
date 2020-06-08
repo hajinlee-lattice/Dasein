@@ -6,10 +6,12 @@ import javax.inject.Inject;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -33,7 +35,7 @@ public class TalkingPointResource {
     @Inject
     private TalkingPointService talkingPointService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @PostMapping
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Talking Point")
@@ -42,35 +44,35 @@ public class TalkingPointResource {
         return talkingPointService.createOrUpdate(talkingPoints);
     }
 
-    @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.GET)
+    @GetMapping("/{talkingPointName}")
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
     public TalkingPointDTO findByName(@PathVariable String talkingPointName) {
         return talkingPointService.findByName(talkingPointName);
     }
 
-    @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
+    @GetMapping("/play/{playName}")
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
     public List<TalkingPointDTO> findAllByPlayName(@PathVariable String playName) {
         return talkingPointService.findAllByPlayName(playName);
     }
 
-    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
+    @GetMapping("/previewresources")
     @ResponseBody
     @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
     public DantePreviewResources getPreviewResources() {
         return talkingPointService.getPreviewResources();
     }
 
-    @RequestMapping(value = "/preview", method = RequestMethod.GET)
+    @GetMapping("/preview")
     @ResponseBody
     @ApiOperation(value = "Get Talking Point Preview Data for a given Play")
     public TalkingPointPreview preview(@RequestParam("playName") String playName) {
         return talkingPointService.preview(playName);
     }
 
-    @RequestMapping(value = "/publish", method = RequestMethod.POST)
+    @PostMapping("/publish")
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
@@ -78,7 +80,7 @@ public class TalkingPointResource {
         talkingPointService.publish(playName);
     }
 
-    @RequestMapping(value = "/revert", method = RequestMethod.POST)
+    @PostMapping("/revert")
     @ResponseBody
     @ApiOperation(
             value = "Revert the given play's talking points to the version last published to dante")
@@ -87,7 +89,7 @@ public class TalkingPointResource {
         return talkingPointService.revert(playName);
     }
 
-    @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{talkingPointName}")
     @ResponseBody
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
@@ -95,7 +97,7 @@ public class TalkingPointResource {
         talkingPointService.delete(talkingPointName);
     }
 
-    @RequestMapping(value = "/attributes", method = RequestMethod.POST)
+    @PostMapping("/attributes")
     @ResponseBody
     @ApiOperation(value = "Get attributes for given notions")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")

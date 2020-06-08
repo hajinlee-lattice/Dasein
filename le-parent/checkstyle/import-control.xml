@@ -24,11 +24,6 @@
     <disallow class="^((?!org\.apache\.commons\.collections4).)*\.MapUtils$" regex="true"/>
     <disallow class="^.*\.MapUtil" regex="true"/>
 
-    <subpackage name="([^.]+\.)+controller" regex="true">
-        <!-- should use GetMapping, PostMapping, PutMapping and DeleteMapping -->
-        <disallow class="org.springframework.web.bind.annotation.RequestMapping"/>
-    </subpackage>
-
     <!-- exceptions -->
     <file name="EventDataSamplingJobUnitTestNG">
         <allow class="org.apache.avro.mapred.Pair" />

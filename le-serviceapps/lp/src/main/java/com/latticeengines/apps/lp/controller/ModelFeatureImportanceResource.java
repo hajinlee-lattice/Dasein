@@ -26,7 +26,7 @@ public class ModelFeatureImportanceResource {
     @Inject
     private ModelFeatureImportanceService importanceService;
 
-    @PostMapping(value = "/model/{modelId}")
+    @PostMapping("/model/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Upsert feature importances")
     public SimpleBooleanResponse upsertFeatureImportances(@PathVariable String customerSpace,
@@ -35,7 +35,7 @@ public class ModelFeatureImportanceResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @GetMapping(value = "/model/{modelGuid}")
+    @GetMapping("/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Get model's feature importances by model GUID")
     public List<ModelFeatureImportance> getFeatureImportancesByModelGuid(@PathVariable String customerSpace,

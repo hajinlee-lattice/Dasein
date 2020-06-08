@@ -25,18 +25,18 @@ public class OrphanRecordsResource {
     @Inject
     private OrphanRecordsService orphanRecordsService;
 
-    @PostMapping(value = "type/{orphanType}/submit")
+    @PostMapping("type/{orphanType}/submit")
     @ResponseBody
     public Job submitOrphanRecordsWorkflow(@PathVariable String orphanType, HttpServletResponse response) {
         return orphanRecordsService.submitOrphanRecordsWorkflow(orphanType, response);
     }
 
-    @GetMapping(value = "/orphanexport/{exportId}")
+    @GetMapping("/orphanexport/{exportId}")
     public void downloadOrphanArtifact(@PathVariable String exportId, HttpServletRequest request, HttpServletResponse response) {
         orphanRecordsService.downloadOrphanArtifact(exportId, request, response);
     }
 
-    @GetMapping(value = "/count")
+    @GetMapping("/count")
     public String getOrphanRecordsCount(@RequestParam(required = false) String orphanType) {
         return orphanRecordsService.getOrphanRecordsCount(orphanType);
     }

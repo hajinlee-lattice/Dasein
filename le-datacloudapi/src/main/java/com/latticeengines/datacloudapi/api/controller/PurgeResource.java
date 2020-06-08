@@ -5,8 +5,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +27,7 @@ public class PurgeResource {
     @Inject
     private PurgeService purgeService;
 
-    @RequestMapping(value = "sources", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("sources")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Get DataCloud sources to purge")
@@ -47,7 +47,7 @@ public class PurgeResource {
         }
     }
 
-    @RequestMapping(value = "sources/unknown", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("sources/unknown")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Get unknown sources to purger")

@@ -41,7 +41,7 @@ public class ProductHierarchyResource {
     @Resource(name = ProductHierarchyDanteFormatter.Qualifier)
     private ProductHierarchyDanteFormatter productHierarchyDanteFormatter;
 
-    @GetMapping(value = "/danteformat", headers = "Accept=application/json")
+    @GetMapping("/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get the product hierarchy data for the given account")
     public FrontEndResponse<List<String>> getProductHierarchy() {

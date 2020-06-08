@@ -6,10 +6,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,7 +34,7 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
     private SamplingService samplingService;
 
     @Override
-    @RequestMapping(value = "/samplingconfigs", method = RequestMethod.GET)
+    @GetMapping("/samplingconfigs")
     @ResponseBody
     @ApiOperation(value = "Get list of sampling configurations")
     public List<Sampling> getSamplingConfigs() {
@@ -42,7 +42,7 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/samplingconfigs/{samplingConfigName:.*}", method = RequestMethod.GET)
+    @GetMapping("/samplingconfigs/{samplingConfigName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get list of sampling configurations")
     public Sampling getSamplingConfigByName(@PathVariable String samplingConfigName) {
@@ -50,7 +50,7 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/samplingconfigs", method = RequestMethod.POST)
+    @PostMapping("/samplingconfigs")
     @ResponseBody
     @ApiOperation(value = "Create sampling configuration")
     public String createSamplingConfig(@RequestBody Sampling samplingConfig) {
@@ -58,7 +58,7 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/samplingconfigs/latest", method = RequestMethod.POST)
+    @PostMapping("/samplingconfigs/latest")
     @ResponseBody
     @ApiOperation(value = "Create production sampling config")
     public Sampling createSamplingFromProduction() {

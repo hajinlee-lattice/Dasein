@@ -1,10 +1,10 @@
 package com.latticeengines.api.controller;
 
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,7 +15,7 @@ import com.wordnik.swagger.annotations.Api;
 @RestController
 public class StatusResource {
 
-    @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
+    @GetMapping("/{op}/{left}/{right}")
     @ResponseBody
     public Status calculate(@PathVariable("op") String op, @PathVariable("left") Integer left,
             @PathVariable("right") Integer right) {
@@ -29,7 +29,7 @@ public class StatusResource {
         return doCalc(result);
     }
 
-    @RequestMapping(value = "/post", method = RequestMethod.POST)
+    @PostMapping("/post")
     @ResponseBody
     public Status calculate(@RequestBody Status calc) {
         Assert.notNull(calc, "RequestBody status cannot be null");

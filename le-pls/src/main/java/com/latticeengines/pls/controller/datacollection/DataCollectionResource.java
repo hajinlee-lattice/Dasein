@@ -4,9 +4,9 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,9 +44,7 @@ public class DataCollectionResource {
         this.dataCollectionPrecheckService = dataCollectionPrecheckService;
     }
 
-    @RequestMapping(value = ATTR_CONFIG_PATH, //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(ATTR_CONFIG_PATH)
     @ResponseBody
     @ApiOperation(value = "Get attr config request")
     public AttrConfigRequest getAttrConfigRequest(HttpServletRequest request,
@@ -55,9 +53,7 @@ public class DataCollectionResource {
         return cdlAttrConfigProxy.getAttrConfigByEntity(tenant.getId(), entity, true);
     }
 
-    @RequestMapping(value = ATTR_CONFIG_PATH, //
-            method = RequestMethod.POST, //
-            headers = "Accept=application/json")
+    @PostMapping(ATTR_CONFIG_PATH)
     @ResponseBody
     @ApiOperation(value = "Save attr config request")
     public AttrConfigRequest saveAttrConfigRequest(HttpServletRequest request,
@@ -67,9 +63,7 @@ public class DataCollectionResource {
         return cdlAttrConfigProxy.saveAttrConfig(tenant.getId(), config, mode);
     }
 
-    @RequestMapping(value = ATTR_CONFIG_PATH + "/validate", //
-            method = RequestMethod.POST, //
-            headers = "Accept=application/json")
+    @PostMapping(ATTR_CONFIG_PATH + "/validate")
     @ResponseBody
     @ApiOperation(value = "Validate attr config request")
     public AttrConfigRequest validateAttrConfigRequest(HttpServletRequest request,
@@ -79,7 +73,7 @@ public class DataCollectionResource {
         return cdlAttrConfigProxy.validateAttrConfig(tenant.getId(), config, mode);
     }
 
-    @GetMapping(value = "/status")
+    @GetMapping("/status")
     @ResponseBody
     @ApiOperation(value = "Get attr data collection status")
     public DataCollectionStatus getCollectionStatus(
@@ -88,7 +82,7 @@ public class DataCollectionResource {
                MultiTenantContext.getCustomerSpace().toString(), version);
     }
 
-    @GetMapping(value = "/precheck")
+    @GetMapping("/precheck")
     @ApiOperation(value = "Check whether Account, Product, Transaction and their attributes exist in serving store.")
     public DataCollectionPrechecks precheck() {
         return dataCollectionPrecheckService.validateDataCollectionPrechecks(

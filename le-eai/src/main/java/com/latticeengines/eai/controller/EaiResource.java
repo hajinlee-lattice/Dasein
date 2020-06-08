@@ -4,9 +4,9 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +18,7 @@ import com.latticeengines.network.exposed.eai.EaiInterface;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "eaijobs", description = "REST resource for importing/exporting data into/from Lattice")
+@Api(value = "REST resource for importing/exporting data into/from Lattice")
 @RestController
 @RequestMapping("")
 public class EaiResource implements EaiInterface {
@@ -26,7 +26,7 @@ public class EaiResource implements EaiInterface {
     @Inject
     private EaiService eaiService;
 
-    @RequestMapping(value = "/jobs", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/jobs")
     @ResponseBody
     @ApiOperation(value = "Submit an eai job")
     public AppSubmission submitEaiJob(@RequestBody EaiJobConfiguration eaiJobConfig) {

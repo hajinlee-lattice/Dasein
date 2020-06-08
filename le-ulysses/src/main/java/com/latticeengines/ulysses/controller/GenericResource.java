@@ -26,7 +26,7 @@ public class GenericResource {
     @Inject
     private Oauth2RestApiProxy tenantProxy;
 
-    @GetMapping(value = "/oauthtotenant", headers = "Accept=application/json")
+    @GetMapping("/oauthtotenant")
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
@@ -35,7 +35,7 @@ public class GenericResource {
         return tenantProxy.getTenantNameFromOAuthRequest(bearerToken);
     }
 
-    @GetMapping(value = "/oauthtoappid", headers = "Accept=application/json")
+    @GetMapping("/oauthtoappid")
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog

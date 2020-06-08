@@ -2,19 +2,19 @@ package com.latticeengines.playmaker.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 
-@Controller
+@RestController
 public class ErrorController {
 
-    @GetMapping(value = "errors")
+    @GetMapping("errors")
     @ResponseBody
     public JsonNode renderErrorPage(HttpServletRequest httpRequest) {
         int httpErrorCode = getErrorCode(httpRequest);

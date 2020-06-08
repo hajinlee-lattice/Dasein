@@ -39,7 +39,7 @@ public class LookupIdMappingResource {
     @Inject
     private TrayService trayService;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get mapped configirations of org id and corresponding lookup id per external system type")
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(@PathVariable String customerSpace, //
@@ -52,7 +52,7 @@ public class LookupIdMappingResource {
         return lookupIdMappingService.getLookupIdsMapping(externalSystemType, sortby, descending);
     }
 
-    @PostMapping(value = "/register")
+    @PostMapping("/register")
     @ResponseBody
     @ApiOperation(value = "Register an org")
     public LookupIdMap registerExternalSystem(@PathVariable String customerSpace,
@@ -60,21 +60,21 @@ public class LookupIdMappingResource {
         return lookupIdMappingService.registerExternalSystem(lookupIdMap);
     }
 
-    @PutMapping(value = "/deregister")
+    @PutMapping("/deregister")
     @ResponseBody
     @ApiOperation(value = "Deregister an org")
     public void deregisterExternalSystem(@PathVariable String customerSpace, @RequestBody LookupIdMap lookupIdMap) {
         lookupIdMappingService.deregisterExternalSystem(lookupIdMap);
     }
 
-    @GetMapping(value = "/config/{id}")
+    @GetMapping("/config/{id}")
     @ResponseBody
     @ApiOperation(value = "Get mapped configuration for given config id")
     public LookupIdMap getLookupIdMap(@PathVariable String customerSpace, @PathVariable String id) {
         return lookupIdMappingService.getLookupIdMap(id);
     }
 
-    @PutMapping(value = "/config/{id}")
+    @PutMapping("/config/{id}")
     @ResponseBody
     @ApiOperation(value = "Update mapped configuration for given config id")
     public LookupIdMap updateLookupIdMap(@PathVariable String customerSpace, @PathVariable String id,
@@ -82,14 +82,14 @@ public class LookupIdMappingResource {
         return lookupIdMappingService.updateLookupIdMap(id, lookupIdMap);
     }
 
-    @DeleteMapping(value = "/config/{id}")
+    @DeleteMapping("/config/{id}")
     @ResponseBody
     @ApiOperation(value = "Delete mapped configuration for given config id")
     public void deleteLookupIdMap(@PathVariable String customerSpace, @PathVariable String id) {
         lookupIdMappingService.deleteLookupIdMap(id);
     }
 
-    @PutMapping(value = "/delete-connection/{lookupIdMapId}")
+    @PutMapping("/delete-connection/{lookupIdMapId}")
     @ResponseBody
     @ApiOperation(value = "Delete Tray solution instance, authentication, and lookupidmap")
     public void deleteConnection(@PathVariable String customerSpace, @PathVariable String lookupIdMapId,
@@ -99,7 +99,7 @@ public class LookupIdMappingResource {
         lookupIdMappingService.deleteLookupIdMap(lookupIdMapId);
     }
 
-    @GetMapping(value = "/available-lookup-ids")
+    @GetMapping("/available-lookup-ids")
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(@PathVariable String customerSpace, //
@@ -108,14 +108,14 @@ public class LookupIdMappingResource {
         return lookupIdMappingService.getAllLookupIds(externalSystemType);
     }
 
-    @GetMapping(value = "/all-external-system-types")
+    @GetMapping("/all-external-system-types")
     @ResponseBody
     @ApiOperation(value = "Get all external system type")
     public List<CDLExternalSystemType> getAllCDLExternalSystemType(@PathVariable String customerSpace) {
         return lookupIdMappingService.getAllCDLExternalSystemType();
     }
 
-    @GetMapping(value = "/org/{orgId}")
+    @GetMapping("/org/{orgId}")
     @ResponseBody
     @ApiOperation(value = "Get lookup id map from org id")
     public LookupIdMap getLookupIdMapByOrgId(@PathVariable String customerSpace, @PathVariable String orgId,

@@ -4,8 +4,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +22,7 @@ public class StatusController {
     @Inject
     private StatusService statusService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "check status of all the microservices modules")
     public Map<String, String> checkModules() {

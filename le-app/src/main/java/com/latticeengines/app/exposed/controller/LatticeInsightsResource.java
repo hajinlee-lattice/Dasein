@@ -20,10 +20,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,7 +55,7 @@ import io.swagger.annotations.ApiParam;
 
 @Api(value = "latticeinsights", description = "REST resource for Lattice Insights")
 @RestController
-@RequestMapping(value = "/latticeinsights")
+@RequestMapping("/latticeinsights")
 public class LatticeInsightsResource {
 
     public static final String INSIGHTS_PATH = "/insights";
@@ -79,7 +79,7 @@ public class LatticeInsightsResource {
     private LPAttrConfigProxy proxy;
 
     // ------------START for Insights-------------------//
-    @GetMapping(value = INSIGHTS_PATH + "/categories")
+    @GetMapping(INSIGHTS_PATH + "/categories")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getInsightsCategories(HttpServletRequest request) {
@@ -95,7 +95,7 @@ public class LatticeInsightsResource {
         return categoryStrList;
     }
 
-    @GetMapping(value = INSIGHTS_PATH + "/subcategories")
+    @GetMapping(INSIGHTS_PATH + "/subcategories")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getInsightsSubcategories(HttpServletRequest request, //
@@ -111,7 +111,7 @@ public class LatticeInsightsResource {
         return new ArrayList<String>(subcategories);
     }
 
-    @PutMapping(value = INSIGHTS_PATH)
+    @PutMapping(INSIGHTS_PATH)
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveInsightsAttributes(HttpServletRequest request, //
@@ -123,7 +123,7 @@ public class LatticeInsightsResource {
                 considerInternalAttributes);
     }
 
-    @PutMapping(value = INSIGHTS_PATH + "/save")
+    @PutMapping(INSIGHTS_PATH + "/save")
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveInsightsSelectedAttributes(HttpServletRequest request, //
@@ -135,7 +135,7 @@ public class LatticeInsightsResource {
                 considerInternalAttributes);
     }
 
-    @GetMapping(value = INSIGHTS_PATH)
+    @GetMapping(INSIGHTS_PATH)
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag", response = List.class)
     public List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request, //
@@ -168,9 +168,7 @@ public class LatticeInsightsResource {
         return attributes;
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/count", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(INSIGHTS_PATH + "/count")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
     public int getInsightsAttributesCount(HttpServletRequest request,
@@ -196,8 +194,7 @@ public class LatticeInsightsResource {
     }
 
     // M37: This api is deprecated (replaced by the token api below)
-    @RequestMapping(value = INSIGHTS_PATH
-            + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(INSIGHTS_PATH + "/downloadcsv")
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public void downloadEnrichmentCSV(HttpServletRequest request, HttpServletResponse response,
@@ -215,7 +212,7 @@ public class LatticeInsightsResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
-    @GetMapping(value = INSIGHTS_PATH + "/downloadcsv-token")
+    @GetMapping(INSIGHTS_PATH + "/downloadcsv-token")
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public ResponseDocument<String> downloadEnrichmentCSVToken(@ApiParam(value = "Should get only selected attribute") //
@@ -227,8 +224,7 @@ public class LatticeInsightsResource {
 
     private static final String SEGMENT_CONTACTS_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/internal/export-state-%s.csv";
 
-    @RequestMapping(value = SEGMENTS_PATH
-            + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(SEGMENTS_PATH + "/downloadcsv")
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public void downloadSegmentCSV(HttpServletRequest request, HttpServletResponse response,
@@ -242,9 +238,7 @@ public class LatticeInsightsResource {
         downloader.downloadFile(request, response);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/premiumattributeslimitation", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(INSIGHTS_PATH + "/premiumattributeslimitation")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getInsightsPremiumAttributesLimitation(HttpServletRequest request) {
@@ -252,9 +246,7 @@ public class LatticeInsightsResource {
         return attributeService.getPremiumAttributesLimitation(tenant);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/premiumattributeslimitationmap", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(INSIGHTS_PATH + "/premiumattributeslimitationmap")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getInsightsPremiumAttributesLimitationMap(HttpServletRequest request) {
@@ -262,9 +254,7 @@ public class LatticeInsightsResource {
         return attributeService.getPremiumAttributesLimitationMap(tenant);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/selectedattributes/count", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(INSIGHTS_PATH + "/selectedattributes/count")
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getInsightsSelectedAttributeCount(HttpServletRequest request) {
@@ -273,9 +263,7 @@ public class LatticeInsightsResource {
         return attributeService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/selectedpremiumattributes/count", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(INSIGHTS_PATH + "/selectedpremiumattributes/count")
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getInsightsSelectedAttributePremiumCount(HttpServletRequest request) {
@@ -284,9 +272,7 @@ public class LatticeInsightsResource {
         return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
-    @RequestMapping(value = ATTR_CONFIG_PATH, //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(ATTR_CONFIG_PATH)
     @ResponseBody
     @ApiOperation(value = "Get attr config request")
     public AttrConfigRequest getAttrConfigRequest(HttpServletRequest request,
@@ -295,9 +281,7 @@ public class LatticeInsightsResource {
         return proxy.getAttrConfigByEntity(tenant.getId(), entity, true);
     }
 
-    @RequestMapping(value = ATTR_CONFIG_PATH, //
-            method = RequestMethod.POST, //
-            headers = "Accept=application/json")
+    @PostMapping(ATTR_CONFIG_PATH)
     @ResponseBody
     @ApiOperation(value = "Save attr config request")
     public AttrConfigRequest saveAttrConfigRequest(HttpServletRequest request, @RequestBody AttrConfigRequest config,
@@ -306,9 +290,7 @@ public class LatticeInsightsResource {
         return proxy.saveAttrConfig(tenant.getId(), config, mode);
     }
 
-    @RequestMapping(value = ATTR_CONFIG_PATH + "/validate", //
-            method = RequestMethod.POST, //
-            headers = "Accept=application/json")
+    @PostMapping(ATTR_CONFIG_PATH + "/validate")
     @ResponseBody
     @ApiOperation(value = "Validate attr config request")
     public AttrConfigRequest validateAttrConfigRequest(HttpServletRequest request,
@@ -338,21 +320,21 @@ public class LatticeInsightsResource {
     // ------------END for Insights-------------------//
 
     // ------------START for statistics---------------------//
-    @RequestMapping(value = AM_STATS_PATH + "/cube", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(AM_STATS_PATH + "/cube")
     @ResponseBody
     @ApiOperation(value = "Load account master cube", response = AccountMasterCube.class)
     public StatsCube loadAMStatisticsCube() {
         return enrichmentService.getStatsCube();
     }
 
-    @RequestMapping(value = AM_STATS_PATH + "/cubes", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(AM_STATS_PATH + "/cubes")
     @ResponseBody
     @ApiOperation(value = "Load account master cube as a map", response = AccountMasterCube.class)
     public Map<BusinessEntity, StatsCube> getAMStatsCubes() {
         return enrichmentService.getStatsCubes();
     }
 
-    @RequestMapping(value = AM_STATS_PATH + "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(AM_STATS_PATH + "/topn")
     @ResponseBody
     @ApiOperation(value = "Get top N attributes for all category")
     public TopNTree getTopTree() {

@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,20 +22,20 @@ import io.swagger.annotations.ApiOperation;
 @Deprecated
 @Api(value = "Tenant config", description = "REST resource for tenant config")
 @RestController
-@RequestMapping(value = "/tenant")
+@RequestMapping("/tenant")
 public class CommonTenantConfigResource {
 
     @Inject
     private CommonTenantConfigService configService;
 
-    @RequestMapping(value = "/featureflags", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/featureflags")
     @ResponseBody
     @ApiOperation(value = "Get tenant's feature flags")
     public FeatureFlagValueMap getFeatureFlags() {
         return configService.getFeatureFlags(MultiTenantContext.getTenant().getId());
     }
 
-    @RequestMapping(value = "/products", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/products")
     @ResponseBody
     @ApiOperation(value = "Get tenant's feature flags")
     public List<String> getProducts() {

@@ -39,7 +39,7 @@ public class TeamResource {
     @Inject
     private TeamService teamService;
 
-    @GetMapping(value = "/username/{username:.+}")
+    @GetMapping("/username/{username:.+}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username,
@@ -48,7 +48,7 @@ public class TeamResource {
         return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
 
-    @GetMapping(value = "/session")
+    @GetMapping("/session")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsFromSession(
@@ -58,14 +58,14 @@ public class TeamResource {
         return globalTeams;
     }
 
-    @GetMapping(value = "")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "List all teams")
     public List<GlobalTeam> getAllTeams() {
         return teamService.getTeamsInContext(true, false);
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create a new team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
@@ -77,7 +77,7 @@ public class TeamResource {
         }
     }
 
-    @PutMapping(value = "/teamId/{teamId}")
+    @PutMapping("/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Update a team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
@@ -91,7 +91,7 @@ public class TeamResource {
         }
     }
 
-    @DeleteMapping(value = "/teamId/{teamId}")
+    @DeleteMapping("/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
@@ -101,7 +101,7 @@ public class TeamResource {
 
     }
 
-    @GetMapping(value = "/{teamId}/dependencies")
+    @GetMapping("/{teamId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, List<String>> getDependencies(@PathVariable String teamId) throws Exception {

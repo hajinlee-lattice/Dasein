@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/health")
 public class HealthResource {
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog

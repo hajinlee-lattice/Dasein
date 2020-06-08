@@ -7,13 +7,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,21 +47,21 @@ public class SegmentResource {
     @Inject
     private ActionService actionService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
         return segmentService.getSegments();
     }
 
-    @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public MetadataSegment getSegment(@PathVariable String customerSpace, @PathVariable String segmentName) {
         return segmentService.findByName(segmentName);
     }
 
-    @GetMapping(value = "/{segmentName}/dependencies")
+    @GetMapping("/{segmentName}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, List<String>> getDependencies(@PathVariable String customerSpace,
@@ -93,7 +93,7 @@ public class SegmentResource {
         return res;
     }
 
-    @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{segmentName}")
     @ApiOperation(value = "Delete a segment by name")
     public Boolean deleteSegmentByName(@PathVariable String customerSpace,
             @PathVariable String segmentName,
@@ -102,7 +102,7 @@ public class SegmentResource {
         return segmentService.deleteSegmentByName(segmentName, false, hardDelete);
     }
 
-    @PutMapping(value = "/{segmentName}/revertdelete")
+    @PutMapping("/{segmentName}/revertdelete")
     @ResponseBody
     @ApiOperation(value = "Revert segment deletion given its name")
     public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace,
@@ -111,14 +111,14 @@ public class SegmentResource {
         return true;
     }
 
-    @GetMapping(value = "/deleted")
+    @GetMapping("/deleted")
     @ResponseBody
     @ApiOperation(value = "Get all deleted segments")
     public List<String> getAllDeletedSegments(@PathVariable String customerSpace) {
         return segmentService.getAllDeletedSegments();
     }
 
-    @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{segmentName}/stats")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName,
@@ -126,7 +126,7 @@ public class SegmentResource {
         return segmentService.getStats(segmentName, version);
     }
 
-    @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{segmentName}/stats")
     @ResponseBody
     @ApiOperation(value = "Upsert stats to a segment")
     public SimpleBooleanResponse upsertStatsToSegment(@PathVariable String customerSpace,
@@ -135,7 +135,7 @@ public class SegmentResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @PutMapping(value = "/{segmentName}/counts")
+    @PutMapping("/{segmentName}/counts")
     @ResponseBody
     @ApiOperation(value = "Update counts for a segment")
     public Map<BusinessEntity, Long> updateSegmentCount(@PathVariable String customerSpace,
@@ -143,14 +143,14 @@ public class SegmentResource {
         return segmentService.updateSegmentCounts(segmentName);
     }
 
-    @PutMapping(value = "/counts/async")
+    @PutMapping("/counts/async")
     @ResponseBody
     @ApiOperation(value = "Update counts for all segment")
     public void updateAllCountsAsync(@PathVariable String customerSpace) {
         segmentService.updateSegmentsCountsAsync();
     }
 
-    @PostMapping(value = "/attributes")
+    @PostMapping("/attributes")
     @ResponseBody
     @ApiOperation(value = "get attributes for segments")
     public List<AttributeLookup> findDependingAttributes(@PathVariable String customerSpace,

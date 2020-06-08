@@ -31,14 +31,14 @@ public class UploadResource {
     @Inject
     private UploadService uploadService;
 
-    @GetMapping(value = "/sourceId/{sourceId}")
+    @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get uploads by sourceId")
     public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status) {
         return uploadService.getAllBySourceId(sourceId, status);
     }
 
-    @GetMapping(value = "/uploadId/{uploadId}")
+    @GetMapping("/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation("Get upload by uploadID")
     public UploadDetails getUpload(@PathVariable String uploadId) {
@@ -49,7 +49,7 @@ public class UploadResource {
         }
     }
 
-    @GetMapping(value = "/uploadId/{uploadId}/token")
+    @GetMapping("/uploadId/{uploadId}/token")
     @ResponseBody
     @ApiOperation("Generate a token for downloading zip file of the upload results")
     public String getToken(@PathVariable String uploadId) {

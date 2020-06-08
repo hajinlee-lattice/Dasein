@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +35,7 @@ public class ImportWorkflowResource {
     private ImportWorkflowService importWorkflowService;
 
     // API to upload a new Spec
-    @RequestMapping(value = "/specs/upload", method = RequestMethod.POST)
+    @PostMapping("/specs/upload")
     @ResponseBody
     @ApiOperation(value = "upload a new Spec to S3")
     public String uploadSpecToS3(
@@ -50,7 +51,7 @@ public class ImportWorkflowResource {
     }
 
     // API to list specs by systemType and systemObject
-    @RequestMapping(value = "/specs/list", method = RequestMethod.GET)
+    @GetMapping("/specs/list")
     @ResponseBody
     @ApiOperation(value = "list the specs in system")
     public List<ImportWorkflowSpec> listSpecs(
@@ -62,7 +63,7 @@ public class ImportWorkflowResource {
     }
 
     // API to download a spec
-    @RequestMapping(value = "/specs/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/specs/download")
     @ResponseBody
     @ApiOperation(value = "Get spec info from s3")
     public void downloadSpecFromS3(

@@ -4,10 +4,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +32,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     private AlgorithmEntityMgr algorithmEntityMgr;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get Algorithms")
     public List<Algorithm> getAlgorithms() {
@@ -39,7 +40,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     }
 
     @Override
-    @RequestMapping(value = "/latest", method = RequestMethod.POST)
+    @PostMapping("/latest")
     @ResponseBody
     @ApiOperation(value = "Upsert Algorithms")
     public Algorithm createAlgorithmFromProduction() {
@@ -47,7 +48,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create Algorithm")
     public String createAlgorithm(@RequestBody Algorithm algorithm) {
@@ -55,7 +56,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     }
 
     @Override
-    @RequestMapping(value = "/{algorithmName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{algorithmName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get Algorithm by name")
     public Algorithm getAlgorithmByName(@PathVariable String algorithmName) {

@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "convert_batchstore_info", description = "REST resource for ConvertBatchStore info")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/convertbatchstoreinfo")
+@RequestMapping("/customerspaces/{customerSpace}/convertbatchstoreinfo")
 public class ConvertBatchStoreInfoResource {
 
     @Inject

@@ -8,12 +8,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,14 +76,14 @@ public class ModelSummaryResource {
     }
 
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/create")
     @ResponseBody
     @ApiOperation(value = "Create model summary")
     public void createModelSummary(@PathVariable String customerSpace, @RequestBody ModelSummary modelSummary) {
         modelSummaryService.create(modelSummary);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Register a model summary")
     public ModelSummary createModelSummary(@PathVariable String customerSpace, @RequestBody ModelSummary modelSummary,
@@ -98,7 +99,7 @@ public class ModelSummaryResource {
         return summary;
     }
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
     public Boolean update(@PathVariable String customerSpace, @PathVariable String modelId, @RequestBody AttributeMap attrMap) {
@@ -106,7 +107,7 @@ public class ModelSummaryResource {
         return true;
     }
 
-    @RequestMapping(value = "/updatestatus/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/updatestatus/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Update model summary by model id")
     public Boolean updateStatusByModelId(@PathVariable String customerSpace,
@@ -115,7 +116,7 @@ public class ModelSummaryResource {
         return true;
     }
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Delete a model summary")
     public Boolean deleteByModelId(@PathVariable String customerSpace, @PathVariable String modelId) {
@@ -133,7 +134,7 @@ public class ModelSummaryResource {
         return modelSummary;
     }
 
-    @RequestMapping(value = "/findbymodelid/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/findbymodelid/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Find model summary by model id")
     public ModelSummary findByModelId(@PathVariable String customerSpace, @PathVariable String modelId,
@@ -176,7 +177,7 @@ public class ModelSummaryResource {
         return modelSummary;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries(@PathVariable String customerSpace,
@@ -184,7 +185,7 @@ public class ModelSummaryResource {
         return modelSummaryService.getModelSummaries(selection);
     }
 
-    @RequestMapping(value = "/findall", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/findall")
     @ResponseBody
     @ApiOperation(value = "Find all model summaries")
     public List<ModelSummary> findAll(@PathVariable String customerSpace) {
@@ -194,7 +195,7 @@ public class ModelSummaryResource {
         return modelSummaries;
     }
 
-    @RequestMapping(value = "/findallvalid", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/findallvalid")
     @ResponseBody
     @ApiOperation(value = "Find total count")
     public List<ModelSummary> findAllValid(@PathVariable String customerSpace) {
@@ -204,7 +205,7 @@ public class ModelSummaryResource {
         return modelSummaries;
     }
 
-    @RequestMapping(value = "/findallactive", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/findallactive")
     @ResponseBody
     @ApiOperation(value = "Find total count")
     public List<ModelSummary> findAllActive(@PathVariable String customerSpace) {
@@ -214,7 +215,7 @@ public class ModelSummaryResource {
         return modelSummaries;
     }
 
-    @RequestMapping(value = "/findpaginatedmodels", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/findpaginatedmodels")
     @ResponseBody
     @ApiOperation(value = "Find paginated models")
     public List<ModelSummary> findPaginatedModels(@PathVariable String customerSpace, @RequestParam long lastUpdateTime,
@@ -225,21 +226,21 @@ public class ModelSummaryResource {
         return modelSummaries;
     }
 
-    @RequestMapping(value = "/findtotalcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/findtotalcount")
     @ResponseBody
     @ApiOperation(value = "Find total count")
     public int findTotalCount(@PathVariable String customerSpace, @RequestParam long lastUpdateTime, @RequestParam boolean considerAllStatus) {
         return modelSummaryService.findTotalCount(lastUpdateTime, considerAllStatus);
     }
 
-    @RequestMapping(value = "/alerts/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/alerts/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get diagnostic alerts for a model")
     public Boolean modelIdinTenant(@PathVariable String customerSpace, @PathVariable String modelId) {
         return modelSummaryService.modelIdinTenant(modelId, customerSpace);
     }
 
-    @RequestMapping(value = "/predictors/all/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/predictors/all/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get all the predictors for a specific model")
     public List<Predictor> getAllPredictors(@PathVariable String customerSpace, @PathVariable String modelId) {
@@ -247,7 +248,7 @@ public class ModelSummaryResource {
         return predictors;
     }
 
-    @RequestMapping(value = "/predictors/bi/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/predictors/bi/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get predictors used by BuyerInsgihts for a specific model")
     public List<Predictor> getPredictorsForBuyerInsights(@PathVariable String customerSpace, @PathVariable String modelId) {
@@ -255,7 +256,7 @@ public class ModelSummaryResource {
         return predictors;
     }
 
-    @RequestMapping(value = "/predictors/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/predictors/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Update predictors of a sourceModelSummary for the use of BuyerInsights")
     public Boolean updatePredictors(@PathVariable String customerSpace,

@@ -31,7 +31,7 @@ public class PlayTypeResource {
     @Inject
     private PlayProxy playProxy;
 
-    @GetMapping(value = "", headers = "Accept=application/json")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get all playtypes for a tenant")
     public List<PlayType> getPlayTypes() {
@@ -39,7 +39,7 @@ public class PlayTypeResource {
         return playProxy.getPlayTypes(tenant.getId());
     }
 
-    @PostMapping(value = "", headers = "Accept=application/json")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create new Playtype")
     public PlayType createPlayType(@RequestBody PlayType playType) {
@@ -50,7 +50,7 @@ public class PlayTypeResource {
         return playProxy.createPlayType(tenant.getId(), playType);
     }
 
-    @GetMapping(value = "/{playTypeId}", headers = "Accept=application/json")
+    @GetMapping("/{playTypeId}")
     @ResponseBody
     @ApiOperation(value = "Get a playtype for a tenant given its ID")
     public PlayType getPlayTypeById(@PathVariable String playTypeId) {
@@ -58,7 +58,7 @@ public class PlayTypeResource {
         return playProxy.getPlayTypeById(tenant.getId(), playTypeId);
     }
 
-    @PostMapping(value = "/{playTypeId}", headers = "Accept=application/json")
+    @PostMapping("/{playTypeId}")
     @ResponseBody
     @ApiOperation(value = "Update a playtype given its ID")
     public void updatePlayType(@PathVariable String playTypeId, @RequestBody PlayType playType) {
@@ -68,7 +68,7 @@ public class PlayTypeResource {
         playProxy.updatePlayType(tenant.getId(), playTypeId, playType);
     }
 
-    @DeleteMapping(value = "/{playTypeId}", headers = "Accept=application/json")
+    @DeleteMapping("/{playTypeId}")
     @ResponseBody
     @ApiOperation(value = "Delete a playtype given its ID")
     public void deletePlayType(@PathVariable String playTypeId) {

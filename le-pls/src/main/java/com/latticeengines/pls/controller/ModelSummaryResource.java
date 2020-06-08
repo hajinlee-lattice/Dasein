@@ -9,10 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,7 +66,7 @@ public class ModelSummaryResource {
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
     public ModelSummary getModelSummary(@PathVariable String modelId, HttpServletRequest request,
@@ -77,28 +80,28 @@ public class ModelSummaryResource {
         return modelSummary;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries(@RequestParam(value = "selection", required = false) String selection) {
         return modelSummaryProxy.getModelSummaries(MultiTenantContext.getTenant().getId(), selection);
     }
 
-    @RequestMapping(value = "/updated/{timeframe}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/updated/{timeframe}")
     @ResponseBody
     @ApiOperation(value = "Get a list of model summary updated within the timeframe as specified")
     public List<ModelSummary> getModelSummariesUpdatedWithinTimeFrame(@PathVariable long timeFrame) {
         return modelSummaryProxy.getModelSummariesModifiedWithinTimeFrame(timeFrame);
     }
 
-    @RequestMapping(value = "/tenant/{tenantName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/tenant/{tenantName}")
     @ResponseBody
     @ApiOperation(value = "Get list of model summaries available for given tenant")
     public List<ModelSummary> getAllForTenant(@PathVariable String tenantName) {
         return modelSummaryProxy.getAllForTenant(tenantName);
     }
 
-    @RequestMapping(value = "/alerts/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/alerts/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get diagnostic alerts for a model.")
     public String getModelAlerts(@PathVariable String modelId, HttpServletRequest request,
@@ -122,7 +125,7 @@ public class ModelSummaryResource {
         return alerts.toString();
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
@@ -136,7 +139,7 @@ public class ModelSummaryResource {
         return modelSummaryProxy.createModelSummary(tenant.getId(), modelSummary, usingRaw);
     }
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Delete a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
@@ -146,7 +149,7 @@ public class ModelSummaryResource {
         return true;
     }
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
@@ -160,7 +163,7 @@ public class ModelSummaryResource {
         return true;
     }
 
-    @RequestMapping(value = "/predictors/all/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/predictors/all/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get all the predictors for a specific model")
     public List<Predictor> getAllPredictors(@PathVariable String modelId) {
@@ -169,7 +172,7 @@ public class ModelSummaryResource {
         return predictors;
     }
 
-    @RequestMapping(value = "/predictors/bi/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/predictors/bi/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get predictors used by BuyerInsgihts for a specific model")
     public List<Predictor> getPredictorsForBuyerInsights(@PathVariable String modelId) {
@@ -178,7 +181,7 @@ public class ModelSummaryResource {
         return predictors;
     }
 
-    @RequestMapping(value = "/predictors/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/predictors/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Update predictors of a sourceModelSummary for the use of BuyerInsights")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
@@ -188,7 +191,7 @@ public class ModelSummaryResource {
         return true;
     }
 
-    @RequestMapping(value = "/metadata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/metadata/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get metadata for the event table used for the specified model")
     @PreAuthorize("hasRole('View_PLS_Refine_Clone')")
@@ -196,7 +199,7 @@ public class ModelSummaryResource {
         return modelMetadataService.getMetadata(modelId);
     }
 
-    @RequestMapping(value = "/trainingdata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/trainingdata/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get training table attributes used for the specified model")
     public ResponseDocument<List<Attribute>> getTableAttributes(@PathVariable String modelId) {
@@ -207,7 +210,7 @@ public class ModelSummaryResource {
         return ResponseDocument.successResponse(trainingTable.getAttributes());
     }
 
-    @RequestMapping(value = "/metadata/required/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/metadata/required/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get required column names for the event table used for the specified model")
     public List<String> getRequiredColumns(@PathVariable String modelId) {

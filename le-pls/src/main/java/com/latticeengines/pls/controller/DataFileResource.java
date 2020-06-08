@@ -11,9 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
-@RequestMapping(value = "/datafiles")
+@RequestMapping("/datafiles")
 @PreAuthorize("hasRole('View_PLS_Configurations')")
 public class DataFileResource {
 
@@ -38,7 +38,7 @@ public class DataFileResource {
     @Inject
     private DataFileProviderService dataFileProviderService;
 
-    @RequestMapping(value = "/modeljson", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modeljson")
     @ResponseBody
     @ApiOperation(value = "Get model json file for specific model summary")
     public void getModelJsonFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -48,7 +48,7 @@ public class DataFileResource {
                 "modelsummary.json");
     }
 
-    @RequestMapping(value = "/diagnosticsjson", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/diagnosticsjson")
     @ResponseBody
     @ApiOperation(value = "Get diagnostics json file for specific model summary")
     public void getDiagnosticsJsonFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -58,7 +58,7 @@ public class DataFileResource {
                 "diagnostics.json");
     }
 
-    @RequestMapping(value = "/metadataavsc", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/metadataavsc")
     @ResponseBody
     @ApiOperation(value = "Get metadata avsc file for specific model summary")
     public void getMetadataAvscFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -67,7 +67,7 @@ public class DataFileResource {
         dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_JSON, "metadata.avsc");
     }
 
-    @RequestMapping(value = "/predictorcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/predictorcsv")
     @ResponseBody
     @ApiOperation(value = "Get top predictors csv file for specific model summary")
     public void getTopPredictorsCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -77,7 +77,7 @@ public class DataFileResource {
                 HttpFileDownLoader.DownloadMode.TOP_PREDICTOR);
     }
 
-    @RequestMapping(value = "/readoutcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/readoutcsv")
     @ResponseBody
     @ApiOperation(value = "Get readout sample csv file for specific model summary")
     public void getReadoutSampleCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -86,7 +86,7 @@ public class DataFileResource {
         dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_readoutsample.csv");
     }
 
-    @RequestMapping(value = "/scorecsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/scorecsv")
     @ResponseBody
     @ApiOperation(value = "Get score csv file for specific model summary")
     public void getScoreCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -95,7 +95,7 @@ public class DataFileResource {
         dataFileProviderService.downloadFile(request, response, modelId, MediaType.TEXT_PLAIN, ".*_scored.txt");
     }
 
-    @RequestMapping(value = "/explorercsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/explorercsv")
     @ResponseBody
     @ApiOperation(value = "Get threshold explorer csv file for specific model summary")
     public void getThresholdExplorerCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -104,7 +104,7 @@ public class DataFileResource {
         dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_explorer.csv");
     }
 
-    @RequestMapping(value = "/rfmodelcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/rfmodelcsv")
     @ResponseBody
     @ApiOperation(value = "Get RF model csv file for specific model summary")
     public void getRfModelCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -113,7 +113,7 @@ public class DataFileResource {
                 HttpFileDownLoader.DownloadMode.RF_MODEL);
     }
 
-    @RequestMapping(value = "/postmatcheventtablecsv/{eventTableType}", method = RequestMethod.GET)
+    @GetMapping("/postmatcheventtablecsv/{eventTableType}")
     @ResponseBody
     @ApiOperation(value = "Get Post Match Event Table csv file for specific model summary")
     public void getPostMatchTrainingEventTableCsvFile(@RequestParam(value = "modelId") String modelId,
@@ -152,7 +152,7 @@ public class DataFileResource {
 
     }
 
-    @RequestMapping(value = "/scoredeventtablecsv/{scoredfiletype}", method = RequestMethod.GET)
+    @GetMapping("/scoredeventtablecsv/{scoredfiletype}")
     @ResponseBody
     @ApiOperation(value = "Get Scored Event Table csv file for specific model summary")
     public void getScoredEventTableCsvFile(@RequestParam(value = "modelId") String modelId,
@@ -168,7 +168,7 @@ public class DataFileResource {
         }
     }
 
-    @RequestMapping(value = "/pivotmappingcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/pivotmappingcsv")
     @ResponseBody
     @ApiOperation(value = "Get pivot file for download")
     public void getPivotMappingCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -176,7 +176,7 @@ public class DataFileResource {
         dataFileProviderService.downloadPivotFile(request, response, modelId, MediaType.TEXT_PLAIN);
     }
 
-    @RequestMapping(value = "/trainingfilecsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/trainingfilecsv")
     @ResponseBody
     @ApiOperation(value = "Get training set used for modeling")
     public void getTrainingSetCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -185,7 +185,7 @@ public class DataFileResource {
         dataFileProviderService.downloadTrainingSet(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
     }
 
-    @RequestMapping(value = "/modelprofileavro", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modelprofileavro")
     @ResponseBody
     @ApiOperation(value = "Get model profile avro file.")
     public void getModelProfileAvroFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
@@ -194,7 +194,7 @@ public class DataFileResource {
         dataFileProviderService.downloadModelProfile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
     }
 
-    @RequestMapping(value = "/sourcefilecsv/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/sourcefilecsv/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Get source file uploaded to create model or score against model via Application Id")
     public void getSourceFileViaAppId( //
@@ -210,7 +210,7 @@ public class DataFileResource {
         }
     }
 
-    @RequestMapping(value = "/sourcefile", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/sourcefile")
     @ResponseBody
     @ApiOperation(value = "Get source file uploaded to create model or score against model via internal file name")
     public void getSourceFileViaFileName( //
@@ -231,7 +231,7 @@ public class DataFileResource {
         }
     }
 
-    @RequestMapping(value = "/errorscsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/errorscsv")
     @ResponseBody
     @ApiOperation(value = "Get error file via file path")
     public void getErrorsCsvFile( //
@@ -245,7 +245,7 @@ public class DataFileResource {
         }
     }
 
-    @RequestMapping(value = "/bundlecsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/bundlecsv")
     @ResponseBody
     @ApiOperation(value = "Get bundle file from s3")
     public void getBundleCsvFile(

@@ -4,10 +4,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,9 +32,7 @@ public class RuleResultResource {
     @Inject
     private RuleResultService ruleResultService;
 
-    @RequestMapping(value = "/column", //
-    method = RequestMethod.POST, //
-    headers = "Accept=application/json")
+    @PostMapping("/column")
     @ResponseBody
     @ApiOperation(value = "Create column rule results")
     public Boolean createColumnResults(@RequestBody List<ColumnRuleResult> columnResults) {
@@ -41,9 +40,7 @@ public class RuleResultResource {
         return true;
     }
 
-    @RequestMapping(value = "/row", //
-    method = RequestMethod.POST, //
-    headers = "Accept=application/json")
+    @PostMapping("/row")
     @ResponseBody
     @ApiOperation(value = "Create row rule results")
     public Boolean createRowResults(@RequestBody List<RowRuleResult> rowResults) {
@@ -51,25 +48,21 @@ public class RuleResultResource {
         return true;
     }
 
-    @RequestMapping(value = "/column/{modelId}", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+    @GetMapping("/column/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get list of column results")
     public List<ColumnRuleResult> getColumnResults(@PathVariable String modelId) {
         return ruleResultService.findColumnResults(modelId);
     }
 
-    @RequestMapping(value = "/row/{modelId}", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+    @GetMapping("/row/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get list of row results")
     public List<RowRuleResult> getRowResults(@PathVariable String modelId) {
         return ruleResultService.findRowResults(modelId);
     }
 
-    @RequestMapping(value = "/reviewdata/{customerSpace}/{modelId}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/reviewdata/{customerSpace}/{modelId}/{eventTableName}")
     @ResponseBody
     @ApiOperation(value = "Get model review data for a model")
     public ModelReviewData getReviewData(@PathVariable String customerSpace, @PathVariable String modelId, @PathVariable String eventTableName) {

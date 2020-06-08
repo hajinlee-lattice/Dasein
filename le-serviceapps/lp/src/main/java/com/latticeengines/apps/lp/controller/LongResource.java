@@ -25,21 +25,21 @@ public class LongResource {
 
     private AtomicLong counter = new AtomicLong();
 
-    @GetMapping(value = "/mono")
+    @GetMapping("/mono")
     @ResponseBody
     @NoCustomerSpace
     public Mono<Long> getLong() {
         return Mono.just(counter.getAndIncrement());
     }
 
-    @GetMapping(value = "/slow")
+    @GetMapping("/slow")
     @ResponseBody
     @NoCustomerSpace
     public Mono<Long> getLongSlow() {
         return Mono.delay(Duration.ofMillis(10000)).log(Loggers.getLogger(getClass()));
     }
 
-    @GetMapping(value = "/slow2")
+    @GetMapping("/slow2")
     @ResponseBody
     @NoCustomerSpace
     public Long getLongSlowBlocking() {
@@ -54,7 +54,7 @@ public class LongResource {
         return mono.flux();
     }
 
-    @GetMapping(value = "/flux")
+    @GetMapping("/flux")
     @ResponseBody
     @NoCustomerSpace
     public Flux<Long> getLongs() {
@@ -75,7 +75,7 @@ public class LongResource {
         return Flux.interval(Duration.ofMillis(10000)).log(Loggers.getLogger(getClass()));
     }
 
-    @PutMapping(value = "/reset")
+    @PutMapping("/reset")
     @ResponseBody
     @NoCustomerSpace
     public void resetCounter() {

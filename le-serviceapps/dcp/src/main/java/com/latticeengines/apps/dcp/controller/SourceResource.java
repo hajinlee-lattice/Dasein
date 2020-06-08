@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "Source", description = "REST resource for source")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/source")
+@RequestMapping("/customerspaces/{customerSpace}/source")
 public class SourceResource {
 
     private static final Logger log = LoggerFactory.getLogger(SourceResource.class);

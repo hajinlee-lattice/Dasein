@@ -4,9 +4,9 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,21 +22,21 @@ public class QuartzJobClientResource {
     @Inject
     private QuartzJobService quartzJobService;
 
-    @RequestMapping(value = "/triggerjob", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/triggerjob")
     @ResponseBody
     public TriggeredJobInfo triggerJob(@RequestBody QuartzJobArguments jobArgs,
             HttpServletRequest request) {
         return quartzJobService.runJob(jobArgs);
     }
 
-    @RequestMapping(value = "/checkactivejob", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/checkactivejob")
     @ResponseBody
     public Boolean checkActiveJob(@RequestBody QuartzJobArguments jobArgs,
             HttpServletRequest request) {
         return quartzJobService.hasActiveJob(jobArgs);
     }
 
-    @RequestMapping(value = "/checkjobbean", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/checkjobbean")
     @ResponseBody
     public Boolean checkJobBean(@RequestBody QuartzJobArguments jobArgs, HttpServletRequest request) {
         return quartzJobService.jobBeanExist(jobArgs);

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "activities")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/activities")
+@RequestMapping("/customerspaces/{customerSpace}/activities")
 public class ActivityStoreResource {
 
     @Inject
@@ -55,7 +55,7 @@ public class ActivityStoreResource {
                 request.getDataFeedTaskUniqueId(), request.getPrimaryKeyColumn());
     }
 
-    @RequestMapping(value = "/catalogs/{catalogName}", method = RequestMethod.GET)
+    @GetMapping("/catalogs/{catalogName}")
     @ResponseBody
     @ApiOperation("Find catalog by name")
     public Catalog findCatalogByName( //
@@ -80,7 +80,7 @@ public class ActivityStoreResource {
         return activityStoreService.createStream(customerSpace, stream);
     }
 
-    @RequestMapping(value = "/streams/{streamName}", method = RequestMethod.GET)
+    @GetMapping("/streams/{streamName}")
     @ResponseBody
     @ApiOperation("Find stream by name")
     public AtlasStream findStreamByName( //
@@ -90,7 +90,7 @@ public class ActivityStoreResource {
         return activityStoreService.findStreamByTenantAndName(customerSpace, streamName, inflateDimensions);
     }
 
-    @RequestMapping(value = "/streams/{streamName}/dimensions/{dimensionName}", method = RequestMethod.PUT)
+    @PutMapping("/streams/{streamName}/dimensions/{dimensionName}")
     @ResponseBody
     @ApiOperation("Update stream dimension dimension")
     public StreamDimension update( //

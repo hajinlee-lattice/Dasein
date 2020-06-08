@@ -41,7 +41,7 @@ public class DefaultDataFeedController {
     @Inject
     private CDLJobService cdlJobService;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "find data feed by name")
     public DataFeed findDataFeedByName(@PathVariable String customerSpace) {
@@ -49,7 +49,7 @@ public class DefaultDataFeedController {
         return datafeedService.getOrCreateDataFeed(customerSpace);
     }
 
-    @GetMapping(value = "/default")
+    @GetMapping("/default")
     @ResponseBody
     @ApiOperation(value = "find data feed by name")
     public DataFeed getDefaultDataFeed(@PathVariable String customerSpace) {
@@ -57,7 +57,7 @@ public class DefaultDataFeedController {
         return datafeedService.getDefaultDataFeed(customerSpace);
     }
 
-    @PutMapping(value = "/drainingstatus/{drainingStatus}")
+    @PutMapping("/drainingstatus/{drainingStatus}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedDrainingStatus(@PathVariable String customerSpace, @PathVariable String drainingStatus) {
@@ -65,7 +65,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedDrainingStatus(customerSpace, drainingStatus);
     }
 
-    @PutMapping(value = "/maintenance/{maintenanceMode}")
+    @PutMapping("/maintenance/{maintenanceMode}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedMaintenanceMode(@PathVariable String customerSpace,
@@ -74,7 +74,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedMaintenanceMode(customerSpace, maintenanceMode);
     }
 
-    @PostMapping(value = "/jobtype/{jobType}/startexecution")
+    @PostMapping("/jobtype/{jobType}/startexecution")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
@@ -84,7 +84,7 @@ public class DefaultDataFeedController {
         return datafeedService.startExecution(customerSpace, "", jobType, jobId);
     }
 
-    @PostMapping(value = "/jobtype/{jobType}/restartexecution")
+    @PostMapping("/jobtype/{jobType}/restartexecution")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
     public Long restartExecution(@PathVariable String customerSpace, //
@@ -93,7 +93,7 @@ public class DefaultDataFeedController {
         return datafeedService.restartExecution(customerSpace, "", jobType);
     }
 
-    @PostMapping(value = "/jobtype/{jobType}/lockexecution")
+    @PostMapping("/jobtype/{jobType}/lockexecution")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
     public ResponseDocument<Long> lockExecution(@PathVariable String customerSpace, //
@@ -102,7 +102,7 @@ public class DefaultDataFeedController {
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, "", jobType));
     }
 
-    @PutMapping(value = "/status/{status}")
+    @PutMapping("/status/{status}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedStatus(@PathVariable String customerSpace, @PathVariable String status) {
@@ -110,7 +110,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeed(customerSpace, "", status);
     }
 
-    @PostMapping(value = "/updatenextinvoketime")
+    @PostMapping("/updatenextinvoketime")
     @ResponseBody
     @ApiOperation(value = "update data feed next invoke time by name")
     public void updateDataFeedNextInvokeTime(@PathVariable String customerSpace, @RequestBody(required = false) Date time) {
@@ -118,7 +118,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedNextInvokeTime(customerSpace, time);
     }
 
-    @PostMapping(value = "/updatescheduletime")
+    @PostMapping("/updatescheduletime")
     @ResponseBody
     @ApiOperation(value = "update data feed schedule time by name")
     public void updateDataFeedScheduleTime(@PathVariable String customerSpace,
@@ -129,7 +129,7 @@ public class DefaultDataFeedController {
     }
 
 
-    @GetMapping(value = "/jobtype/{jobType}/latestexecution")
+    @GetMapping("/jobtype/{jobType}/latestexecution")
     @ResponseBody
     @ApiOperation(value = "get the latest data feed execution")
     public DataFeedExecution getLatestExecution(@PathVariable String customerSpace, //
@@ -139,7 +139,7 @@ public class DefaultDataFeedController {
         return datafeedService.getLatestExecution(customerSpace, dataFeed.getName(), jobType);
     }
 
-    @PostMapping(value = "/status/{initialDataFeedStatus}/finishexecution")
+    @PostMapping("/status/{initialDataFeedStatus}/finishexecution")
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
     public DataFeedExecution finishExecution(@PathVariable String customerSpace,
@@ -153,7 +153,7 @@ public class DefaultDataFeedController {
         }
     }
 
-    @PostMapping(value = "/status/{initialDataFeedStatus}/failexecution")
+    @PostMapping("/status/{initialDataFeedStatus}/failexecution")
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
     public DataFeedExecution failExecution(@PathVariable String customerSpace,
@@ -166,7 +166,7 @@ public class DefaultDataFeedController {
         }
     }
 
-    @PostMapping(value = "/execution/workflow/{workflowId}")
+    @PostMapping("/execution/workflow/{workflowId}")
     @ResponseBody
     @ApiOperation(value = "update data feed execution")
     public DataFeedExecution updateExecutionWorkflowId(@PathVariable String customerSpace,
@@ -175,7 +175,7 @@ public class DefaultDataFeedController {
         return datafeedService.updateExecutionWorkflowId(customerSpace, "", workflowId);
     }
 
-    @PostMapping(value = "/rebuildtransaction/{isRebuild}")
+    @PostMapping("/rebuildtransaction/{isRebuild}")
     @ResponseBody
     @ApiOperation(value = "rebuild transaction store")
     public DataFeed rebuildTransaction(@PathVariable String customerSpace, @PathVariable Boolean isRebuild) {
@@ -183,7 +183,7 @@ public class DefaultDataFeedController {
         return datafeedService.rebuildTransaction(customerSpace, "", isRebuild);
     }
 
-    @PostMapping(value = "/earliesttransaction/{earliestDayPeriod}/{latestDayPeriod}")
+    @PostMapping("/earliesttransaction/{earliestDayPeriod}/{latestDayPeriod}")
     @ResponseBody
     @ApiOperation(value = "update earliest and latest transaction day period")
     public DataFeed updateEarliestLatestTransaction(@PathVariable String customerSpace,
@@ -192,7 +192,7 @@ public class DefaultDataFeedController {
         return datafeedService.updateEarliestLatestTransaction(customerSpace, "", earliestDayPeriod, latestDayPeriod);
     }
 
-    @PostMapping(value = "/resetimport")
+    @PostMapping("/resetimport")
     @ResponseBody
     @ApiOperation(value = "Reset the pending import data for this data feed")
     public void resetImport(@PathVariable String customerSpace) {
@@ -200,7 +200,7 @@ public class DefaultDataFeedController {
         datafeedService.resetImport(customerSpace, "");
     }
 
-    @PostMapping(value = "/resetimport/{entity}")
+    @PostMapping("/resetimport/{entity}")
     @ResponseBody
     @ApiOperation(value = "Reset the pending import data for this data feed")
     public void resetImportByEntity(@PathVariable String customerSpace, @PathVariable String entity) {
@@ -208,7 +208,7 @@ public class DefaultDataFeedController {
         datafeedService.resetImportByEntity(customerSpace, "", entity);
     }
 
-    @GetMapping(value = "/nextinvoketime")
+    @GetMapping("/nextinvoketime")
     @ResponseBody
     @ApiOperation(value = "Get tentative next invoke time of scheduled P&A")
     public Long nextInvokeTime(@PathVariable String customerSpace) {

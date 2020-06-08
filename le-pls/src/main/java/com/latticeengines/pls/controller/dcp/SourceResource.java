@@ -54,7 +54,7 @@ public class SourceResource {
     @Inject
     private ModelingFileMetadataService modelingFileMetadataService;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation("Create source")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
@@ -73,7 +73,7 @@ public class SourceResource {
     //   sourceId: The id used to identify one Source .
     // Body:
     //    The UploadSourceRequest representing the updates for this source.
-    @PutMapping(value = "")
+    @PutMapping("")
     @ResponseBody
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
     @ApiOperation(value = "update source")
@@ -88,14 +88,14 @@ public class SourceResource {
         }
     }
 
-    @GetMapping(value = "/sourceId/{sourceId}")
+    @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get sources by sourceId")
     public Source getSource(@PathVariable String sourceId) {
         return sourceService.getSource(sourceId);
     }
 
-    @DeleteMapping(value = "/sourceId/{sourceId}")
+    @DeleteMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Delete source by sourceId")
     public Boolean deleteSource(@PathVariable String sourceId) {
@@ -103,25 +103,24 @@ public class SourceResource {
     }
 
 
-    @GetMapping(value = "/projectId/{projectId}")
+    @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation("Get sources by projectId")
     public List<Source> getSourceUnderProduct(@PathVariable String projectId) {
         return sourceService.getSourceList(projectId);
     }
 
-    @PutMapping(value = "/sourceId/{sourceId}/pause")
+    @PutMapping("/sourceId/{sourceId}/pause")
     @ResponseBody
     @ApiOperation("Pause source by sourceId")
     public Boolean pauseSource(@PathVariable String sourceId) {
         return sourceService.pauseSource(sourceId);
     }
 
-
     // Parameters:
     //   entityType: The entity type of this template eg. Accounts
     //   fileImportId: The name of the CSV file this template is being generated for.
-    @GetMapping(value = "/mappings")
+    @GetMapping("/fetch")
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End")
     public FetchFieldDefinitionsResponse getSourceMappings(
@@ -142,7 +141,7 @@ public class SourceResource {
     //   fileImportId: The name of the CSV file this template is being generated for.
     // Body:
     // ValidateFieldDefinitionsRequest representing field definition changes/records
-    @PostMapping(value = "/validate")
+    @PostMapping("/validate")
     @ResponseBody
     @ApiOperation(value = "Provide validation result")
     public ValidateFieldDefinitionsResponse validateSourceMappings(
@@ -162,7 +161,7 @@ public class SourceResource {
         }
     }
 
-    @PutMapping(value = "/sourceId/{sourceId}/reactivate")
+    @PutMapping("/sourceId/{sourceId}/reactivate")
     @ResponseBody
     @ApiOperation("Reactivate source by sourceId")
     public Boolean reactivateSource(@PathVariable String sourceId) {

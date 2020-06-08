@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiParam;
 
 @Api(value = "Playmaker recommendation api", description = "REST resource for getting playmaker recomendationss")
 @RestController
-@RequestMapping(value = "/playmaker")
+@RequestMapping("/playmaker")
 public class RecommendationResource {
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationResource.class);
@@ -42,7 +42,7 @@ public class RecommendationResource {
     @Inject
     private Oauth2RestApiProxy tenantProxy;
 
-    @RequestMapping(value = "/recommendations", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/recommendations")
     @ResponseBody
     @ApiOperation(value = "Get recommendations")
     public Map<String, Object> getRecommendations(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -60,7 +60,7 @@ public class RecommendationResource {
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/recommendationcount")
     @ResponseBody
     @ApiOperation(value = "Get recommendation count")
     public Map<String, Object> getRecommendationCount(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -76,7 +76,7 @@ public class RecommendationResource {
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/plays", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/plays")
     @ResponseBody
     @ApiOperation(value = "Get plays")
     public Map<String, Object> getPlays(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -93,7 +93,7 @@ public class RecommendationResource {
                 tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/playcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/playcount")
     @ResponseBody
     @ApiOperation(value = "Get play count")
     public Map<String, Object> getPlayCount(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -109,7 +109,7 @@ public class RecommendationResource {
                 tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/accountextensions", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/accountextensions")
     @ResponseBody
     @ApiOperation(value = "Get account extensions")
     public Map<String, Object> getAccountExtensions(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -133,7 +133,7 @@ public class RecommendationResource {
         return accountExtensions;
     }
 
-    @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/accountextensioncount")
     @ResponseBody
     @ApiOperation(value = "Get record count of account extension")
     public Map<String, Object> getAccountExtensionCount(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -150,7 +150,7 @@ public class RecommendationResource {
                 filterBy, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/accountextensionschema")
     @ResponseBody
     @ApiOperation(value = "Get account extensions")
     public List<Map<String, Object>> getAccountExtensionSchema(HttpServletRequest request,
@@ -159,7 +159,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getAccountExtensionSchema(tenantName, lookupSource);
     }
 
-    @RequestMapping(value = "/accountextensioncolumncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/accountextensioncolumncount")
     @ResponseBody
     @ApiOperation(value = "Get column count of account extension")
     public Map<String, Object> getAccountExtensionColumnCount(HttpServletRequest request,
@@ -168,7 +168,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getAccountExtensionColumnCount(tenantName, lookupSource);
     }
 
-    @RequestMapping(value = "/contacts", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/contacts")
     @ResponseBody
     @ApiOperation(value = "Get contacts")
     public Map<String, Object> getContacts(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -191,7 +191,7 @@ public class RecommendationResource {
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/contactcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/contactcount")
     @ResponseBody
     @ApiOperation(value = "Get contact count")
     public Map<String, Object> getContactCount(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -211,7 +211,7 @@ public class RecommendationResource {
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/contactextensions", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/contactextensions")
     @ResponseBody
     @ApiOperation(value = "Get contact extensions")
     public Map<String, Object> getContactExtensions(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -231,7 +231,7 @@ public class RecommendationResource {
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/contactextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/contactextensioncount")
     @ResponseBody
     @ApiOperation(value = "Get record count of contact extension")
     public Map<String, Object> getContactExtensionCount(HttpServletRequest request, RequestEntity<String> requestEntity,
@@ -249,7 +249,7 @@ public class RecommendationResource {
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
-    @RequestMapping(value = "/contactextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/contactextensionschema")
     @ResponseBody
     @ApiOperation(value = "Get Contact extensions")
     public List<Map<String, Object>> getContactExtensionSchema(HttpServletRequest request,
@@ -258,7 +258,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getContactExtensionSchema(tenantName, lookupSource);
     }
 
-    @RequestMapping(value = "/contactextensioncolumncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/contactextensioncolumncount")
     @ResponseBody
     @ApiOperation(value = "Get column count of contact extension")
     public Map<String, Object> getContactExtensionColumnCount(HttpServletRequest request,
@@ -267,7 +267,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getContactExtensionColumnCount(tenantName, lookupSource);
     }
 
-    @RequestMapping(value = "/playvalues", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/playvalues")
     @ResponseBody
     @ApiOperation(value = "Get flexible play values")
     public Map<String, Object> getPlayValues(HttpServletRequest request,
@@ -281,7 +281,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getPlayValues(tenantName, lookupSource, start, offset, maximum, playgroupIds);
     }
 
-    @RequestMapping(value = "/playvaluecount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/playvaluecount")
     @ResponseBody
     @ApiOperation(value = "Get flexible play value count")
     public Map<String, Object> getPlayValues(HttpServletRequest request,
@@ -293,7 +293,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getPlayValueCount(tenantName, lookupSource, start, playgroupIds);
     }
 
-    @RequestMapping(value = "/workflowtypes", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/workflowtypes")
     @ResponseBody
     @ApiOperation(value = "Get workflow types' IDs and Names")
     public List<Map<String, Object>> getWorkflowTypes(HttpServletRequest request,
@@ -303,7 +303,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getWorkflowTypes(tenantName, lookupSource);
     }
 
-    @RequestMapping(value = "/playgroupcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/playgroupcount")
     @ResponseBody
     @ApiOperation(value = "Get record count of play groups")
     public Map<String, Object> getPlayGroupCount(HttpServletRequest request,
@@ -314,7 +314,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getPlayGroupCount(tenantName, lookupSource, start);
     }
 
-    @RequestMapping(value = "/playgroups", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/playgroups")
     @ResponseBody
     @ApiOperation(value = "Get all play groups' IDs and Names")
     public List<Map<String, Object>> getPlayGroups(HttpServletRequest request,
@@ -326,7 +326,7 @@ public class RecommendationResource {
         return playmakerRecommendationMgr.getPlayGroups(tenantName, lookupSource, start, offset, maximum);
     }
 
-    @RequestMapping(value = "/oauthtotenant", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/oauthtotenant")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
     public String getOauthTokenToTenant(HttpServletRequest request) {

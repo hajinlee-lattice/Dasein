@@ -34,7 +34,7 @@ public class BucketedScoreResource {
     @Inject
     private BucketedScoreService bucketedScoreService;
 
-    @PostMapping(value = "/abcdbuckets")
+    @PostMapping("/abcdbuckets")
     @ResponseBody
     @ApiOperation(value = "Create ABCD Buckets")
     public SimpleBooleanResponse createABCDBuckets(@PathVariable String customerSpace,
@@ -43,7 +43,7 @@ public class BucketedScoreResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @PutMapping(value = "/abcdbuckets")
+    @PutMapping("/abcdbuckets")
     @ResponseBody
     @ApiOperation(value = "Create ABCD Buckets")
     public List<BucketMetadata> updateABCDBuckets(@PathVariable String customerSpace,
@@ -51,7 +51,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.updateABCDBuckets(request);
     }
 
-    @GetMapping(value = "/abcdbuckets/model/{modelGuid}")
+    @GetMapping("/abcdbuckets/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Get ABCD Buckets history info by model GUID")
     public Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(@PathVariable String customerSpace,
@@ -59,7 +59,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getModelBucketMetadataGroupedByCreationTimes(modelGuid);
     }
 
-    @GetMapping(value = "/uptodateabcdbuckets/model/{modelGuid}")
+    @GetMapping("/uptodateabcdbuckets/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Get up-to-date ABCD Buckets info by model GUID")
     public List<BucketMetadata> getUpToDateABCDBucketsByModelGuid(@PathVariable String customerSpace,
@@ -67,15 +67,15 @@ public class BucketedScoreResource {
         return bucketedScoreService.getABCDBucketsByModelGuid(modelGuid);
     }
 
-    @GetMapping(value = "/modelabcdbuckets/model/{modelGuid}")
+    @GetMapping("/modelabcdbuckets/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Get Model ABCD Buckets info by model GUID")
     public List<BucketMetadata> getModelABCDBucketsByModelGuid(@PathVariable String customerSpace,
             @PathVariable String modelGuid) {
         return bucketedScoreService.getModelABCDBucketsByModelGuid(modelGuid);
     }
-    
-    @GetMapping(value = "/publishedbuckets/model")
+
+    @GetMapping("/publishedbuckets/model")
     @ResponseBody
     @ApiOperation(value = "Get all up-to-date ABCD Buckets info from list of by model GUID")
     public Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(
@@ -84,7 +84,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getAllPublishedBucketMetadataByModelSummaryIdList(modelSummaryIdList);
     }
 
-    @GetMapping(value = "/publishedbuckets/model/{modelSummaryId}")
+    @GetMapping("/publishedbuckets/model/{modelSummaryId}")
     @ResponseBody
     @ApiOperation(value = "Get up-to-date ABCD Buckets info by model GUID")
     public List<BucketMetadata> getPublishedBucketMetadataByModelGuid(@PathVariable String customerSpace,
@@ -92,7 +92,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getPublishedBucketMetadataByModelGuid(modelSummaryId);
     }
 
-    @GetMapping(value = "/summary/model/{modelGuid}")
+    @GetMapping("/summary/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Get bucketed score summary for model GUID")
     public BucketedScoreSummary getBucketedScoreSummary(@PathVariable String customerSpace,
@@ -100,7 +100,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getBucketedScoreSummaryByModelGuid(modelGuid);
     }
 
-    @PostMapping(value = "/summary/model/{modelGuid}")
+    @PostMapping("/summary/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Create or update bucketed score summary for model GUID")
     public BucketedScoreSummary createBucketedScoreSummary(@PathVariable String customerSpace,
@@ -108,7 +108,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.createOrUpdateBucketedScoreSummary(modelGuid, summary);
     }
 
-    @GetMapping(value = "/abcdbuckets/engine/{engineId}")
+    @GetMapping("/abcdbuckets/engine/{engineId}")
     @ResponseBody
     @ApiOperation(value = "Get ABCD Buckets for given rating engine Id grouped by creation times")
     public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(@PathVariable String customerSpace,
@@ -116,7 +116,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getRatingEngineBucketMetadataGroupedByCreationTimes(engineId);
     }
 
-    @GetMapping(value = "/abcdbuckets/ratingengines/{ratingEngineId}")
+    @GetMapping("/abcdbuckets/ratingengines/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Get all ABCD Buckets created for a given rating engine Id")
     public List<BucketMetadata> getAllBucketsByRatingEngineId(@PathVariable String customerSpace,
@@ -124,7 +124,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getAllBucketsByRatingEngineId(ratingEngineId);
     }
 
-    @GetMapping(value = "/publishedbuckets/ratingengines/{ratingEngineId}")
+    @GetMapping("/publishedbuckets/ratingengines/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Get all published ABCD Buckets created for a given rating engine Id")
     public List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(@PathVariable String customerSpace,
@@ -132,7 +132,7 @@ public class BucketedScoreResource {
         return bucketedScoreService.getAllPublishedBucketsByRatingEngineId(ratingEngineId);
     }
 
-    @GetMapping(value = "/uptodateabcdbuckets/engine/{engineId}")
+    @GetMapping("/uptodateabcdbuckets/engine/{engineId}")
     @ResponseBody
     @ApiOperation(value = "Get ABCD Buckets info by rating engine Id")
     public List<BucketMetadata> getUpToDateABCDBucketsByEngineId(@PathVariable String customerSpace,

@@ -6,13 +6,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,20 +34,20 @@ public class ScoringJobResource {
     @Inject
     private ScoringJobService scoringJobService;
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Retrieve all scoring jobs for the provided model id")
     public List<Job> findAll(@PathVariable String modelId) {
         return scoringJobService.getJobs(modelId);
     }
 
-    @RequestMapping(value = "{jobId}/results/score", method = RequestMethod.GET, produces = "application/csv")
+    @GetMapping(value = "{jobId}/results/score", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     @ApiOperation(value = "Retrieve results csv for the provided jobId")
     public void getResultsCsv(@PathVariable String jobId, HttpServletResponse response) {
         try {
             InputStream is = scoringJobService.getScoreResults(jobId);
-            response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             response.setHeader("Content-Encoding", "gzip");
             response.setHeader("Content-Disposition",
                     String.format("attachment; filename=\"%s\"", scoringJobService.getResultScoreFileName(jobId)));
@@ -57,13 +57,13 @@ public class ScoringJobResource {
         }
     }
 
-    @RequestMapping(value = "{jobId}/results/pivotscore", method = RequestMethod.GET, produces = "application/csv")
+    @GetMapping(value = "{jobId}/results/pivotscore", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     @ApiOperation(value = "Retrieve results csv for the provided jobId")
     public void getPivotScoringResultCsv(@PathVariable String jobId, HttpServletResponse response) {
         try {
             InputStream is = scoringJobService.getPivotScoringFile(jobId);
-            response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             response.setHeader("Content-Encoding", "gzip");
             response.setHeader("Content-Disposition",
                     String.format("attachment; filename=\"%s\"", scoringJobService.getResultPivotScoreFileName(jobId)));
@@ -73,7 +73,7 @@ public class ScoringJobResource {
         }
     }
 
-    @RequestMapping(value = "{jobId}/errors", method = RequestMethod.GET, produces = "application/csv")
+    @GetMapping(value = "{jobId}/errors", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     @ApiOperation(value = "Retrieve file import errors")
     public void getImportErrors(@PathVariable String jobId, HttpServletResponse response) {

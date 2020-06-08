@@ -4,10 +4,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +31,7 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     private AnalyticTestService analyticTestService;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get AnalyticTest")
     public List<AnalyticTestEntityNames> getAnalyticTests() {
@@ -37,7 +39,7 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create analytic test")
     public String createAnalyticTest(@RequestBody AnalyticTestEntityNames analyticTestEntityNames) {
@@ -45,7 +47,7 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     }
 
     @Override
-    @RequestMapping(value = "/{analyticTestName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{analyticTestName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get AnalyticTest by name")
     public AnalyticTestEntityNames getAnalyticTestByName(@PathVariable String analyticTestName) {
@@ -53,7 +55,7 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     }
 
     @Override
-    @RequestMapping(value = "/execute/{analyticTestName:.*}", method = RequestMethod.PUT)
+    @PutMapping("/execute/{analyticTestName:.*}")
     @ResponseBody
     @ApiOperation(value = "Execute AnalyticTest by name")
     public List<ModelRun> executeAnalyticTestByName(@PathVariable String analyticTestName) {
@@ -61,7 +63,7 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     }
 
     @Override
-    @RequestMapping(value = "/updateproduction", method = RequestMethod.PUT)
+    @PutMapping("/updateproduction")
     @ResponseBody
     @ApiOperation(value = "Update the production analytic pipeline in existing analytic tests")
     public List<AnalyticTest> updateProductionAnalyticPipeline() {

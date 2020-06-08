@@ -4,8 +4,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,7 @@ public class HealthCheckResource {
     @Inject
     private StatusService statusService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "check overall health of microservice")
     public StatusDocument checkHealth() {
@@ -37,14 +38,14 @@ public class HealthCheckResource {
         }
     }
 
-    @RequestMapping(value = "/apps/detail", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/apps/detail")
     @ResponseBody
     @ApiOperation(value = "check detail status of lattice webapps")
     public Map<String, String> checkApps() {
         return statusService.appStatus();
     }
 
-    @RequestMapping(value = "/apps", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/apps")
     @ResponseBody
     @ApiOperation(value = "check overall health of lattice webapps")
     public StatusDocument checkAppsHealth() {
@@ -56,7 +57,7 @@ public class HealthCheckResource {
         }
     }
 
-    @RequestMapping(value = "/apps", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/apps")
     @ResponseBody
     @ApiOperation(value = "unhookApp an app from health check for now. It will be automatically monitored again, once the health of it becomes OK.")
     public SimpleBooleanResponse unhookApp(@RequestParam(value = "app") String app) {

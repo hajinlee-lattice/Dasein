@@ -4,9 +4,9 @@ import static com.latticeengines.domain.exposed.exception.LedpCode.LEDP_18152;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +32,7 @@ public class DataCloudResource {
         this.dataCloudService = dataCloudService;
     }
 
-    @RequestMapping(value = "/customerreports/incorrectlookups", method = RequestMethod.POST)
+    @PostMapping("/customerreports/incorrectlookups")
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
     public ResponseDocument<String> createLookupCustomerReport(@RequestBody IncorrectLookupReportRequest request) {
@@ -44,7 +44,7 @@ public class DataCloudResource {
         }
     }
 
-    @RequestMapping(value = "/customerreports/incorrectmatchedattrs", method = RequestMethod.POST)
+    @PostMapping("/customerreports/incorrectmatchedattrs")
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
     public ResponseDocument<String> createMatchedAttrsCustomerReport(@RequestBody IncorrectMatchedAttrReportRequest request) {

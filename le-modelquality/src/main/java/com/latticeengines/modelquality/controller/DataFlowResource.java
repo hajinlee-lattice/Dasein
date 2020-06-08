@@ -6,10 +6,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +37,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     private DataFlowService modelQualityDataFlowService;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get DataFlows")
     public List<DataFlow> getDataFlows() {
@@ -44,7 +45,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create DataFlow")
     public String createDataFlow(@RequestBody DataFlow dataFlow) {
@@ -52,7 +53,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{dataFlowName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{dataFlowName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get DataFlows")
     public DataFlow getDataFlowByName(@PathVariable String dataFlowName) {
@@ -60,7 +61,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/latest", method = RequestMethod.POST)
+    @PostMapping("/latest")
     @ResponseBody
     @ApiOperation(value = "Create production data flow config")
     public DataFlow createDataFlowFromProduction() {

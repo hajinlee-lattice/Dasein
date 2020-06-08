@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "sureshot", description = "REST resource for providing SureShot links")
 @RestController
-@RequestMapping(value = "/sureshot")
+@RequestMapping("/sureshot")
 public class SureShotResource {
 
     private static final Logger log = LoggerFactory.getLogger(SureShotResource.class);
@@ -41,7 +41,7 @@ public class SureShotResource {
     @Inject
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 
-    @RequestMapping(value = "/credentials", method = RequestMethod.GET)
+    @GetMapping("/credentials")
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
     public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType,
@@ -57,7 +57,7 @@ public class SureShotResource {
                 tenantId, token.getAccessToken());
     }
 
-    @RequestMapping(value = "/urls", method = RequestMethod.GET)
+    @GetMapping("/urls")
     @ResponseBody
     @ApiOperation(value = "Get SureShot Urls")
     public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType,

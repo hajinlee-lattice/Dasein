@@ -5,10 +5,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,7 +35,7 @@ public class AnalyticPipelineResource
     private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get AnalyticPipelines")
     public List<AnalyticPipelineEntityNames> getAnalyticPipelines() {
@@ -42,7 +43,7 @@ public class AnalyticPipelineResource
     }
 
     @Override
-    @RequestMapping(value = "/latest", method = RequestMethod.POST)
+    @PostMapping("/latest")
     @ResponseBody
     @ApiOperation(value = "Create analytic pipeline for production")
     public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction() {
@@ -52,7 +53,7 @@ public class AnalyticPipelineResource
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create analytic pipeline")
     public String createAnalyticPipeline(@RequestBody AnalyticPipelineEntityNames analyticPipelineEntityNames) {
@@ -60,7 +61,7 @@ public class AnalyticPipelineResource
     }
 
     @Override
-    @RequestMapping(value = "/{analyticPipelineName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{analyticPipelineName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get AnalyticPipeline by name")
     public AnalyticPipelineEntityNames getAnalyticPipelineByName(@PathVariable String analyticPipelineName) {

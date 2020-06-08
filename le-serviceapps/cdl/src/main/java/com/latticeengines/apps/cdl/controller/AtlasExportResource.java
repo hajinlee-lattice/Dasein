@@ -40,13 +40,13 @@ public class AtlasExportResource {
     @Inject
     private S3ExportFolderService s3ExportFolderService;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ApiOperation(value = "Get Export record by UUID")
     public AtlasExport findAtlasExportById(@PathVariable String customerSpace, @RequestParam String uuid) {
         return atlasExportService.getAtlasExport(customerSpace, uuid);
     }
 
-    @PutMapping(value = "")
+    @PutMapping
     @ApiOperation(value = "Update Export")
     public void updateAtlasExportStatus(@PathVariable String customerSpace, @RequestParam String uuid,
                                         @RequestParam MetadataSegmentExport.Status status) {
@@ -55,19 +55,19 @@ public class AtlasExportResource {
         atlasExportService.updateAtlasExport(customerSpace, atlasExport);
     }
 
-    @PostMapping(value = "")
+    @PostMapping
     @ApiOperation(value = "Create Export")
     public AtlasExport createAtlasExport(@PathVariable String customerSpace, @RequestBody AtlasExport atlasExport) {
         return atlasExportService.createAtlasExport(customerSpace, atlasExport);
     }
 
-    @GetMapping(value = "/findAll")
+    @GetMapping("/findAll")
     @ApiOperation(value = "Get all atlas exports")
     public List<AtlasExport> findAllAtlasExport(@PathVariable String customerSpace) {
         return atlasExportService.findAll(customerSpace);
     }
 
-    @PostMapping(value = "/systemfiles")
+    @PostMapping("/systemfiles")
     @ApiOperation(value = "Add export file to systempath")
     public void addFileToSystemPath(@PathVariable String customerSpace, @RequestParam String uuid,
                                     @RequestBody AtlasExportFileParams atlasExportFileParams) {
@@ -75,14 +75,14 @@ public class AtlasExportResource {
                 atlasExportFileParams.getFilesToDelete());
     }
 
-    @PostMapping(value = "/dropfolderfiles")
+    @PostMapping("/dropfolderfiles")
     @ApiOperation(value = "Add export file to dropfolder")
     public void addFileToDropFolder(@PathVariable String customerSpace, @RequestParam String uuid,
                                     @RequestBody AtlasExportFileParams atlasExportFileParams) {
         atlasExportService.addFileToDropFolder(customerSpace, uuid, atlasExportFileParams.getFileName(), atlasExportFileParams.getFilesToDelete());
     }
 
-    @GetMapping(value = "/dropfolder/path")
+    @GetMapping("/dropfolder/path")
     @ApiOperation(value = "Get export dropfolder path")
     public String getDropFolderExportPath(@PathVariable String customerSpace,
                                           @RequestParam AtlasExportType exportType, @RequestParam String datePrefix,
@@ -96,7 +96,7 @@ public class AtlasExportResource {
         }
     }
 
-    @GetMapping(value = "/system/path")
+    @GetMapping("/system/path")
     @ApiOperation(value = "Get export dropfolder path")
     public String getSystemExportPath(@PathVariable String customerSpace,
                                       @RequestParam(defaultValue = "false") boolean withProtocol) {
@@ -108,7 +108,7 @@ public class AtlasExportResource {
         }
     }
 
-    @PostMapping(value = "/s3/path")
+    @PostMapping("/s3/path")
     @ApiOperation(value = "Get s3 path")
     public String getS3PathWithProtocol(@PathVariable String customerSpace, @RequestBody String relativePath) {
         return s3ExportFolderService.getS3PathWithProtocol(customerSpace, relativePath);

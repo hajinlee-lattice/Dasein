@@ -5,9 +5,9 @@ import java.util.Arrays;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,14 +31,14 @@ public class ScoringResource {
     @Inject
     private ScoringService scoringService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create a scoring job")
     public AppSubmission createScoringJob(@RequestBody ScoringConfiguration scoringConfig) {
         return new AppSubmission(Arrays.<ApplicationId> asList(scoringJobService.score(scoringConfig)));
     }
 
-    @RequestMapping(value = "/rtsbulkscore", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/rtsbulkscore")
     @ResponseBody
     @ApiOperation(value = "Submit a bulk scoring job")
     public AppSubmission submitBulkScoreJob(@RequestBody RTSBulkScoringConfiguration rtsBulkScoringConfig) {

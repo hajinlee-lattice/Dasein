@@ -6,12 +6,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,28 +35,28 @@ public class ImportTableResource {
     @Inject
     private TableResourceHelper tableResourceHelper;
 
-    @RequestMapping(value = "/importtables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/importtables")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public List<String> getTables(@PathVariable String customerSpace) {
         return tableResourceHelper.getTables(customerSpace);
     }
 
-    @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/importtables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTable(customerSpace, tableName, true);
     }
 
-    @RequestMapping(value = "/importtables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/importtables/{tableName}/metadata")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
     public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTableMetadata(customerSpace, tableName);
     }
 
-    @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/importtables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create table")
     public Boolean createTable(@PathVariable String customerSpace, //
@@ -64,7 +65,7 @@ public class ImportTableResource {
         return tableResourceHelper.createTable(customerSpace, tableName, table);
     }
 
-    @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/importtables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Update table")
     public Boolean updateTable(@PathVariable String customerSpace, //
@@ -73,7 +74,7 @@ public class ImportTableResource {
         return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
 
-    @PostMapping(value = "/importtables/{tableName}/fixattributes")
+    @PostMapping("/importtables/{tableName}/fixattributes")
     @ResponseBody
     @ApiOperation(value = "Fix table attributes")
     public Boolean fixTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
@@ -81,7 +82,7 @@ public class ImportTableResource {
         return tableResourceHelper.fixTableAttributes(customerSpace, tableName, attributeFixerList);
     }
 
-    @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/importtables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Delete table")
     public Boolean deleteTable(@PathVariable String customerSpace, //
@@ -89,7 +90,7 @@ public class ImportTableResource {
         return tableResourceHelper.deleteImportTableAndCleanup(customerSpace, tableName);
     }
 
-    @PutMapping(value = "/importtables/{tableName}/policy")
+    @PutMapping("/importtables/{tableName}/policy")
     @ResponseBody
     @ApiOperation(value = "Update import table retention policy")
     public Boolean updateTableRetentionPolicy(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName,

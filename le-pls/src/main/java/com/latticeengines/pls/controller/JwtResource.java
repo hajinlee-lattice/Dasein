@@ -3,10 +3,10 @@ package com.latticeengines.pls.controller;
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +41,7 @@ public class JwtResource {
     @Inject
     private JwtManager jwtManager;
 
-    @RequestMapping(value = "/handle_request", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/handle_request")
     @ResponseBody
     @ApiOperation(value = "Get the jwt redirect URL. for Zendesk handler, 'return_to' and 'source_ref' are required in the post body")
     public JwtReplyParameters getJwtToken(@RequestBody JwtRequestParameters reqParams,

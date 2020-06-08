@@ -31,7 +31,7 @@ public class EventResource {
         this.eventQueryService = eventQueryService;
     }
 
-    @PostMapping(value = "/count/scoring")
+    @PostMapping("/count/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     @InvocationMeter(name ="scoring", measurment = "objectapi")
@@ -40,7 +40,7 @@ public class EventResource {
         return eventQueryService.getScoringCount(frontEndQuery, version);
     }
 
-    @PostMapping(value = "/count/training")
+    @PostMapping("/count/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     @InvocationMeter(name ="training", measurment = "objectapi")
@@ -49,7 +49,7 @@ public class EventResource {
         return eventQueryService.getTrainingCount(frontEndQuery, version);
     }
 
-    @PostMapping(value = "/count/event")
+    @PostMapping("/count/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     @InvocationMeter(name ="event", measurment = "objectapi")
@@ -58,7 +58,7 @@ public class EventResource {
         return eventQueryService.getEventCount(frontEndQuery, version);
     }
 
-    @PostMapping(value = "/data/scoring")
+    @PostMapping("/data/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the scoring tuples for the specified query")
     public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
@@ -66,7 +66,7 @@ public class EventResource {
         return eventQueryService.getScoringTuples(frontEndQuery, version);
     }
 
-    @PostMapping(value = "/data/training")
+    @PostMapping("/data/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the training tuples for the specified query")
     public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
@@ -74,7 +74,7 @@ public class EventResource {
         return eventQueryService.getTrainingTuples(frontEndQuery, version);
     }
 
-    @PostMapping(value = "/data/event")
+    @PostMapping("/data/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the event tuples for the specified query")
     public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
@@ -82,7 +82,7 @@ public class EventResource {
         return eventQueryService.getEventTuples(frontEndQuery, version);
     }
 
-    @PostMapping(value = "/query")
+    @PostMapping("/query")
     @ResponseBody
     @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, //

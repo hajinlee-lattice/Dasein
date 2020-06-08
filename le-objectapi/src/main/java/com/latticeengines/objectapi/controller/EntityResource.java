@@ -39,7 +39,7 @@ public class EntityResource {
         this.entityQueryService = entityQueryService;
     }
 
-    @PostMapping(value = "/count")
+    @PostMapping("/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     @InvocationMeter(name = "entity-count", measurment = "objectapi")
@@ -52,7 +52,7 @@ public class EntityResource {
         return entityQueryService.getCount(frontEndQuery, version, sqlUser);
     }
 
-    @PostMapping(value = "/data")
+    @PostMapping("/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -64,7 +64,7 @@ public class EntityResource {
 
     }
 
-    @PostMapping(value = "/query")
+    @PostMapping("/query")
     @ResponseBody
     @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -74,7 +74,7 @@ public class EntityResource {
         return entityQueryService.getQueryStr(frontEndQuery, version, BATCH_USER, isCountQuery);
     }
 
-    @PostMapping(value = "/ratingcount")
+    @PostMapping("/ratingcount")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rating count for the specified query")
     @InvocationMeter(name ="entity-rating-coverage", measurment = "objectapi")

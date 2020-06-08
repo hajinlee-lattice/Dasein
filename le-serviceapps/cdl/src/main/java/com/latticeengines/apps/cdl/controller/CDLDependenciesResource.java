@@ -5,9 +5,9 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "cdldenpendencies", description = "REST resource for get CDL depending object")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/dependencies")
+@RequestMapping("/customerspaces/{customerSpace}/dependencies")
 public class CDLDependenciesResource {
 
     @Inject
@@ -35,7 +35,7 @@ public class CDLDependenciesResource {
     @Inject
     private PlayService playService;
 
-    @RequestMapping(value = "/segments", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/segments")
     @ResponseBody
     @ApiOperation(value = "Get impacted segments")
     public List<MetadataSegment> getDependingSegments(@PathVariable String customerSpace,
@@ -43,7 +43,7 @@ public class CDLDependenciesResource {
         return segmentService.findDependingSegments(attributes);
     }
 
-    @RequestMapping(value = "/ratingengines", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/ratingengines")
     @ResponseBody
     @ApiOperation(value = "Get impacted rating engines")
     public List<RatingEngine> getDependingRatingEngines(@PathVariable String customerSpace,
@@ -51,7 +51,7 @@ public class CDLDependenciesResource {
         return ratingEngineService.getDependingRatingEngines(attributes);
     }
 
-    @RequestMapping(value = "/ratingmodels", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/ratingmodels")
     @ResponseBody
     @ApiOperation(value = "Get impacted rating models")
     public List<RatingModel> getDependingRatingModels(@PathVariable String customerSpace,
@@ -59,7 +59,7 @@ public class CDLDependenciesResource {
         return ratingEngineService.getDependingRatingModels(attributes);
     }
 
-    @RequestMapping(value = "/plays", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/plays")
     @ResponseBody
     @ApiOperation(value = "Find Plays using the given attributes")
     public List<String> findDependantPlays(@PathVariable String customerSpace, @RequestBody List<String> attributes) {

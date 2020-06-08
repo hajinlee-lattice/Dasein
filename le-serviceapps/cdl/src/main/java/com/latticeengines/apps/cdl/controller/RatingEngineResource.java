@@ -94,7 +94,7 @@ public class RatingEngineResource {
     // -------------
     // RatingEngines
     // -------------
-    @GetMapping(value = "")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
     public List<RatingEngineSummary> getRatingEngineSummaries( //
@@ -104,21 +104,21 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingEngineSummaries(type, status, publishedRatingsOnly);
     }
 
-    @GetMapping(value = "/deleted")
+    @GetMapping("/deleted")
     @ResponseBody
     @ApiOperation(value = "Get all Deleted Rating Engines")
     public List<RatingEngine> getAllDeletedRatingEngines(@PathVariable String customerSpace) {
         return ratingEngineService.getAllDeletedRatingEngines();
     }
 
-    @GetMapping(value = "/types")
+    @GetMapping("/types")
     @ResponseBody
     @ApiOperation(value = "Get types for Rating Engines")
     public List<RatingEngineType> getRatingEngineTypes(@PathVariable String customerSpace) {
         return Arrays.asList(RatingEngineType.values());
     }
 
-    @GetMapping(value = "/ids")
+    @GetMapping("/ids")
     @ResponseBody
     @ApiOperation(value = "Get ids for published Rating Engines. Can be filtered by segment name.")
     public List<String> getRatingEngineIds(@PathVariable String customerSpace,
@@ -126,14 +126,14 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingEngineIdsInSegment(segment);
     }
 
-    @GetMapping(value = "/{ratingEngineId}")
+    @GetMapping("/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Get a Rating Engine given its id")
     public RatingEngine getRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ResponseBody
     @Action
     @ApiOperation(value = "Register or update a Rating Engine")
@@ -168,14 +168,14 @@ public class RatingEngineResource {
         }
     }
 
-    @PostMapping(value = "/replicate/{engineId}")
+    @PostMapping("/replicate/{engineId}")
     @ResponseBody
     @ApiOperation(value = "Replicate a Rating Engine")
     public RatingEngine replicateRatingEngine(@PathVariable String customerSpace, @PathVariable String engineId) {
         return ratingEngineService.replicateRatingEngine(engineId);
     }
 
-    @DeleteMapping(value = "/{ratingEngineId}")
+    @DeleteMapping("/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId, //
@@ -186,7 +186,7 @@ public class RatingEngineResource {
         return true;
     }
 
-    @PutMapping(value = "/{ratingEngineId}/revertdelete")
+    @PutMapping("/{ratingEngineId}/revertdelete")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
@@ -194,7 +194,7 @@ public class RatingEngineResource {
         return true;
     }
 
-    @PutMapping(value = "/{ratingEngineId}/counts")
+    @PutMapping("/{ratingEngineId}/counts")
     @ResponseBody
     @ApiOperation(value = "Update rating engine counts")
     public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace,
@@ -202,7 +202,7 @@ public class RatingEngineResource {
         return ratingEngineService.updateRatingEngineCounts(ratingEngineId);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/dependencies")
+    @GetMapping("/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
     public Map<String, List<String>> getRatingEngineDependencies(@PathVariable String customerSpace,
@@ -211,7 +211,7 @@ public class RatingEngineResource {
         return ratingEngineService.getRatingEngineDependencies(customerSpace, ratingEngineId);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/dashboard", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/dashboard")
     @ResponseBody
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
     public RatingEngineDashboard getRatingEngineDashboardById(@PathVariable String customerSpace,
@@ -220,7 +220,7 @@ public class RatingEngineResource {
                 ratingEngineId);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/publishedhistory", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/publishedhistory")
     @ResponseBody
     @ApiOperation(value = "Get a published bucket metadata per iteration of a rating engine given its id")
     public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String customerSpace,
@@ -228,7 +228,7 @@ public class RatingEngineResource {
         return ratingEngineService.getPublishedHistory(CustomerSpace.parse(customerSpace).toString(), ratingEngineId);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/entitypreview", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/entitypreview")
     @ResponseBody
     @ApiOperation(value = "Get preview of Account and Contact as related to Rating Engine given its id")
     public DataPage getEntityPreview( //
@@ -261,7 +261,7 @@ public class RatingEngineResource {
                 selectedBuckets, lookupIdColumn);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/entitypreview/count", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/entitypreview/count")
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
     public Long getEntityPreviewCount( //
@@ -284,14 +284,14 @@ public class RatingEngineResource {
     // -------------
     // RatingModels
     // -------------
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/ratingmodels")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
     public List<RatingModel> getRatingModels(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels", headers = "Accept=application/json")
+    @PostMapping("/{ratingEngineId}/ratingmodels")
     @ResponseBody
     @ApiOperation(value = "Create an iteration for a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
     public RatingModel createModelIteration(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
@@ -300,7 +300,7 @@ public class RatingEngineResource {
         return ratingEngineService.createModelIteration(ratingEngine, ratingModel);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
     public RatingModel getRatingModel(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
@@ -308,7 +308,7 @@ public class RatingEngineResource {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", headers = "Accept=application/json")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}")
     @ResponseBody
     @Action
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
@@ -323,7 +323,7 @@ public class RatingEngineResource {
         return updatedRatingModel;
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
     public List<ColumnMetadata> getIterationMetadata(@PathVariable String customerSpace,
@@ -343,7 +343,7 @@ public class RatingEngineResource {
 
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/cube", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/cube")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
     public Map<String, StatsCube> getIterationMetadataCube(@PathVariable String customerSpace,
@@ -363,7 +363,7 @@ public class RatingEngineResource {
 
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/topn", headers = "Accept=application/json")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/topn")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
     public TopNTree getIterationMetadataTopN(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
@@ -383,7 +383,7 @@ public class RatingEngineResource {
 
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
     public EventFrontEndQuery getModelingQueryByRatingId(@PathVariable String customerSpace, //
@@ -395,7 +395,7 @@ public class RatingEngineResource {
                 ratingEngine);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
     public EventFrontEndQuery getModelingQueryByRating(@PathVariable String customerSpace, //
@@ -413,7 +413,7 @@ public class RatingEngineResource {
                 version);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
     public Long getModelingQueryCountByRatingId(@PathVariable String customerSpace, //
@@ -426,7 +426,7 @@ public class RatingEngineResource {
                 version, ratingEngine);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
     public Long getModelingQueryCountByRatingEngine(@PathVariable String customerSpace, //
@@ -447,7 +447,7 @@ public class RatingEngineResource {
 
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
+    @GetMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
     @ResponseBody
     @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
     public boolean validateForModelingByRatingId(@PathVariable String customerSpace, //
@@ -463,7 +463,7 @@ public class RatingEngineResource {
         return ratingEngineService.validateForModeling(customerSpace, ratingEngine, (AIModel) ratingModel);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
     @ResponseBody
     @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
     public boolean validateForModeling(@PathVariable String customerSpace, //
@@ -484,7 +484,7 @@ public class RatingEngineResource {
         return ratingEngineService.validateForModeling(customerSpace, ratingEngine, (AIModel) ratingModel);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/model")
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String modelRatingEngine(@PathVariable String customerSpace, //
@@ -504,7 +504,7 @@ public class RatingEngineResource {
                 userEmail, skipValidation);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus")
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
     public void updateModelingStatus(@PathVariable String customerSpace, //
@@ -514,7 +514,7 @@ public class RatingEngineResource {
         ratingEngineService.updateModelingJobStatus(ratingEngineId, ratingModelId, newStatus);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setScoringIteration")
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/setScoringIteration")
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
     public void setScoringIteration(@PathVariable String customerSpace, //
@@ -532,7 +532,7 @@ public class RatingEngineResource {
     // ------------------
     // RatingEngine Notes
     // ------------------
-    @GetMapping(value = "/{ratingEngineId}/notes")
+    @GetMapping("/{ratingEngineId}/notes")
     @ResponseBody
     @ApiOperation(value = "Get all notes for single rating engine via rating engine id.")
     public List<RatingEngineNote> getAllNotes(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
@@ -540,7 +540,7 @@ public class RatingEngineResource {
         return ratingEngineNoteService.getAllByRatingEngineId(ratingEngineId);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/notes")
+    @PostMapping("/{ratingEngineId}/notes")
     @ResponseBody
     @ApiOperation(value = "Insert one note for a certain rating engine.")
     public Boolean createNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
@@ -550,7 +550,7 @@ public class RatingEngineResource {
         return Boolean.TRUE;
     }
 
-    @DeleteMapping(value = "/{ratingEngineId}/notes/{noteId}")
+    @DeleteMapping("/{ratingEngineId}/notes/{noteId}")
     @ResponseBody
     @ApiOperation(value = "Delete a note from a certain rating engine via rating engine id and note id.")
     public void deleteNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
@@ -560,7 +560,7 @@ public class RatingEngineResource {
         ratingEngineNoteService.deleteById(noteId);
     }
 
-    @PostMapping(value = "/{ratingEngineId}/notes/{noteId}")
+    @PostMapping("/{ratingEngineId}/notes/{noteId}")
     @ResponseBody
     @ApiOperation(value = "Update the content of a certain note via note id.")
     public Boolean updateNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
@@ -576,7 +576,7 @@ public class RatingEngineResource {
     // -------------------
     // RatingEngine Others
     // -------------------
-    @GetMapping(value = "/dependingattrs/type/{engineType}/model/{modelId}")
+    @GetMapping("/dependingattrs/type/{engineType}/model/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
     public List<AttributeLookup> getDependingAttrsForModel(@PathVariable String customerSpace,
@@ -588,7 +588,7 @@ public class RatingEngineResource {
     // RatingEngine
     // get all models created in customer space
     // -------------------
-    @GetMapping(value = "/allmodels")
+    @GetMapping("/allmodels")
     @ResponseBody
     @ApiOperation(value = "get all models in customer space")
     public List<RatingModel> getAllModels(@PathVariable String customerSpace) {

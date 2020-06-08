@@ -31,7 +31,7 @@ public class ActionResource {
     @Inject
     private ActionService actionService;
 
-    @PostMapping(value = "/find")
+    @PostMapping("/find")
     @ApiOperation(value = "Get all actions")
     @SuppressWarnings("unchecked")
     public List<Action> findAll(@PathVariable String customerSpace, @RequestBody Map<String, Object> actionParameter) {
@@ -54,31 +54,31 @@ public class ActionResource {
         return actions;
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ApiOperation(value = "Create Action")
     public Action create(@PathVariable String customerSpace, @RequestBody Action action) {
         return actionService.create(action);
     }
 
-    @PutMapping(value = "")
+    @PutMapping("")
     @ApiOperation(value = "Update Action")
     public Action update(@PathVariable String customerSpace, @RequestBody Action action) {
         return actionService.update(action);
     }
 
-    @GetMapping(value = "")
+    @GetMapping("")
     @ApiOperation(value = "Cancel Action")
     public Action cancel(@PathVariable String customerSpace, @RequestParam(name = "actionPid") Long actionPid) {
         return actionService.cancel(actionPid);
     }
 
-    @DeleteMapping(value = "")
+    @DeleteMapping("")
     @ApiOperation(value = "Delete Action")
     public void delete(@PathVariable String customerSpace, @RequestParam(name = "actionPid") Long actionPid) {
         actionService.delete(actionPid);
     }
 
-    @PutMapping(value = "/ownerid")
+    @PutMapping("/ownerid")
     @ApiOperation(value = "Patch Owner Id")
     public void patchOwnerId(@PathVariable String customerSpace, //
                              @RequestParam(name = "pids", required = false) List<Long> pids, //
@@ -86,7 +86,7 @@ public class ActionResource {
         actionService.patchOwnerIdByPids(ownerId, pids);
     }
 
-    @PostMapping(value = "/actions")
+    @PostMapping("/actions")
     @ApiOperation(value = "get Actions By TrackingPids")
     public List<Action> getActionByjobPids(@PathVariable String customerSpace, @RequestBody List<Long> jobPids) {
         return actionService.getActionsByJobPids(jobPids);

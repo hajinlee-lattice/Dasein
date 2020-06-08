@@ -34,14 +34,14 @@ public class RecommendationResource {
     @Resource(name = RecommendationDanteFormatter.Qualifier)
     private DanteFormatter<Recommendation> recommendationDanteFormatter;
 
-    @GetMapping(value = "/{recommendationId}", headers = "Accept=application/json")
+    @GetMapping("/{recommendationId}")
     @ResponseBody
     @ApiOperation(value = "Get a recommendation by recommendationId")
     public Recommendation getRecommendationById(@PathVariable String recommendationId) {
         return lpiPMRecommendation.getRecommendationById(recommendationId);
     }
 
-    @GetMapping(value = "/{recommendationId}/danteformat", headers = "Accept=application/json")
+    @GetMapping("/{recommendationId}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get a recommendation in legacy Dante format by Id")
     public FrontEndResponse<String> getRecommendationByIdInDanteFormat(@PathVariable String recommendationId) {

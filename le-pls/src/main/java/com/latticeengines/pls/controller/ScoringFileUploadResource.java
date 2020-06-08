@@ -12,9 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,7 +72,7 @@ public class ScoringFileUploadResource {
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public ResponseDocument<SourceFile> uploadFile( //
@@ -150,7 +151,7 @@ public class ScoringFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "/fieldmappings", method = RequestMethod.POST)
+    @PostMapping("/fieldmappings")
     @ResponseBody
     @ApiOperation(value = "Takes a file and get first round of field mappings through best effort")
     public ResponseDocument<FieldMappingDocument> getFieldMappings( //
@@ -160,7 +161,7 @@ public class ScoringFileUploadResource {
                 scoringFileMetadataService.mapRequiredFieldsWithFileHeaders(csvFileName, modelId));
     }
 
-    @RequestMapping(value = "fieldmappings/resolve", method = RequestMethod.POST)
+    @PostMapping("fieldmappings/resolve")
     @ApiOperation(value = "Take user input and resolve required field mappings for scoring")
     public void saveFieldMappingDocument( //
             @RequestParam(value = "csvFileName", required = true) String csvFileName,
@@ -170,7 +171,7 @@ public class ScoringFileUploadResource {
                 fieldMappingDocument);
     }
 
-    @RequestMapping(value = "/headerfields", method = RequestMethod.GET)
+    @GetMapping("/headerfields")
     @ResponseBody
     @ApiOperation(value = "Returns the header fields for a uploaded file")
     public ResponseDocument<Set<String>> getHeaderFields(

@@ -23,12 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -110,11 +110,12 @@ import io.swagger.annotations.ApiParam;
 
 @Api(value = "internal", description = "REST resource for internal operations")
 @RestController
-@RequestMapping(value = "/internal")
+@RequestMapping("/internal")
 public class InternalResource extends InternalResourceBase {
 
-    private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
     private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
+
+    private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
     private static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
     private static final String passwordTesterPwd = "Lattice123";
     private static final String adminTester = "pls-super-admin-tester@test.lattice-engines.com";
@@ -195,8 +196,7 @@ public class InternalResource extends InternalResourceBase {
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
 
-    @RequestMapping(value = "/reports/"
-            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/reports/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Register a report")
     public void registerReport(@PathVariable("tenantId") String tenantId, @RequestBody Report report,
@@ -211,8 +211,7 @@ public class InternalResource extends InternalResourceBase {
                 report.getJson().getPayload()));
     }
 
-    @RequestMapping(value = "/reports/{reportName}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/reports/{reportName}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Retrieve a Report")
     public Report findReportByName(@PathVariable("reportName") String reportName,
@@ -223,8 +222,7 @@ public class InternalResource extends InternalResourceBase {
         return reportService.getReportByName(reportName);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Retrieve a SourceFile")
     public SourceFile findSourceFileByName(@PathVariable("sourceFileName") String sourceFileName,
@@ -235,8 +233,7 @@ public class InternalResource extends InternalResourceBase {
         return sourceFileService.findByName(sourceFileName);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Update a SourceFile")
     public void updateSourceFile(@PathVariable("sourceFileName") String sourceFileName,
@@ -247,8 +244,7 @@ public class InternalResource extends InternalResourceBase {
         sourceFileService.update(sourceFile);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
-            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Create a SourceFile")
     public void createSourceFile(@PathVariable("sourceFileName") String sourceFileName,
@@ -259,8 +255,7 @@ public class InternalResource extends InternalResourceBase {
         sourceFileService.create(sourceFile);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"  + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
@@ -277,8 +272,7 @@ public class InternalResource extends InternalResourceBase {
         return categoryStrList;
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories" + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories" + "/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
@@ -295,8 +289,7 @@ public class InternalResource extends InternalResourceBase {
         return new ArrayList<>(subcategories);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request, //
@@ -334,8 +327,7 @@ public class InternalResource extends InternalResourceBase {
                 onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count" + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count" + "/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
     public int getLeadEnrichmentAttributesCount(HttpServletRequest request, //
@@ -368,8 +360,7 @@ public class InternalResource extends InternalResourceBase {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveLeadEnrichmentAttributes(HttpServletRequest request, //
@@ -382,10 +373,7 @@ public class InternalResource extends InternalResourceBase {
         attributeService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation" + "/"
-            + TENANT_ID_PATH, //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request, //
@@ -395,10 +383,7 @@ public class InternalResource extends InternalResourceBase {
         return attributeService.getPremiumAttributesLimitation(tenant);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedattributes/count" + "/"
-            + TENANT_ID_PATH, //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedattributes/count/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request, //
@@ -411,10 +396,7 @@ public class InternalResource extends InternalResourceBase {
         return attributeService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count"
-            + "/" + TENANT_ID_PATH, //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request, //
@@ -427,16 +409,14 @@ public class InternalResource extends InternalResourceBase {
         return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
-    @RequestMapping(value = "/enrichment/all"
-            + LatticeInsightsResource.INSIGHTS_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/enrichment/all" + LatticeInsightsResource.INSIGHTS_PATH)
     @ResponseBody
     @ApiOperation(value = "Get all lead enrichment")
     public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes(HttpServletRequest request) {
         return attributeService.getAllAttributes();
     }
 
-    @RequestMapping(value = "/emails/createmodel/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/createmodel/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after model creation")
     public void sendPlsCreateModelEmail(@PathVariable("result") String result,
@@ -479,8 +459,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/score/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/score/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after scoring")
     public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
@@ -517,8 +496,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/enrichment/internal/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/enrichment/internal/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after enrichment of internal attributes")
     public void sendPlsInternalEnrichmentEmail(@PathVariable("result") String result,
@@ -546,8 +524,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/processanalyze/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/processanalyze/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after processanalyze")
     public void sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
@@ -568,7 +545,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @PutMapping(value = "/emails/orphanexport/result/{result}/" + TENANT_ID_PATH, headers = "Accept=application/json")
+    @PutMapping("/emails/orphanexport/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after orphan records export")
     public void sendOrphanRecordsExportEmail(@PathVariable String result, @PathVariable String tenantId,
@@ -600,8 +577,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/segmentexport/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/segmentexport/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendSegmentExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
@@ -638,8 +614,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/atlasexport/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/atlasexport/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendAtlasExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
@@ -650,8 +625,7 @@ public class InternalResource extends InternalResourceBase {
         sendEmail(exportType, exportID, users, result, tenantId, export.getCreatedBy());
     }
 
-    @RequestMapping(value = "/emails/s3import/result/{result}/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/s3import/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 import")
     public void sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
@@ -687,8 +661,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/s3template/create/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/s3template/create/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template created")
     public void sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
@@ -706,8 +679,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/s3template/update/"
-            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/emails/s3template/update/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
     public void sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
@@ -727,7 +699,7 @@ public class InternalResource extends InternalResourceBase {
     }
 
     @SuppressWarnings("deprecation")
-    @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/testtenants")
     @ResponseBody
     @ApiOperation(value = "Reset the testing environment for protractor tests.")
     public SimpleBooleanResponse createTestTenant(
@@ -915,7 +887,7 @@ public class InternalResource extends InternalResourceBase {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/modelnotes/{modelSummaryId}", method = RequestMethod.POST)
+    @PostMapping("/modelnotes/{modelSummaryId}")
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams,
@@ -926,7 +898,7 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "/modelnotes/{fromModelSummaryId}/{toModelSummaryId}", method = RequestMethod.POST)
+    @PostMapping("/modelnotes/{fromModelSummaryId}/{toModelSummaryId}")
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId,
@@ -938,7 +910,7 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "/segment/{segmentName}/restriction/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @GetMapping("/segment/{segmentName}/restriction/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get segment restriction.")
     public Restriction getSegmentRestriction(@PathVariable("tenantId") String tenantId, //
@@ -954,7 +926,7 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/segment/export/{exportId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @GetMapping("/segment/export/{exportId}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get Segment export job info.")
     public MetadataSegmentExport getMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
@@ -965,7 +937,7 @@ public class InternalResource extends InternalResourceBase {
         return metadataSegmentExportService.getSegmentExportByExportId(exportId);
     }
 
-    @RequestMapping(value = "/segment/export/{exportId}/" + TENANT_ID_PATH, method = RequestMethod.PUT)
+    @PutMapping("/segment/export/{exportId}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Update segment export job info.")
     public MetadataSegmentExport updateMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
@@ -979,7 +951,7 @@ public class InternalResource extends InternalResourceBase {
         return metadataSegmentExportService.updateSegmentExportJob(metadataSegmentExport);
     }
 
-    @PostMapping(value = "/segment/orphan/customerspace/" + TENANT_ID_PATH)
+    @PostMapping("/segment/orphan/customerspace/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "create orphan record through MetadataSegmentExportEntityMgr")
     public MetadataSegmentExport createOrphanRecordThruMgr(@PathVariable("tenantId") String tenantId,
@@ -1129,7 +1101,7 @@ public class InternalResource extends InternalResourceBase {
         return false;
     }
 
-    @RequestMapping(value = "/jobs/all/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @GetMapping("/jobs/all/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get actions for a tenant")
     public List<Job> getJobsBasedOnActionIdsAndType( //
@@ -1145,7 +1117,7 @@ public class InternalResource extends InternalResourceBase {
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }
 
-    @RequestMapping(value = "/external-scoring-config-context/{configUuid}", method = RequestMethod.GET)
+    @GetMapping("/external-scoring-config-context/{configUuid}")
     @ResponseBody
     @ApiOperation(value = "Get attributes within a predefined group for a tenant")
     public ScoringRequestConfigContext getScoringRequestConfigContext(HttpServletRequest request,
@@ -1161,7 +1133,7 @@ public class InternalResource extends InternalResourceBase {
         return srcContext;
     }
 
-    @PutMapping(value = "/emails/upload")
+    @PutMapping("/emails/upload")
     @ResponseBody
     @ApiOperation(value = "Send out email after upload state change")
     public void sendUploadEmail(@RequestBody UploadEmailInfo uploadEmailInfo) {

@@ -40,7 +40,7 @@ public class DataMappingResource {
     //   systemType: The type of system for which a template is being created, eg. Salesforce
     //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
     //   importFile: The name of the CSV file this template is being generated for.
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get Data Mapping for a System Object")
     public ResponseDocument<FetchFieldDefinitionsResponse> fetchFieldDefinitions(
@@ -66,7 +66,7 @@ public class DataMappingResource {
     //   importFile: The name of the CSV file this template is being generated for.
     // Body:
     // ValidateFieldDefinitionsRequest representing field definition changes/records
-    @PostMapping(value = "/validate")
+    @PostMapping("/validate")
     @ResponseBody
     @ApiOperation(value = "Validate Data Mapping for a System Object")
     public ResponseDocument<ValidateFieldDefinitionsResponse> validateFieldDefinitions(
@@ -94,7 +94,7 @@ public class DataMappingResource {
     //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
     // Body:
     //    The FieldDefinitionsRecord representing the field mappings for this template.
-    @PostMapping(value = "")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Set Data Mapping for a System Object")
     public ResponseDocument<FieldDefinitionsRecord> CommitFieldDefinitions(

@@ -7,10 +7,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,7 +40,7 @@ public class CDLExternalSystemResource {
         this.cdlExternalSystemService = cdlExternalSystemService;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get all CDL external system for a tenant")
     public CDLExternalSystem getExternalSystem(@PathVariable String customerSpace,
@@ -48,7 +49,7 @@ public class CDLExternalSystemResource {
         return cdlExternalSystemService.getExternalSystem(customerSpace, BusinessEntity.getByName(entity));
     }
 
-    @RequestMapping(value = "/map", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/map")
     @ResponseBody
     @ApiOperation(value = "Get all CDL external system for a tenant")
     public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(@PathVariable String customerSpace,
@@ -57,7 +58,7 @@ public class CDLExternalSystemResource {
         return cdlExternalSystemService.getExternalSystemMap(customerSpace, BusinessEntity.getByName(entity));
     }
 
-    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/type/{type}")
     @ResponseBody
     @ApiOperation(value = "Get all CDL external system for a tenant")
     public List<CDLExternalSystemMapping> getExternalSystemByType(@PathVariable String customerSpace,
@@ -67,7 +68,7 @@ public class CDLExternalSystemResource {
         return cdlExternalSystemService.getExternalSystemByType(customerSpace, type, BusinessEntity.getByName(entity));
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create or Update a CDL external system for a tenant")
     public void createOrUpdateCDLExternalSystem(@PathVariable String customerSpace,

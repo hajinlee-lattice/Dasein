@@ -4,9 +4,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,21 +31,21 @@ public class DataLakeStatisticsResource {
         this.dataLakeService = dataLakeService;
     }
 
-    @RequestMapping(value = "/cubes", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/cubes")
     @ResponseBody
     @ApiOperation(value = "Get (entity, stats cube) pairs")
     public Map<String, StatsCube> getStatsCubes() {
         return dataLakeService.getStatsCubes();
     }
 
-    @RequestMapping(value = "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/topn")
     @ResponseBody
     @ApiOperation(value = "Get statistics")
     public TopNTree getTopNTree() {
         return dataLakeService.getTopNTree();
     }
 
-    @RequestMapping(value = "/attrs/{entity}/{attribute}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/attrs/{entity}/{attribute}")
     @ResponseBody
     @ApiOperation(value = "Get statistics")
     public AttributeStats getAttributeStats(@PathVariable("entity") BusinessEntity entity,

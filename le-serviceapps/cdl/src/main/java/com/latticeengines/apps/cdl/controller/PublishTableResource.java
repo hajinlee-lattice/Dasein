@@ -25,7 +25,7 @@ public class PublishTableResource {
     @Inject
     private PublishTableRoleWorkflowSubmitter workflowSubmitter;
 
-    @PostMapping(value = "/dynamo")
+    @PostMapping("/dynamo")
     @ApiOperation(value = "publish dynamo table")
     public ResponseDocument<String> publishDynamo(@PathVariable String customerSpace, //
                                                   @RequestBody PublishTableRoleRequest request) {

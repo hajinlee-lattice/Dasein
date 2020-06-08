@@ -41,7 +41,7 @@ public class AttrConfigResource {
     @Inject
     private AttrConfigService attrConfigService;
 
-    @GetMapping(value = "/entities/{entity}")
+    @GetMapping("/entities/{entity}")
     @ResponseBody
     @ApiOperation("get cdl attribute config request")
     public AttrConfigRequest getAttrConfigByEntity(@PathVariable String customerSpace,
@@ -53,14 +53,14 @@ public class AttrConfigResource {
         return request;
     }
 
-    @GetMapping(value = "/custom-displaynames")
+    @GetMapping("/custom-displaynames")
     @ResponseBody
     @ApiOperation("get cdl attribute customized display names")
     public Map<BusinessEntity, List<AttrConfig>> getCustomDisplayNames(@PathVariable String customerSpace) {
         return attrConfigService.findAllHaveCustomDisplayNameByTenantId(MultiTenantContext.getShortTenantId());
     }
 
-    @GetMapping(value = "/categories/{categoryName}")
+    @GetMapping("/categories/{categoryName}")
     @ResponseBody
     @ApiOperation("get cdl attribute config request")
     public AttrConfigRequest getAttrConfigByCategory(@PathVariable String customerSpace,
@@ -72,7 +72,7 @@ public class AttrConfigResource {
         return request;
     }
 
-    @GetMapping(value = "/properties/{propertyName}")
+    @GetMapping("/properties/{propertyName}")
     @ResponseBody
     @ApiOperation("get cdl attribute config request by property")
     public AttrConfigRequest getAttrConfigByProperty(@PathVariable String customerSpace,
@@ -84,7 +84,7 @@ public class AttrConfigResource {
         return request;
     }
 
-    @PostMapping(value = "/overview")
+    @PostMapping("/overview")
     @ResponseBody
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
                                                                             @RequestParam(value = "category", required = false) List<String> categoryNames, //
@@ -98,7 +98,7 @@ public class AttrConfigResource {
         return attrConfigService.getAttrConfigOverview(categories, propertyNames, activeOnly, attributeSetName);
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation("save cdl attribute config request")
     public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace, @RequestBody AttrConfigRequest request,
@@ -109,7 +109,7 @@ public class AttrConfigResource {
         return attrConfigService.saveRequest(request, mode, updateDefaultSet);
     }
 
-    @DeleteMapping(value = "")
+    @DeleteMapping("")
     @ResponseBody
     @ApiOperation("delete attribute for tenant")
     public void removeAttrConfig(@PathVariable String customerSpace,
@@ -122,7 +122,7 @@ public class AttrConfigResource {
     }
 
     // Deprecated before M23
-    @PostMapping(value = "/validate")
+    @PostMapping("/validate")
     @ResponseBody
     @ApiOperation("put cdl attribute config request")
     public AttrConfigRequest validateAttrConfig(@PathVariable String customerSpace,
@@ -132,19 +132,19 @@ public class AttrConfigResource {
         return attrConfigService.validateRequest(request, mode);
     }
 
-    @GetMapping(value = "/attributeset/name/{name}")
+    @GetMapping("/attributeset/name/{name}")
     @ApiOperation(value = "Get attribute set by name")
     public AttributeSet getAttributeSet(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
         return attrConfigService.getAttributeSetByName(name);
     }
 
-    @GetMapping(value = "/attributeset")
+    @GetMapping("/attributeset")
     @ApiOperation(value = "Get attribute set list")
     public List<AttributeSet> getAttributeSets(@PathVariable String customerSpace) {
         return attrConfigService.getAttributeSets(false);
     }
 
-    @PostMapping(value = "/attributeset/clone")
+    @PostMapping("/attributeset/clone")
     @ApiOperation(value = "clone attribute attribute set based on an existing attribute set")
     public AttributeSet cloneAttributeSet(@PathVariable String customerSpace,
                                                   @RequestParam(value = "attributeSetName") String attributeSetName,
@@ -152,19 +152,19 @@ public class AttrConfigResource {
         return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
     }
 
-    @PostMapping(value = "/attributeset")
+    @PostMapping("/attributeset")
     @ApiOperation(value = "create new attribute set")
     public AttributeSetResponse createAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
         return attrConfigService.createAttributeSet(attributeSet);
     }
 
-    @PutMapping(value = "/attributeset")
+    @PutMapping("/attributeset")
     @ApiOperation(value = "update attribute set")
     public AttributeSetResponse updateAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
         return attrConfigService.updateAttributeSet(attributeSet);
     }
 
-    @DeleteMapping(value = "/attributeset/name/{name}")
+    @DeleteMapping("/attributeset/name/{name}")
     @ApiOperation(value = "Delete attribute set")
     public Boolean deleteAttributeSet(@PathVariable String customerSpace, @PathVariable("name") String name) {
         attrConfigService.deleteAttributeSetByName(name);

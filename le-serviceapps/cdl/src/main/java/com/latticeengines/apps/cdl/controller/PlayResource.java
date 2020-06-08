@@ -114,7 +114,7 @@ public class PlayResource {
     // -----
     // Plays
     // -----
-    @GetMapping(value = "", headers = "Accept=application/json")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get all full plays for a tenant")
     public List<Play> getPlays( //
@@ -126,7 +126,7 @@ public class PlayResource {
         return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
     }
 
-    @GetMapping(value = "/deleted-play-ids", headers = "Accept=application/json")
+    @GetMapping("/deleted-play-ids")
     @ResponseBody
     @ApiOperation(value = "Get all deleted play ids for a tenant")
     public List<String> getDeletedPlayIds( //
@@ -135,7 +135,7 @@ public class PlayResource {
         return playService.getAllDeletedPlayIds(forCleanupOnly);
     }
 
-    @GetMapping(value = "/{playName}")
+    @GetMapping("/{playName}")
     @ResponseBody
     @ApiOperation(value = "Get full play for a specific tenant based on playName")
     public Play getPlay(//
@@ -152,7 +152,7 @@ public class PlayResource {
         return play;
     }
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Register a play")
     public Play createOrUpdate(//
@@ -171,7 +171,7 @@ public class PlayResource {
         return playService.createOrUpdate(play, shouldLoadCoverage, tenant.getId());
     }
 
-    @DeleteMapping(value = "/{playName}", headers = "Accept=application/json")
+    @DeleteMapping("/{playName}")
     @ResponseBody
     @ApiOperation(value = "Delete a play")
     public Boolean delete( //
@@ -186,7 +186,7 @@ public class PlayResource {
     // Channels
     // -------------
 
-    @GetMapping(value = "/{playName}/channels")
+    @GetMapping("/{playName}/channels")
     @ResponseBody
     @ApiOperation(value = "For the given play, get a list of play launch channels")
     public List<PlayLaunchChannel> getPlayLaunchChannels(@PathVariable String customerSpace, //
@@ -195,7 +195,7 @@ public class PlayResource {
         return playLaunchChannelService.getPlayLaunchChannels(playName, includeUnlaunchedChannels);
     }
 
-    @GetMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @GetMapping("/{playName}/channels/{channelId}")
     @ResponseBody
     @ApiOperation(value = "Get the play launch channel by the given play id and channel id")
     public PlayLaunchChannel getPlayLaunchChannelById(@PathVariable String customerSpace, //
@@ -207,7 +207,7 @@ public class PlayResource {
         return playLaunchChannelService.findById(channelId);
     }
 
-    @PostMapping(value = "/{playName}/channels", headers = "Accept=application/json")
+    @PostMapping("/{playName}/channels")
     @ResponseBody
     @ApiOperation(value = "Create play launch channel")
     public PlayLaunchChannel createPlayLaunchChannel( //
@@ -235,7 +235,7 @@ public class PlayResource {
         return playLaunchChannel;
     }
 
-    @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @PutMapping("/{playName}/channels/{channelId}")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
     public PlayLaunchChannel updatePlayLaunchChannel(@PathVariable String customerSpace, //
@@ -261,7 +261,7 @@ public class PlayResource {
         return playLaunchChannel;
     }
 
-    @PatchMapping(value = "/{playName}/channels/{channelId}/next-scheduled-date", headers = "Accept=application/json")
+    @PatchMapping("/{playName}/channels/{channelId}/next-scheduled-date")
     @ResponseBody
     @ApiOperation(value = "Update next schedule date for play launch channel for a given play and channel id")
     public PlayLaunchChannel updatePlayLaunchChannel(@PathVariable String customerSpace, //
@@ -270,7 +270,7 @@ public class PlayResource {
         return playLaunchChannelService.updateNextScheduledDate(playName, channelId);
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
+    @PostMapping("/{playName}/channels/{channelId}/launch")
     @ResponseBody
     @ApiOperation(value = "Queue a new Play launch for a given play, channel with delta tables")
     public PlayLaunch createNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
@@ -298,7 +298,7 @@ public class PlayResource {
         return playLaunchChannelService.createNewLaunchByPlayAndChannel(play, channel, launch, isAutoLaunch);
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-workflow", headers = "Accept=application/json")
+    @PostMapping("/{playName}/channels/{channelId}/kickoff-workflow")
     @ResponseBody
     @ApiOperation(value = "Internal only use API to kick off campaignLaunch workflow immediately for a channel")
     public Long createLaunchByChannelAndKickoffWorkflow(@PathVariable String customerSpace, //
@@ -342,7 +342,7 @@ public class PlayResource {
         return workflowId;
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-delta-calculation", headers = "Accept=application/json")
+    @PostMapping("/{playName}/channels/{channelId}/kickoff-delta-calculation")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
     public Long schedule(@PathVariable String customerSpace, //
@@ -371,7 +371,7 @@ public class PlayResource {
     // Play Launches
     // -------------
 
-    @GetMapping(value = "/{playName}/launches")
+    @GetMapping("/{playName}/launches")
     @ResponseBody
     @ApiOperation(value = "Get list of launches for a given play")
     public List<PlayLaunch> getPlayLaunches(@PathVariable String customerSpace, //
@@ -380,7 +380,7 @@ public class PlayResource {
         return playLaunchService.findByPlayId(getPlayId(playName), launchStates);
     }
 
-    @GetMapping(value = "/{playName}/launches/{launchId}/channel")
+    @GetMapping("/{playName}/launches/{launchId}/channel")
     @ResponseBody
     @ApiOperation(value = "Get play launch channel from play launch")
     public PlayLaunchChannel getPlayLaunchChannelFromPlayLaunch(@PathVariable String customerSpace, //
@@ -389,7 +389,7 @@ public class PlayResource {
         return playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
     }
 
-    @PostMapping(value = "/{playName}/launches", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches")
     @ResponseBody
     @ApiOperation(value = "Create play launch for a given play")
     public PlayLaunch createPlayLaunch( //
@@ -416,7 +416,7 @@ public class PlayResource {
         return playLaunch;
     }
 
-    @GetMapping(value = "/{playName}/launches/{launchId}")
+    @GetMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Get play launch for a given play and launch id")
     public PlayLaunch getPlayLaunch(@PathVariable String customerSpace, //
@@ -426,7 +426,7 @@ public class PlayResource {
         return playLaunchService.findByLaunchId(launchId, false);
     }
 
-    @PostMapping(value = "/{playName}/launches/{launchId}", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Update a play launch for a given play")
     public PlayLaunch updatePlayLaunch(@PathVariable String customerSpace, //
@@ -460,7 +460,7 @@ public class PlayResource {
         return playLaunchService.update(playLaunch);
     }
 
-    @PostMapping(value = "/{playName}/launches/{launchId}/kickoff-launch", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches/{launchId}/kickoff-launch")
     @ResponseBody
     @ApiOperation(value = "Launch a play launch for a given play")
     public Long kickoffWorkflowForLaunch(@PathVariable String customerSpace, //
@@ -528,7 +528,7 @@ public class PlayResource {
                 || StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable());
     }
 
-    @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
+    @PostMapping("/{playName}/launches/{launchId}/launch")
     @ResponseBody
     @ApiOperation(value = "Launch a play launch for a given play")
     @Deprecated
@@ -588,7 +588,7 @@ public class PlayResource {
         return playLaunchService.update(playLaunch);
     }
 
-    @GetMapping(value = "/launches/dashboard", headers = "Accept=application/json")
+    @GetMapping("/launches/dashboard")
     @ResponseBody
     public PlayLaunchDashboard getPlayLaunchDashboard( //
             @PathVariable String customerSpace, //
@@ -619,7 +619,7 @@ public class PlayResource {
                 descending, endTimestamp, orgId, externalSysType, false);
     }
 
-    @GetMapping(value = "/launches/dashboard/count", headers = "Accept=application/json")
+    @GetMapping("/launches/dashboard/count")
     @ResponseBody
     @ApiOperation(value = "Play entries count for launch dashboard for a tenant")
     public Long getPlayLaunchDashboardEntriesCount( //
@@ -643,7 +643,7 @@ public class PlayResource {
                 endTimestamp, orgId, externalSysType);
     }
 
-    @PatchMapping(value = "/{playName}/launches/{launchId}")
+    @PatchMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Update play launch progress.")
     public PlayLaunch updatePlayLaunchProgress(//
@@ -670,7 +670,7 @@ public class PlayResource {
         return playLaunchService.update(playLaunch);
     }
 
-    @PutMapping(value = "/{playName}/launches/{launchId}/{action}", headers = "Accept=application/json")
+    @PutMapping("/{playName}/launches/{launchId}/{action}")
     @ResponseBody
     @ApiOperation(value = "Update play launch for a given play and launch id with given action")
     public PlayLaunch updatePlayLaunch( //
@@ -692,7 +692,7 @@ public class PlayResource {
         return existingPlayLaunch;
     }
 
-    @DeleteMapping(value = "/{playName}/launches/{launchId}")
+    @DeleteMapping("/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Delete play launch for a given play and launch id")
     public void deletePlayLaunch( //
@@ -709,7 +709,7 @@ public class PlayResource {
     // --------------
     // Talking Points
     // --------------
-    @PostMapping(value = "/{playName}/talkingpoints/publish", headers = "Accept=application/json")
+    @PostMapping("/{playName}/talkingpoints/publish")
     @ResponseBody
     @ApiOperation(value = "Publish Talking Points for a given play")
     public void publishTalkingPoints( //

@@ -5,8 +5,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +31,7 @@ public class DataFeedInternalResource {
     @Inject
     private DataFeedService dataFeedService;
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/list")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all data feeds.")
@@ -39,7 +39,7 @@ public class DataFeedInternalResource {
         return dataFeedService.getAllDataFeeds();
     }
 
-    @RequestMapping(value = "/simpledatafeedlist", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/simpledatafeedlist")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all simple data feeds.")
@@ -53,7 +53,7 @@ public class DataFeedInternalResource {
         }
     }
 
-    @RequestMapping(value = "/datafeedlist", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/datafeedlist")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all data feeds.")
@@ -67,8 +67,7 @@ public class DataFeedInternalResource {
         }
     }
 
-    @RequestMapping(value = "/datafeedlistBySchedulingGroup", method = RequestMethod.GET, headers = "Accept" +
-            "=application/json")
+    @GetMapping("/datafeedlistBySchedulingGroup")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all data feeds by schedulingGroup.")
@@ -84,7 +83,7 @@ public class DataFeedInternalResource {
         }
     }
 
-    @RequestMapping(value = "/dataQuotaLimitMap", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/dataQuotaLimitMap")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all data quota limit list.")
@@ -94,7 +93,7 @@ public class DataFeedInternalResource {
         return dataFeedService.getDataQuotaLimitMap(customerSpace1);
     }
 
-    @RequestMapping(value = "/attributeQuotaLimit", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/attributeQuotaLimit")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get attribute limit")

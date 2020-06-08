@@ -2,10 +2,11 @@ package com.latticeengines.eai.controller;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -24,27 +25,27 @@ public class EaiJobDetailResource implements EaiJobDetailInterface {
     private EaiImportJobDetailService eaiImportJobDetailService;
 
     @Override
-    @RequestMapping(value = "/jobdetail/collectionIdentifier/{collectionIdentifier:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/jobdetail/collectionIdentifier/{collectionIdentifier:.+}")
     @ApiOperation(value = "Get an eai job detail")
     public EaiImportJobDetail getImportJobDetailByCollectionIdentifier(@PathVariable String collectionIdentifier) {
         return eaiImportJobDetailService.getImportJobDetailByCollectionIdentifier(collectionIdentifier);
     }
 
     @Override
-    @RequestMapping(value = "/jobdetail/applicationId/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/jobdetail/applicationId/{applicationId}")
     @ApiOperation(value = "Get an eai job detail")
     public EaiImportJobDetail getImportJobDetailByAppId(@PathVariable String applicationId) {
         return eaiImportJobDetailService.getImportJobDetailByAppId(applicationId);
     }
 
     @Override
-    @RequestMapping(value = "/jobdetail/update", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/jobdetail/update")
     public void updateImportJobDetail(@RequestBody EaiImportJobDetail eaiImportJobDetail) {
         eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
     }
 
     @Override
-    @RequestMapping(value = "/jobdetail/{collectionIdentifier:.+}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/jobdetail/{collectionIdentifier:.+}/cancel")
     @ApiOperation(value = "Cancel eai job by identifier.")
     public void cancelImportJob(@PathVariable String collectionIdentifier) {
         eaiImportJobDetailService.cancelImportJob(collectionIdentifier);

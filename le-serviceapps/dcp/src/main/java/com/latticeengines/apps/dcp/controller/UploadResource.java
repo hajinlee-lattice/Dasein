@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "Upload")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/uploads")
+@RequestMapping("/customerspaces/{customerSpace}/uploads")
 public class UploadResource {
 
     private static final Logger log = LoggerFactory.getLogger(UploadResource.class);
