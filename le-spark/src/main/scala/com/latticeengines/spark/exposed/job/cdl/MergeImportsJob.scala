@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
-import org.apache.spark.sql.functions.{col, lit, when}
+import org.apache.spark.sql.functions.{col, lit, when, count}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
@@ -109,15 +109,37 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     }
     val dedup =
       if (deduplicate) {
-        val mergeInGrp = new MergeInGroup(renamed.schema, false)
-        renamed.groupBy(joinKeys map col: _*).
-          agg(mergeInGrp(renamed.columns map col: _*).as("ColumnStruct")).
-          select(col("ColumnStruct.*"))
+        doDedupe(renamed, joinKeys)
       } else {
         renamed
       }
 
     dedup
+  }
+  private def doDedupe(df: DataFrame, joinKeys: Seq[String]): DataFrame = {
+
+    var keyDf = df.select(joinKeys map col: _*)
+    var dupKeyDf = keyDf.groupBy(joinKeys map col: _*)
+      .agg(count("*").alias("_cnt"))
+      .filter(col("_cnt") > 1)
+      .drop(col("_cnt"))
+    val dupDfCont = dupKeyDf.count()
+    if (dupDfCont == 0) {
+      return df
+    }
+    
+    var joinedDf = MergeUtils.joinWithMarkers(df, dupKeyDf, joinKeys, "left")
+    val (fromMarker, toMarker) = MergeUtils.getJoinMarkers()
+    
+    var dupDf = joinedDf.filter(col(toMarker).isNotNull)
+    val mergeInGrp = new MergeInGroup(dupDf.schema, false)
+    dupDf = dupDf.groupBy(joinKeys map col: _*).
+      agg(mergeInGrp(dupDf.columns map col: _*).as("ColumnStruct")).
+      select(col("ColumnStruct.*"))
+
+    var distDf = joinedDf.filter(col(toMarker).isNull)
+    
+    distDf.union(dupDf).drop(Seq(fromMarker, toMarker): _*) 
   }
 
   private def renameSrcFlds(src: DataFrame, renameFlds: Array[Array[String]]): DataFrame = {
