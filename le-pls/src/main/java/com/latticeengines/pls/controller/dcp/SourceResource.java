@@ -120,7 +120,7 @@ public class SourceResource {
     // Parameters:
     //   entityType: The entity type of this template eg. Accounts
     //   fileImportId: The name of the CSV file this template is being generated for.
-    @GetMapping("/fetch")
+    @GetMapping("/mappings")
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End")
     public FetchFieldDefinitionsResponse getSourceMappings(
