@@ -315,7 +315,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         config.timelineVersionMap = timelineVersionMap;
         config.templateToSystemTypeMap = templateToSystemTypeMap;
         config.needRebuild = true;
-        config.timelineRelatedRoleTables = new HashMap<>();
+        config.timelineRelatedMaterTables = new HashMap<>();
         config.tableRoleSuffix = "TEST_ROLE";
         return config;
     }
