@@ -30,8 +30,8 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val partitionKey: String = config.partitionKey
     val sortKey: String = config.sortKey
     val needRebuild: Boolean = config.needRebuild
-    val roleTableInputIdx = config.roleTableInputIdx.asScala
-    val timelineRelatedRoleTables = config.timelineRelatedRoleTables.asScala
+    val masterStoreInputIdx = config.masterStoreInputIdx.asScala
+    val timelineRelatedMasterTables = config.timelineRelatedMaterTables.asScala
     val suffix: String = config.tableRoleSuffix
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
@@ -100,21 +100,21 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
             .col(recordIdColumn)))
           (timelineId, timelineRawStreamTable)
       }.toSeq: _*)
-    val timelineRoleTableMap =
+    val timelineMasterStoreMap =
       immutable.Map(timelineRawStreamTableMap.map {
         case (timelineId, timelineRawStreamTable) =>
           val roleTimelineId = timelineId + suffix
           if (!needRebuild) {
-            val roleTableName = timelineRelatedRoleTables.getOrElse(timelineId, "")
-            val idx: Integer = roleTableInputIdx.getOrElse(roleTableName, -1)
-            val RoleTable: DataFrame = lattice.input(idx)
-            val mergedRoleTable = MergeUtils.concat2(RoleTable, timelineRawStreamTable)
-            (roleTimelineId, mergedRoleTable)
+            val masterStoreTableName = timelineRelatedMasterTables.getOrElse(timelineId, "")
+            val idx: Integer = masterStoreInputIdx.getOrElse(masterStoreTableName, -1)
+            val masterStoreTable: DataFrame = lattice.input(idx)
+            val mergedMasterTable = MergeUtils.concat2(masterStoreTable, timelineRawStreamTable)
+            (roleTimelineId, mergedMasterTable)
           }else {
             (roleTimelineId, timelineRawStreamTable)
           }
       }.toSeq: _*)
-    val outputs = (timelineRawStreamTableMap++ timelineRoleTableMap).toList
+    val outputs = (timelineRawStreamTableMap++ timelineMasterStoreMap).toList
     //output
     lattice.output = outputs.map(_._2)
     // timelineId -> corresponding output index

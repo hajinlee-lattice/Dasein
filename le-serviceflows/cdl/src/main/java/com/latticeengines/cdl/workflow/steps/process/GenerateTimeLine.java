@@ -84,7 +84,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private Map<String, String> timelineVersionMap;
 
     //timelineId -> tableRoleTableName
-    private Map<String, String> timelineRoleTableNameMap;
+    private Map<String, String> timelineMaterStoreNameMap;
 
     private DataCollectionStatus dcStatus;
 
@@ -108,7 +108,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         active = inactive.complement();
         dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
-        timelineRoleTableNameMap = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
+        timelineMaterStoreNameMap = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
                 TableRoleInCollection.TimelineProfile, active, null);
         checkRebuild();
         bumpVersion();
@@ -138,9 +138,9 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         //timelineId -> (BusinessEntity, streamTableName list)
         config.timelineRelatedStreamTables =
                 getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
-        if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables) && MapUtils.isNotEmpty(timelineRoleTableNameMap)) {
+        if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables) && MapUtils.isNotEmpty(timelineMaterStoreNameMap)) {
             config.timelineRelatedRoleTables =
-                    timelineRoleTableNameMap.entrySet().stream().filter(entry -> config.timelineRelatedRoleTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                    timelineMaterStoreNameMap.entrySet().stream().filter(entry -> config.timelineRelatedRoleTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
             config.timelineRelatedRoleTables = new HashMap<>();
         }
@@ -172,7 +172,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         // timeline -> timeline rawstream table name
         Map<String, String> tableNames = new HashMap<>();
         Map<String, Table> tables = new HashMap<>();
-        Map<String, String> mergedRoleTableNames = new HashMap<>();
+        Map<String, String> mergedMaterStoreNames = new HashMap<>();
         timelineOutputIdx.forEach((timelineId, outputIdx) -> {
             // create table
             String key = String.format(TIMELINE_TABLE_PREFIX, timelineId);
@@ -183,7 +183,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             if (timelineId.endsWith(SUFFIX)) {
                 int lastIndex = timelineId.lastIndexOf(SUFFIX);
                 timelineId = timelineId.substring(0, lastIndex - 1);
-                mergedRoleTableNames.put(timelineId, name);
+                mergedMaterStoreNames.put(timelineId, name);
                 exportToS3(table);
             } else {
                 tableNames.put(timelineId, name);
@@ -191,24 +191,24 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             }
         });
         if (!needRebuild) {
-            timelineRoleTableNameMap = timelineRoleTableNameMap.entrySet().stream().map(entry -> {
-                if (mergedRoleTableNames.keySet().contains(entry.getKey())) {
-                    return Pair.of(entry.getKey(), mergedRoleTableNames.get(entry.getKey()));
+            timelineMaterStoreNameMap = timelineMaterStoreNameMap.entrySet().stream().map(entry -> {
+                if (mergedMaterStoreNames.keySet().contains(entry.getKey())) {
+                    return Pair.of(entry.getKey(), mergedMaterStoreNames.get(entry.getKey()));
                 } else {
                     return Pair.of(entry.getKey(), entry.getValue());
                 }
             }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
-            timelineRoleTableNameMap = mergedRoleTableNames;
+            timelineMaterStoreNameMap = mergedMaterStoreNames;
         }
-        log.info("merged timelineRoleTable names = {}.", mergedRoleTableNames);
+        log.info("merged timelineMasterStore names = {}.", mergedMaterStoreNames);
         log.info("timeline rawStream table names = {}", tableNames);
         exportToS3AndAddToContext(tables, TIMELINE_RAWTABLE_NAME);
         tableNames.values().forEach(name -> {
             exportToDynamo(name);
             addToListInContext(TEMPORARY_CDL_TABLES, name, String.class);
         });
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineRoleTableNameMap,
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineMaterStoreNameMap,
                 TableRoleInCollection.TimelineProfile, inactive);
     }
 
