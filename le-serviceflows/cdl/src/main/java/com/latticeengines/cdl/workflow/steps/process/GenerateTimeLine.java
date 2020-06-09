@@ -139,13 +139,13 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         config.timelineRelatedStreamTables =
                 getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
         if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables) && MapUtils.isNotEmpty(timelineMaterStoreNameMap)) {
-            config.timelineRelatedRoleTables =
-                    timelineMaterStoreNameMap.entrySet().stream().filter(entry -> config.timelineRelatedRoleTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            config.timelineRelatedMaterTables =
+                    timelineMaterStoreNameMap.entrySet().stream().filter(entry -> config.timelineRelatedMaterTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
-            config.timelineRelatedRoleTables = new HashMap<>();
+            config.timelineRelatedMaterTables = new HashMap<>();
         }
         toDataUnits(new ArrayList<>(sourceTables.values()), config.rawStreamInputIdx, inputs);
-        toDataUnits(new ArrayList<>(config.timelineRelatedRoleTables.values()), config.roleTableInputIdx, inputs);
+        toDataUnits(new ArrayList<>(config.timelineRelatedMaterTables.values()), config.masterStoreInputIdx, inputs);
         config.setInput(inputs);
         Table contactTable = getContactTable();
         if (contactTable != null) {
