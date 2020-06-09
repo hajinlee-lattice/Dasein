@@ -13,6 +13,8 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerC
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Email;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreetAddress1;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreetAddress2;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +54,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.matchapi.testframework.AdvancedMatchDeploymentTestNGBase;
 
 // dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
-public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
+public class
+
+ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ContactMatchDeploymentTestNG.class);
 
     private static final String TestId = "TestId";
@@ -61,7 +65,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
     private static final String[] DEFAULT_FIELDS = new String[] { TestId, //
             CDLTemplateName.name(), // input template
             // contact fields (email used in both)
-            CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), //
+            CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), StreetAddress1.name(), StreetAddress2.name(), //
             // account fields
             CustomerAccountId.name(), CompanyName.name(), Country.name(), State.name() };
     private static final String[] DEFAULT_MATCH_RESULT_FIELDS = ArrayUtils
@@ -75,43 +79,43 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
             // Google
             { //
                     "C0_01", "t1", //
-                    "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", //
+                    "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_02", "t1", //
-                    "C_CID_02", "h.finch@google.com", "Harold Finch", "888-888-8888", //
+                    "C_CID_02", "h.finch@google.com", "Harold Finch", "888-888-8888", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_03", "t2", //
-                    "C_CID_03", "l.fusco@google.com", "Lionel Fusco", "777-777-7777", //
+                    "C_CID_03", "l.fusco@google.com", "Lionel Fusco", "777-777-7777", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_04", "t1", //
-                    "C_CID_04", "s.shaw@google.com", "Sameen Shaw", "666-666-6666", //
+                    "C_CID_04", "s.shaw@google.com", "Sameen Shaw", "666-666-6666", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_05", "t3", //
-                    "C_CID_05", "s.groves@google.com", "Samantha Groves", "555-555-5555", //
+                    "C_CID_05", "s.groves@google.com", "Samantha Groves", "555-555-5555", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
                // netflix
             { //
                     "C0_11", "t4", //
-                    "C_CID_11", "j.greer@netflix.com", "John Greer", "444-444-4444", //
+                    "C_CID_11", "j.greer@netflix.com", "John Greer", "444-444-4444", "Street1", "Street2", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
             { //
                     "C0_12", "t3", //
-                    "C_CID_12", "k.stanton@netflix.com", "Kara Stanton", "333-333-3333", //
+                    "C_CID_12", "k.stanton@netflix.com", "Kara Stanton", "333-333-3333", "Street1", "Street2", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
             { //
                     "C0_13", "t3", //
-                    "C_CID_13", "j.lambert@netflix.com", "Jeremy Lambert", "222-222-2222", //
+                    "C_CID_13", "j.lambert@netflix.com", "Jeremy Lambert", "222-222-2222", "Street1", "Street2", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
     };
@@ -519,8 +523,6 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         map.addMatchKey(Domain, MatchKey.Email.name());
         map.addMatchKey(MatchKey.Country, MatchKey.Country.name());
         map.addMatchKey(MatchKey.State, MatchKey.State.name());
-        map.addMatchKey(MatchKey.StreetAddress1, MatchKey.StreetAddress1.name());
-        map.addMatchKey(MatchKey.StreetAddress2, MatchKey.StreetAddress2.name());
         return map;
     }
 

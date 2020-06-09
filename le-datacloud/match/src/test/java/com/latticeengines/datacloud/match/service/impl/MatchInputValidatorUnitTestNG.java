@@ -608,7 +608,6 @@ public class MatchInputValidatorUnitTestNG {
             String state = randomString(10);
             String country = "USA";
             String duns = randomString(10);
-            String nationalId = randomString(20);
             String street1 = randomString(20);
             String street2 = randomString(20);
             String sfdcid, mktoid;
@@ -616,9 +615,9 @@ public class MatchInputValidatorUnitTestNG {
             if (withSystemId) {
                 sfdcid = randomId(12);
                 mktoid = randomId(15);
-                row = Arrays.asList((Object) i, domain, name, city, state, country, duns, sfdcid, mktoid, nationalId, street1, street2);
+                row = Arrays.asList((Object) i, domain, name, city, state, country, duns, sfdcid, mktoid, street1, street2);
             } else {
-                row = Arrays.asList((Object) i, domain, name, city, state, country, duns, nationalId, street1, street2);
+                row = Arrays.asList((Object) i, domain, name, city, state, country, duns, street1, street2);
             }
             data.add(row);
         }
