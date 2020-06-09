@@ -16,16 +16,16 @@ public class GenerateYarnMetricsTestNG extends DataPlatformFunctionalTestNGBase 
     @Inject
     private YarnService yarnService;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "functional" }, enabled = false)
     public void setup() throws Exception {
         generateYarnMetrics.setYarnService(yarnService);
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "functional" }, enabled = false)
     public void tearDown() throws Exception {
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional" }, enabled = false)
     public void testGenerateMetrics() throws Exception {
         generateYarnMetrics.run();
     }
