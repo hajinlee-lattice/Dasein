@@ -63,7 +63,7 @@ public class TrayServiceImpl implements TrayService {
                     JsonUtils.serialize(settings)));
 
             String query = String.format(
-                    "{\"query\":\"mutation ($authenticationId: ID!){\n  removeAuthentication(input: { authenticationId: $authenticationId }) {\n    clientMutationId\n  }\n}\",\"variables\":{\"authenticationId\":\"%s\"}}",
+                    "{\"query\":\"mutation($authenticationId: ID!) { removeAuthentication(input: {    authenticationId: $authenticationId\\n  }) {  clientMutationId\\n }}\",\"variables\":{\"authenticationId\":\"%s\"}}",
                     settings.getAuthenticationId());
             Map<String, String> headers = new HashMap<>();
             headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

@@ -1,14 +1,30 @@
 package com.latticeengines.domain.exposed.remote.tray;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TraySettings {
 
+    @JsonProperty("userToken")
     private String userToken;
 
+    @JsonProperty("solutionInstanceId")
     private String solutionInstanceId;
 
+    @JsonProperty("authenticationId")
     private String authenticationId;
 
+    @JsonProperty("clientMutationId")
     private String clientMutationId;
+
+    public TraySettings() {
+
+    }
 
     public TraySettings(String userToken, String solutionInstanceId, String authenticationId, String clientMutationId) {
         this.userToken = userToken;
