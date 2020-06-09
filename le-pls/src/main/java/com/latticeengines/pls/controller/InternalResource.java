@@ -1,10 +1,7 @@
 package com.latticeengines.pls.controller;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +10,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,24 +26,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.service.ReportService;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -62,45 +43,30 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
-import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
-import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
-import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -115,20 +81,7 @@ public class InternalResource extends InternalResourceBase {
 
     private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
 
-    private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
-    private static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
-    private static final String passwordTesterPwd = "Lattice123";
-    private static final String adminTester = "pls-super-admin-tester@test.lattice-engines.com";
-    private static final String adminTesterPwd = "admin";
-    private static final String adUsername = "testuser1";
-    private static final String adPassword = "Lattice1";
     public static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
-
-    @Inject
-    private GlobalAuthenticationService globalAuthenticationService;
-
-    @Inject
-    private GlobalUserManagementService globalUserManagementService;
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -140,28 +93,13 @@ public class InternalResource extends InternalResourceBase {
     private UserService userService;
 
     @Inject
-    private CrmCredentialService crmCredentialService;
-
-    @Inject
-    private TenantConfigService tenantConfigService;
-
-    @Inject
-    private InternalTestUserService internalTestUserService;
-
-    @Inject
     private TenantService tenantService;
 
     @Inject
     private ReportService reportService;
 
     @Inject
-    private SourceFileService sourceFileService;
-
-    @Inject
     private EmailService emailService;
-
-    @Inject
-    private ModelNoteService modelNoteService;
 
     @Inject
     private MetadataSegmentService metadataSegmentService;
@@ -220,39 +158,6 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         return reportService.getReportByName(reportName);
-    }
-
-    @GetMapping("/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Retrieve a SourceFile")
-    public SourceFile findSourceFileByName(@PathVariable("sourceFileName") String sourceFileName,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return sourceFileService.findByName(sourceFileName);
-    }
-
-    @PutMapping("/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Update a SourceFile")
-    public void updateSourceFile(@PathVariable("sourceFileName") String sourceFileName,
-            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        sourceFileService.update(sourceFile);
-    }
-
-    @PostMapping("/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Create a SourceFile")
-    public void createSourceFile(@PathVariable("sourceFileName") String sourceFileName,
-            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        sourceFileService.create(sourceFile);
     }
 
     @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"  + TENANT_ID_PATH)
@@ -698,218 +603,6 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @PutMapping("/testtenants")
-    @ResponseBody
-    @ApiOperation(value = "Reset the testing environment for protractor tests.")
-    public SimpleBooleanResponse createTestTenant(
-            @RequestParam(value = "forceinstall", required = false, defaultValue = "false") Boolean forceInstallation,
-            HttpServletRequest request) throws IOException {
-        checkHeader(request);
-        String productPrefix = request.getParameter("product");
-
-        String jsonFileName = testTenantRegJson;
-        if (productPrefix != null && !jsonFileName.startsWith(productPrefix)) {
-            jsonFileName = productPrefix + "-" + jsonFileName;
-        }
-        log.info("Cleaning up test tenants through internal API");
-
-        List<String> testTenantIds = getTestTenantIds();
-        final String tenant1Id = testTenantIds.get(0);
-        final String tenant2Id = testTenantIds.get(1);
-
-        // ==================================================
-        // Provision through tenant console if needed
-        // ==================================================
-        if (forceInstallation) {
-
-            provisionThroughTenantConsole(tenant1Id, "Marketo", jsonFileName);
-            provisionThroughTenantConsole(tenant2Id, "Eloqua", jsonFileName);
-
-            waitForTenantConsoleInstallation(CustomerSpace.parse(tenant1Id));
-            waitForTenantConsoleInstallation(CustomerSpace.parse(tenant2Id));
-
-        } else {
-            if (StringStandardizationUtils.objectIsNullOrEmptyString(productPrefix)) {
-                Camille camille = CamilleEnvironment.getCamille();
-                Path productsPath = PathBuilder
-                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1Id))
-                        .append("SpaceConfiguration").append("Products");
-                try {
-                    camille.upsert(productsPath,
-                            new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
-                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                productsPath = PathBuilder
-                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2Id))
-                        .append("SpaceConfiguration").append("Products");
-                try {
-                    camille.upsert(productsPath,
-                            new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
-                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            try {
-                tenantConfigService.getTopology(tenant1Id);
-            } catch (LedpException e) {
-                try {
-                    provisionThroughTenantConsole(tenant1Id, "Marketo", jsonFileName);
-                } catch (Exception ex) {
-                    // do not interrupt, functional test could fail on this
-                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
-                }
-            }
-
-            try {
-                tenantConfigService.getTopology(tenant2Id);
-            } catch (LedpException e) {
-                try {
-                    provisionThroughTenantConsole(tenant2Id, "Eloqua", jsonFileName);
-                } catch (Exception ex) {
-                    // do not interrupt, functional test could fail on this
-                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
-                }
-            }
-        }
-
-        // ==================================================
-        // Upload modelsummary if necessary
-        // ==================================================
-        Credentials creds = new Credentials();
-        creds.setUsername(adminTester);
-        creds.setPassword(DigestUtils.sha256Hex(adminTesterPwd));
-
-        List<BasicNameValuePair> headers = new ArrayList<>();
-        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
-        headers.add(new BasicNameValuePair("Accept", "application/json"));
-
-        String payload = JsonUtils.serialize(creds);
-        String loginDocAsString = HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/login", true,
-                headers, payload);
-        LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
-
-        headers.add(new BasicNameValuePair(Constants.AUTHORIZATION, loginDoc.getData()));
-        if (!forceInstallation) {
-            for (Tenant tenant : loginDoc.getResult().getTenants()) {
-                if (tenant.getId().equals(tenant2Id)) {
-                    log.info("Checking models for tenant " + tenant.getId());
-                    payload = JsonUtils.serialize(tenant);
-                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers,
-                            payload);
-                    String response = HttpClientWithOptionalRetryUtils
-                            .sendGetRequest(getHostPort() + "/pls/modelsummaries?selection=all", true, headers);
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode jNode = mapper.readTree(response);
-                    log.info("Found " + jNode.size() + " models for " + tenant.getId());
-                    while (jNode.size() < 2) {
-                        InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                                "com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
-                        ModelSummary data = new ModelSummary();
-                        Tenant fakeTenant = new Tenant();
-                        fakeTenant.setId("FAKE_TENANT");
-                        fakeTenant.setName("Fake Tenant");
-                        fakeTenant.setPid(-1L);
-                        data.setTenant(fakeTenant);
-                        data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                        HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
-                                true, headers, JsonUtils.serialize(data));
-                        response = HttpClientWithOptionalRetryUtils
-                                .sendGetRequest(getHostPort() + "/pls/modelsummaries", true, headers);
-                        jNode = mapper.readTree(response);
-                        log.info("Uploaded a model to " + tenant.getId() + ". Now there are " + jNode.size()
-                                + " models");
-                    }
-                    for (JsonNode modelNode : jNode) {
-                        ModelSummary data = mapper.treeToValue(modelNode, ModelSummary.class);
-                        ModelSummaryStatus status = data.getStatus();
-                        if (ModelSummaryStatus.DELETED.equals(status)) {
-                            log.info("Found a deleted model " + data.getId());
-                            String modelApi = getHostPort() + "/pls/modelsummaries/" + data.getId();
-                            payload = String.format("{ \"Status\": \"%s\" }",
-                                    ModelSummaryStatus.INACTIVE.getStatusCode());
-                            HttpClientWithOptionalRetryUtils.sendPutRequest(modelApi, false, headers, payload);
-                            log.info("Update model " + data.getId() + " to inactive.");
-                        }
-                    }
-                }
-            }
-        }
-
-        // ==================================================
-        // Delete test users
-        // ==================================================
-        for (User user : userService.getUsers(tenant1Id)) {
-            if (user.getUsername().indexOf("0tempuser") > 0) {
-                userService.deleteUser(tenant1Id, user.getUsername());
-            }
-        }
-        for (User user : userService.getUsers(tenant2Id)) {
-            if (user.getUsername().indexOf("0tempuser") > 0) {
-                userService.deleteUser(tenant2Id, user.getUsername());
-            }
-        }
-
-        List<Tenant> testTenants = new ArrayList<>();
-        for (String tenantId : testTenantIds) {
-            Tenant tenant = new Tenant();
-            tenant.setId(tenantId);
-            tenant.setName(tenant1Id);
-            testTenants.add(tenant);
-        }
-
-        Map<AccessLevel, User> accessLevelToUsers = internalTestUserService
-                .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(testTenants);
-
-        // ==================================================
-        // Reset password of password tester
-        // ==================================================
-        resetPasswordTester();
-
-        // ==================================================
-        // Cleanup stored credentials
-        // ==================================================
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant1Id, false);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant1Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant1Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_SFDC, tenant2Id, false);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_ELOQUA, tenant2Id, true);
-        crmCredentialService.removeCredentials(CrmConstants.CRM_MARKETO, tenant2Id, true);
-
-        assignTestingUsersToTenants(accessLevelToUsers);
-
-        return SimpleBooleanResponse.successResponse();
-    }
-
-    @PostMapping("/modelnotes/{modelSummaryId}")
-    @ResponseBody
-    @ApiOperation(value = "Insert one note for certain model summary.")
-    public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams,
-            HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
-        modelNoteService.create(modelSummaryId, noteParams);
-        return true;
-    }
-
-    @PostMapping("/modelnotes/{fromModelSummaryId}/{toModelSummaryId}")
-    @ResponseBody
-    @ApiOperation(value = "Insert one note for certain model summary.")
-    public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId,
-            HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNote", fromModelSummaryId,
-                toModelSummaryId));
-        modelNoteService.copyNotes(fromModelSummaryId, toModelSummaryId);
-        return true;
-    }
-
     @GetMapping("/segment/{segmentName}/restriction/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get segment restriction.")
@@ -965,110 +658,6 @@ public class InternalResource extends InternalResourceBase {
         String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
         String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
         return Arrays.asList(tenant1Id, tenant2Id);
-    }
-
-    @SuppressWarnings("deprecation")
-    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)
-            throws IOException {
-        if (resetByAdminApi) {
-            List<BasicNameValuePair> adHeaders = loginAd();
-
-            String tenantToken = "${TENANT}";
-            String topologyToken = "${TOPOLOGY}";
-            String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-            InputStream ins = getClass().getClassLoader()
-                    .getResourceAsStream("com/latticeengines/pls/controller/internal/" + tenantRegJson);
-            String payload = IOUtils.toString(ins);
-            payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
-            HttpClientWithOptionalRetryUtils.sendPostRequest(
-                    adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
-        } else {
-            throw new RuntimeException(
-                    "We need to add the request tenant into ZK, but we do not have AD credentials in the environment. "
-                            + tupleId);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
-        long timeout = 1800000L; // bardjams has a long long timeout
-        long totTime = 0L;
-        String url = adminApi + "/tenants/" + customerSpace.getTenantId() + "?contractId="
-                + customerSpace.getContractId();
-        BootstrapState state = BootstrapState.createInitialState();
-        while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
-                && totTime <= timeout) {
-            try {
-                List<BasicNameValuePair> adHeaders = loginAd();
-                String jsonResponse = HttpClientWithOptionalRetryUtils.sendGetRequest(url, false, adHeaders);
-                log.info("JSON response from tenant console: " + jsonResponse);
-                TenantDocument tenantDocument = JsonUtils.deserialize(jsonResponse, TenantDocument.class);
-                BootstrapState newState = tenantDocument.getBootstrapState();
-                state = newState == null ? state : newState;
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to query tenant installation state", e);
-            } finally {
-                try {
-                    Thread.sleep(5000L);
-                    totTime += 5000L;
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        }
-
-        if (!BootstrapState.State.OK.equals(state.state)) {
-            throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private List<BasicNameValuePair> loginAd() throws IOException {
-        List<BasicNameValuePair> headers = new ArrayList<>();
-        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
-        headers.add(new BasicNameValuePair("Accept", "application/json"));
-
-        Credentials credentials = new Credentials();
-        credentials.setUsername(adUsername);
-        credentials.setPassword(adPassword);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/adlogin", false, headers,
-                JsonUtils.serialize(credentials));
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json = mapper.readTree(response);
-        String token = json.get("Token").asText();
-
-        headers.add(new BasicNameValuePair("Authorization", token));
-        return headers;
-    }
-
-    private void assignTestingUsersToTenants(Map<AccessLevel, User> accessLevelToUsers) {
-        for (String testTenantId : getTestTenantIds()) {
-            for (Map.Entry<AccessLevel, User> accessLevelToUser : accessLevelToUsers.entrySet()) {
-                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId,
-                        accessLevelToUser.getValue().getUsername());
-            }
-            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, passwordTester);
-        }
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, getTestTenantIds().get(0), EXTERNAL_USER_USERNAME_1);
-        userService.deleteUser(getTestTenantIds().get(1), EXTERNAL_USER_USERNAME_1);
-    }
-
-    private void resetPasswordTester() {
-        String tempPwd = globalUserManagementService.resetLatticeCredentials(passwordTester);
-        Ticket ticket = globalAuthenticationService.authenticateUser(passwordTester, DigestUtils.sha256Hex(tempPwd));
-
-        Credentials oldCreds = new Credentials();
-        oldCreds.setUsername(passwordTester);
-        oldCreds.setPassword(DigestUtils.sha256Hex(tempPwd));
-        Credentials newCreds = new Credentials();
-        newCreds.setUsername(passwordTester);
-        newCreds.setPassword(DigestUtils.sha256Hex(passwordTesterPwd));
-        globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
-    }
-
-    private String getHostPort() {
-        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
     private Tenant manufactureSecurityContextForInternalAccess(String tenantId) {

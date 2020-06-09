@@ -312,13 +312,13 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     @Override
     public void deleteById(String id) {
         String url = constructUrl("/modelsummaries/internal/modelnote/{modelSummaryId}", id);
-        delete("create model notes by model id", url);
+        delete("delete model notes by model id", url);
     }
 
     @Override
     public void updateById(String id, NoteParams noteParams) {
         String url = constructUrl("/modelsummaries/internal/modelnote/{modelSummaryId}", id);
-        put("create model notes by model id", url, noteParams);
+        put("update model notes by model id", url, noteParams);
     }
 
     @Override

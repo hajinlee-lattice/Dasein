@@ -7,11 +7,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 
 @Component("workflowReportService")
-public class WorkflowReportServiceImpl implements WorkflowReportService {
+public class WorkflowReportServiceImpl implements ReportService {
 
     @Inject
     private ReportEntityMgr reportEntityMgr;
@@ -27,7 +27,7 @@ public class WorkflowReportServiceImpl implements WorkflowReportService {
     }
 
     @Override
-    public void deleteReportByName(String customerSpace, String name) {
+    public void deleteReportByName(String name) {
         Report report = reportEntityMgr.findByName(name);
         if (report != null) {
             reportEntityMgr.delete(report);
@@ -35,12 +35,12 @@ public class WorkflowReportServiceImpl implements WorkflowReportService {
     }
 
     @Override
-    public Report getReportByName(String customerSpace, String name) {
+    public Report getReportByName(String name) {
         return reportEntityMgr.findByName(name);
     }
 
     @Override
-    public List<Report> findAll(String customerSpace) {
+    public List<Report> findAll() {
         return reportEntityMgr.findAll();
     }
 
