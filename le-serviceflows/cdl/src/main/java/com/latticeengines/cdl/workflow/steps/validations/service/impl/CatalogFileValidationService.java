@@ -94,19 +94,12 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                             }
                                         }
                                         String nameStr = getFieldValue(record, name.name());
-                                        if (StringUtils.isBlank(nameStr)) {
+                                        if (nameList.contains(nameStr)) {
                                             rowError = true;
                                             fileError = true;
-                                            csvFilePrinter.printRecord(lineId, "", "Name field contains empty values" +
-                                                    ". Please correct and try again");
+                                            csvFilePrinter.printRecord(lineId, "", "We found multiple entries for the same Name field. Please correct and try again.");
                                         } else {
-                                            if (nameList.contains(nameStr)) {
-                                                rowError = true;
-                                                fileError = true;
-                                                csvFilePrinter.printRecord(lineId, "", "We found multiple entries for the same Name field. Please correct and try again.");
-                                            } else {
-                                                nameList.add(nameStr);
-                                            }
+                                            nameList.add(nameStr);
                                         }
                                         if (rowError) {
                                             errorInPath++;
