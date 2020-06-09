@@ -1,7 +1,10 @@
 package com.latticeengines.dcp.workflow.listeners;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -13,6 +16,9 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
@@ -75,7 +81,20 @@ public class SourceImportListener extends LEJobListener {
             } else {
                 log.error("SourceImport workflow job {} failed with unknown status {}", jobExecution.getId(), jobStatus);
             }
-            uploadDiagnostics.setLastErrorMessage(job.getErrorDetails().getErrorMsg());
+            List<Throwable> exceptions = jobExecution.getAllFailureExceptions();
+            if (exceptions.size() > 0) {
+                Throwable exception = exceptions.get(0);
+
+                ErrorDetails details;
+                if (exception instanceof LedpException) {
+                    LedpException casted = (LedpException) exception;
+                    details = casted.getErrorDetails();
+                } else {
+                    details = new ErrorDetails(LedpCode.LEDP_00002, exception.getMessage(),
+                            ExceptionUtils.getStackTrace(exception));
+                }
+                uploadDiagnostics.setLastErrorMessage(JsonUtils.serialize(details));
+            }
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR, uploadDiagnostics);
         }
 
