@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
+import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -805,7 +806,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(task).withStreamType(AtlasStream.StreamType.DnbIntentData)
                         .withName(streamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
                         .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
-                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
+                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).withAttributeDerivers(Collections.singletonList(createDnbIntentDeriver())).build();
         stream.setStreamId(AtlasStream.generateId());
         streamEntityMgr.create(stream);
         log.info("DbIntentData AtlasStream is {}.", JsonUtils.serialize(stream));
@@ -818,6 +819,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             throw new IllegalStateException(String.format(
                     "Failed to setup DnbIntentData metric groups for tenant %s", customerSpace));
         }
+    }
+
+    private StreamAttributeDeriver createDnbIntentDeriver() {
+        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
+        deriver.setTargetAttribute(InterfaceName.HasIntent.name());
+        deriver.setCalculation(StreamAttributeDeriver.Calculation.TRUE);
+        deriver.setTargetFundamentalType(FundamentalType.BOOLEAN);
+        return deriver;
     }
 
     private void createDropFolder(String customerSpace, String systemName, EntityType entityType) {
