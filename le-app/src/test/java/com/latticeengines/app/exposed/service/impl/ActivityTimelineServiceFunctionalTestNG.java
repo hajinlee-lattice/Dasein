@@ -67,6 +67,20 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
     }
 
     @Test(groups = "functional")
+    public void testGetAccountActivityData() {
+        DataPage result = activityTimelineService.getAccountActivities(TEST_ACCOUNT_ID, "P90D", null);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
+        Map<String, Long> expectedResults = expectedContactReportResults();
+        int webVisitPathPatternsRecognized = 0;
+        for (Map<String, Object> item : result.getData()) {
+            Assert.assertTrue(MapUtils.isNotEmpty(item));
+            webVisitPathPatternsRecognized += item.containsKey("detail2") ? 1 : 0;
+        }
+        Assert.assertEquals(webVisitPathPatternsRecognized, 8);
+    }
+
+    @Test(groups = "functional")
     public void testContactReport() {
         DataPage result = activityTimelineService.getAccountAggregationReportByContact(TEST_ACCOUNT_ID, "P90D", null);
         Assert.assertNotNull(result);
