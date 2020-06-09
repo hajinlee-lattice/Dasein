@@ -29,35 +29,35 @@ public class ExternalSystemAuthenticationResource {
     @Inject
     private ExternalSystemAuthenticationProxy extSysAuthenticationProxy;
 
-    @PostMapping(value = "/")
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "create external authentication")
     public ExternalSystemAuthentication createAuthentication(@RequestBody ExternalSystemAuthentication externalSystemAuthentication) {
         return extSysAuthenticationProxy.createAuthentication(MultiTenantContext.getTenant().getId(), externalSystemAuthentication);
     }
 
-    @PutMapping(value = "/{authId}")
+    @PutMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "update external authentication")
     public ExternalSystemAuthentication updateAuthentication(@PathVariable String authId, @RequestBody ExternalSystemAuthentication externalSystemAuthentication) {
         return extSysAuthenticationProxy.updateAuthentication(MultiTenantContext.getTenant().getId(), authId, externalSystemAuthentication);
     }
 
-    @GetMapping(value = "/{authId}")
+    @GetMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "Get external authentication by Id")
     public ExternalSystemAuthentication findAuthenticationByAuthId(@PathVariable String authId) {
         return extSysAuthenticationProxy.findAuthenticationByAuthId(MultiTenantContext.getTenant().getId(), authId);
     }
 
-    @GetMapping(value = "/")
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get All external authentications")
     public List<ExternalSystemAuthentication> findAuthentications() {
         return extSysAuthenticationProxy.findAuthentications(MultiTenantContext.getTenant().getId());
     }
 
-    @GetMapping(value = "/lookupid-mappings")
+    @GetMapping("/lookupid-mappings")
     @ResponseBody
     @ApiOperation(value = "Get external authentication by list of LookupIdMappings")
     public List<ExternalSystemAuthentication> findAuthenticationsByLookupIdMappings(

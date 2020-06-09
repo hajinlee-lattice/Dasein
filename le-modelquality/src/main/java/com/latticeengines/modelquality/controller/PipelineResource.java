@@ -9,10 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +44,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     private PipelineService pipelineService;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get the list of pipeline instances")
     public List<Pipeline> getPipelines() {
@@ -51,7 +52,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/latest", method = RequestMethod.POST)
+    @PostMapping("/latest")
     @ResponseBody
     @ApiOperation(value = " the latest active production pipeline")
     public Pipeline createPipelineFromProduction() {
@@ -59,7 +60,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create new pipeline from a list of either existing pipeline steps or uploaded files")
     public String createPipeline(@RequestParam("pipelineName") String pipelineName,
@@ -69,7 +70,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{pipelineName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{pipelineName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get pipeline by name")
     public Pipeline getPipelineByName(@PathVariable String pipelineName) {
@@ -77,7 +78,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/pipelinestepfiles/metadata", method = RequestMethod.POST)
+    @PostMapping("/pipelinestepfiles/metadata")
     @ResponseBody
     @ApiOperation(value = "Upload custom python pipeline metadata file")
     public String uploadPipelineStepMetadata(@RequestParam(value = "fileName", required = true) String fileName, //
@@ -92,7 +93,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/pipelinestepfiles/python", method = RequestMethod.POST)
+    @PostMapping("/pipelinestepfiles/python")
     @ResponseBody
     @ApiOperation(value = "Upload custom python pipeline implementation file")
     public String uploadPipelineStepPythonScript(@RequestParam(value = "fileName", required = true) String fileName, //
@@ -107,7 +108,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/pipelinestepfiles/pythonrts", method = RequestMethod.POST)
+    @PostMapping("/pipelinestepfiles/pythonrts")
     @ResponseBody
     @ApiOperation(value = "Upload custom python RTS pipeline implementation file")
     public String uploadPipelineStepRTSPythonScript(@RequestParam(value = "fileName", required = true) String fileName, //

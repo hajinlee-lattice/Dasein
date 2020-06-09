@@ -49,31 +49,31 @@ public class PeriodResource {
         this.businessCalendarService = businessCalendarService;
     }
 
-    @GetMapping(value = "/names")
+    @GetMapping("/names")
     @ApiOperation(value = "Get all period names defined in a tenant")
     public List<String> getPeriodNames(@PathVariable String customerSpace) {
         return periodService.getPeriodNames();
     }
 
-    @GetMapping(value = "/strategies")
+    @GetMapping("/strategies")
     @ApiOperation(value = "Get all period names defined in a tenant")
     public List<PeriodStrategy> getPeriodStrategies(@PathVariable String customerSpace) {
         return periodService.getPeriodStrategies();
     }
 
-    @GetMapping(value = "/calendar")
+    @GetMapping("/calendar")
     @ApiOperation(value = "Get business calendar")
     public BusinessCalendar getBusinessCalendar(@PathVariable String customerSpace) {
         return businessCalendarService.find();
     }
 
-    @GetMapping(value = "/evaluationdate")
+    @GetMapping("/evaluationdate")
     @ApiOperation(value = "Get evaluation date")
     public String getEvaluationDate(@PathVariable String customerSpace) {
         return periodService.getEvaluationDate();
     }
 
-    @GetMapping(value = "/daterange/{year}")
+    @GetMapping("/daterange/{year}")
     @ApiOperation(value = "Get start date and end date")
     public List<String> getStartEndDate(@PathVariable String customerSpace, @PathVariable Integer year) {
         String yearString = String.valueOf(year);
@@ -97,14 +97,14 @@ public class PeriodResource {
         return result;
     }
 
-    @PostMapping(value = "/calendar")
+    @PostMapping("/calendar")
     @ApiOperation(value = "Save business calendar")
     public BusinessCalendar saveBusinessCalendar(@PathVariable String customerSpace,
             @RequestBody BusinessCalendar businessCalendar) {
         return businessCalendarService.save(businessCalendar);
     }
 
-    @DeleteMapping(value = "/calendar")
+    @DeleteMapping("/calendar")
     @ApiOperation(value = "Delete business calendar")
     public void deleteBusinessCalendar(@PathVariable String customerSpace) {
         BusinessCalendar calender = businessCalendarService.delete();
@@ -115,21 +115,21 @@ public class PeriodResource {
         }
     }
 
-    @PostMapping(value = "/calendar/validate")
+    @PostMapping("/calendar/validate")
     @ApiOperation(value = "Validate business calendar")
     public String validateBusinessCalendar(@PathVariable String customerSpace,
             @RequestBody BusinessCalendar businessCalendar) {
         return businessCalendarService.validate(businessCalendar);
     }
 
-    @PostMapping(value = "/periodid/{date}")
+    @PostMapping("/periodid/{date}")
     @ApiOperation(value = "Convert date string to period id based on period strategy; If date is empty, use max transaction date; If period strategy is empty, return all the period strategies")
     public Map<PeriodStrategy.Template, Integer> getPeriodId(@PathVariable String customerSpace,
             @PathVariable String date, @RequestBody PeriodStrategy periodStrategy) {
         return periodService.getPeriodId(date, periodStrategy);
     }
 
-    @PostMapping(value = "/maxperiodid")
+    @PostMapping("/maxperiodid")
     @ApiOperation(value = "Get the largest period id")
     // Only a temporary helper api for data science
     public int getMaxPeriodId(@PathVariable String customerSpace,

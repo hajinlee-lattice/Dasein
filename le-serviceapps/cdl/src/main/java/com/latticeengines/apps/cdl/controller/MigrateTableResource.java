@@ -26,7 +26,7 @@ public class MigrateTableResource {
     @Inject
     private MigrateDynamoWorkflowSubmitter migrateDynamoWorkflowSubmitter;
 
-    @PostMapping(value = "/dynamo")
+    @PostMapping("/dynamo")
     @ApiOperation(value = "migrate dynamo table")
     @SuppressWarnings("unchecked")
     public ResponseDocument<String> migrateDynamo(@PathVariable String customerSpace, @RequestBody MigrateDynamoRequest migrateDynamoRequest) {

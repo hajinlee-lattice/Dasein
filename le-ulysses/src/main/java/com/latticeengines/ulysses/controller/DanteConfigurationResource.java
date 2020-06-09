@@ -71,7 +71,7 @@ public class DanteConfigurationResource {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    @GetMapping(value = "", headers = "Accept=application/json")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get an account by of attributes in a group")
     public FrontEndResponse<FrontEndDanteConfigurationDocument> getDanteConfiguration() {

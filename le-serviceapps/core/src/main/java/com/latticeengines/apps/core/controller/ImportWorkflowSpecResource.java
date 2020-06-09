@@ -35,7 +35,7 @@ public class ImportWorkflowSpecResource {
     @Inject
     private ImportWorkflowSpecService importWorkflowSpecService;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation("get import workflow spec")
     public ImportWorkflowSpec getImportWorkflowSpec(
@@ -57,7 +57,7 @@ public class ImportWorkflowSpecResource {
     // tableName is the optional user provided name for the table.
     // writeAll should be set true to add all FieldDefinitions from the record to the Table, even those that do not
     // have a columnName, meaning they were not mapped in the imported file.
-    @PostMapping(value = "/table")
+    @PostMapping("/table")
     @ResponseBody
     @ApiOperation("generate table from field definition record")
     public Table generateTable(
@@ -77,7 +77,7 @@ public class ImportWorkflowSpecResource {
         return table;
     }
 
-    @GetMapping(value = "/list")
+    @GetMapping("/list")
     @ResponseBody
     @ApiOperation("get workflow spec by type/excludeSystemType and object")
     public List<ImportWorkflowSpec> getImportWorkflowSpecs(
@@ -95,7 +95,7 @@ public class ImportWorkflowSpecResource {
         }
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ApiOperation("add the spec to s3")
     public void putSpecToS3(
             @PathVariable String customerSpace, //
@@ -110,7 +110,7 @@ public class ImportWorkflowSpecResource {
         }
     }
 
-    @DeleteMapping(value = "")
+    @DeleteMapping("")
     @ApiOperation("delete spec from s3")
     public void deleteSpecFromS3(
         @PathVariable String customerSpace, //

@@ -27,7 +27,7 @@ public class IngestionResource {
     @Inject
     private IngestionService ingestionService;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Scan and trigger all ingestions that can proceed.")
     public List<IngestionProgress> scan(
@@ -35,7 +35,7 @@ public class IngestionResource {
         return ingestionService.scan(hdfsPod);
     }
 
-    @PostMapping(value = "/internal/{ingestionName}")
+    @PostMapping("/internal/{ingestionName}")
     @ResponseBody
     @ApiOperation(value = "Forcefully start an ingestion. "
             + "If an ingestion for same file/data is going on, skip the operation. "

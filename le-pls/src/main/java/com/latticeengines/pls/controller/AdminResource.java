@@ -11,10 +11,13 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,7 +43,7 @@ import io.swagger.annotations.ApiOperation;
 @Deprecated
 @Api(value = "admin", description = "REST resource for managing PLS tenants")
 @RestController
-@RequestMapping(value = "/admin")
+@RequestMapping("/admin")
 public class AdminResource extends InternalResourceBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminResource.class);
 
@@ -56,7 +59,7 @@ public class AdminResource extends InternalResourceBase {
     @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @RequestMapping(value = "/tenants", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/tenants")
     @ResponseBody
     @ApiOperation(value = "Add a PLS tenant")
     public Boolean addTenant(@RequestBody Tenant tenant, HttpServletRequest request) {
@@ -70,7 +73,7 @@ public class AdminResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "/tenants", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/tenants")
     @ResponseBody
     @ApiOperation(value = "Get list of registered tenants")
     public List<Tenant> getTenants(HttpServletRequest request) {
@@ -79,7 +82,7 @@ public class AdminResource extends InternalResourceBase {
         return tenantService.getAllTenants();
     }
 
-    @RequestMapping(value = "/tenants/{tenantId:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/tenants/{tenantId:.+}")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant.")
     public Boolean deleteTenant(@PathVariable String tenantId,
@@ -94,7 +97,7 @@ public class AdminResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "/users", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/users")
     @ResponseBody
     @ApiOperation(value = "Add a PLS admin user")
     public Boolean addAdminUser(@RequestBody UserRegistrationWithTenant userRegistrationWithTenant,
@@ -104,7 +107,7 @@ public class AdminResource extends InternalResourceBase {
         return userService.addAdminUser(MultiTenantContext.getEmailAddress(), userRegistrationWithTenant);
     }
 
-    @RequestMapping(value = "/users", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/users")
     @ResponseBody
     @ApiOperation(value = "Update users. Mainly for upgrade from old GrantedRights to new AccessLevel.")
     public SimpleBooleanResponse updateUsers(@RequestParam(value = "username") String username,
@@ -173,7 +176,7 @@ public class AdminResource extends InternalResourceBase {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/temppassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/temppassword")
     @ResponseBody
     @ApiOperation(value = "Reset temporary password")
     public String restTempPassword(@RequestBody User user, HttpServletRequest request) {
@@ -190,7 +193,7 @@ public class AdminResource extends InternalResourceBase {
         return tempPass;
     }
 
-    @RequestMapping(value = "/users", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/users")
     @ResponseBody
     @ApiOperation(value = "Check whether a user exists by email")
     public Boolean checkUserExistenceByEmail(@RequestParam(value = "useremail") String userEmail,
@@ -201,7 +204,7 @@ public class AdminResource extends InternalResourceBase {
         return user != null;
     }
 
-    @RequestMapping(value = "/setSendImportEmailState", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/setSendImportEmailState")
     @ResponseBody
     @ApiOperation(value = "set S3Import Email Notification state")
     public void setImportNotifictionStatus(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =
@@ -210,7 +213,7 @@ public class AdminResource extends InternalResourceBase {
         tenantService.setNotificationStateByTenantId(tenantId, notificationLevel);
     }
 
-    @RequestMapping(value = "/setSendImportEmailType", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/setSendImportEmailType")
     @ResponseBody
     @ApiOperation(value = "set S3Import Email Notification state")
     public void setEmailNotifictionType(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =

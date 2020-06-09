@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "serviceadmin")
 @RestController
-@RequestMapping(value = "/services")
+@RequestMapping("/services")
 @PostAuthorize("hasRole('adminconsole')")
 public class ServiceResource {
 
@@ -44,7 +44,7 @@ public class ServiceResource {
     @Inject
     private DynamicOptionsService dynamicOptionsService;
 
-    @GetMapping("")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get list of services")
     public List<String> getServices() {

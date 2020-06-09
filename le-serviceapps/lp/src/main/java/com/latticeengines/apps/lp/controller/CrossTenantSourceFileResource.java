@@ -23,7 +23,7 @@ public class CrossTenantSourceFileResource {
     @Inject
     private SourceFileService sourceFileService;
 
-    @GetMapping(value = "/tablename/{tableName}")
+    @GetMapping("/tablename/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Find source file by table name cross tenants")
     @NoCustomerSpace

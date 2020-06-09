@@ -28,7 +28,7 @@ public class ExportFieldMetadataResource {
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get export field metadata")
     public List<ColumnMetadata> getExportFieldMetadata(@PathVariable String customerSpace,
@@ -36,8 +36,7 @@ public class ExportFieldMetadataResource {
         PlayLaunchChannel channel = playLaunchChannelService.findById(playChannelId);
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
-        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(customerSpace, channel);
-        return columnMetadata;
+        return fieldMetadataService.getExportEnabledFields(customerSpace, channel);
     }
 
 }

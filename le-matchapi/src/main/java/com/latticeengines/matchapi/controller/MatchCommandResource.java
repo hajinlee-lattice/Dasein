@@ -2,10 +2,11 @@ package com.latticeengines.matchapi.controller;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +31,7 @@ public class MatchCommandResource {
     @Inject
     private MatchCommandsService matchCommandsService;
 
-    @RequestMapping(value = "/{commandID}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{commandID}")
     @ResponseBody
     @ApiOperation(value = "Get the status of a match command on the specific client. "
             + "URL parameter matchClient can be PD126, PD127, PD128, PD131, or PD130. "
@@ -42,7 +43,7 @@ public class MatchCommandResource {
         return new MatchStatusResponse(status);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create a match command on the specific client. "
             + "URL parameter matchClient can be PD126, PD127, PD128, PD131, or PD130. "
@@ -53,7 +54,7 @@ public class MatchCommandResource {
         return matchCommandsService.createMatchCommand(request);
     }
 
-    @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/bestclient")
     @ResponseBody
     @NoMetricsLog
     @ApiOperation(value = "Return the best matcher client to use. " +

@@ -34,7 +34,7 @@ public class TransformationResource {
     @Inject
     private SourceTransformationService sourceTransformationService;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Scan all transformation progresses that can be proceeded. "
             + "url parameter podid is for testing purpose.")

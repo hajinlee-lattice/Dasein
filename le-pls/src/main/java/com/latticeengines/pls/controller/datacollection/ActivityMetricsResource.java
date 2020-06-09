@@ -47,13 +47,13 @@ public class ActivityMetricsResource {
         this.metricsProxy = metricsProxy;
     }
 
-    @GetMapping(value = "/{type}/active")
+    @GetMapping("/{type}/active")
     @ApiOperation(value = "Get all the active metrics for specific activity type")
     public List<ActivityMetrics> getActiveActivityMetrics(@PathVariable ActivityType type) {
         return metricsProxy.getActiveActivityMetrics(MultiTenantContext.getCustomerSpace().toString(), type);
     }
 
-    @PostMapping(value = "/{type}")
+    @PostMapping("/{type}")
     @ApiOperation(value = "Save purchase metrics")
     public List<ActivityMetrics> saveActivityMetrics(@PathVariable ActivityType type,
             @RequestBody List<ActivityMetrics> metrics) {

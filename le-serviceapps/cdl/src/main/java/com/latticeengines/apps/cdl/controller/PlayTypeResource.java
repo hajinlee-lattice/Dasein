@@ -51,14 +51,14 @@ public class PlayTypeResource {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @GetMapping(value = "", headers = "Accept=application/json")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get all play types for a tenant")
     public List<PlayType> getPlayTypes(@PathVariable String customerSpace) {
         return playTypeService.getAllPlayTypes(customerSpace);
     }
 
-    @PostMapping(value = "", headers = "Accept=application/json")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create new Play type")
     public PlayType createPlayType(@PathVariable String customerSpace, @RequestBody PlayType playType) {
@@ -76,14 +76,14 @@ public class PlayTypeResource {
         }
     }
 
-    @GetMapping(value = "/{playTypeId}", headers = "Accept=application/json")
+    @GetMapping("/{playTypeId}")
     @ResponseBody
     @ApiOperation(value = "Get a playtype given its id")
     public PlayType getPlayTypeById(@PathVariable String customerSpace, @PathVariable String playTypeId) {
         return playTypeEntityMgr.findById(playTypeId);
     }
 
-    @PostMapping(value = "/{playTypeId}", headers = "Accept=application/json")
+    @PostMapping("/{playTypeId}")
     @ResponseBody
     @ApiOperation(value = "Update a playtype given its id")
     public void updatePlayType(@PathVariable String customerSpace, @PathVariable String playTypeId,
@@ -100,7 +100,7 @@ public class PlayTypeResource {
         }
     }
 
-    @DeleteMapping(value = "/{playTypeId}", headers = "Accept=application/json")
+    @DeleteMapping("/{playTypeId}")
     @ResponseBody
     @ApiOperation(value = "Delete a playtype given its id")
     public void deletePlayType(@PathVariable String customerSpace, @PathVariable String playTypeId) {

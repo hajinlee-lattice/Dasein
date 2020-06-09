@@ -1,16 +1,15 @@
 package com.latticeengines.api.controller;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,24 +47,21 @@ public class ModelResource {
         return ":" + System.getProperty("jetty.class.path");
     }
 
-    @RequestMapping(value = "/submit", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/submit")
     @ResponseBody
     @ApiOperation(value = "Submit models")
     public AppSubmission submit(@RequestBody Model model) {
-        AppSubmission submission = new AppSubmission(modelingService.submitModel(model));
-        return submission;
+        return new AppSubmission(modelingService.submitModel(model));
     }
 
-    @RequestMapping(value = "/createSamples", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/createSamples")
     @ResponseBody
     @ApiOperation(value = "Create named samples to be used by profiling or modeling")
     public AppSubmission createSamples(@RequestBody SamplingConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService
-                .createSamples(config)));
-        return submission;
+        return new AppSubmission(Collections.singletonList(modelingService.createSamples(config)));
     }
 
-    @RequestMapping(value = "/throttle", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/throttle")
     @ResponseBody
     @ApiOperation(value = "Throttle the number of jobs allowed to run in the cluster", hidden = true)
     public ThrottleSubmission throttle(@RequestBody ThrottleConfiguration config) {
@@ -74,7 +70,7 @@ public class ModelResource {
         return new ThrottleSubmission(config.isImmediate());
     }
 
-    @RequestMapping(value = "/resetThrottle", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/resetThrottle")
     @ResponseBody
     @ApiOperation(value = "Reset the internal throttling value", hidden = true)
     public ThrottleSubmission resetThrottle() {
@@ -82,38 +78,35 @@ public class ModelResource {
         return new ThrottleSubmission();
     }
 
-    @RequestMapping(value = "/load", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/load")
     @ResponseBody
     @ApiOperation(value = "Load data from a database table")
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.loadData(config)));
-        return submission;
+        return new AppSubmission(Collections.singletonList(modelingService.loadData(config)));
     }
 
-    @RequestMapping(value = "/getJobStatus/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/getJobStatus/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     public JobStatus getJobStatus(@PathVariable String applicationId) {
         return modelingService.getJobStatus(applicationId);
     }
 
-    @RequestMapping(value = "/profile", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/profile")
     @ResponseBody
     @ApiOperation(value = "Profile data")
     public AppSubmission profile(@RequestBody DataProfileConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.profileData(config)));
-        return submission;
+        return new AppSubmission(Collections.singletonList(modelingService.profileData(config)));
     }
 
-    @RequestMapping(value = "/review", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/review")
     @ResponseBody
     @ApiOperation(value = "Review data")
     public AppSubmission review(@RequestBody ModelReviewConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.reviewData(config)));
-        return submission;
+        return new AppSubmission(Collections.singletonList(modelingService.reviewData(config)));
     }
 
-    @RequestMapping(value = "/features", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/features")
     @ResponseBody
     @ApiOperation(value = "Get list of features generated by the data profile")
     public StringList getFeatures(@RequestBody Model model) {

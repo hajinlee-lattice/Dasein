@@ -12,9 +12,9 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,7 +52,7 @@ public class EntityResource extends BaseFrontEndEntityResource {
 
     }
 
-    @RequestMapping(value = "/counts", method = RequestMethod.POST)
+    @PostMapping("/counts")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Map<BusinessEntity, Long> getCounts(@RequestBody(required = false) FrontEndQuery frontEndQuery) {

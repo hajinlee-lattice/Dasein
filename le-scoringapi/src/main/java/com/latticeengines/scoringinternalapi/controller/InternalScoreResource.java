@@ -8,10 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("score")
 public class InternalScoreResource extends BaseScoring {
 
-    @RequestMapping(value = "/models", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/models")
     @ResponseBody
     @ApiOperation(value = "Get active models")
     public List<Model> getActiveModels(HttpServletRequest request,
@@ -54,7 +55,7 @@ public class InternalScoreResource extends BaseScoring {
     }
 
     @Deprecated
-    @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/models/{type}")
     @ResponseBody
     @ApiOperation(value = "Get active models")
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type,
@@ -68,7 +69,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/models/{modelId}/fields")
     @ResponseBody
     @ApiOperation(value = "Get fields for a model")
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId,
@@ -82,7 +83,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modeldetails")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
     public List<ModelDetail> getPaginatedModels(HttpServletRequest request,
@@ -105,7 +106,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modeldetails/count")
     @ResponseBody
     @ApiOperation(value = "Get total count of models for specified criteria")
     public int getModelCount(HttpServletRequest request,
@@ -125,7 +126,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/record")
     @ApiOperation(value = "Score a record")
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest, //
@@ -150,7 +151,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/records")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
@@ -175,7 +176,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/records/debug")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
@@ -200,7 +201,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/record/debug")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability")
     public DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
@@ -225,7 +226,7 @@ public class InternalScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/record/apiconsole/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/record/apiconsole/debug")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability via APIConsole")
     public DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, //

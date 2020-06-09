@@ -6,10 +6,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +37,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     private PropDataService propDataService;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get PropData configurations")
     public List<PropData> getPropDataConfigs() {
@@ -44,7 +45,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create PropData configuration")
     public String createPropDataConfig(@RequestBody PropData propDataConfig) {
@@ -52,7 +53,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/latest", method = RequestMethod.POST)
+    @PostMapping("/latest")
     @ResponseBody
     @ApiOperation(value = "Create PropData configuration from production")
     public PropData createPropDataConfigFromProduction() {
@@ -60,7 +61,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/latestForUI", method = RequestMethod.POST)
+    @PostMapping("/latestForUI")
     @ResponseBody
     @ApiOperation(value = "Create PropData configuration from production")
     public List<PropData> createPropDataConfigFromProductionForUI() {
@@ -68,7 +69,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{propDataConfigName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{propDataConfigName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get PropData configuration by name")
     public PropData getPropDataConfigByName(@PathVariable String propDataConfigName) {

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -81,7 +80,7 @@ public class DropBoxResource {
         return summary;
     }
 
-    @PostMapping(value = "/folder/{objectName}")
+    @PostMapping("/folder/{objectName}")
     @ApiOperation(value = "Create template folder")
     public boolean createFolder(@PathVariable String customerSpace, @PathVariable String objectName,
             @RequestParam(required = false) String path, @RequestParam(required = false) String systemName) {
@@ -89,14 +88,14 @@ public class DropBoxResource {
         return true;
     }
 
-    @GetMapping(value = "/folder/{systemName}")
+    @GetMapping("/folder/{systemName}")
     @ApiOperation(value = "Create template folder")
     public boolean createFolder(@PathVariable String customerSpace, @PathVariable String systemName) {
         dropBoxService.createFolder(customerSpace, systemName, null, null);
         return true;
     }
 
-    @GetMapping(value = "/folder")
+    @GetMapping("/folder")
     @ApiOperation(value = "Get all sub folders")
     public List<String> getAllSubFolders(@PathVariable String customerSpace,
             @RequestParam(required = false) String systemName, @RequestParam(required = false) String objectName,
@@ -104,7 +103,7 @@ public class DropBoxResource {
         return dropBoxService.getDropFolders(customerSpace, systemName, objectName, path);
     }
 
-    @RequestMapping(value = "/import", method = RequestMethod.POST)
+    @PostMapping("/import")
     @ResponseBody
     @ApiOperation("Import file to s3")
     public boolean importFileToS3(@PathVariable String customerSpace, @RequestParam("s3Path") String s3Path,
@@ -112,7 +111,7 @@ public class DropBoxResource {
         return dropBoxService.uploadFileToS3(customerSpace, s3Path, filename, hdfsPath);
     }
 
-    @GetMapping(value = "/fileList")
+    @GetMapping("/fileList")
     @ApiOperation(value = "Get all files under path")
     public List<FileProperty> getAllSubFolders(@PathVariable String customerSpace, @RequestParam String s3Path,
             @RequestParam(required = false, defaultValue = "") String filter) {

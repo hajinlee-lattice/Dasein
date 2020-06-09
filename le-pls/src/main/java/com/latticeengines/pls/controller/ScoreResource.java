@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +30,7 @@ public class ScoreResource {
     @Inject
     private ScoringJobService scoringJobService;
 
-    @RequestMapping(value = "/{modelId}", method = RequestMethod.POST)
+    @PostMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Score the provided testing set file. Returns the job id.")
     public String score(//
@@ -46,7 +46,7 @@ public class ScoreResource {
 
     }
 
-    @RequestMapping(value = "/{modelId}/training", method = RequestMethod.POST)
+    @PostMapping("/{modelId}/training")
     @ResponseBody
     @ApiOperation(value = "Score the training data for the provided model.")
     public String scoreTrainingData(//

@@ -113,7 +113,7 @@ public class MatchResource {
         InstrumentRegistry.register(BulkRealtimeMatchInstrument.NAME_MATCHED, new BulkRealtimeMatchInstrument(true));
     }
 
-    @PostMapping(value = "/realtime")
+    @PostMapping("/realtime")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
@@ -142,7 +142,7 @@ public class MatchResource {
         }
     }
 
-    @PostMapping(value = "/bulkrealtime")
+    @PostMapping("/bulkrealtime")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
@@ -172,7 +172,7 @@ public class MatchResource {
     }
 
     @PodContextAware
-    @PostMapping(value = "/bulk", produces = "application/json")
+    @PostMapping("/bulk")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
             + "except using InputBuffer instead of embedding Data in json body directly. "
@@ -203,7 +203,7 @@ public class MatchResource {
      * @return
      */
     @PodContextAware
-    @PostMapping(value = "/bulkconf", produces = "application/json")
+    @PostMapping("/bulkconf")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
             + "except using InputBuffer instead of embedding Data in json body directly. "
@@ -223,7 +223,7 @@ public class MatchResource {
         }
     }
 
-    @GetMapping(value = "/bulk/{rootuid}", produces = "application/json")
+    @GetMapping("/bulk/{rootuid}")
     @ResponseBody
     @ApiOperation(value = "Get match status using rootuid (RootOperationUid).")
     public MatchCommand bulkMatchStatus(@PathVariable String rootuid) {
@@ -234,7 +234,7 @@ public class MatchResource {
         }
     }
 
-    @PostMapping(value = "/cdllookup")
+    @PostMapping("/cdllookup")
     @ResponseBody
     @ApiOperation(value = "Looking for AccountId using given LookupId")
     public String lookupInternalAccountId(@RequestBody InternalAccountIdLookupRequest request) {
@@ -246,7 +246,7 @@ public class MatchResource {
         );
     }
 
-    @PostMapping(value = "/cdllookup/contacts")
+    @PostMapping("/cdllookup/contacts")
     @ResponseBody
     @ApiOperation(value = "Looking for AccountId using given LookupId")
     public List<Map<String, Object>> lookupContactsByInternalAccountId(@RequestBody InternalContactLookupRequest request) {
@@ -259,7 +259,7 @@ public class MatchResource {
         );
     }
 
-    @PostMapping(value = "/entity/publish")
+    @PostMapping("/entity/publish")
     @ResponseBody
     @ApiOperation(value = "Publish entity seed/lookup entries "
             + "from source tenant (staging env) to dest tenant (staging/serving env). "
@@ -280,7 +280,7 @@ public class MatchResource {
         }
     }
 
-    @PostMapping(value = "/entity/publish/list")
+    @PostMapping("/entity/publish/list")
     @ResponseBody
     @ApiOperation(value = "Serve multiple requests to publish entity seed/lookup entries "
             + "from source tenant (staging env) to dest tenant (staging/serving env). "
@@ -301,14 +301,14 @@ public class MatchResource {
         }
     }
 
-    @PostMapping(value = "/entity/versions")
+    @PostMapping("/entity/versions")
     @ResponseBody
     @ApiOperation(value = "Bump up entity match version of a target tenant in a list of specified environments")
     public BumpVersionResponse bumpVersion(@RequestBody BumpVersionRequest request) {
         return bumpVersion(request, false);
     }
 
-    @PostMapping(value = "/entity/versions/next")
+    @PostMapping("/entity/versions/next")
     @ResponseBody
     @ApiOperation(value = "Bump up next entity match version of a target tenant in a list of specified environments")
     public BumpVersionResponse bumpNextVersion(@RequestBody BumpVersionRequest request) {
@@ -335,7 +335,7 @@ public class MatchResource {
         return response;
     }
 
-    @GetMapping(value = "/entity/versions/{customerSpace}")
+    @GetMapping("/entity/versions/{customerSpace}")
     @ResponseBody
     @ApiOperation(value = "Retrieve entity match versions of all environments for designated tenant")
     public Map<EntityMatchEnvironment, EntityMatchVersion> getVersions(
@@ -348,7 +348,7 @@ public class MatchResource {
         return versions;
     }
 
-    @GetMapping(value = "/entity/versions/{customerSpace}/{environment}")
+    @GetMapping("/entity/versions/{customerSpace}/{environment}")
     @ResponseBody
     @ApiOperation(value = "Retrieve entity match versions of all environments for designated tenant")
     public EntityMatchVersion getVersion( //
@@ -378,7 +378,7 @@ public class MatchResource {
      * @return
      */
     @ApiIgnore
-    @PutMapping(value = "/dnbtoken/{keyType}")
+    @PutMapping("/dnbtoken/{keyType}")
     @ApiOperation(value = "Force to refresh DnB token. Only for manual operation purpose")
     public DnBTokenRefreshResponse refreshDnBToken(@PathVariable("keyType") DnBKeyType keyType,
             @RequestParam(value = "newtoken", required = false) String newToken) {

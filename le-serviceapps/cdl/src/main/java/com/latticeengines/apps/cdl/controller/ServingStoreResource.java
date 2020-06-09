@@ -38,7 +38,7 @@ public class ServingStoreResource {
     @Inject
     private ServingStoreService servingStoreService;
 
-    @GetMapping(value = "/{entity}/decoratedmetadata")
+    @GetMapping("/{entity}/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
     public Flux<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
@@ -49,7 +49,7 @@ public class ServingStoreResource {
         return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups, attributeSetName, filter);
     }
 
-    @GetMapping(value = "/systemmetadata")
+    @GetMapping("/systemmetadata")
     @ResponseBody
     @ApiOperation(value = "Get system metadata attributes")
     public Flux<ColumnMetadata> getSystemMetadataAttrs( //
@@ -59,7 +59,7 @@ public class ServingStoreResource {
         return servingStoreService.getSystemMetadataAttrFlux(customerSpace, entity, version);
     }
 
-    @GetMapping(value = "/new-modeling")
+    @GetMapping("/new-modeling")
     @ResponseBody
     @ApiOperation(value = "Get attributes that are enabled for first iteration modeling")
     public Flux<ColumnMetadata> getNewModelingAttrs( //
@@ -73,7 +73,7 @@ public class ServingStoreResource {
         return servingStoreService.getAttrsEnabledForModeling(customerSpace, entity, version);
     }
 
-    @GetMapping(value = "/allow-modeling")
+    @GetMapping("/allow-modeling")
     @ResponseBody
     @ApiOperation(value = "Get attributes that are allowed for modeling")
     public Flux<ColumnMetadata> getAllowedModelingAttrs( //
@@ -85,7 +85,7 @@ public class ServingStoreResource {
         return servingStoreService.getAttrsCanBeEnabledForModeling(customerSpace, entity, version, allCustomerAttrs);
     }
 
-    @PostMapping(value = "/{entity}/attrs-usage")
+    @PostMapping("/{entity}/attrs-usage")
     @ResponseBody
     @ApiOperation(value = "Get attributes usage")
     public Map<String, Boolean> getAttrsUsage( //

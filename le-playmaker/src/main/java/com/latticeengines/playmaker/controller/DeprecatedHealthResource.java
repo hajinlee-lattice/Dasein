@@ -1,7 +1,7 @@
 package com.latticeengines.playmaker.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/health")
 public class DeprecatedHealthResource {
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog

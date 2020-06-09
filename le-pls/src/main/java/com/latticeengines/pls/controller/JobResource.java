@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +29,7 @@ public class JobResource {
     @Inject
     private WorkflowJobService workflowJobService;
 
-    @GetMapping(value = "/{jobId}")
+    @GetMapping("/{jobId}")
     @ResponseBody
     @ApiOperation(value = "Get a job by id")
     public Job find(@PathVariable String jobId, //
@@ -37,7 +37,7 @@ public class JobResource {
         return workflowJobService.find(jobId, true);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Retrieve all jobs")
     public List<Job> findAll( //
@@ -61,21 +61,21 @@ public class JobResource {
                 includeEmptyPA);
     }
 
-    @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/yarnapps/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Retrieve job from yarn application id")
     public Job findByApplicationId(@PathVariable String applicationId) {
         return workflowJobService.findByApplicationId(applicationId);
     }
 
-    @RequestMapping(value = "/find", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/find")
     @ResponseBody
     @ApiOperation(value = "Find jobs with the provided job type")
     public List<Job> findAllWithType(@RequestParam("type") String type) {
         return workflowJobService.findAllWithType(type);
     }
 
-    @RequestMapping(value = "/{jobId}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{jobId}/cancel")
     @ResponseBody
     @ApiOperation(value = "Cancel a running job")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
@@ -83,8 +83,7 @@ public class JobResource {
         workflowJobService.cancel(jobId);
     }
 
-    @RequestMapping(value = "/{jobPid}/setErrorCategory", method = RequestMethod.GET, headers = "Accept" +
-            "=application/json")
+    @GetMapping("/{jobPid}/setErrorCategory")
     @ResponseBody
     @ApiOperation(value = "set error_category")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
@@ -92,7 +91,7 @@ public class JobResource {
         workflowJobService.setErrorCategoryByJobPid(jobPid, errorCategory);
     }
 
-    @RequestMapping(value = "/{jobId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{jobId}/restart")
     @ResponseBody
     @ApiOperation(value = "Restart a previous job")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
@@ -100,7 +99,7 @@ public class JobResource {
         return ResponseDocument.successResponse(workflowJobService.restart(jobId).toString());
     }
 
-    @RequestMapping(value = "/{jobId}/report/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{jobId}/report/download")
     @ResponseBody
     @ApiOperation(value = "Generate P&A job report")
     public ResponseDocument<String> downloadReport(@PathVariable String jobId) {

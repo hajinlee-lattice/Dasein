@@ -43,7 +43,7 @@ public class PeriodResource {
         this.actionService = actionService;
     }
 
-    @GetMapping(value = "/names", headers = "Accept=application/json")
+    @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "Get all period names defined in a tenant")
     public List<String> getPeriodNames() {
@@ -55,7 +55,7 @@ public class PeriodResource {
         }
     }
 
-    @GetMapping(value = "/calendar")
+    @GetMapping("/calendar")
     @ApiOperation(value = "Get business calendar")
     public BusinessCalendar getBusinessCalendar() {
         try {
@@ -66,7 +66,7 @@ public class PeriodResource {
         }
     }
 
-    @GetMapping(value = "/daterange/{year}")
+    @GetMapping("/daterange/{year}")
     @ApiOperation(value = "Get the start date and end date of given year")
     public List<String> getDateRange(@PathVariable int year) {
         try {
@@ -78,7 +78,7 @@ public class PeriodResource {
     }
 
     @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
-    @PostMapping(value = "/calendar")
+    @PostMapping("/calendar")
     @ApiOperation(value = "Save business calendar")
     public BusinessCalendar saveBusinessCalendar(@RequestBody BusinessCalendar businessCalendar) {
         try {
@@ -94,7 +94,7 @@ public class PeriodResource {
     }
 
     @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
-    @DeleteMapping(value = "/calendar")
+    @DeleteMapping("/calendar")
     @ApiOperation(value = "Delete business calendar")
     public void deleteBusinessCalendar() {
         try {
@@ -107,7 +107,7 @@ public class PeriodResource {
     }
 
     @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
-    @PostMapping(value = "/calendar/validate")
+    @PostMapping("/calendar/validate")
     @ApiOperation(value = "Validate business calendar")
     public BusinessCalendarValidation validateBusinessCalendar(@RequestBody BusinessCalendar businessCalendar) {
         try {

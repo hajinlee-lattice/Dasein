@@ -29,7 +29,7 @@ public class EntityMatchResource {
     @Inject
     private BulkEntityMatchWorkflowSubmitter bulkEntityMatchWorkflowSubmitter;
 
-    @PostMapping(value = "/bulk", headers = "Accept=application/json")
+    @PostMapping("/bulk")
     @ResponseBody
     @ApiOperation(value = "Submit a bulk match job for entity match")
     public ResponseDocument<BulkEntityMatchWorkflowSubmitter.Response> startBulkEntityMatch(

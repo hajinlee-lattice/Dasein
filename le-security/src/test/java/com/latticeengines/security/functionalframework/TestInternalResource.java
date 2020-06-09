@@ -3,8 +3,7 @@ package com.latticeengines.security.functionalframework;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,7 +12,7 @@ import com.latticeengines.domain.exposed.StatusDocument;
 @RestController
 public class TestInternalResource {
 
-    @RequestMapping(value = "/internal/resource", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/internal/resource")
     @ResponseBody
     public Map<String, String> getSomeInternalResource() {
         Map<String, String> returnVal = new HashMap<>();
@@ -21,18 +20,18 @@ public class TestInternalResource {
         return returnVal;
     }
 
-    @RequestMapping(value = "/internal/health", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/internal/health")
     @ResponseBody
     public StatusDocument checkHealth() {
         return StatusDocument.online();
     }
 
-    @RequestMapping(value = "/internal/bad", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/internal/bad")
     public String getBad() {
         throw new RuntimeException("I want to fail");
     }
 
-    @RequestMapping(value = "/internal/noaccess", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/internal/noaccess")
     public String getNoAccess() {
         return "You should not see this!";
     }

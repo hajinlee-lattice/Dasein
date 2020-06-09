@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,7 +69,7 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/models/{modelId}/fields")
     @ResponseBody
     @ApiOperation(value = "Get fields for a model")
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId) {
@@ -83,7 +82,7 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @GetMapping(value = "/modeldetails")
+    @GetMapping("/modeldetails")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
     public List<ModelDetail> getPaginatedModels(HttpServletRequest request,

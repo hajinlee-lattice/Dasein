@@ -69,7 +69,7 @@ public class PurchaseHistoryResource {
 
     private String defaultPeriodName = PeriodStrategy.Template.Month.name();
 
-    @GetMapping(value = "/account/{crmAccountId}/danteformat", headers = "Accept=application/json")
+    @GetMapping("/account/{crmAccountId}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for the given account")
     public FrontEndResponse<List<String>> getPurchaseHistoryAccountById(
@@ -103,7 +103,7 @@ public class PurchaseHistoryResource {
 
     }
 
-    @GetMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}/danteformat", headers = "Accept=application/json")
+    @GetMapping("/spendanalyticssegment/{spendAnalyticsSegment}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for all the accounts in the given spend analytics segment")
     @SuppressWarnings("ConstantConditions")

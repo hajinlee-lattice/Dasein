@@ -8,11 +8,12 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,7 @@ public class FileUploadResource {
     @Inject
     private FileUploadService fileUploadService;
 
-    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "application/csv")
+    @GetMapping(value = "{fileName}/import/errors", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     @ApiOperation(value = "Retrieve file import errors")
     public void getImportErrors(@PathVariable String fileName, HttpServletResponse response) {
@@ -48,15 +49,15 @@ public class FileUploadResource {
             throw new LedpException(LedpCode.LEDP_18093, e);
         }
     }
-    
-    @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET, produces = "application/json")
+
+    @GetMapping("{fileName}/metadata")
     @ResponseBody
     @ApiOperation(value = "Retrieve metadata for a source file")
     public Table getMetadataForSourceFile(@PathVariable String fileName) {
         return fileUploadService.getMetadata(fileName);
     }
 
-    @PostMapping(value = "/{fileName:.+}")
+    @PostMapping("/{fileName:.+}")
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public SourceFileInfo uploadFile(

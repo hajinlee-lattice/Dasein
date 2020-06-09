@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "enrich", description = "REST resource for retrieving enrichment values")
 @RestController
-@RequestMapping(value = "/enrich")
+@RequestMapping("/enrich")
 public class EnrichResource extends BaseEnrich {
 
     private static final String ENRICH_RECORD_INSTRUMENT = "EnrichRecord";

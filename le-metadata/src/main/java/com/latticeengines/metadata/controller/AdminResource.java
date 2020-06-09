@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "admin", description = "REST resource for provisioning metadata component")
 @RestController
-@RequestMapping(value = "/admin")
+@RequestMapping("/admin")
 public class AdminResource {
 
     @Inject

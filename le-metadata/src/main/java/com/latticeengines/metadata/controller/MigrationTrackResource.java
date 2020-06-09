@@ -42,20 +42,20 @@ public class MigrationTrackResource {
     @Inject
     private CDLProxy cdlProxy;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     public List<MigrationTrack> getallTracks() {
         return migrationTrackEntityMgr.findAll();
     }
 
-    @GetMapping(value = "/tenants/getByStatus/{status}")
+    @GetMapping("/tenants/getByStatus/{status}")
     @ResponseBody
     public List<Long> getTenantPidsByStatus(@PathVariable(name = "status") MigrationTrack.Status status) {
         return migrationTrackEntityMgr.getTenantPidsByStatus(status);
     }
 
     // get tenant active collection version in migration table
-    @GetMapping(value = "/tenants/{customerSpace}/activeDataCollection/version")
+    @GetMapping("/tenants/{customerSpace}/activeDataCollection/version")
     @ResponseBody
     public DataCollection.Version getActiveDataCollectionVersion(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -66,7 +66,7 @@ public class MigrationTrackResource {
         return migrationTrackEntityMgr.findByTenant(tenant).getDataCollection().getVersion();
     }
 
-    @GetMapping(value = "/tenants/{customerSpace}/tables/{tableName}/canDeleteOrRename")
+    @GetMapping("/tenants/{customerSpace}/tables/{tableName}/canDeleteOrRename")
     @ResponseBody
     public boolean canDeleteOrRenameTable(@PathVariable(name = "customerSpace") String customerSpace,
                                           @PathVariable(name = "tableName") String tableName) {
@@ -78,7 +78,7 @@ public class MigrationTrackResource {
         return migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, tableName);
     }
 
-    @GetMapping(value = "/tenants/{customerSpace}/status")
+    @GetMapping("/tenants/{customerSpace}/status")
     @ResponseBody
     public MigrationTrack.Status getMigrationStatus(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -90,7 +90,7 @@ public class MigrationTrackResource {
         return track == null ? null : track.getStatus();
     }
 
-    @GetMapping(value = "/tenants/{customerSpace}/activeTables")
+    @GetMapping("/tenants/{customerSpace}/activeTables")
     @ResponseBody
     public Map<TableRoleInCollection, String[]> getActiveTables(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -105,7 +105,7 @@ public class MigrationTrackResource {
         return track.getCurActiveTable();
     }
 
-    @PutMapping(value = "/tenants/{customerSpace}/importMigrateTracking")
+    @PutMapping("/tenants/{customerSpace}/importMigrateTracking")
     @ResponseBody
     public Boolean updateImportTracking(@PathVariable(name = "customerSpace") String customerSpace,
                                         @RequestBody ImportMigrateTracking importMigrateTracking) {
@@ -123,7 +123,7 @@ public class MigrationTrackResource {
         return true;
     }
 
-    @PostMapping(value = "/tenants/{customerSpace}/restoreAllTemplates")
+    @PostMapping("/tenants/{customerSpace}/restoreAllTemplates")
     @ResponseBody
     public Boolean restoreAllTemplates(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();

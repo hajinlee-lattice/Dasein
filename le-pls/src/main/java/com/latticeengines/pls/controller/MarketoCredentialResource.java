@@ -6,10 +6,13 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,14 +46,14 @@ public class MarketoCredentialResource {
     @Inject
     private MarketoSoapService marketoSoapService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ApiOperation(value = "Create a marketo credential")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void create(@RequestBody MarketoCredential marketoCredential) {
         marketoCredentialService.createMarketoCredential(marketoCredential);
     }
 
-    @RequestMapping(value = "/{credentialId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{credentialId}")
     @ApiOperation(value = "Get marketo credential by id")
     @ResponseBody
     @PreAuthorize("hasRole('View_PLS_MarketoCredentials')")
@@ -58,7 +61,7 @@ public class MarketoCredentialResource {
         return marketoCredentialService.findMarketoCredentialById(credentialId);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ApiOperation(value = "Get all marketo credentials")
     @ResponseBody
     @PreAuthorize("hasRole('View_PLS_MarketoCredentials')")
@@ -66,7 +69,7 @@ public class MarketoCredentialResource {
         return marketoCredentialService.findAllMarketoCredentials();
     }
 
-    @RequestMapping(value = "/simplified/{credentialId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/simplified/{credentialId}")
     @ApiOperation(value = "Get marketo credential by id")
     @ResponseBody
     public MarketoCredential findSimplified(@PathVariable String credentialId) {
@@ -76,7 +79,7 @@ public class MarketoCredentialResource {
         return marketoCredential;
     }
 
-    @RequestMapping(value = "/simplified", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/simplified")
     @ApiOperation(value = "Get all marketo credentials")
     @ResponseBody
     public List<MarketoCredential> findAllSimplified() {
@@ -88,7 +91,7 @@ public class MarketoCredentialResource {
         return marketoCredentials;
     }
 
-    @RequestMapping(value = "/matchfields", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/matchfields")
     @ApiOperation(value = "Get list of marketo match fields")
     @ResponseBody
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
@@ -100,14 +103,14 @@ public class MarketoCredentialResource {
                 marketoSoapEncryptionKey);
     }
 
-    @RequestMapping(value = "/{credentialId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{credentialId}")
     @ApiOperation(value = "Delete a marketo credential")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void delete(@PathVariable String credentialId) {
         marketoCredentialService.deleteMarketoCredentialById(credentialId);
     }
 
-    @RequestMapping(value = "/{credentialId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{credentialId}")
     @ApiOperation(value = "Updates a marketo credential")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void update(@PathVariable String credentialId,
@@ -115,7 +118,7 @@ public class MarketoCredentialResource {
         marketoCredentialService.updateMarketoCredentialById(credentialId, credential);
     }
 
-    @RequestMapping(value = "/{credentialId}/enrichment", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{credentialId}/enrichment")
     @ApiOperation(value = "Updates a enrichment mathcing fields")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void updateEnrichment(@PathVariable String credentialId,
@@ -127,7 +130,7 @@ public class MarketoCredentialResource {
      * ScoringRequestConfig resources
      * */
 
-    @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{credentialId}/scoring-requests")
     @ApiOperation(value = "Get list of ScoringRequest Configurations")
     @ResponseBody
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
@@ -135,7 +138,7 @@ public class MarketoCredentialResource {
         return scoringRequestConfigService.findAllByMarketoCredential(credentialId);
     }
 
-    @RequestMapping(value = "/{credentialId}/scoring-requests/{configId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{credentialId}/scoring-requests/{configId}")
     @ApiOperation(value = "Get ScoringRequestConfiguration")
     @ResponseBody
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
@@ -155,7 +158,7 @@ public class MarketoCredentialResource {
         }
     }
 
-    @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{credentialId}/scoring-requests")
     @ApiOperation(value = "Creates new ScoringRequestConfiguration")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public ScoringRequestConfig createScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,
@@ -166,7 +169,7 @@ public class MarketoCredentialResource {
         return scoringRequestConfig;
     }
 
-    @RequestMapping(value = "/{credentialId}/scoring-requests/{configId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{credentialId}/scoring-requests/{configId}")
     @ApiOperation(value = "Update ScoringRequestConfiguration")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void updateScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,

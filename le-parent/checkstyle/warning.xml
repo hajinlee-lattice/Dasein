@@ -147,6 +147,14 @@
         <module name="PackageName"/>
         <module name="TypeName"/>
 
+        <!-- Regex -->
+        <!-- should use GetMapping, PostMapping, PutMapping and DeleteMapping -->
+        <module name="Regexp">
+            <property name="format" value="@RequestMapping\(.*method = .*\)"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="ignoreComments" value="true"/>
+        </module>
+
         <!-- Sizes -->
         <module name="AnonInnerLength">
             <property name="max" value="50"/>

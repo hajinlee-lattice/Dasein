@@ -2,9 +2,9 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +26,7 @@ public class InternalResource {
     @Inject
     private SqoopProxy sqoopProxy;
 
-    @RequestMapping(value = "/sqoopimports", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/sqoopimports")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Import data from SQL to HDFS")
@@ -36,7 +36,7 @@ public class InternalResource {
         return sqoopProxy.importData(importer);
     }
 
-    @RequestMapping(value = "/sqoopexports", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/sqoopexports")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Export data from HDFS to SQL")

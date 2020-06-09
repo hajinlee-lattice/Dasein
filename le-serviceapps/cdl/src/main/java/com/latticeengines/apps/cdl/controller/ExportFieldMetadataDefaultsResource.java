@@ -30,7 +30,7 @@ public class ExportFieldMetadataDefaultsResource {
     @Inject
     private ExportFieldMetadataDefaultsService exportFieldMetadataDefaultsService;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Add new default fields")
     @NoCustomerSpace
@@ -39,7 +39,7 @@ public class ExportFieldMetadataDefaultsResource {
         return exportFieldMetadataDefaultsService.createDefaultExportFields(defaultExportFields);
     }
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get default fields by system name")
     @NoCustomerSpace
@@ -48,7 +48,7 @@ public class ExportFieldMetadataDefaultsResource {
         return exportFieldMetadataDefaultsService.getAllAttributes(systemName);
     }
 
-    @PutMapping(value = "")
+    @PutMapping
     @ResponseBody
     @ApiOperation(value = "Update default fields by system name")
     @NoCustomerSpace
@@ -58,7 +58,7 @@ public class ExportFieldMetadataDefaultsResource {
         return exportFieldMetadataDefaultsService.updateDefaultFields(systemName, defaultExportFields);
     }
 
-    @DeleteMapping(value = "")
+    @DeleteMapping
     @ResponseBody
     @ApiOperation(value = "Delete default fields")
     @NoCustomerSpace

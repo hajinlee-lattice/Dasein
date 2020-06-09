@@ -13,10 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -104,7 +105,7 @@ public class ModelResource {
     @Resource(name = "distCpConfiguration")
     private Configuration distCpConfiguration;
 
-    @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
+    @PostMapping("/{modelName}")
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
     public ResponseDocument<String> model(@PathVariable String modelName, //
@@ -114,7 +115,7 @@ public class ModelResource {
                 .successResponse(cdlModelProxy.model(MultiTenantContext.getTenant().getId(), modelName, parameters));
     }
 
-    @RequestMapping(value = "/rating/{modelName}", method = RequestMethod.POST)
+    @PostMapping("/rating/{modelName}")
     @ResponseBody
     @ApiOperation(value = "Generate a cross sell model from the table name(or query) and parameters. Returns the job id.")
     public ResponseDocument<String> crossSellModel(@PathVariable String modelName, //
@@ -129,7 +130,7 @@ public class ModelResource {
         }
     }
 
-    @RequestMapping(value = "/rating/{modelName}/clone", method = RequestMethod.POST)
+    @PostMapping("/rating/{modelName}/clone")
     @ResponseBody
     @ApiOperation(value = "Clones and remodels with the specified model name.")
     public ResponseDocument<String> ratingEngineCloneAndRemodel(@PathVariable String modelName,
@@ -145,7 +146,7 @@ public class ModelResource {
         }
     }
 
-    @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)
+    @PostMapping("/{modelName}/clone")
     @ResponseBody
     @ApiOperation(value = "Clones and remodels with the specified model name.")
     @PreAuthorize("hasRole('Edit_PLS_Refine_Clone')")
@@ -205,7 +206,7 @@ public class ModelResource {
         }
     }
 
-    @RequestMapping(value = "/pmml/{modelName}", method = RequestMethod.POST)
+    @PostMapping("/pmml/{modelName}")
     @ResponseBody
     @ApiOperation(value = "Generate a PMML model from the supplied module. Returns the job id.")
     public ResponseDocument<String> modelForPmml(@PathVariable String modelName, //
@@ -227,7 +228,7 @@ public class ModelResource {
 
     }
 
-    @RequestMapping(value = "/copymodel/{modelId}", method = RequestMethod.POST)
+    @PostMapping("/copymodel/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Copy a model from current tenant to target tenant.")
     public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
@@ -238,7 +239,7 @@ public class ModelResource {
         return ResponseDocument.successResponse(true);
     }
 
-    @RequestMapping(value = "/replacemodel/{sourceModelId}", method = RequestMethod.POST)
+    @PostMapping("/replacemodel/{sourceModelId}")
     @ResponseBody
     @ApiOperation(value = "Use source tenant's model to replace target tenant's model.")
     public ResponseDocument<Boolean> replaceModel(@PathVariable String sourceModelId,
@@ -250,7 +251,7 @@ public class ModelResource {
                         targetModelId));
     }
 
-    @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/reviewmodel/{modelName}/{eventTableName}")
     @ResponseBody
     @ApiOperation(value = "Get the model review data rules and rule output for the model")
     public ResponseDocument<ModelReviewData> getModelReviewData(@PathVariable String modelName,
@@ -259,14 +260,14 @@ public class ModelResource {
         return ResponseDocument.successResponse(metadataProxy.getReviewData(tenant.getId(), modelName, eventTableName));
     }
 
-    @RequestMapping(value = "/modelreview/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modelreview/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get the data rules for model")
     public ResponseDocument<List<DataRule>> getDataRules(@PathVariable String modelId) throws IOException {
         return ResponseDocument.successResponse(modelMetadataService.getEventTableFromModelId(modelId).getDataRules());
     }
 
-    @RequestMapping(value = "/modelreview/attributes/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modelreview/attributes/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get customer provided attributes for model")
     public ResponseDocument<List<VdbMetadataField>> getModelAttributes(@PathVariable String modelId) {
@@ -276,35 +277,35 @@ public class ModelResource {
                         SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation())));
     }
 
-    @RequestMapping(value = "/reviewmodel/column", method = RequestMethod.POST)
+    @PostMapping("/reviewmodel/column")
     @ResponseBody
     @ApiOperation(value = "Create the column results")
     public ResponseDocument<Boolean> createModelColumnResults(@RequestBody List<ColumnRuleResult> columnRuleResults) {
         return ResponseDocument.successResponse(metadataProxy.createColumnResults(columnRuleResults));
     }
 
-    @RequestMapping(value = "/reviewmodel/row", method = RequestMethod.POST)
+    @PostMapping("/reviewmodel/row")
     @ResponseBody
     @ApiOperation(value = "Create the row results")
     public ResponseDocument<Boolean> createModelRowResults(@RequestBody List<RowRuleResult> rowRuleResults) {
         return ResponseDocument.successResponse(metadataProxy.createRowResults(rowRuleResults));
     }
 
-    @RequestMapping(value = "/reviewmodel/column/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/reviewmodel/column/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get the column results")
     public ResponseDocument<List<ColumnRuleResult>> getColumnRuleResults(@PathVariable String modelId) {
         return ResponseDocument.successResponse(metadataProxy.getColumnResults(modelId));
     }
 
-    @RequestMapping(value = "/reviewmodel/row/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/reviewmodel/row/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get the row results")
     public ResponseDocument<List<RowRuleResult>> getRowRuleResults(@PathVariable String modelId) {
         return ResponseDocument.successResponse(metadataProxy.getRowResults(modelId));
     }
 
-    @RequestMapping(value = "/cleanup/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/cleanup/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Clean up model")
     public ResponseDocument<Boolean> cleanUpModel(@PathVariable String modelId) {

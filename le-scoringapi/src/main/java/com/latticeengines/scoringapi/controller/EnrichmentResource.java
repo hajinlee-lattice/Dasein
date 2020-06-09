@@ -6,9 +6,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +28,7 @@ import io.swagger.annotations.ApiParam;
 
 @Api(value = "enrichment", description = "REST resource for enrichment configuration")
 @RestController
-@RequestMapping(value = "/enrichment")
+@RequestMapping("/enrichment")
 public class EnrichmentResource {
 
     @Inject
@@ -38,15 +37,11 @@ public class EnrichmentResource {
     @Inject
     private BatonService batonService;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
     @Inject
     private PlsInternalProxy plsInternalProxy;
 
     // ------------START for LeadEnrichment-------------------//
-    @RequestMapping(value = "/categories", method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/categories")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
@@ -54,8 +49,7 @@ public class EnrichmentResource {
         return plsInternalProxy.getLeadEnrichmentCategories(customerSpace);
     }
 
-    @RequestMapping(value = "/subcategories", method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/subcategories")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
@@ -65,29 +59,7 @@ public class EnrichmentResource {
         return plsInternalProxy.getLeadEnrichmentSubcategories(customerSpace, category);
     }
 
-    // NOTE - anoop - based on discussion with Jeff, we'enable put operation if
-    // PM ask for it
-    // @RequestMapping(value = "", //
-    // method = RequestMethod.PUT, //
-    // headers = "Accept=application/json")
-    // @ResponseBody
-    // @ApiOperation(value = "Save lead enrichment selection")
-    // public void saveLeadEnrichmentAttributes(HttpServletRequest request, //
-    // @ApiParam(value = "Update lead enrichment selection", required = true) //
-    // @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
-    // try {
-    // CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request,
-    // oAuthUserEntityMgr);
-    // internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace,
-    // attributes);
-    // } catch (Exception e) {
-    // throw new LedpException(LedpCode.LEDP_31112, new String[] {
-    // e.getMessage() });
-    // }
-    // }
-
-    @RequestMapping(method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping()
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with specified query parameters")
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request,
@@ -122,9 +94,7 @@ public class EnrichmentResource {
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 
-    @RequestMapping(value = "/count", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/count")
     @ResponseBody
     @ApiOperation(value = "Get count of attributes with specified query parameters")
     public int getLeadEnrichmentAttributesCount(HttpServletRequest request,
@@ -152,9 +122,7 @@ public class EnrichmentResource {
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 
-    @RequestMapping(value = "/premiumattributeslimitation", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/premiumattributeslimitation")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
@@ -162,9 +130,7 @@ public class EnrichmentResource {
         return plsInternalProxy.getPremiumAttributesLimitation(customerSpace);
     }
 
-    @RequestMapping(value = "/selectedattributes/count", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/selectedattributes/count")
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request) {
@@ -173,9 +139,7 @@ public class EnrichmentResource {
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 
-    @RequestMapping(value = "/selectedpremiumattributes/count", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping("/selectedpremiumattributes/count")
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {

@@ -4,9 +4,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +18,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "jobs", description = "REST resource for all jobs")
+@Api(value = "REST resource for all jobs")
 @RestController
 public class JobResource implements JobInterface {
     @SuppressWarnings("unused")
@@ -32,7 +31,7 @@ public class JobResource implements JobInterface {
     }
 
     @Override
-    @RequestMapping(value = "/jobs/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/jobs/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     public JobStatus getJobStatus(@PathVariable String applicationId) {
@@ -44,7 +43,7 @@ public class JobResource implements JobInterface {
     }
 
     @Override
-    @RequestMapping(value = "/jobs/{applicationId}/counters", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/jobs/{applicationId}/counters")
     @ResponseBody
     @ApiOperation(value = "Get job counters for a completed mapreduce job")
     public Counters getMRJobCounters(@PathVariable String applicationId) {

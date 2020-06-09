@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks")
+@RequestMapping("/customerspaces/{customerSpace}/datacollection/datafeed/tasks")
 public class DataFeedTaskController {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskController.class);
@@ -55,7 +54,7 @@ public class DataFeedTaskController {
         this.dataFeedTaskManagerService = dataFeedTaskManagerService;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
@@ -71,7 +70,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/create")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
@@ -96,7 +95,7 @@ public class DataFeedTaskController {
 
     }
 
-    @RequestMapping(value = "/import/{taskIdentifier}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/import/{taskIdentifier}")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
@@ -107,7 +106,7 @@ public class DataFeedTaskController {
         return startImportJob(customerSpace, taskIdentifier, false, vdbImportConfig);
     }
 
-    @RequestMapping(value = "/import/internal/{taskIdentifier}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/import/internal/{taskIdentifier}")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
@@ -130,7 +129,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @RequestMapping(value = "/s3import", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/s3import")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     @NoCustomerSpace
@@ -146,7 +145,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/reset")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
     public ResponseDocument<Boolean> resetImport(@PathVariable String customerSpace,
@@ -159,7 +158,7 @@ public class DataFeedTaskController {
 
     }
 
-    @PostMapping(value = "/setup/webvisit")
+    @PostMapping("/setup/webvisit")
     @ResponseBody
     @ApiOperation(value = "Create a WebVisit template")
     public ResponseDocument<Boolean> createWebVisitTemplate(
@@ -188,7 +187,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/setup/webvisit2")
+    @PostMapping("/setup/webvisit2")
     @ResponseBody
     @ApiOperation(value = "Create a WebVisit template with IW 2.0")
     public ResponseDocument<Boolean> createWebVisitTemplate2(
@@ -217,7 +216,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/backup/{uniqueTaskId}")
+    @PostMapping("/backup/{uniqueTaskId}")
     @ResponseBody
     @ApiOperation(value = "Back up template to S3")
     public ResponseDocument<String> backupTemplate(@PathVariable String customerSpace,
@@ -230,7 +229,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/restore/{uniqueTaskId}")
+    @PostMapping("/restore/{uniqueTaskId}")
     @ResponseBody
     @ApiOperation(value = "Read table from backup file")
     public ResponseDocument<Table> restoreTemplate(@PathVariable String customerSpace,
@@ -245,7 +244,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/diagnostic/{taskIdentifier}")
+    @PostMapping("/diagnostic/{taskIdentifier}")
     @ResponseBody
     @ApiOperation(value = "Template diagnostic")
     public ResponseDocument<ImportTemplateDiagnostic> templateDiagnostic(@PathVariable String customerSpace,
@@ -253,7 +252,7 @@ public class DataFeedTaskController {
         return ResponseDocument.successResponse(dataFeedTaskManagerService.diagnostic(customerSpace, taskIdentifier));
     }
 
-    @PostMapping(value = "/setup/defaultOpportunity")
+    @PostMapping("/setup/defaultOpportunity")
     @ResponseBody
     @ApiOperation(value = "Create a default opportunity template")
     public ResponseDocument<Boolean> createDefaultOpportunityTemplate(@PathVariable String customerSpace,
@@ -283,7 +282,7 @@ public class DataFeedTaskController {
     }
 
 
-    @PostMapping(value = "/setup/opportunity")
+    @PostMapping("/setup/opportunity")
     @ResponseBody
     @ApiOperation(value = "Create a opportunity template")
     public ResponseDocument<Boolean> createOpportunityTemplate(@PathVariable String customerSpace,
@@ -315,7 +314,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/setup/defaultMarketing")
+    @PostMapping("/setup/defaultMarketing")
     @ResponseBody
     @ApiOperation(value = "Create a default marketing template")
     public ResponseDocument<Boolean> createDefaultMarketingTemplate(@PathVariable String customerSpace,
@@ -346,7 +345,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/setup/marketing")
+    @PostMapping("/setup/marketing")
     @ResponseBody
     @ApiOperation(value = "Create a marketing template")
     public ResponseDocument<Boolean> createMarketingTemplate(@PathVariable String customerSpace,
@@ -379,7 +378,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/setup/defaultDnbIntentData")
+    @PostMapping("/setup/defaultDnbIntentData")
     @ResponseBody
     @ApiOperation(value = "Create a default DnbIntentData template")
     public ResponseDocument<Boolean> createDefaultDnbIntentDataTemplate(@PathVariable String customerSpace,
@@ -399,7 +398,7 @@ public class DataFeedTaskController {
         }
     }
 
-    @PostMapping(value = "/setup/dnbIntentData")
+    @PostMapping("/setup/dnbIntentData")
     @ResponseBody
     @ApiOperation(value = "Create a DnbIntentData template")
     public ResponseDocument<Boolean> createDnbIntentDataTemplate(@PathVariable String customerSpace,

@@ -38,7 +38,7 @@ public class RatingResource {
         this.ratingQueryService = ratingQueryService;
     }
 
-    @PostMapping(value = "/count")
+    @PostMapping("/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -50,7 +50,7 @@ public class RatingResource {
         return ratingQueryService.getCount(frontEndQuery, version, sqlUser);
     }
 
-    @PostMapping(value = "/data")
+    @PostMapping("/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -60,7 +60,7 @@ public class RatingResource {
         return ratingQueryService.getData(frontEndQuery, version, finalSqlUser);
     }
 
-    @PostMapping(value = "/query")
+    @PostMapping("/query")
     @ResponseBody
     @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -69,7 +69,7 @@ public class RatingResource {
         return ratingQueryService.getQueryStr(frontEndQuery, version, BATCH_USER);
     }
 
-    @PostMapping(value = "/coverage")
+    @PostMapping("/coverage")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rating count for the specified query")
     @InvocationMeter(name ="rating-rating-coverage", measurment = "objectapi")

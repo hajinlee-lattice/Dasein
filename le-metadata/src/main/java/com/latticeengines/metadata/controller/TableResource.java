@@ -39,14 +39,14 @@ public class TableResource extends BaseRestResource {
     @Inject
     private TableResourceHelper tableResourceHelper;
 
-    @GetMapping(value = "/tables")
+    @GetMapping("/tables")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public List<String> getTables(@PathVariable String customerSpace) {
         return tableResourceHelper.getTables(customerSpace);
     }
 
-    @GetMapping(value = "/tables/{tableName}")
+    @GetMapping("/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName,
@@ -54,14 +54,14 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.getTable(customerSpace, tableName, includeAttributes);
     }
 
-    @GetMapping(value = "/tables/{tableName}/attribute_count")
+    @GetMapping("/tables/{tableName}/attribute_count")
     @ResponseBody
     @ApiOperation(value = "Get table columns by name")
     public Long getTableColumnCount(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTableAttributeCount(customerSpace, tableName);
     }
 
-    @GetMapping(value = "/tables/{tableName}/attributes")
+    @GetMapping("/tables/{tableName}/attributes")
     @ResponseBody
     @ApiOperation(value = "Get table columns by name")
     public List<Attribute> getTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
@@ -73,14 +73,14 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.getTableAttributes(customerSpace, tableName, pageRequest);
     }
 
-    @GetMapping(value = "/tables/{tableName}/metadata")
+    @GetMapping("/tables/{tableName}/metadata")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
     public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTableMetadata(customerSpace, tableName);
     }
 
-    @PostMapping(value = "/tables/{tableName}")
+    @PostMapping("/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create table")
     public Boolean createTable(@PathVariable String customerSpace, //
@@ -89,7 +89,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.createTable(customerSpace, tableName, table);
     }
 
-    @PostMapping(value = "/tables/{tableName}/attributes")
+    @PostMapping("/tables/{tableName}/attributes")
     @ResponseBody
     @ApiOperation(value = "Add table attributes")
     public Boolean createTableAttributes(@PathVariable String customerSpace, //
@@ -98,7 +98,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.createTableAttributes(customerSpace, tableName, attributes);
     }
 
-    @PostMapping(value = "/tables/{tableName}/fixattributes")
+    @PostMapping("/tables/{tableName}/fixattributes")
     @ResponseBody
     @ApiOperation(value = "Fix table attributes")
     public Boolean fixTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
@@ -106,7 +106,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.fixTableAttributes(customerSpace, tableName, attributeFixerList);
     }
 
-    @PutMapping(value = "/tables/{tableName}")
+    @PutMapping("/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Update table")
     public Boolean updateTable(@PathVariable String customerSpace, //
@@ -115,7 +115,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
 
-    @PostMapping(value = "/tables/{tableName}/rename/{newTableName}")
+    @PostMapping("/tables/{tableName}/rename/{newTableName}")
     @ResponseBody
     @ApiOperation(value = "Update table")
     public Boolean renameTable(@PathVariable String customerSpace, //
@@ -124,7 +124,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.renameTable(customerSpace, tableName, newTableName);
     }
 
-    @DeleteMapping(value = "/tables/{tableName}")
+    @DeleteMapping("/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Delete table and cleanup data dir")
     public Boolean deleteTable(@PathVariable String customerSpace, //
@@ -132,7 +132,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.deleteTableAndCleanup(customerSpace, tableName);
     }
 
-    @PostMapping(value = "/tables/{tableName}/clone")
+    @PostMapping("/tables/{tableName}/clone")
     @ResponseBody
     @ApiOperation(value = "Clone table and underlying extracts")
     public Table cloneTable(@PathVariable String customerSpace, //
@@ -141,7 +141,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.cloneTable(customerSpace, tableName, ignoreExtracts);
     }
 
-    @PostMapping(value = "/tables/{tableName}/copy")
+    @PostMapping("/tables/{tableName}/copy")
     @ResponseBody
     @ApiOperation(value = "Copy table and underlying extracts")
     public Table copyTable(@PathVariable String customerSpace, //
@@ -150,7 +150,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.copyTable(customerSpace, targetCustomerSpace, tableName);
     }
 
-    @PostMapping(value = "/tables/{tableName}/storage")
+    @PostMapping("/tables/{tableName}/storage")
     @ResponseBody
     @ApiOperation(value = "Add a storage mechanism")
     public Boolean addStorageMechanism(@PathVariable String customerSpace, //
@@ -159,14 +159,14 @@ public class TableResource extends BaseRestResource {
         return true;
     }
 
-    @PostMapping(value = "/tables/reset")
+    @PostMapping("/tables/reset")
     @ResponseBody
     @ApiOperation(value = "Reset tables")
     public Boolean resetTables(@PathVariable String customerSpace) {
         return tableResourceHelper.resetTables(customerSpace);
     }
 
-    @PostMapping(value = "/validations")
+    @PostMapping("/validations")
     @ResponseBody
     @ApiOperation(value = "Validate metadata")
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
@@ -174,7 +174,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.validateMetadata(customerSpace, metadata);
     }
 
-    @PutMapping(value = "/tables/{tableName}/policy")
+    @PutMapping("/tables/{tableName}/policy")
     @ResponseBody
     @ApiOperation(value = "Update table retention policy")
     public Boolean updateTableRetentionPolicy(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName,
@@ -182,7 +182,7 @@ public class TableResource extends BaseRestResource {
         return tableResourceHelper.updateTableRetentionPolicy(customerSpace, tableName, retentionPolicy);
     }
 
-    @PutMapping(value = "/tables/policy/updatepolicies")
+    @PutMapping("/tables/policy/updatepolicies")
     @ResponseBody
     @ApiOperation(value = "batch update table retention policy")
     public Boolean updateTableRetentionPolicies(@PathVariable String customerSpace,

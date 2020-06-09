@@ -1,13 +1,12 @@
 package com.latticeengines.dataflowapi.controller;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,11 +26,10 @@ public class DataFlowResource implements DataFlowInterface {
     @Inject
     private DataFlowService dataFlowService;
 
-    @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create a data flow submission")
     public AppSubmission submitDataFlowExecution(@RequestBody DataFlowConfiguration dataFlowConfig) {
-        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { dataFlowService
-                .submitDataFlow(dataFlowConfig) }));
+        return new AppSubmission(Collections.singletonList(dataFlowService.submitDataFlow(dataFlowConfig)));
     }
 }

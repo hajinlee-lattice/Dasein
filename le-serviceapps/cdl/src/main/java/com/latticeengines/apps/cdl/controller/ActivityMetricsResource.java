@@ -35,7 +35,7 @@ public class ActivityMetricsResource {
     private ActivityMetricsGroupService activityMetricsGroupService;
 
     // For P&A profiling purchase history
-    @GetMapping(value = "/{type}")
+    @GetMapping("/{type}")
     @ApiOperation(value = "Get all the metrics for specific activity type")
     public List<ActivityMetrics> getActivityMetrics(@PathVariable String customerSpace,
             @PathVariable ActivityType type) {
@@ -43,14 +43,14 @@ public class ActivityMetricsResource {
     }
 
     // For metrics configuration
-    @GetMapping(value = "/{type}/active")
+    @GetMapping("/{type}/active")
     @ApiOperation(value = "Get all the active metrics for specific activity type")
     public List<ActivityMetrics> getActiveActivityMetrics(@PathVariable String customerSpace,
             @PathVariable ActivityType type) {
         return metricsService.findActiveWithType(type);
     }
 
-    @PostMapping(value = "/{type}")
+    @PostMapping("/{type}")
     @ApiOperation(value = "Save purchase metrics")
     public ActivityMetricsWithAction saveActivityMetrics(@PathVariable String customerSpace,
             @PathVariable ActivityType type, @RequestBody List<ActivityMetrics> metrics) {
@@ -59,7 +59,7 @@ public class ActivityMetricsResource {
         return new ActivityMetricsWithAction(saved, action);
     }
 
-    @PostMapping(value = "/setupDefaultWebVisitProfile")
+    @PostMapping("/setupDefaultWebVisitProfile")
     @ApiOperation(value = "Setup default web visit metric groups for total visit and source medium")
     public Boolean setupDefaultWebVisitProfile(@PathVariable String customerSpace,
             @RequestBody String streamName) {
@@ -70,7 +70,7 @@ public class ActivityMetricsResource {
         return true;
     }
 
-    @PostMapping(value = "/setupDefaultOpportunityProfile")
+    @PostMapping("/setupDefaultOpportunityProfile")
     @ApiOperation(value = "Setup default opportunity metric groups for opportunity by stage")
     public Boolean setupDefaultOpportunityProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
         ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(customerSpace,

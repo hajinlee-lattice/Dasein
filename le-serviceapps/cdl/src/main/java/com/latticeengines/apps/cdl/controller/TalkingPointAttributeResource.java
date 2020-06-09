@@ -6,10 +6,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,14 +31,14 @@ public class TalkingPointAttributeResource {
     @Inject
     private TalkingPointAttributeService talkingPointAttributeService;
 
-    @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
+    @GetMapping("/accountattributes")
     @ResponseBody
     @ApiOperation(value = "Get account attributes for this tenant")
     public List<TalkingPointAttribute> getAccountAttributes(@PathVariable String customerSpace) {
         return talkingPointAttributeService.getAccountAttributes();
     }
 
-    @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
+    @GetMapping("/recommendationattributes")
     @ResponseBody
     @ApiOperation(value = "Get recommendation attributes")
     public List<TalkingPointAttribute> getRecommendationAttributes(
@@ -45,7 +46,7 @@ public class TalkingPointAttributeResource {
         return talkingPointAttributeService.getRecommendationAttributes();
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Get attributes for given notions")
     public TalkingPointNotionAttributes getAttributesByNotions(@PathVariable String customerSpace,

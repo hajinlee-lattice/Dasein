@@ -33,63 +33,63 @@ public class SourceFileResource {
     // use request param instead of path variable
     // because if file name has extension (.csv)
     // spring will confused with its json representation
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Find source file by name")
     public SourceFile findByName(@PathVariable String customerSpace, @RequestParam(name = "name") String name) {
         return sourceFileService.findByName(name);
     }
 
-    @GetMapping(value = "/tablename/{tableName}")
+    @GetMapping("/tablename/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Find source file by table name")
     public SourceFile findByTableName(@PathVariable String customerSpace, @PathVariable String tableName) {
         return sourceFileService.findByTableName(tableName);
     }
 
-    @GetMapping(value = "/applicationid/{applicationId}")
+    @GetMapping("/applicationid/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Find source file by application Id")
     public SourceFile findByApplicationId(@PathVariable String customerSpace, @PathVariable String applicationId) {
         return sourceFileService.findByApplicationId(applicationId);
     }
 
-    @GetMapping(value = "/workflowpid/{workflowPid}")
+    @GetMapping("/workflowpid/{workflowPid}")
     @ResponseBody
     @ApiOperation(value = "Find source file by workflow pid")
     public SourceFile findByWorkflowPid(@PathVariable String customerSpace, @PathVariable String workflowPid) {
         return sourceFileService.findByWorkflowPid(Long.parseLong(workflowPid));
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create source file")
     public void create(@PathVariable String customerSpace, @RequestBody SourceFile sourceFile) {
         sourceFileService.create(sourceFile);
     }
 
-    @PutMapping(value = "")
+    @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "Update source file")
     public void update(@PathVariable String customerSpace, @RequestBody SourceFile sourceFile) {
         sourceFileService.update(sourceFile);
     }
 
-    @DeleteMapping(value = "/name/{name:.+}")
+    @DeleteMapping("/name/{name:.+}")
     @ResponseBody
     @ApiOperation(value = "Delete source file by name")
     public void delete(@PathVariable String customerSpace, @PathVariable String name) {
         sourceFileService.delete(name);
     }
 
-    @PostMapping(value = "/copy")
+    @PostMapping("/copy")
     @ResponseBody
     @ApiOperation(value = "Copy source file to the target tenant")
     public void copySourceFile(@PathVariable String customerSpace, @RequestBody CopySourceFileRequest request) {
         sourceFileService.copySourceFile(request);
     }
 
-    @PostMapping(value = "/fromS3")
+    @PostMapping("/fromS3")
     @ApiOperation(value = "Get file inputStream from s3")
     public ResponseDocument<SourceFile> createSourceFileFromS3(@PathVariable String customerSpace,
                                                               @RequestParam(value = "entity") String entity,

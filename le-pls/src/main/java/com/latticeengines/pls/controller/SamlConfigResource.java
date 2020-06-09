@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,7 +45,7 @@ public class SamlConfigResource {
     @Inject
     private SamlConfigProxy samlConfigProxy;
 
-    @RequestMapping(value = "/sp-uri-info", method = RequestMethod.GET)
+    @GetMapping("/sp-uri-info")
     @ResponseBody
     @ApiOperation(value = "Get Service Provider URI Info")
     public ServiceProviderURIInfo getSPUriInfo(HttpServletRequest request) {
@@ -61,7 +63,7 @@ public class SamlConfigResource {
         return spUriInfo;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get SSO/Saml configuration")
     public IdentityProvider getConfig() {
@@ -70,7 +72,7 @@ public class SamlConfigResource {
         return samlConfigProxy.getConfig(tenantId);
     }
 
-    @RequestMapping(value = "/validate", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/validate")
     @ResponseBody
     @ApiOperation(value = "Validate SSO/Saml configuration")
     public IdpMetadataValidationResponse validateConfig(@RequestBody IdentityProvider identityProvider) {
@@ -79,7 +81,7 @@ public class SamlConfigResource {
         return samlConfigProxy.validateMetadata(tenantId, identityProvider);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create SSO/Saml configuration")
     public void createConfig(@RequestBody IdentityProvider identityProvider) {
@@ -88,7 +90,7 @@ public class SamlConfigResource {
         samlConfigProxy.saveConfig(tenantId, identityProvider);
     }
 
-    @RequestMapping(value = "/{configId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{configId}")
     @ResponseBody
     @ApiOperation(value = "Delete SSO/Saml configuration")
     public void deleteConfig(@PathVariable String configId) {

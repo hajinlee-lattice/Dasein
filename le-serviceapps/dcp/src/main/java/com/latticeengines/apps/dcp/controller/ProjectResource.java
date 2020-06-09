@@ -27,13 +27,13 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "project", description = "REST resource for project")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/project")
+@RequestMapping("/customerspaces/{customerSpace}/project")
 public class ProjectResource {
 
     @Inject
     private ProjectService projectService;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create an Project")
     public ResponseDocument<ProjectDetails> createProject(@PathVariable String customerSpace,
@@ -54,7 +54,7 @@ public class ProjectResource {
         }
     }
 
-    @GetMapping(value = "/list")
+    @GetMapping("/list")
     @ResponseBody
     @ApiOperation(value = "Get all projects")
     @UseReaderConnection
@@ -62,7 +62,7 @@ public class ProjectResource {
         return projectService.getAllProject(customerSpace);
     }
 
-    @GetMapping(value = "/projectId/{projectId}")
+    @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
     @UseReaderConnection
@@ -70,7 +70,7 @@ public class ProjectResource {
         return projectService.getProjectDetailByProjectId(customerSpace, projectId);
     }
 
-    @DeleteMapping(value = "/{projectId}")
+    @DeleteMapping("/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Delete project by projectId")
     public Boolean deleteProject(@PathVariable String customerSpace, @PathVariable String projectId) {

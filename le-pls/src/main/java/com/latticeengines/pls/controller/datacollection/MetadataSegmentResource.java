@@ -104,7 +104,7 @@ public class MetadataSegmentResource {
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
     }
 
-    @PutMapping(value = "/{segmentName}/counts")
+    @PutMapping("/{segmentName}/counts")
     @ResponseBody
     @ApiOperation(value = "Update counts for a segment")
     public Map<BusinessEntity, Long> updateSegmentCounts(@PathVariable String segmentName) {

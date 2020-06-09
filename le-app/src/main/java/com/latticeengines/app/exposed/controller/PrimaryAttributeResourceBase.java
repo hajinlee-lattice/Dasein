@@ -3,8 +3,7 @@ package com.latticeengines.app.exposed.controller;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.latticeengines.app.exposed.service.PrimaryAttributeService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -22,7 +21,7 @@ public class PrimaryAttributeResourceBase {
     @Inject
     private PrimaryAttributeService attributeService;
 
-    @RequestMapping(value = "/primaryfield-configuration", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/primaryfield-configuration")
     @ApiOperation(value = "Provides all matching attributes and its validation expression that are required for Scoring, Company Lookup API using Global Field Mappings")
     public PrimaryFieldConfiguration getPrimaryAttributeConfiguration(HttpServletRequest request) {
             PrimaryFieldConfiguration primaryConfig = new  PrimaryFieldConfiguration();

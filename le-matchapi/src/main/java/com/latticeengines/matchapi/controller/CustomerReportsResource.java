@@ -4,10 +4,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +27,7 @@ public class CustomerReportsResource {
     @Inject
     private CustomerReportService customerReportService;
 
-    @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
     public Boolean createCustomerReport(@RequestBody CustomerReport report) {
@@ -35,7 +36,7 @@ public class CustomerReportsResource {
         return Boolean.TRUE;
     }
 
-    @RequestMapping(value = "/{customerId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{customerId}")
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
     public CustomerReport getById(@PathVariable String customerId) {

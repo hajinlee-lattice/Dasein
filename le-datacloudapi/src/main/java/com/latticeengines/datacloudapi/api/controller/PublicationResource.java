@@ -5,9 +5,9 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +30,7 @@ public class PublicationResource {
     private PublicationService publicationService;
 
     @Deprecated // No use in production
-    @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Scan all publication progresses that can be proceeded. "
             + "url parameter podid is for testing purpose.")
@@ -40,7 +40,7 @@ public class PublicationResource {
     }
 
     @Deprecated // No use in production
-    @RequestMapping(value = "/internal/{publicationName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/internal/{publicationName}")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Forcefully trigger a new publication for a source at its latest version. "
@@ -52,7 +52,7 @@ public class PublicationResource {
         return publicationService.kickoff(publicationName, publicationRequest);
     }
 
-    @RequestMapping(value = "/{publicationName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{publicationName}")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Forcefully trigger a new publication for a source at its latest version. "

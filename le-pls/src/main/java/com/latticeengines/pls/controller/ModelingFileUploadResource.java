@@ -16,10 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,7 +90,7 @@ public class ModelingFileUploadResource {
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public ResponseDocument<SourceFile> uploadFile( //
@@ -105,7 +106,7 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(response);
     }
 
-    @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
+    @PostMapping("/unnamed")
     @ResponseBody
     @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
     public ResponseDocument<SourceFile> uploadFile( //
@@ -119,7 +120,7 @@ public class ModelingFileUploadResource {
                 entity, file, outsizeFlag);
     }
 
-    @RequestMapping(value = "{sourceFileName}/fieldmappings", method = RequestMethod.POST)
+    @PostMapping("{sourceFileName}/fieldmappings")
     @ResponseBody
     @ApiOperation(value = "Decides if the csv is a lead or model based. Returned the best mapping and unknown columns as well as lattice fields")
     public ResponseDocument<FieldMappingDocument> getFieldMappings( //
@@ -150,7 +151,7 @@ public class ModelingFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "/validate", method = RequestMethod.POST)
+    @PostMapping("/validate")
     @ResponseBody
     @ApiOperation(value = "Validate csv field mapping.")
     public FieldValidationResult validateFieldMappingDocumnet( //
@@ -163,7 +164,7 @@ public class ModelingFileUploadResource {
                         feedType);
     }
 
-    @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
+    @PostMapping("fieldmappings")
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
             @RequestParam(value = "displayName") String csvFileName,
@@ -185,7 +186,7 @@ public class ModelingFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "latticeschema", method = RequestMethod.GET)
+    @GetMapping("latticeschema")
     @ResponseBody
     @ApiOperation(value = "return a map from account and lead to the lattice attribute fields")
     public ResponseDocument<Map<SchemaInterpretation, List<LatticeSchemaField>>> getLatticeSchemaFieldMap(
@@ -211,7 +212,7 @@ public class ModelingFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "/dateformat", method = RequestMethod.GET)
+    @GetMapping("/dateformat")
     @ResponseBody
     @ApiOperation(value = "return supported date/time format and timezone.")
     public ResponseDocument<AvailableDateFormat> getSupportedDateTimeFormat() {
@@ -222,7 +223,7 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(availableDateFormat);
     }
 
-    @RequestMapping(value = "/uploaddeletefiletemplate", method = RequestMethod.POST)
+    @PostMapping("/uploaddeletefiletemplate")
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public ResponseDocument<SourceFile> uploadDeleteFileTemplate( //
@@ -271,7 +272,7 @@ public class ModelingFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "/cdlexternalsystems", method = RequestMethod.GET)
+    @GetMapping("/cdlexternalsystems")
     @ResponseBody
     @ApiOperation(value = "return a map with all existed external systems.")
     public ResponseDocument<Map<String, List<String>>> getCDLExternalSystemMap(
@@ -292,7 +293,7 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(result);
     }
 
-    @RequestMapping(value = "/importFile", method = RequestMethod.POST)
+    @PostMapping("/importFile")
     @ResponseBody
     @ApiOperation(value = "Import a file from s3")
     public ResponseDocument<SourceFile> importFile( //

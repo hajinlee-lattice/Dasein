@@ -54,7 +54,7 @@ public class ColumnMetadataResource {
     @Resource(name = "localCacheService")
     private CacheService localCacheService;
 
-    @GetMapping(value = "/predefined/{selectName}")
+    @GetMapping("/predefined/{selectName}")
     @ResponseBody
     @ApiOperation(value = "Available choices for selectName are LeadEnrichment, DerivedColumns and Model (case-sensitive)")
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
@@ -70,14 +70,14 @@ public class ColumnMetadataResource {
         }
     }
 
-    @GetMapping(value = "/versions")
+    @GetMapping("/versions")
     @ResponseBody
     @ApiOperation(value = "Get all known data cloud versions")
     public List<DataCloudVersion> getVersions() {
         return dataCloudVersionService.allVerions();
     }
 
-    @GetMapping(value = "/versions/latest")
+    @GetMapping("/versions/latest")
     @ResponseBody
     @ApiOperation(value = "Get latest approved data cloud version. If query parameter compatibleto is provided. "
             + "Will return latest approved version under the same major version.")
@@ -89,7 +89,7 @@ public class ColumnMetadataResource {
         return dataCloudVersionService.latestApprovedForMajorVersion(compatibleToVersion);
     }
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get all columns belong to a data cloud version")
     @Timed
@@ -103,7 +103,7 @@ public class ColumnMetadataResource {
         return columnMetadataService.findAll(dataCloudVersion, page, size);
     }
 
-    @GetMapping(value = "/count")
+    @GetMapping("/count")
     @ResponseBody
     @ApiOperation(value = "Get number of columns belong to a data cloud version")
     public Long getCount(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
@@ -115,7 +115,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @GetMapping(value = "/statscube")
+    @GetMapping("/statscube")
     @ApiOperation(value = "Get enrichment stats cube.")
     public StatsCube getStatsCube(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)){
@@ -126,7 +126,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @GetMapping(value = "/topn")
+    @GetMapping("/topn")
     @ApiOperation(value = "Get enrichment topn tree.")
     public TopNTree getTopNTree(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)){
@@ -137,7 +137,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @DeleteMapping(value = "/caches")
+    @DeleteMapping("/caches")
     @ApiOperation(value = "Refresh metadata caches.")
     public void refreshCache() {
         localCacheService.refreshKeysByPattern(DataCloudConstants.SERVICE_TENANT,
@@ -145,7 +145,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @PutMapping(value = "/publish")
+    @PutMapping("/publish")
     @ApiOperation(value = "Publish DataCloud metadata to serving store(S3)")
     public MetadataPublishResponse publish(
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {

@@ -8,10 +8,13 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,7 +42,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "internal_service_resource", description = "REST service resource for internal operations")
 @RestController
-@RequestMapping(value = "/internal")
+@RequestMapping("/internal")
 public class InternalResource {
 
     @Inject
@@ -57,7 +60,7 @@ public class InternalResource {
     @Inject
     private BatonService batonService;
 
-    @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("services/options")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
     public SelectableConfigurationDocument getServiceOptionalConfigs(
@@ -69,7 +72,7 @@ public class InternalResource {
         return dynamicOptionsService.bind(doc);
     }
 
-    @RequestMapping(value = "services/options", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("services/options")
     @ResponseBody
     @ApiOperation(value = "Update dropdown options of a field")
     public Boolean patchServiceOptionalConfigs(@RequestParam(value = "component") String component,
@@ -86,7 +89,7 @@ public class InternalResource {
         }
     }
 
-    @RequestMapping(value = "tenants/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("tenants/{tenantId}")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
     public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId,
@@ -95,21 +98,21 @@ public class InternalResource {
         return tenantService.deleteTenant(userName, contractId, tenantId, true);
     }
 
-    @RequestMapping(value = "datastore/{option}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("datastore/{option}/{tenantId}")
     @ResponseBody
     @ApiOperation(value = "Get files of a tenant in datastore")
     public List<String> getTenantFoldersInDatastore(@PathVariable String option, @PathVariable String tenantId) {
         return new ArrayList<>();
     }
 
-    @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("datastore/{server}/{tenantId}")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant from datastore")
     public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId) {
         return true;
     }
 
-    @RequestMapping(value = "services/deactiveUserStatus", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("services/deactiveUserStatus")
     @ResponseBody
     @ApiOperation(value = "set user status to inactive")
     public Boolean deactiveUserStatusBasedOnEmails(@RequestBody String emails, HttpServletRequest request) {
@@ -119,7 +122,7 @@ public class InternalResource {
         return true;
     }
 
-    @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("permstore/{option}/{server}/{tenant}")
     @ResponseBody
     @ApiOperation(value = "Get file names in permstore")
     public Boolean hasVDBInPermstore(@PathVariable String option, @PathVariable String server,
@@ -127,7 +130,7 @@ public class InternalResource {
         return Boolean.FALSE;
     }
 
-    @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("permstore/{option}/{server}/{tenant}")
     @ResponseBody
     @ApiOperation(value = "Delete file in permstore")
     public Boolean deleteVDBInPermstore(@PathVariable String option, @PathVariable String server,
@@ -142,7 +145,7 @@ public class InternalResource {
         return patch.defaultIsValid();
     }
 
-    @RequestMapping(value = "services/addUserAccessLevel", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("services/addUserAccessLevel")
     @ResponseBody
     @ApiOperation(value = "add user Access level")
     public Boolean addUserAccessLevel(@RequestBody String emails,
@@ -169,7 +172,7 @@ public class InternalResource {
         return userName;
     }
 
-    @RequestMapping(value = "/{tenantId}/components", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{tenantId}/components")
     @ResponseBody
     @ApiOperation(value = "Set components for a tenant")
     public Boolean setComponents(@PathVariable String tenantId, @RequestBody ComponentsMap components) {

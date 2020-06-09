@@ -16,9 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -252,7 +251,7 @@ public class LoginResource {
         return doc;
     }
 
-    @RequestMapping(value = "/forgotpassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/forgotpassword")
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
     public boolean forgotPassword(@RequestBody ResetPasswordRequest request) {
@@ -272,7 +271,7 @@ public class LoginResource {
         return true;
     }
 
-    @RequestMapping(value = "/forgotpasswordconfirmation", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/forgotpasswordconfirmation")
     @ResponseBody
     @ApiOperation(value = "Send an email to confirm a password reset request")
     public boolean forgotPasswordConfirmation(@RequestBody ResetPasswordConfirmationRequest request) {
@@ -288,7 +287,7 @@ public class LoginResource {
         return true;
     }
 
-    @GetMapping(value = "/logout")
+    @GetMapping("/logout")
     @ResponseBody
     @ApiOperation(value = "Logout the user")
     public ResponseDocument<String> logout(@RequestParam(name = "redirectTo", required = false) String redirectTo, //
@@ -335,7 +334,7 @@ public class LoginResource {
         }
     }
 
-    @RequestMapping(value = "/password/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/password/{username:.+}")
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,

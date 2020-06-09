@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +25,14 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "oauth2", description = "REST resource for generating oauth2 token")
 @RestController
-@RequestMapping(value = "/oauth2")
+@RequestMapping("/oauth2")
 public class Oauth2Resource {
     private static final Logger log = LoggerFactory.getLogger(Oauth2Resource.class);
 
     @Inject
     private Oauth2Interface oauth2Service;
 
-    @RequestMapping(value = "/apitoken", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/apitoken")
     @ResponseBody
     @ApiOperation(value = "Generate an Oauth2 Api Token for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
@@ -42,7 +42,7 @@ public class Oauth2Resource {
         return oauth2Service.createAPIToken(targetTenantId);
     }
 
-    @RequestMapping(value = "/accesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/accesstoken")
     @ResponseBody
     @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token_External')")
@@ -64,7 +64,7 @@ public class Oauth2Resource {
         return oauth2Service.createOAuth2AccessToken(targetTenantId, appId, client).getValue();
     }
 
-    @RequestMapping(value = "/accesstoken/json", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/accesstoken/json")
     @ResponseBody
     @ApiOperation(value = "Generate an Oauth2 Access token for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")

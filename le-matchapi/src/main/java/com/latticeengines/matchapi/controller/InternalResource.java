@@ -40,7 +40,7 @@ public class InternalResource extends InternalResourceBase {
 
     private Map<String, String> props = null;
 
-    @PostMapping(value = "/yarnjobs")
+    @PostMapping("/yarnjobs")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Match a block of input data in yarn container")
@@ -49,7 +49,7 @@ public class InternalResource extends InternalResourceBase {
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
-    @GetMapping(value = "/yarn-config")
+    @GetMapping("/yarn-config")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Match a block of input data in yarn container")
@@ -66,7 +66,7 @@ public class InternalResource extends InternalResourceBase {
     }
 
     // an api to test reactive endpoint
-    @GetMapping(value = "/mono")
+    @GetMapping("/mono")
     @ResponseBody
     public Mono<String> submitYarnJob() {
         return Mono.just("Hello!");

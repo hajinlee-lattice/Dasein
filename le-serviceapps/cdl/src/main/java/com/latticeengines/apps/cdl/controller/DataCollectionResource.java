@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.MediaType;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +57,7 @@ public class DataCollectionResource {
     @Inject
     private SegmentService segmentService;
 
-    @GetMapping(value = "")
+    @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
     public DataCollection getDataCollection(@PathVariable String customerSpace) {
@@ -66,7 +65,7 @@ public class DataCollectionResource {
         return dataCollectionService.getDataCollection(customerSpace, null);
     }
 
-    @PutMapping(value = "/version/{version}")
+    @PutMapping("/version/{version}")
     @ResponseBody
     @ApiOperation(value = "Switch the version of default data collection")
     public ResponseDocument<DataCollection.Version> switchVersion(@PathVariable String customerSpace,
@@ -77,7 +76,7 @@ public class DataCollectionResource {
         return ResponseDocument.successResponse(version1);
     }
 
-    @GetMapping(value = "/status")
+    @GetMapping("/status")
     @ResponseBody
     @ApiOperation(value = "Get or create data collection status")
     public DataCollectionStatus getDataCollectionStatus(@PathVariable String customerSpace,
@@ -86,7 +85,7 @@ public class DataCollectionResource {
         return dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
     }
 
-    @PostMapping(value = "/version/{version}/status")
+    @PostMapping("/version/{version}/status")
     @ResponseBody
     @ApiOperation(value = "Save or update data collection status")
     public void saveDataCollectionStatus(@PathVariable String customerSpace,
@@ -95,7 +94,7 @@ public class DataCollectionResource {
         dataCollectionService.saveOrUpdateStatus(customerSpace, status, version);
     }
 
-    @PostMapping(value = "/statushistory")
+    @PostMapping("/statushistory")
     @ResponseBody
     @ApiOperation(value = "Save data collection status history")
     public void saveDataCollectionStatusHistory(@PathVariable String customerSpace,
@@ -104,7 +103,7 @@ public class DataCollectionResource {
         dataCollectionService.saveStatusHistory(customerSpace, status);
     }
 
-    @GetMapping(value = "/statushistory")
+    @GetMapping("/statushistory")
     @ResponseBody
     @ApiOperation(value = "Get data collection status history")
     public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(@PathVariable String customerSpace) {
@@ -112,7 +111,7 @@ public class DataCollectionResource {
         return dataCollectionService.getCollectionStatusHistory(customerSpace);
     }
 
-    @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber:.+}")
+    @PutMapping("/datacloudbuildnumber/{dataCloudBuildNumber:.+}")
     @ResponseBody
     @ApiOperation(value = "Switch the version of default data collection")
     public ResponseDocument<String> updateDataCloudVersion(@PathVariable String customerSpace,
@@ -123,7 +122,7 @@ public class DataCollectionResource {
         return ResponseDocument.successResponse(newDataCloudVersion);
     }
 
-    @GetMapping(value = "/tables")
+    @GetMapping("/tables")
     @ResponseBody
     @ApiOperation(value = "Get the first table based on table role")
     public Table getTable(@PathVariable String customerSpace, @RequestParam(value = "role") TableRoleInCollection role,
@@ -137,7 +136,7 @@ public class DataCollectionResource {
         }
     }
 
-    @GetMapping(value = "/alltables")
+    @GetMapping("/alltables")
     @ResponseBody
     @ApiOperation(value = "Get all tables based on table role")
     public List<Table> getTables(@PathVariable String customerSpace,
@@ -152,7 +151,7 @@ public class DataCollectionResource {
         }
     }
 
-    @GetMapping(value = "/tablenames")
+    @GetMapping("/tablenames")
     @ResponseBody
     @ApiOperation(value = "Get the Table names via table role and version")
     public List<String> getTableNames(@PathVariable String customerSpace,
@@ -162,7 +161,7 @@ public class DataCollectionResource {
         return dataCollectionService.getTableNames(customerSpace, null, role, version);
     }
 
-    @GetMapping(value = "/tablenames/signatures")
+    @GetMapping("/tablenames/signatures")
     @ResponseBody
     @ApiOperation(value = "Get a map of signature to tableName via table role, version and list of signatures")
     public Map<String, String> getTableNames(@PathVariable String customerSpace,
@@ -174,14 +173,14 @@ public class DataCollectionResource {
                 signatures);
     }
 
-    @GetMapping(value = "/segments")
+    @GetMapping("/segments")
     @ResponseBody
     @ApiOperation(value = "Get the all segments in the default collection.")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
         return segmentService.getSegments();
     }
 
-    @GetMapping(value = "/stats")
+    @GetMapping("/stats")
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the default collection.")
     public StatisticsContainer getMainStats(@PathVariable String customerSpace,
@@ -191,7 +190,7 @@ public class DataCollectionResource {
         return container == null ? null : container.detachHibernate();
     }
 
-    @GetMapping(value = "/attrrepo")
+    @GetMapping("/attrrepo")
     @ResponseBody
     @ApiOperation(value = "Get the attribute repository of the default collection.")
     public AttributeRepository getAttrRepo(@PathVariable String customerSpace,
@@ -200,7 +199,7 @@ public class DataCollectionResource {
         return dataCollectionService.getAttrRepo(customerSpace, null, version);
     }
 
-    @PostMapping(value = "/tables/{tableName}")
+    @PostMapping("/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse upsertTable(@PathVariable String customerSpace, //
@@ -212,7 +211,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @PostMapping(value = "/tables/multi/{tableNames}")
+    @PostMapping("/tables/multi/{tableNames}")
     @ResponseBody
     @ApiOperation(value = "Create or insert tables into the collection")
     public SimpleBooleanResponse upsertTables(@PathVariable String customerSpace, //
@@ -224,7 +223,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @PostMapping(value = "/tables/signatures")
+    @PostMapping("/tables/signatures")
     @ResponseBody
     @ApiOperation(value = "Create or insert tables with signatures into the collection")
     public SimpleBooleanResponse upsertTablesWithSignatures(@PathVariable String customerSpace, //
@@ -236,7 +235,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @DeleteMapping(value = "/tables/{tableName}")
+    @DeleteMapping("/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse removeTable(@PathVariable String customerSpace, //
@@ -248,7 +247,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @DeleteMapping(value = "/tables")
+    @DeleteMapping("/tables")
     @ResponseBody
     @ApiOperation(value = "Unlink all tables under tenant in current active data collection")
     public SimpleBooleanResponse unlinkTables(@PathVariable String customerSpace, //
@@ -263,7 +262,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @PostMapping(value = "/resettables")
+    @PostMapping("/resettables")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse resetTable(@PathVariable String customerSpace, //
@@ -273,7 +272,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @PostMapping(value = "/stats")
+    @PostMapping("/stats")
     @ResponseBody
     @ApiOperation(value = "Create or update the main statistics of the collection")
     public SimpleBooleanResponse upsertStats(@PathVariable String customerSpace, //
@@ -283,7 +282,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @DeleteMapping(value = "/stats")
+    @DeleteMapping("/stats")
     @ResponseBody
     @ApiOperation(value = "Remove the main statistics of the collection")
     public SimpleBooleanResponse removeStats(@PathVariable String customerSpace,
@@ -293,7 +292,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @GetMapping(value = "/attributegroups")
+    @GetMapping("/attributegroups")
     @ResponseBody
     @ApiOperation(value = "Get mocked metadat of attribute group for company profile and talking point")
     public List<String> getAttributeGroupsForCompanyProfileAndTalkingPoints(@PathVariable String customerSpace) {
@@ -302,7 +301,7 @@ public class DataCollectionResource {
                 InterfaceName.YearStarted.toString());
     }
 
-    @PostMapping(value = "/reset")
+    @PostMapping("/reset")
     @ResponseBody
     @ApiOperation(value = "Reset the full data collection or an business entity")
     public ResponseDocument<String> reset(@PathVariable String customerSpace,
@@ -321,7 +320,7 @@ public class DataCollectionResource {
         }
     }
 
-    @DeleteMapping(value = "/clearcache")
+    @DeleteMapping("/clearcache")
     @ResponseBody
     @ApiOperation(value = "Clear cache for data collection")
     public ResponseDocument<String> clearCache(@PathVariable String customerSpace) {
@@ -329,7 +328,7 @@ public class DataCollectionResource {
         return ResponseDocument.successResponse("Success");
     }
 
-    @PutMapping(value = "/refreshcounts")
+    @PutMapping("/refreshcounts")
     @ResponseBody
     @ApiOperation(value = "Refresh segment and rating engine counts.")
     public SimpleBooleanResponse refreshCount(@PathVariable String customerSpace) {
@@ -337,7 +336,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @GetMapping(value = "/dataspace")
+    @GetMapping("/dataspace")
     @ResponseBody
     @ApiOperation(value = "Dump out the paths of tenant's CDL data space")
     public CDLDataSpace getCDLDataSpace(@PathVariable String customerSpace) {
@@ -345,7 +344,7 @@ public class DataCollectionResource {
         return dataCollectionService.createCDLDataSpace(customerSpace);
     }
 
-    @GetMapping(value = "/artifact")
+    @GetMapping("/artifact")
     @ApiOperation(value = "Get data collection artifacts by customer space, artifact status and version.")
     public List<DataCollectionArtifact> getArtifacts(@PathVariable String customerSpace,
             @RequestParam(value = "status", required = false) DataCollectionArtifact.Status status,
@@ -354,7 +353,7 @@ public class DataCollectionResource {
         return dataCollectionService.getArtifacts(customerSpace, status, version);
     }
 
-    @GetMapping(value = "/artifact/{name}")
+    @GetMapping("/artifact/{name}")
     @ApiOperation(value = "Get single data collection artifact by customer space, artifact name and version.")
     public DataCollectionArtifact getArtifact(@PathVariable String customerSpace, @PathVariable String name,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
@@ -370,7 +369,7 @@ public class DataCollectionResource {
         }
     }
 
-    @PutMapping(value = "/artifact")
+    @PutMapping("/artifact")
     @ApiOperation(value = "Update a data collection artifact.")
     public DataCollectionArtifact updateArtifact(@PathVariable String customerSpace,
             @RequestBody DataCollectionArtifact artifact) {
@@ -382,7 +381,7 @@ public class DataCollectionResource {
         return dataCollectionService.updateArtifact(customerSpace, artifact);
     }
 
-    @PostMapping(value = "/artifact/version/{version}")
+    @PostMapping("/artifact/version/{version}")
     @ApiOperation(value = "Create a data collection artifact.")
     public DataCollectionArtifact createArtifact(@PathVariable String customerSpace,
             @PathVariable DataCollection.Version version, @RequestBody DataCollectionArtifact artifact) {
@@ -391,7 +390,7 @@ public class DataCollectionResource {
                 artifact.getStatus(), version);
     }
 
-    @DeleteMapping(value = "/artifact/{name}")
+    @DeleteMapping("/artifact/{name}")
     @ApiOperation(value = "Delete a data collection artifact.")
     public DataCollectionArtifact deleteArtifact(@PathVariable String customerSpace, @PathVariable String name,
             @RequestParam(value = "version") DataCollection.Version version,
@@ -403,13 +402,13 @@ public class DataCollectionResource {
         return dataCollectionService.deleteArtifact(customerSpace, name, version, deleteLatest);
     }
 
-    @GetMapping(value = "/artifact/{exportId}/path", produces = MediaType.APPLICATION_OCTET_STREAM)
+    @GetMapping("/artifact/{exportId}/path")
     @ApiOperation(value = "get data collection artifact path")
     public String getDataCollectionArtifactPath(@PathVariable String customerSpace, @PathVariable String exportId) {
         return dataCollectionService.getDataCollectionArtifactPath(customerSpace, exportId);
     }
 
-    @PostMapping(value = "/diagnostic/{dataCollectionTablePid}")
+    @PostMapping("/diagnostic/{dataCollectionTablePid}")
     @ResponseBody
     @ApiOperation(value = "diagnose collection and service store table")
     public ResponseDocument<ImportTemplateDiagnostic> servingAndBatchDiagnostic(@PathVariable String customerSpace, @PathVariable Long dataCollectionTablePid) {

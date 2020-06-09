@@ -11,11 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,7 +68,7 @@ public class UserResource {
     @Inject
     private TenantService tenantService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get all users that have at least one access right to the current tenant")
     @PreAuthorize("hasRole('View_PLS_Users')")
@@ -89,7 +92,7 @@ public class UserResource {
         return response;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
@@ -157,7 +160,7 @@ public class UserResource {
         return response;
     }
 
-    @RequestMapping(value = "/{username:.+}/creds", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{username:.+}/creds")
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
@@ -178,7 +181,7 @@ public class UserResource {
         return updateCredentials(data, request);
     }
 
-    @RequestMapping(value = "/creds", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/creds")
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@RequestBody UserUpdateData data, HttpServletRequest request) {
@@ -191,7 +194,7 @@ public class UserResource {
         }
     }
 
-    @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{username:.+}")
     @ResponseBody
     @ApiOperation(value = "Update users")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
@@ -237,7 +240,7 @@ public class UserResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/{username:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{username:.+}")
     @ResponseBody
     @ApiOperation(value = "Delete a user. The user must be in the tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")

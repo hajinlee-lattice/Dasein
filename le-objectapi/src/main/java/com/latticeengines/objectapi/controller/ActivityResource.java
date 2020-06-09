@@ -29,7 +29,7 @@ public class ActivityResource {
     @Inject
     private ActivityTimelineQueryService activityTimelineQueryService;
 
-    @PostMapping(value = "/data", headers = "Accept=application/json")
+    @PostMapping("/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve timeseries activity data")
     public DataPage getActivityData(@PathVariable String customerSpace,

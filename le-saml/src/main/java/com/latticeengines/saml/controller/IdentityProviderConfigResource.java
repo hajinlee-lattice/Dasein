@@ -7,10 +7,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,7 +44,7 @@ public class IdentityProviderConfigResource {
     @Inject
     private IdentityProviderService identityProviderService;
 
-    @RequestMapping(value = TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Retrieve all identity providers")
     public List<IdentityProvider> findAll(@PathVariable("tenantId") String tenantId) {
@@ -51,7 +53,7 @@ public class IdentityProviderConfigResource {
         return identityProviderService.findAll();
     }
 
-    @RequestMapping(value = TENANT_ID_PATH +"/config-metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(TENANT_ID_PATH +"/config-metadata")
     @ResponseBody
     @ApiOperation(value = "Retrieve all identity providers")
     public SamlConfigMetadata getSamlConfigMetadata(@PathVariable("tenantId") String tenantId) {
@@ -59,9 +61,8 @@ public class IdentityProviderConfigResource {
         log.info("Retrieving Config Metadata");
         return identityProviderService.getConfigMetadata(tenant);
     }
-    
-    @RequestMapping(value = TENANT_ID_PATH
-            + "/validate", method = RequestMethod.POST, headers = "Accept=application/json")
+
+    @PostMapping(TENANT_ID_PATH + "/validate")
     @ResponseBody
     @ApiOperation(value = "Validate an identity provider config")
     public IdpMetadataValidationResponse validate(@PathVariable("tenantId") String tenantId,
@@ -71,7 +72,7 @@ public class IdentityProviderConfigResource {
         return identityProviderService.validate(identityProvider);
     }
 
-    @RequestMapping(value = TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Create an identity provider")
     public void create(@PathVariable("tenantId") String tenantId, @RequestBody IdentityProvider identityProvider) {
@@ -80,8 +81,7 @@ public class IdentityProviderConfigResource {
         identityProviderService.create(identityProvider);
     }
 
-    @RequestMapping(value = TENANT_ID_PATH
-            + "/{configId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping(TENANT_ID_PATH + "/{configId}")
     @ResponseBody
     @ApiOperation(value = "Delete a identity provider with the specified entityId")
     public void delete(@PathVariable("tenantId") String tenantId, @PathVariable String configId) {

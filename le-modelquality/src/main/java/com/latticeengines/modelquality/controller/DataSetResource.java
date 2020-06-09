@@ -6,10 +6,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,7 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     private DataSetService dataSetService;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get DataSets")
     public List<DataSet> getDataSets() {
@@ -46,7 +47,7 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Insert new DataSet")
     public String createDataSet(@RequestBody DataSet dataSet) {
@@ -54,7 +55,7 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     }
 
     @Override
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping("/create")
     @ResponseBody
     @ApiOperation(value = "Insert new DataSet for given tenant")
     public String createDataSetFromTenant(@RequestParam("tenantType") DataSetTenantType tenantType,
@@ -76,7 +77,7 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     }
 
     @Override
-    @RequestMapping(value = "/{dataSetName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{dataSetName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get DataSet by name")
     public DataSet getDataSetByName(@PathVariable String dataSetName) {

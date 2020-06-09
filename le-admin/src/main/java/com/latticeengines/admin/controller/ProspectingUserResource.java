@@ -20,13 +20,13 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "internal_user_resource", description = "REST service resource for internally create prospecting users")
 @RestController
-@RequestMapping(value = "/prospectingusers")
+@RequestMapping("/prospectingusers")
 public class ProspectingUserResource {
 
     @Inject
     private ProspectingUserService prospectingUserService;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('adminconsole')")

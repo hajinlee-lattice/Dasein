@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -108,7 +108,7 @@ public class CDLResource {
     @Inject
     private SystemStatusService systemStatusService;
 
-    @RequestMapping(value = "/consolidateAndProfile", method = RequestMethod.POST)
+    @PostMapping("/consolidateAndProfile")
     @ApiOperation(value = "Start Consolidate And Profile job")
     public ResponseDocument<String> startConsolidateAndProfileJob() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -117,7 +117,7 @@ public class CDLResource {
         return ResponseDocument.successResponse(result.toString());
     }
 
-    @RequestMapping(value = "/processanalyze", method = RequestMethod.POST)
+    @PostMapping("/processanalyze")
     @ApiOperation(value = "Start Process And Analyze job")
     public ResponseDocument<String> processAnalyze(@RequestBody(required = false) ProcessAnalyzeRequest request) {
         StatusDocument statusDocument = systemStatusService.getSystemStatus();
@@ -148,7 +148,7 @@ public class CDLResource {
         }
     }
 
-    @RequestMapping(value = "/import/csv", method = RequestMethod.POST)
+    @PostMapping("/import/csv")
     @ApiOperation(value = "Start import job")
     public ResponseDocument<String> startImportCSV(@RequestParam(value = "templateFileName") String templateFileName,
                                                    @RequestParam(value = "dataFileName") String dataFileName, @RequestParam(value = "source") String source, //
@@ -171,7 +171,7 @@ public class CDLResource {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/s3/template", method = RequestMethod.POST)
+    @PostMapping("/s3/template")
     @ApiOperation(value = "Create s3 import template")
     public Map<String, UIAction> createS3Template(@RequestParam(value = "templateFileName") String templateFileName,
                                                   @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
@@ -216,7 +216,7 @@ public class CDLResource {
         }
     }
 
-    @RequestMapping(value = "/s3/template/import", method = RequestMethod.POST)
+    @PostMapping("/s3/template/import")
     @ApiOperation(value = "Start s3 import job")
     public Map<String, UIAction> importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
                                                   @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
@@ -240,7 +240,7 @@ public class CDLResource {
         }
     }
 
-    @RequestMapping(value = "/s3/template/displayname", method = RequestMethod.PUT)
+    @PutMapping("/s3/template/displayname")
     @ApiOperation(value = "Update template display name")
     public ResponseDocument<String> updateTemplateName(
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
@@ -262,7 +262,7 @@ public class CDLResource {
         }
     }
 
-    @RequestMapping(value = "/s3/template/status", method = RequestMethod.PUT)
+    @PutMapping("/s3/template/status")
     @ApiOperation(value = "Update template import status")
     public ResponseDocument<String> updateS3TemplateStatus(
             @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
@@ -287,7 +287,7 @@ public class CDLResource {
         }
     }
 
-    @PostMapping(value = "/soft-delete")
+    @PostMapping("/soft-delete")
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> softDelete(@RequestBody DeleteRequest deleteRequest) {
         UIAction uiAction = cdlService.softDelete(deleteRequest);
@@ -295,7 +295,7 @@ public class CDLResource {
     }
 
 
-    @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
+    @PostMapping("/cleanupbyupload")
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> cleanup(@RequestParam(value = "fileName") String fileName,
                                          @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
@@ -306,7 +306,7 @@ public class CDLResource {
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
-    @RequestMapping(value = "/cleanupbyrange", method = RequestMethod.POST)
+    @PostMapping("/cleanupbyrange")
     @ApiOperation(value = "Start cleanup job")
     public ResponseDocument<String> cleanupByRange(@RequestParam(value = "startTime") String startTime,
                                                    @RequestParam(value = "endTime") String endTime,
@@ -323,7 +323,7 @@ public class CDLResource {
         }
     }
 
-    @RequestMapping(value = "/cleanupall", method = RequestMethod.POST)
+    @PostMapping("/cleanupall")
     @ApiOperation(value = "Start cleanup job")
     public ResponseDocument<String> cleanupAll(
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
@@ -338,7 +338,7 @@ public class CDLResource {
         }
     }
 
-    @RequestMapping(value = "/replaceData", method = RequestMethod.POST)
+    @PostMapping("/replaceData")
     @ApiOperation(value = "create Replace Action to replace data")
     public ResponseDocument<String> replaceData(@RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -352,7 +352,7 @@ public class CDLResource {
         }
     }
 
-    @GetMapping(value = "/s3import/template")
+    @GetMapping("/s3import/template")
     @ResponseBody
     @ApiOperation("get template table fields")
     public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries(
@@ -365,7 +365,7 @@ public class CDLResource {
                 null);
     }
 
-    @GetMapping(value = "/s3import/fileList")
+    @GetMapping("/s3import/fileList")
     @ResponseBody
     @ApiOperation("get file list under s3Path")
     public List<FileProperty> getFileList(@RequestParam String s3Path) {
@@ -374,7 +374,7 @@ public class CDLResource {
         return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path, "csv");
     }
 
-    @PostMapping(value = "/s3import/system")
+    @PostMapping("/s3import/system")
     @ResponseBody
     @ApiOperation("create new S3 Import system")
     public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemDisplayName,
@@ -399,7 +399,7 @@ public class CDLResource {
     }
 
     @Deprecated
-    @GetMapping(value = "/s3import/system/list")
+    @GetMapping("/s3import/system/list")
     @ResponseBody
     @ApiOperation("create new S3 Import system")
     public List<S3ImportSystem> getS3ImportSystemList(
@@ -416,7 +416,7 @@ public class CDLResource {
                 templateDisplay);
     }
 
-    @PostMapping(value = "/s3import/system/mappinglist")
+    @PostMapping("/s3import/system/mappinglist")
     @ResponseBody
     @ApiOperation("Get S3ImportSystem list for Id mapping")
     public List<S3ImportSystem> getS3ImportSystemListForMapping(
@@ -433,7 +433,7 @@ public class CDLResource {
                 templateDisplay);
     }
 
-    @PostMapping(value = "/s3import/system/list")
+    @PostMapping("/s3import/system/list")
     @ResponseBody
     @ApiOperation("update import system priority based on sequence")
     public Map<String, UIAction> updateSystemPriorityBasedOnSequence(@RequestBody List<S3ImportSystem> systemList) {
@@ -452,7 +452,7 @@ public class CDLResource {
         }
     }
 
-    @GetMapping(value = "/s3import/system")
+    @GetMapping("/s3import/system")
     @ResponseBody
     @ApiOperation("Get S3 Import system")
     public ResponseDocument<S3ImportSystem> getS3ImportSystem(@RequestParam String systemName) {
@@ -463,7 +463,7 @@ public class CDLResource {
         return ResponseDocument.successResponse(cdlService.getS3ImportSystem(customerSpace.toString(), systemName));
     }
 
-    @PostMapping(value = "s3import/template/preview")
+    @PostMapping("s3import/template/preview")
     @ResponseBody
     @ApiOperation("Get template preview")
     public List<TemplateFieldPreview> getTemplatePreview(
@@ -599,8 +599,7 @@ public class CDLResource {
         return dataFeedTask;
     }
 
-    @RequestMapping(value = "s3import/template/downloadcsv", headers = "Accept=application/json", method =
-            RequestMethod.POST)
+    @PostMapping("s3import/template/downloadcsv")
     @ResponseBody
     @ApiOperation("Download template csv file")
     public void downloadTemplateCSV(HttpServletRequest request, HttpServletResponse response,
@@ -637,7 +636,7 @@ public class CDLResource {
         }
     }
 
-    @PostMapping(value = "/s3import/template/create/webvisit")
+    @PostMapping("/s3import/template/create/webvisit")
     @ResponseBody
     @ApiOperation("Create WebVist template")
     public boolean createWebVisitTemplate(@RequestParam(value = "entityType") EntityType entityType,
@@ -655,7 +654,7 @@ public class CDLResource {
         }
     }
 
-    @PostMapping(value = "/s3import/template/create/opportunity")
+    @PostMapping("/s3import/template/create/opportunity")
     @ResponseBody
     @ApiOperation("Create Opportunity template")
     public boolean createDefaultOpportunity(@RequestParam("systemName") String systemName) {
@@ -667,7 +666,7 @@ public class CDLResource {
         return cdlService.createDefaultOpportunityTemplate(customerSpace.toString(), systemName);
     }
 
-    @PostMapping(value = "/s3import/template/create/marketing")
+    @PostMapping("/s3import/template/create/marketing")
     @ResponseBody
     @ApiOperation("Create Marketing template")
     public boolean createDefaultMarketing(@RequestParam("systemName") String systemName,
@@ -680,7 +679,7 @@ public class CDLResource {
         return cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType);
     }
 
-    @PostMapping(value = "/s3import/template/create/dnbIntentData")
+    @PostMapping("/s3import/template/create/dnbIntentData")
     @ResponseBody
     @ApiOperation("Create DnbIntentData template")
     public boolean createDefaultDnbIntentData() {
@@ -691,7 +690,7 @@ public class CDLResource {
         return cdlService.createDefaultDnbIntentDataTemplate(customerSpace.toString());
     }
 
-    @GetMapping(value = "/bundle/upload")
+    @GetMapping("/bundle/upload")
     @ResponseBody
     @ApiOperation("")
     public boolean checkUploadBundleFile() {
@@ -707,7 +706,7 @@ public class CDLResource {
         return false;
     }
 
-    @GetMapping(value = "/s3import/template/getDimensionMetadataInStream")
+    @GetMapping("/s3import/template/getDimensionMetadataInStream")
     @ResponseBody
     @ApiOperation("get dimension metadata using streamName")
     public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(@RequestParam("systemName") String systemName,
@@ -719,8 +718,7 @@ public class CDLResource {
         return cdlService.getDimensionMetadataInStream(customerSpace.toString(), systemName, entityType);
     }
 
-    @RequestMapping(value = "s3import/template/downloadDimensionMetadataInStream", headers = "Accept=application/json", method =
-            RequestMethod.POST)
+    @PostMapping("s3import/template/downloadDimensionMetadataInStream")
     @ResponseBody
     @ApiOperation("Download DimensionMetadata csv file using streamName and dimensionName")
     public void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
@@ -742,7 +740,7 @@ public class CDLResource {
         }
     }
 
-    @GetMapping(value = "/import/csv")
+    @GetMapping("/import/csv")
     @ResponseBody
     @ApiOperation(value = "Get all import files")
     public List<ImportFileInfo> getAllImportFiles() {

@@ -7,10 +7,10 @@ import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,13 +28,13 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "metadata", description = "REST resource for metadata data feed task")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/datafeed/tasks")
+@RequestMapping("/customerspaces/{customerSpace}/datafeed/tasks")
 public class DataFeedTaskResource {
 
     @Inject
     private DataFeedTaskService dataFeedTaskService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create data feed task")
     public void createDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask) {
@@ -42,7 +42,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{source}/{dataFeedType}/{entity}/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create data feed task")
     public void createOrUpdateDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
@@ -51,7 +51,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.createOrUpdateDataFeedTask(customerSpace, source, dataFeedType, entity, tableName);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
     public void updateDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask,
@@ -60,8 +60,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, Boolean.TRUE.equals(updateTaskOnly));
     }
 
-    @RequestMapping(value = "/s3status/{source}/{dataFeedType}/{status}", method = RequestMethod.PUT,
-            headers = "Accept=application/json")
+    @PutMapping("/s3status/{source}/{dataFeedType}/{status}")
     @ResponseBody
     @ApiOperation(value = "Update data feed task s3 import status")
     public void updateS3ImportStatus(@PathVariable String customerSpace, @PathVariable String source,
@@ -70,7 +69,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.updateS3ImportStatus(customerSpace, source, dataFeedType, status);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{source}/{dataFeedType}/{entity}")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
@@ -79,7 +78,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType, entity);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{source}/{dataFeedType}")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
@@ -88,7 +87,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType);
     }
 
-    @RequestMapping(value = "/{taskId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{taskId}")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String taskId) {
@@ -120,7 +119,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getSourcesBySystemPid(customerSpace, systemPid);
     }
 
-    @RequestMapping(value = "/{entity}/list", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{entity}/list")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public List<DataFeedTask> getDataFeedTaskWithSameEntity(@PathVariable String customerSpace,
@@ -129,8 +128,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace, entity);
     }
 
-    @RequestMapping(value = "/{entity}/{excludeSource}/{excludeFeedType}/list", method = RequestMethod.GET, headers = "Accept" +
-            "=application/json")
+    @GetMapping("/{entity}/{excludeSource}/{excludeFeedType}/list")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(@PathVariable String customerSpace,
@@ -142,7 +140,7 @@ public class DataFeedTaskResource {
                 excludeFeedType);
     }
 
-    @RequestMapping(value = "/byuniqueids", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/byuniqueids")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public List<DataFeedTask> getDataFeedTaskByUniqueIds(@PathVariable String customerSpace,
@@ -151,7 +149,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTaskByUniqueIds(customerSpace, uniqueIds);
     }
 
-    @RequestMapping(value = "/{taskId}/registerextract/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{taskId}/registerextract/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
     public List<String> registerExtract(@PathVariable String customerSpace, @PathVariable String taskId,
@@ -160,7 +158,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.registerExtract(customerSpace, taskId, tableName, extract);
     }
 
-    @RequestMapping(value = "/{taskId}/registerextracts/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/{taskId}/registerextracts/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
     public List<String> registerExtracts(@PathVariable String customerSpace, @PathVariable String taskId,
@@ -169,8 +167,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
     }
 
-    @RequestMapping(value = "/{taskId}/addtabletoqueue/{tableName}", method = RequestMethod.PUT, headers =
-            "Accept=application/json")
+    @PutMapping("/{taskId}/addtabletoqueue/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Add table to data feed task table queue")
     public void addTableToQueue(@PathVariable String customerSpace, @PathVariable String taskId,
@@ -188,7 +185,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.addTablesToQueue(customerSpace, taskId, tables);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/unconsolidatedextracts", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{source}/{dataFeedType}/{entity}/unconsolidatedextracts")
     @ResponseBody
     @ApiOperation(value = "Get unconsolidated extracts in queue")
     public List<Extract> getExtractsPendingInQueue(@PathVariable String customerSpace, @PathVariable String source,
@@ -197,7 +194,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getExtractsPendingInQueue(customerSpace, source, dataFeedType, entity);
     }
 
-    @RequestMapping(value = "/{entity}/getTables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{entity}/getTables")
     @ResponseBody
     @ApiOperation(value = "Get data feed task template tables")
     public List<Table> getTemplateTables(@PathVariable String customerSpace,
@@ -206,7 +203,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getTemplateTables(customerSpace, entity);
     }
 
-    @RequestMapping(value = "/{taskId}/getSystem", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{taskId}/getSystem")
     @ResponseBody
     @ApiOperation(value = "Get data feed task template tables")
     public S3ImportSystem getSystemFromTaskId(@PathVariable String customerSpace,
@@ -215,7 +212,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getImportSystemByTaskId(customerSpace, taskId);
     }
 
-    @GetMapping(value = "/{entity}/getTemplatesBySystemPriority")
+    @GetMapping("/{entity}/getTemplatesBySystemPriority")
     @ResponseBody
     @ApiOperation(value = "Get templates ordered by system priority")
     public List<String> getTemplatesBySystemPriority(@PathVariable String customerSpace, @PathVariable String entity,
@@ -224,7 +221,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getTemplatesBySystemPriority(customerSpace, entity, Boolean.TRUE.equals(highestFirst));
     }
 
-    @PutMapping(value = "/{pid}/deleted/{deleted}")
+    @PutMapping("/{pid}/deleted/{deleted}")
     @ApiOperation(value = "Set data feed task deleted status")
     public void setDataFeedTaskDeleteStatus(@PathVariable String customerSpace, @PathVariable Long pid,
                                             @PathVariable Boolean deleted) {
@@ -232,7 +229,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.setDataFeedTaskDelete(customerSpace, pid, deleted);
     }
 
-    @PutMapping(value = "/{pid}/S3Import/status/{status}")
+    @PutMapping("/{pid}/S3Import/status/{status}")
     @ApiOperation(value = "Set data feed task s3 import status")
     public void setDataFeedTaskS3ImportStatus(@PathVariable String customerSpace, @PathVariable Long pid,
                                             @PathVariable DataFeedTask.S3ImportStatus status) {
@@ -240,7 +237,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.setDataFeedTaskS3ImportStatus(customerSpace, pid, status);
     }
 
-    @GetMapping(value = "/{taskUniqueId}/templateName")
+    @GetMapping("/{taskUniqueId}/templateName")
     @ResponseBody
     @ApiOperation(value = "Get template name by task unique id")
     public String getTemplateName(@PathVariable String customerSpace, @PathVariable String taskUniqueId) {
@@ -248,7 +245,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getTemplateName(customerSpace, taskUniqueId);
     }
 
-    @GetMapping(value = "/templateToSystemMap")
+    @GetMapping("/templateToSystemMap")
     @ResponseBody
     @ApiOperation(value = "Get template to import system Map")
     public Map<String, String> getTemplateToSystemMap(@PathVariable String customerSpace) {
@@ -256,7 +253,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getTemplateToSystemMap(customerSpace);
     }
 
-    @GetMapping(value = "/templateToSystemObjectMap")
+    @GetMapping("/templateToSystemObjectMap")
     @ResponseBody
     @ApiOperation(value = "Get template to import system Map")
     public Map<String, S3ImportSystem> getTemplateToSystemObjMap(@PathVariable String customerSpace) {
@@ -264,7 +261,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
     }
 
-    @GetMapping(value = "/templateToSystemTypeMap")
+    @GetMapping("/templateToSystemTypeMap")
     @ResponseBody
     @ApiOperation(value = "Get template to import systemType Map")
     public Map<String, S3ImportSystem.SystemType> getTemplateToSystemTypeMap(@PathVariable String customerSpace) {
@@ -272,7 +269,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getTemplateToSystemTypeMap(customerSpace);
     }
 
-    @GetMapping(value = "/templateToDataFeedTaskMap")
+    @GetMapping("/templateToDataFeedTaskMap")
     @ResponseBody
     @ApiOperation(value = "Get template to DataFeedTask Map")
     public Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(@PathVariable String customerSpace) {

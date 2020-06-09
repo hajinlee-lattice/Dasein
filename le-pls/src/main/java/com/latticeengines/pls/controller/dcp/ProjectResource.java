@@ -46,7 +46,7 @@ public class ProjectResource {
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
-    @PostMapping(value = "")
+    @PostMapping
     @ResponseBody
     @ApiOperation("Create new project")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
@@ -66,7 +66,7 @@ public class ProjectResource {
         }
     }
 
-    @GetMapping(value = "/list")
+    @GetMapping("/list")
     @ResponseBody
     @ApiOperation("Get all projects")
     @PreAuthorize("hasRole('View_DCP_Projects')")
@@ -86,7 +86,7 @@ public class ProjectResource {
         }
     }
 
-    @GetMapping(value = "/projectId/{projectId}")
+    @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation("Get project by projectId")
     @PreAuthorize("hasRole('View_DCP_Projects')")
@@ -106,7 +106,7 @@ public class ProjectResource {
         }
     }
 
-    @DeleteMapping(value = "/{projectId}")
+    @DeleteMapping("/{projectId}")
     @ResponseBody
     @ApiOperation("Archive project by projectId")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")

@@ -29,7 +29,7 @@ public class PeriodTransactionResource {
     @Inject
     private PurchaseHistoryService purchaseHistoryService;
 
-    @GetMapping(value = "/accountid/{accountId}")
+    @GetMapping("/accountid/{accountId}")
     @ResponseBody
     @ApiOperation("Get all PeriodTransactions for the given AccountID")
     public List<PeriodTransaction> getPeriodTransactionByAccountId(@PathVariable String customerSpace,
@@ -39,14 +39,14 @@ public class PeriodTransactionResource {
         return purchaseHistoryService.getPeriodTransactionsByAccountId(accountId, periodName, productType);
     }
 
-    @GetMapping(value = "/spendanalyticssegments")
+    @GetMapping("/spendanalyticssegments")
     @ResponseBody
     @ApiOperation("Get All Segments")
     public DataPage getAllSegments(@PathVariable String customerSpace) {
         return purchaseHistoryService.getAllSpendAnalyticsSegments();
     }
 
-    @GetMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}")
+    @GetMapping("/spendanalyticssegment/{spendAnalyticsSegment}")
     @ResponseBody
     @ApiOperation("Get Period Transactions for all accounts with the given spendAnalyticsSegment value")
     public List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(@PathVariable String customerSpace,
@@ -57,7 +57,7 @@ public class PeriodTransactionResource {
                 productType);
     }
 
-    @GetMapping(value = "/producthierarchy")
+    @GetMapping("/producthierarchy")
     @ResponseBody
     @ApiOperation("Get ProductHierarchy")
     public List<ProductHierarchy> getProductHierarchy(@PathVariable String customerSpace,
@@ -65,7 +65,7 @@ public class PeriodTransactionResource {
         return purchaseHistoryService.getProductHierarchy(version);
     }
 
-    @GetMapping(value = "/transaction/maxmindate")
+    @GetMapping("/transaction/maxmindate")
     @ResponseBody
     @ApiOperation("Get final and first transaction date")
     public List<String> getFinalAndFirstTransactionDate(@PathVariable String customerSpace,

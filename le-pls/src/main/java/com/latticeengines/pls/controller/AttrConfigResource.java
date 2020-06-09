@@ -36,7 +36,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "AttrConfig", description = "REST resource for attribute config.")
 @RestController
-@RequestMapping(value = "/attrconfig")
+@RequestMapping("/attrconfig")
 public class AttrConfigResource {
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigResource.class);
@@ -44,21 +44,21 @@ public class AttrConfigResource {
     @Inject
     private AttrConfigService attrConfigService;
 
-    @GetMapping(value = "/activation/overview")
+    @GetMapping("/activation/overview")
     @ResponseBody
     @ApiOperation("get activation overview")
     public AttrConfigStateOverview getActivationOverview() {
         return attrConfigService.getOverallAttrConfigActivationOverview();
     }
 
-    @GetMapping(value = "/usage/overview")
+    @GetMapping("/usage/overview")
     @ResponseBody
     @ApiOperation("get usage overview")
     public AttrConfigUsageOverview getUsageOverview() {
         return attrConfigService.getOverallAttrConfigUsageOverview();
     }
 
-    @GetMapping(value = "/usage/overview/attributeset")
+    @GetMapping("/usage/overview/attributeset")
     @ResponseBody
     @ApiOperation("get usage overview")
     public AttrConfigUsageOverview getUsageOverviewByAttributeSet(@RequestParam(value = "attributeSetName", required = false) String attributeSetName) {
@@ -66,7 +66,7 @@ public class AttrConfigResource {
 
     }
 
-    @GetMapping(value = "/name/overview")
+    @GetMapping("/name/overview")
     @ResponseBody
     @ApiOperation("get Name overview")
     public AttrConfigStateOverview getNameOverview() {
@@ -74,7 +74,7 @@ public class AttrConfigResource {
     }
 
     @ResponseBody
-    @PutMapping(value = "/activation/config/category/{categoryName}")
+    @PutMapping("/activation/config/category/{categoryName}")
     @ApiOperation("update Activation Config")
     public Map<String, UIAction> updateActivationConfig(@PathVariable String categoryName,
             @RequestBody AttrConfigSelectionRequest request) {
@@ -82,7 +82,7 @@ public class AttrConfigResource {
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
-    @PutMapping(value = "/usage/config/category/{categoryName}")
+    @PutMapping("/usage/config/category/{categoryName}")
     @ApiOperation("update Usage Config")
     public Map<String, UIAction> updateUsageConfig(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName,
@@ -91,21 +91,21 @@ public class AttrConfigResource {
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
-    @PutMapping(value = "/name/config/category/{categoryName}")
+    @PutMapping("/name/config/category/{categoryName}")
     @ApiOperation("update Name or Description for Account/Contract attributes")
     public SubcategoryDetail updateNameConfig(@PathVariable String categoryName, @RequestBody SubcategoryDetail request,
             HttpServletResponse response) {
         return attrConfigService.updateNameConfig(categoryName, request);
     }
 
-    @GetMapping(value = "/activation/config/category/{categoryName}")
+    @GetMapping("/activation/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get activation configuration detail for a specific category")
     public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryName) {
         return attrConfigService.getAttrConfigSelectionDetailForState(categoryName);
     }
 
-    @GetMapping(value = "/usage/config/category/{categoryName}")
+    @GetMapping("/usage/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get usage configuration detail for a specific category")
     public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
@@ -114,14 +114,14 @@ public class AttrConfigResource {
         return attrConfigService.getAttrConfigSelectionDetailForUsage(categoryName, usageName, attributeSetName);
     }
 
-    @GetMapping(value = "/name/config/category/{categoryName}")
+    @GetMapping("/name/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get name configuration detail for a specific category")
     public SubcategoryDetail getNameConfiguration(@PathVariable String categoryName) {
         return attrConfigService.getAttrConfigSelectionDetailForName(categoryName);
     }
 
-    @GetMapping(value = "/stats/category/{categoryName}")
+    @GetMapping("/stats/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get (attr, stats buckets) pairs for specific category and sub-category")
     public Map<String, AttributeStats> getStats(@PathVariable String categoryName,
@@ -129,26 +129,26 @@ public class AttrConfigResource {
         return attrConfigService.getStats(categoryName, subcatName);
     }
 
-    @GetMapping(value = "/attributeset/name/{name}")
+    @GetMapping("/attributeset/name/{name}")
     @ApiOperation(value = "Get attribute set by name")
     public AttributeSet getAttributeSet(@PathVariable(value = "name") String name) {
         return attrConfigService.getAttributeSet(name);
     }
 
-    @GetMapping(value = "/attributeset")
+    @GetMapping("/attributeset")
     @ApiOperation(value = "Get attribute set list")
     public List<AttributeSet> getAttributeSets() {
         return attrConfigService.getAttributeSets();
     }
 
-    @DeleteMapping(value = "/attributeset/name/{name}")
+    @DeleteMapping("/attributeset/name/{name}")
     @ApiOperation(value = "Delete attribute set")
     public Boolean deleteAttributeSet(@PathVariable("name") String name) {
         attrConfigService.deleteAttributeSet(name);
         return true;
     }
 
-    @PostMapping(value = "/attributeset/clone")
+    @PostMapping("/attributeset/clone")
     @ApiOperation(value = "create new attribute set based on an existing attribute set")
     public AttributeSet cloneAttributeSet(@RequestParam(value = "attributeSetName") String attributeSetName,
                                           @RequestBody AttributeSet attributeSet) {
@@ -159,7 +159,7 @@ public class AttrConfigResource {
         }
     }
 
-    @PostMapping(value = "/attributeset")
+    @PostMapping("/attributeset")
     @ApiOperation(value = "create new attribute set based on an existing attribute set")
     public AttributeSet createAttributeSet(@RequestBody AttributeSet attributeSet) {
         try {
@@ -169,7 +169,7 @@ public class AttrConfigResource {
         }
     }
 
-    @PutMapping(value = "/attributeset")
+    @PutMapping("/attributeset")
     @ApiOperation(value = "update attribute set")
     public AttributeSet updateAttributeSet(@RequestBody AttributeSet attributeSet) {
         try {

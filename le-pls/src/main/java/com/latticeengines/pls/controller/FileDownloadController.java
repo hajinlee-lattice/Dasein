@@ -34,7 +34,7 @@ public class FileDownloadController {
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
-    @GetMapping(value = "/{token}")
+    @GetMapping("/{token}")
     @ResponseBody
     @ApiOperation("Pipe an output stream to http response via a token")
     public UIAction downloadByToken(@PathVariable String token,

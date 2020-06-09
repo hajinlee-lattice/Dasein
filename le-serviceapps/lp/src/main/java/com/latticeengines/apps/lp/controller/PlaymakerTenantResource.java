@@ -6,11 +6,14 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "Playmaker tenant api", description = "REST resource for managing playmaker tenants")
 @RestController
-@RequestMapping(value = "/playmaker/tenants")
+@RequestMapping("/playmaker/tenants")
 public class PlaymakerTenantResource {
 
     @Inject
@@ -34,7 +37,7 @@ public class PlaymakerTenantResource {
     @Inject
     private PlaymakerTenantEntityMgr playmakerEntityMgr;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create a playmaker API tenant")
     @NoCustomerSpace
@@ -42,7 +45,7 @@ public class PlaymakerTenantResource {
         return playmakerEntityMgr.create(tenant);
     }
 
-    @RequestMapping(value = "/{tenantName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{tenantName}")
     @ResponseBody
     @ApiOperation(value = "Update playmaker API tenant")
     @NoCustomerSpace
@@ -50,7 +53,7 @@ public class PlaymakerTenantResource {
         return playmakerEntityMgr.updateByTenantName(tenant);
     }
 
-    @RequestMapping(value = "/{tenantName:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{tenantName:.+}")
     @ResponseBody
     @ApiOperation(value = "Get a playmaker tenant")
     @NoCustomerSpace
@@ -62,7 +65,7 @@ public class PlaymakerTenantResource {
         return new PlaymakerTenant();
     }
 
-    @RequestMapping(value = "/{tenantName:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{tenantName:.+}")
     @ResponseBody
     @ApiOperation(value = "Delete playmaker tenant")
     @NoCustomerSpace
@@ -70,7 +73,7 @@ public class PlaymakerTenantResource {
         playmakerEntityMgr.deleteByTenantName(tenantName);
     }
 
-    @RequestMapping(value = "/oauthtotenant", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/oauthtotenant")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
     @NoCustomerSpace
@@ -78,14 +81,14 @@ public class PlaymakerTenantResource {
         return OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
     }
 
-    @RequestMapping(value = "/oauthtoappid", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/oauthtoappid")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
     public Map<String, String> getAppIdFromOauthToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken) {
         return OAuth2Utils.getAppId(authToken, oAuthUserEntityMgr);
     }
 
-    @RequestMapping(value = "/oauthtoorginfo", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/oauthtoorginfo")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
     public Map<String, String> getOrgInfoFromOauthToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken) {

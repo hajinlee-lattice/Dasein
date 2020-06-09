@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,7 +58,7 @@ public class ModelSummaryInternalResource {
         return modelSummary;
     }
 
-    @RequestMapping(value = "/tenant/{tenantName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/tenant/{tenantName}")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "Get list of model summaries available for given tenant")
@@ -82,7 +81,7 @@ public class ModelSummaryInternalResource {
         return modelSummaries;
     }
 
-    @RequestMapping(value = "/updated/{timeframe}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/updated/{timeframe}")
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all data feeds.")

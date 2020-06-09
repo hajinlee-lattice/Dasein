@@ -27,7 +27,7 @@ public class ModelDetailResource {
     @Inject
     private ModelDetailProxy modelDetailProxy;
 
-    @GetMapping(value = "/{modelId}")
+    @GetMapping("/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get detail for specific model")
     public ModelDetail getModelDetail(@PathVariable String modelId) {

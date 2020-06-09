@@ -6,9 +6,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +28,7 @@ public class ModelConfigResource {
 
     private static final Logger log = LoggerFactory.getLogger(ModelConfigResource.class);
 
-    @RequestMapping(value = "/modelconfigs", method = RequestMethod.GET)
+    @GetMapping("/modelconfigs")
     @ResponseBody
     @ApiOperation(value = "Get ModelConfigs")
     public ResponseDocument<List<ModelConfig>> getModelConfigs() {
@@ -42,7 +42,7 @@ public class ModelConfigResource {
         }
     }
 
-    @RequestMapping(value = "/modelconfigs", method = RequestMethod.POST)
+    @PostMapping("/modelconfigs")
     @ResponseBody
     @ApiOperation(value = "Upsert ModelConfigs")
     public ResponseDocument<String> upsertModelConfigs(@RequestBody List<ModelConfig> modelconfigs) {

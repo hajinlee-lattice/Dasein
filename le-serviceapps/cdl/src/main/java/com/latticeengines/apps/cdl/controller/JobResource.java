@@ -3,9 +3,9 @@ package com.latticeengines.apps.cdl.controller;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +32,7 @@ public class JobResource {
     @Inject
     private DLTenantMappingService dlTenantMappingService;
 
-    @RequestMapping(value = "/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     @NoCustomerSpace

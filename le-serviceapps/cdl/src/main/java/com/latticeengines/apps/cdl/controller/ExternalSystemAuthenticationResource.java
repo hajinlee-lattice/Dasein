@@ -28,7 +28,7 @@ public class ExternalSystemAuthenticationResource {
     @Inject
     private ExternalSystemAuthenticationService extSysAuthenticationService;
 
-    @PostMapping(value = "/")
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "create external authentication")
     public ExternalSystemAuthentication createAuthentication(@PathVariable String customerSpace,
@@ -36,7 +36,7 @@ public class ExternalSystemAuthenticationResource {
         return extSysAuthenticationService.createAuthentication(externalSystemAuthentication);
     }
 
-    @PutMapping(value = "/{authId}")
+    @PutMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "update external authentication")
     public ExternalSystemAuthentication updateAuthentication(@PathVariable String customerSpace,
@@ -44,7 +44,7 @@ public class ExternalSystemAuthenticationResource {
         return extSysAuthenticationService.updateAuthentication(authId, externalSystemAuthentication);
     }
 
-    @GetMapping(value = "/{authId}")
+    @GetMapping("/{authId}")
     @ResponseBody
     @ApiOperation(value = "Get external authentication by Id")
     public ExternalSystemAuthentication findAuthenticationByAuthId(@PathVariable String customerSpace,
@@ -52,14 +52,14 @@ public class ExternalSystemAuthenticationResource {
         return extSysAuthenticationService.findAuthenticationByAuthId(authId);
     }
 
-    @GetMapping(value = "/")
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get All external authentications")
     public List<ExternalSystemAuthentication> findAuthentications(@PathVariable String customerSpace) {
         return extSysAuthenticationService.findAuthentications();
     }
 
-    @GetMapping(value = "/lookupid-mappings")
+    @GetMapping("/lookupid-mappings")
     @ResponseBody
     @ApiOperation(value = "Get external authentication by list of LookupIdMappings")
     public List<ExternalSystemAuthentication> findAuthenticationsByLookupIdMappings(@PathVariable String customerSpace,

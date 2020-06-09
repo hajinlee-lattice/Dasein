@@ -87,7 +87,7 @@ public class DataFeedController {
         this.servingStoreService = servingStoreService;
     }
 
-    @PostMapping(value = "/processanalyze")
+    @PostMapping("/processanalyze")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace,
@@ -115,7 +115,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/processanalyze/restart")
+    @PostMapping("/processanalyze/restart")
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed processanalyze execution")
     public ResponseDocument<String> restart(@PathVariable String customerSpace,
@@ -129,7 +129,7 @@ public class DataFeedController {
         return ResponseDocument.successResponse(appId.toString());
     }
 
-    @PostMapping(value = "/exportorphanrecords")
+    @PostMapping("/exportorphanrecords")
     @ResponseBody
     @ApiOperation(value = "Invoke orphanRecordExport workflow. Returns the job id.")
     public ResponseDocument<String> orphanRecordExport(@PathVariable String customerSpace,
@@ -147,7 +147,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/convertbatchstoretoimport")
+    @PostMapping("/convertbatchstoretoimport")
     @ResponseBody
     @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
     public ResponseDocument<String> convertBatchStoreToImport(@PathVariable String customerSpace,
@@ -168,7 +168,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/migrateimport")
+    @PostMapping("/migrateimport")
     @ResponseBody
     @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
     public ResponseDocument<String> migrateImport(@PathVariable String customerSpace, @RequestBody String userId) {
@@ -193,7 +193,7 @@ public class DataFeedController {
         return appId;
     }
 
-    @PostMapping(value = "/entityexport")
+    @PostMapping("/entityexport")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> entityExport(@PathVariable String customerSpace,
@@ -234,7 +234,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/mock-activity-store")
+    @PostMapping("/mock-activity-store")
     @ResponseBody
     @ApiOperation(value = "Invoke mock activity store workflow. Returns the job id.")
     public ResponseDocument<String> mockActivityStore(@PathVariable String customerSpace) {

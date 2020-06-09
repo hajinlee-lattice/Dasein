@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,7 +40,7 @@ public class ActionResource {
 
     private static final String CANCELSUCCESS_MSG = "<p>Cancel this action success.</p>";
 
-    @RequestMapping(value = "/cancel", method = RequestMethod.POST)
+    @PostMapping("/cancel")
     @ApiOperation(value = "cancel action")
     public Map<String, UIAction> cancelAction(@RequestParam(value = "actionPid") Long actionPid) {
         try {

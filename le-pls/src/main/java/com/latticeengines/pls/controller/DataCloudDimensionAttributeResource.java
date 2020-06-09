@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +25,7 @@ public class DataCloudDimensionAttributeResource {
     @Inject
     private DimensionAttributeProxy dimensionAttributeProxy;
 
-    @RequestMapping(value = "/dimensions", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/dimensions")
     @ResponseBody
     @ApiOperation(value = "Get all top level Dimentions")
     public List<CategoricalDimension> getAllDimensions() {
@@ -33,7 +33,7 @@ public class DataCloudDimensionAttributeResource {
         return allDimensions;
     }
 
-    @RequestMapping(value = "/attributes", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/attributes")
     @ResponseBody
     @ApiOperation(value = "Get all attributes by Dimension's root Id")
     public List<CategoricalAttribute> getAllAttributes(

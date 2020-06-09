@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 public class SessionResource {
 
-    @GetMapping(value = "/session")
+    @GetMapping("/session")
     @ResponseBody
     @ApiOperation(value = "Get current session")
     public Session getCurrentSession() {

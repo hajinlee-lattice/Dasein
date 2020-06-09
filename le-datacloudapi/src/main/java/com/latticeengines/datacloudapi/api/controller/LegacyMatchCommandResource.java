@@ -6,8 +6,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +42,7 @@ public class LegacyMatchCommandResource {
         }
     }
 
-    @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/bestclient")
     @ResponseBody
     @ApiOperation(value = "Return the best matcher client to use. " +
             "Requires a query parameter \"rows\", which is the number of records to be matched.")

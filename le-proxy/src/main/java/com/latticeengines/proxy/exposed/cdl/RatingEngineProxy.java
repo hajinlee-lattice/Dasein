@@ -11,8 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -333,7 +332,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("validateForModeling", url, ratingEngine, Boolean.class);
     }
 
-    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus", method = RequestMethod.POST)
+    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus")
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
     public void updateModelingStatus(@PathVariable String customerSpace, //

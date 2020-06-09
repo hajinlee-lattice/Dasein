@@ -5,10 +5,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +43,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     private ModelProxy modelProxy;
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/")
     @ResponseBody
     @ApiOperation(value = "Get ModelRuns")
     public List<ModelRunEntityNames> getModelRuns() {
@@ -50,7 +51,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create model run")
     public String createModelRun(@RequestBody ModelRunEntityNames modelRunEntityNames, //
@@ -62,7 +63,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{modelRunName:.*}", method = RequestMethod.GET)
+    @GetMapping("/{modelRunName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get ModelRun by name")
     public ModelRunEntityNames getModelRunByName(@PathVariable String modelRunName) {
@@ -70,7 +71,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/status/{modelRunName:.*}", method = RequestMethod.GET)
+    @GetMapping("/status/{modelRunName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get ModelRun status by name")
     public String getModelRunStatusByName(@PathVariable String modelRunName) {
@@ -78,7 +79,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/modelhdfsdir/{modelRunName:.*}", method = RequestMethod.GET)
+    @GetMapping("/modelhdfsdir/{modelRunName:.*}")
     @ResponseBody
     @ApiOperation(value = "Get ModelRun model HDFS directory by name")
     public String getModelRunModelHDFSDirByName(@PathVariable String modelRunName) {
