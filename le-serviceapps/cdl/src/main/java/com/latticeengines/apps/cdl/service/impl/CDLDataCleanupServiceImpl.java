@@ -1,7 +1,12 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -9,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RegisterDeleteDataWorkflowSubmitter;
@@ -23,6 +30,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -33,6 +41,7 @@ import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteByDateRangeActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -52,12 +61,22 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     private SourceFileProxy sourceFileProxy;
 
     @Inject
+    private ActivityStoreService activityStoreService;
+
+    @Inject
     private RegisterDeleteDataWorkflowSubmitter registerDeleteDataWorkflowSubmitter;
 
     @Inject
     private BatonService batonService;
 
     private final CDLOperationWorkflowSubmitter cdlOperationWorkflowSubmitter;
+
+    private final Map<EntityType, AtlasStream.StreamType> STREAM_TYPE_REFERENCE = ImmutableMap.of(
+            EntityType.WebVisit, AtlasStream.StreamType.WebVisit,
+            EntityType.Opportunity, AtlasStream.StreamType.Opportunity,
+            EntityType.MarketingActivity, AtlasStream.StreamType.MarketingActivity,
+            EntityType.CustomIntent, AtlasStream.StreamType.DnbIntentData
+    );
 
     @Inject
     public CDLDataCleanupServiceImpl(CDLOperationWorkflowSubmitter cdlOperationWorkflowSubmitter) {
@@ -186,9 +205,21 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         deleteConfig.setDeleteEntityType(request.getDeleteEntityType());
         deleteConfig.setFromDate(request.getFromDate());
         deleteConfig.setToDate(request.getToDate());
+        if (request.getDeleteEntities().contains(BusinessEntity.ActivityStream) && CollectionUtils.isNotEmpty(request.getDeleteStreamIds())) {
+            deleteConfig.setDeleteStreamIds(translateStreamIds(customerSpace, request.getDeleteEntityType()));
+        }
         action.setActionConfiguration(deleteConfig);
         action.setTenant(tenant);
         return actionService.create(action);
+    }
+
+    private List<String> translateStreamIds(CustomerSpace customerSpace, EntityType deleteEntityType) {
+        AtlasStream.StreamType streamType = STREAM_TYPE_REFERENCE.get(deleteEntityType);
+        if (streamType == null) {
+            throw new UnsupportedOperationException(String.format("entity type %s mapped to stream type %s is not supported for delete.", deleteEntityType, streamType));
+        }
+        List<AtlasStream> targetedStreams = activityStoreService.getStreamsByStreamType(customerSpace.toString(), streamType);
+        return targetedStreams.stream().map(AtlasStream::getStreamId).collect(Collectors.toList());
     }
 
     private void verifyCleanupByDataRangeConfiguration(

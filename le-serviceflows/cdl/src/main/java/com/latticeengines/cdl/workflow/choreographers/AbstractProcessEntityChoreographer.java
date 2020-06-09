@@ -7,9 +7,9 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOME
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_ENABLED;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.FULL_REMATCH_PA;
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DELETE_ACTIONS;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -250,8 +250,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     private void checkSnHDelete(AbstractStep<? extends BaseStepConfiguration> step) {
-        List<Action> softDeletes = step.getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
-        List<Action> hardDeletes = step.getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
+        List<Action> softDeletes = step.getListObjectFromContext(SOFT_DELETE_ACTIONS, Action.class);
+        List<Action> hardDeletes = step.getListObjectFromContext(HARD_DELETE_ACTIONS, Action.class);
         hasHardDelete = CollectionUtils.isNotEmpty(hardDeletes);
         if (hasHardDelete) {
             log.info(String.format("Found %d hard delete actions", hardDeletes.size()));

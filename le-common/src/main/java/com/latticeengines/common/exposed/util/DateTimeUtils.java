@@ -2,13 +2,17 @@ package com.latticeengines.common.exposed.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 public final class DateTimeUtils {
 
@@ -145,5 +149,17 @@ public final class DateTimeUtils {
     public static String subtractDays(String date, Integer days) {
         Integer dateId = dateToDayPeriod(date);
         return dayPeriodToDate(subtractDays(dateId, days));
+    }
+
+    // return [ start day period, end day period ]
+    // TODO assume format is yyyy-MM-dd for now, handle different format in the future
+    public static List<Long> parseTimeRange(String fromDate, String toDate) {
+        Integer startDayPeriod = dateToDayPeriod(fromDate);
+        Integer endDayPeriod = dateToDayPeriod(toDate);
+        Preconditions.checkNotNull(startDayPeriod,
+                String.format("Failed to parse delete from date string %s", fromDate));
+        Preconditions.checkNotNull(endDayPeriod,
+                String.format("Failed to parse delete to date string %s", toDate));
+        return Arrays.asList(startDayPeriod.longValue(), endDayPeriod.longValue());
     }
 }

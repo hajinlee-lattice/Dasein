@@ -151,4 +151,6 @@ public interface ActivityStoreService {
     Map<String, String> getStreamNameMap(@NotNull String customerSpace);
 
     List<AtlasStream> getStreams(@NotNull String customerSpace);
+
+    List<AtlasStream> getStreamsByStreamType(@NotNull String customerSpace, AtlasStream.StreamType streamType);
 }

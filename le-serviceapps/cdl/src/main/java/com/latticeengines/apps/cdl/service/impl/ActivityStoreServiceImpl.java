@@ -260,6 +260,13 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         return streams;
     }
 
+    @Override
+    @WithCustomerSpace
+    public List<AtlasStream> getStreamsByStreamType(String customerSpace, AtlasStream.StreamType streamType) {
+        List<AtlasStream> streams = streamEntityMgr.findByStreamType(streamType);
+        return CollectionUtils.isEmpty(streams) ? Collections.emptyList() : streams;
+    }
+
     // streamId -> streamName
     @Override
     @WithCustomerSpace

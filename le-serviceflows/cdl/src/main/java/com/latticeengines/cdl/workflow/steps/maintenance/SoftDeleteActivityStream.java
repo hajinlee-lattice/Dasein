@@ -1,21 +1,39 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_TS_DELETE_TXFMR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 
 @Component(SoftDeleteActivityStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -25,7 +43,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
 
     static final String BEAN_NAME = "softDeleteActivityStream";
 
-    List<Action> softDeleteActions;
+    private List<Action> softDeleteActivityActions;
 
 
     @Override
@@ -39,18 +57,24 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         if (configuration.isRematchMode()) {
             return;
         }
-        Map<String, String> rawStreamTables = buildRawStreamBatchStore();
+        Map<String, String> rawStreamTables = updateRawStreamTableEntries();
         exportToS3AndAddToContext(rawStreamTables, RAW_ACTIVITY_STREAM_TABLE_NAME);
         updateEntityValueMapInContext(PERFORM_SOFT_DELETE, Boolean.TRUE, Boolean.class);
         if (MapUtils.isNotEmpty(rawStreamTables)) {
-            putObjectInContext(RAW_STREAM_TABLE_AFTER_DELETE, rawStreamTables);
-            log.info("Put updated raw stream table in context: {}", rawStreamTables);
+            putObjectInContext(RAW_STREAM_TABLE_AFTER_DELETE, rawStreamsAfterDelete);
+            log.info("Put updated raw stream table in context: {}", rawStreamsAfterDelete);
         }
+    }
+
+    private Map<String, String> updateRawStreamTableEntries() {
+        Map<String, String> updated = new HashMap<>(configuration.getActiveRawStreamTables());
+        updated.putAll(rawStreamsAfterDelete);
+        return updated;
     }
 
     @Override
     protected List<Action> deleteActions() {
-        return softDeleteActions;
+        return softDeleteActivityActions;
     }
 
     @Override
@@ -66,7 +90,11 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
+        List<Action> deleteActions = getListObjectFromContext(SOFT_DELETE_ACTIONS, Action.class);
+        softDeleteActivityActions = CollectionUtils.isEmpty(deleteActions) ? Collections.emptyList() : deleteActions.stream().filter(deleteAction -> {
+            DeleteActionConfiguration config = (DeleteActionConfiguration) deleteAction.getActionConfiguration();
+            return config.hasEntity(BusinessEntity.ActivityStream);
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -75,7 +103,108 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
             log.info("Activity Stream use replace mode. Skip soft delete!");
             return null;
         }
-        return super.getConsolidateRequest();
+        if (CollectionUtils.isEmpty(softDeleteActivityActions)) {
+            log.info("No delete action detected, Skip soft delete!");
+            return null;
+        }
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+        request.setName(getBeanName());
+
+        List<TransformationStepConfig> steps = new ArrayList<>();
+
+        configuration.getActiveRawStreamTables().forEach((streamId, tableName) -> {
+            List<DeleteActionConfiguration> deleteConfigsForStream = softDeleteActivityActions.stream().filter(action -> {
+                DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
+                return config.hasStream(streamId);
+            }).map(action -> (DeleteActionConfiguration) action.getActionConfiguration()).collect(Collectors.toList());
+            String idColumn = configuration.getActivityStreamMap().get(streamId).getAggrEntities()
+                    .contains(BusinessEntity.Contact.name()) ? InterfaceName.ContactId.name() : InterfaceName.AccountId.name();
+
+            TransformationStepConfig mergeTimeSeriesDeleteStep = getMergeTimeSeriesDeleteStep(idColumn, deleteConfigsForStream);
+            if (mergeTimeSeriesDeleteStep != null) {
+                List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace.toString(), tableName);
+                boolean hasId = cms.stream().anyMatch(cm -> idColumn.equals(cm.getAttrName()));
+                if (!hasId) {
+                    // requested to delete stream by ID, but stream doesn't have the ID, skip deleting step
+                    log.warn("Stream {} does not have the deletion id {}", streamId, idColumn);
+                    return;
+                }
+                steps.add(mergeTimeSeriesDeleteStep);
+            }
+            appendSoftDeleteStreamStep(steps, mergeTimeSeriesDeleteStep != null, deleteConfigsForStream, idColumn, streamId, tableName);
+        });
+
+        if (steps.isEmpty()) {
+            log.info("No suitable delete actions for any stream.");
+            return null;
+        } else {
+            request.setSteps(steps);
+            return request;
+        }
+    }
+
+    private void appendSoftDeleteStreamStep(List<TransformationStepConfig> steps, boolean hasDeleteImport, List<DeleteActionConfiguration> deleteConfigsForStream, String idColumn, String streamId, String rawStreamTable) {
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setIdColumn(idColumn);
+        softDeleteConfig.setPartitionKeys(RAWSTREAM_PARTITION_KEYS);
+        softDeleteConfig.setNeedPartitionOutput(needPartition());
+        softDeleteConfig.setEventTimeColumn(configuration.getActivityStreamMap().get(streamId).getDateAttribute());
+        softDeleteConfig.setTimeRangesColumn(InterfaceName.TimeRanges.name());
+        softDeleteConfig.setTimeRangesToDelete(extractGlobalTimeRanges(deleteConfigsForStream));
+
+        TransformationStepConfig step = new TransformationStepConfig();
+        String targetTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
+        step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        setTargetTable(step, targetTablePrefix);
+        rawStreamsAfterDelete.put(streamId, targetTablePrefix);
+
+        addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), rawStreamTable);
+        if (hasDeleteImport) {
+            log.info("Add batch store table {} and delete import table for soft delete.", rawStreamTable);
+            step.setInputSteps(Collections.singletonList(steps.size() - 1));
+        } else {
+            log.info("Add batch store table {} for soft delete by only time ranges.", rawStreamTable);
+        }
+        steps.add(step);
+    }
+
+    private Set<List<Long>> extractGlobalTimeRanges(List<DeleteActionConfiguration> deleteConfigsForStream) {
+        return deleteConfigsForStream.stream().filter(config -> StringUtils.isBlank(config.getDeleteDataTable())).map(config -> {
+            Preconditions.checkArgument(StringUtils.isNotBlank(config.getFromDate()),
+                    "Delete action need to have either delete data or time range. Missing FromDate in time range");
+            Preconditions.checkArgument(StringUtils.isNotBlank(config.getToDate()),
+                    "Delete action need to have either delete data or time range. Missing ToDate in time range");
+            return DateTimeUtils.parseTimeRange(config.getFromDate(), config.getToDate());
+        }).collect(Collectors.toSet());
+    }
+
+    private TransformationStepConfig getMergeTimeSeriesDeleteStep(String joinKey, List<DeleteActionConfiguration> deleteConfigsForStream) {
+        if (deleteConfigsForStream.stream().noneMatch(deleteConfig -> StringUtils.isNotBlank(deleteConfig.getDeleteDataTable()))) {
+            // no delete import, skip merging step
+            return null;
+        }
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MERGE_TS_DELETE_TXFMR);
+        Map<Integer, List<Long>> timeRanges = new HashMap<>();
+        int timeRangeIdx = 0;
+        for (int i = 0; i < deleteConfigsForStream.size(); i++) {
+            DeleteActionConfiguration deleteConfig = deleteConfigsForStream.get(i);
+            if (StringUtils.isNotBlank(deleteConfig.getDeleteDataTable())) {
+                // only merge delete with delete import, skip ones deleting only by time range
+                addBaseTables(step, deleteConfig.getDeleteDataTable());
+                if (StringUtils.isNotBlank(deleteConfig.getFromDate()) && StringUtils.isNotBlank(deleteConfig.getToDate())) {
+                    timeRanges.put(timeRangeIdx, DateTimeUtils.parseTimeRange(deleteConfig.getFromDate(), deleteConfig.getToDate()));
+                }
+                timeRangeIdx++;
+            }
+        }
+        MergeTimeSeriesDeleteDataConfig config = new MergeTimeSeriesDeleteDataConfig();
+        config.joinKey = joinKey;
+        config.timeRanges.putAll(timeRanges);
+        step.setConfiguration((appendEngineConf(config, lightEngineConfig())));
+        return step;
     }
 
     protected TransformationWorkflowConfiguration generateWorkflowConf() {

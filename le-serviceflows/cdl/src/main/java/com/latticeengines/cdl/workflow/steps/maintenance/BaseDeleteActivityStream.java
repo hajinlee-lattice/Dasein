@@ -38,8 +38,8 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
 
     private static final Logger log = LoggerFactory.getLogger(BaseDeleteActivityStream.class);
 
-    private static final String RAWSTREAM_TABLE_PREFIX_FORMAT = "SD_RawStream_%s";
-    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
+    protected static final String RAWSTREAM_TABLE_PREFIX_FORMAT = "SD_RawStream_%s";
+    protected static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;

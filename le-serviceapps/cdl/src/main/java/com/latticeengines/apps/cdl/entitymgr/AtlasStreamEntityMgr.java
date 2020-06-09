@@ -53,4 +53,6 @@ public interface AtlasStreamEntityMgr extends BaseEntityMgrRepository<AtlasStrea
      * @return list of Stream, will not be {@code null}
      */
     List<AtlasStream> findByTenant(@NotNull Tenant tenant, boolean inflateDimensions);
+
+    List<AtlasStream> findByStreamType(@NotNull AtlasStream.StreamType streamType);
 }

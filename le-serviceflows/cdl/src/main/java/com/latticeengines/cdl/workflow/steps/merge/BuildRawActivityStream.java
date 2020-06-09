@@ -78,6 +78,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         log.info("Matched raw stream import tables = {}", matchedStreamImportTables);
         if (softDeleteEntities.containsKey(entity)) {
             log.info("Soft delete performed for Activity Stream");
+            // only streams performed soft delete have updatedRawStreamTables entry
+            // using this context to identify which streams performed delete
             updatedRawStreamTables = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
             log.info("Updated raw stream tables = {}", updatedRawStreamTables);
         }

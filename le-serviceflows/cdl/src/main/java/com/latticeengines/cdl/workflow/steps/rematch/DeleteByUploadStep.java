@@ -58,7 +58,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         if (isShortCutMode()) {
             return null;
         }
-        hardDeleteTableLists = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
+        hardDeleteTableLists = getListObjectFromContext(HARD_DELETE_ACTIONS, Action.class);
         if (CollectionUtils.isEmpty(hardDeleteTableLists)) {
             return null;
         }
