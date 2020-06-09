@@ -3,8 +3,9 @@ package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -52,7 +53,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         InterfaceName pathPattern = InterfaceName.PathPattern;
         //Detect duplicates. There can only be one value per Name field in the input
         InterfaceName name = InterfaceName.Name;
-        List<String> nameList = new ArrayList<>();
+        Set<String> nameList = new HashSet<>();
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             // iterate through all files, remove all illegal record row
@@ -99,11 +100,11 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                             csvFilePrinter.printRecord(lineId, "", "Name field contains empty values" +
                                                     ". Please correct and try again");
                                         } else {
-                                            if (nameList.size() > 0 && nameList.contains(nameStr)) {
+                                            if (nameList.contains(nameStr)) {
                                                 rowError = true;
                                                 fileError = true;
                                                 csvFilePrinter.printRecord(lineId, "", "We found multiple entries for the same Name field. Please correct and try again.");
-                                            }else {
+                                            } else {
                                                 nameList.add(nameStr);
                                             }
                                         }
