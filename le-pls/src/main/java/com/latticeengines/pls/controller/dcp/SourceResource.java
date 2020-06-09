@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
@@ -96,13 +95,6 @@ public class SourceResource {
         return sourceService.getSource(sourceId);
     }
 
-    @GetMapping(value = "/sourceId/{sourceId}/mappings")
-    @ResponseBody
-    @ApiOperation("Get source mappings")
-    public FieldDefinitionsRecord getSourceMappings(@PathVariable String sourceId) {
-        return sourceService.getSourceMappings(sourceId);
-    }
-
     @DeleteMapping(value = "/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Delete source by sourceId")
@@ -128,16 +120,16 @@ public class SourceResource {
 
     // Parameters:
     //   entityType: The entity type of this template eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
-    @GetMapping(value = "/fetch")
+    //   fileImportId: The name of the CSV file this template is being generated for.
+    @GetMapping(value = "/mappings")
     @ResponseBody
-    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public FetchFieldDefinitionsResponse fetchFieldDefinitions(
+    @ApiOperation(value = "Provide field definition to Front End")
+    public FetchFieldDefinitionsResponse getSourceMappings(
             @RequestParam(value = "sourceId", required = false) String sourceId, //
             @RequestParam(value = "entityType", required = false, defaultValue = "Accounts") String entityType, //
-            @RequestParam(value = "importFile") String importFile) {
+            @RequestParam(value = "fileImportId", required = false) String fileImportId) {
         try {
-            return sourceService.fetchFieldDefinitions(sourceId, entityType, importFile);
+            return sourceService.getSourceMappings(sourceId, entityType, fileImportId);
         } catch (Exception e) {
             log.error("Fetch Field Definition Failed with Exception.", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -147,19 +139,20 @@ public class SourceResource {
     }
 
     // Parameters:
-    //   importFile: The name of the CSV file this template is being generated for.
+    //   fileImportId: The name of the CSV file this template is being generated for.
     // Body:
     // ValidateFieldDefinitionsRequest representing field definition changes/records
     @PostMapping(value = "/validate")
     @ResponseBody
-    @ApiOperation(value = "Provide validation result and merged field definition to front end")
-    public ValidateFieldDefinitionsResponse validateFieldDefinitions(
-            @RequestParam(value = "importFile") String importFile, //
+    @ApiOperation(value = "Provide validation result")
+    public ValidateFieldDefinitionsResponse validateSourceMappings(
+            @RequestParam(value = "entityType", required = false, defaultValue = "Accounts") String entityType, //
+            @RequestParam(value = "fileImportId", required = false) String fileImportId, //
             @RequestBody ValidateFieldDefinitionsRequest validateRequest) {
         ValidateFieldDefinitionsResponse validateFieldDefinitionsResponse = null;
         try {
-            validateFieldDefinitionsResponse = sourceService.validateFieldDefinitions(
-                    importFile, validateRequest);
+            validateFieldDefinitionsResponse = sourceService.validateSourceMappings(fileImportId,
+                    entityType, validateRequest);
             return validateFieldDefinitionsResponse;
         } catch (Exception e) {
             log.error("Failed to validate definitions", e);

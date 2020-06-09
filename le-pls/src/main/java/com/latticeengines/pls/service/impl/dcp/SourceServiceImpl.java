@@ -1,11 +1,9 @@
 package com.latticeengines.pls.service.impl.dcp;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -25,14 +23,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.OtherTemplateData;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.service.DataMappingService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.pls.util.ImportWorkflowUtils;
@@ -63,6 +60,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataMappingService dataMappingService;
 
     @Override
     public Source createSource(SourceRequest sourceRequest) {
@@ -110,16 +110,21 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String entityType,
+    public FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
                                                                String importFile)
             throws Exception {
+
+        Preconditions.checkState(!StringUtils.isAllBlank(sourceId, importFile),
+                "provide one parameter at least : source Id or import file Id");
 
         // 1a. Convert systemObject to entity.
         EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
                 EntityType.valueOf(entityType) : EntityType.Accounts;
+        Preconditions.checkState(EntityType.Accounts.equals(entityTypeObj), String.format("illegal entity type %s",
+                entityTypeObj));
 
         // 1b. Generate sourceFile object.
-        SourceFile sourceFile = getSourceFile(importFile);
+        SourceFile sourceFile = sourceFileService.findByName(importFile);
 
         // 1c. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -129,7 +134,7 @@ public class SourceServiceImpl implements SourceService {
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
                         "   Source File: %s\n   Customer Space: %s", entityTypeObj.getEntity(),
                 entityTypeObj.getSubType(),
-                sourceFile.getName(), customerSpace.toString()));
+                sourceFile == null ? "empty" : sourceFile.getName(), customerSpace.toString()));
 
         // 2a. Set up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
@@ -148,10 +153,11 @@ public class SourceServiceImpl implements SourceService {
         setExistingFieldDefinitionsFromSource(customerSpace, fetchFieldDefinitionsResponse, sourceId);
 
         // 2d. Create a MetadataResolver using the sourceFile.
-        MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
-        fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
-                ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
-
+        if (sourceFile != null) {
+            MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
+            fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
+                    ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
+        }
 
         // 3. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file.
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
@@ -160,42 +166,14 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
-                                                              ValidateFieldDefinitionsRequest validateRequest) {
-        // get default spec from s3
-        if (validateRequest.getImportWorkflowSpec() == null || MapUtils.isEmpty(validateRequest.getImportWorkflowSpec()
-                .getFieldDefinitionsRecordsMap())) {
-            throw new RuntimeException("no spec info");
-        }
-
-        if (MapUtils.isEmpty(validateRequest.getAutodetectionResultsMap())) {
-            throw new RuntimeException("no auto-detected field definition");
-        }
-
-        if (validateRequest.getCurrentFieldDefinitionsRecord() == null || MapUtils.isEmpty(
-                validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap())) {
-            throw new RuntimeException("no field definition records");
-        }
-
-        Map<String, FieldDefinition> autoDetectionResultsMap = validateRequest.getAutodetectionResultsMap();
-        Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap =
-                validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap();
-        Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap =
-                validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap();
-        Map<String, FieldDefinition> existingFieldDefinitionMap = validateRequest.getExistingFieldDefinitionsMap();
-        Map<String, OtherTemplateData> otherTemplateDataMap = validateRequest.getOtherTemplateDataMap();
-
-        // 1 Generate source file and resolver
-        SourceFile sourceFile = getSourceFile(importFile);
-        MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
-
-        // 2. generate validation message
-        ValidateFieldDefinitionsResponse response =
-                ImportWorkflowUtils.generateValidationResponse(fieldDefinitionsRecordsMap, autoDetectionResultsMap,
-                        specFieldDefinitionsRecordsMap, existingFieldDefinitionMap, otherTemplateDataMap, resolver);
-        // set field definition records map for ui
-        response.setFieldDefinitionsRecordsMap(fieldDefinitionsRecordsMap);
-        return response;
+    public ValidateFieldDefinitionsResponse validateSourceMappings(String importFile, String entityType,
+                                                              ValidateFieldDefinitionsRequest validateRequest) throws Exception {
+        EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
+                EntityType.valueOf(entityType) : EntityType.Accounts;
+        Preconditions.checkState(EntityType.Accounts.equals(entityTypeObj), String.format("illegal entity type %s",
+                entityTypeObj));
+        return dataMappingService.validateFieldDefinitions("faked", S3ImportSystem.SystemType.DCP.name(),
+                entityType, importFile, validateRequest);
     }
 
     @Override
@@ -205,40 +183,6 @@ public class SourceServiceImpl implements SourceService {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return sourceProxy.updateSource(customerSpace.toString(), updateSourceRequest);
-    }
-
-    @Override
-    public FieldDefinitionsRecord getSourceMappings(String sourceId) {
-        // 1a. default entity type.
-        EntityType entityTypeObj = EntityType.Accounts;
-
-        // 1b. Generate customerSpace.
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
-        }
-        log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
-                        "   Customer Space: %s", entityTypeObj.getEntity(),
-                entityTypeObj.getSubType(), customerSpace.toString()));
-
-        // 2a. Set up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
-        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
-        fetchFieldDefinitionsResponse.setCurrentFieldDefinitionsRecord(
-                new FieldDefinitionsRecord(S3ImportSystem.SystemType.DCP.getDefaultSystemName(),
-                        S3ImportSystem.SystemType.DCP.name(),
-                        entityTypeObj.getDisplayName()));
-
-        // 2b. Retrieve Spec for given systemType and systemObject.
-        fetchFieldDefinitionsResponse.setImportWorkflowSpec(
-                importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(),
-                        S3ImportSystem.SystemType.DCP.name(),
-                        entityTypeObj.getDisplayName()));
-
-        // 2c. Find previously saved template matching this customerSpace, sourceId, if it exists.
-        setExistingFieldDefinitionsFromSource(customerSpace, fetchFieldDefinitionsResponse, sourceId);
-
-        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
-        return fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
     }
 
     private void setExistingFieldDefinitionsFromSource(CustomerSpace customerSpace,
@@ -254,14 +198,6 @@ public class SourceServiceImpl implements SourceService {
             fetchFieldDefinitionsResponse.setExistingFieldDefinitionsMap(
                     ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTable));
         }
-    }
-
-    private SourceFile getSourceFile(String sourceFileName) {
-        SourceFile sourceFile = sourceFileService.findByName(sourceFileName);
-        if (sourceFile == null) {
-            throw new RuntimeException(String.format("Could not locate source file with name %s", sourceFileName));
-        }
-        return sourceFile;
     }
 
 

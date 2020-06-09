@@ -10,7 +10,6 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 
@@ -47,27 +46,36 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         put("pause source", url);
     }
 
-    public FetchFieldDefinitionsResponse fetchDefinitions(String sourceId, String entityType,
-                                                          String importFile) {
-        String url = constructUrl("/fetch/?importFile={importFile}", importFile);
+    public FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
+                                                          String fileImportId) {
+        String url = constructUrl("/mappings");
+        boolean isFirst = true;
+        if (StringUtils.isNotBlank(fileImportId)) {
+            url += "?fileImportId=" + fileImportId;
+            isFirst = false;
+        }
         if (StringUtils.isNotBlank(sourceId)) {
-            url += "&sourceId=" + sourceId;
+            url += (isFirst ? "?sourceId=" + sourceId : "&sourceId=" + sourceId);
+            isFirst = false;
         }
         if (StringUtils.isNotBlank(entityType)) {
-            url += "&entityType=" + entityType;
+            url += isFirst ? "?entityType=" + entityType : "&entityType=" + entityType;
         }
-        return get("get definitions", url, FetchFieldDefinitionsResponse.class);
+        return get("get source mappings", url, FetchFieldDefinitionsResponse.class);
     }
 
-    public ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
+    public ValidateFieldDefinitionsResponse validateSourceMappings(String fileImportId, String entityType,
                                                                      ValidateFieldDefinitionsRequest validateRequest) {
-        String url = constructUrl("/validate/?importFile={importFile}", importFile);
-        return post("validate definitions", url, validateRequest, ValidateFieldDefinitionsResponse.class);
-    }
-
-    public FieldDefinitionsRecord getSourceMappings(String sourceId) {
-        String url = constructUrl("/sourceId/{sourceId}/mappings", sourceId);
-        return get("get source mappings", url, FieldDefinitionsRecord.class);
+        String url = constructUrl("/validate/");
+        boolean isFirst = true;
+        if (StringUtils.isNotBlank(fileImportId)) {
+            url += "?fileImportId=" + fileImportId;
+            isFirst = false;
+        }
+        if (StringUtils.isNotBlank(entityType)) {
+            url += isFirst ? "?entityType=" + entityType : "&entityType=" + entityType;
+        }
+        return post("validate mappings", url, validateRequest, ValidateFieldDefinitionsResponse.class);
     }
 
     public Source updateSource(UpdateSourceRequest updateSourceRequest) {
