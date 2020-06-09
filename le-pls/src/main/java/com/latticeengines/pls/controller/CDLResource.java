@@ -556,6 +556,7 @@ public class CDLResource {
                         }
                         break;
                     case Contacts:
+                    case ProductPurchases:
                         if (contactSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
                             fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                             Pair<S3ImportSystem, EntityType> attrInfoPair = contactSystemIdMap.get(fieldPreview.getNameInTemplate());
