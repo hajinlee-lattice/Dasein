@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -37,6 +39,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     private volatile boolean waitForCaller;
 
     @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
     private WorkflowService workflowService;
 
     @Inject
@@ -47,6 +52,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Value("${cdl.processAnalyze.job.retry.count:1}")
+    private int processAnalyzeJobRetryCount;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -108,7 +116,15 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         }
         WorkflowStatus status = workflowService.getStatus(new WorkflowExecutionId(executionId), jobExecution);
         log.info("Job status=" + jobExecution.getStatus() + " workflow Id=" + jobExecution.getId());
-        workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
+        JobStatus statusToUpdate = JobStatus.fromString(status.getStatus().name());
+
+        String tenantId = workflowJob.getTenant().getId();
+        if (canRetry(jobExecution, dataFeedProxy.getDataFeed(tenantId), processAnalyzeJobRetryCount)) {
+            log.info("Current PA can be retried, set workflow status to {}", JobStatus.PENDING_RETRY);
+            statusToUpdate = JobStatus.PENDING_RETRY;
+        }
+
+        workflowJob.setStatus(statusToUpdate.name());
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
         log.info("Updated work flow status=" + status + " workflow Id=" + executionId);
         if (BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {

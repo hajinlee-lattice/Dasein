@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -268,22 +269,48 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobs.add(unstartedPnAJob);
             }
         }
-        updateLastFailedPA(jobs, schedulingStatus);
-        return jobs;
+        updatePendingRetryJobs(jobs, schedulingStatus);
+        // not showing retried PA
+        return jobs.stream() //
+                .filter(job -> !JobStatus.RETRIED.equals(job.getJobStatus())) //
+                .collect(Collectors.toList());
     }
 
     /*
-     * Update latest failed PA status to pending retry if scheduler is going to
-     * retry it
+     * Update all jobs with Pending Retry status: 1. last failed one, if waiting for
+     * scheduler retry => RUNNING 2. others => FAILED
      */
-    private void updateLastFailedPA(List<Job> jobs, SchedulingStatus status) {
-        // check scheduler is enabled and all references exist
-        if (CollectionUtils.isEmpty(jobs) || status == null || !status.isSchedulerEnabled()) {
+    private void updatePendingRetryJobs(List<Job> jobs, SchedulingStatus status) {
+        if (CollectionUtils.isEmpty(jobs)) {
             return;
         }
+        Long pendingRetryPAId = getPendingRetryPAId(status);
+
+        jobs.stream() //
+                .filter(Objects::nonNull) //
+                .filter(job -> job.getJobStatus() == JobStatus.PENDING_RETRY) //
+                .forEach(job -> {
+                    if (pendingRetryPAId != null && pendingRetryPAId.equals(job.getId())) {
+                        job.setJobStatus(JobStatus.RUNNING);
+                    } else {
+                        job.setJobStatus(JobStatus.FAILED);
+                    }
+                });
+    }
+
+    /*-
+     * get workflow pid for last failed PA
+     */
+    private Long getPendingRetryPAId(SchedulingStatus status) {
+        // check scheduler is enabled and all references exist
+        if (status == null) {
+            return null;
+        }
+        // TODO consider only return when scheduler is enabled (active stack)
+        // - status.isSchedulerEnabled()
         if (status.getDataFeed() == null || status.getLatestExecution() == null
                 || status.getLatestExecution().getStatus() != DataFeedExecution.Status.Failed) {
-            return;
+            return null;
         }
 
         DataFeedExecution exec = status.getLatestExecution();
@@ -292,17 +319,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 log.warn("Got empty workflowId for last failed execution. ExecutionId={}, tenant={}", exec.getPid(),
                         status.getCustomerSpace());
             }
-            return;
+            return null;
         }
-
-        /*-
-         * FIXME re-enable or change this after UX finalized the behavior
-        jobs.stream() //
-                .filter(Objects::nonNull) //
-                .filter(job -> exec.getWorkflowPid().equals(job.getId())) //
-                .findAny() //
-                .ifPresent(job -> job.setJobStatus(JobStatus.PENDING_RETRY));
-         */
+        return exec.getWorkflowId();
     }
 
     @Override

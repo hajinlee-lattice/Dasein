@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationI
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -106,15 +107,11 @@ public class WorkflowResource {
 
         AppSubmission submission = new AppSubmission(
                 workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));
-        // update status of retried job
-        /*-
-         * FIXME re-enable or change this after UX finalized the behavior
-        if (Boolean.TRUE.equals(autoRetry)) {
-            // TODO maybe update all retried jobs instead of only auto-retried ones
-            log.info("Updating retried job status, workflowId = {}", wfId);
+        if (ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME.equalsIgnoreCase(job.getName())) {
+            // update status of retried job
+            log.info("Updating retried PA job status, workflowId = {}", wfId);
             workflowJobService.updateWorkflowStatusAfterRetry(customerSpace, wfId);
         }
-         */
         return submission;
     }
 
