@@ -206,7 +206,10 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
         String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
-        return uploadProxy.getUploadByUploadId(customerSpace, uploadId);
+        UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(customerSpace, uploadId);
+
+        uploadDetails.getUploadDiagnostics().setApplicationId(appId.toString());
+        return uploadDetails;
     }
 
     @Override

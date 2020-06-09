@@ -141,7 +141,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED);
+
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
 
         updateUploadStatistics(result);
     }

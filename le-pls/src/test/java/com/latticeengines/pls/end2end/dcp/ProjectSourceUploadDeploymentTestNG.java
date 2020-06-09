@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +36,6 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
-import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
@@ -47,11 +45,10 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
-import com.latticeengines.pls.service.dcp.ProjectService;
-import com.latticeengines.pls.service.dcp.SourceService;
-import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
-import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestUploadProxy;
 
 public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -63,10 +60,10 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     private static final String SOURCE_ID = "SourceId";
 
     @Inject
-    private ProjectService projectService;
+    private TestProjectProxy testProjectProxy;
 
     @Inject
-    private SourceService sourceService;
+    private TestSourceProxy testSourceProxy;
 
     @Inject
     private S3Service s3Service;
@@ -78,16 +75,16 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     private DropBoxProxy dropBoxProxy;
 
     @Inject
-    private UploadProxy uploadProxy;
-
-    @Inject
-    private UploadService uploadService;
+    private TestUploadProxy testUploadProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         MultiTenantContext.setTenant(mainTestTenant);
+        attachProtectedProxy(testUploadProxy);
+        attachProtectedProxy(testProjectProxy);
+        attachProtectedProxy(testSourceProxy);
     }
 
     @Test(groups = "deployment")
@@ -95,12 +92,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
 
-        ProjectRequest projectRequest = new ProjectRequest();
-        projectRequest.setDisplayName(PROJECT_NAME);
-        projectRequest.setProjectId(PROJECT_ID);
-        projectRequest.setProjectType(Project.ProjectType.Type1);
-        ProjectDetails details = projectService.createProject(customerSpace, projectRequest,
-                MultiTenantContext.getEmailAddress());
+        ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID, Project.ProjectType.Type1);
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
         GrantDropBoxAccessResponse response = details.getDropFolderAccess();
         Assert.assertNotNull(response);
@@ -112,19 +104,19 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         sourceRequest.setDisplayName(SOURCE_NAME);
         sourceRequest.setProjectId(PROJECT_ID);
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
-        Source source = sourceService.createSource(sourceRequest);
+        Source source = testSourceProxy.createSource(sourceRequest);
         verifySourceAndAccess(source, response, true);
 
 
         // create another source with specific id under same project
         sourceRequest.setSourceId(SOURCE_ID);
-        Source source2 = sourceService.createSource(sourceRequest);
+        Source source2 = testSourceProxy.createSource(sourceRequest);
         verifySourceAndAccess(source2, response, true);
 
         // Copy test file to drop folder, then trigger dcp workflow
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
         // pause source for s3 import
-        sourceService.pauseSource(source.getSourceId());
+        testSourceProxy.pauseSourceById(source.getSourceId());
         String dropPath = UploadS3PathBuilderUtils.getDropRoot(details.getProjectId(), source2.getSourceId());
         dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
@@ -136,25 +128,25 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         request.setProjectId(details.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
-        ApplicationId applicationId = uploadProxy.startImport(customerSpace, request);
-        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
+        UploadDetails uploadDetail = testUploadProxy.startImport( request);
+        JobStatus completedStatus = waitForWorkflowStatus(uploadDetail.getUploadDiagnostics().getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        List<UploadDetails> uploadDetails = uploadService.getAllBySourceId(source.getSourceId(), null);
+        List<UploadDetails> uploadDetails = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
         Assert.assertNotNull(uploadDetails);
         Assert.assertEquals(uploadDetails.size(), 1);
-        UploadDetails uploadDetail = uploadDetails.get(0);
-        UploadDetails retrievedDetail = uploadService.getByUploadId(uploadDetail.getUploadId());
+        uploadDetail = uploadDetails.get(0);
+        UploadDetails retrievedDetail = testUploadProxy.getUpload(uploadDetail.getUploadId());
         Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
-        String token = uploadService.generateToken(retrievedDetail.getUploadId());
+        String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
     public void testGetAndDelete() {
-        List<ProjectSummary> projects = projectService.getAllProjects(customerSpace);
+        List<ProjectSummary> projects = testProjectProxy.getAllProjects();
         Assert.assertNotNull(projects);
         Assert.assertEquals(projects.size(), 1);
-        ProjectDetails details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
+        ProjectDetails details = testProjectProxy.getProjectByProjectId(PROJECT_ID);
         Assert.assertNotNull(details);
         Assert.assertFalse(details.getDeleted());
         Assert.assertEquals(details.getProjectId(), PROJECT_ID);
@@ -164,28 +156,29 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         List<Source> sources = details.getSources();
         Assert.assertNotNull(sources);
         Assert.assertEquals(sources.size(), 2);
-        List<Source> sources2 = sourceService.getSourceList(PROJECT_ID);
+        List<Source> sources2 = testSourceProxy.getSourcesByProject(PROJECT_ID);
         Assert.assertEquals(sources2.size(), 2);
         sources.forEach(s -> verifySourceAndAccess(s, response,false));
 
         // delete one source
-        sourceService.deleteSource(SOURCE_ID);
-        details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
+        testSourceProxy.deleteSourceById(SOURCE_ID);
+        details = testProjectProxy.getProjectByProjectId(PROJECT_ID);
         Assert.assertNotNull(details);
         sources = details.getSources();
         Assert.assertNotNull(sources);
         Assert.assertEquals(sources.size(), 1);
-        sources2 = sourceService.getSourceList(PROJECT_ID);
+        sources2 = testSourceProxy.getSourcesByProject(PROJECT_ID);
         Assert.assertNotNull(sources2);
         Assert.assertEquals(sources2.size(), 1);
         Source source = sources.get(0);
 
         // soft delete project
-        projectService.deleteProject(customerSpace, PROJECT_ID);
+        testProjectProxy.deleteProject(PROJECT_ID);
         SleepUtils.sleep(1000);
-        projects = projectService.getAllProjects(customerSpace);
+        projects = testProjectProxy.getAllProjects();
+      
         Assert.assertFalse(CollectionUtils.isEmpty(projects));
-        details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
+        details = testProjectProxy.getProjectByProjectId(PROJECT_ID);
         Assert.assertNotNull(details);
         log.info("retrieved details : " + JsonUtils.serialize(details));
         Assert.assertTrue(details.getDeleted());
@@ -194,15 +187,15 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         sources = details.getSources();
         Assert.assertNotNull(sources);
         Assert.assertEquals(sources.size(), 1);
-        sources2 = sourceService.getSourceList(PROJECT_ID);
+        sources2 = testSourceProxy.getSourcesByProject(PROJECT_ID);
         Assert.assertNotNull(sources2);
         Assert.assertEquals(sources2.size(), 1);
-        source = sourceService.getSource(source.getSourceId());
+        source = testSourceProxy.getSource(source.getSourceId());
         Assert.assertNotNull(source);
 
         // delete source
-        sourceService.deleteSource(source.getSourceId());
-        Assert.assertTrue(CollectionUtils.isEmpty(sourceService.getSourceList(PROJECT_ID)));
+        testSourceProxy.deleteSourceById(source.getSourceId());
+        Assert.assertTrue(CollectionUtils.isEmpty(testSourceProxy.getSourcesByProject(PROJECT_ID)));
     }
 
     /**

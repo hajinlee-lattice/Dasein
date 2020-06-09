@@ -51,7 +51,8 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     protected void preMatchProcessing(MatchInput matchInput) {
         String uploadId = configuration.getUploadId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_STARTED);
+
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_STARTED, null);
 
         matchInput.setUseDirectPlus(true);
         matchInput.setDplusMatchConfig(configuration.getMatchConfig());

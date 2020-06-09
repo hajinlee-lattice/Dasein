@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 import io.swagger.annotations.Api;
@@ -103,9 +104,10 @@ public class UploadResource {
     @ApiOperation(value = "update the upload status")
     public void updateStatus(@PathVariable String customerSpace,
                              @PathVariable String uploadId,
-                             @PathVariable Upload.Status status) {
+                             @PathVariable Upload.Status status,
+                             @RequestBody(required = false) UploadDiagnostics uploadDiagnostics) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.updateUploadStatus(customerSpace, uploadId, status);
+        uploadService.updateUploadStatus(customerSpace, uploadId, status, uploadDiagnostics);
     }
 
     @PutMapping("/{uploadId}/stats/{statsId}")

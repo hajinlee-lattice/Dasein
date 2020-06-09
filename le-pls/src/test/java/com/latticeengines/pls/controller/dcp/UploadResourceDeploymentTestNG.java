@@ -1,17 +1,23 @@
 package com.latticeengines.pls.controller.dcp;
 
+import static org.testng.Assert.assertEquals;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -22,9 +28,13 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.FileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
@@ -47,6 +57,12 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private TestUploadProxy testUploadProxy;
 
+    @Inject
+    private SourceFileProxy sourceFileProxy;
+
+    @Inject
+    private Configuration yarnConfiguration;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
@@ -59,7 +75,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testUploadFile() {
+    public void testUploadFile() throws IOException {
         Resource csvResource = new ClassPathResource(PATH,
                 Thread.currentThread().getContextClassLoader());
         SourceFileInfo sourceFileInfo = fileUploadProxy.uploadFile(fileName, csvResource);
@@ -67,6 +83,11 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(sourceFileInfo);
         Assert.assertFalse(StringUtils.isEmpty(sourceFileInfo.getFileImportId()));
         Assert.assertEquals(sourceFileInfo.getDisplayName(), fileName);
+
+        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileInfo.getFileImportId());
+        Assert.assertNotNull(sourceFile);
+        Assert.assertFalse(StringUtils.isEmpty(sourceFile.getPath()));
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, sourceFile.getPath()));
     }
 
     @Test(groups = "deployment")
@@ -92,6 +113,14 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         dcpImportRequest.setSourceId(source.getSourceId());
         dcpImportRequest.setFileImportId(sourceFileInfo.getFileImportId());
         UploadDetails uploadDetails = testUploadProxy.startImport(dcpImportRequest);
+
+        JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadDiagnostics().getApplicationId(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        List<UploadDetails> uploadDetailsList = testUploadProxy.getAllBySourceId(source.getSourceId(),
+                Upload.Status.FINISHED);
+
+        Assert.assertTrue(CollectionUtils.isNotEmpty(uploadDetailsList));
 
         Assert.assertNotNull(uploadDetails);
 

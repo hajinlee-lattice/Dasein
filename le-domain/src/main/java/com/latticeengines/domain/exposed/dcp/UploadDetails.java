@@ -29,6 +29,9 @@ public class UploadDetails {
     @JsonProperty("upload_stats")
     public UploadStats statistics;
 
+    @JsonProperty("upload_Diagnostics")
+    public UploadDiagnostics uploadDiagnostics;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -67,5 +70,13 @@ public class UploadDetails {
 
     public void setStatistics(UploadStats statistics) {
         this.statistics = statistics;
+    }
+
+    public UploadDiagnostics getUploadDiagnostics() {
+        return uploadDiagnostics;
+    }
+
+    public void setUploadDiagnostics(UploadDiagnostics uploadDiagnostics) {
+        this.uploadDiagnostics = uploadDiagnostics;
     }
 }

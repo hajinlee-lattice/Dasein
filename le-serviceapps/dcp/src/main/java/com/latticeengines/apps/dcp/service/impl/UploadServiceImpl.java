@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -43,6 +45,9 @@ public class UploadServiceImpl implements UploadService {
 
     @Inject
     private MetadataService metadataService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId) {
@@ -112,12 +117,15 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status) {
+    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status, UploadDiagnostics uploadDiagnostics) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         upload.setStatus(status);
+        if(uploadDiagnostics != null) {
+            upload.setUploadDiagnostics(uploadDiagnostics);
+        }
         uploadEntityMgr.update(upload);
     }
 
@@ -217,6 +225,11 @@ public class UploadServiceImpl implements UploadService {
         details.setUploadId(upload.getUploadId());
         details.setStatistics(upload.getStatistics());
         details.setStatus(upload.getStatus());
+        if(upload.getUploadDiagnostics() != null) {
+            details.setUploadDiagnostics(upload.getUploadDiagnostics());
+        } else {
+            details.setUploadDiagnostics(new UploadDiagnostics());
+        }
         details.setUploadConfig(upload.getUploadConfig());
         details.setSourceId(upload.getSourceId());
         return details;

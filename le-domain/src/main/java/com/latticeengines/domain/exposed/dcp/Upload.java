@@ -78,6 +78,10 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Transient
     public UploadStats statistics;
 
+    @Column(name = "UPLOAD_DIAGNOSTICS", columnDefinition = "'JSON'", length = 8000)
+    @Type(type = "json")
+    private UploadDiagnostics uploadDiagnostics;
+
     @Override
     public Long getPid() {
         return pid;
@@ -166,6 +170,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         this.matchResult = matchResult;
     }
 
+    public UploadDiagnostics getUploadDiagnostics() {
+        return uploadDiagnostics;
+    }
+
+    public void setUploadDiagnostics(UploadDiagnostics uploadDiagnostics) {
+        this.uploadDiagnostics = uploadDiagnostics;
+    }
+
     public enum Status{
         NEW,
         IMPORT_STARTED,
@@ -175,4 +187,6 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         FINISHED,
         ERROR
     }
+
+
 }
