@@ -88,6 +88,8 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                             if (!isValidRegex(regexStr)) {
                                                 rowError = true;
                                                 fileError = true;
+                                                errorInPath++;
+                                                errorLine++;
                                                 csvFilePrinter.printRecord(lineId, "", String.format(
                                                         "invalid pattern \"%s\" found (expanded into regex \"%s\"",
                                                         pathStr, regexStr));
@@ -95,15 +97,10 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                         }
                                         String nameStr = getFieldValue(record, name.name());
                                         if (nameList.contains(nameStr)) {
-                                            rowError = true;
-                                            fileError = true;
-                                            csvFilePrinter.printRecord(lineId, "", "We found multiple entries for the same Name field. Please correct and try again.");
+                                            throw new IOException(String.format("We found multiple entries for the same " +
+                                                    "Name field in line %s. Please correct and try again.", lineId));
                                         } else {
                                             nameList.add(nameStr);
-                                        }
-                                        if (rowError) {
-                                            errorInPath++;
-                                            errorLine++;
                                         }
                                     } else {
                                         csvFilePrinter.printRecord(lineId, "", "invalid row as its file size exceeds " +
