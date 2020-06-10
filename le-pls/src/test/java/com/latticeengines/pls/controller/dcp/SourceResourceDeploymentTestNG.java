@@ -73,7 +73,8 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(projectDetail);
         String projectId = projectDetail.getProjectId();
 
-        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
+                TEST_TEMPLATE_NAME);
 
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
 
@@ -158,7 +159,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
         updateSourceRequest.setDisplayName("testSourceAfterUpdate");
         updateSourceRequest.setFieldDefinitionsRecord(validateRequest.getCurrentFieldDefinitionsRecord());
-        updateSourceRequest.setImportFile(testSourceFile.getFileImportId());
+        updateSourceRequest.setFileImportId(testSourceFile.getFileImportId());
         updateSourceRequest.setSourceId(sourceId);
         Source retrievedSource = testSourceProxy.updateSource(updateSourceRequest);
         Assert.assertNotNull(retrievedSource);

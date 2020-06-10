@@ -85,18 +85,19 @@ public class DataMappingServiceImpl implements DataMappingService {
     private static final String TEMPLATE_NAME = "%s_%d_Template";
 
     @Override
-    public FetchFieldDefinitionsResponse fetchFieldDefinitions(String systemName, String systemType,
-                                                               String systemObject, String importFile)
-            throws Exception {
+    public FetchFieldDefinitionsResponse fetchFieldDefinitions(
+            String systemName, String systemType,
+            String systemObject, String fileImportId) throws Exception {
 
         // 1. Validate HTTP request parameters.
-        validateFieldDefinitionRequestParameters("Fetch", systemName, systemType, systemObject, importFile);
+        validateFieldDefinitionRequestParameters("Fetch", systemName, systemType, systemObject,
+                fileImportId);
 
         // 2. Generate extra fields from older parameters to interact with proxies and services.
         // systemObject ==> entityType
         // systemName + entityType ==> feedType
         // "File" ==> source   [hard coded for since only File is needed]
-        // importFile ==> sourceFile
+        // fileImportId ==> sourceFile
         // MultiTenantContext ==> customerSpace
 
         // 2a. Convert systemObject to entity.
@@ -109,7 +110,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         String source = "File";
 
         // 2d. Generate sourceFile object.
-        SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
+        SourceFile sourceFile = StringUtils.isBlank(fileImportId) ? null : getSourceFile(fileImportId);
 
         // 2e. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -186,10 +187,11 @@ public class DataMappingServiceImpl implements DataMappingService {
      */
     @Override
     public ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
-                                                                     String systemObject, String importFile,
+                                                                     String systemObject, String fileImportId,
                                                                      ValidateFieldDefinitionsRequest validateRequest) {
         // 1. Validate HTTP request parameters.
-        validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject, importFile);
+        validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject,
+                fileImportId);
 
         // 2. Verify the request has a valid Import Workflow Spec.
         if (validateRequest.getImportWorkflowSpec() == null ||
@@ -205,7 +207,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         }
 
         // 4. Generate source file and metadata resolver.
-        SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
+        SourceFile sourceFile = StringUtils.isBlank(fileImportId) ? null : getSourceFile(fileImportId);
         MetadataResolver resolver = sourceFile == null ? null : getMetadataResolver(sourceFile, null, true);
 
         // 5. Break up sections of ValidateFieldDefinitionsRequest.
@@ -232,12 +234,13 @@ public class DataMappingServiceImpl implements DataMappingService {
 
     @Override
     public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
-                                                         String importFile, boolean runImport,
+                                                         String fileImportId, boolean runImport,
                                                          FieldDefinitionsRecord commitRequest)
             throws LedpException, IllegalArgumentException {
 
         // 1a. Validate HTTP request parameters.
-        validateFieldDefinitionRequestParameters("Commit", systemName, systemType, systemObject, importFile);
+        validateFieldDefinitionRequestParameters("Commit", systemName, systemType, systemObject,
+                fileImportId);
 
         // 1b. Validate Commit Request.
         validateFieldDefinitionsRequestBody("Commit", commitRequest);
@@ -246,7 +249,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         // systemObject ==> entityType
         // systemName + entityType ==> feedType
         // "File" ==> source   [hard coded since only File is needed]
-        // importFile ==> sourceFile
+        // fileImportId ==> sourceFile
         // MultiTenantContext ==> customerSpace
 
         // 2a. Convert systemObject to entity.
@@ -259,7 +262,7 @@ public class DataMappingServiceImpl implements DataMappingService {
         String source = "File";
 
         // 2d. Generate sourceFile object.
-        SourceFile sourceFile = StringUtils.isBlank(importFile) ? null : getSourceFile(importFile);
+        SourceFile sourceFile = StringUtils.isBlank(fileImportId) ? null : getSourceFile(fileImportId);
 
         // 2e. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -316,10 +319,10 @@ public class DataMappingServiceImpl implements DataMappingService {
 
 
         // 10. If requested, submit a workflow import job for this new template.
-        if (runImport && StringUtils.isNotBlank(importFile)) {
+        if (runImport && StringUtils.isNotBlank(fileImportId)) {
             log.info("Running import workflow job for CustomerSpace {} and task ID {} on file {}",
-                    customerSpace.toString(), taskId, importFile);
-            cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, importFile);
+                    customerSpace.toString(), taskId, fileImportId);
+            cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, fileImportId);
         }
 
         // 11. Setup the Commit Response for this request.  For now, we just return the Commit Request.

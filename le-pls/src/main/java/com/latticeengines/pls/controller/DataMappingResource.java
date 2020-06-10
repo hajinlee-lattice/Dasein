@@ -39,7 +39,7 @@ public class DataMappingResource {
     //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
     //   systemType: The type of system for which a template is being created, eg. Salesforce
     //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
+    //   fileImportId: The name of the CSV file this template is being generated for.
     @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get Data Mapping for a System Object")
@@ -63,7 +63,7 @@ public class DataMappingResource {
     //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
     //   systemType: The type of system for which a template is being created, eg. Salesforce
     //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
+    //   fileImportId: The name of the CSV file this template is being generated for.
     // Body:
     // ValidateFieldDefinitionsRequest representing field definition changes/records
     @PostMapping("/validate")
@@ -90,7 +90,7 @@ public class DataMappingResource {
     //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
     //   systemType: The type of system for which a template is being created, eg. Salesforce
     //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
-    //   importFile: The name of the CSV file this template is being generated for.
+    //   fileImportId: The name of the CSV file this template is being generated for.
     //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
     // Body:
     //    The FieldDefinitionsRecord representing the field mappings for this template.

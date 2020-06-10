@@ -81,7 +81,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
-                               String importFile, FieldDefinitionsRecord fieldDefinitionsRecord) {
+                               String fileImportId, FieldDefinitionsRecord fieldDefinitionsRecord) {
         S3ImportSystem importSystem = projectService.getImportSystemByProjectId(customerSpace, projectId);
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
         if (importSystem == null || projectInfo == null) {
@@ -93,7 +93,7 @@ public class SourceServiceImpl implements SourceService {
         validateSourceId(customerSpace, sourceId);
         String relativePath = generateRelativePath(sourceId);
 
-        Table templateTable = getTableFromRecord(importFile, customerSpace, sourceId, fieldDefinitionsRecord);
+        Table templateTable = getTableFromRecord(fileImportId, customerSpace, sourceId, fieldDefinitionsRecord);
 
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, importSystem, templateTable,
                 EntityType.fromDisplayNameToEntityType(fieldDefinitionsRecord.getSystemObject()), relativePath,
@@ -109,9 +109,9 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public Source updateSource(String customerSpace, String displayName, String sourceId, String importFile,
+    public Source updateSource(String customerSpace, String displayName, String sourceId, String fileImportId,
                                FieldDefinitionsRecord fieldDefinitionsRecord) {
-        Table newTable = getTableFromRecord(importFile, customerSpace, sourceId, fieldDefinitionsRecord);
+        Table newTable = getTableFromRecord(fileImportId, customerSpace, sourceId, fieldDefinitionsRecord);
         ProjectInfo projectInfo = projectService.getProjectBySourceId(customerSpace, sourceId);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
         Preconditions.checkNotNull(dataFeedTask, String.format("Can't retrieve data feed task for source %s",
@@ -249,12 +249,12 @@ public class SourceServiceImpl implements SourceService {
         return String.format(SOURCE_RELATIVE_PATH_PATTERN, sourceId);
     }
 
-    private Table getTableFromRecord(String importFile, String customerSpace, String sourceId,
+    private Table getTableFromRecord(String fileImportId, String customerSpace, String sourceId,
                                     FieldDefinitionsRecord fieldDefinitionsRecord) {
-        if (StringUtils.isNotBlank(importFile)) {
-            SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, importFile);
+        if (StringUtils.isNotBlank(fileImportId)) {
+            SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, fileImportId);
             Preconditions.checkNotNull(sourceFile, String.format("Could not locate source file with name %s",
-                    importFile));
+                    fileImportId));
             String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
             Table newTable = importWorkflowSpecService.tableFromRecord(newTableName, false,
                     fieldDefinitionsRecord);
