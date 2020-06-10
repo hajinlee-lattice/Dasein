@@ -22,7 +22,7 @@ import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final String[] FIELDS = {
-            "Customer ID",
+            "CustomerID",
             InterfaceName.PhoneNumber.name(),
             InterfaceName.State.name(),
             InterfaceName.Country.name(),
