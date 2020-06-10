@@ -195,11 +195,15 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData) {
         GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
-        if (CollectionUtils.isNotEmpty(globalTeamData.getTeamMembers()) && isExternalUser(loginUser)) {
+        if (isExternalUser(loginUser)) {
             // add the internal users into team member list if internal user exists in the edit team
             if (globalAuthTeam != null && CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
                 List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
-                Set<String> teamMembers = globalTeamData.getTeamMembers();
+                Set<String> teamMembers;
+                if (CollectionUtils.isEmpty(globalTeamData.getTeamMembers())) {
+                    globalTeamData.setTeamMembers(new HashSet<>());
+                }
+                teamMembers = globalTeamData.getTeamMembers();
                 for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
                     String username = globalAuthUserTenantRight.getGlobalAuthUser().getEmail();
                     if (!teamMembers.contains(username) && isInternalUser(globalAuthUserTenantRight)) {
