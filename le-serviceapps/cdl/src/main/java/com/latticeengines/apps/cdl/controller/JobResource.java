@@ -46,7 +46,7 @@ public class JobResource {
             JobStatus jobStatus = job.getJobStatus();
             if (jobStatus == JobStatus.COMPLETED) {
                 jobStatusResult.setStatus(FinalApplicationStatus.SUCCEEDED);
-            } else if (jobStatus == JobStatus.FAILED) {
+            } else if (jobStatus == JobStatus.FAILED || jobStatus == JobStatus.PENDING_RETRY) {
                 jobStatusResult.setStatus(FinalApplicationStatus.FAILED);
             } else if (jobStatus == JobStatus.CANCELLED || jobStatus == JobStatus.SKIPPED) {
                 jobStatusResult.setStatus(FinalApplicationStatus.KILLED);

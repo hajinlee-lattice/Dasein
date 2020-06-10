@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 public class Job implements HasId<Long>, HasName {
 
     public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED,
-            JobStatus.CANCELLED, JobStatus.FAILED, JobStatus.SKIPPED);
+            JobStatus.CANCELLED, JobStatus.FAILED, JobStatus.SKIPPED, JobStatus.PENDING_RETRY, JobStatus.RETRIED);
     public static final EnumSet<JobStatus> NON_TERMINAL_JOB_STATUS = EnumSet.complementOf(TERMINAL_JOB_STATUS);
 
     private Long pid;

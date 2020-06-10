@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +61,12 @@ public class ProcessAnalyzeListener extends LEJobListener {
 
     private String customerSpace;
 
+    @Value("${cdl.processAnalyze.job.retry.count:1}")
+    private int processAnalyzeJobRetryCount;
+
+    @Value("${workflow.jobs.pa.hideRetried}")
+    private boolean hideRetriedPA;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -95,12 +102,18 @@ public class ProcessAnalyzeListener extends LEJobListener {
             log.warn("Workflow ended in an unknown state.");
         }
 
-        AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
-        emailInfo.setUserId(userId);
-        try {
-            plsInternalProxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
-        } catch (Exception e) {
-            log.error("Can not send process analyze email: " + e.getMessage());
+        if (!hideRetriedPA
+                || !canRetry(jobExecution, dataFeedProxy.getDataFeed(customerSpace), processAnalyzeJobRetryCount)) {
+            log.info("Sending PA notification");
+            AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
+            emailInfo.setUserId(userId);
+            try {
+                plsInternalProxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+            } catch (Exception e) {
+                log.error("Can not send process analyze email: " + e.getMessage());
+            }
+        } else {
+            log.info("Skip sending PA notification since current PA will be retried");
         }
     }
 

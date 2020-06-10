@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,9 +37,11 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationI
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
@@ -69,6 +73,9 @@ public class WorkflowResource {
     @Inject
     private WorkflowContainerService workflowContainerService;
 
+    @Value("${workflow.jobs.pa.hideRetried}")
+    private boolean hideRetriedPA;
+
     @PostMapping("/job/{workflowId}/stop")
     @ApiOperation(value = "Stop an executing workflow")
     public void stopWorkflowExecution(@PathVariable String workflowId,
@@ -95,6 +102,12 @@ public class WorkflowResource {
         workflowConfig.setRestart(true);
         workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        // set restart workflow job id
+        if (job.getInputs() == null) {
+            job.setInputs(new HashMap<>());
+        }
+        job.getInputs().put(WorkflowContextConstants.Inputs.RESTART_JOB_ID, String.valueOf(wfId));
+
         workflowConfig.setInputProperties(job.getInputs());
         if (Boolean.TRUE.equals(autoRetry)) {
             workflowConfig.setUserId(AUTO_RETRY_USER);
@@ -106,15 +119,11 @@ public class WorkflowResource {
 
         AppSubmission submission = new AppSubmission(
                 workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));
-        // update status of retried job
-        /*-
-         * FIXME re-enable or change this after UX finalized the behavior
-        if (Boolean.TRUE.equals(autoRetry)) {
-            // TODO maybe update all retried jobs instead of only auto-retried ones
-            log.info("Updating retried job status, workflowId = {}", wfId);
+        if (hideRetriedPA && ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME.equalsIgnoreCase(job.getName())) {
+            // update status of retried job
+            log.info("Updating retried PA job status, workflowId = {}", wfId);
             workflowJobService.updateWorkflowStatusAfterRetry(customerSpace, wfId);
         }
-         */
         return submission;
     }
 

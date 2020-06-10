@@ -524,6 +524,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.error("Failed to update job status after retry for workflowId = {}, workflow job not found",
                     workflowId);
             return;
+        } else if (!JobStatus.PENDING_RETRY.name().equals(job.getStatus())) {
+            log.warn("Target job have status {}, skip update to retried status", job.getStatus());
+            return;
         }
 
         job.setStatus(JobStatus.RETRIED.name());

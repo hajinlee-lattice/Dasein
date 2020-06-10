@@ -470,7 +470,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         long queryTime = System.currentTimeMillis() - beforeQuery;
         jobQueryTime.add(queryTime);
         log.info("query workflow {} need {} ms.", execution.getWorkflowId(), queryTime);
-        if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType()) || job.getJobStatus() != JobStatus.FAILED) {
+        if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType())
+                || (job.getJobStatus() != JobStatus.FAILED && job.getJobStatus() != JobStatus.PENDING_RETRY)) {
             throw new IllegalArgumentException("the last pa job isn't failed in tenant " + tenantId);
         }
         return job;

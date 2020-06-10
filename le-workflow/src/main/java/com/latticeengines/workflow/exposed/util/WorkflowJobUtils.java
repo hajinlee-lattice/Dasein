@@ -56,6 +56,7 @@ public final class WorkflowJobUtils {
 
     private static final String CUSTOMER_SPACE = "CustomerSpace";
     private static final String DEFAULT_ERROR_CATEGORY = "UNKNOWN";
+    private static final String USER_ERROR_CATEGORY = "User Error";
     private static final Date MIGRATE_THRESHOLD = getMigrateThreshold();
     private static final int DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT = 1000;
     private static final String WORKFLOW_JOB_QUOTA_LIMIT = "WorkflowJobQuotaLimit";
@@ -253,6 +254,10 @@ public final class WorkflowJobUtils {
             workflowJobStatuses.addAll(JobStatus.mappedWorkflowJobStatuses(jobStatus));
         });
         return new ArrayList<>(workflowJobStatuses);
+    }
+
+    public static boolean isUserError(String errorCategory) {
+        return USER_ERROR_CATEGORY.equalsIgnoreCase(errorCategory);
     }
 
     public static String searchErrorCategory(ErrorDetails errorDetails) {

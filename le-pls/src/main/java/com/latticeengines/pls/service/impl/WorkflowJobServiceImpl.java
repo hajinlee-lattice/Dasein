@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,11 +22,13 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +37,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -116,6 +120,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Value("${workflow.jobs.pa.hideRetried}")
+    private boolean hideRetriedPA;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -268,22 +275,150 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobs.add(unstartedPnAJob);
             }
         }
-        updateLastFailedPA(jobs, schedulingStatus);
-        return jobs;
+        try {
+            updateRetriedPASteps(jobs);
+        } catch (Exception e) {
+            log.error(String.format("Failed to update retried PA jobs steps for tenant %s",
+                    MultiTenantContext.getCustomerSpace()), e);
+        }
+        try {
+            updatePendingRetryJobs(jobs, schedulingStatus);
+        } catch (Exception e) {
+            log.error(String.format("Failed to update pending retry PA job status for tenant %s",
+                    MultiTenantContext.getCustomerSpace()), e);
+        }
+        // not showing retried PA
+        return jobs.stream() //
+                .filter(job -> !JobStatus.RETRIED.equals(job.getJobStatus())) //
+                .collect(Collectors.toList());
+    }
+
+    private void updateRetriedPASteps(List<Job> jobs) {
+        if (!hideRetriedPA) {
+            return;
+        }
+
+        // job.getId (workflow id) -> job
+        Map<Long, Job> jobMap = jobs.stream() //
+                .filter(Objects::nonNull) //
+                .filter(job -> job.getId() != null) //
+                .collect(Collectors.toMap(Job::getId, job -> job, (v1, v2) -> v1));
+
+        jobs.stream() //
+                .filter(Objects::nonNull) //
+                .filter(job -> {
+                    Long id = getRestartedJobId(job);
+                    return id != null && jobMap.containsKey(id);
+                }) //
+                .map(job -> Pair.of(job, jobMap.get(getRestartedJobId(job)))) //
+                .filter(pair -> pair.getLeft() != null && pair.getRight() != null) //
+                .forEach(pair -> {
+                    Job job = pair.getLeft();
+                    Job retriedJob = pair.getRight();
+                    if (retriedJob == null || retriedJob.getJobStatus() != JobStatus.RETRIED) {
+                        return;
+                    }
+                    if (job.getJobStatus() == JobStatus.PENDING) {
+                        // make it as if old job is still running
+                        job.setJobStatus(JobStatus.RUNNING);
+                    }
+
+                    if (CollectionUtils.isNotEmpty(retriedJob.getSteps())) {
+                        // merge steps, use restarted job's step first
+                        List<JobStep> mergedSteps = new ArrayList<>();
+                        // fake start timestamp as well
+                        if (retriedJob.getStartTimestamp() != null) {
+                            job.setStartTimestamp(retriedJob.getStartTimestamp());
+                        }
+
+                        int m = CollectionUtils.size(job.getSteps());
+                        int n = retriedJob.getSteps().size();
+
+                        for (int i = 0; i < Math.max(m, n); i++) {
+                            if (i < n && retriedJob.getSteps().get(i) != null
+                                    && retriedJob.getSteps().get(i).getStepStatus() != JobStatus.FAILED) {
+                                // use the failed job's step first to make it look like it's still running (not
+                                // failed), skip the failed step
+                                mergedSteps.add(retriedJob.getSteps().get(i));
+                            } else if (i < m) {
+                                mergedSteps.add(job.getSteps().get(i));
+                            }
+                        }
+                        if (!mergedSteps.isEmpty() && job.getJobStatus() == JobStatus.RUNNING) {
+                            // make last step running
+                            mergedSteps.get(mergedSteps.size() - 1).setStepStatus(JobStatus.RUNNING);
+                        }
+
+                        job.setSteps(mergedSteps);
+                    }
+                });
+    }
+
+    private Long getRestartedJobId(@NotNull Job retryJob) {
+        String retryJobId = MapUtils.emptyIfNull(retryJob.getInputs())
+                .get(WorkflowContextConstants.Inputs.RESTART_JOB_ID);
+        if (StringUtils.isBlank(retryJobId)) {
+            return null;
+        }
+        try {
+            return Long.parseLong(retryJobId);
+        } catch (Exception e) {
+            // do nothing
+            return null;
+        }
     }
 
     /*
-     * Update latest failed PA status to pending retry if scheduler is going to
-     * retry it
+     * Update all jobs with Pending Retry status: 1. last failed one, if waiting for
+     * scheduler retry => RUNNING 2. others => FAILED
      */
-    private void updateLastFailedPA(List<Job> jobs, SchedulingStatus status) {
-        // check scheduler is enabled and all references exist
-        if (CollectionUtils.isEmpty(jobs) || status == null || !status.isSchedulerEnabled()) {
+    private void updatePendingRetryJobs(List<Job> jobs, SchedulingStatus status) {
+        if (CollectionUtils.isEmpty(jobs)) {
             return;
         }
+        Long pendingRetryPAId = getPendingRetryPAId(status);
+
+        jobs.stream() //
+                .filter(Objects::nonNull) //
+                .filter(job -> job.getJobStatus() == JobStatus.PENDING_RETRY) //
+                .forEach(job -> {
+                    if (hideRetriedPA && pendingRetryPAId != null && pendingRetryPAId.equals(job.getId())) {
+                        job.setJobStatus(JobStatus.RUNNING);
+                        if (CollectionUtils.isNotEmpty(job.getSteps())) {
+                            List<JobStep> steps = job.getSteps();
+                            JobStep lastStep = steps.get(steps.size() - 1);
+                            // make it seems like it's still running
+                            if (lastStep != null && lastStep.getStepStatus() == JobStatus.FAILED) {
+                                lastStep.setStepStatus(JobStatus.RUNNING);
+                            }
+                        }
+                    } else {
+                        job.setJobStatus(JobStatus.FAILED);
+                    }
+                });
+
+        if (!hideRetriedPA) {
+            // set retried status to failed
+            jobs.stream() //
+                    .filter(Objects::nonNull) //
+                    .filter(job -> job.getJobStatus() == JobStatus.RETRIED) //
+                    .forEach(job -> job.setJobStatus(JobStatus.FAILED));
+        }
+    }
+
+    /*-
+     * get workflow pid for last failed PA
+     */
+    private Long getPendingRetryPAId(SchedulingStatus status) {
+        // check scheduler is enabled and all references exist
+        if (status == null) {
+            return null;
+        }
+        // TODO consider only return when scheduler is enabled (active stack)
+        // - status.isSchedulerEnabled()
         if (status.getDataFeed() == null || status.getLatestExecution() == null
                 || status.getLatestExecution().getStatus() != DataFeedExecution.Status.Failed) {
-            return;
+            return null;
         }
 
         DataFeedExecution exec = status.getLatestExecution();
@@ -292,17 +427,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 log.warn("Got empty workflowId for last failed execution. ExecutionId={}, tenant={}", exec.getPid(),
                         status.getCustomerSpace());
             }
-            return;
+            return null;
         }
-
-        /*-
-         * FIXME re-enable or change this after UX finalized the behavior
-        jobs.stream() //
-                .filter(Objects::nonNull) //
-                .filter(job -> exec.getWorkflowPid().equals(job.getId())) //
-                .findAny() //
-                .ifPresent(job -> job.setJobStatus(JobStatus.PENDING_RETRY));
-         */
+        return exec.getWorkflowId();
     }
 
     @Override
