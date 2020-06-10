@@ -14,9 +14,9 @@ public interface SourceService {
                         FieldDefinitionsRecord fieldDefinitionsRecord);
 
     Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
-                        String importFile, FieldDefinitionsRecord fieldDefinitionsRecord);
+                        String fileImportId, FieldDefinitionsRecord fieldDefinitionsRecord);
 
-    Source updateSource(String customerSpace, String displayName, String sourceId, String importFile,
+    Source updateSource(String customerSpace, String displayName, String sourceId, String fileImportId,
                         FieldDefinitionsRecord fieldDefinitionsRecord);
 
     Source getSource(String customerSpace, String sourceId);

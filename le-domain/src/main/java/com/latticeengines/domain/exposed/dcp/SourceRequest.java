@@ -19,9 +19,9 @@ public class SourceRequest {
     @ApiModelProperty(value = "sourceId")
     private String sourceId;
 
-    @JsonProperty("import_file")
-    @ApiModelProperty(value = "importFile")
-    private String importFile;
+    @JsonProperty("file_import_id")
+    @ApiModelProperty(value = "fileImportId")
+    private String fileImportId;
 
     @JsonProperty("field_definitions_record")
     @ApiModelProperty(required = true, value = "fieldDefinitionsRecord")
@@ -51,12 +51,12 @@ public class SourceRequest {
         this.sourceId = sourceId;
     }
 
-    public String getImportFile() {
-        return importFile;
+    public String getFileImportId() {
+        return fileImportId;
     }
 
-    public void setImportFile(String importFile) {
-        this.importFile = importFile;
+    public void setFileImportId(String fileImportId) {
+        this.fileImportId = fileImportId;
     }
 
     public FieldDefinitionsRecord getFieldDefinitionsRecord() {

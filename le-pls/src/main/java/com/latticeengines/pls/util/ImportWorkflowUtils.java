@@ -72,10 +72,10 @@ public final class ImportWorkflowUtils {
 
 
     public static void validateFieldDefinitionRequestParameters(
-            String requestType, String systemName, String systemType, String systemObject, String importFile)
+            String requestType, String systemName, String systemType, String systemObject, String fileImportId)
             throws LedpException {
         log.info("Field Definition Request Parameters:\n   systemName: " + systemName + "\n   systemType: " +
-                systemType + "\n   systemObject: " + systemObject + "\n   importFile: " + importFile);
+                systemType + "\n   systemObject: " + systemObject + "\n   fileImportId: " + fileImportId);
 
         // TODO(jwinter): Figure out what validation is needed.
 
@@ -103,8 +103,8 @@ public final class ImportWorkflowUtils {
                     "systemObject value " + systemObject + " is not a valid EntityType"});
         }
 
-        if (StringUtils.isBlank(importFile)) {
-            log.info("importFile is null or blank");
+        if (StringUtils.isBlank(fileImportId)) {
+            log.info("fileImportId is null or blank");
         }
     }
 

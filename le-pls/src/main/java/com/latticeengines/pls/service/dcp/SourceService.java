@@ -24,9 +24,9 @@ public interface SourceService {
     Boolean pauseSource(String sourceId);
 
     FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
-                                                        String importFile) throws Exception;
+                                                        String fileImportId) throws Exception;
 
-    ValidateFieldDefinitionsResponse validateSourceMappings(String importFile, String entityType,
+    ValidateFieldDefinitionsResponse validateSourceMappings(String fileImportId, String entityType,
                                                               ValidateFieldDefinitionsRequest validateRequest)
             throws Exception ;
 

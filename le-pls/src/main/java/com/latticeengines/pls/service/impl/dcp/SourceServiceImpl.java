@@ -111,10 +111,8 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
-                                                               String importFile)
-            throws Exception {
-
-        Preconditions.checkState(!StringUtils.isAllBlank(sourceId, importFile),
+                                                           String fileImportId) throws Exception {
+        Preconditions.checkState(!StringUtils.isAllBlank(sourceId, fileImportId),
                 "provide one parameter at least : source Id or import file Id");
 
         // 1a. Convert systemObject to entity.
@@ -124,7 +122,7 @@ public class SourceServiceImpl implements SourceService {
                 entityTypeObj));
 
         // 1b. Generate sourceFile object.
-        SourceFile sourceFile = sourceFileService.findByName(importFile);
+        SourceFile sourceFile = sourceFileService.findByName(fileImportId);
 
         // 1c. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -166,14 +164,14 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public ValidateFieldDefinitionsResponse validateSourceMappings(String importFile, String entityType,
-                                                              ValidateFieldDefinitionsRequest validateRequest) throws Exception {
+    public ValidateFieldDefinitionsResponse validateSourceMappings(
+            String fileImportId, String entityType, ValidateFieldDefinitionsRequest validateRequest) throws Exception {
         EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
                 EntityType.valueOf(entityType) : EntityType.Accounts;
         Preconditions.checkState(EntityType.Accounts.equals(entityTypeObj), String.format("illegal entity type %s",
                 entityTypeObj));
         return dataMappingService.validateFieldDefinitions("faked", S3ImportSystem.SystemType.DCP.name(),
-                entityType, importFile, validateRequest);
+                entityType, fileImportId, validateRequest);
     }
 
     @Override
