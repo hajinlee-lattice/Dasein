@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkf
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
@@ -100,6 +102,12 @@ public class WorkflowResource {
         workflowConfig.setRestart(true);
         workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        // set restart workflow job id
+        if (job.getInputs() == null) {
+            job.setInputs(new HashMap<>());
+        }
+        job.getInputs().put(WorkflowContextConstants.Inputs.RESTART_JOB_ID, String.valueOf(wfId));
+
         workflowConfig.setInputProperties(job.getInputs());
         if (Boolean.TRUE.equals(autoRetry)) {
             workflowConfig.setUserId(AUTO_RETRY_USER);

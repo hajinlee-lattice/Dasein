@@ -56,5 +56,7 @@ public final class WorkflowContextConstants {
         public static final String PLAY_LAUNCH_ID = "PLAY_LAUNCH_ID";
         public static final String PLAY_LAUNCH_CHANNEL_ID = "PLAY_LAUNCH_CHANNEL_ID";
         public static final String PA_TIMESTAMP = "PA_TIMESTAMP";
+        // Workflow ID that current job is restarting with
+        public static final String RESTART_JOB_ID = "RESTART_JOB_ID";
     }
 }
