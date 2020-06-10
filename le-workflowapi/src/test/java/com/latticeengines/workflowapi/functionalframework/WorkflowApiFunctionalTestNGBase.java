@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
@@ -73,6 +74,9 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     @Inject
     protected PlsInternalProxy plsInternalProxy;
+
+    @Inject
+    protected SourceFileProxy sourceFileProxy;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected YarnFunctionalTestNGBase platformTestBase;

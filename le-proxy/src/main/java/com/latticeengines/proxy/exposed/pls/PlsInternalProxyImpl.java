@@ -31,9 +31,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
-import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -221,39 +219,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
-    @Override
-    public void createSourceFile(SourceFile sourceFile, String tenantId) {
-        try {
-            String url = constructUrl(combine("/internal/sourcefiles", sourceFile.getName(), tenantId));
-            log.info(String.format("Posting to %s", url));
-            post("createSourceFile", url, sourceFile, Void.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createSourceFile: Remote call failure", e);
-        }
-    }
-
-    @Override
-    public SourceFile findSourceFileByName(String name, String tenantId) {
-        try {
-            String url = constructUrl(combine("/internal/sourcefiles", name, tenantId));
-            log.info(String.format("Getting from %s", url));
-            return get("findSourceFileByName", url, SourceFile.class);
-        } catch (Exception e) {
-            throw new RuntimeException("findSourceFileByName: Remote call failure", e);
-        }
-    }
-
-    @Override
-    public void updateSourceFile(SourceFile sourceFile, String tenantId) {
-        try {
-            String url = constructUrl(combine("/internal/sourcefiles", sourceFile.getName(), tenantId));
-            log.info(String.format("Putting to %s", url));
-            put("updateSourceFile", url, sourceFile);
-        } catch (Exception e) {
-            throw new RuntimeException("updateSourceFile: Remote call failure", e);
-        }
-    }
-
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
                                                    String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
                                                    Boolean considerInternalAttributes) {
@@ -425,17 +390,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
-    @Override
-    public void copyNotes(String fromModelSummaryId, String toModelSummaryId) {
-        try {
-            String url = constructUrl(combine("/internal/modelnotes/", fromModelSummaryId, toModelSummaryId));
-            log.debug(String.format("Copy note from ModelSummary %s to ModelSummary %s, url %s", fromModelSummaryId, toModelSummaryId, url));
-            post("copyNotes", url, null, Boolean.class);
-        } catch (Exception e) {
-            throw new RuntimeException("CopyNotes: Remote call failure", e);
-        }
-    }
-
     public void deleteTenant(CustomerSpace customerSpace) {
         try {
             String url = constructUrl(combine("/admin/tenants/", customerSpace.toString()));
@@ -443,17 +397,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
             delete("deleteTenant", url);
         } catch (Exception e) {
             throw new RuntimeException("deleteTenant: Remote call failure", e);
-        }
-    }
-
-    @Override
-    public void createNote(String modelId, NoteParams noteParams) {
-        try {
-            String url = constructUrl(combine("/internal/modelnotes/", modelId));
-            log.debug(String.format("Creating model %s's note content to %s", modelId, noteParams.getContent(), url));
-            post("createNote", url, noteParams, Boolean.class);
-        } catch (Exception e) {
-            throw new RuntimeException("CreateNote: Remote call failure", e);
         }
     }
 

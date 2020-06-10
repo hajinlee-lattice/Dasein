@@ -1,4 +1,4 @@
-package com.latticeengines.pls.dao;
+package com.latticeengines.apps.lp.dao;
 
 import java.util.List;
 

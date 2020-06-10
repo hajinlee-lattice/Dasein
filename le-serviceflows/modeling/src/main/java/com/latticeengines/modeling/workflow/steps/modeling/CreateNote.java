@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,12 +16,16 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("createNote")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateNote extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CreateNote.class);
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public void execute() {
@@ -42,13 +48,13 @@ public class CreateNote extends BaseModelStep<ModelStepConfiguration> {
 
             log.info(String.format("Create a new note by user %s", userName));
             for (String modelId : modelIds) {
-                plsInternalProxy.createNote(modelId, noteParams);
+                modelSummaryProxy.create(modelId, noteParams);
             }
         }
         if (sourceModelSummary != null) {
             log.info(String.format("Copy all notes according to ModelSummaryId %s", sourceModelSummary.getId()));
             for (String modelId : modelIds) {
-                plsInternalProxy.copyNotes(sourceModelSummary.getId(), modelId);
+                modelSummaryProxy.copyNotes(sourceModelSummary.getId(), modelId);
             }
 
         }

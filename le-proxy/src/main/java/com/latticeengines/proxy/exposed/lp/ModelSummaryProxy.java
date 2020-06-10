@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.Predictor;
 
 public interface ModelSummaryProxy {
@@ -72,4 +74,15 @@ public interface ModelSummaryProxy {
     List<ModelSummary> getModelSummariesByApplicationId(String applicationId);
 
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
+
+    void deleteById(String id);
+
+    void updateById(String id, NoteParams noteParams);
+
+    void create(String modelSummaryId, NoteParams noteParams);
+
+    List<ModelNote> getAllByModelSummaryId(String customerSpace, String modelId, boolean returnRelational,
+                                           boolean returnDocument, boolean validOnly);
+
+    void copyNotes(String sourceModelSummaryId, String targetModelSummaryId);
 }

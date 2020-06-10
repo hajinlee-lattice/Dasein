@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.apps.lp.service.ModelNoteService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -42,6 +44,9 @@ public class ModelSummaryResource {
 
     @Inject
     private ModelSummaryService modelSummaryService;
+
+    @Inject
+    private ModelNoteService modelNoteService;
 
     @PostMapping("/downloadflag")
     @ResponseBody
@@ -265,6 +270,16 @@ public class ModelSummaryResource {
         return true;
     }
 
+    @GetMapping(value = "/modelnote/{modelId}", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Find all model notes by model id")
+    public List<ModelNote> getAllByModelSummaryId(@PathVariable String customerSpace, @PathVariable String modelId,
+                                                  @RequestParam(value = "relational", required = false) boolean returnRelational,
+                                                  @RequestParam(value = "document", required = false) boolean returnDocument,
+                                                  @RequestParam(value = "validonly", required = false) boolean validOnly) {
+        return modelNoteService.getAllByModelSummaryId(modelId, returnRelational, returnDocument, validOnly);
+    }
+
     private void clearPredictorFroModelSummary (ModelSummary modelSummary) {
         if (modelSummary != null) {
             modelSummary.setPredictors(new ArrayList<>());
@@ -279,4 +294,6 @@ public class ModelSummaryResource {
             }
         }
     }
+
+
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.lp.entitymgr.impl;
 
 import java.util.List;
 
@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.lp.dao.ModelNoteDao;
+import com.latticeengines.apps.lp.entitymgr.ModelNoteEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.ModelNote;
-import com.latticeengines.pls.dao.ModelNoteDao;
-import com.latticeengines.pls.entitymanager.ModelNoteEntityMgr;
 
 @Component("modelNotesEntityMgr")
 public class ModelNoteEntityMgrImpl extends BaseEntityMgrImpl<ModelNote> implements ModelNoteEntityMgr {
@@ -33,13 +33,13 @@ public class ModelNoteEntityMgrImpl extends BaseEntityMgrImpl<ModelNote> impleme
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelNote findByNoteId(String noteId) {
+    public ModelNote getByNoteId(String noteId) {
         return modelNotesDao.findByNoteId(noteId);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteById(String id) {
+    public void removeById(String id) {
         modelNotesDao.deleteById(id);
     }
 

@@ -82,7 +82,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         SourceFile sourceFile = retrieveSourceFile(getConfiguration().getCustomerSpace(), //
                 getConfiguration().getSourceFileName());
         sourceFile.setState(SourceFileState.Imported);
-        plsInternalProxy.updateSourceFile(sourceFile, space.toString());
+        sourceFileProxy.update(space.toString(), sourceFile);
 
         Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
                 sourceFile.getTableName());

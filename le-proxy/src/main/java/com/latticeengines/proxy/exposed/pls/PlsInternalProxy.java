@@ -16,9 +16,7 @@ import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 
@@ -44,10 +42,6 @@ public interface PlsInternalProxy {
     MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
                                                       String exportId, MetadataSegmentExport.Status state);
 
-    void copyNotes(String fromModelSummaryId, String toModelSummaryId);
-
-    void createNote(String modelId, NoteParams noteParams);
-
     void sendOrphanRecordsExportEmail(String result, String tenantId, OrphanRecordsExportRequest export);
 
     void sendPlsEnrichInternalAttributeEmail(String result, String tenantId,
@@ -61,13 +55,7 @@ public interface PlsInternalProxy {
 
     void registerReport(Report report, String tenantId);
 
-    void updateSourceFile(SourceFile sourceFile, String tenantId);
-
     Report findReportByName(String name, String tenantId);
-
-    SourceFile findSourceFileByName(String name, String tenantId);
-
-    void createSourceFile(SourceFile sourceFile, String tenantId);
 
     void saveLeadEnrichmentAttributes(CustomerSpace customerSpace,
                                       LeadEnrichmentAttributesOperationMap attributes);

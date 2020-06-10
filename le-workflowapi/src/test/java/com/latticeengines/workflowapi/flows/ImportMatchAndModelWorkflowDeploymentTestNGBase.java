@@ -80,8 +80,8 @@ public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends Wo
             table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
             metadataProxy.createTable(tenant.getId(), table.getName(), table);
             sourceFile.setTableName(table.getName());
-            plsInternalProxy.createSourceFile(sourceFile, tenant.getId());
-            return plsInternalProxy.findSourceFileByName(sourceFile.getName(), tenant.getId());
+            sourceFileProxy.create(tenant.getId(), sourceFile);
+            return sourceFileProxy.findByName(tenant.getId(), sourceFile.getName());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
