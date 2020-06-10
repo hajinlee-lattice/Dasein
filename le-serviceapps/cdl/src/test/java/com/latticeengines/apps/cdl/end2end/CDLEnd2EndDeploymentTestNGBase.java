@@ -5,6 +5,7 @@ import static com.latticeengines.common.exposed.metric.MetricTags.Test.TAG_TEST_
 import static com.latticeengines.common.exposed.metric.MetricTags.Test.TAG_TEST_METHOD;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -647,7 +648,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         log.info("processAnalyzeAppId=" + processAnalyzeAppId);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
                 false);
-        assertEquals(completedStatus, expectedResult);
+        if (expectedResult != JobStatus.FAILED) {
+            assertEquals(completedStatus, expectedResult);
+        } else {
+            assertTrue(completedStatus == JobStatus.FAILED || completedStatus == JobStatus.PENDING_RETRY, String.format(
+                    "Completed status should be either pending retry or failed, got %s instead", completedStatus));
+        }
     }
 
     SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,

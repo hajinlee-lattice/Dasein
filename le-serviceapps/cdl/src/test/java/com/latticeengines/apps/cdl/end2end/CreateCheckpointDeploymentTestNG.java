@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 
@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 
 
@@ -64,7 +65,8 @@ public class CreateCheckpointDeploymentTestNG  extends CDLEnd2EndDeploymentTestN
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
                 false);
         log.info("JobStatus is: " + completedStatus.getName());
-        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.FAILED);
+        assertTrue(completedStatus == JobStatus.FAILED || completedStatus == JobStatus.PENDING_RETRY, String
+                .format("Completed status should be either pending retry or failed, got %s instead", completedStatus));
     }
 
     private void verifyProcess() {

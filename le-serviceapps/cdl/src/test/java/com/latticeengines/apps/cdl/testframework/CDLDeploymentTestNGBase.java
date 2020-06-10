@@ -233,7 +233,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
             }
 
             if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
-                if (job.getJobStatus() == JobStatus.FAILED) {
+                if (job.getJobStatus() == JobStatus.FAILED || job.getJobStatus() == JobStatus.PENDING_RETRY) {
                     log.error(applicationId + " Failed with ErrorCode " + job.getErrorCode() + ". \n"
                             + job.getErrorMsg());
                 }
