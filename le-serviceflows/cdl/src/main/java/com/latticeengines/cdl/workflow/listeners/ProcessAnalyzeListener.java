@@ -64,6 +64,9 @@ public class ProcessAnalyzeListener extends LEJobListener {
     @Value("${cdl.processAnalyze.job.retry.count:1}")
     private int processAnalyzeJobRetryCount;
 
+    @Value("${workflow.jobs.pa.hideRetried}")
+    private boolean hideRetriedPA;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -99,7 +102,8 @@ public class ProcessAnalyzeListener extends LEJobListener {
             log.warn("Workflow ended in an unknown state.");
         }
 
-        if (!canRetry(jobExecution, dataFeedProxy.getDataFeed(customerSpace), processAnalyzeJobRetryCount)) {
+        if (!hideRetriedPA
+                || !canRetry(jobExecution, dataFeedProxy.getDataFeed(customerSpace), processAnalyzeJobRetryCount)) {
             log.info("Sending PA notification");
             AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
             emailInfo.setUserId(userId);

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,6 +71,9 @@ public class WorkflowResource {
     @Inject
     private WorkflowContainerService workflowContainerService;
 
+    @Value("${workflow.jobs.pa.hideRetried}")
+    private boolean hideRetriedPA;
+
     @PostMapping("/job/{workflowId}/stop")
     @ApiOperation(value = "Stop an executing workflow")
     public void stopWorkflowExecution(@PathVariable String workflowId,
@@ -107,7 +111,7 @@ public class WorkflowResource {
 
         AppSubmission submission = new AppSubmission(
                 workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));
-        if (ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME.equalsIgnoreCase(job.getName())) {
+        if (hideRetriedPA && ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME.equalsIgnoreCase(job.getName())) {
             // update status of retried job
             log.info("Updating retried PA job status, workflowId = {}", wfId);
             workflowJobService.updateWorkflowStatusAfterRetry(customerSpace, wfId);

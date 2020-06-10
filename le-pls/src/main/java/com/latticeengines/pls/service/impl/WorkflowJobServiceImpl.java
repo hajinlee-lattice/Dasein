@@ -27,6 +27,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,6 +118,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Value("${workflow.jobs.pa.hideRetried}")
+    private boolean hideRetriedPA;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -290,7 +294,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 .filter(Objects::nonNull) //
                 .filter(job -> job.getJobStatus() == JobStatus.PENDING_RETRY) //
                 .forEach(job -> {
-                    if (pendingRetryPAId != null && pendingRetryPAId.equals(job.getId())) {
+                    if (hideRetriedPA && pendingRetryPAId != null && pendingRetryPAId.equals(job.getId())) {
                         job.setJobStatus(JobStatus.RUNNING);
                     } else {
                         job.setJobStatus(JobStatus.FAILED);
