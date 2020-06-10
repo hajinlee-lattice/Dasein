@@ -182,7 +182,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             metadataProxy.createTable(configuration.getCustomer(), name, table);
             if (timelineId.endsWith(SUFFIX)) {
                 int lastIndex = timelineId.lastIndexOf(SUFFIX);
-                timelineId = timelineId.substring(0, lastIndex - 1);
+                timelineId = timelineId.substring(0, lastIndex);
                 mergedMaterStoreNames.put(timelineId, name);
                 exportToS3(table);
             } else {
