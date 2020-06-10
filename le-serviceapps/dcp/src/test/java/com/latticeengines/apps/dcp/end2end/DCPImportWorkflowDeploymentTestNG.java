@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.DunsStats;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -211,6 +212,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertEquals(Long.valueOf(matchStats.getAcceptedCnt() + //
                 matchStats.getPendingReviewCnt() + matchStats.getRejectedCnt()), importStats.getSuccessCnt());
+
+        DunsStats duns = uploadStats.getDunsStats();
+        Assert.assertNotNull(duns);
+        Assert.assertEquals(Long.valueOf(duns.getUniqueCnt() + duns.getDuplicatedCnt()), matchStats.getAcceptedCnt());
     }
 
     private void verifyMatchResult(UploadDetails upload) {

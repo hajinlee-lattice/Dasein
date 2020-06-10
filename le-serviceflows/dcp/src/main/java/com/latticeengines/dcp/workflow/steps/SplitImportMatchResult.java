@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.dcp.DunsStats;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -154,6 +155,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         matchStats.setPendingReviewCnt(0L);
         matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         stats.setMatchStats(matchStats);
+        DunsStats duns = JsonUtils.deserialize(result.getOutput(), DunsStats.class);
+        stats.setDunsStats(duns);
         putObjectInContext(UPLOAD_STATS, stats);
     }
 
