@@ -239,28 +239,28 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_01", "sdfsdf", //
-                                                "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", //
+                                                "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", "Street1", "Street2", //
                                                 "C_AID_01", "Google", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_01" //
                                 ), // match with CustomerAccountId & CustomerContactId
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_02", "sdfsdf", //
-                                                null, "j.reese@google.com", null, null, //
+                                                null, "j.reese@google.com", null, null, "Street1", "Street2", //
                                                 null, "Google", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_01" //
                                 ), // match with Name/Country for account & AccountEntityId + Email for contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_03", "sdfsdf", //
-                                                null, "l.fusco123@google.com", "Lionel Fusco", "777-777-7777", //
+                                                null, "l.fusco123@google.com", "Lionel Fusco", "777-777-7777", "Street1", "Street2", //
                                                 "C_AID_01", "Google Inc.", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_03" //
                                 ), // CustomerAccountId for account & AccountEntityId + N + P for contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_04", "t5", //
-                                                null, null, "Samantha Groves", "555-555-5555", //
+                                                null, null, "Samantha Groves", "555-555-5555", "Street1", "Street2", //
                                                 null, "Lyft", "USA", "CA", //
                                         }, null, null //
                                 ), // New account & New contact (no CustomerContactId, so AccountEntityId + N+P
@@ -268,49 +268,49 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_05", "t6", //
-                                                "C_CID_05", "s.groves@uber.com", "Samantha Groves", "555-555-5555", //
+                                                "C_CID_05", "s.groves@uber.com", "Samantha Groves", "555-555-5555", "Street1", "Street2", //
                                                 null, "Uber", "USA", "CA", //
                                         }, null, "C_CID_05" //
                                 ), // New account & CustomerContactId for contact (change company)
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_06", "t7", //
-                                                null, "bear@google.com", null, null, //
+                                                null, "bear@google.com", null, null, "Street1", "Street2", //
                                                 null, "Google", "USA", "CA", //
                                         }, "C_AID_01", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_07", "t8", //
-                                                "C_CID_999", "samaritan@netflix.com", null, null, //
+                                                "C_CID_999", "samaritan@netflix.com", null, null, "Street1", "Street2", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_08", "t9", //
-                                                null, null, "John Doe", "000-000-0000", //
+                                                null, null, "John Doe", "000-000-0000", "Street1", "Street2", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_09", "t10", //
-                                                null, null, null, null, //
+                                                null, null, null, null, "Street1", "Street2", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", ENTITY_ANONYMOUS_ID //
                                 ), // match with Name/Country for account & anonymous contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_10", "t11", //
-                                                null, null, null, null, //
+                                                null, null, null, null, "Street1", "Street2", //
                                                 null, null, null, null //
                                         }, ENTITY_ANONYMOUS_ID, ENTITY_ANONYMOUS_ID //
                                 ), // anonymous account & contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_11", "t12", //
-                                                "C_CID_13", null, "Jeremy Lambert", "222-222-2222", //
+                                                "C_CID_13", null, "Jeremy Lambert", "222-222-2222", "Street1", "Street2", //
                                                 null, null, null, null //
                                         }, ENTITY_ANONYMOUS_ID, "C_CID_13" //
                                 ), // anonymous account & match with CustomerContactId for contact (note that N+P
