@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +164,11 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
         Map<String, Set<String>> newAttributesMap = newAttributeSet.getAttributesMap();
-        if (newAttributesMap != null) {
+        boolean isNewAttributeMapEmpty = MapUtils.isEmpty(newAttributesMap);
+        if (existingAttributeSet == null && isNewAttributeMapEmpty) {
+            return attrConfigRequest;
+        }
+        if (!isNewAttributeMapEmpty) {
             for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
                 Category category = CategoryUtils.getEntityCategory(entity);
                 Set<String> existingAttributes = new HashSet<>();
