@@ -216,7 +216,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         List<MatchKeyFill> fills = uploadStats.getMatchKeyFills();
         Assert.assertTrue(CollectionUtils.isNotEmpty(fills));
-        fills.forEach(e -> Assert.assertTrue(e.getFillRate() >= 0));
+        fills.forEach(e -> Assert.assertTrue(e.getFillRate() >= 0 && e.getFillRate() <= 100));
     }
 
     private void verifyMatchResult(UploadDetails upload) {

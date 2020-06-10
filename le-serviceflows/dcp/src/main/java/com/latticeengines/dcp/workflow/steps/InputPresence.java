@@ -107,7 +107,7 @@ public class InputPresence extends RunSparkJob<ImportSourceStepConfiguration, In
             fill.setIngested(ingested);
             fill.setMissing(ingested - populated);
             fill.setPopulated(populated);
-            fill.setFillRate(fill.getPopulated() * 1.0 / fill.getIngested());
+            fill.setFillRate((int)Math.round(fill.getPopulated() * 100.0 / fill.getIngested()));
             fills.add(fill);
         });
         stats.setMatchKeyFills(fills);

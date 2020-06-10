@@ -23,7 +23,7 @@ public class MatchKeyFill {
     private long ingested;
 
     @JsonProperty("fill_rate")
-    private double fillRate;
+    private int fillRate;
 
     public String getDisplayName() {
         return displayName;
@@ -57,11 +57,11 @@ public class MatchKeyFill {
         this.ingested = ingested;
     }
 
-    public double getFillRate() {
+    public int getFillRate() {
         return fillRate;
     }
 
-    public void setFillRate(double fillRate) {
+    public void setFillRate(int fillRate) {
         this.fillRate = fillRate;
     }
 }
