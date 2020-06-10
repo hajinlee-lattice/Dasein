@@ -97,7 +97,7 @@ public class AccountAttributeQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploy
         log.info("processAnalyzeAppId=" + processAnalyzeAppId);
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         Assert.assertEquals(status, result);
-        if (JobStatus.FAILED.equals(result)) {
+        if (JobStatus.FAILED.equals(result) || JobStatus.PENDING_RETRY.equals(result)) {
             Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(),
                     CustomerSpace.parse(mainTestTenant.getId()).toString());
             Assert.assertEquals(job.getErrorMsg(), "The input contains more than 47 fields. Please reduce the no. of " +
