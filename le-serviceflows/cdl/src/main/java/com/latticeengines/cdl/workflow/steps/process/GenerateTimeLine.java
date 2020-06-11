@@ -140,7 +140,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
         if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables) && MapUtils.isNotEmpty(timelineMaterStoreNameMap)) {
             config.timelineRelatedMasterTables =
-                    timelineMaterStoreNameMap.entrySet().stream().filter(entry -> config.timelineRelatedMasterTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                    timelineMaterStoreNameMap.entrySet().stream().filter(entry -> config.timelineRelatedStreamTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
             config.timelineRelatedMasterTables = new HashMap<>();
         }
