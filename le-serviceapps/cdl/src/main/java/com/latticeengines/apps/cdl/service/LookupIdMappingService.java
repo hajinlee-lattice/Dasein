@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 
 public interface LookupIdMappingService {
 
@@ -21,6 +22,8 @@ public interface LookupIdMappingService {
     LookupIdMap updateLookupIdMap(String id, LookupIdMap lookupIdMap);
 
     void deleteLookupIdMap(String id);
+
+    void deleteConnection(String lookupIdMapId, TraySettings traySettings);
 
     Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(CDLExternalSystemType externalSystemType);
 

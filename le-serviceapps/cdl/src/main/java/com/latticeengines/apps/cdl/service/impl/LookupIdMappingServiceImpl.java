@@ -32,7 +32,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.remote.exposed.service.tray.TrayService;
 
 @Component("lookupIdMappingService")
 public class LookupIdMappingServiceImpl implements LookupIdMappingService {
@@ -40,6 +42,9 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Inject
     private CDLExternalSystemService externalSystemService;
+
+    @Inject
+    private TrayService trayService;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -150,6 +155,23 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Override
     public void deleteLookupIdMap(String id) {
         lookupIdMappingEntityMgr.deleteLookupIdMap(id);
+    }
+
+    @Override
+    public void deleteConnection(String lookupIdMapId, TraySettings traySettings) {
+        try{
+            LookupIdMap map = getLookupIdMap(lookupIdMapId);
+            trayService.removeSolutionInstance(traySettings);
+            map.setIsRegistered(false);
+            updateLookupIdMap(lookupIdMapId, map);
+            trayService.removeAuthentication(traySettings);
+            map.setIsRegistered(false);
+            updateLookupIdMap(lookupIdMapId, map);
+            deleteLookupIdMap(lookupIdMapId);
+        }
+        catch (Exception ex) {
+            log.error("Errors while deleting connection: ", ex.getMessage());
+        }
     }
 
     @Override

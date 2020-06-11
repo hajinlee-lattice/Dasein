@@ -1,6 +1,7 @@
 package com.latticeengines.remote.service.tray.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ public class TrayServiceImpl implements TrayService {
 
     private volatile RestApiClient trayClient;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object removeSolutionInstance(TraySettings settings) {
         Object returnObj = null;
@@ -48,6 +50,11 @@ public class TrayServiceImpl implements TrayService {
 
             returnObj = getTrayClient().postWithHeaders(trayGraphQLurl, query, headers, Object.class);
             log.info(String.format("Returned object is %s", returnObj));
+            if (((Map<String, List<Object>>) returnObj).get("errors") != null) {
+                String errorMessage = ((Map<String, String>) ((Map<String, List<Object>>) returnObj).get("errors")
+                        .get(0)).get("message");
+                throw new Exception(errorMessage);
+            }
         } catch (Exception e) {
             log.error("Failed to remove Tray solution instance", e);
             log.error(ExceptionUtils.getStackTrace(e));
