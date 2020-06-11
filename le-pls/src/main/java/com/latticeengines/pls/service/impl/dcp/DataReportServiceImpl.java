@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl.dcp;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -43,8 +42,8 @@ public class DataReportServiceImpl implements DataReportService {
         basicStats.setTotalSubmitted(totalCnt);
         basicStats.setSuccessCnt(successCnt);
         basicStats.setErrorCnt(errorCnt);
-        basicStats.setAcceptedCnt(matchCnt);
-        basicStats.setRejectedCnt(unmatchedCnt);
+        basicStats.setMatchedCnt(matchCnt);
+        basicStats.setUnmatchedCnt(unmatchedCnt);
 
         DataReport.InputPresenceReport inputPresenceReport = new DataReport.InputPresenceReport();
         Long p1 = new RandomDataGenerator().nextLong(0L, successCnt);
@@ -79,23 +78,21 @@ public class DataReportServiceImpl implements DataReportService {
         matchToDUNSReport.setMatched(dMatch);
         matchToDUNSReport.setUnmatched(dUnMatch);
         Long[] c = new Long[11];
-        for (int i = 10; i >=0; i--) {
+        for (int i = 10; i > 0; i--) {
             Long sum = 0L;
             for (int j = 10; j > i; j--) {
                 sum += c[j];
             }
-            if (i == 0) {
+            if (i == 1) {
                 c[i] = dMatch - sum;
             } else {
                 c[i] = new RandomDataGenerator().nextLong(0L, (dMatch - sum) / 2);
             }
 
         }
-        Map<Integer, Integer> confidenceMap = new HashMap<>();
-        for (int i = 10; i >= 0; i--) {
-            confidenceMap.put(i, getRate(c[i], dMatch));
+        for (int i = 10; i > 0; i--) {
+            matchToDUNSReport.addConfidenceItem(i, c[i], dMatch);
         }
-        matchToDUNSReport.setRateByConfidence(confidenceMap);
 
         DataReport.DuplicationReport duplicationReport = new DataReport.DuplicationReport();
         Long unique = new RandomDataGenerator().nextLong(100L, matchCnt);
@@ -108,10 +105,8 @@ public class DataReportServiceImpl implements DataReportService {
         dataReport.setMatchToDUNSReport(matchToDUNSReport);
         dataReport.setDuplicationReport(duplicationReport);
 
-        return dataReport;
-    }
+        dataReport.setRefreshTimestamp(Instant.now().toEpochMilli());
 
-    private int getRate(Long value, Long total) {
-        return (int)Math.round((value.doubleValue() / total.doubleValue()) * 100);
+        return dataReport;
     }
 }

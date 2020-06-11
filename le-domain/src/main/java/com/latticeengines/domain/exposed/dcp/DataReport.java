@@ -35,6 +35,9 @@ public class DataReport {
     @JsonProperty("duplication_report")
     private DuplicationReport duplicationReport;
 
+    @JsonProperty("refresh_timestamp")
+    private Long refreshTimestamp;
+
     public BasicStats getBasicStats() {
         return basicStats;
     }
@@ -75,6 +78,14 @@ public class DataReport {
         this.duplicationReport = duplicationReport;
     }
 
+    public Long getRefreshTimestamp() {
+        return refreshTimestamp;
+    }
+
+    public void setRefreshTimestamp(Long refreshTimestamp) {
+        this.refreshTimestamp = refreshTimestamp;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -89,14 +100,14 @@ public class DataReport {
         @JsonProperty("error_cnt")
         private Long errorCnt;
 
-        @JsonProperty("accepted_cnt")
-        private Long acceptedCnt;
+        @JsonProperty("matched_cnt")
+        private Long matchedCnt;
 
         @JsonProperty("pending_review_cnt")
         private Long pendingReviewCnt;
 
-        @JsonProperty("rejected_cnt")
-        private Long rejectedCnt;
+        @JsonProperty("unmatched_cnt")
+        private Long unmatchedCnt;
 
         public Long getTotalSubmitted() {
             return totalSubmitted;
@@ -122,12 +133,12 @@ public class DataReport {
             this.errorCnt = errorCnt;
         }
 
-        public Long getAcceptedCnt() {
-            return acceptedCnt;
+        public Long getMatchedCnt() {
+            return matchedCnt;
         }
 
-        public void setAcceptedCnt(Long acceptedCnt) {
-            this.acceptedCnt = acceptedCnt;
+        public void setMatchedCnt(Long matchedCnt) {
+            this.matchedCnt = matchedCnt;
         }
 
         public Long getPendingReviewCnt() {
@@ -138,12 +149,12 @@ public class DataReport {
             this.pendingReviewCnt = pendingReviewCnt;
         }
 
-        public Long getRejectedCnt() {
-            return rejectedCnt;
+        public Long getUnmatchedCnt() {
+            return unmatchedCnt;
         }
 
-        public void setRejectedCnt(Long rejectedCnt) {
-            this.rejectedCnt = rejectedCnt;
+        public void setUnmatchedCnt(Long unmatchedCnt) {
+            this.unmatchedCnt = unmatchedCnt;
         }
     }
 
@@ -220,6 +231,14 @@ public class DataReport {
         @JsonProperty("geo_distribution_map")
         private Map<String, GeographicalItem> geographicalDistributionMap;
 
+        public Map<String, GeographicalItem> getGeographicalDistributionMap() {
+            return geographicalDistributionMap;
+        }
+
+        public void setGeographicalDistributionMap(Map<String, GeographicalItem> geographicalDistributionMap) {
+            this.geographicalDistributionMap = geographicalDistributionMap;
+        }
+
         @JsonIgnore
         public void addGeoDistribution(String countryCode, Long recordCnt, Long totalCnt) {
             Preconditions.checkArgument(StringUtils.isNotEmpty(countryCode));
@@ -279,8 +298,8 @@ public class DataReport {
         @JsonProperty("unmatched")
         private Long unmatched;
 
-        @JsonProperty("rate_by_confidence")
-        private Map<Integer, Integer> rateByConfidence;
+        @JsonProperty("confidence_rate_map")
+        private Map<Integer, ConfidenceItem> confidenceRateMap;
 
         public Long getMatched() {
             return matched;
@@ -298,12 +317,32 @@ public class DataReport {
             this.unmatched = unmatched;
         }
 
-        public Map<Integer, Integer> getRateByConfidence() {
-            return rateByConfidence;
+        public Map<Integer, ConfidenceItem> getConfidenceRateMap() {
+            return confidenceRateMap;
         }
 
-        public void setRateByConfidence(Map<Integer, Integer> rateByConfidence) {
-            this.rateByConfidence = rateByConfidence;
+        public void setConfidenceRateMap(Map<Integer, ConfidenceItem> confidenceRateMap) {
+            this.confidenceRateMap = confidenceRateMap;
+        }
+
+        @JsonIgnore
+        public void addConfidenceItem(Integer confidenceCode, Long recordCnt, Long totalCnt) {
+            Preconditions.checkNotNull(confidenceCode);
+            Preconditions.checkNotNull(recordCnt);
+            Preconditions.checkNotNull(totalCnt);
+            Preconditions.checkArgument(totalCnt >= recordCnt);
+            if (confidenceRateMap == null) {
+                confidenceRateMap = new HashMap<>();
+            }
+            ConfidenceItem confidenceItem = new ConfidenceItem();
+            confidenceItem.setCount(recordCnt);
+            if (totalCnt == 0L) {
+                confidenceItem.setRate(0);
+            } else {
+                confidenceItem.setRate((int)Math.round((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+            }
+            confidenceRateMap.put(confidenceCode, confidenceItem);
+
         }
 
         @JsonProperty("match_rate")
@@ -315,6 +354,34 @@ public class DataReport {
                 return (int) Math.round((matchedCnt / total) * 100);
             } else {
                 return 0;
+            }
+        }
+
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+        public static class ConfidenceItem {
+
+            @JsonProperty("count")
+            private Long count;
+
+            @JsonProperty("rate")
+            private Integer rate;
+
+            public Long getCount() {
+                return count;
+            }
+
+            public void setCount(Long count) {
+                this.count = count;
+            }
+
+            public Integer getRate() {
+                return rate;
+            }
+
+            public void setRate(Integer rate) {
+                this.rate = rate;
             }
         }
     }
