@@ -122,7 +122,8 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         JobStatus statusToUpdate = JobStatus.fromString(status.getStatus().name());
 
         String tenantId = workflowJob.getTenant().getId();
-        if (hideRetriedPA && canRetry(jobExecution, dataFeedProxy.getDataFeed(tenantId), processAnalyzeJobRetryCount)) {
+        if (hideRetriedPA && ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME.equalsIgnoreCase(workflowJob.getType())
+                && canRetry(jobExecution, dataFeedProxy.getDataFeed(tenantId), processAnalyzeJobRetryCount)) {
             log.info("Current PA can be retried, set workflow status to {}", JobStatus.PENDING_RETRY);
             statusToUpdate = JobStatus.PENDING_RETRY;
         }
