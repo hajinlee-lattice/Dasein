@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.remote.tray.TraySettings;
-import com.latticeengines.remote.exposed.service.tray.TrayService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,9 +34,6 @@ public class LookupIdMappingResource {
 
     @Inject
     private LookupIdMappingService lookupIdMappingService;
-
-    @Inject
-    private TrayService trayService;
 
     @GetMapping
     @ResponseBody
@@ -94,9 +90,7 @@ public class LookupIdMappingResource {
     @ApiOperation(value = "Delete Tray solution instance, authentication, and lookupidmap")
     public void deleteConnection(@PathVariable String customerSpace, @PathVariable String lookupIdMapId,
             @RequestBody TraySettings traySettings) {
-        trayService.removeSolutionInstance(traySettings);
-        trayService.removeAuthentication(traySettings);
-        lookupIdMappingService.deleteLookupIdMap(lookupIdMapId);
+        lookupIdMappingService.deleteConnection(lookupIdMapId, traySettings);
     }
 
     @GetMapping("/available-lookup-ids")
