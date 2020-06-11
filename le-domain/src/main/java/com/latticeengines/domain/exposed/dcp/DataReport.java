@@ -153,26 +153,15 @@ public class DataReport {
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
     public static class InputPresenceReport {
 
-        @JsonProperty("presence_cnt_map")
-        private Map<String, Long> presenceCntMap;
+        @JsonProperty("input_presence_map")
+        private Map<String, PresenceItem> presenceMap;
 
-        @JsonProperty("presence_rate_map")
-        private Map<String, Integer> presenceRateMap;
-
-        public Map<String, Long> getPresenceCntMap() {
-            return presenceCntMap;
+        public Map<String, PresenceItem> getPresenceMap() {
+            return presenceMap;
         }
 
-        public void setPresenceCntMap(Map<String, Long> presenceCntMap) {
-            this.presenceCntMap = presenceCntMap;
-        }
-
-        public Map<String, Integer> getPresenceRateMap() {
-            return presenceRateMap;
-        }
-
-        public void setPresenceRateMap(Map<String, Integer> presenceRateMap) {
-            this.presenceRateMap = presenceRateMap;
+        public void setPresenceMap(Map<String, PresenceItem> presenceMap) {
+            this.presenceMap = presenceMap;
         }
 
         @JsonIgnore
@@ -181,19 +170,45 @@ public class DataReport {
             Preconditions.checkNotNull(presenceCnt);
             Preconditions.checkNotNull(totalCnt);
             Preconditions.checkArgument(totalCnt >= presenceCnt);
-            if (presenceCntMap == null) {
-                presenceCntMap = new HashMap<>();
+            if (presenceMap == null) {
+                presenceMap = new HashMap<>();
             }
-            if (presenceRateMap == null) {
-                presenceRateMap = new HashMap<>();
-            }
-            presenceCntMap.put(field, presenceCnt);
+            PresenceItem presenceItem = new PresenceItem();
+            presenceItem.setCount(presenceCnt);
             if (totalCnt == 0L) {
-                presenceRateMap.put(field, 0);
+                presenceItem.setRate(0);
             } else {
-                presenceRateMap.put(field, (int)Math.round((presenceCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+                presenceItem.setRate((int)Math.round((presenceCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+            }
+            presenceMap.put(field, presenceItem);
+        }
+
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+        public static class PresenceItem {
+
+            @JsonProperty("count")
+            private Long count;
+
+            @JsonProperty("rate")
+            private Integer rate;
+
+            public Long getCount() {
+                return count;
             }
 
+            public void setCount(Long count) {
+                this.count = count;
+            }
+
+            public Integer getRate() {
+                return rate;
+            }
+
+            public void setRate(Integer rate) {
+                this.rate = rate;
+            }
         }
     }
 
@@ -203,26 +218,7 @@ public class DataReport {
     public static class GeoDistributionReport {
 
         @JsonProperty("geo_distribution_map")
-        private Map<String, Long> geographicalDistributionMap;
-
-        @JsonProperty("geo_distribution_rate_map")
-        private Map<String, Integer> geographicalDistributionRateMap;
-
-        public Map<String, Long> getGeographicalDistributionMap() {
-            return geographicalDistributionMap;
-        }
-
-        public void setGeographicalDistributionMap(Map<String, Long> geographicalDistributionMap) {
-            this.geographicalDistributionMap = geographicalDistributionMap;
-        }
-
-        public Map<String, Integer> getGeographicalDistributionRateMap() {
-            return geographicalDistributionRateMap;
-        }
-
-        public void setGeographicalDistributionRateMap(Map<String, Integer> geographicalDistributionRateMap) {
-            this.geographicalDistributionRateMap = geographicalDistributionRateMap;
-        }
+        private Map<String, GeographicalItem> geographicalDistributionMap;
 
         @JsonIgnore
         public void addGeoDistribution(String countryCode, Long recordCnt, Long totalCnt) {
@@ -233,14 +229,41 @@ public class DataReport {
             if (geographicalDistributionMap == null) {
                 geographicalDistributionMap = new HashMap<>();
             }
-            if (geographicalDistributionRateMap == null) {
-                geographicalDistributionRateMap = new HashMap<>();
-            }
-            geographicalDistributionMap.put(countryCode, recordCnt);
+            GeographicalItem geographicalItem = new GeographicalItem();
+            geographicalItem.setCount(recordCnt);
             if (totalCnt == 0L) {
-                geographicalDistributionRateMap.put(countryCode, 0);
+                geographicalItem.setRate(0);
             } else {
-                geographicalDistributionRateMap.put(countryCode, (int)Math.round((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+                geographicalItem.setRate((int)Math.round((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+            }
+            geographicalDistributionMap.put(countryCode, geographicalItem);
+        }
+
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+        public static class GeographicalItem {
+
+            @JsonProperty("count")
+            private Long count;
+
+            @JsonProperty("rate")
+            private Integer rate;
+
+            public Long getCount() {
+                return count;
+            }
+
+            public void setCount(Long count) {
+                this.count = count;
+            }
+
+            public Integer getRate() {
+                return rate;
+            }
+
+            public void setRate(Integer rate) {
+                this.rate = rate;
             }
         }
     }
