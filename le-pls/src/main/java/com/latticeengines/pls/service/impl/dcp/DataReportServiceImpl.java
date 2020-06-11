@@ -75,8 +75,10 @@ public class DataReportServiceImpl implements DataReportService {
         DataReport.MatchToDUNSReport matchToDUNSReport = new DataReport.MatchToDUNSReport();
         Long dMatch = new RandomDataGenerator().nextLong(300L, matchCnt);
         Long dUnMatch = matchCnt - dMatch;
+        Long dNoMatch = new RandomDataGenerator().nextLong(0L, dUnMatch);
         matchToDUNSReport.setMatched(dMatch);
         matchToDUNSReport.setUnmatched(dUnMatch);
+        matchToDUNSReport.setNoMatchCnt(dNoMatch);
         Long[] c = new Long[11];
         for (int i = 10; i > 0; i--) {
             Long sum = 0L;
