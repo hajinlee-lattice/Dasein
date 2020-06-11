@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -288,6 +289,10 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 if (fieldMapping.isMappedToLatticeField()
                         && fieldMapping.getMappedField().equals(attribute.getName())) {
                     attribute.setDisplayName(fieldMapping.getUserField());
+                    // For PLS-17600: there's some attributes that has sourceAttrName, need to be updated.
+                    if (StringUtils.isNotEmpty(attribute.getSourceAttrName())) {
+                        attribute.setSourceAttrName(fieldMapping.getUserField());
+                    }
                     fieldMappingIterator.remove();
                     break;
                 }
