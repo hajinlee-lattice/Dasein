@@ -38,6 +38,9 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
     // streamId -> table prefix of raw streams processed by transformation request
     protected final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
 
+    // streamId -> raw stream after deletion
+    protected Map<String, String> rawStreamsAfterDelete = new HashMap<>();
+
     /*
      * Retrieve effective activity stream batch store in active version, based on
      * stream setting and PA mode

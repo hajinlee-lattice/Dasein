@@ -40,7 +40,7 @@ public class ConvertActivityStreamToActivityImport extends BaseDeleteActivityStr
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        hardDeleteActions = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
+        hardDeleteActions = getListObjectFromContext(HARD_DELETE_ACTIONS, Action.class);
     }
 
     @Override

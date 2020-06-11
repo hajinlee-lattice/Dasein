@@ -33,6 +33,7 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
         prepareStream();
         for (String name : STREAM_NAMES) {
             AtlasStream stream = streams.get(name);
+            stream.setStreamType(name.equals(STREAM_WEBVISIT) ? AtlasStream.StreamType.WebVisit : AtlasStream.StreamType.MarketingActivity);
             Assert.assertNotNull(stream);
             Assert.assertNotNull(stream.getPid());
         }
@@ -67,6 +68,15 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
         Assert.assertEquals(streams.size(), STREAM_NAMES.size());
         streams.forEach(stream -> Assert.assertTrue(CollectionUtils.isEmpty(stream.getDimensions()),
                 String.format("Should have empty dimensions in stream %s", stream.getName())));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreate", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testFindByStreamType() {
+        List<AtlasStream> streams = streamEntityMgr.findByStreamType(AtlasStream.StreamType.WebVisit);
+        streams.forEach(stream -> {
+            Assert.assertEquals(stream.getStreamType(), AtlasStream.StreamType.WebVisit);
+            Assert.assertEquals(stream.getTenant().getId(), mainTestTenant.getId());
+        });
     }
 
     private void validateStream(AtlasStream stream) {

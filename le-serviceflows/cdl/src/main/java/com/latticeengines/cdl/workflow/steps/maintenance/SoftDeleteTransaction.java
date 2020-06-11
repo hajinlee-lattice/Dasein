@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -153,7 +154,7 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
                         "Delete action need to have either delete data or time range. Missing FromDate in time range");
                 Preconditions.checkArgument(StringUtils.isNotBlank(config.getToDate()),
                         "Delete action need to have either delete data or time range. Missing ToDate in time range");
-                deleteTimeRanges.add(parseTimeRange(config));
+                deleteTimeRanges.add(DateTimeUtils.parseTimeRange(config.getFromDate(), config.getToDate()));
             }
         }
         return deleteDataToMerge;

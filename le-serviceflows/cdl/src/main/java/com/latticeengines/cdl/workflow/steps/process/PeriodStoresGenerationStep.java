@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +60,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
 
     private DataCollection.Version inactive;
 
+    private Set<String> streamsPerformedDelete = new HashSet<>();
+
 
     @Override
     protected Class<? extends AbstractSparkJob<DailyStoreToPeriodStoresJobConfig>> getJobClz() {
@@ -68,6 +71,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     @Override
     protected DailyStoreToPeriodStoresJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
+        streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Set<String> skippedStreamIds = getSkippedStreamIds();
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.streams = stepConfiguration.getActivityStreamMap().values()
@@ -76,7 +81,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
         Map<String, Table> dailyDeltaTables = getTablesFromMapCtxKey(customerSpace.toString(), DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME);
         config.incrementalStreams = config.streams.stream()
-                .filter(stream -> shouldIncrUpdate() && dailyDeltaTables.get(stream.getStreamId()) != null)
+                .filter(stream -> shouldIncrUpdate(stream.getStreamId()) && dailyDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId).collect(Collectors.toSet());
 
         log.info("Generating period stores. tenant: {}; evaluation date: {}", customerSpace, config.evaluationDate);
@@ -189,7 +194,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         return skippedStreamIds;
     }
 
-    private boolean shouldIncrUpdate() {
-        return !configuration.isShouldRebuild();
+    private boolean shouldIncrUpdate(String streamId) {
+        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(streamId);
     }
 }

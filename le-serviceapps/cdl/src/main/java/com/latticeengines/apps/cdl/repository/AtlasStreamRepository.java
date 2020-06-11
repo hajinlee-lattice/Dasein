@@ -13,4 +13,6 @@ public interface AtlasStreamRepository extends BaseJpaRepository<AtlasStream, Lo
     List<AtlasStream> findByNameAndTenant(String name, Tenant tenant);
 
     List<AtlasStream> findByTenant(Tenant tenant);
+
+    List<AtlasStream> findByStreamType(AtlasStream.StreamType streamType);
 }

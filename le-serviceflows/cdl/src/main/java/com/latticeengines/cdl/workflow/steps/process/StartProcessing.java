@@ -355,8 +355,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putObjectInContext(ACTION_IMPACTED_SEGMENTS, segments);
         List<Action> softDeleteActions = getSoftOrHardDeleteActions(true, actions);
         List<Action> hardDeleteActions = getSoftOrHardDeleteActions(false, actions);
-        putObjectInContext(SOFT_DEELETE_ACTIONS, softDeleteActions);
-        putObjectInContext(HARD_DEELETE_ACTIONS, hardDeleteActions);
+        putObjectInContext(SOFT_DELETE_ACTIONS, softDeleteActions);
+        putObjectInContext(HARD_DELETE_ACTIONS, hardDeleteActions);
         setLegacyDeleteByUploadActions(actions);
         setLegacyDeleteByDateRangeActions(actions);
 

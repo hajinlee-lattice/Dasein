@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_TS_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -86,7 +83,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
+        softDeleteActions = getListObjectFromContext(SOFT_DELETE_ACTIONS, Action.class);
         entity = configuration.getMainEntity();
         batchStore = BusinessEntity.Transaction.equals(entity) ? TableRoleInCollection.ConsolidatedRawTransaction :
                 entity.getBatchStore();
@@ -244,7 +241,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
             }
             addBaseTables(step, config.getDeleteDataTable());
             if (StringUtils.isNotBlank(config.getFromDate()) && StringUtils.isNotBlank(config.getToDate())) {
-                timeRanges.put(i, parseTimeRange(config));
+                timeRanges.put(i, DateTimeUtils.parseTimeRange(config.getFromDate(), config.getToDate()));
             }
         }
 
@@ -253,19 +250,6 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         config.timeRanges.putAll(timeRanges);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
-    }
-
-    // return [ start day period, end day period ]
-    List<Long> parseTimeRange(@NotNull DeleteActionConfiguration config) {
-        // TODO assume format is yyyy-MM-dd for now, handle different format in the
-        // future
-        Integer startDayPeriod = DateTimeUtils.dateToDayPeriod(config.getFromDate());
-        Integer endDayPeriod = DateTimeUtils.dateToDayPeriod(config.getToDate());
-        Preconditions.checkNotNull(startDayPeriod,
-                String.format("Failed to parse delete from date string %s", config.getFromDate()));
-        Preconditions.checkNotNull(endDayPeriod,
-                String.format("Failed to parse delete to date string %s", config.getToDate()));
-        return Arrays.asList(startDayPeriod.longValue(), endDayPeriod.longValue());
     }
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep) {
