@@ -23,8 +23,8 @@ public final class PlaymakerConstants {
 
     public static final String Contacts = "Contacts";
     public static final String Email = "Email";
-    public static final String Address = "Address";
-    public static final String Address2 = "Address2";
+    public static final String Address = "Address Street 1";
+    public static final String Address2 = "Address Street 2";
     public static final String Phone = "Phone";
     public static final String State = "State";
     public static final String ZipCode = "ZipCode";
