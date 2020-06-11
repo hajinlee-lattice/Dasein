@@ -587,7 +587,15 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         private void validateAttribute(CSVRecord csvRecord, Attribute attr, String csvColumnName) {
             String attrKey = attr.getName();
-            if (!attr.isNullable() && StringUtils.isEmpty(csvRecord.get(csvColumnName))) {
+            String csvVal;
+            try {
+                csvVal = csvRecord.get(csvColumnName);
+            } catch (Exception e) {
+                LOG.info("can't get value for column {} which corresponds to attribute {}",
+                        csvColumnName, attr.getName());
+                csvVal = null;
+            }
+            if (!attr.isNullable() && StringUtils.isEmpty(csvVal)) {
                 if (attr.getDefaultValueStr() == null) {
                     missingRequiredColValue = true;
                     throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
