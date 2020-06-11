@@ -82,7 +82,8 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
 
         String accountIdValue = (String) (isSegment ? entity.get(accountIdColumnName.toLowerCase())
                 : entity.get(accountIdColumnName));
-        accountIdValue = (String) (!isSegment && isEntityMatchEnabled ? entity.get(custAccountIdColumnName)
+        accountIdValue = (String) (!isSegment && isEntityMatchEnabled
+                ? entity.getOrDefault(custAccountIdColumnName, accountIdValue)
                 : accountIdValue);
         entity.put(RequiredDanteAccountProperty.BaseExternalID, accountIdValue);
         entity.put(RequiredDanteAccountProperty.LEAccount_External_ID, accountIdValue);
