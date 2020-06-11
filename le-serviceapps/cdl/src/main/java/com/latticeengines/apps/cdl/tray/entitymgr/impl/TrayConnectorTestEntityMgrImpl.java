@@ -77,10 +77,12 @@ public class TrayConnectorTestEntityMgrImpl
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public TrayConnectorTest updateTrayConnectorTest(TrayConnectorTest trayConnectorTest) {
         TrayConnectorTest existingTest = findByWorkflowRequestId(trayConnectorTest.getWorkflowRequestId());
         if (existingTest != null) {
             mergeTrayConnectorTest(existingTest, trayConnectorTest);
+            trayConnectorTestDao.update(existingTest);
             return existingTest;
         } else {
             throw new RuntimeException(

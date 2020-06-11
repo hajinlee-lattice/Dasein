@@ -49,6 +49,7 @@
                                 <argument>com.latticeengines.domain.exposed.security</argument>
                                 <argument>com.latticeengines.domain.exposed.serviceapps.cdl</argument>
                                 <argument>com.latticeengines.domain.exposed.cdl</argument>
+                                <argument>com.latticeengines.domain.exposed.cdl.tray</argument>
                                 <argument>com.latticeengines.domain.exposed.cdl.activity</argument>
                                 <argument>com.latticeengines.domain.exposed.dcp</argument>
                                 <argument>com.latticeengines.domain.exposed.ulysses</argument>

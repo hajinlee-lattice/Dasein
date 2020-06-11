@@ -91,13 +91,13 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         TriggerMetadata trigger = metadata.getTrigger();
         ExternalIntegrationMessageBody message = trigger.getMessage();
         TriggerConfig triggerConfig = trigger.getTriggerConfig();
-        // TODO generate solution instnace
+
         if (triggerConfig.getGenerateSolutionInstance()) {
-
+            // TODO generate solution instance
         }
-        // TODO generate external audience
-        if (triggerConfig.getGenerateExternalAudience()) {
 
+        if (triggerConfig.getGenerateExternalAudience()) {
+            // TODO generate external audience
         }
 
         publishToSnsTopic(customerSpace, workflowRequestId, message);

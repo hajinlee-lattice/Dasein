@@ -4,6 +4,6 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 
 public interface TrayConnectorTestService {
 
-    public void triggerTrayConnectorTest(CDLExternalSystemName externalSystemName, String testScenario);
+    void triggerTrayConnectorTest(CDLExternalSystemName externalSystemName, String testScenario);
 
 }
