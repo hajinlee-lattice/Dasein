@@ -63,8 +63,10 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     private LookupIdMap lookupIdMap1;
     private LookupIdMap lookupIdMap2;
+    private LookupIdMap disconnectedLookupIdMap;
     private PlayLaunchChannel playLaunchChannel1;
     private PlayLaunchChannel playLaunchChannel2;
+    private PlayLaunchChannel disconnectedPlayLaunchChannel;
 
     private List<PlayType> types;
 
@@ -73,6 +75,9 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     private String orgId2 = "org2";
     private String orgName2 = "marketo_org";
+
+    private String orgId3 = "org3";
+    private String orgName3 = "disconnected_org";
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
@@ -122,8 +127,17 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         lookupIdMap2 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap2);
         Assert.assertNotNull(lookupIdMap2);
 
+        disconnectedLookupIdMap = new LookupIdMap();
+        disconnectedLookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
+        disconnectedLookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
+        disconnectedLookupIdMap.setOrgId(orgId3);
+        disconnectedLookupIdMap.setOrgName(orgName3);
+        disconnectedLookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(disconnectedLookupIdMap);
+        Assert.assertNotNull(lookupIdMap2);
+
         playLaunchChannel1 = createPlayLaunchChannel(play, lookupIdMap1);
         playLaunchChannel2 = createPlayLaunchChannel(play, lookupIdMap2);
+        disconnectedPlayLaunchChannel = createPlayLaunchChannel(play, disconnectedLookupIdMap);
 
         playLaunchChannel1.setIsAlwaysOn(true);
         playLaunchChannel1.setExpirationPeriodString("P3M");
@@ -156,6 +170,12 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment-app", dependsOnMethods = "testCreateChannel")
     public void testBasicOperations() {
+        LookupIdMap disconnectedMap = lookupIdMappingEntityMgr.getLookupIdMap(disconnectedLookupIdMap.getId());
+        disconnectedMap.setIsRegistered(false);
+        lookupIdMappingEntityMgr.updateLookupIdMap(disconnectedMap);
+
+        List<PlayLaunchChannel> channelList = playLaunchChannelService.getPlayLaunchChannels(play.getName(), true);
+        Assert.assertFalse(channelList.contains(disconnectedPlayLaunchChannel));
 
         PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
         Assert.assertNotNull(retrieved);
