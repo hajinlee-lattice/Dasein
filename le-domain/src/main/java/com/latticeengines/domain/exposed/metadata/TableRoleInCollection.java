@@ -59,7 +59,7 @@ public enum TableRoleInCollection {
     CustomIntentProfile,
     PeriodStores, //
     MetricsGroup, //
-
+    TimelineProfile, //
     AccountMaster;
 
     static {
@@ -155,8 +155,12 @@ public enum TableRoleInCollection {
         CustomIntentProfile.distKey = InterfaceName.AccountId;
         CustomIntentProfile.hasSignature = true;
 
+        TimelineProfile.partitionKey = InterfaceName.PartitionKey;
+        TimelineProfile.rangeKey = InterfaceName.SortKey;
+
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
+        TimelineProfile.hasSignature = true;
     }
 
     private static final Logger log = LoggerFactory.getLogger(TableRoleInCollection.class);

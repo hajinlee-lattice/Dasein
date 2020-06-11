@@ -29,6 +29,10 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val timelineVersionMap = config.timelineVersionMap.asScala
     val partitionKey: String = config.partitionKey
     val sortKey: String = config.sortKey
+    val needRebuild: Boolean = config.needRebuild
+    val masterStoreInputIdx = config.masterStoreInputIdx.asScala
+    val timelineRelatedMasterTables = config.timelineRelatedMasterTables.asScala
+    val suffix: String = config.tableRoleSuffix
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
         lattice.input(config.contactTableIdx)
@@ -96,15 +100,25 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
             .col(recordIdColumn)))
           (timelineId, timelineRawStreamTable)
       }.toSeq: _*)
-    val outputs = timelineRawStreamTableMap.toList
+    val timelineMasterStoreMap =
+      immutable.Map(timelineRawStreamTableMap.map {
+        case (timelineId, timelineRawStreamTable) =>
+          val roleTimelineId = timelineId + suffix
+          if (!needRebuild) {
+            val masterStoreTableName = timelineRelatedMasterTables.getOrElse(timelineId, "")
+            val idx: Integer = masterStoreInputIdx.getOrElse(masterStoreTableName, -1)
+            val masterStoreTable: DataFrame = lattice.input(idx)
+            val mergedMasterTable = MergeUtils.concat2(masterStoreTable, timelineRawStreamTable)
+            (roleTimelineId, mergedMasterTable)
+          }else {
+            (roleTimelineId, timelineRawStreamTable)
+          }
+      }.toSeq: _*)
+    val outputs = (timelineRawStreamTableMap++ timelineMasterStoreMap).toList
     //output
     lattice.output = outputs.map(_._2)
     // timelineId -> corresponding output index
     lattice.outputStr = Serialization.write(outputs.zipWithIndex.map(t => (t._1._1, t._2)).toMap)(org.json4s.DefaultFormats)
-  }
-
-  def getSource(row: Row, template: String): String = {
-    null
   }
 
   def createTimelineRawStreamTable(entityTableMap: immutable.Map[String, util.Set[String]], streamTables: immutable

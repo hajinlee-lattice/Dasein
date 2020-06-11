@@ -126,7 +126,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(this::verify, this::verify, this::verify);
+        return Arrays.asList(this::verify, this::verify, this::verify, this::verify, this::verify, this::verify);
     }
 
     private Boolean verify(HdfsDataUnit tgt) {
@@ -314,6 +314,9 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         config.partitionKey = "partitionKey";
         config.timelineVersionMap = timelineVersionMap;
         config.templateToSystemTypeMap = templateToSystemTypeMap;
+        config.needRebuild = true;
+        config.timelineRelatedMasterTables = new HashMap<>();
+        config.tableRoleSuffix = "TEST_ROLE";
         return config;
     }
 }
