@@ -84,7 +84,7 @@ public class TrayConnectorTest implements HasPid, HasTenant {
     private Date startTime;
 
     @JsonProperty("endTime")
-    @Column(name = "END_TIME", nullable = false)
+    @Column(name = "END_TIME")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endTime;
 
@@ -100,11 +100,11 @@ public class TrayConnectorTest implements HasPid, HasTenant {
         this.externalSystemName = externalSystemName;
     }
 
-    public TestState getTestState() {
+    public DataIntegrationEventType getTestState() {
         return this.testState;
     }
 
-    public void setTestState(TestState testState) {
+    public void setTestState(DataIntegrationEventType testState) {
         this.testState = testState;
     }
 
@@ -136,7 +136,7 @@ public class TrayConnectorTest implements HasPid, HasTenant {
         return this.endTime;
     }
 
-    public void setEventStartedTime(Date eventEndedTime) {
+    public void setEndTime(Date eventEndedTime) {
         this.endTime = eventEndedTime;
     }
 

@@ -9,8 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.tray.dao.TrayConnectorTestDao;
 import com.latticeengines.apps.cdl.tray.entitymgr.TrayConnectorTestEntityMgr;
 import com.latticeengines.apps.cdl.tray.repository.TrayConnectorTestRepository;
+import com.latticeengines.apps.cdl.tray.repository.reader.TrayConnectorTestReaderRepository;
+import com.latticeengines.apps.cdl.tray.repository.writer.TrayConnectorTestWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTest;
 
 @Component("trayConnectorTestEntityMgr")
@@ -19,10 +22,16 @@ public class TrayConnectorTestEntityMgrImpl
         implements TrayConnectorTestEntityMgr {
 
     @Inject
+    private TrayConnectorTestEntityMgrImpl _self;
+
+    @Inject
     private TrayConnectorTestDao trayConnectorTestDao;
 
     @Inject
-    private TrayConnectorTestRepository trayConnectorTestRepository;
+    private TrayConnectorTestReaderRepository trayConnectorTestReaderRepository;
+
+    @Inject
+    private TrayConnectorTestWriterRepository trayConnectorTestWriterRepository;
 
     @Override
     public BaseDao<TrayConnectorTest> getDao() {
@@ -30,15 +39,20 @@ public class TrayConnectorTestEntityMgrImpl
     }
 
     @Override
-    public void create(TrayConnectorTest entity) {
-        // TODO Auto-generated method stub
-
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(TrayConnectorTest trayConnectorTest) {
+        trayConnectorTest.setTenant(MultiTenantContext.getTenant());
+        super.create(trayConnectorTest);
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByWorkflowRequestId(String workflowRequestId) {
-        // TODO Auto-generated method stub
-
+        TrayConnectorTest trayConnectorTest = trayConnectorTestWriterRepository
+                .findByWorkflowRequestId(workflowRequestId);
+        if (trayConnectorTest != null) {
+            delete(trayConnectorTest);
+        }
     }
 
     @Override
@@ -49,20 +63,41 @@ public class TrayConnectorTestEntityMgrImpl
 
     @Override
     protected TrayConnectorTestRepository getReaderRepo() {
-        // TODO Auto-generated method stub
-        return null;
+        return trayConnectorTestReaderRepository;
     }
 
     @Override
     protected TrayConnectorTestRepository getWriterRepo() {
-        // TODO Auto-generated method stub
-        return null;
+        return trayConnectorTestWriterRepository;
     }
 
     @Override
     protected BaseReadWriteRepoEntityMgrImpl<TrayConnectorTestRepository, TrayConnectorTest, Long> getSelf() {
-        // TODO Auto-generated method stub
-        return null;
+        return _self;
+    }
+
+    @Override
+    public TrayConnectorTest updateTrayConnectorTest(TrayConnectorTest trayConnectorTest) {
+        TrayConnectorTest existingTest = findByWorkflowRequestId(trayConnectorTest.getWorkflowRequestId());
+        if (existingTest != null) {
+            mergeTrayConnectorTest(existingTest, trayConnectorTest);
+            return existingTest;
+        } else {
+            throw new RuntimeException(
+                    String.format("TrayConnectorTest %s does not exist.", trayConnectorTest.getWorkflowRequestId()));
+        }
+    }
+
+    private void mergeTrayConnectorTest(TrayConnectorTest oldTest, TrayConnectorTest newTest) {
+        if (newTest.getEndTime() != null) {
+            oldTest.setEndTime(newTest.getEndTime());
+        }
+        if (newTest.getErrorDetails() != null) {
+            oldTest.setErrorDetails(newTest.getErrorDetails());
+        }
+        if (newTest.getTestState() != null) {
+            oldTest.setTestState(newTest.getTestState());
+        }
     }
 
 }

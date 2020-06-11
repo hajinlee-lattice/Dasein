@@ -9,4 +9,6 @@ public interface TrayConnectorTestEntityMgr extends BaseEntityMgrRepository<Tray
 
     TrayConnectorTest findByWorkflowRequestId(String workflowRequestId);
 
+    TrayConnectorTest updateTrayConnectorTest(TrayConnectorTest trayConnectorTest);
+
 }

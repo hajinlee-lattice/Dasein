@@ -24,9 +24,9 @@ import com.latticeengines.aws.sns.SNSService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
-import com.latticeengines.domain.exposed.cdl.tray.TestState;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTest;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTestMetadata;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTestMetadata.TriggerConfig;
@@ -112,7 +112,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         test.setCDLExternalSystemName(externalSystemName);
         test.setTenant(MultiTenantContext.getTenant());
         test.setTestScenario(testScenario);
-        test.setTestState(TestState.Started);
+        test.setTestState(DataIntegrationEventType.WorkflowSubmitted);
         test.setWorkflowRequestId(workflowRequestId);
         trayConnectorTestEntityMgr.create(test);
     }
