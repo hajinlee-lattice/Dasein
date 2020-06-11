@@ -30,7 +30,7 @@ public class TimeLineJobConfig extends SparkJobConfig implements Serializable {
 
     //timelineId -> RoleTableName
     @JsonProperty
-    public Map<String, String> timelineRelatedMaterTables;
+    public Map<String, String> timelineRelatedMasterTables;
 
     @JsonProperty
     public boolean needRebuild;

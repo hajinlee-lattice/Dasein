@@ -31,7 +31,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val sortKey: String = config.sortKey
     val needRebuild: Boolean = config.needRebuild
     val masterStoreInputIdx = config.masterStoreInputIdx.asScala
-    val timelineRelatedMasterTables = config.timelineRelatedMaterTables.asScala
+    val timelineRelatedMasterTables = config.timelineRelatedMasterTables.asScala
     val suffix: String = config.tableRoleSuffix
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
