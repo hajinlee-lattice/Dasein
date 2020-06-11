@@ -1,43 +1,25 @@
+/*
+* script name - mysql.sql
+* purpose - Base sql file to prepare DB upgrade script. This file DDL/DML can be applied at 'release regression' & 'release window' cycle
+* Rule - Contains DDL/DML (create, add, modify etc.) queries.  Should maintain backward compatibility.
+*/
+
 USE `PLS_MultiTenant`;
 
+DROP PROCEDURE IF EXISTS `UpdateSchema`;
 DELIMITER //
-CREATE PROCEDURE `UpdatePLSTables`()
-BEGIN
-    DROP TABLE if EXISTS `METADATA_ATTRIBUTE_SET`;
-    CREATE TABLE `METADATA_ATTRIBUTE_SET` (
-	    `PID` bigint not null auto_increment,
-	    `NAME` VARCHAR(255) NOT NULL,
-	    `DISPLAY_NAME` varchar(255) NOT NULL,
-	    `DESCRIPTION` varchar(255),
-	    `ATTRIBUTES` longblob NULL,
-	    `FK_TENANT_ID` bigint(20) NOT NULL,
-	    `CREATED`  datetime NOT NULL,
-	    `UPDATED` datetime NOT NULL,
-	    `CREATED_BY` VARCHAR(255) DEFAULT NULL,
-	    `UPDATED_BY` VARCHAR(255) DEFAULT NULL,
-	    PRIMARY KEY (`PID`)
-	) ENGINE=InnoDB;
-    ALTER TABLE `METADATA_ATTRIBUTE_SET` ADD CONSTRAINT `FK_METADATAATTRIBUTESET_FKTENANTID_TENANT`
-        FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
-    ALTER TABLE `METADATA_ATTRIBUTE_SET` ADD CONSTRAINT `UK8ve4s3goubtlf0hqku9ud5ulg` UNIQUE (`NAME`, `FK_TENANT_ID`);
-    ALTER TABLE `ATLAS_EXPORT`
-        ADD COLUMN `ATTRIBUTE_SET_NAME` VARCHAR(255);
-    ALTER TABLE `RATING_ENGINE`
-        ADD COLUMN `TEAM_ID` VARCHAR(255);
 
-    ALTER TABLE `DATAFEED_TASK`
-            ADD COLUMN `TASK_CONFIG` JSON;
+-- ##############################################################
+CREATE PROCEDURE `UpdateSchema`()
+  BEGIN
+      -- User input section (DDL/DML). This is just a template, developer can modify based on need.
 
-    ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
-        ADD COLUMN `USE_LATEST_VERSION` BIT(1) NULL;
-    ALTER TABLE `PLS_MultiTenant`.`ATLAS_STREAM_DIMENSION`
-        ADD COLUMN `SHOULD_REPLACE` BIT(1) NULL;
-    ALTER TABLE `PLS_MultiTenant`.`STRING_TEMPLATE`
-    CHANGE COLUMN `TEMPLATE` `TEMPLATE` VARCHAR(1000) NOT NULL ;
 
-    ALTER TABLE `DCP_UPLOAD`
-        ADD COLUMN `UPLOAD_DIAGNOSTICS` JSON;
-END;
-//
+
+
+  END //
+-- ##############################################################
+
+-- DO NOT touch this part
 DELIMITER ;
-CALL `UpdatePLSTables`();
+CALL `UpdateSchema`();
