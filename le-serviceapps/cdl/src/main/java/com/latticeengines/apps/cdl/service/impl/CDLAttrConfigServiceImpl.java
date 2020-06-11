@@ -164,31 +164,28 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
         Map<String, Set<String>> newAttributesMap = newAttributeSet.getAttributesMap();
-        boolean isNewAttributeMapEmpty = MapUtils.isEmpty(newAttributesMap);
-        if (existingAttributeSet == null && isNewAttributeMapEmpty) {
+        if (MapUtils.isEmpty(newAttributesMap)) {
             return attrConfigRequest;
         }
-        if (!isNewAttributeMapEmpty) {
-            for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
-                Category category = CategoryUtils.getEntityCategory(entity);
-                Set<String> existingAttributes = new HashSet<>();
-                if (existingAttributeSet != null && existingAttributeSet.getAttributesMap() != null) {
-                    existingAttributes = getAttributes(existingAttributeSet.getAttributesMap(), category, entity);
-                }
-                entitySetMap.put(entity, existingAttributes);
+        for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
+            Category category = CategoryUtils.getEntityCategory(entity);
+            Set<String> existingAttributes = new HashSet<>();
+            if (existingAttributeSet != null && existingAttributeSet.getAttributesMap() != null) {
+                existingAttributes = getAttributes(existingAttributeSet.getAttributesMap(), category, entity);
             }
-            for (Map.Entry<String, Set<String>> entry : newAttributesMap.entrySet()) {
-                Category category = Category.valueOf(entry.getKey());
-                Set<String> newAttributes;
-                if (existingAttributeSet != null && existingAttributeSet.getAttributesMap() != null) {
-                    Set<String> existingAttributes = existingAttributeSet.getAttributesMap().get(category.name());
-                    existingAttributes = existingAttributes != null ? existingAttributes : new HashSet<>();
-                    newAttributes = newAttributesMap.get(category.name());
-                    generateAttrConfigRequestByCategory(attrConfigs, existingAttributes, newAttributes, category);
-                } else {
-                    newAttributes = newAttributesMap.get(category.name());
-                    generateAttrConfigRequestByCategory(attrConfigs, new HashSet<>(), newAttributes, category);
-                }
+            entitySetMap.put(entity, existingAttributes);
+        }
+        for (Map.Entry<String, Set<String>> entry : newAttributesMap.entrySet()) {
+            Category category = Category.valueOf(entry.getKey());
+            Set<String> newAttributes;
+            if (existingAttributeSet != null && existingAttributeSet.getAttributesMap() != null) {
+                Set<String> existingAttributes = existingAttributeSet.getAttributesMap().get(category.name());
+                existingAttributes = existingAttributes != null ? existingAttributes : new HashSet<>();
+                newAttributes = newAttributesMap.get(category.name());
+                generateAttrConfigRequestByCategory(attrConfigs, existingAttributes, newAttributes, category);
+            } else {
+                newAttributes = newAttributesMap.get(category.name());
+                generateAttrConfigRequestByCategory(attrConfigs, new HashSet<>(), newAttributes, category);
             }
             attrConfigRequest = validateRequest(attrConfigRequest, AttrConfigUpdateMode.Usage, entitySetMap);
         }
