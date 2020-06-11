@@ -386,14 +386,14 @@ public class DataReport {
 
         @JsonProperty("no_match_rate")
         public int getNoMatchRate() {
+            double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
+            double total = matchedCnt + unmatchedCnt;
             double noMatch = noMatchCnt != null ? noMatchCnt.doubleValue() : 0.0;
-            if (unmatchedCnt == 0) {
-                return 0;
-            } else if (noMatch > unmatchedCnt) {
-                return 1;
+            if (total > 0) {
+                return (int) Math.round((noMatch / total) * 100);
             } else {
-                return (int) Math.round((noMatch / unmatchedCnt) * 100);
+                return 0;
             }
         }
 
