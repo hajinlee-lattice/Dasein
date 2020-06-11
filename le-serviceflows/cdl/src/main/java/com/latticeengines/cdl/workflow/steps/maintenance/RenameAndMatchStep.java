@@ -233,7 +233,9 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         log.info("RenameAndMatchStep, RootOperationUid {}, columnNames {} ", matchInput.getRootOperationUid(),
                 columnNames);
 
-        List<String> accountSystemIds = Collections.singletonList(systemIdColumn);
+        List<String> accountSystemIds = Collections.singletonList(getSystemIdColumn(BusinessEntity.Account, idSystem));
+        List<String> contactSystemIds = Collections.singletonList(getSystemIdColumn(BusinessEntity.Contact, idSystem));
+            log.info("RenameAndMatchStep, accountSystemIds {}, contactSystemIds {} ", accountSystemIds, contactSystemIds);
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
         if (idEntity.equals(BusinessEntity.Account)) {
             MatchInput.EntityKeyMap accountKeyMap = new MatchInput.EntityKeyMap();
@@ -242,8 +244,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
             entityKeyMaps.put(BusinessEntity.Account.name(), accountKeyMap);
             matchInput.setEntityKeyMaps(entityKeyMaps);
         } else {
-            List<String> contactSystemIds = Collections
-                    .singletonList(getSystemIdColumn(BusinessEntity.Contact, idSystem));
+            matchInput.setTargetEntity(BusinessEntity.Contact.name());
             MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
                     .fromKeyMap(MatchUtils.getAccountMatchKeysForContact(columnNames, accountSystemIds, false, false));
             MatchInput.EntityKeyMap contactKeyMap = MatchInput.EntityKeyMap
