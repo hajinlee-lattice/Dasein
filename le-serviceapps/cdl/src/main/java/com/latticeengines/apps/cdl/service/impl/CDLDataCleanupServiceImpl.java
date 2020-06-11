@@ -205,8 +205,11 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         deleteConfig.setDeleteEntityType(request.getDeleteEntityType());
         deleteConfig.setFromDate(request.getFromDate());
         deleteConfig.setToDate(request.getToDate());
-        if (request.getDeleteEntities().contains(BusinessEntity.ActivityStream) && CollectionUtils.isNotEmpty(request.getDeleteStreamIds())) {
+        if (request.getDeleteEntityType() != null && STREAM_TYPE_REFERENCE.containsKey(request.getDeleteEntityType()) // delete ActivityStream indicated
+                && CollectionUtils.isEmpty(request.getDeleteStreamIds()) // prevent overwrite deleteStreamIds if already set
+        ) {
             deleteConfig.setDeleteStreamIds(translateStreamIds(customerSpace, request.getDeleteEntityType()));
+            request.getDeleteEntities().add(BusinessEntity.ActivityStream);
         }
         action.setActionConfiguration(deleteConfig);
         action.setTenant(tenant);
