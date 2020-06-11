@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -160,13 +161,25 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Override
     public void deleteConnection(String lookupIdMapId, TraySettings traySettings) {
         try{
+
             LookupIdMap map = getLookupIdMap(lookupIdMapId);
-            trayService.removeSolutionInstance(traySettings);
-            map.setIsRegistered(false);
-            updateLookupIdMap(lookupIdMapId, map);
-            trayService.removeAuthentication(traySettings);
-            map.setIsRegistered(false);
-            updateLookupIdMap(lookupIdMapId, map);
+            ExternalSystemAuthentication trayAuth = map.getExternalAuthentication();
+            // remove solution instance
+            if (trayAuth.getSolutionInstanceId() != null) {
+                trayService.removeSolutionInstance(traySettings);
+                trayAuth.setSolutionInstanceId(null);
+                map.setExternalAuthentication(trayAuth);
+                map.setIsRegistered(false);
+                updateLookupIdMap(lookupIdMapId, map);
+            }
+            // remove authentication
+            if (trayAuth.getTrayAuthenticationId() != null) {
+                trayService.removeAuthentication(traySettings);
+                trayAuth.setTrayAuthenticationId(null);
+                map.setExternalAuthentication(trayAuth);
+                map.setIsRegistered(false);
+                updateLookupIdMap(lookupIdMapId, map);
+            }
             deleteLookupIdMap(lookupIdMapId);
         }
         catch (Exception ex) {
