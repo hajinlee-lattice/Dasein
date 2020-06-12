@@ -1,8 +1,13 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -164,7 +169,6 @@ public class DataReport {
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
     public static class InputPresenceReport {
 
-        @JsonProperty("input_presence_map")
         private Map<String, PresenceItem> presenceMap;
 
         public Map<String, PresenceItem> getPresenceMap() {
@@ -173,6 +177,17 @@ public class DataReport {
 
         public void setPresenceMap(Map<String, PresenceItem> presenceMap) {
             this.presenceMap = presenceMap;
+        }
+
+        @JsonProperty("input_presence_List")
+        public List<PresenceItem> getPresenceList() {
+            if (MapUtils.isNotEmpty(presenceMap)) {
+                List<PresenceItem> presenceList = new ArrayList<>(presenceMap.values());
+                presenceList.sort(Comparator.comparing(PresenceItem::getField));
+                return presenceList;
+            } else {
+                return Collections.emptyList();
+            }
         }
 
         @JsonIgnore
@@ -185,6 +200,7 @@ public class DataReport {
                 presenceMap = new HashMap<>();
             }
             PresenceItem presenceItem = new PresenceItem();
+            presenceItem.setField(field);
             presenceItem.setCount(presenceCnt);
             if (totalCnt == 0L) {
                 presenceItem.setRate(0);
@@ -199,11 +215,22 @@ public class DataReport {
         @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
         public static class PresenceItem {
 
+            @JsonProperty("field")
+            private String field;
+
             @JsonProperty("count")
             private Long count;
 
             @JsonProperty("rate")
             private Integer rate;
+
+            public String getField() {
+                return field;
+            }
+
+            public void setField(String field) {
+                this.field = field;
+            }
 
             public Long getCount() {
                 return count;
@@ -228,7 +255,6 @@ public class DataReport {
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
     public static class GeoDistributionReport {
 
-        @JsonProperty("geo_distribution_map")
         private Map<String, GeographicalItem> geographicalDistributionMap;
 
         public Map<String, GeographicalItem> getGeographicalDistributionMap() {
@@ -239,8 +265,19 @@ public class DataReport {
             this.geographicalDistributionMap = geographicalDistributionMap;
         }
 
+        @JsonProperty("geo_distribution_list")
+        public List<GeographicalItem> getGeographicalDistributionList() {
+            if (MapUtils.isNotEmpty(geographicalDistributionMap)) {
+                List<GeographicalItem> geoDistributionList = new ArrayList<>(geographicalDistributionMap.values());
+                geoDistributionList.sort(Comparator.comparing(GeographicalItem::getGeoCode));
+                return geoDistributionList;
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
         @JsonIgnore
-        public void addGeoDistribution(String countryCode, Long recordCnt, Long totalCnt) {
+        public void addGeoDistribution(String countryCode, String countryName, Long recordCnt, Long totalCnt) {
             Preconditions.checkArgument(StringUtils.isNotEmpty(countryCode));
             Preconditions.checkNotNull(recordCnt);
             Preconditions.checkNotNull(totalCnt);
@@ -249,6 +286,8 @@ public class DataReport {
                 geographicalDistributionMap = new HashMap<>();
             }
             GeographicalItem geographicalItem = new GeographicalItem();
+            geographicalItem.setGeoCode(countryCode);
+            geographicalItem.setGeoName(countryName);
             geographicalItem.setCount(recordCnt);
             if (totalCnt == 0L) {
                 geographicalItem.setRate(0);
@@ -263,11 +302,33 @@ public class DataReport {
         @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
         public static class GeographicalItem {
 
+            @JsonProperty("geo_code")
+            private String geoCode;
+
+            @JsonProperty("geo_name")
+            private String geoName;
+
             @JsonProperty("count")
             private Long count;
 
             @JsonProperty("rate")
             private Integer rate;
+
+            public String getGeoCode() {
+                return geoCode;
+            }
+
+            public void setGeoCode(String geoCode) {
+                this.geoCode = geoCode;
+            }
+
+            public String getGeoName() {
+                return geoName;
+            }
+
+            public void setGeoName(String geoName) {
+                this.geoName = geoName;
+            }
 
             public Long getCount() {
                 return count;
@@ -301,7 +362,6 @@ public class DataReport {
         @JsonProperty("no_match_cnt")
         private Long noMatchCnt;
 
-        @JsonProperty("confidence_rate_map")
         private Map<Integer, ConfidenceItem> confidenceRateMap;
 
         public Long getMatched() {
@@ -336,6 +396,17 @@ public class DataReport {
             this.confidenceRateMap = confidenceRateMap;
         }
 
+        @JsonProperty("confidence_rate_map")
+        public List<ConfidenceItem> getConfidenceRateList() {
+            if (MapUtils.isNotEmpty(confidenceRateMap)) {
+                List<ConfidenceItem> confidenceRateList = new ArrayList<>(confidenceRateMap.values());
+                confidenceRateList.sort(Comparator.comparing(ConfidenceItem::getConfidenceCode));
+                return confidenceRateList;
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
         @JsonIgnore
         public void addConfidenceItem(Integer confidenceCode, Long recordCnt, Long totalCnt) {
             Preconditions.checkNotNull(confidenceCode);
@@ -348,6 +419,7 @@ public class DataReport {
                 confidenceRateMap = new HashMap<>();
             }
             ConfidenceItem confidenceItem = new ConfidenceItem();
+            confidenceItem.setConfidenceCode(confidenceCode);
             confidenceItem.setCount(recordCnt);
             if (totalCnt == 0L) {
                 confidenceItem.setRate(0);
@@ -402,6 +474,9 @@ public class DataReport {
         @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
         public static class ConfidenceItem {
 
+            @JsonProperty("confidence_code")
+            private Integer confidenceCode;
+
             @JsonProperty("count")
             private Long count;
 
@@ -410,6 +485,14 @@ public class DataReport {
 
             @JsonProperty("classification")
             private Classification classification;
+
+            public Integer getConfidenceCode() {
+                return confidenceCode;
+            }
+
+            public void setConfidenceCode(Integer confidenceCode) {
+                this.confidenceCode = confidenceCode;
+            }
 
             public Long getCount() {
                 return count;

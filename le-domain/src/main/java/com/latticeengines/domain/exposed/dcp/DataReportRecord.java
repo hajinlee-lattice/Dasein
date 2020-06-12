@@ -66,9 +66,9 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     @Enumerated(EnumType.STRING)
     private Level level;
 
-    @Column(name = "VERSION")
+    @Column(name = "DATA_SNAPSHOT_TIME")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date version;
+    private Date dataSnapshotTime;
 
     @Column(name = "REFRESH_TIME")
     @Temporal(TemporalType.TIMESTAMP)
@@ -150,12 +150,12 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
         this.level = level;
     }
 
-    public Date getVersion() {
-        return version;
+    public Date getDataSnapshotTime() {
+        return dataSnapshotTime;
     }
 
-    public void setVersion(Date version) {
-        this.version = version;
+    public void setDataSnapshotTime(Date dataSnapshotTime) {
+        this.dataSnapshotTime = dataSnapshotTime;
     }
 
     public Date getRefreshTime() {
