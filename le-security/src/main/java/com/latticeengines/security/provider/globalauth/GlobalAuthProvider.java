@@ -41,7 +41,9 @@ public class GlobalAuthProvider implements AuthenticationProvider {
             Session session = sessionService.retrieve(ticket);
             if (session == null) {
                 log.error("invalid ticket : can't retrieve valid session from the ticket.");
-                throw new RuntimeException("Authentication failed: Can't retrieve session");
+                TicketAuthenticationToken unauthenticated = new TicketAuthenticationToken(null, ticket.getData());
+                unauthenticated.setAuthenticated(false);
+                return unauthenticated;
             }
             List<GrantedAuthority> rights = new ArrayList<>();
 
