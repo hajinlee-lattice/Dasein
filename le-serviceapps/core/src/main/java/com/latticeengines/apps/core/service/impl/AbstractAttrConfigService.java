@@ -671,8 +671,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 if (existingConfig != null) {
                     // write user changed prop
                     existingConfig.getAttrProps().forEach((propName, propValue) -> {
-                        if (!config.getAttrProps().containsKey(propName) && mergeUsageGroupProps) {
-                            config.getAttrProps().put(propName, propValue);
+                        if (!config.getAttrProps().containsKey(propName)) {
+                            // need to merge other properties for attribute set because attribute set already has its
+                            // own group info
+                            if (mergeUsageGroupProps || !groupNames.contains(propName)) {
+                                config.getAttrProps().put(propName, propValue);
+                            }
                         }
                     });
 
