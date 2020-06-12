@@ -398,7 +398,7 @@ public class DataReport {
             this.confidenceRateMap = confidenceRateMap;
         }
 
-        @JsonProperty("confidence_rate_map")
+        @JsonProperty("confidence_rate_list")
         public List<ConfidenceItem> getConfidenceRateList() {
             if (MapUtils.isNotEmpty(confidenceRateMap)) {
                 List<ConfidenceItem> confidenceRateList = new ArrayList<>(confidenceRateMap.values());
