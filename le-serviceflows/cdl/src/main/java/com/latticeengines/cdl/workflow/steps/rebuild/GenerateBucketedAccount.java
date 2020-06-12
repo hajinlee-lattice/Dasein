@@ -1,9 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXFMR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.ArrayList;
@@ -179,7 +179,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private TransformationStepConfig filter() {
         TransformationStepConfig step = new TransformationStepConfig();
         addBaseTables(step, fullAccountTableName);
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
         CopyConfig conf = new CopyConfig();
         conf.setSelectAttrs(getRetrainAttrNames());
         String confStr = appendEngineConf(conf, lightEngineConfig());
@@ -190,7 +190,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(filterStep));
-        step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
+        step.setTransformer(TRANSFORMER_PROFILE_TXFMR);
         ProfileJobConfig conf = new ProfileJobConfig();
         conf.setAutoDetectDiscrete(true);
         conf.setAutoDetectCategorical(true);
@@ -204,7 +204,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private TransformationStepConfig bucketEncode() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(filterStep, profileStep));
-        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
+        step.setTransformer(TRANSFORMER_BUCKET_TXFMR);
 
         setTargetTable(step, servingStoreTablePrefix);
         step.getTargetTable().setExpandBucketedAttrs(true);

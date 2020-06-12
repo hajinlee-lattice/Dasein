@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.ProfileTxfmr.TRANSFORMER_NAME;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXFMR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import com.latticeengines.spark.exposed.job.stats.ProfileJob;
 public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
     private static final Logger log = LoggerFactory.getLogger(ProfileTxfmr.class);
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILE_TXMFR;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILE_TXFMR;
 
     public static final String AM_PROFILE = "AMProfile";
 

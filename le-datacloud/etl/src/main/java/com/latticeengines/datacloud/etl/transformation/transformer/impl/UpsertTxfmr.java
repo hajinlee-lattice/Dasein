@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXFMR;
 
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import com.latticeengines.spark.exposed.job.common.UpsertJob;
 @Component(UpsertTxfmr.TRANSFORMER_NAME)
 public class UpsertTxfmr extends ConfigurableSparkJobTxfmr<UpsertConfig> {
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_UPSERT_TXMFR;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_UPSERT_TXFMR;
 
     @Override
     public String getName() {

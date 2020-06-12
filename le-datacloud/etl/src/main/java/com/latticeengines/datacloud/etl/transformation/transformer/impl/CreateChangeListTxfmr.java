@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CHANGELIST_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CHANGELIST_TXFMR;
 
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import com.latticeengines.spark.exposed.job.cdl.CreateChangeListJob;
 @Component(CreateChangeListTxfmr.TRANSFORMER_NAME)
 public class CreateChangeListTxfmr extends ConfigurableSparkJobTxfmr<ChangeListConfig> {
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_CHANGELIST_TXMFR;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_CHANGELIST_TXFMR;
 
     @Override
     public String getName() {

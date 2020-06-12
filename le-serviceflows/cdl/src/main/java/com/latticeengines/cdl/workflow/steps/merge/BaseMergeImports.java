@@ -1,10 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CHANGELIST_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CHANGELIST_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_REPORT_CHANGELIST_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_REPORT_CHANGELIST_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 
@@ -50,7 +50,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRespo
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxfmrConfigBuilder;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ExtractEmbeddedEntityTableConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -91,16 +91,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     @Inject
     protected MetadataProxy metadataProxy;
-
-    @Inject
-    private MatchProxy matchProxy;
-
     @Inject
     protected CDLAttrConfigProxy cdlAttrConfigProxy;
-
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
-
     protected BusinessEntity entity;
     protected TableRoleInCollection systemBatchStore;
     protected TableRoleInCollection batchStore;
@@ -112,18 +106,18 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String changeListTablePrefix;
     protected String reportChangeListTablePrefix;
     protected String batchStorePrimaryKey;
-
     protected List<Table> inputTables = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
-    Map<BusinessEntity, Boolean> softDeleteEntities;
-    Map<BusinessEntity, Boolean> hardDeleteEntities;
     protected Map<String, String> tableTemplateMap;
     protected List<String> templatesInOrder = new ArrayList<>();
     // A set of columns to filter out, which will be generated later during match
     protected List<String> columnsToFilterOut = new ArrayList<>();
-
     protected boolean hasSystemBatch;
+    Map<BusinessEntity, Boolean> softDeleteEntities;
+    Map<BusinessEntity, Boolean> hardDeleteEntities;
+    @Inject
+    private MatchProxy matchProxy;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -239,7 +233,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         TransformationStepConfig step = new TransformationStepConfig();
         setupActiveMasterTable(step);
         step.setInputSteps(Collections.singletonList(inputStep));
-        step.setTransformer(TRANSFORMER_CHANGELIST_TXMFR);
+        step.setTransformer(TRANSFORMER_CHANGELIST_TXFMR);
         setTargetTable(step, changeListTablePrefix);
         ChangeListConfig config = getChangeListConfig(joinKey);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -249,7 +243,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected TransformationStepConfig reportChangeList(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
-        step.setTransformer(TRANSFORMER_REPORT_CHANGELIST_TXMFR);
+        step.setTransformer(TRANSFORMER_REPORT_CHANGELIST_TXFMR);
         setTargetTable(step, reportChangeListTablePrefix);
         ChangeListConfig config = getChangeListConfig(null);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -259,7 +253,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected TransformationStepConfig reportChangeList(String changeListTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         addBaseTables(step, changeListTableName);
-        step.setTransformer(TRANSFORMER_REPORT_CHANGELIST_TXMFR);
+        step.setTransformer(TRANSFORMER_REPORT_CHANGELIST_TXFMR);
         setTargetTable(step, reportChangeListTablePrefix);
         ChangeListConfig config = getChangeListConfig(null);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -269,8 +263,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     private ChangeListConfig getChangeListConfig(String joinKey) {
         ChangeListConfig config = new ChangeListConfig();
         config.setJoinKey(joinKey);
-        config.setExclusionColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name(),
-                InterfaceName.CDLUpdatedTime.name(), joinKey));
+        config.setExclusionColumns(
+                Arrays.asList(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name(), joinKey));
         return config;
     }
 
@@ -512,9 +506,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     // For common use case. If need to customize more parameters, better to
     // build ConsolidateDataTransformerConfig in workflow step itself instead of
     // making shared method with large signature
-    protected ConsolidateDataTransformerConfig getConsolidateDataTxmfrConfig(boolean dedupeSource,
+    protected ConsolidateDataTransformerConfig getConsolidateDataTxfmrConfig(boolean dedupeSource,
             boolean addTimettamps, boolean mergeOnly) {
-        ConsolidateDataTxmfrConfigBuilder builder = new ConsolidateDataTxmfrConfigBuilder();
+        ConsolidateDataTxfmrConfigBuilder builder = new ConsolidateDataTxfmrConfigBuilder();
         builder.dedupeSource(dedupeSource);
         builder.addTimestamps(addTimettamps);
         builder.mergeOnly(mergeOnly);

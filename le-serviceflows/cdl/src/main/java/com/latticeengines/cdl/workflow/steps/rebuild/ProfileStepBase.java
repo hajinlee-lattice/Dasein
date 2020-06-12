@@ -2,9 +2,9 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXFMR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXFMR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.time.LocalDate;
@@ -124,7 +124,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     private TransformationStepConfig configureProfileStep(TransformationStepConfig step,
                                                           List<ProfileParameters.Attribute> declaredAttrs,
                                                           boolean detectDiscrete, boolean detectCategorical) {
-        step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
+        step.setTransformer(TRANSFORMER_PROFILE_TXFMR);
         ProfileJobConfig conf = new ProfileJobConfig();
         conf.setDeclaredAttrs(declaredAttrs);
         conf.setAutoDetectDiscrete(detectDiscrete);
@@ -145,7 +145,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     private TransformationStepConfig configureBucketStep(TransformationStepConfig step, String outputTablePrefix) {
-        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
+        step.setTransformer(TRANSFORMER_BUCKET_TXFMR);
 
         if (StringUtils.isNotBlank(outputTablePrefix)) {
             TargetTable targetTable = new TargetTable();
@@ -163,7 +163,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(profileStep));
         addBaseTables(step, inputTableName);
-        step.setTransformer(TRANSFORMER_CALC_STATS_TXMFR);
+        step.setTransformer(TRANSFORMER_CALC_STATS_TXFMR);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -178,7 +178,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     protected TransformationStepConfig calcStats(int profileStep, int inputStep, String statsTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(inputStep, profileStep));
-        step.setTransformer(TRANSFORMER_CALC_STATS_TXMFR);
+        step.setTransformer(TRANSFORMER_CALC_STATS_TXFMR);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);

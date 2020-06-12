@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.Collections;
@@ -95,7 +95,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         } else {
             step.setInputSteps(Collections.singletonList(inputStep));
         }
-        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
+        step.setTransformer(TRANSFORMER_BUCKET_TXFMR);
         BucketEncodeConfig config = new BucketEncodeConfig();
         String confStr = heavyEngine ? appendEngineConf(config, heavyEngineConfig()) : appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(confStr);

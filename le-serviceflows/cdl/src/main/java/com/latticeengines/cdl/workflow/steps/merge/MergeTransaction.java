@@ -327,7 +327,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         addBaseTables(step, rawTable.getName());
         step.setInputSteps(Collections.singletonList(dailyStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(appendEngineConf(getConsolidateDataTxmfrConfig(false, false, true), lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(getConsolidateDataTxfmrConfig(false, false, true), lightEngineConfig()));
 
         return step;
     }

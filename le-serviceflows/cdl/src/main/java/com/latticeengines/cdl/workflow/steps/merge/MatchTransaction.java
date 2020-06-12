@@ -18,7 +18,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxfmrConfigBuilder;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -54,7 +54,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             bumpEntityMatchStagingVersion();
             List<String> convertedRematchTableNames = getConvertedRematchTableNames();
             if (CollectionUtils.isNotEmpty(inputTableNames)) {
-                TransformationStepConfig mergeImport = mergeInputs(getConsolidateDataTxmfrConfig(), null,
+                TransformationStepConfig mergeImport = mergeInputs(getConsolidateDataTxfmrConfig(), null,
                         ETLEngineLoad.LIGHT, null, -1);
                 steps.add(mergeImport);
                 if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
@@ -65,7 +65,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
                 // when there is no input table, steps.size() - 1 will be -1
                 TransformationStepConfig mergeImportAndBatchStore = mergeInputs(
-                        getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
+                        getConsolidateDataTxfmrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
                         convertedRematchTableNames, steps.size() - 1);
                 steps.add(mergeImportAndBatchStore);
                 // If has rematch fake imports, filter out those columns after concat all imports
@@ -77,7 +77,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             steps.add(matchImportAndBatchStore);
         } else {
             // legacy tenants, just merge imports
-            steps.add(mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix, ETLEngineLoad.LIGHT, null,
+            steps.add(mergeInputs(getConsolidateDataTxfmrConfig(), matchTargetTablePrefix, ETLEngineLoad.LIGHT, null,
                     -1));
         }
         log.info("steps are {}.", steps);
@@ -134,9 +134,9 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         }
     }
 
-    private ConsolidateDataTransformerConfig getConsolidateDataTxmfrConfig() {
-        ConsolidateDataTransformerConfig config = getConsolidateDataTxmfrConfig(false, true, true);
-        ConsolidateDataTxmfrConfigBuilder builder = new ConsolidateDataTxmfrConfigBuilder(config);
+    private ConsolidateDataTransformerConfig getConsolidateDataTxfmrConfig() {
+        ConsolidateDataTransformerConfig config = getConsolidateDataTxfmrConfig(false, true, true);
+        ConsolidateDataTxfmrConfigBuilder builder = new ConsolidateDataTxfmrConfigBuilder(config);
         // For PA during entity match migration period: some files are imported
         // with legacy template (having AccountId) while some files are imported
         // after template is upgraded (having CustomerAccountId)
