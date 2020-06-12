@@ -623,6 +623,10 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         MultiTenantContext.setTenant(null);
         WorkflowJob originalJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
         Assert.assertNotNull(originalJob);
+        originalJob.setStatus(JobStatus.PENDING_RETRY.name());
+        workflowJobEntityMgr.updateWorkflowJob(originalJob);
+
+        Thread.sleep(1000L);
 
         workflowJobService.updateWorkflowStatusAfterRetry(customerSpace3.toString(), workflowId);
 
