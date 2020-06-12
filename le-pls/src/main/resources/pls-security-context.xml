@@ -546,6 +546,16 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/datareport/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="/pls/datareport/**" access="hasRole('View_DCP_Projects')"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/pls/importfile/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"

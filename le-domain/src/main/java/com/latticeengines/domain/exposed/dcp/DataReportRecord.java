@@ -1,0 +1,212 @@
+package com.latticeengines.domain.exposed.dcp;
+
+import java.util.Date;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
+
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
+
+/**
+ * Persist object for Dashboard
+ */
+@Entity
+@Table(name = "DCP_DATA_REPORT",
+        indexes = {@Index(name = "IX_OWNER_ID_LEVEL", columnList = "OWNER_ID,LEVEL")},
+        uniqueConstraints = {@UniqueConstraint(name = "IX_ID_LEVEL", columnNames = {"FK_TENANT_ID", "OWNER_ID", "LEVEL"})})
+@Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
+public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Tenant tenant;
+
+    @Column(name = "CREATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
+    @Column(name = "UPDATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated;
+
+    @Column(name = "OWNER_ID", nullable = false)
+    private String ownerId;
+
+    @Column(name = "LEVEL", length = 20)
+    @Enumerated(EnumType.STRING)
+    private Level level;
+
+    @Column(name = "DATA_SNAPSHOT_TIME")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataSnapshotTime;
+
+    @Column(name = "REFRESH_TIME")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date refreshTime;
+
+    @Column(name = "BASIC_STATS", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private DataReport.BasicStats basicStats;
+
+    @Column(name = "INPUT_PRESENCE_REPORT", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private DataReport.InputPresenceReport inputPresenceReport;
+
+    @Column(name = "GEO_DISTRIBUTION_REPORT", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private DataReport.GeoDistributionReport geoDistributionReport;
+
+    @Column(name = "MATCH_TO_DUNS_REPORT", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private DataReport.MatchToDUNSReport matchToDUNSReport;
+
+    @Column(name = "DUPLICATION_REPORT", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private DataReport.DuplicationReport duplicationReport;
+
+    @Override
+    public Long getPid() {
+        return pid;
+    }
+
+    @Override
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @Override
+    public Date getCreated() {
+        return created;
+    }
+
+    @Override
+    public void setCreated(Date date) {
+        this.created = date;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return updated;
+    }
+
+    @Override
+    public void setUpdated(Date date) {
+        this.updated = date;
+    }
+
+    @Override
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
+    public Date getDataSnapshotTime() {
+        return dataSnapshotTime;
+    }
+
+    public void setDataSnapshotTime(Date dataSnapshotTime) {
+        this.dataSnapshotTime = dataSnapshotTime;
+    }
+
+    public Date getRefreshTime() {
+        return refreshTime;
+    }
+
+    public void setRefreshTime(Date refreshTime) {
+        this.refreshTime = refreshTime;
+    }
+
+    public DataReport.BasicStats getBasicStats() {
+        return basicStats;
+    }
+
+    public void setBasicStats(DataReport.BasicStats basicStats) {
+        this.basicStats = basicStats;
+    }
+
+    public DataReport.InputPresenceReport getInputPresenceReport() {
+        return inputPresenceReport;
+    }
+
+    public void setInputPresenceReport(DataReport.InputPresenceReport inputPresenceReport) {
+        this.inputPresenceReport = inputPresenceReport;
+    }
+
+    public DataReport.GeoDistributionReport getGeoDistributionReport() {
+        return geoDistributionReport;
+    }
+
+    public void setGeoDistributionReport(DataReport.GeoDistributionReport geoDistributionReport) {
+        this.geoDistributionReport = geoDistributionReport;
+    }
+
+    public DataReport.MatchToDUNSReport getMatchToDUNSReport() {
+        return matchToDUNSReport;
+    }
+
+    public void setMatchToDUNSReport(DataReport.MatchToDUNSReport matchToDUNSReport) {
+        this.matchToDUNSReport = matchToDUNSReport;
+    }
+
+    public DataReport.DuplicationReport getDuplicationReport() {
+        return duplicationReport;
+    }
+
+    public void setDuplicationReport(DataReport.DuplicationReport duplicationReport) {
+        this.duplicationReport = duplicationReport;
+    }
+
+    public enum Level {
+        Tenant, Project, Source, Upload
+    }
+}
