@@ -97,8 +97,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         try (PerformanceTimer timer = new PerformanceTimer()) {
             boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
-            List<ColumnMetadata> columns = getSystemMetadata(entity);
             if (render) {
+                List<ColumnMetadata> columns = getSystemMetadata(entity);
                 renderedList = render(columns, customConfig, entityMatchEnabled);
             } else {
                 renderedList = customConfig;
@@ -672,6 +672,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     // write user changed prop
                     existingConfig.getAttrProps().forEach((propName, propValue) -> {
                         if (!config.getAttrProps().containsKey(propName)) {
+                            // need to merge other properties for attribute set because attribute set already has its
+                            // own group info
                             if (mergeUsageGroupProps || !groupNames.contains(propName)) {
                                 config.getAttrProps().put(propName, propValue);
                             }
