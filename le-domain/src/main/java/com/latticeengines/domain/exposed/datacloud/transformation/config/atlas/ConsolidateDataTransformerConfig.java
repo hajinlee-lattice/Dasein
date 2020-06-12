@@ -144,68 +144,68 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     /**
      * ConsolidateDataTransformerConfig builder
      */
-    public static class ConsolidateDataTxmfrConfigBuilder {
+    public static class ConsolidateDataTxfmrConfigBuilder {
         private ConsolidateDataTransformerConfig config;
 
-        public ConsolidateDataTxmfrConfigBuilder() {
+        public ConsolidateDataTxfmrConfigBuilder() {
             this.config = new ConsolidateDataTransformerConfig();
         }
 
-        public ConsolidateDataTxmfrConfigBuilder(ConsolidateDataTransformerConfig config) {
+        public ConsolidateDataTxfmrConfigBuilder(ConsolidateDataTransformerConfig config) {
             this.config = config;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder srcIdField(String srcIdField) {
+        public ConsolidateDataTxfmrConfigBuilder srcIdField(String srcIdField) {
             config.srcIdField = srcIdField;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder masterIdField(String masterIdField) {
+        public ConsolidateDataTxfmrConfigBuilder masterIdField(String masterIdField) {
             config.masterIdField = masterIdField;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder createTSColumn(boolean createTimestampColumn) {
+        public ConsolidateDataTxfmrConfigBuilder createTSColumn(boolean createTimestampColumn) {
             config.createTimestampColumn = createTimestampColumn;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder columnsFromRight(Set<String> columnsFromRight) {
+        public ConsolidateDataTxfmrConfigBuilder columnsFromRight(Set<String> columnsFromRight) {
             config.columnsFromRight = columnsFromRight;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder compositeKeys(List<String> compositeKeys) {
+        public ConsolidateDataTxfmrConfigBuilder compositeKeys(List<String> compositeKeys) {
             config.compositeKeys = compositeKeys;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder dedupeSource(boolean dedupeSource) {
+        public ConsolidateDataTxfmrConfigBuilder dedupeSource(boolean dedupeSource) {
             config.dedupeSource = dedupeSource;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder addTimestamps(boolean addTimestamps) {
+        public ConsolidateDataTxfmrConfigBuilder addTimestamps(boolean addTimestamps) {
             config.addTimestamps = addTimestamps;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder mergeOnly(boolean mergeOnly) {
+        public ConsolidateDataTxfmrConfigBuilder mergeOnly(boolean mergeOnly) {
             config.mergeOnly = mergeOnly;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder inputLast(boolean inputLast) {
+        public ConsolidateDataTxfmrConfigBuilder inputLast(boolean inputLast) {
             config.inputLast = inputLast;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder cloneSrcFields(String[][] cloneSrcFields) {
+        public ConsolidateDataTxfmrConfigBuilder cloneSrcFields(String[][] cloneSrcFields) {
             config.cloneSrcFields = cloneSrcFields;
             return this;
         }
 
-        public ConsolidateDataTxmfrConfigBuilder renameSrcFields(String[][] renameSrcFields) {
+        public ConsolidateDataTxfmrConfigBuilder renameSrcFields(String[][] renameSrcFields) {
             config.renameSrcFields = renameSrcFields;
             return this;
         }

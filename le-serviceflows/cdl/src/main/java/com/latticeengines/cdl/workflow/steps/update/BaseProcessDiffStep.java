@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +71,7 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
                                                     boolean useTargetTable, TableRoleInCollection role) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(previousStep));
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
 
         if (useTargetTable) {
             setTargetTable(step, tgtTablePrefix, primaryKey);

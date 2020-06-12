@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.CalcStatsTxfmr.TRANSFORMER_NAME;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXFMR;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,7 +27,7 @@ public class CalcStatsTxfmr extends ConfigurableSparkJobTxfmr<CalcStatsConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(CalcStatsTxfmr.class);
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_CALC_STATS_TXMFR;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_CALC_STATS_TXFMR;
 
     @Override
     public String getName() {

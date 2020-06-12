@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     private TransformationStepConfig copy(CustomerSpace customerSpace, String sourceTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
 
         addBaseTables(step, sourceTableName);
 
@@ -235,7 +235,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     private TransformationStepConfig copyLdc(CustomerSpace customerSpace, int inputStep, String joinKey) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
         step.setInputSteps(Collections.singletonList(inputStep));
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);

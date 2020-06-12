@@ -27,7 +27,7 @@ public class MergeProductImports extends BaseSingleEntityMergeImports<ProcessPro
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("MergeProductImports");
-            TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(false, true, true),
+            TransformationStepConfig merge = mergeInputs(getConsolidateDataTxfmrConfig(false, true, true),
                     mergedBatchStoreName, ETLEngineLoad.LIGHT, null, -1);
             List<TransformationStepConfig> steps = Collections.singletonList(merge);
             request.setSteps(steps);

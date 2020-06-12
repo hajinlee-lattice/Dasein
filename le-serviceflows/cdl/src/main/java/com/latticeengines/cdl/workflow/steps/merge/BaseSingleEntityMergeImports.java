@@ -1,9 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_SYSTEM_BATCH_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXFMR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -272,7 +272,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     TransformationStepConfig filterColumnsFromImports(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
 
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
         step.setInputSteps(Collections.singletonList(inputStep));
         CopyConfig config = new CopyConfig();
         config.setDropAttrs(columnsToFilterOut);
@@ -318,7 +318,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, null);
         step.setInputSteps(Collections.singletonList(mergeStep));
-        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
+        step.setTransformer(TRANSFORMER_UPSERT_TXFMR);
         if (setTarget) {
             setTargetTable(step, batchStoreTablePrefix);
         }
@@ -333,7 +333,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         if (mergeStep != -1) {
             step.setInputSteps(Collections.singletonList(mergeStep));
         }
-        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
+        step.setTransformer(TRANSFORMER_UPSERT_TXFMR);
         if (setTarget) {
             setTargetTable(step, systemBatchStoreTablePrefix);
         }
@@ -370,7 +370,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     TransformationStepConfig mergeSystemBatch(int mergeStep, boolean setTarget) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(mergeStep));
-        step.setTransformer(TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR);
+        step.setTransformer(TRANSFORMER_MERGE_SYSTEM_BATCH_TXFMR);
         if (setTarget) {
             setTargetTable(step, batchStoreTablePrefix);
         }
@@ -399,7 +399,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     TransformationStepConfig upsertMaster(boolean entityMatch, String matchedTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, matchedTable);
-        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
+        step.setTransformer(TRANSFORMER_UPSERT_TXFMR);
         setTargetTable(step, batchStoreTablePrefix);
         UpsertConfig config = getUpsertConfig(entityMatch, false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));

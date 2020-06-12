@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
 
     private TransformationStepConfig dropRefreshingIds() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
         addBaseTables(step, masterTableName);
         CopyConfig config = new CopyConfig();
         List<String> colsToDrop = new ArrayList<>();

@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -443,7 +443,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private TransformationStepConfig copyDailyServingStore() {
         TransformationStepConfig step = new TransformationStepConfig();
         addBaseTables(step, dailyTable.getName());
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
 
         CopyConfig conf = new CopyConfig();
         step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));

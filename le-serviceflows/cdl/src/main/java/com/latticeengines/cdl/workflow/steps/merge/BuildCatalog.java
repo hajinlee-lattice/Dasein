@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXFMR;
 import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Replace;
 import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Upsert;
 
@@ -138,7 +138,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         addBaseTables(step, activeTableName);
         // use the merged imports result to upsert
         step.setInputSteps(Collections.singletonList(mergeStepIdx));
-        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
+        step.setTransformer(TRANSFORMER_UPSERT_TXFMR);
         setTargetTable(step, catalogTablePrefix);
 
         UpsertConfig config = new UpsertConfig();

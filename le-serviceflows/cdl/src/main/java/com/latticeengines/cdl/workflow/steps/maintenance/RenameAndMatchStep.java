@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
@@ -176,7 +176,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
     private TransformationStepConfig rename() {
         TransformationStepConfig step = new TransformationStepConfig();
 
-        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setTransformer(TRANSFORMER_COPY_TXFMR);
         String sourceTableName = configuration.getTableName();
         SourceTable sourceTable = new SourceTable(sourceTableName, configuration.getCustomerSpace());
         List<String> baseSources = Collections.singletonList(sourceTableName);

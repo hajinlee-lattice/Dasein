@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.BucketEncodeTxfmr.TRANSFORMER_NAME;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXFMR;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class BucketEncodeTxfmr extends ConfigurableSparkJobTxfmr<BucketEncodeCon
 
     private static final Logger log = LoggerFactory.getLogger(ProfileTxfmr.class);
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_BUCKET_TXMFR;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_BUCKET_TXFMR;
 
     public static final String AM_PROFILE = "AMProfile";
 
