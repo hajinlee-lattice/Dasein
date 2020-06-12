@@ -2,9 +2,10 @@ package com.latticeengines.spark.exposed.job.dcp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
@@ -35,8 +36,9 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         uploadData();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
-        config.setAcceptedAttrsMap(Collections.EMPTY_MAP);
-        config.setRejectedAttrsMap(Collections.EMPTY_MAP);
+        Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
+        config.setAcceptedAttrsMap(map);
+        config.setRejectedAttrsMap(map);
         SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config);
         verifyResult(result);
     }
@@ -47,7 +49,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         DunsStats stats = JsonUtils.deserialize(output, DunsStats.class);
         Assert.assertEquals(stats.getDistinctCnt(), Long.valueOf(4));
         Assert.assertEquals(stats.getUniqueCnt(), Long.valueOf(2));
-        Assert.assertEquals(stats.getDuplicatedCnt(), Long.valueOf(3));
+        Assert.assertEquals(stats.getDuplicatedCnt(), Long.valueOf(5));
     }
 
     @Override

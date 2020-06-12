@@ -27,6 +27,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
     val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
     val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
+      .persist(StorageLevel.DISK_ONLY).checkpoint()
     val uniqueCnt = dunsCntDF.filter(col("cnt") === 1).agg(sum("cnt").cast("long")).first().getLong(0)
     val duplicatedCnt = dunsCntDF.filter(col("cnt") > 1).agg(sum("cnt").cast("long")).first().getLong(0)
     val totalCnt = uniqueCnt + duplicatedCnt
