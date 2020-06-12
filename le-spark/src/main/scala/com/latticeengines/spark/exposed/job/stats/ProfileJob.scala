@@ -19,7 +19,7 @@ import scala.collection.parallel.ParSeq
 
 class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
 
-  private val STR_CHUNK_SIZE: Int = 5
+  private val STR_CHUNK_SIZE: Int = 100
   private val NUM_CHUNK_SIZE: Int = 1000
   private val SAMPLE_SIZE: Long = 1000000 // 1M
   private val ATTR_ATTRNAME = DataCloudConstants.PROFILE_ATTR_ATTRNAME
@@ -34,40 +34,41 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     val randomSeed: Long = if (config.getRandSeed == null) System.currentTimeMillis else config.getRandSeed
     val enforceByAttr: Boolean = if (config.getEnforceProfileByAttr == null) false else config.getEnforceProfileByAttr
     val detectDiscrete: Boolean = config.isAutoDetectDiscrete
-    val totalCnt = inputData.count
+    val totalCnt = if (lattice.inputCnts.head > 100) lattice.inputCnts.head else inputData.count
+
     val numProfile = if (detectDiscrete && enforceByAttr) {
       profileNumAttrsIndividually(spark, totalCnt, numAttrs,
         config.getMaxDiscrete, config.getBucketNum, config.getMinBucketSize, randomSeed)
     } else {
       profileNumAttrs(spark, numAttrs, totalCnt, numAttrs.columns, detectDiscrete,
         config.getMaxDiscrete, config.getBucketNum, config.getMinBucketSize, randomSeed)
-    }
+    }.persist(StorageLevel.DISK_ONLY).checkpoint()
 
     val catAttrs: List[String] =
       if (config.getCatAttrs == null) List() else config.getCatAttrs.asScala.map(_.getAttr).toList
     val strProfile = if (enforceByAttr) {
-      profileStrAttrs(spark, inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)
+      profileStrAttrsIndividually(spark, inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)
     } else {
-      profileStrAttrsByGroup(inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)
-    }
+      profileStrAttrs(spark, inputData, totalCnt, catAttrs, config.getMaxCat, config.getMaxCatLength, randomSeed)
+    }.persist(StorageLevel.DISK_ONLY).checkpoint()
 
     val result = numProfile.union(strProfile)
-            .withColumn(DataCloudConstants.PROFILE_ATTR_SRCATTR, lit(null).cast("string"))
-            .withColumn(DataCloudConstants.PROFILE_ATTR_DECSTRAT, lit(null).cast("string"))
-            .withColumn(DataCloudConstants.PROFILE_ATTR_ENCATTR, lit(null).cast("string"))
-            .withColumn(DataCloudConstants.PROFILE_ATTR_LOWESTBIT, lit(null).cast("integer"))
-            .withColumn(DataCloudConstants.PROFILE_ATTR_NUMBITS, lit(null).cast("integer"))
-            .select(List(
-              DataCloudConstants.PROFILE_ATTR_ATTRNAME,
-              DataCloudConstants.PROFILE_ATTR_SRCATTR,
-              DataCloudConstants.PROFILE_ATTR_DECSTRAT,
-              DataCloudConstants.PROFILE_ATTR_ENCATTR,
-              DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
-              DataCloudConstants.PROFILE_ATTR_NUMBITS,
-              DataCloudConstants.PROFILE_ATTR_BKTALGO
-            ).map(col) : _*)
+      .withColumn(DataCloudConstants.PROFILE_ATTR_SRCATTR, lit(null).cast("string"))
+      .withColumn(DataCloudConstants.PROFILE_ATTR_DECSTRAT, lit(null).cast("string"))
+      .withColumn(DataCloudConstants.PROFILE_ATTR_ENCATTR, lit(null).cast("string"))
+      .withColumn(DataCloudConstants.PROFILE_ATTR_LOWESTBIT, lit(null).cast("integer"))
+      .withColumn(DataCloudConstants.PROFILE_ATTR_NUMBITS, lit(null).cast("integer"))
+      .select(List(
+        DataCloudConstants.PROFILE_ATTR_ATTRNAME,
+        DataCloudConstants.PROFILE_ATTR_SRCATTR,
+        DataCloudConstants.PROFILE_ATTR_DECSTRAT,
+        DataCloudConstants.PROFILE_ATTR_ENCATTR,
+        DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
+        DataCloudConstants.PROFILE_ATTR_NUMBITS,
+        DataCloudConstants.PROFILE_ATTR_BKTALGO
+      ).map(col): _*)
 
-     lattice.output = result :: Nil
+    lattice.output = result :: Nil
   }
 
   private def getNumAttrs(input: DataFrame, config: ProfileJobConfig): DataFrame = {
@@ -90,15 +91,48 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     output
   }
 
-  private def profileStrAttrs(spark: SparkSession, input: DataFrame, catAttrs: List[String],
-                              maxCats: Int, maxLength: Int): DataFrame = {
-    val rdd: RDD[Row] = spark.sparkContext.parallelize(catAttrs.par.map(catAttr => {
+  private def profileStrAttrs(spark: SparkSession, input: DataFrame, totalCnt: Long, catAttrs: List[String],
+                              maxCats: Int, maxLength: Int, randomSeed: Long): DataFrame = {
+    if (totalCnt > SAMPLE_SIZE) {
+      val fraction: Double = if (totalCnt > SAMPLE_SIZE) SAMPLE_SIZE.doubleValue / totalCnt.doubleValue else 1.0
+      val samples = input.sample(fraction, randomSeed)
+      val estimate = estimateStrProfile(samples, catAttrs, maxCats, maxLength)
+      val collected = estimate.collect()
+      val freeTextRows = collected.filter(row => row.getString(1) == null)
+      val potentialCatAttrs = collected
+        .filter(row => row.getString(1) != null && row.getString(1).contains("Categorical"))
+        .map(row => row.getString(0))
+      val exactCatAttrs = estimateStrProfile(input, potentialCatAttrs, maxCats, maxLength)
+      val rdd = spark.sparkContext.parallelize(freeTextRows)
+      val outputSchema = StructType(List(
+        StructField(ATTR_ATTRNAME, StringType),
+        StructField(ATTR_BKTALGO, StringType)
+      ))
+      spark.createDataFrame(rdd, outputSchema) unionByName exactCatAttrs
+    } else {
+      estimateStrProfile(input, catAttrs, maxCats, maxLength)
+    }
+  }
+
+  private def profileStrAttrsIndividually(spark: SparkSession, input: DataFrame, catAttrs: List[String],
+                                          maxCats: Int, maxLength: Int): DataFrame = {
+    val rows = exactStrProfile(input, catAttrs, maxCats, maxLength)
+    val rdd: RDD[Row] = spark.sparkContext.parallelize(rows.toList)
+    val outputSchema = StructType(List(
+      StructField(ATTR_ATTRNAME, StringType),
+      StructField(ATTR_BKTALGO, StringType)
+    ))
+    spark.createDataFrame(rdd, outputSchema)
+  }
+
+  private def exactStrProfile(input: DataFrame, catAttrs: Seq[String], maxCats: Int, maxLength: Int): ParSeq[Row] = {
+    catAttrs.par.map(catAttr => {
       val catCnts = input.filter(col(catAttr).isNotNull && col(catAttr) =!= "")
         .groupBy(catAttr).count().limit(maxCats + 2).collect()
       val nCats = catCnts.length
       val bkgAlgo = if (nCats <= maxCats) {
         val profile = catCnts.map(row => (row.getString(0), row.getLong(1))).sortBy(t => t._1).toList
-        val longestCat = if(profile.isEmpty) 0 else profile.map(_._1.length).max
+        val longestCat = if (profile.isEmpty) 0 else profile.map(_._1.length).max
         if (longestCat > maxLength) {
           null
         } else {
@@ -111,16 +145,10 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
         null
       }
       Row.fromSeq(Seq(catAttr, bkgAlgo))
-    }).toList)
-    val outputSchema = StructType(List(
-      StructField(ATTR_ATTRNAME, StringType),
-      StructField(ATTR_BKTALGO, StringType)
-    ))
-    spark.createDataFrame(rdd, outputSchema).persist(StorageLevel.MEMORY_AND_DISK)
+    })
   }
 
-  private def profileStrAttrsByGroup(input: DataFrame, catAttrs: List[String],
-                                     maxCats: Int, maxLength: Int): DataFrame = {
+  private def estimateStrProfile(input: DataFrame, catAttrs: Seq[String], maxCats: Int, maxLength: Int): DataFrame = {
     if (catAttrs.length <= STR_CHUNK_SIZE) {
       input.select(catAttrs map col: _*)
       val aggregate = new StringProfileAggregation(catAttrs, maxCats, maxLength)
@@ -131,20 +159,20 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
         .drop("agg")
     } else {
       val (head, tail) = catAttrs.splitAt(STR_CHUNK_SIZE)
-      val headProfile: DataFrame = profileStrAttrsByGroup(input, head, maxCats, maxLength)
-      headProfile union profileStrAttrsByGroup(input, tail, maxCats, maxLength)
+      val headProfile: DataFrame = estimateStrProfile(input, head, maxCats, maxLength)
+      headProfile union estimateStrProfile(input, tail, maxCats, maxLength)
     }
   }
 
   private def profileNumAttrsIndividually(spark: SparkSession, totalCnt: Long, input: DataFrame,
-                              maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long): DataFrame = {
+                                          maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long): DataFrame = {
     val rows = exactNumAttrsProfile(input, totalCnt, input.columns, maxDiscrete, numBuckets, minBucketSize, randomSeed)
     val rdd: RDD[Row] = spark.sparkContext.parallelize(rows.toList)
     val outputSchema = StructType(List(
       StructField(ATTR_ATTRNAME, StringType),
       StructField(ATTR_BKTALGO, StringType)
     ))
-    spark.createDataFrame(rdd, outputSchema).persist(StorageLevel.MEMORY_AND_DISK)
+    spark.createDataFrame(rdd, outputSchema)
   }
 
   private def estimateNumAttrsProfile(input: DataFrame, numAttrs: Seq[String], //
