@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -220,6 +221,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (includeUnlaunchedChannels) {
             addUnlaunchedChannels(channels);
         }
+        channels = removeDisconnectedChannels(channels);
         return channels;
     }
 
@@ -248,6 +250,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
         playLaunchService.create(newLaunch);
         return newLaunch;
+    }
+
+    private List<PlayLaunchChannel> removeDisconnectedChannels(List<PlayLaunchChannel> channelList) {
+        channelList.stream().filter(channel -> channel.getLookupIdMap().getIsRegistered()).collect(Collectors.toList());
+        return channelList;
     }
 
     private PlayLaunch createDefaultLaunchFromPlayAndChannel(Play play, PlayLaunchChannel playLaunchChannel,
@@ -325,6 +332,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels) {
         String configId = mapping.getId();
+        if (!mapping.getIsRegistered()) {
+            return;
+        }
         for (PlayLaunchChannel channel : channels) {
             if (channel.getLookupIdMap().getId().equals(configId)) {
                 return;
