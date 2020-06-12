@@ -99,7 +99,9 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
       val estimate = estimateStrProfile(samples, catAttrs, maxCats, maxLength)
       val collected = estimate.collect()
       val freeTextRows = collected.filter(row => row.getString(1) == null)
-      val potentialCatAttrs = collected.filter(row => row.getString(1).contains("Categorical")).map(row => row.getString(0))
+      val potentialCatAttrs = collected
+        .filter(row => row.getString(1) != null && row.getString(1).contains("Categorical"))
+        .map(row => row.getString(0))
       val exactCatAttrs = estimateStrProfile(input, potentialCatAttrs, maxCats, maxLength)
       val rdd = spark.sparkContext.parallelize(freeTextRows)
       val outputSchema = StructType(List(
