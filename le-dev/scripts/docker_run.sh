@@ -4,7 +4,7 @@ IMAGE=$1
 
 if [ "${IMAGE}" = "dynamo" ]; then
 
-    docker run -itd --name lattice_${IMAGE} \
+    docker run -itd --name le_${IMAGE} \
         -v $DOCKER_DATA_ROOT/dynamo:/var/lib/dynamo \
         -p 8000:8000 \
         latticeengines/${IMAGE}
