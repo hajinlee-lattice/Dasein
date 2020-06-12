@@ -66,14 +66,12 @@ public class UsageLimitValidator extends AttrValidator {
 
     private void checkForUsage(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
             String usage, int limit) {
+        userProvidedAttrConfigs = LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
+                ColumnMetadataKey.State, AttrState.Active);
         List<AttrConfig> userSelectedEnabledConfigs = LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
                 usage, Boolean.TRUE);
-        userSelectedEnabledConfigs = LimitValidatorUtils.returnPropertyConfigs(userSelectedEnabledConfigs,
-                ColumnMetadataKey.State, AttrState.Active);
         List<AttrConfig> userSelectedDisabledConfigs = LimitValidatorUtils
                 .returnPropertyConfigs(userProvidedAttrConfigs, usage, Boolean.FALSE);
-        userSelectedDisabledConfigs = LimitValidatorUtils.returnPropertyConfigs(userSelectedDisabledConfigs,
-                ColumnMetadataKey.State, AttrState.Active);
         log.info("user selected enabled configs " + userSelectedEnabledConfigs.size());
         log.info("user selected disabled configs " + userSelectedDisabledConfigs.size());
 
