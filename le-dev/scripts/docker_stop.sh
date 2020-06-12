@@ -2,20 +2,16 @@
 
 IMAGE=$1
 
-if [ "${IMAGE}" = "tez-ui" ] || [ "${IMAGE}" = "mysql" ] || [ "${IMAGE}" = "zookeeper" ]; then
-
-    docker run -itd --name lattice_${IMAGE} \
-        -v $DOCKER_DATA_ROOT/dynamo:/var/lib/dynamo \
-        -p 8000:8000 \
-        latticeengines/${IMAGE}
-
-elif [ "${IMAGE}" = "kafka" ]; then
+if [ "${IMAGE}" = "kafka" ]; then
 
     docker-compose -p kafka -f $WSHOME/le-dev/scripts/kafka-docker-compose.yml down
 
 else
 
-    docker stop le_${IMAGE}
+    if [[ "$(docker ps | grep -q le_${IMAGE})" ]]; then
+      docker stop le_${IMAGE}
+    fi
+    docker rm "$(docker ps -a -q)" && docker ps -a 2>/dev/null
 
 fi
 
