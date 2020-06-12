@@ -11,11 +11,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 
 public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
@@ -40,6 +42,10 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testUsageLimit() throws Exception {
         List<AttrConfig> attrConfigs = new ArrayList<>();
+        AttrConfigProp<AttrState> stateProp = new AttrConfigProp<>();
+        stateProp.setAllowCustomization(Boolean.TRUE);
+        stateProp.setCustomValue(AttrState.Active);
+
         AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
         enrichProp.setAllowCustomization(Boolean.TRUE);
         enrichProp.setCustomValue(Boolean.TRUE);
@@ -48,6 +54,7 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
             config.setAttrName(String.format("Attr%d", i));
             config.setEntity(BusinessEntity.Account);
             config.putProperty(ColumnSelection.Predefined.Enrichment.name(), enrichProp);
+            config.putProperty(ColumnMetadataKey.State, stateProp);
             attrConfigs.add(config);
         }
         usageLimitValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
@@ -57,6 +64,7 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         activeConfig.setAttrName("Attr_enrich1");
         activeConfig.setEntity(BusinessEntity.Account);
         activeConfig.putProperty(ColumnSelection.Predefined.Enrichment.name(), enrichProp);
+        activeConfig.putProperty(ColumnMetadataKey.State, stateProp);
         attrConfigs.add(activeConfig);
         usageLimitValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
@@ -70,6 +78,7 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         inactiveProp.setAllowCustomization(Boolean.TRUE);
         inactiveProp.setCustomValue(Boolean.FALSE);
         inactiveConfig.putProperty(ColumnSelection.Predefined.Enrichment.name(), inactiveProp);
+        inactiveConfig.putProperty(ColumnMetadataKey.State, stateProp);
         attrConfigs.add(inactiveConfig);
         usageLimitValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         // the new config should not have error message
