@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -203,9 +205,9 @@ public class DataReport {
             presenceItem.setField(field);
             presenceItem.setCount(presenceCnt);
             if (totalCnt == 0L) {
-                presenceItem.setRate(0);
+                presenceItem.setRate(getScaledDouble(0.0));
             } else {
-                presenceItem.setRate((int)Math.round((presenceCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+                presenceItem.setRate(getScaledDouble((presenceCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             presenceMap.put(field, presenceItem);
         }
@@ -222,7 +224,7 @@ public class DataReport {
             private Long count;
 
             @JsonProperty("rate")
-            private Integer rate;
+            private Double rate;
 
             public String getField() {
                 return field;
@@ -240,11 +242,11 @@ public class DataReport {
                 this.count = count;
             }
 
-            public Integer getRate() {
+            public Double getRate() {
                 return rate;
             }
 
-            public void setRate(Integer rate) {
+            public void setRate(Double rate) {
                 this.rate = rate;
             }
         }
@@ -290,9 +292,9 @@ public class DataReport {
             geographicalItem.setGeoName(countryName);
             geographicalItem.setCount(recordCnt);
             if (totalCnt == 0L) {
-                geographicalItem.setRate(0);
+                geographicalItem.setRate(getScaledDouble(0.0));
             } else {
-                geographicalItem.setRate((int)Math.round((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+                geographicalItem.setRate(getScaledDouble((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             geographicalDistributionMap.put(countryCode, geographicalItem);
         }
@@ -312,7 +314,7 @@ public class DataReport {
             private Long count;
 
             @JsonProperty("rate")
-            private Integer rate;
+            private Double rate;
 
             public String getGeoCode() {
                 return geoCode;
@@ -338,11 +340,11 @@ public class DataReport {
                 this.count = count;
             }
 
-            public Integer getRate() {
+            public Double getRate() {
                 return rate;
             }
 
-            public void setRate(Integer rate) {
+            public void setRate(Double rate) {
                 this.rate = rate;
             }
         }
@@ -422,9 +424,9 @@ public class DataReport {
             confidenceItem.setConfidenceCode(confidenceCode);
             confidenceItem.setCount(recordCnt);
             if (totalCnt == 0L) {
-                confidenceItem.setRate(0);
+                confidenceItem.setRate(getScaledDouble(0.0));
             } else {
-                confidenceItem.setRate((int)Math.round((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
+                confidenceItem.setRate(getScaledDouble((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             ConfidenceItem.Classification classification = confidenceCode < 5 ? ConfidenceItem.Classification.Low :
                     (confidenceCode < 8 ? ConfidenceItem.Classification.Medium : ConfidenceItem.Classification.High);
@@ -433,39 +435,39 @@ public class DataReport {
         }
 
         @JsonProperty("matched_rate")
-        public int getMatchedRate() {
+        public double getMatchedRate() {
             double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
             double total = matchedCnt + unmatchedCnt;
             if (total > 0) {
-                return (int) Math.round((matchedCnt / total) * 100);
+                return getScaledDouble((matchedCnt / total) * 100);
             } else {
-                return 0;
+                return getScaledDouble(0.0);
             }
         }
 
         @JsonProperty("unmatched_rate")
-        public int getUnmatchedRate() {
+        public double getUnmatchedRate() {
             double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
             double total = matchedCnt + unmatchedCnt;
             if (total > 0) {
-                return (int) Math.round((unmatchedCnt / total) * 100);
+                return getScaledDouble((unmatchedCnt / total) * 100);
             } else {
-                return 0;
+                return getScaledDouble(0.0);
             }
         }
 
         @JsonProperty("no_match_rate")
-        public int getNoMatchRate() {
+        public double getNoMatchRate() {
             double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
             double total = matchedCnt + unmatchedCnt;
             double noMatch = noMatchCnt != null ? noMatchCnt.doubleValue() : 0.0;
             if (total > 0) {
-                return (int) Math.round((noMatch / total) * 100);
+                return getScaledDouble((noMatch / total) * 100);
             } else {
-                return 0;
+                return getScaledDouble(0.0);
             }
         }
 
@@ -481,7 +483,7 @@ public class DataReport {
             private Long count;
 
             @JsonProperty("rate")
-            private Integer rate;
+            private Double rate;
 
             @JsonProperty("classification")
             private Classification classification;
@@ -502,11 +504,11 @@ public class DataReport {
                 this.count = count;
             }
 
-            public Integer getRate() {
+            public Double getRate() {
                 return rate;
             }
 
-            public void setRate(Integer rate) {
+            public void setRate(Double rate) {
                 this.rate = rate;
             }
 
@@ -552,20 +554,25 @@ public class DataReport {
         }
 
         @JsonProperty("unique_rate")
-        public int getUniqueRate() {
+        public double getUniqueRate() {
             double unique = uniqueRecords != null ? uniqueRecords.doubleValue() : 0.0;
             double duplicate = duplicateRecords != null ? duplicateRecords.doubleValue() : 0.0;
             double total = unique + duplicate;
             if (total > 0) {
-                return (int)Math.round((unique / total) * 100);
+                return getScaledDouble((unique / total) * 100);
             } else {
-                return 100;
+                return 100.0;
             }
         }
 
         @JsonProperty("duplicate_rate")
-        public int getDuplicateRate() {
-            return 100 - getUniqueRate();
+        public double getDuplicateRate() {
+            return getScaledDouble(100 - getUniqueRate());
         }
+    }
+
+    public static double getScaledDouble(double d) {
+        BigDecimal bd = new BigDecimal(d).setScale(3, RoundingMode.HALF_EVEN);
+        return bd.doubleValue();
     }
 }
