@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -572,7 +572,7 @@ public class DataReport {
     }
 
     public static double getScaledDouble(double d) {
-        BigDecimal bd = new BigDecimal(d).setScale(3, RoundingMode.HALF_EVEN);
+        BigDecimal bd = new BigDecimal(d).round(new MathContext(3));
         return bd.doubleValue();
     }
 }
