@@ -49,20 +49,20 @@ public class CalcStatsTxfmr extends ConfigurableSparkJobTxfmr<CalcStatsConfig> {
         Source profileSource = step.getBaseSources()[1];
         String profileVersion = step.getBaseVersions().get(1);
 
-        if (!isProfileSource(profileSource, profileVersion)) {
+        if (isProfileSource(profileSource, profileVersion)) {
+            log.info("Resolved the second base source as profile.");
+        } else {
             profileSource = step.getBaseSources()[0];
             profileVersion = step.getBaseVersions().get(0);
-            if (!isProfileSource(profileSource, profileVersion)) {
-                throw new RuntimeException("Neither base source has the profile schema");
-            } else {
+            if (isProfileSource(profileSource, profileVersion)) {
                 log.info("Resolved the first base source as profile.");
                 List<DataUnit> inputs = new ArrayList<>();
                 inputs.add(jobConfig.getInput().get(1));
                 inputs.add(jobConfig.getInput().get(0));
                 jobConfig.setInput(inputs);
+            } else {
+                throw new RuntimeException("Neither base source has the profile schema");
             }
-        } else {
-            log.info("Resolved the second base source as profile.");
         }
     }
 

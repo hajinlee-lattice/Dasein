@@ -97,7 +97,6 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         }
 
         setPartitionMultiplier(apsPartitionMultiplier);
-
         setSparkMaxResultSize(apsSparkMaxResultSize);
     }
 

@@ -271,8 +271,10 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
         val discrete = discreteNumAttrsProfile(input, nonIntervalAttrs, maxDiscrete).collect()
         val discreteRows = discrete.filter(row => row.getString(1).contains("Discrete"))
         val nonDiscreteAttrs = discrete.filter(row => row.getString(1).contains("Interval")).map(row => row.getString(0))
-        val rows = exactNumAttrsProfile(input, totalCnt, nonDiscreteAttrs, maxDiscrete, numBuckets, minBucketSize, randomSeed)
-        val rdd = spark.sparkContext.parallelize(intervalRows ++ discreteRows ++ rows)
+        val samples2 = input.sample(fraction, randomSeed * 2) // samples again
+        val nonDiscreteRows = estimateNumAttrsProfile(samples2, nonDiscreteAttrs, detectDiscrete = false, //
+          maxDiscrete, numBuckets, minBucketSize, randomSeed).collect()
+        val rdd = spark.sparkContext.parallelize(intervalRows ++ discreteRows ++ nonDiscreteRows)
         val outputSchema = StructType(List(
           StructField(ATTR_ATTRNAME, StringType),
           StructField(ATTR_BKTALGO, StringType)

@@ -36,19 +36,19 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
     val filteredProfile = filterProfile(profileData)
     val depivotedMap = depivot(inputData)
 
-    val withBktId = depivotedMap.values.map(df => {
+    val withBktId = depivotedMap.values.par.map(df => {
       val withBktId = toBktId(df, filteredProfile)
-      withBktId.groupBy(withBktId.columns map col: _*).count().withColumnRenamed("count", Count)
-    }).reduce(_ union _).persist(StorageLevel.DISK_ONLY)
+      withBktId.withColumn(Count, lit(1L)).persist(StorageLevel.DISK_ONLY).checkpoint()
+    }).reduce(_ union _)
 
     val bktCntAgg = new BucketCountAggregation
     val grpCols = withBktId.columns.diff(Seq(BktId, Count))
-    val withBktCnt = withBktId.join(filteredProfile, Seq(AttrName), joinType = "left")
-      .groupBy(grpCols map col: _*)
+    val withBktCnt = withBktId.groupBy(grpCols map col: _*)
       .agg(bktCntAgg(col(BktId), col(Count)).as("agg"))
       .withColumn(NotNullCount, col(s"agg.$BktSum"))
       .withColumn(Bkts, col(s"agg.$Bkts"))
       .drop("agg")
+      .persist(StorageLevel.MEMORY_AND_DISK)
     val allColsRdd: RDD[Row] = spark.sparkContext.parallelize(inputData.columns.map(c => Row.fromSeq(Seq(c))))
     val allColsDf = spark.createDataFrame(allColsRdd, StructType(List(StructField(AttrName, StringType))))
     val rhs = filteredProfile.select(AttrName, BktAlgo)
@@ -64,7 +64,7 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
     schemaMap.map(t => {
       val (dType, fields) = t
       val attrs: List[String] = fields.map(_.name).toList
-      val depivoted = depivotCols(df, attrs, dType).persist(StorageLevel.DISK_ONLY).checkpoint()
+      val depivoted = depivotCols(df, attrs, dType)
       (dType, depivoted)
     })
   }
