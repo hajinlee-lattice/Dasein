@@ -2,12 +2,15 @@ package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -18,16 +21,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -83,6 +89,31 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     private int scalingMultiplier = 1;
     private int partitionMultiplier = 1;
     private String sparkMaxResultSize = null;
+    private List<String> workSpaces = new ArrayList<>();
+
+    @PreDestroy
+    public void tearDown() {
+        clearAllWorkspaces();
+    }
+
+    protected CustomerSpace parseCustomerSpace(S stepConfiguration) {
+        if (stepConfiguration instanceof SparkJobStepConfiguration) {
+            SparkJobStepConfiguration sparkJobStepConfiguration = (SparkJobStepConfiguration) stepConfiguration;
+            return CustomerSpace.parse(sparkJobStepConfiguration.getCustomer());
+        } else {
+            Method method = ReflectionUtils.findMethod(stepConfiguration.getClass(), "getCustomerSpace");
+            if (method != null) {
+                if (CustomerSpace.class.equals(method.getReturnType())) {
+                    return (CustomerSpace) ReflectionUtils.invokeMethod(method, stepConfiguration);
+                } else if (String.class.equals(method.getReturnType())) {
+                    String customerSpaceStr = (String) ReflectionUtils.invokeMethod(method, stepConfiguration);
+                    return CustomerSpace.parse(customerSpaceStr);
+                }
+            }
+            throw new UnsupportedOperationException("Do not know how to parse customer space from a " //
+                    + stepConfiguration.getClass().getCanonicalName());
+        }
+    }
 
     protected LivySession createLivySession(String jobName) {
         Map<String, String> extraConf = null;
@@ -117,8 +148,57 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         return sparkJobService.runJob(session, jobClz, jobConfig);
     }
 
+    protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
+    SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
+        jobConfig.setWorkspace(getRandomWorkspace());
+        String configStr = JsonUtils.serialize(jobConfig);
+        if (configStr.length() > 1000) {
+            configStr = "long string";
+        }
+        log.info("Run spark job " + jobClz.getSimpleName() + " with configuration: " + configStr);
+        computeScalingMultiplier(jobConfig.getInput(), jobConfig.getNumTargets());
+        try {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            return retry.execute(context -> {
+                if (context.getRetryCount() > 0) {
+                    log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
+                            + jobClz.getSimpleName());
+                    log.warn("Previous failure:", context.getLastThrowable());
+                    killLivySession();
+                }
+                String tenantId = customerSpace.getTenantId();
+                String jobName = tenantId + "~" + jobClz.getSimpleName() + "~" + getClass().getSimpleName();
+                LivySession session = createLivySession(jobName);
+                return sparkJobService.runJob(session, jobClz, jobConfig);
+            });
+        } finally {
+            killLivySession();
+        }
+    }
+
     protected String getRandomWorkspace() {
-        return PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
+        String workSpace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
+        workSpaces.add(workSpace);
+        return workSpace;
+    }
+
+    protected void clearAllWorkspacesAsync() {
+        new Thread(this::clearAllWorkspaces).start();
+    }
+
+    protected void clearAllWorkspaces() {
+        List<String> toBeRemoved = new ArrayList<>();
+        for (String workSpace: workSpaces) {
+            try {
+                if (HdfsUtils.isDirectory(yarnConfiguration, workSpace)) {
+                    HdfsUtils.rmdir(yarnConfiguration, workSpace);
+                }
+                toBeRemoved.add(workSpace);
+            } catch (Exception e) {
+                log.warn("Failed to remove workspace {}", workSpace, e);
+            }
+        }
+        workSpaces.retainAll(toBeRemoved);
     }
 
     protected Table dirToTable(String tableName, HdfsDataUnit jobTarget) {

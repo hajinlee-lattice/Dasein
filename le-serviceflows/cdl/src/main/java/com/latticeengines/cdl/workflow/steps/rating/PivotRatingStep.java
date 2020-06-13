@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportCon
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
+import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -108,6 +110,7 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         putStringValueInContext(RATING_ITERATION_RESULT_TABLE_NAME, resultTableName);
 
         updateAttrRepo(resultTable);
+        updateStatusDateForRating();
 
         cleanupTemporaryTables();
     }
@@ -210,7 +213,6 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         deleteTableNameInContext(AI_RAW_RATING_TABLE_NAME);
         deleteTableNameInContext(FILTER_EVENT_TARGET_TABLE_NAME);
         deleteTableNameInContext(SCORING_RESULT_TABLE_NAME);
-
         deleteTableInContext(PREMATCH_UPSTREAM_EVENT_TABLE);
         deleteTableInContext(EVENT_TABLE);
     }
@@ -242,6 +244,13 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
     private boolean shouldPublishDynamo() {
         boolean enableTp = batonService.hasModule(customerSpace, LatticeModule.TalkingPoint);
         return !skipPublishDynamo && enableTp;
+    }
+
+    private void updateStatusDateForRating() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        DataCollectionStatusUtils.updateTimeForCategoryChange(status, getLongValueFromContext(PA_TIMESTAMP),
+                Category.RATING);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
+package com.latticeengines.serviceflows.workflow.stats;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ACCOUNT_ID;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ID;
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -29,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -67,7 +65,6 @@ public class AttrClassifier {
     // decoded attr -> decode strategy str
     private final Map<String, String> decodeStrs = new HashMap<>();
 
-    private final ProfileParameters params;
     private final ProfileJobConfig jobConfig;
     private final String stage;
     private final long evaluationTime;
@@ -77,14 +74,11 @@ public class AttrClassifier {
     private final String encAttrPrefix;
     private final int encodeBits;
     private final int maxAttrs;
-    private final boolean useSpark;
     private String idAttr;
 
     public AttrClassifier(ProfileJobConfig jobConfig, Map<String, ProfileArgument> amAttrConfig,
                           Map<String, ProfileParameters.Attribute> declaredAttrConfig,
                           int encodeBits, int maxAttrs) {
-        this.useSpark = true;
-        this.params = null;
         this.jobConfig = jobConfig;
         this.detectCategorical = jobConfig.isAutoDetectCategorical();
 
@@ -101,30 +95,6 @@ public class AttrClassifier {
         this.declaredAttrConfig = declaredAttrConfig;
         this.encAttrPrefix = jobConfig.getEncAttrPrefix();
         this.idAttr = jobConfig.getIdAttr();
-        this.encodeBits = encodeBits;
-        this.maxAttrs = maxAttrs;
-    }
-
-    public AttrClassifier(ProfileParameters params, ProfileConfig config, Map<String, ProfileArgument> amAttrConfig,
-            int encodeBits, int maxAttrs) {
-        this.useSpark = false;
-        this.detectCategorical = true;
-        this.params = params;
-        this.jobConfig = null;
-
-        this.stage = config.getStage();
-        if (config.getEvaluationDateAsTimestamp() == -1) {
-            // Make sure the evaluation date is set to something.
-            // If it isn't, then set it to the beginning of today at UTC.
-            long evalDate = ProfileUtils.getBeginningOfTodayAsEvaluationDate();
-            config.setEvaluationDateAsTimestamp(evalDate);
-            log.warn("Evaluation Date not set before SourceProfiler, setting to " + evalDate);
-        }
-        this.evaluationTime = config.getEvaluationDateAsTimestamp();
-        this.amAttrConfig = amAttrConfig;
-        this.encAttrPrefix = config.getEncAttrPrefix();
-        this.declaredAttrConfig = new HashMap<>();
-        this.idAttr = params.getIdAttr();
         this.encodeBits = encodeBits;
         this.maxAttrs = maxAttrs;
     }
@@ -431,42 +401,18 @@ public class AttrClassifier {
                                              List<ProfileParameters.Attribute> numericAttrs,
                                              List<ProfileParameters.Attribute> amAttrsToEnc,
                                              List<ProfileParameters.Attribute> attrsToRetain) {
-        switch (stage) {
-            case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
-                    log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
-                            attr.getAttr()));
-                    amAttrsToEnc.add(attr);
-                } else if (attr.getAlgo() instanceof IntervalBucket) {
-                    log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
-                            attr.getAttr()));
-                    numericAttrs.add(attr);
-                } else {
-                    log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
-                            attr.getAttr()));
-                    attrsToRetain.add(attr);
-                }
-                break;
-            case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
-                    log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
-                            attr.getAttr()));
-                    if (attr.getEncodeBitUnit() == null) {
-                        log.info("Adding null bit unit to attrs to enc " + JsonUtils.serialize(attr));
-                    }
-                    amAttrsToEnc.add(attr);
-                } else if (attr.getAlgo() instanceof IntervalBucket) {
-                    log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
-                            attr.getAttr()));
-                    numericAttrs.add(attr);
-                } else {
-                    log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
-                            attr.getAttr()));
-                    attrsToRetain.add(attr);
-                }
-                break;
-            default:
-                throw new RuntimeException("Unrecognized stage " + stage);
+        if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
+            log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                    attr.getAttr()));
+            amAttrsToEnc.add(attr);
+        } else if (attr.getAlgo() instanceof IntervalBucket) {
+            log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                    attr.getAttr()));
+            numericAttrs.add(attr);
+        } else {
+            log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                    attr.getAttr()));
+            attrsToRetain.add(attr);
         }
     }
 
@@ -593,32 +539,28 @@ public class AttrClassifier {
         return encAttrPrefix + encodedSeq;
     }
 
-    public List<ProfileParameters.Attribute> getAttrsToRetain() {
-        return attrsToRetain;
-    }
-
     private List<ProfileParameters.Attribute> getNumericAttrs() {
-        return useSpark ? jobConfig.getNumericAttrs() : params.getNumericAttrs();
+        return jobConfig.getNumericAttrs();
     }
 
     private List<ProfileParameters.Attribute> getCatAttrs() {
-        return useSpark ? jobConfig.getCatAttrs() : params.getCatAttrs();
+        return jobConfig.getCatAttrs();
     }
 
     private List<ProfileParameters.Attribute> getAmAttrsToEnc() {
-        return useSpark ? jobConfig.getAmAttrsToEnc() : params.getAmAttrsToEnc();
+        return jobConfig.getAmAttrsToEnc();
     }
 
     private List<ProfileParameters.Attribute> getExAttrsToEnc() {
-        return useSpark ? jobConfig.getExAttrsToEnc() : params.getExAttrsToEnc();
+        return jobConfig.getExAttrsToEnc();
     }
 
     private Map<String, BitCodeBook> getCodeBookMap() {
-        return useSpark ? jobConfig.getCodeBookMap() : params.getCodeBookMap();
+        return jobConfig.getCodeBookMap();
     }
 
     private Map<String, String> getCodeBookLookup() {
-        return useSpark ? jobConfig.getCodeBookLookup() : params.getCodeBookLookup();
+        return jobConfig.getCodeBookLookup();
     }
 
 }

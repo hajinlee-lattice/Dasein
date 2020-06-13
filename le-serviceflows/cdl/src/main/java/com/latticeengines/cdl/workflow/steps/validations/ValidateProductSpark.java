@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -77,6 +78,7 @@ import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.ValidateProduct;
 
+@Lazy
 @Component("ValidateProductSpark")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ValidateProductSpark extends RunSparkJob<ProductFileConfiguration, ValidateProductConfig> {

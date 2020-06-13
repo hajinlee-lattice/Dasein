@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
+@Lazy
 @Component("inputFileValidator")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class InputFileValidator extends BaseReportStep<InputFileValidatorConfiguration> {

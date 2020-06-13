@@ -259,7 +259,6 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024));
         jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
-        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         engineConf.setScalingMultiplier(scalingMultiplier);
@@ -280,7 +279,6 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * scaleUp));
         jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scaleOut));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scaleOut));
-        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scaleOut));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         engineConf.setScalingMultiplier(scalingMultiplier);
@@ -296,7 +294,6 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * extraHeavyMultiplier));
         jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
-        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         engineConf.setScalingMultiplier(scalingMultiplier);

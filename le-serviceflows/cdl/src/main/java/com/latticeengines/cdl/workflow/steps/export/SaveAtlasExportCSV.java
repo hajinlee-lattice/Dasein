@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -41,30 +40,23 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
-import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
-import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
+import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.spark.exposed.job.common.ConvertToCSVJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("saveAtlasExportCSV")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguration, ConvertToCSVConfig> {
+public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SaveAtlasExportCSV.class);
     private static final String ISO_8601 = ConvertToCSVConfig.ISO_8601; // default date format
 
     private Map<ExportEntity, HdfsDataUnit> inputUnits;
     private Map<ExportEntity, HdfsDataUnit> outputUnits = new HashMap<>();
-
-    @Inject
-    private S3Service s3Service;
-
-    @Value("${aws.customer.s3.bucket}")
-    private String s3Bucket;
 
     @Value("${cdl.atlas.export.dropfolder.tag}")
     private String dropFolderTag;
@@ -87,24 +79,8 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     }
 
     @Override
-    protected Class<ConvertToCSVJob> getJobClz() {
-        return ConvertToCSVJob.class;
-    }
-
-    @Override
-    protected ConvertToCSVConfig configureJob(EntityExportStepConfiguration stepConfiguration) {
+    public void execute() {
         inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
-
-        if (MapUtils.isEmpty(inputUnits)) {
-            throw new IllegalStateException("No extracted entities to be converted to csv.");
-        }
-        ConvertToCSVConfig config = new ConvertToCSVConfig();
-        config.setInput(new ArrayList<>(inputUnits.values()));
-        return config;
-    }
-
-    @Override
-    protected SparkJobResult runSparkJob(LivySession session) {
         inputUnits.forEach((exportEntity, hdfsDataUnit) -> {
             ConvertToCSVConfig config = new ConvertToCSVConfig();
             config.setInput(Collections.singletonList(hdfsDataUnit));
@@ -117,10 +93,29 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 config.setExportTimeAttr(InterfaceName.LatticeExportTime.name());
             }
             log.info("Submit spark job to convert " + exportEntity + " csv.");
-            SparkJobResult result = sparkJobService.runJob(session, getJobClz(), config);
+            SparkJobResult result = runSparkJob(ConvertToCSVJob.class, config);
             outputUnits.put(exportEntity, result.getTargets().get(0));
         });
-        return null;
+
+        AtlasExport exportRecord = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
+        if (exportRecord == null) {
+            log.error(String.format("Cannot find atlas export record for id: %s, skip save data",
+                    configuration.getAtlasExportId()));
+            return;
+        }
+        outputUnits.forEach(((exportEntity, hdfsDataUnit) -> {
+            String outputDir = hdfsDataUnit.getPath();
+            String csvGzPath;
+            try {
+                List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
+                        (HdfsUtils.HdfsFilenameFilter) filename -> //
+                                filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
+                csvGzPath = files.get(0);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + outputDir);
+            }
+            processResultCSV(exportEntity, csvGzPath, exportRecord);
+        }));
     }
 
     private void renameDisplayNameMap(ExportEntity exportEntity, ColumnMetadata cm, String displayName, Map<String, String> displayNameMap) {
@@ -133,7 +128,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
-    private class DisplayData {
+    private static class DisplayData {
 
         private ColumnMetadata columnMetadata;
 
@@ -300,29 +295,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             return cm1.getCategory().getOrder().compareTo(cm2.getCategory().getOrder());
         });
         return schema;
-    }
-
-    @Override
-    protected void postJobExecution(SparkJobResult result) {
-        AtlasExport exportRecord = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
-        if (exportRecord == null) {
-            log.error(String.format("Cannot find atlas export record for id: %s, skip save data",
-                    configuration.getAtlasExportId()));
-            return;
-        }
-        outputUnits.forEach(((exportEntity, hdfsDataUnit) -> {
-            String outputDir = hdfsDataUnit.getPath();
-            String csvGzPath;
-            try {
-                List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
-                        (HdfsUtils.HdfsFilenameFilter) filename -> //
-                                filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
-                csvGzPath = files.get(0);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read " + outputDir);
-            }
-            processResultCSV(exportEntity, csvGzPath, exportRecord);
-        }));
     }
 
     private void processResultCSV(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {

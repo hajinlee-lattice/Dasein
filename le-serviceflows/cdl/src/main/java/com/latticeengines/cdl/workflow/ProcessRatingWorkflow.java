@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
+import com.latticeengines.cdl.workflow.steps.rating.CalcRatingStats;
 import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
-import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
 import com.latticeengines.cdl.workflow.steps.rating.SplitRatingEngines;
 import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
@@ -47,7 +47,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
     private GenerateRatingWorkflow generateRatingWorkflow;
 
     @Inject
-    private ProfileRatingWrapper profileRatingWrapper;
+    private CalcRatingStats calcRatingStats;
 
     @Inject
     private CombineStatistics combineStatistics;
@@ -76,7 +76,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
             builder = builder.next(startIteration) //
                     .next(postIterationInitialization) //
                     .next(generateRatingWorkflow) //
-                    .next(profileRatingWrapper) //
+                    .next(calcRatingStats) //
                     .next(combineStatistics) //
                     .next(exportToRedshift) //
                     .next(exportToDynamo);

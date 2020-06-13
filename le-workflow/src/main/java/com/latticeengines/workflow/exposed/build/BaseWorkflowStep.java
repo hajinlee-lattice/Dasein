@@ -695,6 +695,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
     }
 
+    protected boolean hasTableInCtxKey(String customer, String tableNameCtxKey) {
+        Table table = getTableSummaryFromKey(customer, tableNameCtxKey);
+        return table != null;
+    }
+
     protected Table getTableSummaryFromKey(String customer, String tableNameCtxKey) {
         String tableName = getStringValueFromContext(tableNameCtxKey);
         return getTableSummary(customer, tableName);

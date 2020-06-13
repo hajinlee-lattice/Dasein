@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
@@ -67,7 +66,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
@@ -87,7 +85,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     public static final String BEAN_NAME = "profilePurchaseHistory";
 
-    private int curateStep, pivotStep, profileStep, bucketStep;
+    private int curateStep, pivotStep, profileStep;
     private Map<String, List<Product>> productMap;
     private String accountTableName;
     private String productTableName;
@@ -139,18 +137,15 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         curateStep = 0;
         pivotStep = 1;
         profileStep = 2;
-        bucketStep = 3;
 
         TransformationStepConfig curate = curate();
         TransformationStepConfig pivot = pivot();
         TransformationStepConfig profile = profile();
-        TransformationStepConfig bucket = bucket();
         TransformationStepConfig calc = calcStats();
         TransformationStepConfig sortProfile = sortProfile();
         steps.add(curate);
         steps.add(pivot);
         steps.add(profile);
-        steps.add(bucket);
         steps.add(calc);
         steps.add(sortProfile);
 
@@ -428,15 +423,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setEncAttrPrefix(CEAttr);
         String confStr = appendEngineConf(conf, heavyMemoryEngineConfig());
         step.setConfiguration(confStr);
-        return step;
-    }
-
-    private TransformationStepConfig bucket() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(pivotStep, profileStep));
-        step.setTransformer(TRANSFORMER_BUCKET_TXFMR);
-        BucketEncodeConfig config = new BucketEncodeConfig();
-        step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
         return step;
     }
 
