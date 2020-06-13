@@ -8,11 +8,11 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.serviceflows.cdl.SegmentExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -24,6 +24,9 @@ public class SegmentExportListener extends LEJobListener {
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Inject
+    private SegmentProxy segmentProxy;
 
     @Inject
     private PlsInternalProxy plsInternalProxy;
@@ -45,7 +48,7 @@ public class SegmentExportListener extends LEJobListener {
         if (job != null) {
             String exportId = job.getInputContextValue(SegmentExportWorkflowConfiguration.SEGMENT_EXPORT_ID);
             try {
-                MetadataSegmentExport metadataSegmentExport = plsInternalProxy.getMetadataSegmentExport(CustomerSpace.parse(tenantId), exportId);
+                MetadataSegmentExport metadataSegmentExport = segmentProxy.getMetadataSegmentExport(tenantId, exportId);
                 log.info(String.format("userId: %s; segmentExportId: %s", metadataSegmentExport.getCreatedBy(),
                         metadataSegmentExport.getExportId()));
 

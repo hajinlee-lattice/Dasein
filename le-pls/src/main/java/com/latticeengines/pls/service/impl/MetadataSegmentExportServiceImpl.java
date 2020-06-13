@@ -35,12 +35,12 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
-import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component("metadataSegmentExportService")
@@ -58,11 +58,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private CDLProxy cdlProxy;
 
     @Inject
-    private MetadataSegmentExportEntityMgr metadataSegmentExportEntityMgr;
-
-    @Inject
     private AtlasExportProxy atlasExportProxy;
 
+    @Inject
+    private SegmentProxy segmentProxy;
 
     @Inject
     private ImportFromS3Service importFromS3Service;
@@ -78,17 +77,18 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Override
     public List<MetadataSegmentExport> getSegmentExports() {
+        String customerSpace = getCustomerSpace().toString();
         List<AtlasExport> atlasExports = atlasExportProxy.findAll(getCustomerSpace().toString());
         List<MetadataSegmentExport> metadataSegmentExports =
                 atlasExports.stream().map(AtlasExport -> MetadataSegmentExportConverter.convertToMetadataSegmentExport(AtlasExport)).collect(Collectors.toList());
-        List<MetadataSegmentExport> result = metadataSegmentExportEntityMgr.findAll();
+        List<MetadataSegmentExport> result = segmentProxy.getMetadataSegmentExports(customerSpace);
         result.addAll(metadataSegmentExports);
         return result;
     }
 
     @Override
     public MetadataSegmentExport getSegmentExportByExportId(String exportId) {
-        MetadataSegmentExport metadataSegmentExport = metadataSegmentExportEntityMgr.findByExportId(exportId);
+        MetadataSegmentExport metadataSegmentExport = segmentProxy.getMetadataSegmentExport(getCustomerSpace().toString(), exportId);
         if (metadataSegmentExport != null) {
             return metadataSegmentExport;
         }
@@ -140,12 +140,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         }
     }
 
-    @Override
-    public MetadataSegmentExport updateSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
-        metadataSegmentExportEntityMgr.createOrUpdate(metadataSegmentExportJob);
-        return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
-    }
-
     private void setCreatedBy(MetadataSegmentExport metadataSegmentExportJob) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal != null) {
@@ -161,7 +155,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Override
     public void deleteSegmentExportByExportId(String exportId) {
-        metadataSegmentExportEntityMgr.deleteByExportId(exportId);
+        segmentProxy.deleteMetadataSegmentExport(MultiTenantContext.getTenant().getId(), exportId);
     }
 
     private void throwDownloadExportException(MetadataSegmentExport.Status status, String exportId) {
@@ -179,10 +173,11 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Override
     public void downloadSegmentExportResult(String exportId, HttpServletRequest request, HttpServletResponse response) {
-        MetadataSegmentExport metadataSegmentExport = metadataSegmentExportEntityMgr.findByExportId(exportId);
+        String customerSpace = getCustomerSpace().toString();
+        MetadataSegmentExport metadataSegmentExport = segmentProxy.getMetadataSegmentExport(customerSpace, exportId);
         if (metadataSegmentExport == null) {
             // handle new download
-            downloadAtlasExport(exportId, request, response);
+            downloadAtlasExport(customerSpace, exportId, request, response);
         } else {
             // handle old download
             downloadSegmentExport(metadataSegmentExport, exportId, request, response);
@@ -194,8 +189,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
        return result.append(filePath ).append(fileName).toString();
     }
 
-    private void downloadAtlasExport(String exportId, HttpServletRequest request, HttpServletResponse response) {
-        String customerSpace = getCustomerSpace().toString();
+    private void downloadAtlasExport(String customerSpace, String exportId, HttpServletRequest request,
+                                     HttpServletResponse response) {
         AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpace, exportId);
         if (atlasExport == null || atlasExport.getCleanupBy().getTime() < System.currentTimeMillis()) {
             throw new LedpException(LedpCode.LEDP_18160, new Object[]{exportId});
@@ -289,12 +284,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                 .setFileName(fileName).setCustomer(customer).setImportFromS3Service(importFromS3Service)
                 .setBatonService(batonService);
         return new CustomerSpaceHdfsFileDownloader(builder);
-    }
-
-    @Override
-    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport) {
-        metadataSegmentExportEntityMgr.create(metadataSegmentExport);
-        return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExport.getExportId());
     }
 
 }

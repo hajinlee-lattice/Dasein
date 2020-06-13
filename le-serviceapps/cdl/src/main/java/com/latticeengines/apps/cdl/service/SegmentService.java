@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -42,4 +43,12 @@ public interface SegmentService {
     List<MetadataSegment> findDependingSegments(List<String> attributes);
 
     Map<String, List<String>> getDependencies(String segmentName) throws Exception;
+
+    MetadataSegmentExport getMetadataSegmentExport(String exportId);
+
+    MetadataSegmentExport updateMetadataSegmentExport(String exportId, MetadataSegmentExport.Status state);
+
+    void deleteMetadataSegmentExport(String exportId);
+
+    List<MetadataSegmentExport> getMetadataSegmentExports();
 }

@@ -59,6 +59,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 import avro.shaded.com.google.common.collect.Sets;
@@ -424,6 +425,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected PlsInternalProxy plsInternalProxy;
 
     @Autowired
+    protected WorkflowReportService workflowReportService;
+
+    @Autowired
     protected SourceFileProxy sourceFileProxy;
 
     @Inject
@@ -525,7 +529,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 log.warn("Last registering report for tenant {} failed. Retrying for {} times.", customerSpace,
                         context.getRetryCount());
             }
-            plsInternalProxy.registerReport(report, customerSpace.toString());
+            workflowReportService.createOrUpdateReport(customerSpace.toString(), report);
             return null;
         });
     }
@@ -542,7 +546,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         if (name == null) {
             return null;
         }
-        return plsInternalProxy.findReportByName(name, space.toString());
+        return workflowReportService.findReportByName(space.toString(), name);
     }
 
     protected Report createReport(String json, ReportPurpose purpose, String name) {

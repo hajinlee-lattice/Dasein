@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -156,5 +157,35 @@ public class SegmentResource {
     public List<AttributeLookup> findDependingAttributes(@PathVariable String customerSpace,
             @RequestBody List<MetadataSegment> metadataSegments) {
         return segmentService.findDependingAttributes(metadataSegments);
+    }
+
+    @GetMapping("/export/{exportId}")
+    @ApiOperation(value = "Get Segment export job info.")
+    public MetadataSegmentExport getMetadataSegmentExport(@PathVariable("customerSpace") String customerSpace, //
+                                                          @PathVariable("exportId") String exportId) {
+        log.debug(String.format("Getting MetadataSegmentExport from %s exportId", exportId));
+        return segmentService.getMetadataSegmentExport(exportId);
+    }
+
+    @PutMapping("/export/{exportId}")
+    @ApiOperation(value = "Update segment export job info.")
+    public MetadataSegmentExport updateMetadataSegmentExport(@PathVariable("customerSpace") String customerSpace, //
+                                                             @PathVariable("exportId") String exportId, //
+                                                             @RequestParam("state") MetadataSegmentExport.Status state) {
+        log.debug(String.format("Updating MetadataSegmentExport from %s exportId", exportId));
+        return segmentService.updateMetadataSegmentExport(exportId, state);
+    }
+
+    @GetMapping("/export")
+    @ApiOperation(value = "Get all Segment export jobs.")
+    public List<MetadataSegmentExport> getMetadataSegmentExports(@PathVariable("customerSpace") String customerSpace) {
+        return segmentService.getMetadataSegmentExports();
+    }
+
+    @DeleteMapping("/export/{exportId}")
+    @ApiOperation(value = "Delete Segment export job info.")
+    public void deleteMetadataSegmentExport(@PathVariable("customerSpace") String customerSpace, //
+                                            @PathVariable("exportId") String exportId) {
+        segmentService.deleteMetadataSegmentExport(exportId);
     }
 }

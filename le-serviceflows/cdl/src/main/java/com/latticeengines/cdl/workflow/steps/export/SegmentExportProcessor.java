@@ -63,9 +63,9 @@ import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -98,7 +98,7 @@ public abstract class SegmentExportProcessor {
     private BatonService batonService;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private SegmentProxy segmentProxy;
 
     @Value("${playmaker.workflow.segment.pagesize:200}")
     protected long pageSize;
@@ -133,7 +133,7 @@ public abstract class SegmentExportProcessor {
         MetadataSegmentExport metadataSegmentExport = config.getMetadataSegmentExport();
         if (metadataSegmentExport == null) {
             String exportId = config.getMetadataSegmentExportId();
-            metadataSegmentExport = plsInternalProxy.getMetadataSegmentExport(customerSpace, exportId);
+            metadataSegmentExport = segmentProxy.getMetadataSegmentExport(customerSpace.toString(), exportId);
         }
 
         AtlasExportType exportType = metadataSegmentExport.getType();

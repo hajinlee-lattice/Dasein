@@ -33,11 +33,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.db.entitymgr.impl.ReportEntityMgrImpl.find*(..))")
-    public void findReport(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
-    }
-
     @Before("execution(* com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr.update*(..))")
     public void updateMarketoCredentialByName(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -70,16 +65,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr.update*(..))")
     public void updateMarketoMatchFieldValue(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr.find*(..))")
-    public void findMetadataSegmentExport(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr.delete*(..))")
-    public void deleteMetadataSegmentExport(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 

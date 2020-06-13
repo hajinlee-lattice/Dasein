@@ -34,7 +34,8 @@ import com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager;
 import com.latticeengines.pls.repository.reader.ScoringRequestConfigReaderRepository;
 
 @Component("scoringRequestConfigEntityMgr")
-public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrRepositoryImpl<ScoringRequestConfig, Long>  implements ScoringRequestConfigEntityManager {
+public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrRepositoryImpl<ScoringRequestConfig, Long>
+        implements ScoringRequestConfigEntityManager {
     private static final Logger LOG = Logger.getLogger(ScoringRequestConfigEntityManagerImpl.class);
 
     private static final String SCORING_REQUEST_CONFIG_ID_PREFIX = "src";
@@ -71,18 +72,18 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
         MarketoCredential marketoCredential = marketoCredentialEntityMgr
                 .findMarketoCredentialById(scoringRequestConfig.getMarketoCredential().getPid().toString());
         if (marketoCredential == null) {
-            throw new LedpException(LedpCode.LEDP_18197, new String[] {scoringRequestConfig.getMarketoCredential().getPid().toString()});
+            throw new LedpException(LedpCode.LEDP_18197, new String[]{scoringRequestConfig.getMarketoCredential().getPid().toString()});
         }
         scoringRequestConfig.setMarketoCredential(marketoCredential);
         if (scoringRequestReadRepository.findByMarketoCredentialPidAndModelUuid(marketoCredential.getPid(), scoringRequestConfig.getModelUuid()) != null) {
-            throw new LedpException(LedpCode.LEDP_18192, new String[] { marketoCredential.getName() });
+            throw new LedpException(LedpCode.LEDP_18192, new String[]{marketoCredential.getName()});
         }
         preprocessCreate(scoringRequestConfig);
         scoringRequestConfig.getMarketoScoringMatchFields()
                 .forEach(matchField -> {
-                        matchField.setScoringRequestConfig(scoringRequestConfig);
-                        matchField.setTenant(scoringRequestConfig.getTenant());
-                    });
+                    matchField.setScoringRequestConfig(scoringRequestConfig);
+                    matchField.setTenant(scoringRequestConfig.getTenant());
+                });
         super.create(scoringRequestConfig);
     }
 
@@ -121,15 +122,13 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
         ScoringRequestConfig existingConfig = this.findByField("configId", scoringRequestConfig.getConfigId());
         if (existingConfig == null) {
             LOG.warn(String.format("Could not retrieve ScoringRequestConfig: %s, for Tenant: %s", scoringRequestConfig, MultiTenantContext.getTenant()));
-            throw new LedpException(LedpCode.LEDP_18194, new String[] {scoringRequestConfig.getConfigId()});
+            throw new LedpException(LedpCode.LEDP_18194, new String[]{scoringRequestConfig.getConfigId()});
         }
-
         //Handle FieldMappings
         Map<String, MarketoScoringMatchField> updatedFieldMappings = scoringRequestConfig.getMarketoScoringMatchFields()
                 .stream()
                 .collect(Collectors.toMap(MarketoScoringMatchField::getModelFieldName, matchField -> matchField));
         List<MarketoScoringMatchField> removedMappings = new ArrayList<>();
-
         // Update the existing mappings and remove the fields if they are not available in new collection
         Iterator<MarketoScoringMatchField> matchFieldIter = existingConfig.getMarketoScoringMatchFields().iterator();
         while (matchFieldIter.hasNext()) {
@@ -145,7 +144,6 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
         }
         // Add any new mappings that are newly selected
         updatedFieldMappings.values().forEach(existingConfig::addMarketoScoringMatchField);
-
         marketoScoringMatchFieldEntityMgr.deleteFields(removedMappings);
         super.update(existingConfig);
     }

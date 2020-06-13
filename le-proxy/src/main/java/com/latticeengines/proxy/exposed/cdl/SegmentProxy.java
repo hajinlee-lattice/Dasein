@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -126,5 +127,32 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
                     });
         }
         return result;
+    }
+
+    public void updateMetadataSegmentExport(String customerSpace, String exportId, MetadataSegmentExport.Status state) {
+        String url = constructUrl("/{customerSpace}/segments/export/{exportId}", //
+                shortenCustomerSpace(customerSpace), exportId);
+        url += "?" + "state=" + state;
+        put("updateMetadataSegmentExport", url, null);
+    }
+
+    public MetadataSegmentExport getMetadataSegmentExport(String customerSpace, String exportId) {
+        String url = constructUrl("/{customerSpace}/segments/export/{exportId}",
+                shortenCustomerSpace(customerSpace), exportId);
+        return get("getMetadataSegmentExport", url, MetadataSegmentExport.class);
+    }
+
+
+    public void deleteMetadataSegmentExport(String customerSpace, String exportId) {
+        String url = constructUrl("/{customerSpace}/segments/export/{exportId}",
+                shortenCustomerSpace(customerSpace), exportId);
+        delete("deleteMetadataSegmentExport", url);
+    }
+
+    public List<MetadataSegmentExport> getMetadataSegmentExports(String customerSpace) {
+        String url = constructUrl("/{customerSpace}/segments/export",
+                shortenCustomerSpace(customerSpace));
+        List<?> response = get("getMetadataSegmentExports", url, List.class);
+        return JsonUtils.convertList(response, MetadataSegmentExport.class);
     }
 }

@@ -3,22 +3,17 @@ package com.latticeengines.proxy.exposed.pls;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.NonNull;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.Report;
 
 public interface PlsInternalProxy {
 
@@ -30,17 +25,9 @@ public interface PlsInternalProxy {
 
     void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo);
 
-    List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, List<Long> actionPids,
-                                              ActionType actionType);
-
     void sendMetadataSegmentExportEmail(String result, String tenantId, MetadataSegmentExport export);
 
-    MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, String exportId);
-
     void sendAtlasExportEmail(String result, String tenantId, AtlasExport export);
-
-    MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
-                                                      String exportId, MetadataSegmentExport.Status state);
 
     void sendOrphanRecordsExportEmail(String result, String tenantId, OrphanRecordsExportRequest export);
 
@@ -52,10 +39,6 @@ public interface PlsInternalProxy {
     void sendPlsScoreEmail(String result, String tenantId, AdditionalEmailInfo info);
 
     void sendPlsCreateModelEmail(String result, String tenantId, AdditionalEmailInfo info);
-
-    void registerReport(Report report, String tenantId);
-
-    Report findReportByName(String name, String tenantId);
 
     void saveLeadEnrichmentAttributes(CustomerSpace customerSpace,
                                       LeadEnrichmentAttributesOperationMap attributes);

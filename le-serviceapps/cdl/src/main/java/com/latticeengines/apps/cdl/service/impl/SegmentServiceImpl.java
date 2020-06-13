@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.MetadataSegmentExportEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.CDLDependencyChecker;
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -67,6 +69,9 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Inject
     private CDLDependencyChecker dependencyChecker;
+
+    @Inject
+    private MetadataSegmentExportEntityMgr metadataSegmentExportEntityMgr;
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
@@ -379,5 +384,32 @@ public class SegmentServiceImpl implements SegmentService {
                     .collect(Collectors.joining(","));
             throw new LedpException(LedpCode.LEDP_40057, new String[] { message });
         }
+    }
+
+    @Override
+    public MetadataSegmentExport getMetadataSegmentExport(String exportId) {
+        return metadataSegmentExportEntityMgr.findByExportId(exportId);
+    }
+
+    @Override
+    public MetadataSegmentExport updateMetadataSegmentExport(String exportId, MetadataSegmentExport.Status state) {
+        MetadataSegmentExport metadataSegmentExport = metadataSegmentExportEntityMgr.findByExportId(exportId);
+        if (metadataSegmentExport != null) {
+            metadataSegmentExport.setStatus(state);
+            metadataSegmentExportEntityMgr.createOrUpdate(metadataSegmentExport);
+            return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExport.getExportId());
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void deleteMetadataSegmentExport(String exportId) {
+        metadataSegmentExportEntityMgr.deleteByExportId(exportId);
+    }
+
+    @Override
+    public List<MetadataSegmentExport> getMetadataSegmentExports() {
+        return metadataSegmentExportEntityMgr.findAll();
     }
 }
