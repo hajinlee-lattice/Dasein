@@ -108,6 +108,8 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         cloneInactiveServingStoresAndBatchStore();
+        log.info("Evict attr repo cache for inactive version " + inactive);
+        dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
         updateStreamCounts();
         registerReport();
         registerCollectionTables();
