@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,56 +231,69 @@ public final class AccountExtensionUtil {
      */
     public static DataPage processMatchOutputResults(String customerSpace, List<ColumnMetadata> dateAttributesMetadata,
             MatchOutput matchOutput) {
+
         DataPage dataPage = createEmptyDataPage();
         Map<String, ColumnMetadata> dateAttributesMap = dateAttributesMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getAttrName, cm -> cm, (cm1, cm2) -> {
                     log.info("duplicate key found! " + JsonUtils.serialize(cm1) + "/n" + JsonUtils.serialize(cm2));
                     return cm1;
                 }));
+
+        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         List<String> fields = matchOutput.getOutputFields();
+        List<ColumnMetadata> dateAttributesToReformat = new ArrayList<>();
+        List<Pair<ColumnMetadata, Object>> dateAttributesFailedToReformat = new ArrayList<>();
         IntStream.range(0, matchOutput.getResult().size()) //
                 .forEach(i -> {
                     Map<String, Object> data = null;
                     if (matchOutput != null //
                             && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
-                            && matchOutput.getResult().get(i) != null) {
+                            && matchOutput.getResult().get(i) != null //
+                            && matchOutput.getResult().get(i).isMatched() == Boolean.TRUE) {
+                        final Map<String, Object> tempDataRef = new HashMap<>();
+                        List<Object> values = matchOutput.getResult().get(i).getOutput();
+                        IntStream.range(0, fields.size()) //
+                                .forEach(j -> {
+                                    Object value = values.get(j);
+                                    if (value != null && dateAttributesMap.containsKey(fields.get(j))) {
+                                        ColumnMetadata cm = dateAttributesMap.get(fields.get(j));
+                                        dateAttributesToReformat.add(cm); // for logging
 
-                        if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
-                            log.info("No match on MatchApi, reverting to ObjectApi on Tenant: " + customerSpace);
-                        } else {
-                            log.info("Found full match from lattice data cloud as well as from my data table.");
-
-                            final Map<String, Object> tempDataRef = new HashMap<>();
-                            List<Object> values = matchOutput.getResult().get(i).getOutput();
-                            IntStream.range(0, fields.size()) //
-                                    .forEach(j -> {
-                                        Object value = values.get(j);
-                                        if (dateAttributesMap.containsKey(fields.get(j))) {
-                                            ColumnMetadata cm = dateAttributesMap.get(fields.get(j));
-                                            log.info("Date attribute to reformat: " + JsonUtils.serialize(cm));
-                                            final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
-                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
-
-                                            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                                            try {
-                                                value = simpleDateFormat.format(value);
-                                            } catch (Exception e) {
-                                                log.info(String.format("Could not reformat date value %s for column %s",
-                                                        String.valueOf(value), fields.get(j)));
-                                            }
+                                        try {
+                                            value = simpleDateFormat.format(value);
+                                        } catch (Exception e) {
+                                            dateAttributesFailedToReformat.add(Pair.of(cm, value)); // for logging
                                         }
-                                        tempDataRef.put(fields.get(j), value);
-                                    });
-                            data = tempDataRef;
-                        }
-
+                                    }
+                                    tempDataRef.put(fields.get(j), value);
+                                });
+                        data = tempDataRef;
                     }
 
                     if (MapUtils.isNotEmpty(data)) {
                         dataPage.getData().add(data);
                     }
                 });
+        try {
+            log.info("Date attributes failed to reformat (CustomerSpace:" + customerSpace + "): "
+                    + dateAttributesToReformat.stream()
+                            .map(cm -> String.format("AttrName:%s FundamentalType:%s, LogicalType:%s", cm.getAttrName(),
+                                    cm.getFundamentalType().getName(), cm.getLogicalDataType()))
+                            .collect(Collectors.joining(",")));
+
+            log.info(
+                    "Date attributes failed to reformat (CustomerSpace:" + customerSpace + "): "
+                            + dateAttributesFailedToReformat
+                                    .stream().map(pair -> String.format("AttrName:%s Value:%s",
+                                            pair.getLeft().getAttrName(), pair.getRight()))
+                                    .collect(Collectors.joining(",")));
+
+        } catch (Exception e) {
+            log.warn("Failed to log");
+        }
         return dataPage;
     }
 
