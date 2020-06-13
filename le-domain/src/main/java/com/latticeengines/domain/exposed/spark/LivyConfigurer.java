@@ -81,7 +81,7 @@ public class LivyConfigurer {
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
 
-        int partitions = minExe * executorCores * 2 * partitionMultiplier;
+        int partitions = 2 * maxExe * executorCores * partitionMultiplier;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
         return conf;
