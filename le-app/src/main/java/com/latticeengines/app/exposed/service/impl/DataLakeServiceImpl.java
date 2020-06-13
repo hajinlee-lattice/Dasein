@@ -483,12 +483,24 @@ public class DataLakeServiceImpl implements DataLakeService {
             matchInput = AccountExtensionUtil.constructMatchInput(customerSpace,
                     Collections.singletonList(internalAccountId), predefined, dataCloudVersion);
         }
-        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);
-        List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream().filter(ColumnMetadata::isDateAttribute)
-                .collect(Collectors.toList());
-        return AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata, matchOutput);
+        log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
+        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+        DataPage datapage;
+
+        if (wasMatchFound(matchOutput)) {
+            // avoiding expensive metadata retrieval if match failed
+            List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace,
+                    BusinessEntity.Account);
+            List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream()
+                    .filter(ColumnMetadata::isDateAttribute).collect(Collectors.toList());
+            datapage = AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata,
+                    matchOutput);
+        } else {
+            log.info("No match on MatchApi, for Id: " + internalAccountId + " on CustomerSpace: " + customerSpace);
+            datapage = convertToDataPage(matchOutput);
+        }
+        return datapage;
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
@@ -512,29 +524,43 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
-        return convertToDataPage(customerSpace, matchOutput);
+        DataPage datapage;
+        if (wasMatchFound(matchOutput)) {
+            // avoiding expensive metadata retrieval if match failed
+            List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace,
+                    BusinessEntity.Account);
+            List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream()
+                    .filter(ColumnMetadata::isDateAttribute).collect(Collectors.toList());
+            datapage = AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata,
+                    matchOutput);
+        } else {
+            log.info("No match on MatchApi, for Id: " + internalAccountId + " on CustomerSpace: " + customerSpace);
+            datapage = convertToDataPage(matchOutput);
+        }
+        return datapage;
     }
 
-    private DataPage convertToDataPage(String customerSpace, MatchOutput matchOutput) {
+    private boolean wasMatchFound(MatchOutput matchOutput) {
+        return matchOutput != null //
+                && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
+                && matchOutput.getResult().get(0) != null //
+                && matchOutput.getResult().get(0).isMatched() == Boolean.TRUE;
+    }
+
+    private DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         Map<String, Object> data = null;
         if (matchOutput != null //
                 && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
-                && matchOutput.getResult().get(0) != null) {
-
-            if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
-                log.info("No match on MatchApi, reverting to ObjectApi on Tenant: " + customerSpace);
-            } else {
-                log.info("Found full match from lattice data cloud as well as from my data table.");
-                final Map<String, Object> tempDataRef = new HashMap<>();
-                List<String> fields = matchOutput.getOutputFields();
-                List<Object> values = matchOutput.getResult().get(0).getOutput();
-                IntStream.range(0, fields.size()) //
-                        .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
-                data = tempDataRef;
-            }
+                && matchOutput.getResult().get(0) != null
+                && matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
+            final Map<String, Object> tempDataRef = new HashMap<>();
+            List<String> fields = matchOutput.getOutputFields();
+            List<Object> values = matchOutput.getResult().get(0).getOutput();
+            IntStream.range(0, fields.size()) //
+                    .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
+            data = tempDataRef;
         }
-
         if (MapUtils.isNotEmpty(data)) {
             dataPage.getData().add(data);
         }
