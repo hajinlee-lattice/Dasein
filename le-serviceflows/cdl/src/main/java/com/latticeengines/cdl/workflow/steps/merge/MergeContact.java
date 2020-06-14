@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(MergeContact.BEAN_NAME)
@@ -44,6 +47,9 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     static final String BEAN_NAME = "mergeContact";
 
     private String matchedContactTable;
+
+    @Inject
+    private PeriodProxy periodProxy;
 
     @Override
     protected void initializeConfiguration() {
@@ -162,8 +168,14 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         addAttrsToMap(attrsToInherit, inputMasterTableName);
         addAttrsToMap(attrsToInherit, matchedContactTable);
         updateAttrs(table, attrsToInherit);
-        if (configuration.isEntityMatchEnabled()) {
-            table.getAttributes().forEach(attr -> {
+        String evaluationDateStr = findEvaluationDate();
+        table.getAttributes().forEach(attr -> {
+            if (LogicalDataType.Date.equals(attr.getLogicalDataType())) {
+                log.info("Setting last data refresh for contact date attribute: " + attr.getName() + " to "
+                        + evaluationDateStr);
+                attr.setLastDataRefresh("Last Data Refresh: " + evaluationDateStr);
+            }
+            if (configuration.isEntityMatchEnabled()) {
                 // update metadata for AccountId attribute since it is only created
                 // after lead to account match and does not have the correct metadata
                 if (InterfaceName.AccountId.name().equals(attr.getName())) {
@@ -182,9 +194,24 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 if (InterfaceName.ContactId.name().equals(attr.getName())) {
                     attr.setDisplayName("Atlas Contact ID");
                 }
-            });
-        }
+            }
+            attr.setCategory(Category.CONTACT_ATTRIBUTES);
+            attr.setSubcategory(null);
+            attr.removeAllowedDisplayNames();
+        });
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+    }
+
+    protected String findEvaluationDate() {
+        String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isBlank(evaluationDate)) {
+            log.error("Failed to find evaluation date from workflow context");
+            evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+            if (StringUtils.isBlank(evaluationDate)) {
+                log.error("Failed to get evaluation date from Period Proxy.");
+            }
+        }
+        return evaluationDate;
     }
 
     @Override

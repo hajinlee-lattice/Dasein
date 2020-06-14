@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -11,7 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 
 @Component("restApiClient")
-@Scope("prototype")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RestApiClient extends BaseRestApiProxy {
 
     // Used to call external API because there is no standardized error handler
@@ -27,7 +28,7 @@ public class RestApiClient extends BaseRestApiProxy {
     /**
      * This is the client used to talk to lattice's internal servers. This
      * client will ignore ssl name check
-     * 
+     *
      * @param appCtx
      * @param hostport
      * @return RestApiClient
@@ -39,7 +40,7 @@ public class RestApiClient extends BaseRestApiProxy {
     /**
      * This is the client used to talk to servers outside of lattice. This
      * client WON'T ignore ssl name check
-     * 
+     *
      * @param appCtx
      * @param hostport
      * @return RestApiClient

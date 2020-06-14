@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_GENERATE_CURATED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
@@ -27,10 +28,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -46,6 +50,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -56,6 +61,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
+@Lazy
 @Component(CuratedAccountAttributesStep.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<CuratedAccountAttributesStepConfiguration> {
@@ -77,6 +83,12 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private BatonService batonService;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -108,11 +120,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         }
 
         PipelineTransformationRequest request = getTransformRequest();
-        if (request == null) {
-            return null;
-        } else {
-            return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
-        }
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     @Override
@@ -123,6 +131,10 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         CuratedAttributeUtils.enrichTableSchema(servingStoreTable, Category.CURATED_ACCOUNT_ATTRIBUTES,
                 MASTER_STORE_ENTITY, templateSystemMap, systemMap);
         metadataProxy.updateTable(customerSpace.toString(), servingStoreTableName, servingStoreTable);
+
+        TableRoleInCollection servingRole = CalculatedCuratedAccountAttribute;
+        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, servingRole, inactive);
+        exportToDynamo(servingStoreTableName, servingRole.getPartitionKey(), servingRole.getRangeKey());
         exportToS3AndAddToContext(servingStoreTableName, CURATED_ACCOUNT_SERVING_TABLE_NAME);
     }
 
@@ -423,5 +435,24 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         } else {
             return false;
         }
+    }
+
+    protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
+        if (shouldPublishDynamo()) {
+            String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+            DynamoExportConfig config = new DynamoExportConfig();
+            config.setTableName(tableName);
+            config.setInputPath(inputPath);
+            config.setPartitionKey(partitionKey);
+            if (StringUtils.isNotBlank(sortKey)) {
+                config.setSortKey(sortKey);
+            }
+            addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        }
+    }
+
+    protected boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
+        return !skipPublishDynamo && enableTp;
     }
 }

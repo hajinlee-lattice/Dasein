@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -43,9 +42,6 @@ public class ProcessAnalyzeListener extends LEJobListener {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private PlayProxy playProxy;
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;

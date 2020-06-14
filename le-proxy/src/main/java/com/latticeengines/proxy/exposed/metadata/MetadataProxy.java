@@ -56,7 +56,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     private static final String TEMP_TABLE_POLICY = RetentionPolicyUtil.retentionPolicyToStr(//
             RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY));
 
-    private boolean enableTempTables;
+    private static boolean ENABLE_TEMP_TABLES = false;
 
     @PostConstruct
     public void init() {
@@ -131,7 +131,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
                 attributes = table.getAttributes();
                 table.setAttributes(Collections.emptyList());
             }
-            if (enableTempTables) {
+            if (ENABLE_TEMP_TABLES) {
+                log.info("({}) Set default retention policy to {}", System.identityHashCode(this), TEMP_TABLE_POLICY);
                 table.setRetentionPolicy(TEMP_TABLE_POLICY);
             }
             post("createTable", url, table, null);
@@ -191,7 +192,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
                 attributes = table.getAttributes();
                 table.setAttributes(Collections.emptyList());
             }
-            if (enableTempTables) {
+            if (ENABLE_TEMP_TABLES) {
+                log.info("({}) Set default retention policy to {}", System.identityHashCode(this), TEMP_TABLE_POLICY);
                 table.setRetentionPolicy(TEMP_TABLE_POLICY);
             }
             put("updateTable", url, table);
@@ -450,7 +452,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     }
 
     public void setEnableTempTables(boolean enableTempTables) {
-        this.enableTempTables = enableTempTables;
-        log.info("Switch enableTempTables to {}", this.enableTempTables);
+        ENABLE_TEMP_TABLES = enableTempTables;
+        log.info("({}) Switch enableTempTables to {}", System.identityHashCode(this), ENABLE_TEMP_TABLES);
     }
 }

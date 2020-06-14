@@ -9,17 +9,24 @@ class RemoveOrphanJob extends AbstractSparkJob[RemoveOrphanConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[RemoveOrphanConfig]): Unit = {
     val config: RemoveOrphanConfig = lattice.config
     val parentSrcIdx: Int = if (config.getParentSrcIdx == null) 1 else config.getParentSrcIdx.toInt
-    val childSrcIdx: Int = (parentSrcIdx + 1) % 2
-    val parentId = config.getParentId
 
-    val parent: DataFrame = lattice.input(parentSrcIdx)
-    val child: DataFrame = lattice.input(childSrcIdx)
+    if (parentSrcIdx < 0) { // no parent, no orphan
+      // finish
+      lattice.output = lattice.input.head :: Nil
+    } else {
+      val childSrcIdx: Int = (parentSrcIdx + 1) % 2
+      val parentId = config.getParentId
 
-    // calculation
-    val result = parent.select(parentId).join(child, Seq(parentId), "inner")
+      val parent: DataFrame = lattice.input(parentSrcIdx)
+      val child: DataFrame = lattice.input(childSrcIdx)
 
-    // finish
-    lattice.output = result::Nil
+      // calculation
+      val result = parent.select(parentId).join(child, Seq(parentId), "inner")
+
+      // finish
+      lattice.output = result :: Nil
+    }
+
   }
 
 }

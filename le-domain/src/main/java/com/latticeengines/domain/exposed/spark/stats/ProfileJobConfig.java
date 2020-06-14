@@ -22,11 +22,12 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("ConsiderAMAttrs")
     private Boolean considerAMAttrs;
 
+    // must provide when considerAMAttrs = true
+    @JsonProperty("DataCloudVersion")
+    private String dataCloudVersion;
+
     @JsonProperty("EvaluationDateAsTimestamp")
     private long evaluationDateAsTimestamp = -1; // Timestamp the PA job is run for use for Date Attribute profiling.
-
-    @JsonProperty("DataCloudVersion")
-    private String dataCloudVersion; // by default, segmentation: use current
 
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
