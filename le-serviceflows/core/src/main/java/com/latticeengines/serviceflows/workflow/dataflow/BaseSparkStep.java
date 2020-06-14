@@ -28,6 +28,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -180,6 +181,22 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         String workSpace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
         workSpaces.add(workSpace);
         return workSpace;
+    }
+
+    protected void clearTempData(DataUnit tempData) {
+        new Thread(() -> {
+            if (tempData instanceof HdfsDataUnit) {
+                HdfsDataUnit hdfsDataUnit = (HdfsDataUnit) tempData;
+                String avroDir = PathUtils.toParquetOrAvroDir(hdfsDataUnit.getPath());
+                try {
+                    if (HdfsUtils.isDirectory(yarnConfiguration, avroDir)) {
+                        HdfsUtils.rmdir(yarnConfiguration, avroDir);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to clear temp data in hdfs: {}", avroDir, e);
+                }
+            }
+        }).start();
     }
 
     protected void clearAllWorkspacesAsync() {

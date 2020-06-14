@@ -141,6 +141,10 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
             jobConfig.setInput(Arrays.asList(inputData, profileData));
 
             SparkJobResult statsResult = runSparkJob(CalcStatsJob.class, jobConfig);
+            if (getProfileRole() == null) {
+                // not saving profile data
+                clearTempData(profileData);
+            }
             String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
             statsTableName = NamingUtils.timestamp(getServingEntity().name() + "Stats");
             Table statsTable = toTable(statsTableName, PROFILE_ATTR_ATTRNAME, statsResult.getTargets().get(0));
