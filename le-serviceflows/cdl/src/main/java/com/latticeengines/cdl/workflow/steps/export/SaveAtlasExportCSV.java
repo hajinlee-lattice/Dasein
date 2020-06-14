@@ -80,6 +80,7 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
 
     @Override
     public void execute() {
+        customerSpace = parseCustomerSpace(configuration);
         inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
         inputUnits.forEach((exportEntity, hdfsDataUnit) -> {
             ConvertToCSVConfig config = new ConvertToCSVConfig();
