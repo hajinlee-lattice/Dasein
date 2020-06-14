@@ -116,6 +116,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         jobConfig.setInput(Collections.singletonList(inputData));
         SparkJobResult profileResult = runSparkJob(ProfileJob.class, jobConfig);
         HdfsDataUnit profileData =  profileResult.getTargets().get(0);
+        statsProfiler.appendResult(profileData);
 
         if (getProfileRole() != null) {
             // save profile table
