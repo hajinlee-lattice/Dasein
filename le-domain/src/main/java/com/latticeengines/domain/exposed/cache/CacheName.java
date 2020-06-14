@@ -18,6 +18,7 @@ public enum CacheName {
 
     DataCloudCMCache(Constants.DataCloudCMCacheName), //
     DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
+    DataCloudProfileCache(Constants.DataCloudProfileCacheName), //
     DataCloudVersionCache(Constants.DataCloudVersionCacheName), //
 
     EMRClusterCache(Constants.EMRClusterCacheName), //
@@ -38,7 +39,7 @@ public enum CacheName {
     }
 
     public static CacheName[] getDataCloudLocalCacheGroup() {
-        return new CacheName[] { DataCloudVersionCache, DataCloudCMCache, DataCloudStatsCache };
+        return new CacheName[] { DataCloudVersionCache, DataCloudCMCache, DataCloudStatsCache, DataCloudProfileCache };
     }
 
     public static CacheName[] getCdlCacheGroup() {
@@ -80,6 +81,7 @@ public enum CacheName {
         public static final String TimeTranslatorCacheName = "TimeTranslatorCache";
         public static final String DataCloudCMCacheName = "DataCloudCMCache";
         public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
+        public static final String DataCloudProfileCacheName = "DataCloudProfileCache";
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
         public static final String ServingMetadataCacheName = "ServingMetadataCache";
         public static final String ServingMetadataLocalCacheName = "ServingMetadataLocalCache";

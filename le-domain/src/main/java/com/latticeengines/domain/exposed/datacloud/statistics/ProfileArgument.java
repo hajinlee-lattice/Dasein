@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.stats;
+package com.latticeengines.domain.exposed.datacloud.statistics;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

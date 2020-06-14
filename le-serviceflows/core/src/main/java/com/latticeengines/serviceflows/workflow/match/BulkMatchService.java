@@ -1,5 +1,7 @@
 package com.latticeengines.serviceflows.workflow.match;
 
+import static com.latticeengines.domain.exposed.metadata.datastore.DataUnit.DataFormat.AVRO;
+
 import java.io.IOException;
 import java.util.Random;
 
@@ -28,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
@@ -142,6 +145,16 @@ public class BulkMatchService {
         } else {
             log.warn("There is no records for new entities, skip registering table " + targetTableName);
         }
+    }
+
+    public HdfsDataUnit getResultDataUnit(MatchCommand matchCommand, String alias) {
+        String outputDir = PathUtils.toParquetOrAvroDir(matchCommand.getResultLocation());
+        HdfsDataUnit dataUnit = new HdfsDataUnit();
+        dataUnit.setPath(outputDir);
+        dataUnit.setCount(Long.valueOf(matchCommand.getRowsMatched()));
+        dataUnit.setDataFormat(AVRO);
+        dataUnit.setName(alias);
+        return dataUnit;
     }
 
 }

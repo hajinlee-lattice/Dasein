@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
+import com.latticeengines.domain.exposed.datacloud.statistics.ProfileArgument;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.BucketedAttribute;

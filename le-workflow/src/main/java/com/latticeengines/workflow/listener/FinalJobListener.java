@@ -63,8 +63,13 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     public void beforeJobExecution(JobExecution jobExecution) {
         Long executionId = jobExecution.getId();
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(executionId);
-        String workflowType = workflowJob.getType();
-        if (workflowTypesEnabledTempTable().contains(workflowType)) {
+        if (workflowJob != null) {
+            String workflowType = workflowJob.getType();
+            if (workflowTypesEnabledTempTable().contains(workflowType)) {
+                metadataProxy.setEnableTempTables(true);
+            }
+        } else {
+            log.info("Cannot determine a workflow job by execution id {}", executionId);
             metadataProxy.setEnableTempTables(true);
         }
     }

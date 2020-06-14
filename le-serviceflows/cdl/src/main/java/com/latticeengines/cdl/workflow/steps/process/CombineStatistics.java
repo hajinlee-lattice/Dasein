@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -49,19 +51,30 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
 
     private Map<BusinessEntity, Table> statsTableMap;
     private String customerSpaceStr;
+    private DataCollection.Version activeVersion;
+    private DataCollection.Version inactiveVersion;
 
     @Override
     public void execute() {
         log.info("Inside CombineStatistics execute()");
         customerSpaceStr = configuration.getCustomerSpace().toString();
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpaceStr);
-        DataCollection.Version inactiveVersion = activeVersion.complement();
+        activeVersion = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        inactiveVersion = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
+        String tenantId = configuration.getCustomerSpace().getTenantId();
+        String lockName = acquireStatsLock(tenantId, inactiveVersion);
+        try {
+            upsertStats();
+        } finally {
+            LockManager.releaseWriteLock(lockName);
+        }
+    }
+
+    private void upsertStats() {
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         if (resetEntities == null) {
             resetEntities = Collections.emptySet();
         }
-
         Map<String, StatsCube> cubeMap = new HashMap<>();
         StatisticsContainer latestStatsContainer = dataCollectionProxy.getStats(customerSpaceStr, inactiveVersion);
         DataCollection.Version latestStatsVersion = null;
@@ -222,6 +235,18 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
 
     private boolean hasRatingAttrSuffix(String attrName) {
         return RatingEngine.SCORE_ATTR_SUFFIX.values().stream().map(s -> "_" + s).anyMatch(attrName::endsWith);
+    }
+
+    public static String acquireStatsLock(String tenantId, DataCollection.Version version) {
+        String lockName = "AtlastStatsLock_" + tenantId + "_" + version;
+        try {
+            LockManager.registerCrossDivisionLock(lockName);
+            LockManager.acquireWriteLock(lockName, 1, TimeUnit.HOURS);
+            log.info("Won the distributed lock {}", lockName);
+        } catch (Exception e) {
+            log.warn("Error while acquiring zk lock {}", lockName, e);
+        }
+        return lockName;
     }
 
 }

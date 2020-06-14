@@ -97,6 +97,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration"),
 
         @Type(value = MockActivityStoreWorkflowConfiguration.class, name = "MockActivityStoreWorkflowConfiguration"),
+        @Type(value = AtlasProfileReportWorkflowConfiguration.class, name = "AtlasProfileReportWorkflowConfiguration"),
 
         @Type(value = ConvertBatchStoreToDataTableWorkflowConfiguration.class, name = "ConvertBatchStoreToDataTableWorkflowConfiguration"),
         @Type(value = ConvertAccountWorkflowConfiguration.class, name = "ConvertAccountWorkflowConfiguration"),
@@ -107,7 +108,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = LegacyDeleteAccountWorkFlowConfiguration.class, name = "LegacyDeleteAccountWorkFlowConfiguration"),
         @Type(value = LegacyDeleteContactWorkFlowConfiguratiion.class, name = "LegacyDeleteContactWorkFlowConfiguratiion"),
         @Type(value = LegacyDeleteTransactionWorkFlowConfiguration.class, name = "LegacyDeleteTransactionWorkFlowConfiguration"),
-
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration"),
         @Type(value = PublishDynamoWorkflowConfiguration.class, name = "PublishDynamoWorkflowConfiguration"),
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration")})
