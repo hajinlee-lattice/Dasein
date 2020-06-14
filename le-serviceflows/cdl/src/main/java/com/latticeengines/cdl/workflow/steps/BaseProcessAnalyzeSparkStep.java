@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,6 +12,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -141,6 +145,23 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
     protected boolean isToReset(BusinessEntity servingEntity) {
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         return CollectionUtils.isNotEmpty(resetEntities) && resetEntities.contains(servingEntity);
+    }
+
+    protected Attribute copyMasterAttr(Map<String, Attribute> masterAttrs, Attribute attr0) {
+        Attribute attr = masterAttrs.get(attr0.getName());
+        if (attr0.getNumOfBits() != null && attr0.getNumOfBits() > 0) {
+            attr.setNullable(Boolean.TRUE);
+            attr.setPhysicalName(attr0.getPhysicalName());
+            attr.setNumOfBits(attr0.getNumOfBits());
+            attr.setBitOffset(attr0.getBitOffset());
+            attr.setPhysicalDataType(Schema.Type.STRING.getName());
+        }
+        if (CollectionUtils.isEmpty(attr.getGroupsAsList())) {
+            attr.setGroupsViaList(Collections.singletonList(ColumnSelection.Predefined.Segment));
+        } else if (!attr.getGroupsAsList().contains(ColumnSelection.Predefined.Segment)) {
+            attr.getGroupsAsList().add(ColumnSelection.Predefined.Segment);
+        }
+        return attr;
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {

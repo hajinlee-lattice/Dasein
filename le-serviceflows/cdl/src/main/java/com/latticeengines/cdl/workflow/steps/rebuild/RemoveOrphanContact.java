@@ -7,8 +7,11 @@ import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -24,9 +27,15 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -45,6 +54,8 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
 
     @Inject
     private BatonService batonService;
+
+    private Table contactTable;
 
     @Override
     public void execute() {
@@ -95,6 +106,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
         TableRoleInCollection servingRole = SortedContact;
         String servingTableName = tenantId + "_" + NamingUtils.timestamp(servingRole.name());
         Table servingTable = toTable(servingTableName, InterfaceName.ContactId.name(), result.getTargets().get(0));
+        enrichTableSchema(servingTable);
         metadataProxy.createTable(tenantId, servingTableName, servingTable);
         dataCollectionProxy.upsertTable(tenantId, servingTableName, servingRole, inactive);
         exportToS3AndAddToContext(servingTable, CONTACT_SERVING_TABLE_NAME);
@@ -102,7 +114,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
 
     private HdfsDataUnit getContactData() {
         TableRoleInCollection contactRole = Contact.getBatchStore();
-        Table contactTable = attemptGetTableRole(contactRole, true);
+        contactTable = attemptGetTableRole(contactRole, true);
         return contactTable.toHdfsDataUnit("Contact");
     }
 
@@ -152,6 +164,44 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
 
     private boolean isATTHotFix() {
         return batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId());
+    }
+
+    private void enrichTableSchema(Table table) {
+        Map<String, Attribute> masterAttrs = new HashMap<>();
+        contactTable.getAttributes().forEach(attr -> {
+            masterAttrs.put(attr.getName(), attr);
+        });
+        List<Attribute> attrs = new ArrayList<>();
+        final AtomicLong masterCount = new AtomicLong(0);
+        table.getAttributes().forEach(attr0 -> {
+            Attribute attr = copyMasterAttr(masterAttrs, attr0);
+            if (masterAttrs.containsKey(attr0.getName())) {
+                attr = copyMasterAttr(masterAttrs, attr0);
+                if (LogicalDataType.Date.equals(attr0.getLogicalDataType())) {
+                    log.info("Setting last data refresh for contact date attribute: " + attr.getName() + " to "
+                            + evaluationDateStr);
+                    attr.setLastDataRefresh("Last Data Refresh: " + evaluationDateStr);
+                }
+                masterCount.incrementAndGet();
+            }
+            // update metadata for AccountId attribute since it is only created after lead
+            // to account match and does not have the correct metadata
+            if (configuration.isEntityMatchEnabled() && InterfaceName.AccountId.name().equals(attr.getName())) {
+                attr.setInterfaceName(InterfaceName.AccountId);
+                attr.setTags(Tag.INTERNAL);
+                attr.setLogicalDataType(LogicalDataType.Id);
+                attr.setNullable(false);
+                attr.setApprovedUsage(ApprovedUsage.NONE);
+                attr.setSourceLogicalDataType(attr.getPhysicalDataType());
+                attr.setFundamentalType(FundamentalType.ALPHA.getName());
+            }
+            attr.setCategory(Category.CONTACT_ATTRIBUTES);
+            attr.setSubcategory(null);
+            attr.removeAllowedDisplayNames();
+            attrs.add(attr);
+        });
+        table.setAttributes(attrs);
+        log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
     }
 
 }
