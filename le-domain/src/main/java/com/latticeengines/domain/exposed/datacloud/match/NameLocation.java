@@ -54,6 +54,8 @@ public class NameLocation implements Fact, Serializable {
         nameLocation.setCountry(keyTuple.getCountry());
         nameLocation.setZipcode(keyTuple.getZipcode());
         nameLocation.setPhoneNumber(keyTuple.getPhoneNumber());
+        nameLocation.setStreet(keyTuple.getAddress());
+        nameLocation.setStreet2(keyTuple.getAddress2());
         return nameLocation;
     }
 
@@ -158,7 +160,9 @@ public class NameLocation implements Fact, Serializable {
                     && StringUtils.equals(this.state, nameLocation.state)
                     && StringUtils.equals(this.zipcode, nameLocation.zipcode)
                     && StringUtils.equals(this.country, nameLocation.country)
-                    && StringUtils.equals(this.phoneNumber, nameLocation.phoneNumber);
+                    && StringUtils.equals(this.phoneNumber, nameLocation.phoneNumber)
+                    && StringUtils.equals(this.street, nameLocation.street)
+                    && StringUtils.equals(this.street2, nameLocation.street2);
         } else {
             return false;
         }
@@ -173,6 +177,8 @@ public class NameLocation implements Fact, Serializable {
         toReturn += (zipcode == null ? "null" : zipcode);
         toReturn += (country == null ? "null" : country);
         toReturn += (phoneNumber == null ? "null" : phoneNumber);
+        toReturn += (street == null ? "null" : street);
+        toReturn += (street2 == null ? "null" : street2);
         toReturn += ")";
         return toReturn;
     }

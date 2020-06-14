@@ -47,8 +47,8 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.DUNS, InterfaceName.DUNS.name());
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.ExternalId, InterfaceName.Id.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.StreetAddress1, InterfaceName.StreetAddress1.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.StreetAddress2, InterfaceName.StreetAddress2.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address, InterfaceName.Address_Street_1.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address2, InterfaceName.Address_Street_2.name());
     }
 
     @Inject

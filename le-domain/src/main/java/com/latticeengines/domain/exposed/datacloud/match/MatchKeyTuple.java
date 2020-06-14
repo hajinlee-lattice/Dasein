@@ -52,11 +52,11 @@ public class MatchKeyTuple implements Fact {
     @JsonProperty("Email")
     private String email;
 
-    @JsonProperty("StreetAddress1")
-    private String streetAddress1;
+    @JsonProperty("Address")
+    private String address;
 
-    @JsonProperty("StreetAddress2")
-    private String streetAddress2;
+    @JsonProperty("Address2")
+    private String address2;
 
     // A list of pairs of System Id name and value.
     @JsonProperty("SystemIds")
@@ -176,23 +176,23 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
-    @MetricField(name = MatchConstants.STREET_ADDRESS1_FIELD)
-    public String getStreetAddress1() {
-        return streetAddress1;
+    @MetricField(name = MatchConstants.ADDRESS_FIELD)
+    public String getAddress() {
+        return address;
     }
 
-    public void setStreetAddress1(String streetAddress1) {
-        this.streetAddress1 = streetAddress1;
+    public void setAddress(String address) {
+        this.address = address;
         refreshCachedStrings();
     }
 
-    @MetricField(name = MatchConstants.STREET_ADDRESS2_FIELD)
-    public String getStreetAddress2() {
-        return streetAddress2;
+    @MetricField(name = MatchConstants.ADDRESS2_FIELD)
+    public String getAddress2() {
+        return address2;
     }
 
-    public void setStreetAddress2(String streetAddress2) {
-        this.streetAddress2 = streetAddress2;
+    public void setAddress2(String address2) {
+        this.address2 = address2;
         refreshCachedStrings();
     }
 
@@ -250,12 +250,12 @@ public class MatchKeyTuple implements Fact {
         return StringUtils.isNotEmpty(email);
     }
 
-    public boolean hasStreetAddress1() {
-        return StringUtils.isNotEmpty(streetAddress1);
+    public boolean hasAddress() {
+        return StringUtils.isNotEmpty(address);
     }
 
-    public boolean hasStreetAddress2() {
-        return StringUtils.isNotEmpty(streetAddress2);
+    public boolean hasAddress2() {
+        return StringUtils.isNotEmpty(address2);
     }
 
     public boolean hasSystemIds() {
@@ -346,11 +346,11 @@ public class MatchKeyTuple implements Fact {
         if (CollectionUtils.isNotEmpty(systemIds)) {
             sb.append(String.format("%s=%s, ", MatchKey.SystemId.name(), systemIds.toString()));
         }
-        if (StringUtils.isNotEmpty(streetAddress1)) {
-            sb.append(String.format("%s=%s, ", MatchConstants.STREET_ADDRESS1_FIELD, streetAddress1));
+        if (StringUtils.isNotEmpty(address)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.ADDRESS_FIELD, address));
         }
-        if (StringUtils.isNotEmpty(streetAddress2)) {
-            sb.append(String.format("%s=%s, ", MatchConstants.STREET_ADDRESS2_FIELD, streetAddress2));
+        if (StringUtils.isNotEmpty(address2)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.ADDRESS2_FIELD, address2));
         }
         sb.append(")");
         serializedFormat = sb.toString();
@@ -393,11 +393,11 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(email)) {
             appendKey(sb, MatchKey.Email.name());
         }
-        if (StringUtils.isNotEmpty(streetAddress1)) {
-            appendKey(sb, MatchKey.StreetAddress1.name());
+        if (StringUtils.isNotEmpty(address)) {
+            appendKey(sb, MatchKey.Address.name());
         }
-        if (StringUtils.isNotEmpty(streetAddress1)) {
-            appendKey(sb, MatchKey.StreetAddress2.name());
+        if (StringUtils.isNotEmpty(address)) {
+            appendKey(sb, MatchKey.Address2.name());
         }
         uniqueIdForKey = sb.toString();
     }
@@ -436,11 +436,11 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(email)) {
             appendKeyValue(sb, MatchKey.Email.name(), email);
         }
-        if (StringUtils.isNotEmpty(streetAddress1)) {
-            appendKeyValue(sb, MatchKey.StreetAddress1.name(), streetAddress1);
+        if (StringUtils.isNotEmpty(address)) {
+            appendKeyValue(sb, MatchKey.Address.name(), address);
         }
-        if (StringUtils.isNotEmpty(streetAddress1)) {
-            appendKeyValue(sb, MatchKey.StreetAddress2.name(), streetAddress2);
+        if (StringUtils.isNotEmpty(address)) {
+            appendKeyValue(sb, MatchKey.Address2.name(), address2);
         }
         uniqueIdForValue = sb.toString();
     }
@@ -524,13 +524,13 @@ public class MatchKeyTuple implements Fact {
             return this;
         }
 
-        public Builder withStreetAddress1(String streetAddress1) {
-            matchKeyTuple.setStreetAddress1(streetAddress1);
+        public Builder withAddress(String address) {
+            matchKeyTuple.setAddress(address);
             return this;
         }
 
-        public Builder withStreetAddress2(String streetAddress2) {
-            matchKeyTuple.setStreetAddress2(streetAddress2);
+        public Builder withAddress2(String address2) {
+            matchKeyTuple.setAddress2(address2);
             return this;
         }
 

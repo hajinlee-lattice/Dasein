@@ -85,8 +85,8 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
         keyMap.put(MatchKey.SystemId, Arrays.asList("CustomerAccountId", "MktoId", "SfdcId"));
-        keyMap.put(MatchKey.StreetAddress1, Collections.singletonList("StreetAddress1"));
-        keyMap.put(MatchKey.StreetAddress2, Collections.singletonList("StreetAddress2"));
+        keyMap.put(MatchKey.Address, Collections.singletonList("StreetAddress1"));
+        keyMap.put(MatchKey.Address2, Collections.singletonList("StreetAddress2"));
         entityKeyMap.setKeyMap(keyMap);
         input.setEntityKeyMaps(new HashMap<>());
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);

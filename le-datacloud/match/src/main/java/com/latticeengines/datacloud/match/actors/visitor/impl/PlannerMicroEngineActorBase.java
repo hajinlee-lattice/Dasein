@@ -84,8 +84,8 @@ public abstract class PlannerMicroEngineActorBase extends ExecutorMicroEngineTem
         res &= validateMatchField(MatchKey.PhoneNumber, tuple.getPhoneNumber(), record);
         res &= validateMatchField(MatchKey.DUNS, tuple.getDuns(), record);
         res &= validateMatchField(MatchKey.Email, tuple.getEmail(), record);
-        res &= validateMatchField(MatchKey.StreetAddress1, tuple.getStreetAddress1(), record);
-        res &= validateMatchField(MatchKey.StreetAddress2, tuple.getStreetAddress2(), record);
+        res &= validateMatchField(MatchKey.Address, tuple.getAddress(), record);
+        res &= validateMatchField(MatchKey.Address2, tuple.getAddress2(), record);
         if (record != null && MapUtils.isNotEmpty(record.getParsedPreferredEntityIds())) {
             boolean isValid = validateMatchField(MatchKey.PreferredEntityId,
                     record.getParsedPreferredEntityIds().get(traveler.getEntity()), record);

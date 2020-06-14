@@ -159,12 +159,12 @@ public final class MatchKeyUtils {
                 case "street_address_1":
                 case "streetaddress1":
                 case "streetaddress_1":
-                    keyMap.put(MatchKey.StreetAddress1, Collections.singletonList(field));
+                    keyMap.put(MatchKey.Address, Collections.singletonList(field));
                     break;
                 case "street_address_2":
                 case "streetaddress2":
                 case "streetaddress_2":
-                    keyMap.put(MatchKey.StreetAddress2, Collections.singletonList(field));
+                    keyMap.put(MatchKey.Address2, Collections.singletonList(field));
                     break;
             default:
             }

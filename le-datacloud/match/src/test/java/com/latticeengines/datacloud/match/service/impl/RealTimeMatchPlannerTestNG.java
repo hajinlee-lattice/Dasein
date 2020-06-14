@@ -87,8 +87,8 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
         keyMap.put(MatchKey.City, Collections.singletonList("City"));
         keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
-        keyMap.put(MatchKey.StreetAddress1, Collections.singletonList("StreetAddress1"));
-        keyMap.put(MatchKey.StreetAddress2, Collections.singletonList("StreetAddress2"));
+        keyMap.put(MatchKey.Address, Collections.singletonList("StreetAddress1"));
+        keyMap.put(MatchKey.Address2, Collections.singletonList("StreetAddress2"));
         input.setKeyMap(keyMap);
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS",
                 "StreetAddress1", "StreetAddress2"));

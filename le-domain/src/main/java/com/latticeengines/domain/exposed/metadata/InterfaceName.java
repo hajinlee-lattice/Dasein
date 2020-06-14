@@ -163,11 +163,7 @@ public enum InterfaceName {
 
     // Internal
     __Row_Count__, // total row count in activity store aggregation
-    __Composite_Key__, // primary key for internal use
-
-    // DCP
-    StreetAddress1,
-    StreetAddress2;
+    __Composite_Key__; // primary key for internal use
 
     private static final Set<String> EntityIds = ImmutableSet.of( //
             InterfaceName.EntityId.name(), //

@@ -13,8 +13,8 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerC
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Email;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreetAddress1;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreetAddress2;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,7 +65,7 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
     private static final String[] DEFAULT_FIELDS = new String[] { TestId, //
             CDLTemplateName.name(), // input template
             // contact fields (email used in both)
-            CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), StreetAddress1.name(), StreetAddress2.name(), //
+            CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), Address_Street_1.name(), Address_Street_2.name(), //
             // account fields
             CustomerAccountId.name(), CompanyName.name(), Country.name(), State.name() };
     private static final String[] DEFAULT_MATCH_RESULT_FIELDS = ArrayUtils
@@ -532,8 +532,8 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         map.addMatchKey(MatchKey.Email, MatchKey.Email.name());
         map.addMatchKey(Name, ContactName.name());
         map.addMatchKey(MatchKey.PhoneNumber, MatchKey.PhoneNumber.name());
-        map.addMatchKey(MatchKey.StreetAddress1, MatchKey.StreetAddress1.name());
-        map.addMatchKey(MatchKey.StreetAddress2, MatchKey.StreetAddress2.name());
+        map.addMatchKey(MatchKey.Address, MatchKey.Address.name());
+        map.addMatchKey(MatchKey.Address2, MatchKey.Address2.name());
         return map;
     }
 
