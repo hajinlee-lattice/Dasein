@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -180,8 +179,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
 
     // reset means remove this entity
     private boolean isToReset() {
-        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
-        return CollectionUtils.isNotEmpty(resetEntities) && resetEntities.contains(getServingEntity());
+        return super.isToReset(getServingEntity());
     }
 
     protected Table getBaseTable() {

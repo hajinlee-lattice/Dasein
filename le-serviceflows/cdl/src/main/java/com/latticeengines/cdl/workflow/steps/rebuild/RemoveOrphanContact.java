@@ -1,7 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +31,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
@@ -47,18 +49,22 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
     @Override
     public void execute() {
         bootstrap();
-        if (shouldRefreshServingStore()) {
-            Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), CONTACT_SERVING_TABLE_NAME);
-            if (tableInCtx == null) {
-                RemoveOrphanConfig jobConfig = configureJob();
-                SparkJobResult result = runSparkJob(RemoveOrphanJob.class, jobConfig);
-                postJobExecution(result);
-            } else {
-                log.info("Found contact serving table in context, skip this step.");
-            }
+        if (isToReset(Contact)) {
+            log.info("Should reset contact serving store, skip this step.");
         } else {
-            log.info("No need to refresh contact serving store.");
-            linkInactiveTable(SortedContact);
+            if (shouldRefreshServingStore()) {
+                Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), CONTACT_SERVING_TABLE_NAME);
+                if (tableInCtx == null) {
+                    RemoveOrphanConfig jobConfig = configureJob();
+                    SparkJobResult result = runSparkJob(RemoveOrphanJob.class, jobConfig);
+                    postJobExecution(result);
+                } else {
+                    log.info("Found contact serving table in context, skip this step.");
+                }
+            } else {
+                log.info("No need to refresh contact serving store.");
+                linkInactiveTable(SortedContact);
+            }
         }
     }
 
@@ -95,13 +101,13 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
     }
 
     private HdfsDataUnit getContactData() {
-        TableRoleInCollection contactRole = BusinessEntity.Contact.getBatchStore();
+        TableRoleInCollection contactRole = Contact.getBatchStore();
         Table contactTable = attemptGetTableRole(contactRole, true);
         return contactTable.toHdfsDataUnit("Contact");
     }
 
     private HdfsDataUnit getAccountData() {
-        TableRoleInCollection accountRole = BusinessEntity.Account.getBatchStore();
+        TableRoleInCollection accountRole = Account.getBatchStore();
         Table accountTable = attemptGetTableRole(accountRole, false);
         if (accountTable == null) {
             log.info("No Account batch store, all contacts are non-orphan.");
@@ -128,8 +134,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
         if (isATTHotFix()) {
             return hasAccountDeletion();
         } else {
-            TableRoleInCollection accountBatchStore = TableRoleInCollection.ConsolidatedAccount;
-            return isChanged(accountBatchStore);
+            return isChanged(ConsolidatedAccount) || isToReset(Account);
         }
     }
 
@@ -137,7 +142,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
         List<Action> softDeletes = getListObjectFromContext(SOFT_DELETE_ACTIONS, Action.class);
         boolean hasAccountSoftDeletion = CollectionUtils.isNotEmpty(softDeletes) && softDeletes.stream().anyMatch(action -> {
             DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
-            return configuration.hasEntity(BusinessEntity.Account);
+            return configuration.hasEntity(Account);
         });
 
         Set<Action> actions = getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,13 +129,18 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
             return !inactiveName.equals(activeName);
         } else {
             // consider no change if no inactive version, no matter whether active version exists
-            // isRemoved will be checked separately
             return false;
         }
     }
 
     protected void linkInactiveTable(TableRoleInCollection tableRole) {
         cloneTableService.linkInactiveTable(tableRole);
+    }
+
+    // reset means remove this entity from serving stores
+    protected boolean isToReset(BusinessEntity servingEntity) {
+        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        return CollectionUtils.isNotEmpty(resetEntities) && resetEntities.contains(servingEntity);
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
