@@ -684,7 +684,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         errorMap.put(attr.getDisplayName(), e.getMessage());
                     }
                     if (attr.getRequired() || !attr.isNullable()) {
-                        errorMap.put(attr.getName(), String.format("%s cannot be empty!", attr.getName()));
+                        String oldMsg = errorMap.get(attr.getName());
+                        String newMsg = String.format("%s cannot be empty!", attr.getName());
+                        String msg = StringUtils.isBlank(oldMsg) ? newMsg : String.format("%s,%s", oldMsg, newMsg);
+                        errorMap.put(attr.getName(), msg);
                     } else {
                         avroRecord.put(attr.getName(), avroFieldValue);
                     }
