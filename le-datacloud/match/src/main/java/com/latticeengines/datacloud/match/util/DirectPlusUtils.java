@@ -62,6 +62,12 @@ public final class DirectPlusUtils {
                 if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
                     parts.add(String.format("telephoneNumber=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
                 }
+                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet())) {
+                    parts.add(String.format("line1=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
+                }
+                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet2())) {
+                    parts.add(String.format("line2=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
+                }
                 break;
             case REALTIME_EMAIL:
                 if (!StringUtils.isEmpty(context.getInputEmail())) {
