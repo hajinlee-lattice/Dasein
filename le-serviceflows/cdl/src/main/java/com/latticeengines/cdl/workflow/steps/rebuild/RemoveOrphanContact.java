@@ -109,6 +109,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
         enrichTableSchema(servingTable);
         metadataProxy.createTable(tenantId, servingTableName, servingTable);
         dataCollectionProxy.upsertTable(tenantId, servingTableName, servingRole, inactive);
+        exportTableRoleToRedshift(servingTable, servingRole);
         exportToS3AndAddToContext(servingTable, CONTACT_SERVING_TABLE_NAME);
     }
 

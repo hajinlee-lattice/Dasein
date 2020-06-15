@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,14 +20,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
@@ -162,6 +167,37 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
             attr.getGroupsAsList().add(ColumnSelection.Predefined.Segment);
         }
         return attr;
+    }
+
+    protected void exportTableRoleToRedshift(Table table, TableRoleInCollection tableRole) {
+        String distKey = tableRole.getDistKey();
+        List<String> sortKeys = new ArrayList<>(tableRole.getSortKeys());
+
+        String partition = null;
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null && dcStatus.getDetail() != null) {
+            partition = dcStatus.getRedshiftPartition();
+        }
+
+        String tableName = table.getName();
+        RedshiftExportConfig config = new RedshiftExportConfig();
+        config.setTableName(tableName);
+        config.setDistKey(distKey);
+        config.setSortKeys(sortKeys);
+        config.setInputPath(PathUtils.toAvroGlob(table.getExtracts().get(0).getPath()));
+        config.setClusterPartition(partition);
+        config.setUpdateMode(false);
+
+        Table summary = metadataProxy.getTableSummary(customerSpace.toString(), tableName);
+        if (CollectionUtils.isNotEmpty(summary.getExtracts())) {
+            Extract extract = summary.getExtracts().get(0);
+            Long count = extract.getProcessedRecords();
+            if (count != null && count > 0) {
+                config.setExpectedCount(count);
+            }
+        }
+
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
