@@ -163,7 +163,7 @@ public final class CampaignLaunchUtils {
 
     public static List<String> generateContactColsForS3() {
         return ImmutableList.<String> builder().add(InterfaceName.Email.name())
-                .add(InterfaceName.Address_Street_1.name()).add(InterfaceName.PhoneNumber.name())
+                .add(InterfaceName.Address.name()).add(InterfaceName.PhoneNumber.name())
                 .add(InterfaceName.State.name()).add(InterfaceName.PostalCode.name()).add(InterfaceName.Country.name())
                 .add(InterfaceName.SalesforceContactID.name()).add(InterfaceName.City.name())
                 .add(InterfaceName.ContactId.name()).add(InterfaceName.Name.name()).add(InterfaceName.FirstName.name())
@@ -213,7 +213,7 @@ public final class CampaignLaunchUtils {
     public static List<String> generateContactColsForMarketo() {
         return Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(), InterfaceName.Email.name(),
                 InterfaceName.Country.name(), InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name(),
-                InterfaceName.Address_Street_1.name(), InterfaceName.City.name(), InterfaceName.ContactName.name(),
+                InterfaceName.Address.name(), InterfaceName.City.name(), InterfaceName.ContactName.name(),
                 InterfaceName.State.name());
     }
 

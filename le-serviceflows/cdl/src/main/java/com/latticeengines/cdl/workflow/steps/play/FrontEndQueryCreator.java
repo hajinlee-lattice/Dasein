@@ -74,7 +74,7 @@ public class FrontEndQueryCreator {
 
     private Set<String> additionalContactAttrs = Arrays
             .asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
-                    InterfaceName.Address_Street_2.name(),
+                    InterfaceName.Address2.name(),
                     InterfaceName.DoNotMail.name(), InterfaceName.DoNotCall.name())
             .stream().collect(Collectors.toSet());
 
@@ -437,7 +437,7 @@ public class FrontEndQueryCreator {
                 InterfaceName.PostalCode.name(), //
                 InterfaceName.PhoneNumber.name(), //
                 InterfaceName.Title.name(), //
-                InterfaceName.Address_Street_1.name()));
+                InterfaceName.Address.name()));
     }
 
     @VisibleForTesting

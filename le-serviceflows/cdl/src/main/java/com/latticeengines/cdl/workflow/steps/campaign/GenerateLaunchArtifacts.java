@@ -85,7 +85,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private ServingStoreProxy servingStoreProxy;
 
     private Set<String> additionalContactAttr = new HashSet<>(Arrays.asList(InterfaceName.FirstName.name(),
-            InterfaceName.LastName.name(), InterfaceName.Address_Street_2.name(), InterfaceName.DoNotCall.name(),
+            InterfaceName.LastName.name(), InterfaceName.Address2.name(), InterfaceName.DoNotCall.name(),
             InterfaceName.DoNotMail.name()));
 
     private DataCollection.Version version;
@@ -397,7 +397,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.PostalCode.name(), //
                     InterfaceName.PhoneNumber.name(), //
                     InterfaceName.Title.name(), //
-                    InterfaceName.Address_Street_1.name()));
+                    InterfaceName.Address.name()));
 
             /*
              * PLS-16386 Add FirstName and LastName

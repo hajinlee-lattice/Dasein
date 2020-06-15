@@ -96,7 +96,7 @@ public enum AtlasExportType {
                 attrs.add(new ImmutablePair<>(InterfaceName.CustomerAccountId, "Customer Account Id"));
                 attrs.add(new ImmutablePair<>(InterfaceName.CompanyName, "Company Name"));
                 attrs.add(new ImmutablePair<>(InterfaceName.Website, "Website"));
-                attrs.add(new ImmutablePair<>(InterfaceName.Address_Street_1, "Street"));
+                attrs.add(new ImmutablePair<>(InterfaceName.Address, "Street"));
                 attrs.add(new ImmutablePair<>(InterfaceName.City, "City"));
                 attrs.add(new ImmutablePair<>(InterfaceName.State, "State"));
                 attrs.add(new ImmutablePair<>(InterfaceName.PostalCode, "Zip"));

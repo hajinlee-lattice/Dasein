@@ -98,8 +98,8 @@ public class SchemaRepository {
             stdAttrs.add(InterfaceName.PhoneNumber);
             stdAttrs.add(InterfaceName.CompanyName);
             stdAttrs.add(InterfaceName.DUNS);
-            stdAttrs.add(InterfaceName.Address_Street_1);
-            stdAttrs.add(InterfaceName.Address_Street_2);
+            stdAttrs.add(InterfaceName.Address);
+            stdAttrs.add(InterfaceName.Address2);
             // special
             switch (entity) {
             case Account:
@@ -1503,18 +1503,18 @@ public class SchemaRepository {
 
         Attribute duns = attrDUNS();
 
-        Attribute address1 = attr(InterfaceName.Address_Street_1.name()) //
+        Attribute address1 = attr(InterfaceName.Address.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ADDRESS1", "ADDRESS_STREET_1", "ADDRESS_1")) //
                 .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Address_Street_1) //
+                .interfaceName(InterfaceName.Address) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build();
 
-        Attribute address2 = attr(InterfaceName.Address_Street_2.name()) //
+        Attribute address2 = attr(InterfaceName.Address2.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ADDRESS2", "ADDRESS_STREET_2", "ADDRESS_2")) //
                 .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Address_Street_2) //
+                .interfaceName(InterfaceName.Address2) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build();

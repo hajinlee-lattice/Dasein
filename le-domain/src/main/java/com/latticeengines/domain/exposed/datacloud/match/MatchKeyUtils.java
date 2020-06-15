@@ -115,58 +115,62 @@ public final class MatchKeyUtils {
         for (String field : fields) {
             String lowerField = field.toLowerCase();
             switch (lowerField) {
-            case "name":
-            case "company":
-            case "companyname":
-            case "company_name":
-                keyMap.put(MatchKey.Name, Collections.singletonList(field));
-                break;
-            case "city":
-                keyMap.put(MatchKey.City, Collections.singletonList(field));
-                break;
-            case "state":
-            case "province":
-            case "state_province":
-                keyMap.put(MatchKey.State, Collections.singletonList(field));
-                break;
-            case "zip":
-            case "zipcode":
-            case "zip_code":
-            case "postalcode":
-            case "postal_code":
-                keyMap.put(MatchKey.Zipcode, Collections.singletonList(field));
-                break;
-            case "phone":
-            case "phonenumber":
-            case "phone_number":
-                keyMap.put(MatchKey.PhoneNumber, Collections.singletonList(field));
-                break;
-            case "country":
-                keyMap.put(MatchKey.Country, Collections.singletonList(field));
-                break;
-            case "duns":
-            case "duns_number":
-            case "dunsnumber":
-                keyMap.put(MatchKey.DUNS, Collections.singletonList(field));
-                break;
-            case latticeAccountId:
-            case "latticeid":
-                keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(field));
-                break;
-            case "entityid":
-                keyMap.put(MatchKey.EntityId, Collections.singletonList(field));
+                case "name":
+                case "company":
+                case "companyname":
+                case "company_name":
+                    keyMap.put(MatchKey.Name, Collections.singletonList(field));
                     break;
+                case "city":
+                    keyMap.put(MatchKey.City, Collections.singletonList(field));
+                    break;
+                case "state":
+                case "province":
+                case "state_province":
+                    keyMap.put(MatchKey.State, Collections.singletonList(field));
+                    break;
+                case "zip":
+                case "zipcode":
+                case "zip_code":
+                case "postalcode":
+                case "postal_code":
+                    keyMap.put(MatchKey.Zipcode, Collections.singletonList(field));
+                    break;
+                case "phone":
+                case "phonenumber":
+                case "phone_number":
+                    keyMap.put(MatchKey.PhoneNumber, Collections.singletonList(field));
+                    break;
+                case "country":
+                    keyMap.put(MatchKey.Country, Collections.singletonList(field));
+                    break;
+                case "duns":
+                case "duns_number":
+                case "dunsnumber":
+                    keyMap.put(MatchKey.DUNS, Collections.singletonList(field));
+                    break;
+                case latticeAccountId:
+                case "latticeid":
+                    keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(field));
+                    break;
+                case "entityid":
+                    keyMap.put(MatchKey.EntityId, Collections.singletonList(field));
+                    break;
+                case "address_1":
+                case "address1":
                 case "street_address_1":
                 case "streetaddress1":
                 case "streetaddress_1":
                     keyMap.put(MatchKey.Address, Collections.singletonList(field));
                     break;
+                case "address_2":
+                case "address2":
                 case "street_address_2":
                 case "streetaddress2":
                 case "streetaddress_2":
                     keyMap.put(MatchKey.Address2, Collections.singletonList(field));
                     break;
-            default:
+                default:
             }
         }
 
