@@ -104,17 +104,17 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultLinkedInExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.LinkedIn);
 
-        assertEquals(defaultLinkedInExportFields.size(), 41);
+        assertEquals(defaultLinkedInExportFields.size(), 43);
         assertEquals(
                 defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                35);
         List<ExportFieldMetadataDefaults> exportEnabledFields = defaultLinkedInExportFields.stream()
                 .filter(ExportFieldMetadataDefaults::getExportEnabled).collect((Collectors.toList()));
         assertEquals(defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                3);
+                5);
 
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account).count(),
-                2);
+                4);
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact).count(),
                 1);
 
@@ -139,10 +139,10 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultOutreachExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
 
-        assertEquals(defaultOutreachExportFields.size(), 42);
+        assertEquals(defaultOutreachExportFields.size(), 37);
         assertEquals(
                 defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                27);
         assertEquals(defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 27);
 
