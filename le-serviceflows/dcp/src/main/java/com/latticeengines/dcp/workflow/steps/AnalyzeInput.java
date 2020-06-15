@@ -37,7 +37,7 @@ import com.latticeengines.spark.exposed.job.dcp.InputPresenceJob;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class InputPresence extends RunSparkJob<ImportSourceStepConfiguration, InputPresenceConfig> {
+public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, InputPresenceConfig> {
 
     static final Map<MatchKey, String> MATCH_KEYS_TO_INTERNAL_NAMES = new HashMap<>();
     static {
@@ -51,7 +51,7 @@ public class InputPresence extends RunSparkJob<ImportSourceStepConfiguration, In
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.ExternalId, InterfaceName.Id.name());
     }
 
-    private static final Logger log = LoggerFactory.getLogger(InputPresence.class);
+    private static final Logger log = LoggerFactory.getLogger(AnalyzeInput.class);
 
     @Inject
     private ImportWorkflowSpecProxy importWorkflowSpecProxy;
@@ -82,8 +82,8 @@ public class InputPresence extends RunSparkJob<ImportSourceStepConfiguration, In
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        Map<String, Integer> map = JsonUtils.convertMap(JsonUtils.deserialize(result.getOutput(), Map.class),
-                String.class, Integer.class);
+        Map<String, Long> map = JsonUtils.convertMap(JsonUtils.deserialize(result.getOutput(), Map.class),
+                String.class, Long.class);
 
         ImportWorkflowSpec spec =
                 importWorkflowSpecProxy.getImportWorkflowSpec(configuration.getCustomerSpace().toString(),
@@ -101,8 +101,10 @@ public class InputPresence extends RunSparkJob<ImportSourceStepConfiguration, In
         List<MatchKeyFill> fills = new ArrayList<>();
         UploadStats.ImportStats importStats = stats.getImportStats();
         long ingested = importStats.getSuccessCnt();
-        map.forEach((name, populated) -> {
+        MATCH_KEYS_TO_INTERNAL_NAMES.forEach((key, name) -> {
+            long populated = map.getOrDefault(name, 0L);
             MatchKeyFill fill = new MatchKeyFill();
+            fill.setMatchKey(key);
             fill.setDisplayName(fieldNameToDisplayName.getOrDefault(name, "empty"));
             fill.setIngested(ingested);
             fill.setMissing(ingested - populated);

@@ -21,8 +21,7 @@ class InputPresenceJob extends AbstractSparkJob[InputPresenceConfig] {
     inputNames.foreach(name => {
       if (result.columns.contains(name)) {
         val populated: DataFrame = result.filter(col(name).isNotNull && regexp_replace(col(name), " ", "") =!= "")
-          .persist
-        StorageLevel.DISK_ONLY
+          .persist(StorageLevel.DISK_ONLY)
         val populatedCnt = populated.count()
         statsMap  += (name -> populatedCnt)
       } else {

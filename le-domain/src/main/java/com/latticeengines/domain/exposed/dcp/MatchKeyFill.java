@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -12,6 +13,9 @@ public class MatchKeyFill {
 
     @JsonProperty("display_name")
     private String displayName;
+
+    @JsonProperty("match_key")
+    private MatchKey matchKey;
 
     @JsonProperty("populated")
     private long populated;
@@ -24,6 +28,14 @@ public class MatchKeyFill {
 
     @JsonProperty("fill_rate")
     private int fillRate;
+
+    public MatchKey getMatchKey() {
+        return matchKey;
+    }
+
+    public void setMatchKey(MatchKey matchKey) {
+        this.matchKey = matchKey;
+    }
 
     public String getDisplayName() {
         return displayName;
