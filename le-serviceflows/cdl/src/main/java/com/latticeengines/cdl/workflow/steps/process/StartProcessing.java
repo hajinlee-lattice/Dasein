@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -125,10 +124,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private ChoreographerContext grapherContext = new ChoreographerContext();
     private Long newTransactionCount = 0L;
     private boolean migrationMode;
-
-    @PostConstruct
-    public void init() {
-    }
 
     // for Spring
     public StartProcessing() {

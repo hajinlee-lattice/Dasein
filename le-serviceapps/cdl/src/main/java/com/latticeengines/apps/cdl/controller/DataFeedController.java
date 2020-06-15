@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.util.EntityExportUtils;
 import com.latticeengines.apps.cdl.util.PAValidationUtils;
+import com.latticeengines.apps.cdl.workflow.AtlasProfileReportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
@@ -34,6 +35,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
+import com.latticeengines.domain.exposed.cdl.AtlasProfileReportRequest;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
@@ -58,6 +60,7 @@ public class DataFeedController {
     private final ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter;
     private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
     private final MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter;
+    private final AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
@@ -73,6 +76,7 @@ public class DataFeedController {
                               ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
                               CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
                               MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter,
+                              AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter,
                               DataFeedService dataFeedService, PAValidationUtils paValidationUtils,
                               AtlasExportService atlasExportService, ServingStoreService servingStoreService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
@@ -81,6 +85,7 @@ public class DataFeedController {
         this.convertBatchStoreToImportWorkflowSubmitter = convertBatchStoreToImportWorkflowSubmitter;
         this.cdlEntityMatchMigrationWorkflowSubmitter = cdlEntityMatchMigrationWorkflowSubmitter;
         this.mockActivityStoreWorkflowSubmitter = mockActivityStoreWorkflowSubmitter;
+        this.atlasProfileReportWorkflowSubmitter = atlasProfileReportWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
         this.atlasExportService = atlasExportService;
@@ -241,6 +246,20 @@ public class DataFeedController {
         try {
             ApplicationId appId;
             appId = mockActivityStoreWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), //
+                    new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping("/profile-report")
+    @ResponseBody
+    @ApiOperation(value = "Invoke generate profile report workflow. Returns the job id.")
+    public ResponseDocument<String> generateProfileReport(@PathVariable String customerSpace,
+                                                          @RequestBody AtlasProfileReportRequest request) {
+        try {
+            ApplicationId appId = atlasProfileReportWorkflowSubmitter.submit(customerSpace, request,
                     new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {

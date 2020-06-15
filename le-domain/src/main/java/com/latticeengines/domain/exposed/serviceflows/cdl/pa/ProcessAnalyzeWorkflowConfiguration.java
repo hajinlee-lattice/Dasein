@@ -49,6 +49,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 .build();
     }
 
+    @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
     public static class Builder {
 
         private ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();

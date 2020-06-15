@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.RegisterImportActionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.report.ProfileReportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
@@ -50,6 +51,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = ModelStepConfiguration.class, name = "ModelStepConfiguration"),
         @Type(value = ParallelBlockExecutionConfiguration.class, name = "ParallelBlockExecutionConfiguration"),
         @Type(value = ProcessStepConfiguration.class, name = "ProcessStepConfiguration"),
+        @Type(value = ProfileReportStepConfiguration.class, name = "ProfileReportStepConfiguration"),
         @Type(value = ResolveMetadataFromUserRefinedAttributesConfiguration.class, name = "ResolveMetadataFromUserRefinedAttributesConfiguration"),
         @Type(value = RTSScoreStepConfiguration.class, name = "RTSScoreStepConfiguration"),
         @Type(value = ScoreStepConfiguration.class, name = "ScoreStepConfiguration"),

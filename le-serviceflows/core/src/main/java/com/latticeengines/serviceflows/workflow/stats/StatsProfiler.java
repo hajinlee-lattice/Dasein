@@ -21,9 +21,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
+import com.latticeengines.domain.exposed.datacloud.statistics.ProfileArgument;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
+import com.latticeengines.proxy.exposed.datacloudapi.ProfileProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component("statsProfiler")
@@ -43,6 +45,12 @@ public class StatsProfiler {
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private ProfileProxy profileProxy;
+
+    @Resource(name = "yarnConfiguration")
+    protected Configuration yarnConfiguration;
 
     private AttrClassifier classifier;
 
@@ -78,8 +86,7 @@ public class StatsProfiler {
         Map<String, ProfileParameters.Attribute> declaredAttrsConfig = parseDeclaredAttrs(jobConfig);
         Map<String, ProfileArgument> amAttrsConfig;
         if (Boolean.TRUE.equals(jobConfig.getConsiderAMAttrs())) {
-//            amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
-            amAttrsConfig = new HashMap<>();
+            amAttrsConfig = findAMAttrsConfig(dataCloudVersion);
         } else {
             amAttrsConfig = new HashMap<>();
         }
@@ -113,6 +120,10 @@ public class StatsProfiler {
             });
         }
         return profileArgMap;
+    }
+
+    private Map<String, ProfileArgument> findAMAttrsConfig(String dataCloudVersion) {
+        return profileProxy.getAMAttrsConfig(dataCloudVersion);
     }
 
 }

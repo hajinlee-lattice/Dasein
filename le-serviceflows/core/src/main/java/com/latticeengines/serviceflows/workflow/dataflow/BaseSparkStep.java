@@ -1,5 +1,7 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import static com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType.S3;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -34,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
@@ -216,6 +219,33 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             }
         }
         workSpaces.retainAll(toBeRemoved);
+    }
+
+    // S3 or HDFS
+    protected DataUnit toDataUnit(Table table, String alias) {
+        String tableName = table.getName();
+        HdfsDataUnit hdfsDataUnit = table.toHdfsDataUnit(alias);
+        String hdfsDir = PathUtils.toParquetOrAvroDir(hdfsDataUnit.getPath());
+        boolean inHdfs = false;
+        try {
+            inHdfs = HdfsUtils.isDirectory(yarnConfiguration, hdfsDir);
+        } catch (IOException e) {
+            log.warn("Failed to check if data path exists in hdfs: {}", hdfsDir);
+        }
+        if (inHdfs) {
+            log.info("Found table data in hdfs for {} at {}", tableName, hdfsDir);
+            return hdfsDataUnit;
+        } else {
+            S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), tableName, S3);
+            if (s3DataUnit != null) {
+                log.info("Found s3 data unit for {} at {}/{}", //
+                        tableName, s3DataUnit.getBucket(), s3DataUnit.getPrefix());
+                s3DataUnit.setName(alias);
+                return s3DataUnit;
+            } else {
+                throw new IllegalStateException("Cannot find data for " + tableName + " in either HDFS or S3");
+            }
+        }
     }
 
     protected Table dirToTable(String tableName, HdfsDataUnit jobTarget) {

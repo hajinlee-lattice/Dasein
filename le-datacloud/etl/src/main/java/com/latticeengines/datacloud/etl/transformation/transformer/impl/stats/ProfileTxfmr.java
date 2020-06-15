@@ -33,6 +33,7 @@ import com.latticeengines.datacloud.etl.transformation.transformer.impl.Configur
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
+import com.latticeengines.domain.exposed.datacloud.statistics.ProfileArgument;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -86,6 +87,7 @@ public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
     protected void preSparkJobProcessing(TransformStep step, String workflowDir, ProfileJobConfig sparkJobConfig) {
         initProfileConfig(sparkJobConfig);
         classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), sparkJobConfig);
+        partitionMultiplier = 2;
     }
 
     @Override

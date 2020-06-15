@@ -99,6 +99,7 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends CDLDeploymentTestNG
 
     protected void runWorkflow(WorkflowConfiguration workflowConfig) throws Exception {
         workflowService.registerJob(workflowConfig, applicationContext);
+        metadataProxy.setEnableTempTables(true);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS,
                 1000).getStatus();

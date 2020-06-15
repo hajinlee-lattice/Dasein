@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
+import com.latticeengines.domain.exposed.datacloud.statistics.ProfileArgument;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 
 public final class ProfileUtils {

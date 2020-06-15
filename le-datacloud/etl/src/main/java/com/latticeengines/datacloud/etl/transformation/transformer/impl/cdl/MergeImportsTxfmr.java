@@ -31,7 +31,7 @@ public class MergeImportsTxfmr extends ConfigurableSparkJobTxfmr<MergeImportsCon
 
     @Override
     protected void preSparkJobProcessing(TransformStep step, String workflowDir, MergeImportsConfig sparkJobConfig) {
-        partitionMultiplier = 2;
+        partitionMultiplier = 4;
     }
 
 }
