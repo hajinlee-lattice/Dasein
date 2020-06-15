@@ -585,20 +585,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             return false;
         }
 
-        private void validateAttribute(CSVRecord csvRecord, Attribute attr, String csvColumnName) {
+        private void validateAttribute(CSVRecord csvRecord, Attribute attr,
+                                       Map<String, String> headerCaseMapping, String csvColumnNameInLowerCase) {
             String attrKey = attr.getName();
-            String csvVal;
-            try {
-                csvVal = csvRecord.get(csvColumnName);
-            } catch (Exception e) {
-                LOG.info("can't get value for column {} which corresponds to attribute {}",
-                        csvColumnName, attr.getName());
-                csvVal = null;
-            }
-            if (!attr.isNullable() && StringUtils.isEmpty(csvVal)) {
-                if (attr.getDefaultValueStr() == null) {
-                    missingRequiredColValue = true;
-                    throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
+            String csvColumnName = headerCaseMapping.get(csvColumnNameInLowerCase);
+            if (!attr.isNullable() && attr.getDefaultValueStr() == null) {
+                if (StringUtils.isBlank(csvColumnName)) {
+                    throw new RuntimeException(String.format("csv file should contain the column %s", csvColumnNameInLowerCase));
+                }
+                if (StringUtils.isEmpty(csvRecord.get(csvColumnName))) {
+                        missingRequiredColValue = true;
+                        throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
                 }
             }
             List<InputValidatorWrapper> validatorWrappers = attr.getValidatorWrappers();
@@ -651,7 +648,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         if (StringUtils.length(csvFieldValue) > MAX_STRING_LENGTH) {
                             throw new RuntimeException(String.format("%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
                         }
-                        validateAttribute(csvRecord, attr, headerCaseMapping.get(csvColumnNameInLowerCase));
+                        validateAttribute(csvRecord, attr, headerCaseMapping, csvColumnNameInLowerCase);
                         if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
                             if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                                 csvFieldValue = attr.getDefaultValueStr();
@@ -681,7 +678,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                 } else {
                     try {
-                        validateAttribute(csvRecord, attr, headerCaseMapping.get(csvColumnNameInLowerCase));
+                        validateAttribute(csvRecord, attr, headerCaseMapping, csvColumnNameInLowerCase);
                     } catch (Exception e) {
                         LOG.warn(e.getMessage());
                         errorMap.put(attr.getDisplayName(), e.getMessage());
