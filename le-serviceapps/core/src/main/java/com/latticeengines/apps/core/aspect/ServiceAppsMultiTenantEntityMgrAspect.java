@@ -40,6 +40,12 @@ public class ServiceAppsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrA
                 Arrays.asList(entityManager, entityManagerReader));
     }
 
+    @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.exist*(..))")
+    public void exist(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
+    }
+
     @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.delete*(..))")
     public void delete(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,

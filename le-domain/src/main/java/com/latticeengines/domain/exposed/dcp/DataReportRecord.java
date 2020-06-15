@@ -35,8 +35,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
  */
 @Entity
 @Table(name = "DCP_DATA_REPORT",
-        indexes = {@Index(name = "IX_OWNER_ID_LEVEL", columnList = "OWNER_ID,LEVEL")},
-        uniqueConstraints = {@UniqueConstraint(name = "IX_ID_LEVEL", columnNames = {"FK_TENANT_ID", "OWNER_ID", "LEVEL"})})
+        indexes = {
+                @Index(name = "IX_OWNER_ID_LEVEL", columnList = "OWNER_ID,LEVEL"),
+                @Index(name = "IX_PARENT_ID", columnList = "PARENT_ID")},
+        uniqueConstraints = {
+                @UniqueConstraint(name = "IX_ID_LEVEL", columnNames = {"FK_TENANT_ID", "OWNER_ID", "LEVEL"})})
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
 
@@ -58,6 +61,9 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
+
+    @Column(name = "PARENT_ID")
+    private Long parentId;
 
     @Column(name = "OWNER_ID", nullable = false)
     private String ownerId;
@@ -142,6 +148,14 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
         this.ownerId = ownerId;
     }
 
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
     public Level getLevel() {
         return level;
     }
@@ -207,6 +221,28 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     }
 
     public enum Level {
-        Tenant, Project, Source, Upload
+        Tenant,
+        Project {
+            @Override
+            public Level getParentLevel() {
+                return Tenant;
+            }
+        },
+        Source {
+            @Override
+            public Level getParentLevel() {
+                return Project;
+            }
+        },
+        Upload {
+            @Override
+            public Level getParentLevel() {
+                return Source;
+            }
+        };
+
+        public Level getParentLevel() {
+            return null;
+        }
     }
 }
