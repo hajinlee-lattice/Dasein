@@ -10,87 +10,69 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UploadStats {
 
-    @JsonProperty("import")
-    private ImportStats importStats;
+    @JsonProperty("submitted")
+    private Long submitted;
 
-    @JsonProperty("match")
-    private MatchStats matchStats;
+    @JsonProperty("successfullyIngested")
+    private Long successfullyIngested;
 
-    public ImportStats getImportStats() {
-        return importStats;
+    @JsonProperty("failedIngested")
+    private Long failedIngested;
+
+    @JsonProperty("matched")
+    private Long matched;
+
+    @JsonProperty("pendingReviewCnt")
+    private Long pendingReviewCnt;
+
+    @JsonProperty("unmatched")
+    private Long unmatched;
+
+    public Long getSubmitted() {
+        return submitted;
     }
 
-    public void setImportStats(ImportStats importStats) {
-        this.importStats = importStats;
+    public void setSubmitted(Long submitted) {
+        this.submitted = submitted;
     }
 
-    public MatchStats getMatchStats() {
-        return matchStats;
+    public Long getSuccessfullyIngested() {
+        return successfullyIngested;
     }
 
-    public void setMatchStats(MatchStats matchStats) {
-        this.matchStats = matchStats;
+    public void setSuccessfullyIngested(Long successfullyIngested) {
+        this.successfullyIngested = successfullyIngested;
     }
 
-    public static class ImportStats {
-
-        @JsonProperty("success_cnt")
-        private Long successCnt;
-
-        @JsonProperty("error_cnt")
-        private Long errorCnt;
-
-        public Long getSuccessCnt() {
-            return successCnt;
-        }
-
-        public void setSuccessCnt(Long successCnt) {
-            this.successCnt = successCnt;
-        }
-
-        public Long getErrorCnt() {
-            return errorCnt;
-        }
-
-        public void setErrorCnt(Long errorCnt) {
-            this.errorCnt = errorCnt;
-        }
+    public Long getFailedIngested() {
+        return failedIngested;
     }
 
-    public static class MatchStats {
-
-        @JsonProperty("accepted_cnt")
-        private Long acceptedCnt;
-
-        @JsonProperty("pending_review_cnt")
-        private Long pendingReviewCnt;
-
-        @JsonProperty("rejected_cnt")
-        private Long rejectedCnt;
-
-        public Long getAcceptedCnt() {
-            return acceptedCnt;
-        }
-
-        public void setAcceptedCnt(Long acceptedCnt) {
-            this.acceptedCnt = acceptedCnt;
-        }
-
-        public Long getPendingReviewCnt() {
-            return pendingReviewCnt;
-        }
-
-        public void setPendingReviewCnt(Long pendingReviewCnt) {
-            this.pendingReviewCnt = pendingReviewCnt;
-        }
-
-        public Long getRejectedCnt() {
-            return rejectedCnt;
-        }
-
-        public void setRejectedCnt(Long rejectedCnt) {
-            this.rejectedCnt = rejectedCnt;
-        }
+    public void setFailedIngested(Long failedIngested) {
+        this.failedIngested = failedIngested;
     }
 
+    public Long getMatched() {
+        return matched;
+    }
+
+    public void setMatched(Long matched) {
+        this.matched = matched;
+    }
+
+    public Long getPendingReviewCnt() {
+        return pendingReviewCnt;
+    }
+
+    public void setPendingReviewCnt(Long pendingReviewCnt) {
+        this.pendingReviewCnt = pendingReviewCnt;
+    }
+
+    public Long getUnmatched() {
+        return unmatched;
+    }
+
+    public void setUnmatched(Long unmatched) {
+        this.unmatched = unmatched;
+    }
 }

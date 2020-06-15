@@ -108,13 +108,12 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
     }
 
     private void updateUploadStatistics(EaiImportJobDetail jobDetail) {
-        UploadStats.ImportStats importStats = new UploadStats.ImportStats();
         long totalCnt = jobDetail.getTotalRows();
         long errorCnt = jobDetail.getIgnoredRows() == null ? 0 : jobDetail.getIgnoredRows();
-        importStats.setSuccessCnt(totalCnt - errorCnt);
-        importStats.setErrorCnt(errorCnt);
         UploadStats stats = new UploadStats();
-        stats.setImportStats(importStats);
+        stats.setSubmitted(totalCnt);
+        stats.setSuccessfullyIngested(totalCnt - errorCnt);
+        stats.setFailedIngested(errorCnt);
         putObjectInContext(UPLOAD_STATS, stats);
     }
 

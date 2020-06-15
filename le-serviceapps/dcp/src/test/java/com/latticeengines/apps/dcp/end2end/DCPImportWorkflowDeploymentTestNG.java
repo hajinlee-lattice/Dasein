@@ -145,8 +145,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
         // Only verify the Error File if there are errors during ingestion and thus the file exists.
-        if (upload.getStatistics().getImportStats().getErrorCnt() > 0) {
-            System.out.println("Found " + upload.getStatistics().getImportStats().getErrorCnt() +
+        if (upload.getStatistics().getFailedIngested() > 0) {
+            System.out.println("Found " + upload.getStatistics().getFailedIngested() +
                     " errors.  Verifying error file.");
             verifyErrorFile(upload);
         } else {
@@ -165,8 +165,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 upload.getUploadConfig().getUploadImportedErrorFilePath());
         System.out.println("Error file path=" + errorFileKey);
         Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
-        Assert.assertNotNull(upload.getStatistics().getImportStats().getErrorCnt());
-        Assert.assertEquals(upload.getStatistics().getImportStats().getErrorCnt().longValue(), 5L);
+        Assert.assertNotNull(upload.getStatistics().getFailedIngested());
+        Assert.assertEquals(upload.getStatistics().getFailedIngested().longValue(), 5L);
     }
 
     private void prepareTenant() {
@@ -200,17 +200,11 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadStats uploadStats = upload.getStatistics();
         System.out.println(JsonUtils.serialize(uploadStats));
         Assert.assertNotNull(uploadStats);
+        Assert.assertTrue(uploadStats.getSuccessfullyIngested() > 0);
+        Assert.assertTrue(uploadStats.getMatched() > 0);
 
-        UploadStats.ImportStats importStats = uploadStats.getImportStats();
-        Assert.assertNotNull(importStats);
-        Assert.assertTrue(importStats.getSuccessCnt() > 0);
-
-        UploadStats.MatchStats matchStats = uploadStats.getMatchStats();
-        Assert.assertNotNull(matchStats);
-        Assert.assertTrue(matchStats.getAcceptedCnt() > 0);
-
-        Assert.assertEquals(Long.valueOf(matchStats.getAcceptedCnt() + //
-                matchStats.getPendingReviewCnt() + matchStats.getRejectedCnt()), importStats.getSuccessCnt());
+        Assert.assertEquals(Long.valueOf(uploadStats.getMatched() + //
+                uploadStats.getPendingReviewCnt() + uploadStats.getUnmatched()), uploadStats.getSuccessfullyIngested());
     }
 
     private void verifyMatchResult(UploadDetails upload) {

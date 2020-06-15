@@ -149,11 +149,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     private void updateUploadStatistics(SparkJobResult result) {
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
-        UploadStats.MatchStats matchStats = new UploadStats.MatchStats();
-        matchStats.setAcceptedCnt(result.getTargets().get(0).getCount());
-        matchStats.setPendingReviewCnt(0L);
-        matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
-        stats.setMatchStats(matchStats);
+        stats.setMatched(result.getTargets().get(0).getCount());
+        stats.setUnmatched(stats.getSuccessfullyIngested() - stats.getMatched());
+        stats.setPendingReviewCnt(0L);
+        //matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         putObjectInContext(UPLOAD_STATS, stats);
     }
 
