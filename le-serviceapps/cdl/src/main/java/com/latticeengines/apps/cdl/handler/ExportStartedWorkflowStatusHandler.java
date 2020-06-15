@@ -33,7 +33,7 @@ public class ExportStartedWorkflowStatusHandler implements WorkflowStatusHandler
 
         updateMonitoringStatus(statusMonitor, DataIntegrationEventType.ExportStart.toString());
 
-        if (statusMonitor.getStatus() == DataIntegrationEventType.ExportStart.toString()) {
+        if (statusMonitor.getStatus().equals(DataIntegrationEventType.ExportStart.toString())) {
 
             statusMonitor.setEventStartedTime(status.getEventTime());
 
