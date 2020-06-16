@@ -126,7 +126,7 @@
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
       "standardField":false,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "historyEnabled":true
    },
    {
