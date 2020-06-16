@@ -73,8 +73,8 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<AtlasStream> findByStreamType(AtlasStream.StreamType streamType) {
-        return readerRepository.findByStreamType(streamType);
+    public List<AtlasStream> findByTenantAndStreamType(Tenant tenant, AtlasStream.StreamType streamType) {
+        return readerRepository.findByTenantAndStreamType(tenant, streamType);
     }
 
     @Override
