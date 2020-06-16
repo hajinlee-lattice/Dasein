@@ -105,6 +105,17 @@ public class MigrationTrackResource {
         return track.getCurActiveTable();
     }
 
+    @GetMapping("/tenants/{customerSpace}/isInMigration")
+    @ResponseBody
+    public Boolean isTenantInMigration(@PathVariable(name = "customerSpace") String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        return migrationTrackEntityMgr.tenantInMigration(tenant);
+    }
+
     @PutMapping("/tenants/{customerSpace}/importMigrateTracking")
     @ResponseBody
     public Boolean updateImportTracking(@PathVariable(name = "customerSpace") String customerSpace,

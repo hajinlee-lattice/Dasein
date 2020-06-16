@@ -405,6 +405,11 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return get("getTenantStatus", url, MigrationTrack.Status.class);
     }
 
+    public Boolean isTenantInMigration(String customerSpace) {
+        String url = constructUrl("/migration/tenants/{customerSpace}/isInMigration", customerSpace);
+        return get("isTenantInMigration", url, Boolean.class);
+    }
+
     @SuppressWarnings("unchecked")
     public Map<TableRoleInCollection, String[]> getActiveTables(String customerSpace) {
         String url = constructUrl("/migration/tenants/{customerSpace}/activeTables", customerSpace);
