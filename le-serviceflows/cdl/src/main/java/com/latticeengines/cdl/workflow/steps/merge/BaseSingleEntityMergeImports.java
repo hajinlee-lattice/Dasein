@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseMergeImports<T> {
@@ -68,6 +69,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     @Inject
     protected BatonService batonService;
+
+    @Inject
+    protected MetadataProxy metadataProxy;
 
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     protected boolean skipPublishDynamo;
@@ -249,7 +253,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
             }
             // in replace mode, delete the records in document db
-            if (Boolean.TRUE.equals(configuration.getNeedReplace())) {
+            if (Boolean.TRUE.equals(configuration.getNeedReplace()) && !metadataProxy.isTenantInMigration(customerSpace.toString())) {
                 cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(),
                         configuration.getMainEntity());
             }
