@@ -129,7 +129,9 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         UploadStatsContainer container0 = new UploadStatsContainer();
         container0.setWorkflowPid(workflowId);
         UploadStats stats = new UploadStats();
-        stats.setFailedIngested(1L);
+        UploadStats.ImportStats importStats = new UploadStats.ImportStats();
+        importStats.setFailedIngested(1L);
+        stats.setImportStats(importStats);
         container0.setStatistics(stats);
 
         UploadStatsContainer container = uploadService.appendStatistics(upload.getUploadId(), container0);
@@ -151,21 +153,23 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         });
 
         Assert.assertNotNull(upload3.getStatistics());
-        Assert.assertEquals(upload3.getStatistics().getFailedIngested(), Long.valueOf(1));
+        Assert.assertEquals(upload3.getStatistics().getImportStats().getFailedIngested(), Long.valueOf(1));
 
         UploadStatsContainer container1 = new UploadStatsContainer();
         container1.setWorkflowPid(workflowId);
         stats = new UploadStats();
-        stats.setFailedIngested(3L);
+        importStats = new UploadStats.ImportStats();
+        importStats.setFailedIngested(3L);
+        stats.setImportStats(importStats);
         container1.setStatistics(stats);
         uploadService.appendStatistics(upload.getUploadId(), container1);
         Assert.assertNotEquals(container1.getPid(), container.getPid());
         UploadDetails upload4 = uploadService.setLatestStatistics(upload.getUploadId(), container1.getPid());
-        Assert.assertEquals(upload4.getStatistics().getFailedIngested(), Long.valueOf(3));
+        Assert.assertEquals(upload4.getStatistics().getImportStats().getFailedIngested(), Long.valueOf(3));
         retry.execute(ctx -> {
             UploadDetails u = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
             Assert.assertNotNull(u.getStatistics());
-            Assert.assertEquals(u.getStatistics().getFailedIngested(), Long.valueOf(3));
+            Assert.assertEquals(u.getStatistics().getImportStats().getFailedIngested(), Long.valueOf(3));
             return u;
         });
     }
