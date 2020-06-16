@@ -15,6 +15,8 @@ public class TestFrameworkWrapperWorkflowConfiguration extends WorkflowConfigura
 
     private static final Logger log = LoggerFactory.getLogger(TestFrameworkWrapperWorkflowConfiguration.class);
 
+    public static final String WORKFLOW_NAME = "testFrameworkWrapperWorkflow";
+
     @JsonProperty("testingSingleStep")
     private boolean testingSingleStep;
 
@@ -117,8 +119,7 @@ public class TestFrameworkWrapperWorkflowConfiguration extends WorkflowConfigura
 
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("testFrameworkWrapperWorkflow", customerSpace,
-                    "testFrameworkWrapperWorkflow");
+            configuration.setContainerConfiguration(WORKFLOW_NAME, customerSpace, WORKFLOW_NAME);
             preStepConfig.setCustomerSpace(customerSpace.toString());
             postStepConfig.setCustomerSpace(customerSpace.toString());
             return this;

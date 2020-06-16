@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.testframework;
 
+import static com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration.WORKFLOW_NAME;
 import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
@@ -48,6 +49,8 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends CDLDeploymentTestNG
 
     @Inject
     protected WorkflowService workflowService;
+
+    private boolean firstRun = true;
 
     public abstract void testWorkflow() throws Exception;
 
@@ -98,7 +101,11 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends CDLDeploymentTestNG
     }
 
     protected void runWorkflow(WorkflowConfiguration workflowConfig) throws Exception {
+        if (!firstRun) {
+            workflowService.unRegisterJob(WORKFLOW_NAME);
+        }
         workflowService.registerJob(workflowConfig, applicationContext);
+        firstRun = false;
         metadataProxy.setEnableTempTables(true);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS,

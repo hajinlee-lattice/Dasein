@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 // Workflow from wrapping the step or workflow under test in a super-workflow containing a preprocessing
 // that setups test infrastructure and a postprocessing step for tearing down test insfrastructure and
 // performing validation.
-@Component("testFrameworkWrapperWorkflow")
+@Component(TestFrameworkWrapperWorkflowConfiguration.WORKFLOW_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TestFrameworkWrapperWorkflow extends AbstractWorkflow<TestFrameworkWrapperWorkflowConfiguration> {
 
