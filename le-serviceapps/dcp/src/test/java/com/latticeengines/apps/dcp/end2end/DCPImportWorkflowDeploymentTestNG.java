@@ -32,6 +32,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -45,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -64,6 +67,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
@@ -155,6 +161,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyMatchResult(upload);
         verifyUploadStats(upload);
         verifyDownload(upload);
+        verifyDataReport();
     }
 
     private void verifyErrorFile(UploadDetails upload) {
@@ -283,6 +290,18 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(contents);
         Assert.assertTrue(contents.length > 0);
 
+    }
+
+    private void verifyDataReport() {
+        DataReport report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadId);
+        Assert.assertNotNull(report);
+        DataReport.BasicStats basicStats  = report.getBasicStats();
+        Assert.assertNotNull(basicStats);
+        Assert.assertTrue(basicStats.getSuccessCnt() > 0);
+        Assert.assertTrue(basicStats.getMatchedCnt() > 0);
+
+        Assert.assertEquals(Long.valueOf(basicStats.getMatchedCnt() + //
+                basicStats.getPendingReviewCnt() + basicStats.getUnmatchedCnt()), basicStats.getSuccessCnt());
     }
 
 }
