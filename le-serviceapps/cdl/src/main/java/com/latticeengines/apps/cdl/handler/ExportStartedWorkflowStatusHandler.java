@@ -33,12 +33,15 @@ public class ExportStartedWorkflowStatusHandler implements WorkflowStatusHandler
 
         updateMonitoringStatus(statusMonitor, DataIntegrationEventType.ExportStart.toString());
 
-        statusMonitor.setEventStartedTime(status.getEventTime());
+        if (statusMonitor.getStatus().equals(DataIntegrationEventType.ExportStart.toString())) {
 
-        if (statusMonitor.getEntityName().equals("PlayLaunch")) {
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
-            playLaunch.setLaunchState(LaunchState.Syncing);
-            playLaunchService.update(playLaunch);
+            statusMonitor.setEventStartedTime(status.getEventTime());
+
+            if (statusMonitor.getEntityName().equals("PlayLaunch")) {
+                PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
+                playLaunch.setLaunchState(LaunchState.Syncing);
+                playLaunchService.update(playLaunch);
+            }
         }
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
