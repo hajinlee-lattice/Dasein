@@ -532,8 +532,8 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         map.addMatchKey(MatchKey.Email, MatchKey.Email.name());
         map.addMatchKey(Name, ContactName.name());
         map.addMatchKey(MatchKey.PhoneNumber, MatchKey.PhoneNumber.name());
-        map.addMatchKey(MatchKey.Address, MatchKey.Address.name());
-        map.addMatchKey(MatchKey.Address2, MatchKey.Address2.name());
+        map.addMatchKey(MatchKey.Address, Address_Street_1.name());
+        map.addMatchKey(MatchKey.Address2, Address_Street_2.name());
         return map;
     }
 

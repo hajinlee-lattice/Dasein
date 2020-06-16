@@ -156,8 +156,9 @@ public final class MatchKeyUtils {
                 case "entityid":
                     keyMap.put(MatchKey.EntityId, Collections.singletonList(field));
                     break;
-                case "address_1":
-                case "address1":
+                case "address":
+                case "address_street_1":
+                case "addressstreet1":
                 case "street_address_1":
                 case "streetaddress1":
                 case "streetaddress_1":
@@ -165,6 +166,8 @@ public final class MatchKeyUtils {
                     break;
                 case "address_2":
                 case "address2":
+                case "address_street_2":
+                case "addressstreet2":
                 case "street_address_2":
                 case "streetaddress2":
                 case "streetaddress_2":
