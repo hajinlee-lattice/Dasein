@@ -95,7 +95,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         assertEquals(defaultS3ExportFields.size(), 41);
         assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 34);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 33);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 32);
 
     }
 
