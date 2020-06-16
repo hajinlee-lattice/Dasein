@@ -67,7 +67,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             InterfaceName.PostalCode.name(), //
             InterfaceName.PhoneNumber.name(), //
             InterfaceName.Title.name(), //
-            InterfaceName.Address.name());
+            InterfaceName.Address_Street_1.name());
 
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,

@@ -279,7 +279,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             Assert.assertTrue(d.containsKey(InterfaceName.PostalCode.name()), row);
             Assert.assertTrue(d.containsKey(InterfaceName.PhoneNumber.name()), row);
             Assert.assertTrue(d.containsKey(InterfaceName.Title.name()), row);
-            Assert.assertTrue(d.containsKey(InterfaceName.Address.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.Address_Street_1.name()), row);
         });
     }
 

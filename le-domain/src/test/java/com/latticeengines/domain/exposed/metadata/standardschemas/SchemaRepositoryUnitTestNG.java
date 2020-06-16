@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.metadata.standardschemas;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityType;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address2;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Amount;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AnnualRevenue;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AnnualRevenueCurrency;
@@ -87,7 +87,7 @@ public class SchemaRepositoryUnitTestNG {
     private static final List<InterfaceName> ACCOUNT_ATTRS = Arrays.asList(AccountId, Industry, AnnualRevenue,
             NumberOfEmployees, Type, AnnualRevenueCurrency, SpendAnalyticsSegment, CustomerParentAccountID, Longitude,
             Latitude, Event, Website, CompanyName, DUNS, City, State, Country, PostalCode, PhoneNumber,
-            Address, Address2);
+            Address_Street_1, Address_Street_2);
 
     private static final List<InterfaceName> ACCOUNT_ENTITY_MATCH_ATTRS = ACCOUNT_ATTRS.stream()
             .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr))
@@ -95,7 +95,7 @@ public class SchemaRepositoryUnitTestNG {
 
     private static final List<InterfaceName> CONTACT_ATTRS = Arrays.asList(ContactId, ContactName, FirstName, LastName,
             AccountId, Title, LeadSource, AnnualRevenue, NumberOfEmployees, Industry, DoNotMail, DoNotCall, LeadStatus,
-            LeadType, CreatedDate, LastModifiedDate, Email, CompanyName, Website, Address, Address2,
+            LeadType, CreatedDate, LastModifiedDate, Email, CompanyName, Website, Address_Street_1, Address_Street_2,
             City, State, Country, PostalCode, PhoneNumber, DUNS);
 
     private static final List<InterfaceName> CONTACT_ENTITY_MATCH_ATTRS = CONTACT_ATTRS.stream()

@@ -64,8 +64,8 @@ public enum InterfaceName {
     PostalCode, //
     Country, //
     PhoneNumber, //
-    Address, //
-    Address2,
+    Address_Street_1, //
+    Address_Street_2,
 
     Website, //
 

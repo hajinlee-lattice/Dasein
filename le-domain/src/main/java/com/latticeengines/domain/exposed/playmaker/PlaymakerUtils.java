@@ -136,7 +136,7 @@ public final class PlaymakerUtils {
         Map<String, String> contact = new HashMap<>();
 
         contact.put(PlaymakerConstants.Email, rawContact.get(InterfaceName.Email.name()));
-        contact.put(PlaymakerConstants.Address, rawContact.get(InterfaceName.Address.name()));
+        contact.put(PlaymakerConstants.Address, rawContact.get(InterfaceName.Address_Street_1.name()));
         contact.put(PlaymakerConstants.Phone, rawContact.get(InterfaceName.PhoneNumber.name()));
         contact.put(PlaymakerConstants.State, rawContact.get(InterfaceName.State.name()));
         contact.put(PlaymakerConstants.ZipCode, rawContact.get(InterfaceName.PostalCode.name()));

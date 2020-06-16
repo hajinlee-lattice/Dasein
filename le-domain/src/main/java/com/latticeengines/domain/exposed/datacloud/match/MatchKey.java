@@ -36,7 +36,7 @@ public enum MatchKey {
             .put(Zipcode, InterfaceName.PostalCode.name()) //
             .put(PhoneNumber, InterfaceName.PhoneNumber.name()) //
             .put(DUNS, InterfaceName.DUNS.name()) //
-            .put(Address, InterfaceName.Address.name()) //
-            .put(Address2, InterfaceName.Address2.name()) //
+            .put(Address, InterfaceName.Address_Street_1.name()) //
+            .put(Address2, InterfaceName.Address_Street_2.name()) //
             .build();
 }

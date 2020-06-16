@@ -60,8 +60,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.DUNS, InterfaceName.DUNS.name());
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.ExternalId, InterfaceName.Id.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address, InterfaceName.Address.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address2, InterfaceName.Address2.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address, InterfaceName.Address_Street_1.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address2, InterfaceName.Address_Street_2.name());
     }
 
     @Inject

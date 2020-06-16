@@ -147,7 +147,7 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
 
     private List<String> generateContactColsForS3() {
         return ImmutableList.<String> builder().add(InterfaceName.Email.name())
-                .add(InterfaceName.Address.name()).add(InterfaceName.Address2.name())
+                .add(InterfaceName.Address_Street_1.name()).add(InterfaceName.Address_Street_2.name())
                 .add(InterfaceName.PhoneNumber.name())
                 .add(InterfaceName.State.name()).add(InterfaceName.PostalCode.name()).add(InterfaceName.Country.name())
                 .add(InterfaceName.SalesforceContactID.name()).add(InterfaceName.City.name())
