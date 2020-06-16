@@ -3,7 +3,6 @@ package com.latticeengines.dcp.workflow.steps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,7 +19,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.dcp.MatchKeyFill;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStep
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
 import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.InputPresenceJob;
@@ -55,6 +56,10 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
 
     @Inject
     private ImportWorkflowSpecProxy importWorkflowSpecProxy;
+
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     @Override
     protected Class<? extends AbstractSparkJob<InputPresenceConfig>> getJobClz() {
@@ -98,21 +103,15 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
                         .collect(Collectors.toMap(FieldDefinition::getFieldName, FieldDefinition::getScreenName));
 
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
-        List<MatchKeyFill> fills = new ArrayList<>();
         UploadStats.ImportStats importStats = stats.getImportStats();
         long ingested = importStats.getSuccessCnt();
+        DataReport.InputPresenceReport inputPresenceReport = new DataReport.InputPresenceReport();
         MATCH_KEYS_TO_INTERNAL_NAMES.forEach((key, name) -> {
             long populated = map.getOrDefault(name, 0L);
-            MatchKeyFill fill = new MatchKeyFill();
-            fill.setMatchKey(key);
-            fill.setDisplayName(fieldNameToDisplayName.getOrDefault(name, "empty"));
-            fill.setIngested(ingested);
-            fill.setMissing(ingested - populated);
-            fill.setPopulated(populated);
-            fill.setFillRate((int)Math.round(fill.getPopulated() * 100.0 / fill.getIngested()));
-            fills.add(fill);
+            inputPresenceReport.addPresence(fieldNameToDisplayName.getOrDefault(name, "empty"), populated, ingested);
         });
-        stats.setMatchKeyFills(fills);
-        putObjectInContext(UPLOAD_STATS, stats);
+
+        dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
+                configuration.getUploadId(), inputPresenceReport);
     }
 }

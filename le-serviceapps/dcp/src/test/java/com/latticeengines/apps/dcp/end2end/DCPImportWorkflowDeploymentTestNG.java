@@ -33,7 +33,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
-import com.latticeengines.domain.exposed.dcp.MatchKeyFill;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -66,6 +68,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
@@ -157,6 +162,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyMatchResult(upload);
         verifyUploadStats(upload);
         verifyDownload(upload);
+        verifyDataReport();
     }
 
     private void verifyErrorFile(UploadDetails upload) {
@@ -213,10 +219,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertEquals(Long.valueOf(matchStats.getAcceptedCnt() + //
                 matchStats.getPendingReviewCnt() + matchStats.getRejectedCnt()), importStats.getSuccessCnt());
-
-        List<MatchKeyFill> fills = uploadStats.getMatchKeyFills();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(fills));
-        fills.forEach(e -> Assert.assertTrue(e.getFillRate() >= 0 && e.getFillRate() <= 100));
     }
 
     private void verifyMatchResult(UploadDetails upload) {
@@ -292,4 +294,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     }
 
+    private void verifyDataReport() {
+        DataReport report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadId);
+        System.out.println(JsonUtils.serialize(report));
+        Assert.assertNotNull(report);
+        DataReport.InputPresenceReport inputPresenceReport  = report.getInputPresenceReport();
+        Assert.assertNotNull(inputPresenceReport);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(inputPresenceReport.getPresenceList()));
+    }
 }
