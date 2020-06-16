@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,12 +14,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
-@Listeners({ SimpleRetryListener.class })
+@Listeners({SimpleRetryListener.class})
 public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
-
-    private static final String STREAM_WEBVISIT = "WebVisit";
-    private static final String STREAM_MARKETO = "MarketoActivity";
-    private static final List<String> STREAM_NAMES = Arrays.asList(STREAM_WEBVISIT, STREAM_MARKETO);
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -33,7 +28,6 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
         prepareStream();
         for (String name : STREAM_NAMES) {
             AtlasStream stream = streams.get(name);
-            stream.setStreamType(name.equals(STREAM_WEBVISIT) ? AtlasStream.StreamType.WebVisit : AtlasStream.StreamType.MarketingActivity);
             Assert.assertNotNull(stream);
             Assert.assertNotNull(stream.getPid());
         }
@@ -41,7 +35,7 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
 
     // [ Name + Tenant ] need to be unique
     @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = {
-            DataIntegrityViolationException.class })
+            DataIntegrityViolationException.class})
     public void testCreateConflict() {
         createStream(STREAM_WEBVISIT);
     }
@@ -71,8 +65,9 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate", retryAnalyzer = SimpleRetryAnalyzer.class)
-    private void testFindByStreamType() {
-        List<AtlasStream> streams = streamEntityMgr.findByStreamType(AtlasStream.StreamType.WebVisit);
+    private void testFindByTenantAndStreamType() {
+        List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(mainTestTenant, AtlasStream.StreamType.WebVisit);
+        Assert.assertEquals(streams.size(), 1);
         streams.forEach(stream -> {
             Assert.assertEquals(stream.getStreamType(), AtlasStream.StreamType.WebVisit);
             Assert.assertEquals(stream.getTenant().getId(), mainTestTenant.getId());

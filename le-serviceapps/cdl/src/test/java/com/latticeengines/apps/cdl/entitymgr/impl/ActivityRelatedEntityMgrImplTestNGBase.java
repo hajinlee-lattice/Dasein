@@ -39,6 +39,10 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
     protected static final List<PeriodStrategy.Template> PERIODS = Arrays.asList(PeriodStrategy.Template.Week,
             PeriodStrategy.Template.Month);
 
+    protected static final String STREAM_WEBVISIT = "WebVisit";
+    protected static final String STREAM_MARKETO = "MarketoActivity";
+    protected static final List<String> STREAM_NAMES = Arrays.asList(STREAM_WEBVISIT, STREAM_MARKETO);
+
     @Inject
     protected DataFeedEntityMgr datafeedEntityMgr;
 
@@ -125,6 +129,7 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
         stream.setPeriods(PERIODS.stream().map(Enum::name).collect(Collectors.toList()));
         stream.setRetentionDays(1000);
         stream.setAttributeDerivers(attrDerivers);
+        stream.setStreamType(name.equals(STREAM_WEBVISIT) ? AtlasStream.StreamType.WebVisit : AtlasStream.StreamType.MarketingActivity);
         streamEntityMgr.create(stream);
         return stream;
     }
