@@ -49,9 +49,6 @@ public class StatsProfiler {
     @Inject
     private ProfileProxy profileProxy;
 
-    @Resource(name = "yarnConfiguration")
-    protected Configuration yarnConfiguration;
-
     private AttrClassifier classifier;
 
     public void initProfileConfig(ProfileJobConfig config) {
