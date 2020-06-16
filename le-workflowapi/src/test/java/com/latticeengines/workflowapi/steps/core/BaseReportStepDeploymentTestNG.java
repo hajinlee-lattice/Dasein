@@ -11,12 +11,13 @@ import org.springframework.batch.core.BatchStatus;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.db.exposed.service.ReportService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.report.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
@@ -30,7 +31,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
     private WorkflowJobService workflowJobService;
 
     @Inject
-    private ReportService reportService;
+    private WorkflowReportService reportService;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -51,7 +52,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
         Report report = job.getReports().get(0);
         assertTrue(report.getName().startsWith("Test"));
 
-        Report retrieved = reportService.getReportByName(report.getName());
+        Report retrieved = reportService.findReportByName(MultiTenantContext.getTenant().getId(), report.getName());
         assertEquals(report.getJson().toString(), retrieved.getJson().toString());
 
         Map<String, String> output = job.getOutputs();
