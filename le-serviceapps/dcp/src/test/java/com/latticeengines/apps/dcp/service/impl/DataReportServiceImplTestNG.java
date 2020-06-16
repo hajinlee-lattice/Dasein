@@ -97,6 +97,10 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertEquals(sourceReportRecord.getParentId(), projectReportRecord.getPid());
         Assert.assertEquals(projectReportRecord.getParentId(), tenantReportRecord.getPid());
 
+        DataReport.BasicStats basicStats1 = dataReportService.getDataReportBasicStats(mainCustomerSpace,
+                DataReportRecord.Level.Upload, "uploadUID");
+        Assert.assertEquals(JsonUtils.serialize(basicStats1), JsonUtils.serialize(dataReportPersist.getBasicStats()));
+
         String report1 = JsonUtils.serialize(dataReportPersist);
         DataReport newReport = getDataReport();
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", newReport);

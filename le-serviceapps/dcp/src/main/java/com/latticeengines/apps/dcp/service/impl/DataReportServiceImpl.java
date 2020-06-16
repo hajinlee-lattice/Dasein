@@ -46,6 +46,14 @@ public class DataReportServiceImpl implements DataReportService {
     }
 
     @Override
+    public DataReport.BasicStats getDataReportBasicStats(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        return dataReportEntityMgr.findDataReportBasicStats(level, ownerId);
+    }
+
+    @Override
     public DataReportRecord getDataReportRecord(String customerSpace, DataReportRecord.Level level, String ownerId) {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;

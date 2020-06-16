@@ -7,6 +7,8 @@ public interface DataReportService {
 
     DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId);
 
+    DataReport.BasicStats getDataReportBasicStats(String customerSpace, DataReportRecord.Level level, String ownerId);
+
     DataReportRecord getDataReportRecord(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport dataReport);

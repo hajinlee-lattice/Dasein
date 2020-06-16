@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.DataReportService;
+import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
@@ -30,10 +31,22 @@ public class DataReportResource {
     @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get Data Report")
+    @UseReaderConnection
     public DataReport getDataReport(@PathVariable String customerSpace, @RequestParam DataReportRecord.Level level,
                                     @RequestParam(required = false) String ownerId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataReportService.getDataReport(customerSpace, level, ownerId);
+    }
+
+    @GetMapping("/basicstats")
+    @ResponseBody
+    @ApiOperation(value = "Get Data Report Only Basic Stats")
+    @UseReaderConnection
+    public DataReport.BasicStats getDataReportBasicStats(@PathVariable String customerSpace,
+                                              @RequestParam DataReportRecord.Level level,
+                                              @RequestParam(required = false) String ownerId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataReportService.getDataReportBasicStats(customerSpace, level, ownerId);
     }
 
     @PostMapping

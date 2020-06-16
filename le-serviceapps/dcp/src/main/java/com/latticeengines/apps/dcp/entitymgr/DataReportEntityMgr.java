@@ -8,6 +8,8 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId);
 
+    DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId);
+
     boolean existsDataReport(DataReportRecord.Level level, String ownerId);
 
     Long findDataReportPid(DataReportRecord.Level level, String ownerId);

@@ -63,6 +63,12 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findBasicStatsByLevelAndOwnerId(level, ownerId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean existsDataReport(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().existsByLevelAndOwnerId(level, ownerId);
     }
