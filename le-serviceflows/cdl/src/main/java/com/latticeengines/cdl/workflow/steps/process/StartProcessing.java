@@ -1,5 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.READY;
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.STALE;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,6 +44,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.MigrationTrack;
@@ -846,8 +850,21 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 }
             }
         }
-        log.info("Removing stats in " + inactiveVersion);
-        dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
+
+        new Thread(() -> {
+            log.info("Removing stats in " + inactiveVersion);
+            dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
+
+            List<DataCollectionArtifact> artifacts =
+                    dataCollectionProxy.getDataCollectionArtifacts(customerSpace.toString(), READY, inactiveVersion);
+            if (CollectionUtils.isNotEmpty(artifacts)) {
+                for (DataCollectionArtifact artifact: artifacts) {
+                    artifact.setStatus(STALE);
+                    dataCollectionProxy.updateDataCollectionArtifact(customerSpace.toString(), artifact);
+                    log.info("Update {} artifact in version {} to STALE", artifact.getName(), artifact.getVersion());
+                }
+            }
+        }).start();
     }
 
     private void resetEntityMatchFlagsForRetry() {
