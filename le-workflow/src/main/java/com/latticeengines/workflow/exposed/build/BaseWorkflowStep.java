@@ -217,6 +217,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
     protected static final String PROCESS_ACCOUNT_FULL_PROFILE = "PROCESS_ACCOUNT_FULL_PROFILE";
     protected static final String ACTIVITY_STREAMS_NEED_REBUILD = "ACTIVITY_STREAMS_NEED_REBUILD";
+    protected static final String ACTIVITY_PARTITION_MIGRATION_PERFORMED = "ACTIVITY_PARTITION_MIGRATION_PERFORMED";
+    protected static final String ACTIVITY_MIGRATED_RAW_STREAM = "ACTIVITY_MIGRATED_RAW_STREAM";
+    protected static final String ACTIVITY_MIGRATED_DAILY_STREAM = "ACTIVITY_MIGRATED_DAILY_STREAM";
     protected static final String ACTIVITY_STREAMS_SKIP_AGG = "ACTIVITY_STREAMS_SKIP_AGG";
     protected static final String ACTIVITY_STREAM_METADATA_CACHE = "STREAM_METADATA_CACHE";
     protected static final String STREAM_DIMENSION_METADATA_MAP = "STREAM_DIMENSION_METADATA_MAP";

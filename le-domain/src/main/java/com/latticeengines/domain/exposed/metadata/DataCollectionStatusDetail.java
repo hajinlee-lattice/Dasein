@@ -93,6 +93,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("timelineVersionMap")
     private Map<String, String> timelineVersionMap;
 
+    @JsonProperty("activityPartitionKeyMigrated")
+    private boolean activityPartitionKeyMigrated = false;
+
     public Integer getMinTxnDate() {
         return minTxnDate;
     }
@@ -263,5 +266,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setTimelineVersionMap(Map<String, String> timelineVersionMap) {
         this.timelineVersionMap = timelineVersionMap;
+    }
+
+    public boolean isActivityPartitionKeyMigrated() {
+        return activityPartitionKeyMigrated;
+    }
+
+    public void setActivityPartitionKeyMigrated(boolean activityPartitionKeyMigrated) {
+        this.activityPartitionKeyMigrated = activityPartitionKeyMigrated;
     }
 }

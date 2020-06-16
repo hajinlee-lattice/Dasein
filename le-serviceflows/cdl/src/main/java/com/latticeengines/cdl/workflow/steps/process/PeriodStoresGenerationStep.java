@@ -128,7 +128,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                     if (dailyStoreDeltaTable == null) {
                         throw new IllegalStateException(String.format("Stream %s is set to incremental update but no import delta table found", streamId));
                     }
-                    inputs.add(dailyStoreDeltaTable.partitionedToHdfsDataUnit(null, Collections.singletonList(InterfaceName.PeriodId.name())));
+                    inputs.add(dailyStoreDeltaTable.partitionedToHdfsDataUnit(null, Collections.singletonList(InterfaceName.StreamDateId.name())));
                     log.info(String.format("Added delta table %s to stream %s for incremental update.", dailyStoreDeltaTable.getName(), streamId));
                 });
                 details.setLabels(labels);
@@ -138,7 +138,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 if (dailyStoreTable == null) {
                     throw new IllegalStateException(String.format("Cannot find the daily store table for stream %s", streamId));
                 }
-                DataUnit tableDU = dailyStoreTable.partitionedToHdfsDataUnit(String.format(INPUT_TABLE_PREFIX, streamId) + dailyStoreTable.getName(), Collections.singletonList(InterfaceName.__StreamDateId.name()));
+                DataUnit tableDU = dailyStoreTable.partitionedToHdfsDataUnit(String.format(INPUT_TABLE_PREFIX, streamId) + dailyStoreTable.getName(), Collections.singletonList(InterfaceName.StreamDateId.name()));
                 inputs.add(tableDU);
                 metadata.put(streamId, details);
             }

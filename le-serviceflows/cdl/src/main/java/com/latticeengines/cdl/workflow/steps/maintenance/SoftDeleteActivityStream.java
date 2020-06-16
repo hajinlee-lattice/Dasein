@@ -67,7 +67,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
     }
 
     private Map<String, String> updateRawStreamTableEntries() {
-        Map<String, String> updated = new HashMap<>(configuration.getActiveRawStreamTables());
+        Map<String, String> updated = new HashMap<>(getActiveRawStreamTables());
         updated.putAll(rawStreamsAfterDelete);
         return updated;
     }
@@ -112,7 +112,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
 
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        configuration.getActiveRawStreamTables().forEach((streamId, tableName) -> {
+        getActiveRawStreamTables().forEach((streamId, tableName) -> {
             List<DeleteActionConfiguration> deleteConfigsForStream = softDeleteActivityActions.stream().filter(action -> {
                 DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
                 return config.hasStream(streamId);
@@ -141,6 +141,13 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
             request.setSteps(steps);
             return request;
         }
+    }
+
+    private Map<String, String> getActiveRawStreamTables() {
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
+            return getMapObjectFromContext(ACTIVITY_MIGRATED_RAW_STREAM, String.class, String.class);
+        }
+        return configuration.getActiveRawStreamTables();
     }
 
     private void appendSoftDeleteStreamStep(List<TransformationStepConfig> steps, boolean hasDeleteImport, List<DeleteActionConfiguration> deleteConfigsForStream, String idColumn, String streamId, String rawStreamTable) {
@@ -189,8 +196,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         step.setTransformer(TRANSFORMER_MERGE_TS_DELETE_TXFMR);
         Map<Integer, List<Long>> timeRanges = new HashMap<>();
         int timeRangeIdx = 0;
-        for (int i = 0; i < deleteConfigsForStream.size(); i++) {
-            DeleteActionConfiguration deleteConfig = deleteConfigsForStream.get(i);
+        for (DeleteActionConfiguration deleteConfig : deleteConfigsForStream) {
             if (StringUtils.isNotBlank(deleteConfig.getDeleteDataTable())) {
                 // only merge delete with delete import, skip ones deleting only by time range
                 addBaseTables(step, deleteConfig.getDeleteDataTable());

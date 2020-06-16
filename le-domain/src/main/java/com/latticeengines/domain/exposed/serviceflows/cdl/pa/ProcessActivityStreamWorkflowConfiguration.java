@@ -68,6 +68,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder activeRawStreamTables(Map<String, String> rawStreamTables) {
             processStepConfiguration.setActiveRawStreamTables(rawStreamTables);
+            activityStreamSparkConfiguration.setActiveRawStreamTables(rawStreamTables);
             return this;
         }
 
