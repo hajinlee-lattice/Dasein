@@ -76,30 +76,30 @@ public class DataReportEntityMgrImpl
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.BasicStats basicStats) {
-        dataReportWriterRepository.updateDataReportBasicStats(pid, new Date(), basicStats);
+        dataReportWriterRepository.updateDataReport(pid, new Date(), basicStats);
     }
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.InputPresenceReport inputPresenceReport) {
-        dataReportWriterRepository.updateDataReportBasicStats(pid, new Date(), inputPresenceReport);
+        dataReportWriterRepository.updateDataReport(pid, new Date(), inputPresenceReport);
     }
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.GeoDistributionReport geoDistributionReport) {
-        dataReportWriterRepository.updateDataReportBasicStats(pid, new Date(), geoDistributionReport);
+        dataReportWriterRepository.updateDataReport(pid, new Date(), geoDistributionReport);
     }
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.MatchToDUNSReport matchToDUNSReport) {
-        dataReportWriterRepository.updateDataReportBasicStats(pid, new Date(), matchToDUNSReport);
+        dataReportWriterRepository.updateDataReport(pid, new Date(), matchToDUNSReport);
     }
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.DuplicationReport duplicationReport) {
-        dataReportWriterRepository.updateDataReportBasicStats(pid, new Date(), duplicationReport);
+        dataReportWriterRepository.updateDataReport(pid, new Date(), duplicationReport);
     }
 }

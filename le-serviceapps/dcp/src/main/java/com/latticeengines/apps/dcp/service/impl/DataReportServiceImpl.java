@@ -38,17 +38,56 @@ public class DataReportServiceImpl implements DataReportService {
 
     @Override
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
         return convertRecordToDataReport(dataReportRecord);
     }
 
     @Override
     public DataReportRecord getDataReportRecord(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         return dataReportEntityMgr.findDataReportRecord(level, ownerId);
     }
 
     @Override
+    public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport dataReport) {
+        if (dataReport == null) {
+            return;
+        }
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+        if (pid != null) {
+            DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+            dataReportRecord.setBasicStats(dataReport.getBasicStats());
+            dataReportRecord.setInputPresenceReport(dataReport.getInputPresenceReport());
+            dataReportRecord.setGeoDistributionReport(dataReport.getGeoDistributionReport());
+            dataReportRecord.setMatchToDUNSReport(dataReport.getMatchToDUNSReport());
+            dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
+            dataReportRecord.setRefreshTime(new Date());
+            dataReportEntityMgr.update(dataReportRecord);
+        } else {
+            DataReportRecord dataReportRecord = getEmptyReportRecord(level, ownerId);
+            dataReportRecord.setBasicStats(dataReport.getBasicStats());
+            dataReportRecord.setInputPresenceReport(dataReport.getInputPresenceReport());
+            dataReportRecord.setGeoDistributionReport(dataReport.getGeoDistributionReport());
+            dataReportRecord.setMatchToDUNSReport(dataReport.getMatchToDUNSReport());
+            dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
+            dataReportRecord.setParentId(getParentPid(customerSpace, level, ownerId));
+            dataReportEntityMgr.create(dataReportRecord);
+        }
+    }
+
+    @Override
     public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.BasicStats basicStats) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             dataReportEntityMgr.updateDataReportRecord(pid, basicStats);
@@ -63,6 +102,9 @@ public class DataReportServiceImpl implements DataReportService {
     @Override
     public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,
                                  DataReport.InputPresenceReport inputPresenceReport) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             dataReportEntityMgr.updateDataReportRecord(pid, inputPresenceReport);
@@ -77,6 +119,9 @@ public class DataReportServiceImpl implements DataReportService {
     @Override
     public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,
                                  DataReport.GeoDistributionReport geoDistributionReport) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             dataReportEntityMgr.updateDataReportRecord(pid, geoDistributionReport);
@@ -91,6 +136,9 @@ public class DataReportServiceImpl implements DataReportService {
     @Override
     public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,
                                  DataReport.MatchToDUNSReport matchToDUNSReport) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             dataReportEntityMgr.updateDataReportRecord(pid, matchToDUNSReport);
@@ -105,6 +153,9 @@ public class DataReportServiceImpl implements DataReportService {
     @Override
     public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,
                                  DataReport.DuplicationReport duplicationReport) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             dataReportEntityMgr.updateDataReportRecord(pid, duplicationReport);

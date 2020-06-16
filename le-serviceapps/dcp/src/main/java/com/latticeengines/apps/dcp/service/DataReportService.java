@@ -9,6 +9,8 @@ public interface DataReportService {
 
     DataReportRecord getDataReportRecord(String customerSpace, DataReportRecord.Level level, String ownerId);
 
+    void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport dataReport);
+
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.BasicStats basicStats);
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.InputPresenceReport inputPresenceReport);

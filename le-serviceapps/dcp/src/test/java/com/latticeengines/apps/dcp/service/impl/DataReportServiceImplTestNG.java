@@ -18,6 +18,7 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
@@ -95,6 +96,14 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertEquals(uploadReportRecord.getParentId(), sourceReportRecord.getPid());
         Assert.assertEquals(sourceReportRecord.getParentId(), projectReportRecord.getPid());
         Assert.assertEquals(projectReportRecord.getParentId(), tenantReportRecord.getPid());
+
+        String report1 = JsonUtils.serialize(dataReportPersist);
+        DataReport newReport = getDataReport();
+        dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", newReport);
+        String report2 = JsonUtils.serialize(dataReportService.getDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Upload, "uploadUID"));
+        Assert.assertNotEquals(report1, report2);
+
     }
 
     private DataReport getDataReport() {
@@ -142,7 +151,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         DataReport.MatchToDUNSReport matchToDUNSReport = new DataReport.MatchToDUNSReport();
         Long dMatch = new RandomDataGenerator().nextLong(300L, matchCnt);
-        Long dUnMatch = matchCnt - dMatch;
+        long dUnMatch = matchCnt - dMatch;
         Long dNoMatch = new RandomDataGenerator().nextLong(0L, dUnMatch);
         matchToDUNSReport.setMatched(dMatch);
         matchToDUNSReport.setUnmatched(dUnMatch);
