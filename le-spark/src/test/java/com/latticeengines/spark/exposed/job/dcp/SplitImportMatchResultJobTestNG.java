@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.dcp.DunsStats;
+import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -46,10 +46,10 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
     @Override
     protected void verifyOutput(String output) {
         System.out.println(output);
-        DunsStats stats = JsonUtils.deserialize(output, DunsStats.class);
-        Assert.assertEquals(stats.getDistinctCnt(), Long.valueOf(4));
-        Assert.assertEquals(stats.getUniqueCnt(), Long.valueOf(2));
-        Assert.assertEquals(stats.getDuplicatedCnt(), Long.valueOf(5));
+        DataReport.DuplicationReport report = JsonUtils.deserialize(output, DataReport.DuplicationReport.class);
+        Assert.assertEquals(report.getDistinctRecords(), Long.valueOf(4));
+        Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(2));
+        Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(5));
     }
 
     @Override

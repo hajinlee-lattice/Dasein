@@ -1,14 +1,12 @@
 package com.latticeengines.spark.exposed.job.dcp
 
 import com.latticeengines.common.exposed.util.JsonUtils
-import com.latticeengines.domain.exposed.dcp.DunsStats
+import com.latticeengines.domain.exposed.dcp.DataReport
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CSVUtils
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.count
-import org.apache.spark.sql.functions.sum
+import org.apache.spark.sql.functions.{col, count, sum}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
@@ -30,14 +28,11 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
       .persist(StorageLevel.DISK_ONLY).checkpoint()
     val uniqueCnt = dunsCntDF.filter(col("cnt") === 1).agg(sum("cnt").cast("long")).first().getLong(0)
     val duplicatedCnt = dunsCntDF.filter(col("cnt") > 1).agg(sum("cnt").cast("long")).first().getLong(0)
-    val totalCnt = uniqueCnt + duplicatedCnt
     val distinctCount = dunsCntDF.count()
-    val duns = new DunsStats
-    duns.setDistinctCnt(distinctCount)
-    duns.setUniqueCnt(uniqueCnt)
-    duns.setDuplicatedCnt(duplicatedCnt)
-    duns.setUniPercent(uniqueCnt * 100.0 / totalCnt)
-    duns.setDupPercent(duplicatedCnt * 100.0 / totalCnt)
+    val duns = new DataReport.DuplicationReport
+    duns.setDistinctRecords(distinctCount)
+    duns.setUniqueRecords(uniqueCnt)
+    duns.setDuplicateRecords(duplicatedCnt)
 
     lattice.outputStr = JsonUtils.serialize(duns)
     lattice.output = acceptedCsv :: rejectedCsv :: Nil

@@ -16,9 +16,6 @@ public class UploadStats {
     @JsonProperty("match")
     private MatchStats matchStats;
 
-    @JsonProperty("duns")
-    private DunsStats dunsStats;
-
     public ImportStats getImportStats() {
         return importStats;
     }
@@ -33,14 +30,6 @@ public class UploadStats {
 
     public void setMatchStats(MatchStats matchStats) {
         this.matchStats = matchStats;
-    }
-
-    public DunsStats getDunsStats() {
-        return dunsStats;
-    }
-
-    public void setDunsStats(DunsStats dunsStats) {
-        this.dunsStats = dunsStats;
     }
 
     public static class ImportStats {
