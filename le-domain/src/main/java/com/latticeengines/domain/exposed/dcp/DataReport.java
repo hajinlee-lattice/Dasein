@@ -8,7 +8,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -192,6 +194,13 @@ public class DataReport {
             }
         }
 
+        @JsonProperty("input_presence_List")
+        public void setPresenceList(List<PresenceItem> presenceList) {
+            if (CollectionUtils.isNotEmpty(presenceList)) {
+                presenceMap = presenceList.stream().collect(Collectors.toMap(PresenceItem::getField, item -> item));
+            }
+        }
+
         @JsonIgnore
         public void addPresence(String field, Long presenceCnt, Long totalCnt) {
             Preconditions.checkArgument(StringUtils.isNotEmpty(field));
@@ -275,6 +284,14 @@ public class DataReport {
                 return geoDistributionList;
             } else {
                 return Collections.emptyList();
+            }
+        }
+
+        @JsonProperty("geo_distribution_list")
+        public void setGeographicalDistributionList(List<GeographicalItem> geographicalItems) {
+            if (CollectionUtils.isNotEmpty(geographicalItems)) {
+                geographicalDistributionMap =
+                        geographicalItems.stream().collect(Collectors.toMap(GeographicalItem::getGeoCode, item -> item));
             }
         }
 
@@ -406,6 +423,14 @@ public class DataReport {
                 return confidenceRateList;
             } else {
                 return Collections.emptyList();
+            }
+        }
+
+        @JsonProperty("confidence_rate_list")
+        public void setConfidenceRateList(List<ConfidenceItem> confidenceItems) {
+            if (CollectionUtils.isNotEmpty(confidenceItems)) {
+                confidenceRateMap =
+                        confidenceItems.stream().collect(Collectors.toMap(ConfidenceItem::getConfidenceCode, item -> item));
             }
         }
 
