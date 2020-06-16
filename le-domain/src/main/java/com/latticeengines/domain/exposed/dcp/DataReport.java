@@ -183,7 +183,7 @@ public class DataReport {
             this.presenceMap = presenceMap;
         }
 
-        @JsonProperty("input_presence_List")
+        @JsonProperty("input_presence_list")
         public List<PresenceItem> getPresenceList() {
             if (MapUtils.isNotEmpty(presenceMap)) {
                 List<PresenceItem> presenceList = new ArrayList<>(presenceMap.values());
@@ -194,7 +194,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("input_presence_List")
+        @JsonProperty("input_presence_list")
         public void setPresenceList(List<PresenceItem> presenceList) {
             if (CollectionUtils.isNotEmpty(presenceList)) {
                 presenceMap = presenceList.stream().collect(Collectors.toMap(PresenceItem::getField, item -> item));
