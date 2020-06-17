@@ -1,4 +1,4 @@
-package com.latticeengines.security.controller;
+package com.latticeengines.pls.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.util.UIActionUtils;
-import com.latticeengines.security.exposed.service.TeamService;
+import com.latticeengines.pls.service.TeamWrapperService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,7 +37,7 @@ public class TeamResource {
     private static final Logger log = LoggerFactory.getLogger(TeamResource.class);
 
     @Inject
-    private TeamService teamService;
+    private TeamWrapperService teamWrapperService;
 
     @GetMapping("/username/{username:.+}")
     @ResponseBody
@@ -45,7 +45,7 @@ public class TeamResource {
     public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username,
                                                @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember) {
         User loginUser = MultiTenantContext.getUser();
-        return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
+        return teamWrapperService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
 
     @GetMapping("/session")
@@ -54,7 +54,7 @@ public class TeamResource {
     public List<GlobalTeam> getTeamsFromSession(
             @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember,
             @RequestParam(value = "appendDefaultGlobalTeam", required = false, defaultValue = "true") boolean appendDefaultGlobalTeam) {
-        List<GlobalTeam> globalTeams = teamService.getMyTeams(withTeamMember, appendDefaultGlobalTeam);
+        List<GlobalTeam> globalTeams = teamWrapperService.getMyTeams(withTeamMember, appendDefaultGlobalTeam);
         return globalTeams;
     }
 
@@ -62,7 +62,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "List all teams")
     public List<GlobalTeam> getAllTeams() {
-        return teamService.getTeamsInContext(true, false);
+        return teamWrapperService.getTeamsInContext(true, false);
     }
 
     @PostMapping("")
@@ -71,7 +71,7 @@ public class TeamResource {
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public String createTeam(@RequestBody GlobalTeamData globalTeamData) {
         try {
-            return teamService.createTeam(MultiTenantContext.getUser().getEmail(), globalTeamData);
+            return teamWrapperService.createTeam(MultiTenantContext.getUser().getEmail(), globalTeamData);
         } catch (Exception ex) {
             throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
         }
@@ -85,7 +85,7 @@ public class TeamResource {
                             @RequestBody GlobalTeamData globalTeamData) {
         log.info("Edit team {}.", teamId);
         try {
-            return teamService.editTeam(teamId, globalTeamData);
+            return teamWrapperService.editTeam(teamId, globalTeamData);
         } catch (Exception ex) {
             throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
         }
@@ -106,6 +106,6 @@ public class TeamResource {
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, List<String>> getDependencies(@PathVariable String teamId) throws Exception {
         log.info(String.format("get all dependencies for teamId=%s", teamId));
-        return teamService.getDependencies(teamId);
+        return teamWrapperService.getDependencies(teamId);
     }
 }

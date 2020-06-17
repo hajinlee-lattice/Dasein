@@ -42,6 +42,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.cdl.TalkingPoint;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -65,7 +67,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
-public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, SoftDeletable {
+public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, SoftDeletable, HasTeamInfo {
 
     private static final String PLAY_NAME_PREFIX = "play";
     private static final String PLAY_NAME_FORMAT = "%s__%s";
@@ -390,11 +392,40 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         return String.format(PLAY_NAME_FORMAT, PLAY_NAME_PREFIX, UUID.randomUUID().toString());
     }
 
+    @Override
+    public String getTeamId() {
+        return targetSegment == null ? null : targetSegment.getTeamId();
+    }
+
+    @Override
+    public void setTeamId(String teamId) {
+        if (targetSegment != null) {
+            targetSegment.setTeamId(teamId);
+        }
+    }
+
+    @Override
     public boolean isViewOnly() {
         return viewOnly;
     }
 
+    @Override
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
+        if (targetSegment != null) {
+            targetSegment.setViewOnly(viewOnly);
+        }
+    }
+
+    @Override
+    public GlobalTeam getTeam() {
+        return targetSegment == null ? null : targetSegment.getTeam();
+    }
+
+    @Override
+    public void setTeam(GlobalTeam team) {
+        if (targetSegment != null) {
+            targetSegment.setTeam(team);
+        }
     }
 }

@@ -1,10 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,12 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.auth.exposed.util.TeamUtils;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.auth.GlobalTeam;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -26,9 +17,8 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayService;
-import com.latticeengines.pls.util.TeamInfoUtils;
+import com.latticeengines.pls.service.TeamWrapperService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.security.exposed.service.TeamService;
 
 @Component("playService")
 public class PlayServiceImpl implements PlayService {
@@ -39,27 +29,21 @@ public class PlayServiceImpl implements PlayService {
     private PlayProxy playProxy;
 
     @Inject
-    private TeamService teamService;
-
-    @Inject
-    private BatonService batonService;
+    private TeamWrapperService teamWrapperService;
 
     @Override
     public List<Play> getPlays(Boolean shouldLoadCoverage, String ratingEngineId) {
+        return getPlays(true, shouldLoadCoverage, ratingEngineId);
+    }
+
+    @Override
+    public List<Play> getPlays(boolean inflateTeam, Boolean shouldLoadCoverage, String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         Tenant tenant = MultiTenantContext.getTenant();
-        boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
-        Map<String, GlobalTeam> globalTeamMap = teamFeatureEnabled ? teamService.getTeamsInContext(true, true)
-                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam)) : new HashMap<>();
-        GlobalTeam defaultGlobalTeam = teamFeatureEnabled ? teamService.getDefaultGlobalTeam() : null;
-        for (Play play : plays) {
-            TeamInfoUtils.fillTeamId(play.getTargetSegment());
-            inflateSegment(play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(),
-                    defaultGlobalTeam), teamService.getMyTeamIds());
-        }
+        teamWrapperService.fillTeamInfoForList(inflateTeam, plays);
         return plays;
     }
 
@@ -67,26 +51,8 @@ public class PlayServiceImpl implements PlayService {
     public Play getPlay(String playName) {
         Tenant tenant = MultiTenantContext.getTenant();
         Play play = playProxy.getPlay(tenant.getId(), playName);
-        if (play != null) {
-            boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-            TeamInfoUtils.fillTeamId(play.getTargetSegment());
-            inflateSegment(play, teamFeatureEnabled ? teamService.getTeamInContext(play.getTargetSegment().getTeamId()) : null
-                    , teamService.getMyTeamIds());
-        }
+        teamWrapperService.fillTeamInfo(play);
         return play;
-    }
-
-    private void inflateSegment(Play play, GlobalTeam globalTeam, Set<String> teamIds) {
-        if (globalTeam == null) {
-            return;
-        }
-        MetadataSegment metadataSegment = play.getTargetSegment();
-        metadataSegment.setTeam(globalTeam);
-        String teamId = metadataSegment.getTeamId();
-        if (!TeamUtils.isGlobalTeam(teamId) && !teamIds.contains(teamId)) {
-            play.setViewOnly(true);
-            metadataSegment.setViewOnly(true);
-        }
     }
 
     @Override

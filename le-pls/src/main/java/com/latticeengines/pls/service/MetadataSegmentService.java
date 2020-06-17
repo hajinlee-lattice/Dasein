@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface MetadataSegmentService {
 
-    List<MetadataSegment> getSegments();
+    List<MetadataSegment> getSegments(boolean translateToFrontEnd);
 
     List<MetadataSegment> getSegmentsInContext();
 
