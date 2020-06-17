@@ -404,6 +404,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             FULL_REMATCH_PA, //
             ENTITY_MATCH_REMATCH_STAGING_VERSION, //
             NEW_RECORD_CUT_OFF_TIME, //
+            CONSOLIDATE_INPUT_TEMPLATES, //
             PROCESS_ACCOUNT_STATS_MERGE);
 
     @Autowired
@@ -644,10 +645,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      * @param tableNameStrCtxKeys
      *            list of context keys that contain a single table as string
      * @param tableNameListCtxKeys
-     *            list of context keys that contain a list of tables as
-     *            serialized list of string
-     * @return list of tables, null will be inserted if the corresponding table
-     *         does not exist
+     *            list of context keys that contain a list of tables as serialized
+     *            list of string
+     * @return list of tables, null will be inserted if the corresponding table does
+     *         not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
             List<String> tableNameListCtxKeys) {

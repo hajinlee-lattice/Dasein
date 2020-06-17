@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,8 @@ public class SplitSystemBatchStore
 
     List<String> discardFields;
 
+    private boolean shortCutMode = false;
+
     @Override
     protected Class<SplitSystemBatchStoreJob> getJobClz() {
         return SplitSystemBatchStoreJob.class;
@@ -66,37 +69,52 @@ public class SplitSystemBatchStore
     @Override
     protected SplitSystemBatchStoreConfig configureJob(ConvertBatchStoreStepConfiguration stepConfiguration) {
         customerSpace = stepConfiguration.getCustomerSpace();
-        TableRoleInCollection role = (configuration.getEntity() == BusinessEntity.Account)
-                ? TableRoleInCollection.SystemAccount
-                : TableRoleInCollection.SystemContact;
-
-        Table table = dataCollectionProxy.getTable(customerSpace.getTenantId(), role);
-        if (table == null) {
-            throw new IllegalStateException(
-                    "Cannot find " + role.toString() + " for this tenant, initial PA might be missing...");
+        Map<String, List<String>> rematchTableMap = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
+                new TypeReference<Map<String, List<String>>>() {
+                });
+        if (rematchTableMap == null) {
+            shortCutMode = false;
         } else {
-            discardFields = new LinkedList<>();
-            // read the table attributes and exact all templates(prefix)
-            table.getAttributes().forEach(attr -> {
-                String attrName = attr.getName();
-                // Column LatticeAccountId is generated during matching,
-                // should discard from split imports
-                if (StringUtils.contains(attrName, LATTICE_ACCOUNT_ID)) {
-                    discardFields.add(attrName);
-                }
-                int i = attrName.indexOf("__");
-                if (i != -1) {
-                    String template = attrName.substring(0, i);
-                    templates.add(template);
-                }
-            });
+            log.info("rematchTableMap: {}, entity: {}", rematchTableMap, configuration.getEntity().name());
+            List<String> rematchTables = rematchTableMap.get(configuration.getEntity().name());
+            shortCutMode = CollectionUtils.isEmpty(rematchTables) ? false : true;
         }
-        log.info("templates are {}, discard fields are {}", templates, discardFields);
-        SplitSystemBatchStoreConfig config = new SplitSystemBatchStoreConfig();
-        config.setInput(Collections.singletonList(table.toHdfsDataUnit(role.toString())));
-        config.setTemplates(templates.stream().collect(Collectors.toList()));
-        config.setDiscardFields(discardFields);
-        return config;
+        if (shortCutMode) {
+            log.info("Found rematch tables in context, going through short-cut mode.");
+            return null;
+        } else {
+            TableRoleInCollection role = (configuration.getEntity() == BusinessEntity.Account)
+                    ? TableRoleInCollection.SystemAccount
+                    : TableRoleInCollection.SystemContact;
+
+            Table table = dataCollectionProxy.getTable(customerSpace.getTenantId(), role);
+            if (table == null) {
+                throw new IllegalStateException(
+                        "Cannot find " + role.toString() + " for this tenant, initial PA might be missing...");
+            } else {
+                discardFields = new LinkedList<>();
+                // read the table attributes and exact all templates(prefix)
+                table.getAttributes().forEach(attr -> {
+                    String attrName = attr.getName();
+                    // Column LatticeAccountId is generated during matching,
+                    // should discard from split imports
+                    if (StringUtils.contains(attrName, LATTICE_ACCOUNT_ID)) {
+                        discardFields.add(attrName);
+                    }
+                    int i = attrName.indexOf("__");
+                    if (i != -1) {
+                        String template = attrName.substring(0, i);
+                        templates.add(template);
+                    }
+                });
+            }
+            log.info("templates are {}, discard fields are {}", templates, discardFields);
+            SplitSystemBatchStoreConfig config = new SplitSystemBatchStoreConfig();
+            config.setInput(Collections.singletonList(table.toHdfsDataUnit(role.toString())));
+            config.setTemplates(templates.stream().collect(Collectors.toList()));
+            config.setDiscardFields(discardFields);
+            return config;
+        }
     }
 
     @Override
@@ -124,7 +142,7 @@ public class SplitSystemBatchStore
         log.info("tableTemplateMap size " + tableTemplateMap.size() + ", tempList size " + tempList.size());
         for (HdfsDataUnit target : targets) {
             String tableName = NamingUtils.timestamp(role.toString() + "_split" + cnt);
-            log.info("Generatd table name is " + tableName);
+            log.info("Generated table name is " + tableName);
             Table splitTable = toTable(tableName, target);
 
             // Update the table template map
@@ -135,6 +153,9 @@ public class SplitSystemBatchStore
 
             rematchTables.putIfAbsent(configuration.getEntity().name(), new LinkedList<String>());
             rematchTables.get(configuration.getEntity().name()).add(tableName);
+
+            exportToS3(splitTable);
+            addToListInContext(TEMPORARY_CDL_TABLES, tableName, String.class);
             cnt++;
         }
 

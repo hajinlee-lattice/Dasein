@@ -265,7 +265,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void syncRedshiftTablesToNewCluster(String newPartition) {
         RedshiftService newRedshiftService = redshiftPartitionService.getSegmentUserService(newPartition);
-        for (TableRoleInCollection servingStore: TableRoleInCollection.values()) {
+        for (TableRoleInCollection servingStore : TableRoleInCollection.values()) {
             if (StringUtils.isNotBlank(servingStore.getDistKey())) {
                 String tableName = //
                         dataCollectionProxy.getTableName(customerSpace.toString(), servingStore, activeVersion);
@@ -280,7 +280,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                         dataUnit.setRedshiftTable(tableName.toLowerCase());
                         newDataUnit = true;
                     }
-                    if (!newPartition.equals(dataUnit.getClusterPartition()) || !newRedshiftService.hasTable(tableName)) {
+                    if (!newPartition.equals(dataUnit.getClusterPartition())
+                            || !newRedshiftService.hasTable(tableName)) {
                         log.info("Publishing redshift table {} to new partition {}", tableName, newPartition);
                         String distKey = servingStore.getDistKey();
                         List<String> sortKeys = new ArrayList<>(servingStore.getSortKeys());
@@ -617,7 +618,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             if (!ActionType.LEGACY_DELETE_UPLOAD.equals(action.getType())) {
                 continue;
             }
-            LegacyDeleteByUploadActionConfiguration config = (LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration();
+            LegacyDeleteByUploadActionConfiguration config = (LegacyDeleteByUploadActionConfiguration) action
+                    .getActionConfiguration();
             if (BusinessEntity.Account.equals(config.getEntity())) {
                 accountLegacyDeleteByUploadActions.add(action);
                 continue;
@@ -633,7 +635,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 transactionLegacyDeleteByUploadActions.put(config.getCleanupOperationType(), actionSet);
             }
         }
-        log.info("transactionLegacyDeleteByUploadActions is {}.", JsonUtils.serialize(transactionLegacyDeleteByUploadActions));
+        log.info("transactionLegacyDeleteByUploadActions is {}.",
+                JsonUtils.serialize(transactionLegacyDeleteByUploadActions));
         log.info("accountLegacyDeleteByUploadActions is {}.", accountLegacyDeleteByUploadActions);
         log.info("contactLegacyDeleteByUploadActions is {}.", contactLegacyDeleteByUploadActions);
         putObjectInContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, accountLegacyDeleteByUploadActions);
@@ -646,7 +649,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (CollectionUtils.isNotEmpty(actions)) {
             for (Action action : actions) {
                 if (ActionType.LEGACY_DELETE_DATERANGE.equals(action.getType())) {
-                    LegacyDeleteByDateRangeActionConfiguration config = (LegacyDeleteByDateRangeActionConfiguration) action.getActionConfiguration();
+                    LegacyDeleteByDateRangeActionConfiguration config = (LegacyDeleteByDateRangeActionConfiguration) action
+                            .getActionConfiguration();
                     Set<Action> actionSet = legacyDeleteByDateRangeActions.get(config.getEntity());
                     if (actionSet == null) {
                         actionSet = new HashSet<>();
@@ -730,7 +734,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void addActionAssociateTables() {
         List<Action> actionList = getImportActions();
         if (CollectionUtils.isNotEmpty(actionList)) {
-            Map<String, String> tableTemplateMap = new HashMap<>();
+            Map<String, String> tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class,
+                    String.class);
+            if (tableTemplateMap == null) {
+                tableTemplateMap = new HashMap<>();
+            }
             for (Action action : actionList) {
                 if (action.getActionConfiguration() == null) {
                     log.warn(String.format("Action %d does not have a import configuration, may need re-import.",
@@ -763,7 +771,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 if (configuration.isEntityMatchEnabled()) {
                     DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
                             importActionConfiguration.getDataFeedTaskId());
-                    String templateName = dataFeedProxy.getTemplateName(customerSpace.toString(), dataFeedTask.getUniqueId());
+                    String templateName = dataFeedProxy.getTemplateName(customerSpace.toString(),
+                            dataFeedTask.getUniqueId());
                     associateTemplates(tables, templateName, tableTemplateMap);
                 }
             }
@@ -795,8 +804,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     /**
      * check transaction limit has two step: this is first step, if there is no
-     * delete transaction action in this PA we will check transaction quota
-     * limit. otherwise, we will check quota in merge step
+     * delete transaction action in this PA we will check transaction quota limit.
+     * otherwise, we will check quota in merge step
      */
     private void reachTransactionLimit() {
         List<Action> deleteTransactionActions = getTransactionDeleteActions();
