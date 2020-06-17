@@ -1,5 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,6 +30,7 @@ import com.latticeengines.cdl.workflow.steps.validations.InputFileValidator;
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
@@ -52,8 +56,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         }
         InterfaceName pathPattern = InterfaceName.PathPattern;
         //Detect duplicates. There can only be one value per Name field in the input
-        InterfaceName name = InterfaceName.Name;
-        Set<String> nameList = new HashSet<>();
+        Set<String> catalogNames = new HashSet<>();
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             // iterate through all files, remove all illegal record row
@@ -95,12 +98,12 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                                         pathStr, regexStr));
                                             }
                                         }
-                                        String nameStr = getFieldValue(record, name.name());
-                                        if (nameList.contains(nameStr)) {
+
+                                        String nameStr = getNameValue(record);
+                                        // false means this display name already exists and there is duplicate
+                                        if (StringUtils.isNotBlank(nameStr) && !catalogNames.add(nameStr)) {
                                             throw new IOException(String.format("We found multiple entries for the same " +
                                                     "Name field in line %s. Please correct and try again.", lineId));
-                                        } else {
-                                            nameList.add(nameStr);
                                         }
                                     } else {
                                         csvFilePrinter.printRecord(lineId, "", "invalid row as its file size exceeds " +
@@ -146,6 +149,40 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         EntityValidationSummary summary = new EntityValidationSummary();
         summary.setErrorLineNumber(errorLine);
         return summary;
+    }
+
+    /*-
+     * get catalog display name value, null if no column or no value
+     */
+    private String getNameValue(@NotNull GenericRecord record) {
+        String nameColumn = getNameColumn(record);
+        if (StringUtils.isBlank(nameColumn)) {
+            return null;
+        }
+
+        return getFieldValue(record, nameColumn);
+    }
+
+    /*
+     * For webvisit, catalog display name column is PathPatternName, otherwise it's
+     * Name
+     */
+    private String getNameColumn(@NotNull GenericRecord record) {
+        if (hasField(record, Name.name())) {
+            return Name.name();
+        } else if (hasField(record, PathPatternName.name())) {
+            return PathPatternName.name();
+        } else {
+            return null;
+        }
+    }
+
+    private boolean hasField(@NotNull GenericRecord record, @NotNull String fieldName) {
+        if (record.getSchema() == null) {
+            return false;
+        }
+
+        return record.getSchema().getField(fieldName) != null;
     }
 
     private boolean isValidRegex(String regex) {
