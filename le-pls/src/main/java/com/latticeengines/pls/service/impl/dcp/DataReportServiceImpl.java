@@ -2,6 +2,8 @@ package com.latticeengines.pls.service.impl.dcp;
 
 import java.time.Instant;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.slf4j.Logger;
@@ -9,14 +11,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.pls.service.dcp.DataReportService;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 
 @Service("dataReportService")
 public class DataReportServiceImpl implements DataReportService {
 
     private static final Logger log = LoggerFactory.getLogger(DataReportServiceImpl.class);
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     @Override
     public DataReport getDataReport(DataReportRecord.Level level, String ownerId, Boolean mock) {
