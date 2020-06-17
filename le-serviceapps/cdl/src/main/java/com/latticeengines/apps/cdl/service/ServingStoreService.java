@@ -30,6 +30,8 @@ public interface ServingStoreService {
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter);
 
+    List<ColumnMetadata> getDataAttributes(String customerSpace, BusinessEntity entity, DataCollection.Version version);
+
     List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
             DataCollection.Version version);
 

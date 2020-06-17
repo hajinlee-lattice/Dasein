@@ -55,6 +55,11 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
+    public List<ColumnMetadata> getDateAttrsFromCache(String customerSpace, BusinessEntity entity) {
+        return cacheService.getDateAttrs(customerSpace, entity);
+    }
+
+    @Override
     public List<ColumnMetadata> getAccountMetadataFromCache(String customerSpace, ColumnSelection.Predefined group) {
         return getDecoratedMetadataWithDeflatedDisplayNamesFromCache(customerSpace,
                 BusinessEntity.getAccountExportEntities(group), Collections.singleton(group));
