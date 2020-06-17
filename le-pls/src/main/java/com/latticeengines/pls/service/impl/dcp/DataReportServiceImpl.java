@@ -19,11 +19,15 @@ public class DataReportServiceImpl implements DataReportService {
     private static final Logger log = LoggerFactory.getLogger(DataReportServiceImpl.class);
 
     @Override
-    public DataReport getDataReport(DataReportRecord.Level level, String ownerId) {
+    public DataReport getDataReport(DataReportRecord.Level level, String ownerId, Boolean mock) {
         Preconditions.checkNotNull(level);
         Preconditions.checkArgument(DataReportRecord.Level.Tenant.equals(level) || StringUtils.isNotEmpty(ownerId));
-
-        return mockReturn();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+        if (Boolean.TRUE.equals(mock)) {
+            return mockReturn();
+        }
+        return dataReportProxy.getDataReport(customerSpace.toString(), level, ownerId);
     }
 
     /**

@@ -28,11 +28,11 @@ public class DataReportResourceDeploymentTestNG extends DCPDeploymentTestNGBase 
 
     @Test(groups = "deployment")
     public void testGetDataReport() {
-        DataReport dataReport = testDataReportProxy.getDataReport(DataReportRecord.Level.Tenant, null);
+        DataReport dataReport = testDataReportProxy.getDataReport(DataReportRecord.Level.Tenant, null, Boolean.TRUE);
         Assert.assertNotNull(dataReport);
-        dataReport = testDataReportProxy.getDataReport(DataReportRecord.Level.Source, "sourceId");
+        dataReport = testDataReportProxy.getDataReport(DataReportRecord.Level.Source, "sourceId", Boolean.TRUE);
         Assert.assertNotNull(dataReport);
         System.out.println(JsonUtils.serialize(dataReport));
-        Assert.assertThrows(() -> testDataReportProxy.getDataReport(DataReportRecord.Level.Upload, null));
+        Assert.assertThrows(() -> testDataReportProxy.getDataReport(DataReportRecord.Level.Upload, null, Boolean.TRUE));
     }
 }
