@@ -42,8 +42,9 @@ public class HttpClientWithOptionalRetryUtilsUnitTestNG {
         Assert.assertTrue(argsObj.get(TEMPERATURE).asText().equals(_101));
 
         JsonNode headersObj = resultObj.get("headers");
-        Assert.assertTrue(headersObj.get(AUTHORIZATION).asText().equals(TOKEN_SOME_TOKEN));
-        Assert.assertTrue(headersObj.get(CONTENT_TYPE).asText().equals(APPLICATION_JSON));
+        Assert.assertEquals(headersObj.get(AUTHORIZATION).asText(), TOKEN_SOME_TOKEN,
+                "Actual Authorization: " + headersObj.get(AUTHORIZATION));
+        Assert.assertTrue(headersObj.get(CONTENT_TYPE).asText().contains(APPLICATION_JSON), "Actual Content Type: " + headersObj.get(CONTENT_TYPE));
     }
 
     @SuppressWarnings("deprecation")
@@ -64,7 +65,7 @@ public class HttpClientWithOptionalRetryUtilsUnitTestNG {
         Assert.assertTrue(resultObj.get("data").asText().equals(SOME_TEST_PAYLOAD));
 
         JsonNode headersObj = resultObj.get("headers");
-        Assert.assertTrue(headersObj.get(AUTHORIZATION).asText().equals(TOKEN_SOME_TOKEN));
-        Assert.assertTrue(headersObj.get(CONTENT_TYPE).asText().equals(APPLICATION_JSON));
+        Assert.assertEquals(headersObj.get(AUTHORIZATION).asText(), TOKEN_SOME_TOKEN, "Actual Authorization: " + headersObj.get(AUTHORIZATION));
+        Assert.assertTrue(headersObj.get(CONTENT_TYPE).asText().contains(APPLICATION_JSON), "Actual Content Type: " + headersObj.get(CONTENT_TYPE));
     }
 }
