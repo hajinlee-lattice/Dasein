@@ -12,8 +12,6 @@ public interface PlayService {
 
     List<Play> getPlays(Boolean shouldLoadCoverage, String ratingEngineId);
 
-    List<Play> getPlays(boolean inflateTeam, Boolean shouldLoadCoverage, String ratingEngineId);
-
     Play getPlay(String playName);
 
     Play createOrUpdate(Play play);

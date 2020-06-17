@@ -26,9 +26,6 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 
 public interface RatingEngineService {
 
-    List<RatingEngineSummary> getRatingEngineSummaries(boolean inflateTeam, String status, String type,
-                                                       Boolean publishedRatingsOnly);
-
     List<RatingEngineSummary> getRatingEngineSummaries(String status, String type, Boolean publishedRatingsOnly);
 
     List<RatingEngine> getAllDeletedRatingEngines();

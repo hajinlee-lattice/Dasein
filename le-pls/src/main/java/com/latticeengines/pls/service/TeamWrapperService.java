@@ -29,7 +29,7 @@ public interface TeamWrapperService {
 
     void fillTeamInfo(HasTeamInfo hasTeamInfo);
 
-    void fillTeamInfoForList(boolean inflateTeam, List<? extends HasTeamInfo> hasTeamInfos);
+    void fillTeamInfoForList(List<? extends HasTeamInfo> hasTeamInfos);
 
     void fillTeamInfo(HasTeamInfo hasTeamInfo, boolean setTeam);
 }

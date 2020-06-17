@@ -65,17 +65,11 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     private TeamWrapperService teamWrapperService;
 
     @Override
-    public List<RatingEngineSummary> getRatingEngineSummaries(boolean inflateTeam, String status, String type,
-                                                              Boolean publishedRatingsOnly) {
+    public List<RatingEngineSummary> getRatingEngineSummaries(String status, String type, Boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
         List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, publishedRatingsOnly);
-        teamWrapperService.fillTeamInfoForList(inflateTeam, ratingEngineSummaries);
+        teamWrapperService.fillTeamInfoForList(ratingEngineSummaries);
         return ratingEngineSummaries;
-    }
-
-    @Override
-    public List<RatingEngineSummary> getRatingEngineSummaries(String status, String type, Boolean publishedRatingsOnly) {
-        return getRatingEngineSummaries(true, status, type, publishedRatingsOnly);
     }
 
     @Override

@@ -18,6 +18,9 @@ import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.service.TeamWrapperService;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.security.exposed.service.TeamService;
 
 @Component("teamWrapperService")
@@ -28,6 +31,15 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private SegmentProxy segmentProxy;
+
+    @Inject
+    private PlayProxy playProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public Map<String, List<String>> getDependencies(String teamId) throws Exception {
@@ -46,7 +58,8 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
 
     @Override
     public List<GlobalTeam> getTeamsInContext(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
-        return teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
+        List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
+        return globalTeams;
     }
 
     @Override
@@ -91,10 +104,7 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     }
 
     @Override
-    public void fillTeamInfoForList(boolean inflateTeam, List<? extends HasTeamInfo> hasTeamInfos) {
-        if (!inflateTeam) {
-            return;
-        }
+    public void fillTeamInfoForList(List<? extends HasTeamInfo> hasTeamInfos) {
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         if (teamFeatureEnabled) {
             Map<String, GlobalTeam> globalTeamMap = getTeamsInContext(false, true)

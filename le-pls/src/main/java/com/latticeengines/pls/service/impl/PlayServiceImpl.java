@@ -33,17 +33,12 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<Play> getPlays(Boolean shouldLoadCoverage, String ratingEngineId) {
-        return getPlays(true, shouldLoadCoverage, ratingEngineId);
-    }
-
-    @Override
-    public List<Play> getPlays(boolean inflateTeam, Boolean shouldLoadCoverage, String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         Tenant tenant = MultiTenantContext.getTenant();
         List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
-        teamWrapperService.fillTeamInfoForList(inflateTeam, plays);
+        teamWrapperService.fillTeamInfoForList(plays);
         return plays;
     }
 
