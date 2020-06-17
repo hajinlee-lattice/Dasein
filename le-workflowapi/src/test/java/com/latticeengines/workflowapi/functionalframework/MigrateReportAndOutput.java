@@ -20,11 +20,11 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 public class MigrateReportAndOutput extends WorkflowTestNGBase {
 
@@ -37,7 +37,7 @@ public class MigrateReportAndOutput extends WorkflowTestNGBase {
     private JobExplorer jobExplorer;
 
     @Inject
-    private ReportService reportService;
+    private WorkflowReportService reportService;
 
     @Test(groups = "manual")
     public void migrate() {
@@ -76,7 +76,7 @@ public class MigrateReportAndOutput extends WorkflowTestNGBase {
         if (contextObj instanceof Map) {
             for (Object obj : ((Map) contextObj).values()) {
                 if (obj instanceof String) {
-                    Report report = reportService.getReportByName((String) obj);
+                    Report report = reportService.findReportByName(workflowJob.getTenant().getId(), (String) obj);
                     if (report != null) {
                         workflowJob.setReportName(report.getPurpose().getKey(), report.getName());
                     }
@@ -87,7 +87,7 @@ public class MigrateReportAndOutput extends WorkflowTestNGBase {
         } else if (contextObj instanceof Set) {
             for (Object obj : (Set) contextObj) {
                 if (obj instanceof String) {
-                    Report report = reportService.getReportByName((String) obj);
+                    Report report = reportService.findReportByName(workflowJob.getTenant().getId(), (String) obj);
                     if (report != null) {
                         workflowJob.setReportName(report.getPurpose().getKey(), report.getName());
                     }

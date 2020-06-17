@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.apps.cdl.entitymgr;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;

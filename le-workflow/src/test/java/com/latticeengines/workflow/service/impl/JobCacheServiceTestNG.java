@@ -27,7 +27,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobCache;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -38,6 +37,7 @@ import com.latticeengines.workflow.cache.JobCacheWriter;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @ContextConfiguration(locations = {"classpath:test-workflow-context.xml"})
@@ -58,7 +58,7 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
 
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
-    private ReportService reportService;
+    private WorkflowReportService workflowReportService;
 
     private RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate(
             MAX_WAIT_ATTEMPTS, WAIT_INTERVALS, MULTIPLIER, Collections.singletonMap(Exception.class, true));
@@ -68,12 +68,12 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
 
     @BeforeClass(groups = "functional")
     public void setUpShared() throws Exception {
-        reportService = Mockito.mock(ReportService.class);
+        workflowReportService = Mockito.mock(WorkflowReportService.class);
         leJobExecutionRetriever = Mockito.mock(LEJobExecutionRetriever.class);
-        configureReportService(reportService);
+        configureReportService();
         Mockito.when(leJobExecutionRetriever.getJobExecution(Mockito.anyLong())).thenReturn(newJobExecution(123L));
         Mockito.when(leJobExecutionRetriever.getJobExecution(Mockito.any(), Mockito.anyBoolean())).thenReturn(newJobExecution(123L));
-        FieldUtils.writeField(service, "reportService", reportService, true);
+        FieldUtils.writeField(service, "workflowReportService", workflowReportService, true);
         FieldUtils.writeField(service, "leJobExecutionRetriever", leJobExecutionRetriever, true);
     }
 
@@ -253,10 +253,10 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 
-    private void configureReportService(ReportService reportService) {
+    private void configureReportService() {
         Report report = new Report();
         report.setPid(123L);
-        Mockito.when(reportService.getReportByName(Mockito.anyString())).thenReturn(report);
+        Mockito.when(workflowReportService.findReportByName(Mockito.anyString(), Mockito.anyString())).thenReturn(report);
     }
 
     private void assertJsonEquals(Object obj1, Object obj2) {
@@ -273,7 +273,7 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
         try {
             String resultStr = mapper.writeValueAsString(result);
             Job job = WorkflowJobUtils.assembleJob(
-                    reportService, leJobExecutionRetriever, microserviceUrl, expectedJob, includeDetails);
+                    workflowReportService, leJobExecutionRetriever, microserviceUrl, expectedJob, includeDetails);
             if (result.getOutputs() != null) {
                 // remove yarn log link path for easier checks
                 result.getOutputs().remove(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH);

@@ -46,9 +46,7 @@ public class MetadataSegmentExportCleanupServiceImpl implements MetadataSegmentE
             tenants.stream() //
                     .forEach(tenant -> {
                         MultiTenantContext.setTenant(tenant);
-
                         List<MetadataSegmentExport> exportJobs = metadataSegmentExportService.getSegmentExports();
-
                         if (CollectionUtils.isNotEmpty(exportJobs)) {
                             exportJobs.stream() //
                                     .forEach(exportJob -> {

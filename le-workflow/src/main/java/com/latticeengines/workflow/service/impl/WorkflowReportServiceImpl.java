@@ -6,28 +6,20 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 
 @Component("workflowReportService")
-public class WorkflowReportServiceImpl implements ReportService {
+public class WorkflowReportServiceImpl implements WorkflowReportService {
 
     @Inject
     private ReportEntityMgr reportEntityMgr;
 
     @Override
-    public void createOrUpdateReport(Report report) {
-        Report existing = reportEntityMgr.findByName(report.getName());
-        if (existing != null) {
-            reportEntityMgr.delete(existing);
-        }
-        reportEntityMgr.create(report);
-
-    }
-
-    @Override
-    public void deleteReportByName(String name) {
+    @WithCustomerSpace
+    public void deleteReportByName(String customerSpace, String name) {
         Report report = reportEntityMgr.findByName(name);
         if (report != null) {
             reportEntityMgr.delete(report);
@@ -35,13 +27,25 @@ public class WorkflowReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Report getReportByName(String name) {
+    @WithCustomerSpace
+    public Report findReportByName(String customerSpace, String name) {
         return reportEntityMgr.findByName(name);
     }
 
     @Override
-    public List<Report> findAll() {
+    @WithCustomerSpace
+    public List<Report> findAll(String customerSpace) {
         return reportEntityMgr.findAll();
     }
 
+    @Override
+    @WithCustomerSpace
+    public void createOrUpdateReport(String customerSpace, Report report) {
+        Report existing = reportEntityMgr.findByName(report.getName());
+        if (existing != null) {
+            reportEntityMgr.delete(existing);
+        }
+        reportEntityMgr.create(report);
+
+    }
 }

@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -21,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.JobRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -29,6 +32,8 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
 public class WorkflowProxy extends MicroserviceRestApiProxy {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowProxy.class);
 
     private static final String CUSTOMER_SPACE_ERROR = "No customer space provided.";
 
@@ -495,5 +500,33 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return constructUrl(urlStr.toString());
     }
 
+    public void registerReport(String customerSpace, Report report) {
+        checkCustomerSpace(customerSpace);
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(constructUrl("/report?customerSpace=")).append(shortenCustomerSpace(customerSpace));
+        post("registerReport", urlStr.toString(), report);
+    }
 
+    public Report findReportByName(String customerSpace, String name) {
+        checkCustomerSpace(customerSpace);
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(constructUrl("/report/{name}", name));
+        urlStr.append("?customerSpace=").append(shortenCustomerSpace(customerSpace));
+        return get("findReportByName", urlStr.toString(), Report.class);
+    }
+
+    public void deleteReportByName(String customerSpace, String name) {
+        checkCustomerSpace(customerSpace);
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(constructUrl("/report/{name}", name));
+        urlStr.append("?customerSpace=").append(shortenCustomerSpace(customerSpace));
+        delete("deleteReportByName", urlStr.toString());
+    }
+
+    public List<Report> findAllReports(String customerSpace) {
+        checkCustomerSpace(customerSpace);
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(constructUrl("/report?customerSpace=")).append(shortenCustomerSpace(customerSpace));
+        return JsonUtils.convertList(get("findAllReports", urlStr.toString(), List.class), Report.class);
+    }
 }

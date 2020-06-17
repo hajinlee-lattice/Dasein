@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Date;
 import java.util.List;
@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.cdl.dao.MetadataSegmentExportDao;
+import com.latticeengines.apps.cdl.entitymgr.MetadataSegmentExportEntityMgr;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -21,8 +23,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.dao.MetadataSegmentExportDao;
-import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 
 @Component("metadataSegmentExportEntityMgr")
 public class MetadataSegmentExportEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegmentExport>
