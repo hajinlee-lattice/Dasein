@@ -35,6 +35,7 @@ import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -60,6 +61,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -238,17 +240,17 @@ public abstract class CheckpointServiceBase {
                 String src = entry.getKey();
                 String tgt = entry.getValue();
                 String msg = String.format("Clone redshift table %s to %s.", src, tgt);
-//                try (PerformanceTimer timer = new PerformanceTimer(msg)) {
-//                    redshiftService.cloneTable(src, tgt);
-//                    RedshiftDataUnit dataUnit = new RedshiftDataUnit();
-//                    dataUnit.setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
-//                    dataUnit.setName(tgt);
-//                    dataUnit.setRedshiftTable(tgt.toLowerCase());
-//                    dataUnit.setClusterPartition(redshiftPartitionService.getDefaultPartition());
-//                    dataUnitProxy.create(mainTestTenant.getId(), dataUnit);
-//                } catch (Exception e) {
-//                    throw new RuntimeException("Failed to clone redshift table.", e);
-//                }
+                try (PerformanceTimer timer = new PerformanceTimer(msg)) {
+                    redshiftService.cloneTable(src, tgt);
+                    RedshiftDataUnit dataUnit = new RedshiftDataUnit();
+                    dataUnit.setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+                    dataUnit.setName(tgt);
+                    dataUnit.setRedshiftTable(tgt.toLowerCase());
+                    dataUnit.setClusterPartition(redshiftPartitionService.getDefaultPartition());
+                    dataUnitProxy.create(mainTestTenant.getId(), dataUnit);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to clone redshift table.", e);
+                }
             });
         }
     }
