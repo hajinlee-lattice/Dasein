@@ -81,8 +81,8 @@ public class InputPresenceJobTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertEquals(map.get(InterfaceName.City.name()), Long.valueOf(6));
         Assert.assertEquals(map.get(InterfaceName.State.name()), Long.valueOf(5));
         Assert.assertEquals(map.get(InterfaceName.Country.name()), Long.valueOf(6));
-        Assert.assertEquals(map.get(InterfaceName.PostalCode.name()), Long.valueOf(2));
+        Assert.assertEquals(map.get(InterfaceName.PostalCode.name()), Long.valueOf(3));
         Assert.assertEquals(map.get(InterfaceName.PhoneNumber.name()), Long.valueOf(3));
-        Assert.assertEquals(map.get(InterfaceName.DUNS.name()), Long.valueOf(2));
+        Assert.assertEquals(map.get(InterfaceName.DUNS.name()), Long.valueOf(3));
     }
 }
