@@ -29,7 +29,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val uniqueDF: DataFrame = dunsCntDF.filter(col("cnt") === 1)
     val uniqueCnt = if (uniqueDF == null) 0 else uniqueDF.count()
     val duplicateDF: DataFrame = dunsCntDF.filter(col("cnt") > 1)
-    val duplicatedCnt = if (duplicateDF == null) 0 else duplicateDF.agg(sum("cnt").cast("long")).first().getLong(0)
+    val duplicatedCnt = if (duplicateDF == null || duplicateDF.head(1).isEmpty) 0 else duplicateDF.agg(sum("cnt").cast("long")).first().getLong(0)
     val distinctCount = dunsCntDF.count()
     val duns = new DataReport.DuplicationReport
     duns.setDistinctRecords(distinctCount)
