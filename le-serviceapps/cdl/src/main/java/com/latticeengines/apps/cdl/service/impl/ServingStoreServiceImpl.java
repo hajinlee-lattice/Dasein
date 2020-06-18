@@ -24,6 +24,7 @@ import com.latticeengines.apps.cdl.mds.CustomizedMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -85,6 +86,19 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
     private boolean isEnrichmentGroup(Collection<ColumnSelection.Predefined> groups) {
         return CollectionUtils.isNotEmpty(groups) && groups.size() == 1 && groups.contains(ColumnSelection.Predefined.Enrichment);
+    }
+
+    @Override
+    public List<ColumnMetadata> getDataAttributes(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+        List<ColumnMetadata> cms;
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            cms = getDecoratedMetadata(customerSpace, entity, version, null, null, StoreFilter.DATE_ATTR) //
+                    .collectList().block();
+            String msg = "Get decorated metadata for " + CollectionUtils.size(cms) //
+                    + " attributes from " + customerSpace + ":" + entity;
+            timer.setTimerMessage(msg);
+        }
+        return cms;
     }
 
     @Override

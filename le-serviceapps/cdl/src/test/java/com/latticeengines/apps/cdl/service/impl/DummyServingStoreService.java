@@ -52,6 +52,11 @@ class DummyServingStoreService implements ServingStoreService {
     }
 
     @Override
+    public List<ColumnMetadata> getDataAttributes(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+        return null;
+    }
+
+    @Override
     public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
                                                    DataCollection.Version version) {
         return null;

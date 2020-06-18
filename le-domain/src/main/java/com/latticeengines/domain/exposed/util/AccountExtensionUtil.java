@@ -249,8 +249,7 @@ public final class AccountExtensionUtil {
         IntStream.range(0, matchOutput.getResult().size()) //
                 .forEach(i -> {
                     Map<String, Object> data = null;
-                    if (matchOutput != null //
-                            && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
+                    if (CollectionUtils.isNotEmpty(matchOutput.getResult()) //
                             && matchOutput.getResult().get(i) != null //
                             && matchOutput.getResult().get(i).isMatched() == Boolean.TRUE) {
                         final Map<String, Object> tempDataRef = new HashMap<>();
@@ -278,19 +277,19 @@ public final class AccountExtensionUtil {
                     }
                 });
         try {
-            log.info("Date attributes failed to reformat (CustomerSpace:" + customerSpace + "): "
-                    + dateAttributesToReformat.stream()
-                            .map(cm -> String.format("AttrName:%s FundamentalType:%s, LogicalType:%s", cm.getAttrName(),
-                                    cm.getFundamentalType().getName(), cm.getLogicalDataType()))
-                            .collect(Collectors.joining(",")));
+            if (CollectionUtils.isNotEmpty(dateAttributesToReformat)) {
+                log.info("Date attributes attempted to reformat (CustomerSpace:" + customerSpace + "): "
+                        + dateAttributesToReformat.stream()
+                                .map(cm -> String.format("AttrName:%s FundamentalType:%s, LogicalType:%s",
+                                        cm.getAttrName(), cm.getFundamentalType().getName(), cm.getLogicalDataType()))
+                                .collect(Collectors.joining(",")));
 
-            log.info(
-                    "Date attributes failed to reformat (CustomerSpace:" + customerSpace + "): "
-                            + dateAttributesFailedToReformat
-                                    .stream().map(pair -> String.format("AttrName:%s Value:%s",
-                                            pair.getLeft().getAttrName(), pair.getRight()))
-                                    .collect(Collectors.joining(",")));
-
+                log.warn("Date attributes failed to reformat (CustomerSpace:" + customerSpace + "): "
+                        + dateAttributesFailedToReformat
+                                .stream().map(pair -> String.format("AttrName:%s Value:%s",
+                                        pair.getLeft().getAttrName(), pair.getRight()))
+                                .collect(Collectors.joining(",")));
+            }
         } catch (Exception e) {
             log.warn("Failed to log");
         }
@@ -305,8 +304,7 @@ public final class AccountExtensionUtil {
         IntStream.range(0, matchOutput.getResult().size()) //
                 .forEach(i -> {
                     Map<String, Object> data = null;
-                    if (matchOutput != null //
-                            && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
+                    if (CollectionUtils.isNotEmpty(matchOutput.getResult()) //
                             && matchOutput.getResult().get(i) != null) {
 
                         if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {

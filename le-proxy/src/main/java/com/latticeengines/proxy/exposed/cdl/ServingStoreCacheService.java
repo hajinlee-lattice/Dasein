@@ -12,5 +12,7 @@ public interface ServingStoreCacheService {
 
     Set<String> getServingTableColumns(String customerSpace, BusinessEntity entity);
 
+    List<ColumnMetadata> getDateAttrs(String customerSpace, BusinessEntity entity);
+
     void clearCache(String customerSpace, BusinessEntity entity);
 }
