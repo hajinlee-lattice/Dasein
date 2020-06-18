@@ -562,6 +562,9 @@ public class DataReport {
         @JsonProperty("duplicate_records")
         private Long duplicateRecords;
 
+        @JsonProperty("distinct_records")
+        private Long distinctRecords;
+
         public Long getUniqueRecords() {
             return uniqueRecords;
         }
@@ -576,6 +579,14 @@ public class DataReport {
 
         public void setDuplicateRecords(Long duplicateRecords) {
             this.duplicateRecords = duplicateRecords;
+        }
+
+        public Long getDistinctRecords() {
+            return distinctRecords;
+        }
+
+        public void setDistinctRecords(Long distinctRecords) {
+            this.distinctRecords = distinctRecords;
         }
 
         @JsonProperty("unique_rate")
