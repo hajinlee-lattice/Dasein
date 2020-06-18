@@ -100,6 +100,38 @@ public final class EntityMatchGAConverterUtils {
         }
     }
 
+    public static void setSystemIdForGATenant(boolean enableEntityMatch, boolean enableEntityMatchGA,
+                                   FieldMappingDocument fieldMappingDocument, S3ImportSystem defaultSystem) {
+        if (!enableEntityMatchGA) {
+            return;
+        }
+        if (enableEntityMatch) {
+            return;
+        }
+        if (fieldMappingDocument == null || CollectionUtils.isEmpty(fieldMappingDocument.getFieldMappings())) {
+            return;
+        }
+        boolean isDefaultSystem = defaultSystem != null && DEFAULT_SYSTEM.equals(defaultSystem.getName());
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
+                if (isDefaultSystem) {
+                    fieldMapping.setIdType(FieldMapping.IdType.Account);
+                    fieldMapping.setSystemName(defaultSystem.getName());
+                    fieldMapping.setMapToLatticeId(true);
+                }
+            }
+
+            if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
+                //add this properties to make sure systemContactId can be set correctly.
+                if (isDefaultSystem) {
+                    fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                    fieldMapping.setSystemName(defaultSystem.getName());
+                    fieldMapping.setMapToLatticeId(true);
+                }
+            }
+        }
+    }
+
     public static void convertSavingMappings(boolean enableEntityMatch, boolean enableEntityMatchGA,
                                              FieldMappingDocument fieldMappingDocument, S3ImportSystem defaultSystem) {
         if (!enableEntityMatchGA) {

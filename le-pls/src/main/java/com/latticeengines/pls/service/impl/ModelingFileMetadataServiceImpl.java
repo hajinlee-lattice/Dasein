@@ -651,11 +651,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         S3ImportSystem defaultSystem = cdlService.getDefaultImportSystem(customerSpace.toString());
         if (dataFeedTask == null) {
             table = TableUtils.clone(schemaTable, schemaTable.getName());
+            EntityMatchGAConverterUtils.setSystemIdForGATenant(enableEntityMatch, enableEntityMatchGA,
+                    fieldMappingDocument, defaultSystem);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
             EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA,
                     fieldMappingDocument, defaultSystem);
         } else {
             table = dataFeedTask.getImportTemplate();
+            EntityMatchGAConverterUtils.setSystemIdForGATenant(enableEntityMatch, enableEntityMatchGA,
+                    fieldMappingDocument, defaultSystem);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
             if (table.getAttribute(InterfaceName.AccountId) == null) {
                 EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA,
