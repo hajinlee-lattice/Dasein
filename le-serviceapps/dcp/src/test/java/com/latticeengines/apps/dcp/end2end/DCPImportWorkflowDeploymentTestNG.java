@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -295,13 +296,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private void verifyDataReport() {
         DataReport report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadId);
         Assert.assertNotNull(report);
+        System.out.println(JsonUtils.serialize(report));
         DataReport.BasicStats basicStats  = report.getBasicStats();
         Assert.assertNotNull(basicStats);
         Assert.assertTrue(basicStats.getSuccessCnt() > 0);
         Assert.assertTrue(basicStats.getMatchedCnt() > 0);
-
         Assert.assertEquals(Long.valueOf(basicStats.getMatchedCnt() + //
                 basicStats.getPendingReviewCnt() + basicStats.getUnmatchedCnt()), basicStats.getSuccessCnt());
-    }
 
+        DataReport.InputPresenceReport inputPresenceReport  = report.getInputPresenceReport();
+        Assert.assertNotNull(inputPresenceReport);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(inputPresenceReport.getPresenceList()));
+    }
 }

@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +28,6 @@ import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
@@ -39,27 +36,21 @@ import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.MetadataSegmentExportService;
-import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
@@ -96,16 +87,7 @@ public class InternalResource extends InternalResourceBase {
     private TenantService tenantService;
 
     @Inject
-    private ReportService reportService;
-
-    @Inject
     private EmailService emailService;
-
-    @Inject
-    private MetadataSegmentService metadataSegmentService;
-
-    @Inject
-    private MetadataSegmentExportService metadataSegmentExportService;
 
     @Inject
     private WorkflowJobService workflowJobService;
@@ -133,32 +115,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
-
-    @PostMapping("/reports/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Register a report")
-    public void registerReport(@PathVariable("tenantId") String tenantId, @RequestBody Report report,
-            HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        reportService.createOrUpdateReport(report);
-        log.info(String.format(
-                "Registered a report for tenant=%s, name=%s, purpose=%s, payload=%s", report.getTenant().getId(),
-                report.getName(), report.getPurpose().name(),
-                report.getJson().getPayload()));
-    }
-
-    @GetMapping("/reports/{reportName}/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Retrieve a Report")
-    public Report findReportByName(@PathVariable("reportName") String reportName,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return reportService.getReportByName(reportName);
-    }
 
     @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"  + TENANT_ID_PATH)
     @ResponseBody
@@ -601,63 +557,6 @@ public class InternalResource extends InternalResourceBase {
                 }
             }
         }
-    }
-
-    @GetMapping("/segment/{segmentName}/restriction/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get segment restriction.")
-    public Restriction getSegmentRestriction(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("segmentName") String segmentName, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Getting restriction from %s segment", segmentName));
-        manufactureSecurityContextForInternalAccess(tenantId);
-        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentName, false);
-        if (segment != null) {
-            return segment.getAccountRestriction();
-        } else {
-            return null;
-        }
-    }
-
-    @GetMapping("/segment/export/{exportId}/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get Segment export job info.")
-    public MetadataSegmentExport getMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("exportId") String exportId, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Getting MetadataSegmentExport from %s exportId", exportId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return metadataSegmentExportService.getSegmentExportByExportId(exportId);
-    }
-
-    @PutMapping("/segment/export/{exportId}/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Update segment export job info.")
-    public MetadataSegmentExport updateMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("exportId") String exportId, //
-            @RequestParam("state") Status state, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Updating MetadataSegmentExport from %s exportId", exportId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-        MetadataSegmentExport metadataSegmentExport = metadataSegmentExportService.getSegmentExportByExportId(exportId);
-        metadataSegmentExport.setStatus(state);
-        return metadataSegmentExportService.updateSegmentExportJob(metadataSegmentExport);
-    }
-
-    @PostMapping("/segment/orphan/customerspace/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "create orphan record through MetadataSegmentExportEntityMgr")
-    public MetadataSegmentExport createOrphanRecordThruMgr(@PathVariable("tenantId") String tenantId,
-            HttpServletRequest request, @RequestBody MetadataSegmentExport metadataSegmentExport) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return metadataSegmentExportService.createOrphanRecordThruMgr(metadataSegmentExport);
-    }
-
-    public List<String> getTestTenantIds() {
-        String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
-        String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
-        return Arrays.asList(tenant1Id, tenant2Id);
     }
 
     private Tenant manufactureSecurityContextForInternalAccess(String tenantId) {

@@ -36,19 +36,18 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
     val filteredProfile = filterProfile(profileData)
     val depivotedMap = depivot(inputData)
 
-    val withBktId = depivotedMap.values.par.map(df => {
-      val withBktId = toBktId(df, filteredProfile)
-      withBktId.withColumn(Count, lit(1L)).persist(StorageLevel.DISK_ONLY).checkpoint()
+    val withBktCnt = depivotedMap.values.par.map(df => {
+      val withBktId = toBktId(df, filteredProfile).persist(StorageLevel.DISK_ONLY).checkpoint()
+      val withBktCnt = withBktId.groupBy(AttrName, BktId).count().withColumnRenamed("count", Count)
+      val bktCntAgg = new BucketCountAggregation
+      withBktCnt.groupBy(AttrName) //
+        .agg(bktCntAgg(col(BktId), col(Count)).as("agg")) //
+        .withColumn(NotNullCount, col(s"agg.$BktSum")) //
+        .withColumn(Bkts, col(s"agg.$Bkts")) //
+        .drop("agg") //
+        .persist(StorageLevel.MEMORY_AND_DISK)
     }).reduce(_ union _)
 
-    val bktCntAgg = new BucketCountAggregation
-    val grpCols = withBktId.columns.diff(Seq(BktId, Count))
-    val withBktCnt = withBktId.groupBy(grpCols map col: _*)
-      .agg(bktCntAgg(col(BktId), col(Count)).as("agg"))
-      .withColumn(NotNullCount, col(s"agg.$BktSum"))
-      .withColumn(Bkts, col(s"agg.$Bkts"))
-      .drop("agg")
-      .persist(StorageLevel.MEMORY_AND_DISK)
     val allColsRdd: RDD[Row] = spark.sparkContext.parallelize(inputData.columns.map(c => Row.fromSeq(Seq(c))))
     val allColsDf = spark.createDataFrame(allColsRdd, StructType(List(StructField(AttrName, StringType))))
     val rhs = filteredProfile.select(AttrName, BktAlgo)
@@ -200,7 +199,7 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
       }
       val vals: Seq[Any] = bktId :: (0 until row.length).filter(i => !i.equals(valIdx)).map(row.get).toList
       Row.fromSeq(vals)
-    })(RowEncoder(outputSchema))
+    })(RowEncoder(outputSchema)).filter(r => r.getInt(0) != 0)
   }
 
 }

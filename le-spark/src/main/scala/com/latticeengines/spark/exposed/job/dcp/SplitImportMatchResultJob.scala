@@ -1,11 +1,14 @@
 package com.latticeengines.spark.exposed.job.dcp
 
+import com.latticeengines.common.exposed.util.JsonUtils
+import com.latticeengines.domain.exposed.dcp.DataReport
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CSVUtils
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, count, sum}
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -19,14 +22,26 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
     val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
 
-    val acceptedCsv = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
     val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
+    val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
+      .persist(StorageLevel.DISK_ONLY).checkpoint()
+    val uniqueCnt = dunsCntDF.filter(col("cnt") === 1).count()
+    val duplicatedCnt = dunsCntDF.filter(col("cnt") > 1).agg(sum("cnt").cast("long")).first().getLong(0)
+    val distinctCount = dunsCntDF.count()
+    val duns = new DataReport.DuplicationReport
+    duns.setDistinctRecords(distinctCount)
+    duns.setUniqueRecords(uniqueCnt)
+    duns.setDuplicateRecords(duplicatedCnt)
 
+    lattice.outputStr = JsonUtils.serialize(duns)
     lattice.output = acceptedCsv :: rejectedCsv :: Nil
   }
 
-  private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]): DataFrame = {
-    selectAndRename(input.filter(col(matchIndicator).isNotNull && col(matchIndicator) =!= ""), acceptedAttrs)
+  private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]):
+  (DataFrame, DataFrame) = {
+    val acceptedDF = input.filter(col(matchIndicator).isNotNull && col(matchIndicator) =!= "")
+    (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs))
   }
 
   private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {

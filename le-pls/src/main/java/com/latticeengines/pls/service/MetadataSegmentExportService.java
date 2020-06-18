@@ -14,13 +14,10 @@ public interface MetadataSegmentExportService {
 
     MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport segmentExport);
 
-    MetadataSegmentExport updateSegmentExportJob(MetadataSegmentExport segmentExport);
-
     void deleteSegmentExportByExportId(String exportId);
 
     void downloadSegmentExportResult(String exportId, HttpServletRequest request, HttpServletResponse response);
 
     String getExportedFilePath(MetadataSegmentExport metadataSegmentExport);
 
-    MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport);
 }

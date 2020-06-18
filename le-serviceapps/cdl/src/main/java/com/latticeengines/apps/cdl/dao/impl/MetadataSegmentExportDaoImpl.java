@@ -1,4 +1,4 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.apps.cdl.dao.impl;
 
 import java.util.List;
 
@@ -7,9 +7,9 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.dao.MetadataSegmentExportDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.pls.dao.MetadataSegmentExportDao;
 
 @Component("metadataSegmentExportDao")
 public class MetadataSegmentExportDaoImpl extends BaseDaoImpl<MetadataSegmentExport>

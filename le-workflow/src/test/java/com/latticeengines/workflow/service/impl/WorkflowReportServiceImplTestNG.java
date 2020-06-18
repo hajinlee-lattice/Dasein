@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.workflow.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
@@ -12,14 +12,17 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
-import com.latticeengines.db.exposed.service.ReportService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.service.TenantService;
-public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
+import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
+
+public class WorkflowReportServiceImplTestNG extends WorkflowTestNGBase {
 
     private static final String TENANT1 = "TENANT1";
     private static final String TENANT2 = "TENANT2";
@@ -29,7 +32,7 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private ReportEntityMgr reportEntityMgr;
 
     @Inject
-    private ReportService reportService;
+    private WorkflowReportService reportService;
 
     @Inject
     private TenantService tenantService;
@@ -61,13 +64,14 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     }
 
     private Tenant setupTenant(String t) {
-        Tenant tenant = tenantService.findByTenantId(t);
+        String tenantId = CustomerSpace.parse(t).toString();
+        Tenant tenant = tenantService.findByTenantId(tenantId);
         if (tenant != null) {
             setupSecurityContext(tenant);
             tenantService.discardTenant(tenant);
         }
         tenant = new Tenant();
-        tenant.setId(t);
+        tenant.setId(tenantId);
         tenant.setName(t);
         tenantService.registerTenant(tenant);
         return tenant;
@@ -77,20 +81,18 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     public void createOrUpdateReportWithTenantAndName(String t, String reportName) throws Exception {
         Tenant tenant = setupTenant(t);
         setupSecurityContext(tenant);
-
         KeyValue json = new KeyValue();
         json.setData(REPORT_DATA.getBytes());
         Report report = new Report();
         report.setName(reportName);
         report.setPurpose(ReportPurpose.IMPORT_SUMMARY);
         report.setJson(json);
-        assertEquals(reportService.findAll().size(), 0);
-        reportService.createOrUpdateReport(report);
-        Report retrievedReport = reportService.getReportByName(reportName);
+        assertEquals(reportService.findAll(MultiTenantContext.getTenant().getId()).size(), 0);
+        reportService.createOrUpdateReport(MultiTenantContext.getTenant().getId(), report);
+        Report retrievedReport = reportService.findReportByName(tenant.getId(), reportName);
         assertEquals(retrievedReport.getName(), reportName);
         String jsonStr = new String(retrievedReport.getJson().getData());
         assertEquals(jsonStr, REPORT_DATA);
-
     }
 
 }

@@ -22,6 +22,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -37,6 +39,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
@@ -63,6 +66,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     @Inject
     private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     @Override
     protected Class<SplitImportMatchResultJob> getJobClz() {
@@ -155,6 +161,11 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         matchStats.setPendingReviewCnt(0L);
         //matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         putObjectInContext(UPLOAD_STATS, stats);
+        DataReport.DuplicationReport duplicationReport = JsonUtils.deserialize(result.getOutput(),
+                DataReport.DuplicationReport.class);
+        dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
+                configuration.getUploadId(), duplicationReport);
+
     }
 
     private String getCsvFilePath(HdfsDataUnit dataUnit) {

@@ -1,19 +1,15 @@
 package com.latticeengines.proxy.exposed.pls;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,17 +21,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 /*
@@ -246,59 +237,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         return url;
     }
 
-    @Override
-    public MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, //
-                                                          String exportId) {
-        try {
-            String url = constructUrl(combine("/internal/segment/export", exportId, customerSpace.toString()));
-            log.debug("Find MetadataSegmentExport by exportId (" + exportId + ")" + url);
-            return get("getMetadataSegmentExport", url, MetadataSegmentExport.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getMetadataSegmentExport: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
-                                                             String exportId, Status state) {
-        if (exportId == null) {
-            log.info("Skipping updating Metadata Segment Export as exportId is null");
-            return null;
-        }
-        try {
-            String url = constructUrl(combine(combine("/internal/segment/export", exportId, customerSpace.toString())));
-            url += "?" + "state=" + state;
-
-            log.debug("Update MetadataSegmentExport by exportId (" + exportId + ")" + url);
-            put("updateMetadataSegmentExport", url, null);
-            return getMetadataSegmentExport(customerSpace, exportId);
-        } catch (Exception e) {
-            throw new RuntimeException("updateMetadataSegmentExport: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    public Restriction getSegmentRestrictionQuery(CustomerSpace customerSpace, String segmentName) {
-        String url = constructUrl(combine("/internal/segment/" + segmentName + "/restriction",
-                customerSpace.toString()));
-        return get("getSegmentRestrictionQuery", url, Restriction.class);
-    }
-
-    @Override
-    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, List<Long> actionPids,
-                                                     ActionType actionType) {
-        try {
-            if (CollectionUtils.isEmpty(actionPids)) {
-                return Collections.emptyList();
-            }
-            String url = generateFindJobsBasedOnActionIdsAndTypeUrl(customerSpace, actionPids,
-                    actionType);
-            List<?> listObj = get("findJobsBasedOnActionIdsAndType", url, List.class);
-            return JsonUtils.convertList(listObj, Job.class);
-        } catch (Exception e) {
-            throw new RuntimeException("findJobsBasedOnActionIdsAndType: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
     public void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3import/result", result, tenantId));
@@ -342,51 +280,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
             throw rle;
         } catch (Exception e) {
             throw new RuntimeException("retrieveScoringRequestConfigContext: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    @VisibleForTesting
-    String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
-                                                      ActionType actionType) {
-        StringBuilder urlStr = new StringBuilder();
-        urlStr.append("/internal/jobs/all/").append(CustomerSpace.parse(customerSpace).toString());
-        if (CollectionUtils.isNotEmpty(actionPids) || actionType != null) {
-            urlStr.append("?");
-            if (CollectionUtils.isNotEmpty(actionPids)) {
-                for (Long pid : actionPids) {
-                    urlStr.append(String.format("pid=%s&", pid));
-                }
-            }
-            if (actionType != null) {
-                urlStr.append(String.format("type=%s", actionType));
-            }
-        }
-        if (urlStr.charAt(urlStr.length() - 1) == '&') {
-            urlStr.setLength(urlStr.length() - 1);
-        }
-        return constructUrl(urlStr.toString());
-    }
-
-    @Override
-    public void registerReport(Report report, String tenantId) {
-        try {
-            String url = constructUrl(combine("/internal/reports", tenantId));
-            log.info(String.format("Posting to %s\n%s", url, JsonUtils.pprint(report)));
-            post("registerReport", url, report, Void.class);
-        } catch (Exception e) {
-            throw new RuntimeException("registerReport: Remote call failure", e);
-
-        }
-    }
-
-    @Override
-    public Report findReportByName(String name, String tenantId) {
-        try {
-            String url = constructUrl(combine("/internal/reports", name, tenantId));
-            log.info(String.format("Getting from %s", url));
-            return get("findReportByName", url, Report.class);
-        } catch (Exception e) {
-            throw new RuntimeException("findReportByName: Remote call failure", e);
         }
     }
 

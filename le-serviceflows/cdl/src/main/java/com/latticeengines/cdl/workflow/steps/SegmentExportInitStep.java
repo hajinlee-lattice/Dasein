@@ -9,7 +9,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessorFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -21,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("segmentExportInitStep")
@@ -37,7 +36,7 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
     private SegmentExportProcessorFactory segmentExportProcessorFactory;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private SegmentProxy segmentProxy;
 
     @Override
     public void execute() {
@@ -45,20 +44,20 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
     }
 
     public void execute(Configuration yarnConfiguration) {
-
         SegmentExportStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
+        String customerSpaceStr = customerSpace.toString();
         String exportId = config.getMetadataSegmentExportId();
 
         try {
             log.info("Inside SegmentExportInitStep execute()");
-            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpaceStr);
 
-            log.info(String.format("For tenant: %s", customerSpace.toString()));
+            log.info(String.format("For tenant: %s", customerSpaceStr));
             log.info(String.format("For exportId: %s", exportId));
             MetadataSegmentExport metadataSegmentExport = configuration.getMetadataSegmentExport();
             if (metadataSegmentExport == null) {
-                metadataSegmentExport = plsInternalProxy.getMetadataSegmentExport(customerSpace, exportId);
+                metadataSegmentExport = segmentProxy.getMetadataSegmentExport(customerSpace.toString(), exportId);
                 config.setMetadataSegmentExport(metadataSegmentExport);
             }
 
@@ -73,25 +72,11 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
             segmentExportProcessorFactory.getProcessor(metadataSegmentExport.getType()) //
                     .executeExportActivity(tenant, config, yarnConfiguration);
 
-            plsInternalProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.COMPLETED);
+            segmentProxy.updateMetadataSegmentExport(customerSpaceStr, exportId, Status.COMPLETED);
         } catch (Exception ex) {
-            plsInternalProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.FAILED);
+            segmentProxy.updateMetadataSegmentExport(customerSpaceStr, exportId, Status.FAILED);
             throw new LedpException(LedpCode.LEDP_18167, ex);
         }
     }
 
-    @VisibleForTesting
-    void setTenantEntityMgr(TenantEntityMgr tenantEntityMgr) {
-        this.tenantEntityMgr = tenantEntityMgr;
-    }
-
-    @VisibleForTesting
-    void setSegmentExportProcessorFactory(SegmentExportProcessorFactory segmentExportProcessorFactory) {
-        this.segmentExportProcessorFactory = segmentExportProcessorFactory;
-    }
-
-    @VisibleForTesting
-    void setPlsInternalProxy(PlsInternalProxy plsInternalProxy){
-        this.plsInternalProxy = plsInternalProxy;
-    }
 }

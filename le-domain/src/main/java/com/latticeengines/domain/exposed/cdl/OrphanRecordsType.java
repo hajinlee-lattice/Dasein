@@ -1,15 +1,19 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.ORPHAN_CONTACTS;
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.ORPHAN_TRXNS;
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.UNMATCHED_ACCOUNTS;
+
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public enum OrphanRecordsType {
-    CONTACT("OrphanContacts", "Orphan Contacts", "orphanContactExportFlow",
+    CONTACT(ORPHAN_CONTACTS, "Orphan Contacts", "orphanContactExportFlow",
             "File", "ContactData", BusinessEntity.Contact),
 
-    TRANSACTION("OrphanTransactions", "Orphan Transactions", "orphanTransactionExportFlow",
+    TRANSACTION(ORPHAN_TRXNS, "Orphan Transactions", "orphanTransactionExportFlow",
             "File", "TransactionData", BusinessEntity.Transaction),
 
-    UNMATCHED_ACCOUNT("UnmatchedAccount", "Unmatched Accounts", "unmatchedAccountExportFlow",
+    UNMATCHED_ACCOUNT(UNMATCHED_ACCOUNTS, "Unmatched Accounts", "unmatchedAccountExportFlow",
             "File", "AccountData", BusinessEntity.Account);
 
     private String orphanType;

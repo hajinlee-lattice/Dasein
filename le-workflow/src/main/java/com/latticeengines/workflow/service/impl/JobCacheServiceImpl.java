@@ -31,7 +31,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -44,6 +43,7 @@ import com.latticeengines.workflow.cache.TenantJobIdListCacheWriter;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Service("jobCacheService")
@@ -74,7 +74,7 @@ public class JobCacheServiceImpl implements JobCacheService {
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
     @Inject
-    private ReportService reportService;
+    private WorkflowReportService workflowReportService;
 
     @Inject
     private JobCacheWriter cacheWriter;
@@ -473,7 +473,7 @@ public class JobCacheServiceImpl implements JobCacheService {
         // set tenant for report retrieval
         try {
             MultiTenantContext.setTenant(workflowJob.getTenant());
-            Job job = WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(),
+            Job job = WorkflowJobUtils.assembleJob(workflowReportService, leJobExecutionRetriever, getLpUrl(),
                     workflowJob, includeDeatils);
             if (workflowJob.getTenant() != null) {
                 job.setTenantId(workflowJob.getTenant().getId());

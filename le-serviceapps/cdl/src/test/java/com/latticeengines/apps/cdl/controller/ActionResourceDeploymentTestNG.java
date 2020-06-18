@@ -20,7 +20,6 @@ import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 
@@ -86,11 +85,6 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(retrievedAction);
         List<Action> actionsWithoutOwner = findByOwnerId(null);
         Assert.assertEquals(actionsWithoutOwner.size(), 2);
-
-        // test internal proxy for getting jobs
-        List<Long> actionPids = findAll().stream().map(Action::getPid).collect(Collectors.toList());
-        List<Job> retrievedJobs = findJobsBasedOnActionIdsAndType(actionPids, ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
-        Assert.assertTrue(CollectionUtils.isEmpty(retrievedJobs));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGet" })
@@ -148,11 +142,6 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private List<Action> findByPidIn(List<Long> actionPids) {
         return actionProxy.getActionsByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(), actionPids);
-    }
-
-    private List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {
-        return plsInternalProxy.findJobsBasedOnActionIdsAndType(
-                CustomerSpace.parse(mainTestTenant.getId()).toString(), actionPids, actionType);
     }
 
 }

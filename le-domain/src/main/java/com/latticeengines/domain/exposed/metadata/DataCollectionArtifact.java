@@ -43,6 +43,18 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     private static final long serialVersionUID = 3886398415278083037L;
 
+    //=========================
+    // BEGIN: Artifact Types
+    //=========================
+    // not using enum, for the possibility of weak typing it in future
+    public static final String UNMATCHED_ACCOUNTS = "UnmatchedAccount";
+    public static final String ORPHAN_CONTACTS = "OrphanContacts";
+    public static final String ORPHAN_TRXNS = "OrphanTransactions";
+    public static final String FULL_PROFILE = "FullProfile";
+    //=========================
+    // END: Artifact Types
+    //=========================
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -153,6 +165,10 @@ public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     }
 
     public enum Status {
-        NOT_SET, GENERATING, READY
+        NOT_SET, GENERATING, READY, STALE;
+
+        public boolean isTerminal() {
+            return !GENERATING.equals(this);
+        }
     }
 }

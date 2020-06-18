@@ -32,7 +32,6 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -45,6 +44,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 
 public final class WorkflowJobUtils {
 
@@ -79,8 +79,8 @@ public final class WorkflowJobUtils {
         return threshold;
     }
 
-    public static Job assembleJob(ReportService reportService, LEJobExecutionRetriever leJobExecutionRetriever,
-                            String lpUrl, WorkflowJob workflowJob, Boolean includeDetails) {
+    public static Job assembleJob(WorkflowReportService reportService, LEJobExecutionRetriever leJobExecutionRetriever,
+                                  String lpUrl, WorkflowJob workflowJob, Boolean includeDetails) {
         Job job = new Job();
         job.setPid(workflowJob.getPid());
         job.setId(workflowJob.getWorkflowId());
@@ -222,11 +222,11 @@ public final class WorkflowJobUtils {
         return steps;
     }
 
-    private static List<Report> getReports(ReportService reportService, WorkflowJob workflowJob) {
+    private static List<Report> getReports(WorkflowReportService reportService, WorkflowJob workflowJob) {
         List<Report> reports = new ArrayList<>();
         Map<String, String> reportContext = workflowJob.getReportContext();
         for (String reportPurpose : reportContext.keySet()) {
-            Report report = reportService.getReportByName(reportContext.get(reportPurpose));
+            Report report = reportService.findReportByName(workflowJob.getTenant().getId(), reportContext.get(reportPurpose));
             if (report != null) {
                 reports.add(report);
             }

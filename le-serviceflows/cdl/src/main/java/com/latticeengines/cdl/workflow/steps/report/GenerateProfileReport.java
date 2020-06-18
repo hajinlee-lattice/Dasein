@@ -1,5 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.report;
 
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.FULL_PROFILE;
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.GENERATING;
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.READY;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
@@ -43,9 +46,11 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -101,16 +106,45 @@ public class GenerateProfileReport extends BaseSparkStep<ProfileReportStepConfig
     @Resource(name = "yarnConfiguration")
     protected Configuration yarnConfiguration;
 
+    private DataCollection.Version activeVersion;
+
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
+        activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         log.info("Submitted by {}", configuration.getUserId());
 
-        HdfsDataUnit filtered = filterAccount();
-        HdfsDataUnit enriched = fetch(filtered);
-        HdfsDataUnit profile = profile(enriched);
-        HdfsDataUnit stats = calcStats(enriched, profile);
-        upsertStats(stats);
+        DataCollectionArtifact artifact = getOrCreateArtifact();
+        if (READY.equals(artifact.getStatus())) {
+            log.info("Artifact was already generated for version {}, skip the whole step", activeVersion);
+        } else {
+            HdfsDataUnit filtered = filterAccount();
+            HdfsDataUnit enriched = fetch(filtered);
+            HdfsDataUnit profile = profile(enriched);
+            HdfsDataUnit stats = calcStats(enriched, profile);
+            upsertStats(stats);
+            updateArtifactStatusToReady();
+        }
+    }
+
+    private DataCollectionArtifact getOrCreateArtifact() {
+        DataCollectionArtifact artifact = dataCollectionProxy.getDataCollectionArtifact(
+                customerSpace.toString(), FULL_PROFILE, activeVersion);
+        if (artifact != null) {
+            if (!READY.equals(artifact.getStatus())) {
+                artifact.setStatus(GENERATING);
+                return dataCollectionProxy.updateDataCollectionArtifact(customerSpace.toString(), artifact);
+            } else {
+                // no need to generate again.
+                return artifact;
+            }
+        } else {
+            artifact = new DataCollectionArtifact();
+            artifact.setName(FULL_PROFILE);
+            artifact.setUrl(null);
+            artifact.setStatus(GENERATING);
+            return dataCollectionProxy.createDataCollectionArtifact(customerSpace.toString(), activeVersion, artifact);
+        }
     }
 
     private HdfsDataUnit filterAccount() {
@@ -169,13 +203,11 @@ public class GenerateProfileReport extends BaseSparkStep<ProfileReportStepConfig
 
     private void upsertStats(HdfsDataUnit statsData) {
         StatsCube newCube = parseStatsCube(statsData);
-
-        DataCollection.Version active = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        String activeLock = CombineStatistics.acquireStatsLock(customerSpace.getTenantId(), active);
-        DataCollection.Version inactive = active.complement();
+        String activeLock = CombineStatistics.acquireStatsLock(customerSpace.getTenantId(), activeVersion);
+        DataCollection.Version inactive = activeVersion.complement();
         String inactiveLock = CombineStatistics.acquireStatsLock(customerSpace.getTenantId(), inactive);
         try {
-            upsertStats(newCube, active);
+            upsertStats(newCube, activeVersion);
         } finally {
             LockManager.releaseWriteLock(activeLock);
         }
@@ -186,18 +218,30 @@ public class GenerateProfileReport extends BaseSparkStep<ProfileReportStepConfig
         }
     }
 
+    public void updateArtifactStatusToReady() {
+        DataCollectionArtifact artifact = dataCollectionProxy.getDataCollectionArtifact(
+                customerSpace.toString(), FULL_PROFILE, activeVersion);
+        artifact.setStatus(DataCollectionArtifact.Status.READY);
+        dataCollectionProxy.updateDataCollectionArtifact(customerSpace.toString(), artifact);
+    }
+
     private void upsertStats(StatsCube newCube, DataCollection.Version version) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace.toString(), version);
         if (container != null) {
-            Map<String, StatsCube> cubes = container.getStatsCubes();
+            Map<String, StatsCube> cubes = new HashMap<>(container.getStatsCubes());
             StatsCube oldCube = cubes.get(Account.name());
-            if (oldCube == null) {
-                cubes.put(Account.name(), newCube);
-            } else {
-                oldCube.getStatistics().putAll(newCube.getStatistics());
+            if (oldCube != null) {
+                log.info("There are {} attributes in the existing account cube.", //
+                        container.getStatsCubes().get(Account.name()).getStatistics().size());
+                Map<String, AttributeStats> statsMap = oldCube.getStatistics();
+                statsMap.putAll(newCube.getStatistics());
+                newCube.setStatistics(statsMap);
             }
+            cubes.put(Account.name(), newCube);
             container.setStatsCubes(cubes);
             container.setName(null);
+            log.info("Expanded the account cube to {} attributes.", //
+                    container.getStatsCubes().get(Account.name()).getStatistics().size());
             dataCollectionProxy.upsertStats(customerSpace.toString(), container);
         }
     }

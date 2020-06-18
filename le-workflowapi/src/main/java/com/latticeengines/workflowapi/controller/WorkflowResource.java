@@ -40,11 +40,13 @@ import com.latticeengines.domain.exposed.pls.JobRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
@@ -75,6 +77,9 @@ public class WorkflowResource {
 
     @Value("${workflow.jobs.pa.hideRetried}")
     private boolean hideRetriedPA;
+
+    @Inject
+    private WorkflowReportService workflowReportService;
 
     @PostMapping("/job/{workflowId}/stop")
     @ApiOperation(value = "Stop an executing workflow")
@@ -417,5 +422,31 @@ public class WorkflowResource {
             log.error("Unable to set flag value for {} - {}.", podid, division);
             return false;
         }
+    }
+
+    @PostMapping("/report")
+    @ApiOperation(value = "create or update a report")
+    public void createOrUpdateReport(@RequestParam(value = "customerSpace") String customerSpace, @RequestBody Report report) {
+        workflowReportService.createOrUpdateReport(customerSpace, report);
+    }
+
+    @DeleteMapping("/report/{name}")
+    @ApiOperation(value = "delete a report")
+    public void deleteReportByName(@PathVariable String name,
+                                   @RequestParam(value = "customerSpace") String customerSpace) {
+        workflowReportService.deleteReportByName(customerSpace, name);
+    }
+
+    @GetMapping("/report/{name}")
+    @ApiOperation(value = "Get a report by name")
+    public Report findReportByName(@PathVariable String name,
+                                   @RequestParam(value = "customerSpace") String customerSpace) {
+        return workflowReportService.findReportByName(customerSpace, name);
+    }
+
+    @GetMapping("/report")
+    @ApiOperation(value = "Get all reports")
+    public List<Report> findAll(@RequestParam(value = "customerSpace") String customerSpace) {
+        return workflowReportService.findAll(customerSpace);
     }
 }

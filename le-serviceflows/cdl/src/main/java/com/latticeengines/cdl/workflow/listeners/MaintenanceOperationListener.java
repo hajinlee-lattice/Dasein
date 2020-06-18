@@ -25,8 +25,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("maintenanceOperationListener")
@@ -41,7 +41,7 @@ public class MaintenanceOperationListener extends LEJobListener {
     private DataFeedProxy dataFeedProxy;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private WorkflowReportService workflowReportService;
 
     @Inject
     private ActionProxy actionProxy;
@@ -76,7 +76,7 @@ public class MaintenanceOperationListener extends LEJobListener {
             // check data feed status? should be Initing or InitialLoaded?
             String reportName = job.getReportName(ReportPurpose.MAINTENANCE_OPERATION_SUMMARY.getKey());
             if (!StringUtils.isEmpty(reportName)) {
-                Report report = plsInternalProxy.findReportByName(reportName, customerSpace);
+                Report report = workflowReportService.findReportByName(customerSpace, reportName);
                 updateMaintenanceActionConfiguration(job, report);
             }
             if (StringUtils.isEmpty(executionId))

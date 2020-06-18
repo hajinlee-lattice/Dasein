@@ -263,7 +263,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     @WithCustomerSpace
     public List<AtlasStream> getStreamsByStreamType(String customerSpace, AtlasStream.StreamType streamType) {
-        List<AtlasStream> streams = streamEntityMgr.findByStreamType(streamType);
+        List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(MultiTenantContext.getTenant(), streamType);
         return CollectionUtils.isEmpty(streams) ? Collections.emptyList() : streams;
     }
 

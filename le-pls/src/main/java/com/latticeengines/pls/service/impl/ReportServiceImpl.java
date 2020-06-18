@@ -6,42 +6,35 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
 import com.latticeengines.db.exposed.service.ReportService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service("reportService")
 public class ReportServiceImpl implements ReportService {
 
     @Inject
-    private ReportEntityMgr reportEntityMgr;
+    private WorkflowProxy workflowProxy;
 
     @Override
     public void createOrUpdateReport(Report report) {
-        Report existing = reportEntityMgr.findByName(report.getName());
-        if (existing != null) {
-            reportEntityMgr.delete(existing);
-        }
-        reportEntityMgr.create(report);
-
+        workflowProxy.registerReport(MultiTenantContext.getTenant().getId(), report);
     }
 
     @Override
     public void deleteReportByName(String name) {
-        Report report = reportEntityMgr.findByName(name);
-        if (report != null) {
-            reportEntityMgr.delete(report);
-        }
+        workflowProxy.deleteReportByName(MultiTenantContext.getTenant().getId(), name);
     }
 
     @Override
     public Report getReportByName(String name) {
-        return reportEntityMgr.findByName(name);
+        return workflowProxy.findReportByName(MultiTenantContext.getTenant().getId(), name);
     }
 
     @Override
     public List<Report> findAll() {
-        return reportEntityMgr.findAll();
+        return workflowProxy.findAllReports(MultiTenantContext.getTenant().getId());
     }
 
 }

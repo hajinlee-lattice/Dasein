@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration.WORKFLOW_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +68,8 @@ public class AtlasProfileReportWorkflowDeploymentTestNG extends CDLWorkflowFrame
         String workflowName = AtlasProfileReportWorkflowConfiguration.WORKFLOW_NAME;
         runWorkflow(generateWorkflowTestConfiguration(null, workflowName, configuration, null));
         verifyTest();
+        workflowService.unRegisterJob(WORKFLOW_NAME);
+        runWorkflow(generateWorkflowTestConfiguration(null, workflowName, configuration, null));
     }
 
     @Override

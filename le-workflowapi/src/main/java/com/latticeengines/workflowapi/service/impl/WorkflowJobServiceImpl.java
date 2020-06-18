@@ -33,7 +33,6 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
@@ -52,6 +51,7 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
+import com.latticeengines.workflow.exposed.service.WorkflowReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
@@ -95,7 +95,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Inject
-    private ReportService reportService;
+    private WorkflowReportService workflowReportService;
 
     @Inject
     private WorkflowService workflowService;
@@ -192,7 +192,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return null;
         }
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
+        return WorkflowJobUtils.assembleJob(workflowReportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
                 includeDetails);
     }
 
@@ -222,7 +222,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
+        return WorkflowJobUtils.assembleJob(workflowReportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
                 includeDetails);
     }
 
@@ -235,7 +235,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
+        return WorkflowJobUtils.assembleJob(workflowReportService, leJobExecutionRetriever, getLpUrl(), workflowJob,
                 includeDetails);
     }
 
@@ -252,7 +252,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
-        List<Job> jobs = workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
+        List<Job> jobs = workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(workflowReportService,
                 leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
         jobs.forEach(this::removeTenantInfo);
         return jobs;
@@ -318,7 +318,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     .collect(Collectors.toList());
         }
 
-        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
+        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(workflowReportService,
                 leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
     }
 
@@ -354,7 +354,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
 
-        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
+        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(workflowReportService,
                 leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
     }
 
