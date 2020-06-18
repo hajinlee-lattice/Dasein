@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +10,9 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -18,11 +24,20 @@ import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
+import com.latticeengines.remote.exposed.service.tray.TrayService;
 
 public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
+    @Mock
+    private TrayService trayService;
+
     @Inject
+    @InjectMocks
     private LookupIdMappingService lookupIdMappingLaunchService;
 
     @Inject
@@ -32,10 +47,23 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
     private String s3CustomerBucket;
 
     private String dropBox;
+    private TraySettings validSettings;
+    private TraySettings faultyAuthOnly;
+    private TraySettings faultySolInstanceOnly;
+    
+    private String userToken = "userToken";
+    private String validAuth = "validAuth";
+    private String invalidAuth = "invalidAuth";
+    private String validSolInstance = "validSolInstance";
+    private String invalidSolInstance = "invalidSolInstance";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
         setupTestEnvironment();
+        validSettings = new TraySettings(userToken, validAuth, validSolInstance, null);
+        faultyAuthOnly = new TraySettings(userToken, invalidAuth, validSolInstance, null);
+        faultySolInstanceOnly = new TraySettings(userToken, validAuth, invalidSolInstance, null);
         dropBox = dropBoxEntityMgr.createDropBox(mainTestTenant, "us-east-1").getDropBox();
     }
 
@@ -148,5 +176,73 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(extractedLookupIdMap.getIsRegistered());
         Assert.assertEquals(extractedLookupIdMap.getIsRegistered(), doRegister ? Boolean.TRUE : Boolean.FALSE);
         return extractedLookupIdMap;
+    }
+
+    @Test(groups = "functional")
+    public void testDeleteConnection() {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        ExternalSystemAuthentication sysAuth = new ExternalSystemAuthentication();
+        sysAuth.setSolutionInstanceId(validSolInstance);
+        sysAuth.setTrayAuthenticationId(validAuth);
+        lookupIdMap.setExternalAuthentication(sysAuth);
+        lookupIdMap.setOrgId("orgId");
+        lookupIdMap.setOrgName("orgName");
+
+        lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+        String configId = lookupIdMap.getId();
+
+        when(trayService.removeSolutionInstance(validSettings)).thenReturn(null);
+        when(trayService.removeAuthentication(validSettings)).thenReturn(null);
+
+        lookupIdMappingLaunchService.deleteConnection(configId, validSettings);
+        Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId));
+
+        LookupIdMap lookupIdMap2 = new LookupIdMap();
+        lookupIdMap2.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap2.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        ExternalSystemAuthentication sysAuth2 = new ExternalSystemAuthentication();
+        sysAuth2.setSolutionInstanceId(validSolInstance);
+        sysAuth2.setTrayAuthenticationId(validAuth);
+        lookupIdMap.setExternalAuthentication(sysAuth2);
+        lookupIdMap2.setOrgId("orgId");
+        lookupIdMap2.setOrgName("orgName");
+
+        lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap2);
+        String configId2 = lookupIdMap2.getId();
+
+        doThrow(new LedpException(LedpCode.LEDP_31000, new String[] { "error" })).when(trayService)
+                .removeSolutionInstance(faultySolInstanceOnly);
+        when(trayService.removeAuthentication(faultySolInstanceOnly)).thenReturn(null);
+
+        try {
+            lookupIdMappingLaunchService.deleteConnection(configId2, faultySolInstanceOnly);
+            Assert.fail("delete connection should fail");
+        } catch (LedpException ex) {
+            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2));
+            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
+                    .getSolutionInstanceId());
+            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
+                    .getTrayAuthenticationId());
+        }
+
+        when(trayService.removeSolutionInstance(faultyAuthOnly)).thenReturn(null);
+        doThrow(new LedpException(LedpCode.LEDP_31000, new String[] { "error" })).when(trayService)
+                .removeAuthentication(faultyAuthOnly);
+
+        try {
+            lookupIdMappingLaunchService.deleteConnection(configId2, faultyAuthOnly);
+            Assert.fail("delete connection should fail");
+        } catch (LedpException ex) {
+            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2));
+            Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
+                    .getSolutionInstanceId());
+            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
+                    .getTrayAuthenticationId());
+
+            lookupIdMappingLaunchService.deleteConnection(configId2, validSettings);
+            Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId2));
+        }
     }
 }
