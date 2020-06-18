@@ -48,7 +48,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         System.out.println(output);
         DataReport.DuplicationReport report = JsonUtils.deserialize(output, DataReport.DuplicationReport.class);
         Assert.assertEquals(report.getDistinctRecords(), Long.valueOf(4));
-        Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(2));
+        Assert.assertEquals(report.getUniqueRecords(), Long.valueOf(2));
         Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(5));
     }
 
