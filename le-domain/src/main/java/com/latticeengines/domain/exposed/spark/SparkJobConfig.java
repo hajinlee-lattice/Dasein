@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
+import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
 import com.latticeengines.domain.exposed.spark.stats.AdvancedCalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
@@ -126,7 +127,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME), //
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
-        @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME) //
+        @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
+        @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 
