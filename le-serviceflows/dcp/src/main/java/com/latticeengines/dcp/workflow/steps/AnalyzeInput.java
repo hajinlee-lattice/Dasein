@@ -104,7 +104,7 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
 
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
         UploadStats.ImportStats importStats = stats.getImportStats();
-        long ingested = importStats.getSuccessCnt();
+        long ingested = importStats.getSuccessfullyIngested();
         DataReport.InputPresenceReport inputPresenceReport = new DataReport.InputPresenceReport();
         MATCH_KEYS_TO_INTERNAL_NAMES.forEach((key, name) -> {
             long populated = map.getOrDefault(name, 0L);
