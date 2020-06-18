@@ -40,6 +40,9 @@ public class Source {
     @JsonProperty("import_status")
     private DataFeedTask.S3ImportStatus importStatus;
 
+    @JsonProperty("basic_stats")
+    private DataReport.BasicStats basicStats;
+
     public String getSourceId() {
         return sourceId;
     }
@@ -99,5 +102,13 @@ public class Source {
 
     public void setImportStatus(DataFeedTask.S3ImportStatus importStatus) {
         this.importStatus = importStatus;
+    }
+
+    public DataReport.BasicStats getBasicStats() {
+        return basicStats;
+    }
+
+    public void setBasicStats(DataReport.BasicStats basicStats) {
+        this.basicStats = basicStats;
     }
 }

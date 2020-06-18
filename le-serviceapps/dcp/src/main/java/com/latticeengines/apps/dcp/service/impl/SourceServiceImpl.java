@@ -2,6 +2,7 @@ package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -16,9 +17,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
+import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceInfo;
@@ -65,6 +69,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private DropBoxService dropBoxService;
+
+    @Inject
+    private DataReportService dataReportService;
 
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId,
@@ -134,7 +141,9 @@ public class SourceServiceImpl implements SourceService {
     public Source getSource(String customerSpace, String sourceId) {
         ProjectInfo projectInfo = projectService.getProjectBySourceId(customerSpace, sourceId);
         SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
-        return getSourceFromSourceInfo(projectInfo, sourceInfo);
+        DataReport.BasicStats basicStats = dataReportService.getDataReportBasicStats(customerSpace,
+                DataReportRecord.Level.Source, sourceId);
+        return getSourceFromSourceInfo(projectInfo, sourceInfo, basicStats);
     }
 
     @Override
@@ -166,13 +175,17 @@ public class SourceServiceImpl implements SourceService {
             if (CollectionUtils.isEmpty(sourceInfoList)) {
                 return Collections.emptyList();
             }
-            return sourceInfoList.stream().map(sourceInfo -> getSourceFromSourceInfo(projectInfo, sourceInfo))
+            Map<String, DataReport.BasicStats> sourceBasicStatsMap =
+                    dataReportService.getDataReportBasicStatsByParent(customerSpace, DataReportRecord.Level.Project, projectId);
+            return sourceInfoList.stream()
+                    .map(sourceInfo -> getSourceFromSourceInfo(projectInfo, sourceInfo, sourceBasicStatsMap.get(sourceInfo.getSourceId())))
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
-    private Source getSourceFromSourceInfo(ProjectInfo projectInfo, SourceInfo sourceInfo) {
+    private Source getSourceFromSourceInfo(ProjectInfo projectInfo, SourceInfo sourceInfo,
+                                           DataReport.BasicStats sourceBasicStats) {
         Source source = new Source();
         source.setImportStatus(sourceInfo.getImportStatus());
         source.setSourceId(sourceInfo.getSourceId());
@@ -180,6 +193,7 @@ public class SourceServiceImpl implements SourceService {
         source.setRelativePath(sourceInfo.getRelativePath());
         source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
                 dropBoxService.getDropBoxPrefix(), projectInfo.getRootPath() + sourceInfo.getRelativePath()));
+        source.setBasicStats(sourceBasicStats);
         source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
         return source;
     }

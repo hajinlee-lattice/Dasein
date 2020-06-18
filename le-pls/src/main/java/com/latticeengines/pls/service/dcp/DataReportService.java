@@ -5,5 +5,5 @@ import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 
 public interface DataReportService {
 
-    DataReport getDataReport(DataReportRecord.Level level, String ownerId);
+    DataReport getDataReport(DataReportRecord.Level level, String ownerId, Boolean mock);
 }

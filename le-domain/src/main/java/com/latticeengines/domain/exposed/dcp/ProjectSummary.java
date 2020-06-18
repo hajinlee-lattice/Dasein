@@ -21,8 +21,8 @@ public class ProjectSummary {
     @JsonProperty("archived")
     private Boolean archieved;
 
-    @JsonProperty("sources")
-    private List<Source> sources;
+    @JsonProperty("basic_stats")
+    private DataReport.BasicStats basicStats;
 
     @JsonProperty("recipient_list")
     private List<String> recipientList;
@@ -60,12 +60,12 @@ public class ProjectSummary {
         this.archieved = archieved;
     }
 
-    public List<Source> getSources() {
-        return sources;
+    public DataReport.BasicStats getBasicStats() {
+        return basicStats;
     }
 
-    public void setSources(List<Source> sources) {
-        this.sources = sources;
+    public void setBasicStats(DataReport.BasicStats basicStats) {
+        this.basicStats = basicStats;
     }
 
     public List<String> getRecipientList() {

@@ -13,11 +13,14 @@ public class TestDataReportProxy extends PlsRestApiProxyBase {
         super("pls/datareport");
     }
 
-    public DataReport getDataReport(DataReportRecord.Level level, String ownerId) {
+    public DataReport getDataReport(DataReportRecord.Level level, String ownerId, Boolean mock) {
         String url = constructUrl();
         url += "?level=" + level;
         if (StringUtils.isNotEmpty(ownerId)) {
             url += "&ownerId=" + ownerId;
+        }
+        if (Boolean.TRUE.equals(mock)) {
+            url += "&mock=true";
         }
         return get("getDataReport", url, DataReport.class);
     }

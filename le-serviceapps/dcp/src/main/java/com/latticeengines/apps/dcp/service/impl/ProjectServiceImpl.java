@@ -2,6 +2,7 @@ package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
+import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -24,6 +26,8 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
@@ -51,6 +55,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Inject
     private SourceService sourceService;
+
+    @Inject
+    private DataReportService dataReportService;
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
@@ -88,7 +95,10 @@ public class ProjectServiceImpl implements ProjectService {
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
-            return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo)).collect(Collectors.toList());
+            Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
+                    DataReportRecord.Level.Project);
+            return projectInfoList.stream().map(projectInfo -> getProjectSummary(projectInfo,
+                    basicStatsMap.get(projectInfo.getProjectId()))).collect(Collectors.toList());
         }
     }
 
@@ -175,13 +185,13 @@ public class ProjectServiceImpl implements ProjectService {
         return details;
     }
 
-    private ProjectSummary getProjectSummary(String customerSpace, ProjectInfo projectInfo) {
+    private ProjectSummary getProjectSummary(ProjectInfo projectInfo, DataReport.BasicStats basicStats) {
         ProjectSummary summary = new ProjectSummary();
         summary.setProjectId(projectInfo.getProjectId());
         summary.setProjectDisplayName(projectInfo.getProjectDisplayName());
         summary.setArchieved(projectInfo.getDeleted());
         summary.setRecipientList(projectInfo.getRecipientList());
-        summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+        summary.setBasicStats(basicStats);
         summary.setCreated(projectInfo.getCreated().getTime());
         summary.setUpdated(projectInfo.getUpdated().getTime());
         summary.setCreatedBy(projectInfo.getCreatedBy());

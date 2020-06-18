@@ -1,9 +1,14 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +74,30 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Map<String, DataReport.BasicStats> findDataReportBasicStatsByLevel(DataReportRecord.Level level) {
+        List<Object[]> result = getReadOrWriteRepository().findBasicStatsByLevel(level);
+        return convertBasicStats(result);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Map<String, DataReport.BasicStats> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId) {
+        List<Object[]> result = getReadOrWriteRepository().findBasicStatsByParentLevelAndOwnerId(parentLevel,
+                parentOwnerId);
+        return convertBasicStats(result);
+    }
+
+    private Map<String, DataReport.BasicStats> convertBasicStats(List<Object[]> rawList) {
+        if (CollectionUtils.isEmpty(rawList)) {
+            return Collections.emptyMap();
+        }
+        Map<String, DataReport.BasicStats> basicStatsMap = new HashMap<>();
+        rawList.forEach(columns -> basicStatsMap.put((String) columns[0], (DataReport.BasicStats) columns[1]));
+        return basicStatsMap;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean existsDataReport(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().existsByLevelAndOwnerId(level, ownerId);
     }
@@ -77,6 +106,12 @@ public class DataReportEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Long findDataReportPid(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findPidByLevelAndOwnerId(level, ownerId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long findParentId(Long pid) {
+        return getReadOrWriteRepository().findParentIdByPid(pid);
     }
 
     @Override
@@ -107,5 +142,35 @@ public class DataReportEntityMgrImpl
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.DuplicationReport duplicationReport) {
         dataReportWriterRepository.updateDataReport(pid, new Date(), duplicationReport);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateDataReportRecordIfNull(Long pid, DataReport.BasicStats basicStats) {
+        dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), basicStats);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateDataReportRecordIfNull(Long pid, DataReport.InputPresenceReport inputPresenceReport) {
+        dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), inputPresenceReport);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateDataReportRecordIfNull(Long pid, DataReport.GeoDistributionReport geoDistributionReport) {
+        dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), geoDistributionReport);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateDataReportRecordIfNull(Long pid, DataReport.MatchToDUNSReport matchToDUNSReport) {
+        dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), matchToDUNSReport);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateDataReportRecordIfNull(Long pid, DataReport.DuplicationReport duplicationReport) {
+        dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), duplicationReport);
     }
 }

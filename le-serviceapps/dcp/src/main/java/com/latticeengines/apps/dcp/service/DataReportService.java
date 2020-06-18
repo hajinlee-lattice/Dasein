@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.service;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 
@@ -8,6 +10,12 @@ public interface DataReportService {
     DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     DataReport.BasicStats getDataReportBasicStats(String customerSpace, DataReportRecord.Level level, String ownerId);
+
+    Map<String, DataReport.BasicStats> getDataReportBasicStats(String customerSpace, DataReportRecord.Level level);
+
+    Map<String, DataReport.BasicStats> getDataReportBasicStatsByParent(String customerSpace,
+                                                                       DataReportRecord.Level parentLevel,
+                                                                       String parentOwnerId);
 
     DataReportRecord getDataReportRecord(String customerSpace, DataReportRecord.Level level, String ownerId);
 
