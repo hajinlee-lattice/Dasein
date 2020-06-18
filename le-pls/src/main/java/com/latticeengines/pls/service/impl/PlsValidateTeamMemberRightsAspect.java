@@ -132,12 +132,18 @@ public class PlsValidateTeamMemberRightsAspect {
         if (joinPoint.getArgs()[0] instanceof RatingEngine) {
             RatingEngine ratingEngine = (RatingEngine) joinPoint.getArgs()[0];
             if (StringUtils.isNotEmpty(ratingEngine.getTeamId())) {
-                checkTeamInContext(ratingEngine.getTeamId());
+                checkTeamWithRatingEngine(ratingEngine);
             } else if (StringUtils.isNotEmpty(ratingEngine.getId())) {
                 checkTeamWithRatingEngineId(ratingEngine.getId());
             }
         } else if (joinPoint.getArgs()[0] instanceof String) {
             checkTeamWithRatingEngineId((String) joinPoint.getArgs()[0]);
+        }
+    }
+
+    private void checkTeamWithRatingEngine(RatingEngine ratingEngine) {
+        if (teamFeatureEnabled()) {
+            checkTeamInContext(ratingEngine.getTeamId());
         }
     }
 

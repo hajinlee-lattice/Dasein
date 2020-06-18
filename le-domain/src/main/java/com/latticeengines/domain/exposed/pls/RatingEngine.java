@@ -48,7 +48,8 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.auth.HasTeamId;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -71,7 +72,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable, HasTeamId {
+public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable, HasTeamInfo {
 
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
@@ -146,6 +147,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private String teamId;
 
     private boolean viewOnly;
+
+    private GlobalTeam team;
 
     public static String generateIdStr() {
         String uuid;
@@ -550,15 +553,30 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.teamId = teamId;
     }
 
-    @JsonProperty("viewOnly")
+    @Override
     @Transient
+    @JsonProperty("viewOnly")
     public boolean isViewOnly() {
         return viewOnly;
     }
 
+    @Override
     @JsonProperty("viewOnly")
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
+    }
+
+    @Override
+    @Transient
+    @JsonProperty("team")
+    public GlobalTeam getTeam() {
+        return this.team;
+    }
+
+    @Override
+    @JsonProperty("team")
+    public void setTeam(GlobalTeam team) {
+        this.team = team;
     }
 
     public enum ScoreType {

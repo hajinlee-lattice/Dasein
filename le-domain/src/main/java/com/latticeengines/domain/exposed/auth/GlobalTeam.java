@@ -7,6 +7,9 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.security.User;
 
 public class GlobalTeam {
@@ -25,6 +28,15 @@ public class GlobalTeam {
 
     @JsonProperty("TeamMembers")
     private List<User> teamMembers;
+
+    @JsonProperty("MetadataSegments")
+    private List<MetadataSegment> metadataSegments;
+
+    @JsonProperty("Plays")
+    private List<Play> plays;
+
+    @JsonProperty("RatingEngines")
+    private List<RatingEngine> ratingEngines;
 
     public static String generateId() {
         return "Team_" + AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
@@ -76,5 +88,29 @@ public class GlobalTeam {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public List<MetadataSegment> getMetadataSegments() {
+        return metadataSegments;
+    }
+
+    public void setMetadataSegments(List<MetadataSegment> metadataSegments) {
+        this.metadataSegments = metadataSegments;
+    }
+
+    public List<Play> getPlays() {
+        return plays;
+    }
+
+    public void setPlays(List<Play> plays) {
+        this.plays = plays;
+    }
+
+    public List<RatingEngine> getRatingEngines() {
+        return ratingEngines;
+    }
+
+    public void setRatingEngines(List<RatingEngine> ratingEngines) {
+        this.ratingEngines = ratingEngines;
     }
 }

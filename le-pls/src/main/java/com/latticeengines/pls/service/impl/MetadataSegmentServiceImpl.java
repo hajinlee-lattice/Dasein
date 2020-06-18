@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -31,7 +32,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.pls.util.TeamInfoUtils;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.security.exposed.service.TeamService;
@@ -68,11 +68,16 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     @Override
-    public List<MetadataSegment> getSegments() {
-        return getSegments(false);
+    public List<MetadataSegment> getSegments(boolean translateToFrontEnd) {
+        if (translateToFrontEnd) {
+            return translateSegments(false);
+        } else {
+            String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+            return segmentProxy.getMetadataSegments(customerSpace);
+        }
     }
 
-    private List<MetadataSegment> getSegments(boolean filter) {
+    private List<MetadataSegment> translateSegments(boolean filter) {
         try (PerformanceTimer timer = new PerformanceTimer(String.format("Call getSegments with filter %s.", filter))) {
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             List<MetadataSegment> backendSegments = segmentProxy.getMetadataSegments(customerSpace);
@@ -87,7 +92,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                         globalTeamMap = teamService.getMyTeams(false, true)
                                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
                         return backendSegments.stream().filter(segment -> {
-                            TeamInfoUtils.fillTeamId(segment);
+                            TeamUtils.fillTeamId(segment);
                             return globalTeamMap.containsKey(segment.getTeamId());
                         }).map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
                                 .sorted((seg1, seg2) -> Boolean.compare( //
@@ -103,7 +108,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 }
                 return backendSegments.stream() //
                         .map(segment -> {
-                            TeamInfoUtils.fillTeamId(segment);
+                            TeamUtils.fillTeamId(segment);
                             return translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds);
                         })
                         .sorted((seg1, seg2) -> Boolean.compare( //
@@ -116,7 +121,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     @Override
     public List<MetadataSegment> getSegmentsInContext() {
-        return getSegments(true);
+        return translateSegments(true);
     }
 
     @Override
@@ -131,7 +136,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
             if (shouldTranslateForFrontend && segment != null) {
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-                TeamInfoUtils.fillTeamId(segment);
+                TeamUtils.fillTeamId(segment);
                 segment = translateForFrontend(segment, teamFeatureEnabled ?
                         teamService.getTeamInContext(segment.getTeamId()) : null, teamService.getMyTeamIds());
             }
@@ -270,7 +275,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             return null;
         }
         try {
-            TeamInfoUtils.fillTeams(segment, globalTeam, teamIds);
+            TeamUtils.fillTeamInfo(segment, globalTeam, teamIds);
             Restriction accountRestriction = segment.getAccountRestriction();
             if (accountRestriction == null) {
                 segment.setAccountFrontEndRestriction(emptyFrontEndRestriction());

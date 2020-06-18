@@ -53,7 +53,7 @@ public class MetadataSegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments() {
-        return metadataSegmentService.getSegments().stream() //
+        return metadataSegmentService.getSegments(true).stream() //
                 .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())) //
                 .collect(Collectors.toList());
     }

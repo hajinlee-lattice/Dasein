@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.auth.exposed.util.TeamUtils;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -44,11 +42,10 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.RatingEngineService;
-import com.latticeengines.pls.util.TeamInfoUtils;
+import com.latticeengines.pls.service.TeamWrapperService;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineDashboardProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.security.exposed.service.TeamService;
 
 @Component("ratingEngineService")
 public class RatingEngineServiceImpl implements RatingEngineService {
@@ -65,16 +62,13 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     private RatingCoverageProxy ratingCoverageProxy;
 
     @Inject
-    private BatonService batonService;
-
-    @Inject
-    private TeamService teamService;
+    private TeamWrapperService teamWrapperService;
 
     @Override
     public List<RatingEngineSummary> getRatingEngineSummaries(String status, String type, Boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
         List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, publishedRatingsOnly);
-        TeamInfoUtils.fillTeamsForList(ratingEngineSummaries, batonService, teamService);
+        teamWrapperService.fillTeamInfoForList(ratingEngineSummaries);
         return ratingEngineSummaries;
     }
 
@@ -93,7 +87,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             ratingEngineSummary = new RatingEngineSummary();
             ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
             ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
-            TeamInfoUtils.fillTeams(ratingEngineSummary, batonService, teamService);
+            teamWrapperService.fillTeamInfo(ratingEngineSummary);
         }
         return ratingEngineSummary;
     }
@@ -102,8 +96,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     public RatingEngine getRatingEngine(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
-        ratingEngine.setViewOnly(!TeamUtils.isMyTeam(ratingEngine.getTeamId()));
-        TeamInfoUtils.fillTeamId(ratingEngine);
+        teamWrapperService.fillTeamInfo(ratingEngine, false);
         return ratingEngine;
     }
 
@@ -134,9 +127,8 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     public RatingEngineDashboard getRatingEngineDashboardById(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         RatingEngineDashboard ratingEngineDashboard = ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(), ratingEngineId);
-        if (ratingEngineDashboard != null && ratingEngineDashboard.getSummary() != null) {
-            RatingEngineSummary ratingEngineSummary = ratingEngineDashboard.getSummary();
-            TeamInfoUtils.fillTeams(ratingEngineSummary, batonService, teamService);
+        if (ratingEngineDashboard != null) {
+            teamWrapperService.fillTeamInfo(ratingEngineDashboard.getSummary());
         }
         return ratingEngineDashboard;
     }

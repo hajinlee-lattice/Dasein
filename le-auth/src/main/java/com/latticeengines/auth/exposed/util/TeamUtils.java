@@ -1,6 +1,7 @@
 package com.latticeengines.auth.exposed.util;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -9,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.auth.HasTeamId;
+import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.security.Session;
 
 public final class TeamUtils {
@@ -45,6 +49,23 @@ public final class TeamUtils {
         } else {
             log.info("Pass team rights check since teamId is empty.");
             return true;
+        }
+    }
+
+    public static void fillTeamInfo(HasTeamInfo hasTeamInfo, GlobalTeam globalTeam, Set<String> teamIds) {
+        if (globalTeam == null) {
+            return;
+        }
+        hasTeamInfo.setTeam(globalTeam);
+        String teamId = hasTeamInfo.getTeamId();
+        if (!TeamUtils.isGlobalTeam(teamId) && !teamIds.contains(teamId)) {
+            hasTeamInfo.setViewOnly(true);
+        }
+    }
+
+    public static void fillTeamId(HasTeamId hasTeamId) {
+        if (StringUtils.isEmpty(hasTeamId.getTeamId())) {
+            hasTeamId.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
         }
     }
 
