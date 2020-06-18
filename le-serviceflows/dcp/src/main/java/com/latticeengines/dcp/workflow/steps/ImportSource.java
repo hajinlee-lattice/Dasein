@@ -111,8 +111,9 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         UploadStats.ImportStats importStats = new UploadStats.ImportStats();
         long totalCnt = jobDetail.getTotalRows();
         long errorCnt = jobDetail.getIgnoredRows() == null ? 0 : jobDetail.getIgnoredRows();
-        importStats.setSuccessCnt(totalCnt - errorCnt);
-        importStats.setErrorCnt(errorCnt);
+        importStats.setSubmitted(totalCnt);
+        importStats.setSuccessfullyIngested(totalCnt - errorCnt);
+        importStats.setFailedIngested(errorCnt);
         UploadStats stats = new UploadStats();
         stats.setImportStats(importStats);
         putObjectInContext(UPLOAD_STATS, stats);

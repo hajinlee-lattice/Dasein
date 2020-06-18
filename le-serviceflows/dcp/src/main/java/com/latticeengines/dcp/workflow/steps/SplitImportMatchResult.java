@@ -156,10 +156,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     private void updateUploadStatistics(SparkJobResult result) {
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
         UploadStats.MatchStats matchStats = new UploadStats.MatchStats();
-        matchStats.setAcceptedCnt(result.getTargets().get(0).getCount());
+        matchStats.setMatched(result.getTargets().get(0).getCount());
+        matchStats.setUnmatched(stats.getImportStats().getSuccessfullyIngested() - matchStats.getMatched());
         matchStats.setPendingReviewCnt(0L);
-        matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
-        stats.setMatchStats(matchStats);
+        //matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         putObjectInContext(UPLOAD_STATS, stats);
         DataReport.DuplicationReport duplicationReport = JsonUtils.deserialize(result.getOutput(),
                 DataReport.DuplicationReport.class);
