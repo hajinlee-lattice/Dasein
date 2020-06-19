@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CSVUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.{col, count, sum}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
@@ -17,6 +18,26 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
   override def runJob(spark: SparkSession, lattice: LatticeContext[SplitImportMatchResultConfig]): Unit = {
     val config: SplitImportMatchResultConfig = lattice.config
     val input: DataFrame = lattice.input.head
+
+    val geoReport : DataReport.GeoDistributionReport = new DataReport.GeoDistributionReport
+    val matchedCountryAttr: String = config.getMatchedCountryAttr
+    val countryCodeName: String = config.getCountryCodeName
+    val totalCnt: Long = config.getTotalCount
+    if (input.columns.contains(matchedCountryAttr)) {
+      // fake one country code column
+      val countryDF = input.withColumn(countryCodeName, col(matchedCountryAttr))
+        .groupBy(col(matchedCountryAttr), col(countryCodeName))
+        .agg(count("*").alias("cnt"))
+        .persist(StorageLevel.DISK_ONLY)
+      countryDF.collect().foreach(row => {
+        val countryVal: String = row.getAs(matchedCountryAttr)
+        val country: String = if (StringUtils.isEmpty(countryVal)) "undefined" else countryVal
+        val countryCodeVal: String = row.getAs(countryCodeName)
+        val countryCode: String = if (StringUtils.isEmpty(countryCodeVal)) "undefined" else countryCodeVal
+        val count: Long = row.getAs("cnt")
+        geoReport.addGeoDistribution(countryCode, country, count, totalCnt)
+      })
+    }
 
     val matchedDunsAttr: String = config.getMatchedDunsAttr
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
@@ -31,12 +52,16 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val duplicateDF: DataFrame = dunsCntDF.filter(col("cnt") > 1)
     val duplicatedCnt = if (duplicateDF == null || duplicateDF.head(1).isEmpty) 0 else duplicateDF.agg(sum("cnt").cast("long")).first().getLong(0)
     val distinctCount = dunsCntDF.count()
-    val duns = new DataReport.DuplicationReport
-    duns.setDistinctRecords(distinctCount)
-    duns.setUniqueRecords(uniqueCnt)
-    duns.setDuplicateRecords(duplicatedCnt)
+    val dupReport = new DataReport.DuplicationReport
+    dupReport.setDistinctRecords(distinctCount)
+    dupReport.setUniqueRecords(uniqueCnt)
+    dupReport.setDuplicateRecords(duplicatedCnt)
 
-    lattice.outputStr = JsonUtils.serialize(duns)
+    val report : DataReport = new DataReport
+    report.setGeoDistributionReport(geoReport)
+    report.setDuplicationReport(dupReport)
+
+    lattice.outputStr = JsonUtils.serialize(report)
     lattice.output = acceptedCsv :: rejectedCsv :: Nil
   }
 

@@ -29,7 +29,8 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
             InterfaceName.State.name(),
             InterfaceName.Country.name(),
             InterfaceName.Website.name(),
-            DataCloudConstants.ATTR_LDC_DUNS
+            DataCloudConstants.ATTR_LDC_DUNS,
+            DataCloudConstants.ATTR_COUNTRY,
     };
 
     @Test(groups = "functional")
@@ -40,6 +41,9 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
+        config.setMatchedCountryAttr(DataCloudConstants.ATTR_COUNTRY);
+        config.setCountryCodeName("LDC_CountryCode");
+        config.setTotalCount(8L);
         SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
                 getWorkspace());
         verifyResult(result);
@@ -48,10 +52,21 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
     @Override
     protected void verifyOutput(String output) {
         System.out.println(output);
-        DataReport.DuplicationReport report = JsonUtils.deserialize(output, DataReport.DuplicationReport.class);
-        Assert.assertEquals(report.getDistinctRecords(), Long.valueOf(4));
-        Assert.assertEquals(report.getUniqueRecords(), Long.valueOf(2));
-        Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(5));
+        DataReport report = JsonUtils.deserialize(output, DataReport.class);
+        DataReport.DuplicationReport dupReport = report.getDuplicationReport();
+        Assert.assertEquals(dupReport.getDistinctRecords(), Long.valueOf(4));
+        Assert.assertEquals(dupReport.getUniqueRecords(), Long.valueOf(2));
+        Assert.assertEquals(dupReport.getDuplicateRecords(), Long.valueOf(5));
+
+        DataReport.GeoDistributionReport geoReport = report.getGeoDistributionReport();
+        Map<String, DataReport.GeoDistributionReport.GeographicalItem> geoMap = geoReport.getGeographicalDistributionMap();
+        DataReport.GeoDistributionReport.GeographicalItem item1 = geoMap.get("USA");
+        Assert.assertNotNull(item1);
+        Assert.assertEquals(item1.getCount(), Long.valueOf(4L));
+        DataReport.GeoDistributionReport.GeographicalItem item2 = geoMap.get("China");
+        Assert.assertNotNull(item2);
+        Assert.assertEquals(item2.getCount(), Long.valueOf(2L));
+
     }
 
     @Override
@@ -66,14 +81,14 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         }
 
         Object[][] data = new Object[][] {
-                {"1", "234-567", "California", "United States", "3i.com", "123456"},
-                {"2", "121-567", "New York", "United States", "3k.com", "234567"},
-                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678"},
-                {"4", "234-888", "Guangdong", "China", "qq.com", "456789"},
-                {"5", "222-333", "France", "Paris", "accor.com", "456789"},
-                {"6", "666-999", "UC", "United States", "3i.com", "456789"},
-                {"7", "888-056", " ", "Switzerland", "adecco.com", "123456"},
-                {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null}
+                {"1", "234-567", "California", "United States", "3i.com", "123456", "USA"},
+                {"2", "121-567", "New York", "United States", "3k.com", "234567", "USA"},
+                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678", "USA"},
+                {"4", "234-888", "Guangdong", "China", "qq.com", "456789", "China"},
+                {"5", "222-333", "France", "Paris", "accor.com", "456789", "France"},
+                {"6", "666-999", "UC", "United States", "3i.com", "456789", "USA"},
+                {"7", "888-056", " ", "Switzerland", "adecco.com", "123456", "Switzerland"},
+                {"8", "777-056", "Zhejiang", "China", "alibaba.com", null, "China"}
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -92,10 +107,11 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
     }
 
     private void verifyNoDupOutput(String output) {
-        DataReport.DuplicationReport report = JsonUtils.deserialize(output, DataReport.DuplicationReport.class);
-        Assert.assertEquals(report.getDistinctRecords(), Long.valueOf(7));
-        Assert.assertEquals(report.getUniqueRecords(), Long.valueOf(7));
-        Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(0));
+        DataReport report = JsonUtils.deserialize(output, DataReport.class);
+        DataReport.DuplicationReport dupReport = report.getDuplicationReport();
+        Assert.assertEquals(dupReport.getDistinctRecords(), Long.valueOf(7));
+        Assert.assertEquals(dupReport.getUniqueRecords(), Long.valueOf(7));
+        Assert.assertEquals(dupReport.getDuplicateRecords(), Long.valueOf(0));
     }
 
     private String uploadDataNoDup() {
@@ -105,14 +121,14 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         }
 
         Object[][] data = new Object[][] {
-                {"1", "234-567", "California", "United States", "3i.com", "123456"},
-                {"2", "121-567", "New York", "United States", "3k.com", "234567"},
-                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678"},
-                {"4", "234-888", "Guangdong", "China", "qq.com", "456789"},
-                {"5", "222-333", "France", "Paris", "accor.com", "567890"},
-                {"6", "666-999", "UC", "United States", "3i.com", "678901"},
-                {"7", "888-056", " ", "Switzerland", "adecco.com", "789012"},
-                {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null}
+                {"1", "234-567", "California", "United States", "3i.com", "123456",  "USA"},
+                {"2", "121-567", "New York", "United States", "3k.com", "234567",  "USA"},
+                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678",  "USA"},
+                {"4", "234-888", "Guangdong", "China", "qq.com", "456789",  "USA"},
+                {"5", "222-333", "France", "Paris", "accor.com", "567890",  "USA"},
+                {"6", "666-999", "UC", "United States", "3i.com", "678901",  "USA"},
+                {"7", "888-056", " ", "Switzerland", "adecco.com", "789012",  "USA"},
+                {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null,  "USA"}
         };
         return uploadHdfsDataUnit(data, fields);
     }

@@ -20,6 +20,15 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("MatchedDunsAttr")
     private String matchedDunsAttr;
 
+    @JsonProperty("MatchedCountryAttr")
+    private String matchedCountryAttr;
+
+    @JsonProperty("CountryCodeName")
+    private String countryCodeName;
+
+    @JsonProperty("TotalCount")
+    private long totalCount;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -53,5 +62,29 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public void setMatchedDunsAttr(String matchedDunsAttr) {
         this.matchedDunsAttr = matchedDunsAttr;
+    }
+
+    public String getMatchedCountryAttr() {
+        return matchedCountryAttr;
+    }
+
+    public void setMatchedCountryAttr(String matchedCountryAttr) {
+        this.matchedCountryAttr = matchedCountryAttr;
+    }
+
+    public String getCountryCodeName() {
+        return countryCodeName;
+    }
+
+    public void setCountryCodeName(String countryCodeName) {
+        this.countryCodeName = countryCodeName;
+    }
+
+    public long getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(long totalCount) {
+        this.totalCount = totalCount;
     }
 }

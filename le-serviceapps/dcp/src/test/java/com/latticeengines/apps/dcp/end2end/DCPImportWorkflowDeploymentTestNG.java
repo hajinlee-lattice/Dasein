@@ -309,5 +309,13 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         DataReport.InputPresenceReport inputPresenceReport  = report.getInputPresenceReport();
         Assert.assertNotNull(inputPresenceReport);
         Assert.assertTrue(CollectionUtils.isNotEmpty(inputPresenceReport.getPresenceList()));
+
+        DataReport.GeoDistributionReport geoDistributionReport = report.getGeoDistributionReport();
+        Assert.assertNotNull(geoDistributionReport);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(geoDistributionReport.getGeographicalDistributionList()));
+
+        DataReport.DuplicationReport duplicationReport = report.getDuplicationReport();
+        Assert.assertNotNull(duplicationReport);
+        Assert.assertTrue(duplicationReport.getDistinctRecords() > 0);
     }
 }

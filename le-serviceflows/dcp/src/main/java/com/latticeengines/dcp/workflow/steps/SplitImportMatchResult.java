@@ -23,6 +23,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
@@ -83,8 +84,12 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         HdfsDataUnit input = matchResult.toHdfsDataUnit("input");
         SplitImportMatchResultConfig jobConfig = new SplitImportMatchResultConfig();
         jobConfig.setInput(Collections.singletonList(input));
+        jobConfig.setTotalCount(input.getCount());
 
         jobConfig.setMatchedDunsAttr("DunsNumber");
+        jobConfig.setMatchedCountryAttr(DataCloudConstants.ATTR_COUNTRY);
+        jobConfig.setCountryCodeName("LDC_CountryCode");
+
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
@@ -164,10 +169,14 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         //matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         stats.setMatchStats(matchStats);
         putObjectInContext(UPLOAD_STATS, stats);
-        DataReport.DuplicationReport duplicationReport = JsonUtils.deserialize(result.getOutput(),
-                DataReport.DuplicationReport.class);
+        DataReport report = JsonUtils.deserialize(result.getOutput(), DataReport.class);
+
+        DataReport.InputPresenceReport inputPresenceReport = getObjectFromContext(INPUT_PRESENCE_REPORT,
+                DataReport.InputPresenceReport.class);
+        report.setInputPresenceReport(inputPresenceReport);
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
-                configuration.getUploadId(), duplicationReport);
+                configuration.getUploadId(), report);
+
 
     }
 
