@@ -2,6 +2,7 @@ package com.latticeengines.spark.exposed.job.dcp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,13 +34,14 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void test() {
-        uploadData();
+        String input = uploadData();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
         Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
-        SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config);
+        SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
+                getWorkspace());
         verifyResult(result);
     }
 
@@ -57,7 +59,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         return Arrays.asList(this::verifySingleTarget, this::verifySingleTarget);
     }
 
-    private void uploadData() {
+    private String uploadData() {
         List<Pair<String, Class<?>>> fields = new ArrayList<>();
         for (String field : FIELDS) {
             fields.add(Pair.of(field, String.class));
@@ -73,18 +75,19 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
                 {"7", "888-056", " ", "Switzerland", "adecco.com", "123456"},
                 {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null}
         };
-        uploadHdfsDataUnit(data, fields);
+        return uploadHdfsDataUnit(data, fields);
     }
 
     @Test(groups = "functional")
     public void testNoDuplicate() {
-        uploadDataNoDup();
+        String input = uploadDataNoDup();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
         Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
-        SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config);
+        SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
+                getWorkspace());
         verifyNoDupOutput(result.getOutput());
     }
 
@@ -95,7 +98,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(0));
     }
 
-    private void uploadDataNoDup() {
+    private String uploadDataNoDup() {
         List<Pair<String, Class<?>>> fields = new ArrayList<>();
         for (String field : FIELDS) {
             fields.add(Pair.of(field, String.class));
@@ -111,6 +114,6 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
                 {"7", "888-056", " ", "Switzerland", "adecco.com", "789012"},
                 {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null}
         };
-        uploadHdfsDataUnit(data, fields);
+        return uploadHdfsDataUnit(data, fields);
     }
 }
