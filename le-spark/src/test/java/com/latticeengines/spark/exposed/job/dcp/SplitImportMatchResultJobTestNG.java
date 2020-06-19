@@ -75,4 +75,42 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         };
         uploadHdfsDataUnit(data, fields);
     }
+
+    @Test(groups = "functional")
+    public void testNoDuplicate() {
+        uploadDataNoDup();
+        SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
+        config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
+        Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
+        config.setAcceptedAttrsMap(map);
+        config.setRejectedAttrsMap(map);
+        SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config);
+        verifyNoDupOutput(result.getOutput());
+    }
+
+    private void verifyNoDupOutput(String output) {
+        DataReport.DuplicationReport report = JsonUtils.deserialize(output, DataReport.DuplicationReport.class);
+        Assert.assertEquals(report.getDistinctRecords(), Long.valueOf(7));
+        Assert.assertEquals(report.getUniqueRecords(), Long.valueOf(7));
+        Assert.assertEquals(report.getDuplicateRecords(), Long.valueOf(0));
+    }
+
+    private void uploadDataNoDup() {
+        List<Pair<String, Class<?>>> fields = new ArrayList<>();
+        for (String field : FIELDS) {
+            fields.add(Pair.of(field, String.class));
+        }
+
+        Object[][] data = new Object[][] {
+                {"1", "234-567", "California", "United States", "3i.com", "123456"},
+                {"2", "121-567", "New York", "United States", "3k.com", "234567"},
+                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678"},
+                {"4", "234-888", "Guangdong", "China", "qq.com", "456789"},
+                {"5", "222-333", "France", "Paris", "accor.com", "567890"},
+                {"6", "666-999", "UC", "United States", "3i.com", "678901"},
+                {"7", "888-056", " ", "Switzerland", "adecco.com", "789012"},
+                {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null}
+        };
+        uploadHdfsDataUnit(data, fields);
+    }
 }
