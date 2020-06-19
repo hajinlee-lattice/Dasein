@@ -17,7 +17,7 @@ public interface TeamWrapperService {
 
     String createTeam(String createdByUser, GlobalTeamData globalTeamData);
 
-    List<GlobalTeam> getTeamsInContext(boolean withTeamMember, boolean appendDefaultGlobalTeam);
+    List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam);
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember);
 

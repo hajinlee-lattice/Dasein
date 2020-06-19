@@ -41,6 +41,13 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         super("cdl");
     }
 
+    public List<Play> getPlays(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/all", shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
+        List<?> list = get("get plays", url, List.class);
+        return JsonUtils.convertList(list, Play.class);
+    }
+
     public List<Play> getPlays(String customerSpace, Boolean shouldLoadCoverage, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();

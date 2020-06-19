@@ -4,14 +4,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.security.User;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GlobalTeam {
 
     @JsonProperty("TeamId")
@@ -36,7 +37,7 @@ public class GlobalTeam {
     private List<Play> plays;
 
     @JsonProperty("RatingEngines")
-    private List<RatingEngine> ratingEngines;
+    private List<RatingEngineSummary> ratingEngineSummaries;
 
     public static String generateId() {
         return "Team_" + AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
@@ -106,11 +107,11 @@ public class GlobalTeam {
         this.plays = plays;
     }
 
-    public List<RatingEngine> getRatingEngines() {
-        return ratingEngines;
+    public List<RatingEngineSummary> getRatingEngineSummaries() {
+        return ratingEngineSummaries;
     }
 
-    public void setRatingEngines(List<RatingEngine> ratingEngines) {
-        this.ratingEngines = ratingEngines;
+    public void setRatingEngineSummaries(List<RatingEngineSummary> ratingEngineSummaries) {
+        this.ratingEngineSummaries = ratingEngineSummaries;
     }
 }

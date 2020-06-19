@@ -50,6 +50,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         super("cdl");
     }
 
+    public List<RatingEngineSummary> getAllRatingEngineSummaries(String customerSpace) {
+        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        List list = get("getAllRatingEngineSummaries", url, List.class);
+        return JsonUtils.convertList(list, RatingEngineSummary.class);
+    }
+
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace) {
         return getRatingEngineSummaries(customerSpace, null, null);
     }

@@ -62,7 +62,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "List all teams")
     public List<GlobalTeam> getAllTeams() {
-        return teamWrapperService.getTeamsInContext(true, false);
+        return teamWrapperService.getTeams(true, false);
     }
 
     @PostMapping("")
