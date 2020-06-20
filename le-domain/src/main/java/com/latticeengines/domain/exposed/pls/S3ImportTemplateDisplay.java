@@ -41,6 +41,9 @@ public class S3ImportTemplateDisplay {
     @JsonProperty("Entity")
     private BusinessEntity entity;
 
+    @JsonProperty("DataLoaded")
+    private Boolean dataLoaded;
+
     public String getObject() {
         return object;
     }
@@ -116,5 +119,13 @@ public class S3ImportTemplateDisplay {
 
     public void setEntity(BusinessEntity entity) {
         this.entity = entity;
+    }
+
+    public Boolean getDataLoaded() {
+        return dataLoaded;
+    }
+
+    public void setDataLoaded(Boolean dataLoaded) {
+        this.dataLoaded = dataLoaded;
     }
 }

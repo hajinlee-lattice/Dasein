@@ -87,6 +87,7 @@ public class CDLResource {
     private static final String editS3TemplateMsg = "<p>%s template has been edited.</p>";
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
+    private static final String resetTemplateMsg = "<p>Your import template has been reset.</p>";
     private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
     private static final String updateS3ImportSystemPriorityMsg = "System priority has been updated.</p>";
 
@@ -287,6 +288,26 @@ public class CDLResource {
         }
     }
 
+    @PostMapping("/s3/template/reset")
+    @ApiOperation(value = "Reset template")
+    @ResponseBody
+    public Map<String, UIAction> resetTemplate(@RequestBody S3ImportTemplateDisplay templateDisplay) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+        try {
+            cdlService.resetTemplate(customerSpace.toString(), templateDisplay.getFeedType());
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    resetTemplateMsg);
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        } catch (LedpException e) {
+            log.error(String.format("Failed to reset import template: %s", e.getMessage()));
+            throw e;
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to reset import template: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18245, new String[]{e.getMessage()});
+        }
+    }
+
     @PostMapping("/soft-delete")
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> softDelete(@RequestBody DeleteRequest deleteRequest) {
@@ -449,6 +470,20 @@ public class CDLResource {
         } catch (RuntimeException e) {
             log.error("Failed to Update system priority: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18223, new String[] {e.getMessage()});
+        }
+    }
+
+    @PostMapping("/s3import/system/list/validate")
+    @ResponseBody
+    @ApiOperation("Try update import system priority based on sequence with validation")
+    public ResponseDocument<Boolean> validateAndUpdateSystemPriority(@RequestBody List<S3ImportSystem> systemList) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+        try {
+            return ResponseDocument.successResponse(cdlService.validateAndUpdateS3ImportSystemPriority(customerSpace.toString(), systemList));
+        } catch (LedpException e) {
+            log.warn("Validation failed when update system priority: " + e.getMessage());
+            return ResponseDocument.failedResponse(e);
         }
     }
 

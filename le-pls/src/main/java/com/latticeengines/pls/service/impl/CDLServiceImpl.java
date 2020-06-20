@@ -21,8 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.parquet.Strings;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -501,6 +503,7 @@ public class CDLServiceImpl implements CDLService {
                     display.setS3ImportSystem(
                             getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
                     display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
+                    display.setDataLoaded(Boolean.FALSE);
                     templates.add(display);
                 }
             } else {
@@ -522,6 +525,7 @@ public class CDLServiceImpl implements CDLService {
                         getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
                 display.setImportStatus(task.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
                         : task.getS3ImportStatus());
+                display.setDataLoaded(Boolean.FALSE);
                 templates.add(display);
             }
         }
@@ -1149,6 +1153,41 @@ public class CDLServiceImpl implements CDLService {
                 .collect(Collectors.toList());
         return importActions.stream().map(action -> getImportFile(customerSpace, action)).
                 filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    @Override
+    public void resetTemplate(String customerSpace, String feedType) {
+        if (!mockReset(feedType)) {
+            throw new RuntimeException("something wrong.");
+        }
+    }
+
+    @Override
+    public boolean validateAndUpdateS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        return mockValidate(customerSpace, systemList);
+    }
+
+    private boolean mockValidate(String customerSpace, List<S3ImportSystem> systemList) {
+        int random = new RandomDataGenerator().nextInt(0, 1000);
+        if (random < 200) {
+            updateS3ImportSystemPriorityBasedOnSequence(customerSpace, systemList);
+            return true;
+        } else {
+            throw new LedpException(LedpCode.LEDP_18246);
+        }
+    }
+
+    private boolean mockReset(String feedType) {
+        int random = new RandomDataGenerator().nextInt(0, 1000);
+        if (random < 300) {
+            return true;
+        } else if (random < 700) {
+            throw new LedpException(LedpCode.LEDP_18247, new String[] {feedType});
+        } else {
+            List<String> dependingTemplates = Arrays.asList("fake_template1", "fake_template2");
+            throw new LedpException(LedpCode.LEDP_18244, new String[] {Strings.join(dependingTemplates, ","),
+                    feedType});
+        }
     }
 
     private ImportFileInfo getImportFile(String customerSpace, Action action) {
