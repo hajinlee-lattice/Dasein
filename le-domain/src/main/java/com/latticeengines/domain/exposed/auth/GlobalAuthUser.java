@@ -36,31 +36,31 @@ public class GlobalAuthUser extends BaseGlobalAuthObject implements HasPid {
     private Long pid;
 
     @JsonProperty("email")
-    @Column(name = "Email", nullable = true)
+    @Column(name = "Email")
     private String email;
 
     @JsonProperty("first_name")
-    @Column(name = "First_Name", nullable = true)
+    @Column(name = "First_Name")
     private String firstName;
 
     @JsonProperty("last_name")
-    @Column(name = "Last_Name", nullable = true)
+    @Column(name = "Last_Name")
     private String lastName;
 
     @JsonProperty("title")
-    @Column(name = "Title", nullable = true)
+    @Column(name = "Title")
     private String title;
 
     @JsonProperty("phone_number")
-    @Column(name = "Phone_Number", nullable = true)
+    @Column(name = "Phone_Number")
     private String phoneNumber;
 
     @JsonProperty("isActive")
-    @Column(name = "IsActive", nullable = true)
+    @Column(name = "IsActive")
     private boolean isActive;
 
     @JsonProperty("created_by_user")
-    @Column(name = "Created_By_User", nullable = true)
+    @Column(name = "Created_By_User")
     private String createdByUser;
 
     @JsonProperty("invalid_login_attempts")

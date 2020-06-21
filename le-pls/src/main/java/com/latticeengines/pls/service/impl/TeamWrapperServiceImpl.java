@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +16,10 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
+import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.service.TeamWrapperService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -56,9 +60,42 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         return teamService.createTeam(createdByUser, globalTeamData);
     }
 
+    private MetadataSegment simplifySegment(MetadataSegment metadataSegment) {
+        MetadataSegment result = new MetadataSegment();
+        result.setTeamId(metadataSegment.getTeamId());
+        result.setName(metadataSegment.getName());
+        result.setDisplayName(metadataSegment.getDisplayName());
+        return result;
+    }
+
+    private Play simplifyPlay(Play play) {
+        Play result = new Play();
+        result.setName(play.getName());
+        result.setDisplayName(play.getDisplayName());
+        return result;
+    }
+
     @Override
-    public List<GlobalTeam> getTeamsInContext(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
+    public List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
+        String tenantId = MultiTenantContext.getTenant().getId();
         List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
+        List<MetadataSegment> metadataSegments = segmentProxy.getMetadataSegments(tenantId).stream()
+                .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())).map(metadataSegment -> simplifySegment(metadataSegment)).collect(Collectors.toList());
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getAllRatingEngineSummaries(tenantId);
+        List<Play> plays = playProxy.getPlays(tenantId);
+        Map<String, List<MetadataSegment>> teamMapForSegment = metadataSegments.stream()
+                .filter(metadataSegment -> !TeamUtils.isGlobalTeam(metadataSegment.getTeamId())).collect(Collectors.groupingBy(MetadataSegment::getTeamId));
+        Map<String, List<RatingEngineSummary>> teamMapForRatingEngine = ratingEngineSummaries.stream()
+                .filter(ratingEngineSummary -> !TeamUtils.isGlobalTeam(ratingEngineSummary.getTeamId())).collect(Collectors.groupingBy(RatingEngineSummary::getTeamId));
+        Map<String, List<Play>> teamMapForPlay = plays.stream().filter(play -> !TeamUtils.isGlobalTeam(play.getTeamId()))
+                .collect(Collectors.groupingBy(Play::getTeamId));
+        teamMapForPlay = teamMapForPlay.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(),
+                entry -> entry.getValue().stream().map(value -> simplifyPlay(value)).collect(Collectors.toList())));
+        for (GlobalTeam globalTeam : globalTeams) {
+            globalTeam.setMetadataSegments(teamMapForSegment.getOrDefault(globalTeam.getTeamId(), new ArrayList<>()));
+            globalTeam.setRatingEngineSummaries(teamMapForRatingEngine.getOrDefault(globalTeam.getTeamId(), new ArrayList<>()));
+            globalTeam.setPlays(teamMapForPlay.getOrDefault(globalTeam.getTeamId(), new ArrayList<>()));
+        }
         return globalTeams;
     }
 
@@ -107,7 +144,7 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     public void fillTeamInfoForList(List<? extends HasTeamInfo> hasTeamInfos) {
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         if (teamFeatureEnabled) {
-            Map<String, GlobalTeam> globalTeamMap = getTeamsInContext(false, true)
+            Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false, true)
                     .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
             Set<String> teamIds = getMyTeamIds();
             for (HasTeamInfo hasTeamInfo : hasTeamInfos) {

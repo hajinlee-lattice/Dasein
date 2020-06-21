@@ -203,6 +203,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
+    public List<RatingEngineSummary> getRatingEngineSummaries() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("Get all the rating engine summaries for tenant %s.", tenant.getId()));
+        return ratingEngineEntityMgr.findAllByTypeAndStatus(null, null).stream()
+                .map(ratingEngine -> constructRatingEngineSummary(ratingEngine)).collect(Collectors.toList());
+    }
+
+    @Override
     public List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status) {
         return getAllRatingEngineSummaries(type, status, false);
     }

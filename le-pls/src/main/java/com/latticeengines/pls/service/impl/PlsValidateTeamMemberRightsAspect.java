@@ -101,7 +101,7 @@ public class PlsValidateTeamMemberRightsAspect {
         if (teamFeatureEnabled()) {
             Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
             if (play != null) {
-                checkTeamInContext(play.getTargetSegment().getTeamId());
+                checkTeamInContext(play.getTeamId());
             }
         }
     }
