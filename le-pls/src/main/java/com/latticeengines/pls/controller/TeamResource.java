@@ -73,7 +73,7 @@ public class TeamResource {
         try {
             return teamWrapperService.createTeam(MultiTenantContext.getUser().getEmail(), globalTeamData);
         } catch (Exception ex) {
-            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+            throw UIActionUtils.handleException(ex);
         }
     }
 
@@ -87,7 +87,7 @@ public class TeamResource {
         try {
             return teamWrapperService.editTeam(teamId, globalTeamData);
         } catch (Exception ex) {
-            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+            throw UIActionUtils.handleException(ex);
         }
     }
 

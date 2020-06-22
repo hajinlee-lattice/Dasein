@@ -155,7 +155,7 @@ public class AttrConfigResource {
         try {
             return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
         } catch (Exception ex) {
-            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+            throw UIActionUtils.handleException(ex);
         }
     }
 
@@ -165,7 +165,7 @@ public class AttrConfigResource {
         try {
             return attrConfigService.createAttributeSet(attributeSet);
         } catch (Exception ex) {
-            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+            throw UIActionUtils.handleException(ex);
         }
     }
 
@@ -175,7 +175,7 @@ public class AttrConfigResource {
         try {
             return attrConfigService.updateAttributeSet(attributeSet);
         } catch (Exception ex) {
-            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+            throw UIActionUtils.handleException(ex);
         }
     }
 }
