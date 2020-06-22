@@ -16,6 +16,7 @@ import com.latticeengines.cdl.workflow.steps.process.GeneratePreScoringReport;
 import com.latticeengines.cdl.workflow.steps.process.GenerateProcessingReport;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.AtlasAccountLookupExportWorkflow;
 import com.latticeengines.serviceflows.workflow.export.ExportProcessAnalyzeToS3;
 import com.latticeengines.serviceflows.workflow.export.ExportTimelineRawTableToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
@@ -86,6 +87,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ExportToDynamo exportToDynamo;
 
     @Inject
+    private AtlasAccountLookupExportWorkflow atlasAccountLookupExportWorkflow;
+
+    @Inject
     private ExportTimelineRawTableToDynamo exportTimelineRawTableToDynamo;
 
     @Inject
@@ -130,7 +134,8 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(generateProcessingReport) //
                 .next(exportProcessAnalyzeToS3) //
                 .next(commitEntityMatchWorkflow) //
-                .next(exportTimelineRawTableToDynamo)
+                .next(exportTimelineRawTableToDynamo) //
+                // .next(atlasAccountLookupExportWorkflow) // TODO - enable in next PR
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
                 .choreographer(choreographer) //

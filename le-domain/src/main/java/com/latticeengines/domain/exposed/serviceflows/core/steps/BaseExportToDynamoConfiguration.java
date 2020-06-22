@@ -9,10 +9,11 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ExportToDynamoStepConfiguration.class, name = "ExportToDynamoStepConfiguration"),
-        @JsonSubTypes.Type(value = ExportTimelineRawTableToDynamoStepConfiguration.class, name = "ExportTimelineRawTableToDynamoStepConfiguration") })
+        @JsonSubTypes.Type(value = ExportToDynamoStepConfiguration.class, name = ExportToDynamoStepConfiguration.NAME),
+        @JsonSubTypes.Type(value = ExportTimelineRawTableToDynamoStepConfiguration.class, name = ExportTimelineRawTableToDynamoStepConfiguration.NAME),
+        @JsonSubTypes.Type(value = AtlasAccountLookupExportStepConfiguration.class, name = AtlasAccountLookupExportStepConfiguration.NAME) })
 public abstract class BaseExportToDynamoConfiguration extends MicroserviceStepConfiguration {
 
     @NotNull

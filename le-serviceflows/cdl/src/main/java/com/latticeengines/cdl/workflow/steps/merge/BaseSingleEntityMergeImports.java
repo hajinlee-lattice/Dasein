@@ -38,6 +38,8 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -49,6 +51,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -87,8 +90,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         reportChangeListTableName = getReportChangeListTableName();
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
-        updateEntityValueMapInContext(ENTITY_CHANGELIST_TABLES, changeListTableName, String.class);
-        addToListInContext(TEMPORARY_CDL_TABLES, changeListTableName, String.class);
+        // FIXME - put 3d retention to change list table mainly for debugging purpose to update dynamoDB accountLookup.
+        //  can add back to TEMPORARY_CDL_TABLES if stable enough
+        addShortRetentionToTable(changeListTableName);
         updateEntityValueMapInContext(ENTITY_REPORT_CHANGELIST_TABLES, reportChangeListTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, reportChangeListTableName, String.class);
 
@@ -101,6 +105,11 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             entityList.add(entity);
             putObjectInContext(ENTITIES_WITH_SCHEMA_CHANGE, entityList);
         }
+    }
+
+    protected void addShortRetentionToTable(String tableName) {
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.DAY);
+        metadataProxy.updateDataTablePolicy(customerSpace.toString(), tableName, retentionPolicy);
     }
 
     protected void registerSystemBatchStore() {
