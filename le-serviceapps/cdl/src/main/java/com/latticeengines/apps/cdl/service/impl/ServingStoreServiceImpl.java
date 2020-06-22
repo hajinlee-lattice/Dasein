@@ -142,15 +142,21 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version,
+                                                     Collection<ColumnSelection.Predefined> groups, String attributeSetName) {
+        return getDecoratedMetadata(customerSpace, entity, version, groups, attributeSetName, StoreFilter.ALL);
+    }
+
+    @Override
     public Map<String, Boolean> getAttributesUsage(String customerSpace, BusinessEntity entity, Set<String> attributes,
-            ColumnSelection.Predefined group, DataCollection.Version version) {
+            ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version) {
         if (CollectionUtils.isEmpty(attributes)) {
             return Collections.<String, Boolean> emptyMap();
         }
 
         Map<String, Boolean> result = attributes.stream().collect(Collectors.toMap(Function.identity(), attr -> false));
 
-        List<String> cms = getDecoratedMetadata(customerSpace, entity, version, Collections.singletonList(group))
+        List<String> cms = getDecoratedMetadata(customerSpace, entity, version, Collections.singletonList(group), attributeSetName)
                 .map(attr -> attr.getAttrName()).collectList().block();
         if (CollectionUtils.isNotEmpty(cms)) {
             attributes.stream().forEach(attr -> {
@@ -176,15 +182,27 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 Collections.singletonList(BusinessEntity.Contact), version, Collections.singleton(group));
     }
 
+    @Override
+    public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                BusinessEntity.getAccountExportEntities(group), version, Collections.singleton(group));
+    }
+
+    @Override
+    public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                Collections.singletonList(BusinessEntity.Contact), version, Collections.singleton(group));
+    }
+
     private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayName(String customerSpace,
             Collection<BusinessEntity> entities, DataCollection.Version version,
-            Collection<ColumnSelection.Predefined> groups) {
+            Collection<ColumnSelection.Predefined> groups, String attributeSetName) {
         List<ColumnMetadata> columnMetadataList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         Map<BusinessEntity, List<ColumnMetadata>> map = entities.stream().parallel()
                 .collect(Collectors.toMap(entity -> entity, entity -> {
                     MultiTenantContext.setTenant(tenant);
-                    List<ColumnMetadata> cms = getDecoratedMetadata(customerSpace, entity, version, groups)
+                    List<ColumnMetadata> cms = getDecoratedMetadata(customerSpace, entity, version, groups, attributeSetName)
                             .collectList().block();
                     if (CollectionUtils.isNotEmpty(cms)
                             && BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
@@ -200,6 +218,11 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 }));
         map.values().forEach(columnMetadataList::addAll);
         return columnMetadataList;
+    }
+
+    private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayName(String customerSpace, Collection<BusinessEntity> entities,
+                                                                             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace, entities, version, groups, null);
     }
 
     @Override
