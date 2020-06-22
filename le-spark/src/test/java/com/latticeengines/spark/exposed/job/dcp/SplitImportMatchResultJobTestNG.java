@@ -1,6 +1,5 @@
 package com.latticeengines.spark.exposed.job.dcp;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,26 +22,28 @@ import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBase {
 
-    private static final String[] FIELDS = {
-            "CustomerID",
-            InterfaceName.PhoneNumber.name(),
-            InterfaceName.State.name(),
-            InterfaceName.Country.name(),
-            InterfaceName.Website.name(),
-            DataCloudConstants.ATTR_LDC_DUNS,
-            DataCloudConstants.ATTR_COUNTRY,
-    };
+    private static final List<Pair<String, Class<?>>> FIELDS = Arrays.asList(
+            Pair.of("CustomerID", String.class),
+            Pair.of(InterfaceName.PhoneNumber.name(), String.class),
+            Pair.of(InterfaceName.State.name(), String.class),
+            Pair.of(InterfaceName.Country.name(), String.class),
+            Pair.of(InterfaceName.Website.name(), String.class),
+            Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class),
+            Pair.of(DataCloudConstants.ATTR_COUNTRY, String.class),
+            Pair.of("LDC_ConfidenceCode", Integer.class)
+    );
 
     @Test(groups = "functional")
     public void test() {
         String input = uploadData();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
-        Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
+        Map<String, String> map = FIELDS.stream().map(Pair::getLeft).collect(Collectors.toMap(e->e, e->e));
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
         config.setMatchedCountryAttr(DataCloudConstants.ATTR_COUNTRY);
-        config.setCountryCodeName("LDC_CountryCode");
+        config.setCountryCode("LDC_CountryCode");
+        config.setConfidenceCode( "LDC_ConfidenceCode");
         config.setTotalCount(8L);
         SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
                 getWorkspace());
@@ -67,6 +68,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         Assert.assertNotNull(item2);
         Assert.assertEquals(item2.getCount(), Long.valueOf(2L));
 
+        DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
     }
 
     @Override
@@ -75,22 +77,19 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
     }
 
     private String uploadData() {
-        List<Pair<String, Class<?>>> fields = new ArrayList<>();
-        for (String field : FIELDS) {
-            fields.add(Pair.of(field, String.class));
-        }
+
 
         Object[][] data = new Object[][] {
-                {"1", "234-567", "California", "United States", "3i.com", "123456", "USA"},
-                {"2", "121-567", "New York", "United States", "3k.com", "234567", "USA"},
-                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678", "USA"},
-                {"4", "234-888", "Guangdong", "China", "qq.com", "456789", "China"},
-                {"5", "222-333", "France", "Paris", "accor.com", "456789", "France"},
-                {"6", "666-999", "UC", "United States", "3i.com", "456789", "USA"},
-                {"7", "888-056", " ", "Switzerland", "adecco.com", "123456", "Switzerland"},
-                {"8", "777-056", "Zhejiang", "China", "alibaba.com", null, "China"}
+                {"1", "234-567", "California", "United States", "3i.com", "123456", "USA", 1},
+                {"2", "121-567", "New York", "United States", "3k.com", "234567", "USA", 2},
+                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678", "USA", 3},
+                {"4", "234-888", "Guangdong", "China", "qq.com", "456789", "China", 4},
+                {"5", "222-333", "France", "Paris", "accor.com", "456789", "France", 5},
+                {"6", "666-999", "UC", "United States", "3i.com", "456789", "USA", 6},
+                {"7", "888-056", " ", "Switzerland", "adecco.com", "123456", "Switzerland", 7},
+                {"8", "777-056", "Zhejiang", "China", "alibaba.com", null, "China", 8}
         };
-        return uploadHdfsDataUnit(data, fields);
+        return uploadHdfsDataUnit(data, FIELDS);
     }
 
     @Test(groups = "functional")
@@ -98,7 +97,9 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         String input = uploadDataNoDup();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
-        Map<String, String> map = Arrays.stream(FIELDS).collect(Collectors.toMap(e->e, e->e));
+        config.setConfidenceCode( "LDC_ConfidenceCode");
+        config.setTotalCount(8L);
+        Map<String, String> map = FIELDS.stream().map(Pair::getLeft).collect(Collectors.toMap(e->e, e->e));
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
         SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
@@ -115,21 +116,17 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
     }
 
     private String uploadDataNoDup() {
-        List<Pair<String, Class<?>>> fields = new ArrayList<>();
-        for (String field : FIELDS) {
-            fields.add(Pair.of(field, String.class));
-        }
 
         Object[][] data = new Object[][] {
-                {"1", "234-567", "California", "United States", "3i.com", "123456",  "USA"},
-                {"2", "121-567", "New York", "United States", "3k.com", "234567",  "USA"},
-                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678",  "USA"},
-                {"4", "234-888", "Guangdong", "China", "qq.com", "456789",  "USA"},
-                {"5", "222-333", "France", "Paris", "accor.com", "567890",  "USA"},
-                {"6", "666-999", "UC", "United States", "3i.com", "678901",  "USA"},
-                {"7", "888-056", " ", "Switzerland", "adecco.com", "789012",  "USA"},
-                {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null,  "USA"}
+                {"1", "234-567", "California", "United States", "3i.com", "123456",  "USA", 1},
+                {"2", "121-567", "New York", "United States", "3k.com", "234567",  "USA", 2},
+                {"3", "123-567", "Illinois", "United States", "abbott.com", "345678",  "USA", 3},
+                {"4", "234-888", "Guangdong", "China", "qq.com", "456789",  "USA", 4},
+                {"5", "222-333", "France", "Paris", "accor.com", "567890",  "USA", 5},
+                {"6", "666-999", "UC", "United States", "3i.com", "678901",  "USA", 6},
+                {"7", "888-056", " ", "Switzerland", "adecco.com", "789012",  "USA", 7},
+                {"8", "777-056", "Zhejiang", "Ali", "alibaba.com", null,  "USA", 8}
         };
-        return uploadHdfsDataUnit(data, fields);
+        return uploadHdfsDataUnit(data, FIELDS);
     }
 }

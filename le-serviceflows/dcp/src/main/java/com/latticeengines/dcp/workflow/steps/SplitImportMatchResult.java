@@ -88,8 +88,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
         jobConfig.setMatchedDunsAttr("DunsNumber");
         jobConfig.setMatchedCountryAttr(DataCloudConstants.ATTR_COUNTRY);
-        jobConfig.setCountryCodeName("LDC_CountryCode");
-
+        jobConfig.setCountryCode("LDC_CountryCode");
+        jobConfig.setConfidenceCode("LDC_ConfidenceCode");
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
@@ -163,8 +163,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     private void updateUploadStatistics(SparkJobResult result) {
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
         UploadStats.MatchStats matchStats = new UploadStats.MatchStats();
-        matchStats.setMatched(result.getTargets().get(0).getCount());
-        matchStats.setUnmatched(stats.getImportStats().getSuccessfullyIngested() - matchStats.getMatched());
+        long matchedCnt = result.getTargets().get(0).getCount();
+        matchStats.setMatched(matchedCnt);
+        long unmatchedCnt = stats.getImportStats().getSuccessfullyIngested() - matchStats.getMatched();
+        matchStats.setUnmatched(unmatchedCnt);
         matchStats.setPendingReviewCnt(0L);
         //matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         stats.setMatchStats(matchStats);
@@ -174,6 +176,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         DataReport.InputPresenceReport inputPresenceReport = getObjectFromContext(INPUT_PRESENCE_REPORT,
                 DataReport.InputPresenceReport.class);
         report.setInputPresenceReport(inputPresenceReport);
+        // set matched/unmatched count for report
+        DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
+        matchToDUNSReport.setMatched(matchedCnt);
+        matchToDUNSReport.setUnmatched(unmatchedCnt);
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 configuration.getUploadId(), report);
 

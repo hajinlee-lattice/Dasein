@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CSVUtils
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.functions.{col, count, sum}
+import org.apache.spark.sql.functions.{col, count, sum, rand, round}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
@@ -19,10 +19,44 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val config: SplitImportMatchResultConfig = lattice.config
     val input: DataFrame = lattice.input.head
 
-    val geoReport : DataReport.GeoDistributionReport = new DataReport.GeoDistributionReport
     val matchedCountryAttr: String = config.getMatchedCountryAttr
-    val countryCodeName: String = config.getCountryCodeName
+    val countryCodeName: String = config.getCountryCode
     val totalCnt: Long = config.getTotalCount
+    val geoReport = generateGeoReport(input, matchedCountryAttr, countryCodeName, totalCnt)
+
+    val cc = config.getConfidenceCode
+    val matchToDUNSReport = generateMatchToDunsReport(input, cc, totalCnt)
+
+    val matchedDunsAttr: String = config.getMatchedDunsAttr
+    val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
+    val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
+
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
+    val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
+    val dupReport = generateDupReport(acceptedDF, matchedDunsAttr)
+
+    val report : DataReport = new DataReport
+    report.setGeoDistributionReport(geoReport)
+    report.setDuplicationReport(dupReport)
+    report.setMatchToDUNSReport(matchToDUNSReport)
+
+    lattice.outputStr = JsonUtils.serialize(report)
+    lattice.output = acceptedCsv :: rejectedCsv :: Nil
+  }
+
+  private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]):
+  (DataFrame, DataFrame) = {
+    val acceptedDF = input.filter(col(matchIndicator).isNotNull && col(matchIndicator) =!= "")
+    (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs))
+  }
+
+  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {
+    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
+  }
+
+  private def generateGeoReport(input: DataFrame, matchedCountryAttr: String, countryCodeName: String,
+                                totalCnt: Long):  DataReport.GeoDistributionReport = {
+    val geoReport: DataReport.GeoDistributionReport = new DataReport.GeoDistributionReport
     if (input.columns.contains(matchedCountryAttr)) {
       // fake one country code column
       val countryDF = input.withColumn(countryCodeName, col(matchedCountryAttr))
@@ -38,13 +72,10 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
         geoReport.addGeoDistribution(countryCode, country, count, totalCnt)
       })
     }
+    geoReport
+  }
 
-    val matchedDunsAttr: String = config.getMatchedDunsAttr
-    val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
-    val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
-
-    val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
-    val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
+  private def generateDupReport(acceptedDF: DataFrame, matchedDunsAttr: String): DataReport.DuplicationReport = {
     val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
       .persist(StorageLevel.DISK_ONLY).checkpoint()
     val uniqueDF: DataFrame = dunsCntDF.filter(col("cnt") === 1)
@@ -56,23 +87,22 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     dupReport.setDistinctRecords(distinctCount)
     dupReport.setUniqueRecords(uniqueCnt)
     dupReport.setDuplicateRecords(duplicatedCnt)
-
-    val report : DataReport = new DataReport
-    report.setGeoDistributionReport(geoReport)
-    report.setDuplicationReport(dupReport)
-
-    lattice.outputStr = JsonUtils.serialize(report)
-    lattice.output = acceptedCsv :: rejectedCsv :: Nil
+    dupReport
   }
 
-  private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]):
-  (DataFrame, DataFrame) = {
-    val acceptedDF = input.filter(col(matchIndicator).isNotNull && col(matchIndicator) =!= "")
-    (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs))
-  }
-
-  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {
-    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
+  private def generateMatchToDunsReport(input: DataFrame, cc: String, totalCnt: Long): DataReport.MatchToDUNSReport = {
+    val matchToDunsReport = new DataReport.MatchToDUNSReport
+    val modifiedDF = if (!input.columns.contains(cc)) input.withColumn(cc, round(rand * 10)) else input
+    val cntDF: DataFrame = modifiedDF.groupBy(cc).agg(count("*").alias("cnt")).persist(StorageLevel.DISK_ONLY)
+    cntDF.collect().foreach(row => {
+      val ccVal: Int = row.getAs(cc)
+      val ccCnt: Long = row.getAs("cnt")
+      if (ccVal == 0) {
+        matchToDunsReport.setNoMatchCnt(ccCnt)
+      }
+      matchToDunsReport.addConfidenceItem(ccVal, ccCnt, totalCnt)
+    })
+    matchToDunsReport
   }
 
   private def selectAndRename(input: DataFrame, attrNames: Map[String, String]): DataFrame = {

@@ -317,5 +317,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         DataReport.DuplicationReport duplicationReport = report.getDuplicationReport();
         Assert.assertNotNull(duplicationReport);
         Assert.assertTrue(duplicationReport.getDistinctRecords() > 0);
+
+        DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
+        Assert.assertNotNull(matchToDUNSReport);
     }
 }

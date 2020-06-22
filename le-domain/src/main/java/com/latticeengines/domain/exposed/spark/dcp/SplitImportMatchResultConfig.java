@@ -23,8 +23,11 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("MatchedCountryAttr")
     private String matchedCountryAttr;
 
-    @JsonProperty("CountryCodeName")
-    private String countryCodeName;
+    @JsonProperty("CountryCode")
+    private String countryCode;
+
+    @JsonProperty("ConfidenceCode")
+    private String confidenceCode;
 
     @JsonProperty("TotalCount")
     private long totalCount;
@@ -72,12 +75,20 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
         this.matchedCountryAttr = matchedCountryAttr;
     }
 
-    public String getCountryCodeName() {
-        return countryCodeName;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCountryCodeName(String countryCodeName) {
-        this.countryCodeName = countryCodeName;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getConfidenceCode() {
+        return confidenceCode;
+    }
+
+    public void setConfidenceCode(String confidenceCode) {
+        this.confidenceCode = confidenceCode;
     }
 
     public long getTotalCount() {
