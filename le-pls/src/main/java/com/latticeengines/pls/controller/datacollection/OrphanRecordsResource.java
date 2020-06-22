@@ -37,7 +37,7 @@ public class OrphanRecordsResource {
         try {
             orphanRecordsService.downloadOrphanArtifact(exportId, request, response);
         } catch (Exception ex) {
-            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+            throw UIActionUtils.handleException(ex);
         }
     }
 
