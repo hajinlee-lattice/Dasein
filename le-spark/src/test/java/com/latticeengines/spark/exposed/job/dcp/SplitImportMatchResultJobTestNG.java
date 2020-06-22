@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -35,6 +36,12 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void test() {
+        List<Runnable> threads = Arrays.asList(this::testDataReport, this::testNoDunsDuplicate);
+        ThreadPoolUtils.runInParallel(threads);
+
+    }
+
+    public void testDataReport() {
         String input = uploadData();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
@@ -69,6 +76,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         Assert.assertEquals(item2.getCount(), Long.valueOf(2L));
 
         DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
+        Assert.assertNotNull(matchToDUNSReport);
     }
 
     @Override
@@ -77,8 +85,6 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
     }
 
     private String uploadData() {
-
-
         Object[][] data = new Object[][] {
                 {"1", "234-567", "California", "United States", "3i.com", "123456", "USA", 1},
                 {"2", "121-567", "New York", "United States", "3k.com", "234567", "USA", 2},
@@ -87,13 +93,12 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
                 {"5", "222-333", "France", "Paris", "accor.com", "456789", "France", 5},
                 {"6", "666-999", "UC", "United States", "3i.com", "456789", "USA", 6},
                 {"7", "888-056", " ", "Switzerland", "adecco.com", "123456", "Switzerland", 7},
-                {"8", "777-056", "Zhejiang", "China", "alibaba.com", null, "China", 8}
+                {"8", "777-056", "Zhejiang", "China", "alibaba.com", null, "China", 0}
         };
         return uploadHdfsDataUnit(data, FIELDS);
     }
 
-    @Test(groups = "functional")
-    public void testNoDuplicate() {
+    public void testNoDunsDuplicate() {
         String input = uploadDataNoDup();
         SplitImportMatchResultConfig config = new SplitImportMatchResultConfig();
         config.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);

@@ -92,7 +92,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
   private def generateMatchToDunsReport(input: DataFrame, cc: String, totalCnt: Long): DataReport.MatchToDUNSReport = {
     val matchToDunsReport = new DataReport.MatchToDUNSReport
-    val modifiedDF = if (!input.columns.contains(cc)) input.withColumn(cc, round(rand * 10)) else input
+    val modifiedDF = if (!input.columns.contains(cc)) input.withColumn(cc, round(rand * 10).cast("integer")) else input
     val cntDF: DataFrame = modifiedDF.groupBy(cc).agg(count("*").alias("cnt")).persist(StorageLevel.DISK_ONLY)
     cntDF.collect().foreach(row => {
       val ccVal: Int = row.getAs(cc)
