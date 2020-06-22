@@ -94,10 +94,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testSimpleMatchWithDplusConfig() {
         Object[][] data = new Object[][] {
-                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
-                { 2, "google.com", "Google", null, "California", "USA" },
-                { 3, "google.com", "Google", null, null, "UK" },
-                { 4, "bp.com", "British Petroleum", "London", "London", "UK"}
+                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", null, null },
+                { 2, "google.com", "Google", null, "California", "USA", null, null },
+                { 3, "google.com", "Google", null, null, "UK", null, null },
+                { 4, "bp.com", "British Petroleum", "London", "London", "UK", null, null }
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         input.setTargetEntity(BusinessEntity.PrimeAccount.name());
@@ -157,8 +157,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public void testSimpleMatchAccountMaster() {
         // Schema: ID, Domain, CompanyName, City, State, Country
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" }, //
-                { 456, "testfakedomain.com", null, null, null, null }, //
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", null, null }, //
+                { 456, "testfakedomain.com", null, null, null, null, null, null }, //
         };
         // ColumnSelection is RTS
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
@@ -182,7 +182,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testSimpleRealTimeBulkMatchAccountMaster() {
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", null, null } };
         List<MatchInput> inputs = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
             MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
@@ -225,8 +225,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testMatchEnrichment() {
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" }, //
-                { 456, "testfakedomain.com", null, null, null, null } };
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", null, null }, //
+                { 456, "testfakedomain.com", null, null, null, null, null, null } };
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setPredefinedSelection(null);
         ColumnSelection columnSelection = testMatchInputService.enrichmentSelection();
@@ -264,7 +264,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional")
     public void testIsPublicDomain() {
-        Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
+        Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null, null, null } };
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);

@@ -171,13 +171,25 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     }
                 }
             }
+            String originalStreet = null;
+            if (keyPositionMap.containsKey(MatchKey.Address)) {
+                for (Integer streetPos : keyPositionMap.get(MatchKey.Address)) {
+                    originalStreet = (String) inputRecord.get(streetPos);
+                }
+            }
+            String originalStreet2 = null;
+            if (keyPositionMap.containsKey(MatchKey.Address2)) {
+                for (Integer streetPos : keyPositionMap.get(MatchKey.Address2)) {
+                    originalStreet2 = (String) inputRecord.get(streetPos);
+                }
+            }
 
             NameLocation origNameLocation = getNameLocation(originalName, originalCountry, originalState, originalCity,
-                    originalZipCode, originalPhoneNumber);
+                    originalZipCode, originalPhoneNumber, originalStreet, originalStreet2);
             record.setOrigNameLocation(origNameLocation);
 
             NameLocation nameLocation = getNameLocation(originalName, originalCountry, originalState, originalCity,
-                    originalZipCode, originalPhoneNumber);
+                    originalZipCode, originalPhoneNumber, originalStreet, originalStreet2);
             nameLocationService.normalize(nameLocation);
             record.setParsedNameLocation(nameLocation);
             if (nameLocationSet != null && isValidNameLocation(nameLocation)) {
@@ -196,7 +208,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     }
 
     private NameLocation getNameLocation(String originalName, String originalCountry, String originalState,
-                                         String originalCity, String originalZipCode, String originalPhoneNumber) {
+                                         String originalCity, String originalZipCode, String originalPhoneNumber,
+                                         String originalStreet, String originalStreet2) {
         NameLocation nameLocation = new NameLocation();
         nameLocation.setName(originalName);
         nameLocation.setState(originalState);
@@ -204,6 +217,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         nameLocation.setCity(originalCity);
         nameLocation.setZipcode(originalZipCode);
         nameLocation.setPhoneNumber(originalPhoneNumber);
+        nameLocation.setStreet(originalStreet);
+        nameLocation.setStreet2(originalStreet2);
         return nameLocation;
     }
 
@@ -356,7 +371,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
             Contact origContact = createContact(originalName, originalEmail, originalPhone);
             record.setOrigContact(origContact);
 
-            NameLocation nameLocation = getNameLocation(null, originalCountry, null, null, null, null);
+            NameLocation nameLocation = getNameLocation(null, originalCountry, null, null,
+                    null, null, null, null);
             nameLocationService.normalize(nameLocation);
 
             Contact parsedContact = origContact.normalize(nameLocation.getCountryCode());
