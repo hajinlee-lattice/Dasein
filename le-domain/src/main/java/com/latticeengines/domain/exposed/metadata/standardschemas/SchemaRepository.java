@@ -1670,7 +1670,7 @@ public class SchemaRepository {
 
     private Attribute attrStageName() {
         return attr(InterfaceName.StageName.name())
-                .allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME", "Stage Name")).notNull().required()
+                .allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME", "Stage Name", "StageName")).notNull().required()
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
