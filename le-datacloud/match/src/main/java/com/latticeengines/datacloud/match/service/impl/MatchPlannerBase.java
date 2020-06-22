@@ -38,9 +38,11 @@ import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -159,17 +161,21 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (isAttrLookup(input)) {
             throw new UnsupportedOperationException("Should not call parseColumnSelection for cdl match.");
         } else {
-            ColumnSelectionService columnSelectionService = beanDispatcher
-                    .getColumnSelectionService(input.getDataCloudVersion());
-
-            String dataCloudVersion = input.getDataCloudVersion();
-            if (input.getUnionSelection() != null) {
-                return combineSelections(columnSelectionService, input.getUnionSelection(), dataCloudVersion);
-            } else if (input.getPredefinedSelection() != null) {
-                return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(),
-                        dataCloudVersion);
-            } else {
+            if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
+                //FIXME: should merge to column selection service after ingesting DataBlock metadata
                 return input.getCustomSelection();
+            } else {
+                ColumnSelectionService columnSelectionService = beanDispatcher
+                        .getColumnSelectionService(input.getDataCloudVersion());
+                String dataCloudVersion = input.getDataCloudVersion();
+                if (input.getUnionSelection() != null) {
+                    return combineSelections(columnSelectionService, input.getUnionSelection(), dataCloudVersion);
+                } else if (input.getPredefinedSelection() != null) {
+                    return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(),
+                            dataCloudVersion);
+                } else {
+                    return input.getCustomSelection();
+                }
             }
         }
     }
@@ -392,7 +398,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
                 throw new UnsupportedOperationException("Column metadatas should already be set for Entity Match");
             }
-            output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
+            if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
+                // FIXME: should move to metadata driven
+                List<DataBlockColumn> columns = DirectPlusUtils.getDataBlockMetadata();
+                Set<String> requestedCols = new HashSet<>(columnSelection.getColumnIds());
+                List<ColumnMetadata> cms = columns.stream().map(DataBlockColumn::toColumnMetadata) //
+                        .filter(cm -> requestedCols.contains(cm.getAttrName())) //
+                        .collect(Collectors.toList());
+                output.setMetadata(cms);
+            } else {
+                output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
+            }
         }
         output = parseOutputFields(output, input.getMetadataFields());
         MatchStatistics statistics = initializeStatistics(input);

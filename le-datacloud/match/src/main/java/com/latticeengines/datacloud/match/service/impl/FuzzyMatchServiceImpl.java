@@ -4,6 +4,7 @@ import static com.latticeengines.datacloud.match.util.EntityMatchUtils.restoreIn
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -181,6 +182,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
         if (multiCandidates) {
             matchRecord.setCandidates(traveler.getCandidates());
+        } else if (CollectionUtils.isNotEmpty(traveler.getCandidates())) {
+            // only save top candidate
+            matchRecord.setCandidates(Collections.singletonList(traveler.getCandidates().get(0)));
         }
     }
 

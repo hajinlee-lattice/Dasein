@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.service.DbHelper;
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
@@ -39,13 +40,11 @@ import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
@@ -73,6 +72,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     protected MetricService metricService;
+
+    @Inject
+    private DirectPlusCandidateService directPlusCandidateService;
 
     @Lazy
     @Inject
@@ -165,7 +167,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
-                if (matchInput.isFetchOnly() && record.getLatticeAccount() != null) {
+                if (matchInput.isFetchOnly() && //
+                        (record.getLatticeAccount() != null || record.getPrimeAccount() != null)) {
                     matchHistory.setMatched(true);
                     matchHistory.setLdcMatched(true);
                 }
@@ -219,6 +222,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
         boolean isAllocateMode = matchContext.getInput().isAllocateId();
+        boolean isPrimeMatch = BusinessEntity.PrimeAccount.name().equals(matchContext.getInput().getTargetEntity());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -430,7 +434,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatchedLatticeAccountId(
                     StringStandardizationUtils.getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId()));
 
-            populateCandidateData(outputRecord, internalRecord);
+            if (isPrimeMatch) {
+                populateCandidateData(outputRecord, internalRecord);
+            }
 
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());
@@ -440,7 +446,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecords.add(outputRecord);
         }
 
-        if (OperationalMode.MULTI_CANDIDATES.equals(matchContext.getInput().getOperationalMode())) {
+        if (isPrimeMatch) {
             matchContext.getOutput().setCandidateOutputFields(candidateOutputFields());
         }
         matchContext.getOutput().setResult(outputRecords);
@@ -518,66 +524,17 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         if (CollectionUtils.isEmpty(internalRecord.getCandidates())) {
             return;
         }
-
         List<DnBMatchCandidate> candidates = internalRecord.getCandidates();
         List<List<Object>> candidateData = new ArrayList<>();
         for (DnBMatchCandidate candidate: candidates) {
-            List<Object> data = new ArrayList<>();
-            String duns = candidate.getDuns();
-            data.add(duns);
-            if (candidate.getNameLocation() != null) {
-                NameLocation nl = candidate.getNameLocation();
-                data.add(nl.getName());
-                data.add(nl.getStreet());
-                data.add(nl.getStreet2());
-                data.add(nl.getCity());
-                data.add(nl.getState());
-                data.add(nl.getZipcode());
-                data.add(nl.getCountryCode());
-                data.add(nl.getPhoneNumber());
-            } else {
-                data.add(null); // name
-                data.add(null); // street
-                data.add(null); // street 2
-                data.add(null); // city
-                data.add(null); // state
-                data.add(null); // zip code
-                data.add(null); // country code
-                data.add(null); // phone
-            }
-            if (candidate.getMatchInsight() != null) {
-                DnBMatchInsight matchInsight = candidate.getMatchInsight();
-                data.add(matchInsight.getConfidenceCode());
-                data.add(matchInsight.getMatchGrade().getRawCode());
-                data.add(matchInsight.getMatchDataProfile().getText());
-            } else {
-                data.add(null); // confidence code
-                data.add(null); // match grade
-                data.add(null); // match data profile
-            }
+            List<Object> data = directPlusCandidateService.parseCandidate(candidate);
             candidateData.add(data);
         }
         outputRecord.setCandidateOutput(candidateData);
     }
 
     private List<String> candidateOutputFields() {
-        // hard coded for now
-        // need to match the corresponding LDC attributes
-        // need to in sync with ProcessorContext.getCandidateSchema
-        return Arrays.asList(
-                DataCloudConstants.ATTR_LDC_DUNS,
-                DataCloudConstants.ATTR_LDC_NAME,
-                "LDC_Street",
-                "STREET_ADDRESS_2",
-                DataCloudConstants.ATTR_CITY,
-                DataCloudConstants.ATTR_STATE,
-                DataCloudConstants.ATTR_ZIPCODE,
-                "DnB_COUNTRY_CODE",
-                "TELEPHONE_NUMBER",
-                "ConfidenceCode",
-                "MatchGrade",
-                "MatchDataProfile"
-        );
+        return directPlusCandidateService.candidateOutputFields();
     }
 
     private String getEntityId(InternalOutputRecord record, String entity) {
