@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflow
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.CreatePMMLModel;
 import com.latticeengines.modeling.workflow.steps.modeling.DownloadAndProcessModelSummaries;
+import com.latticeengines.modeling.workflow.steps.modeling.SetPythonVersion;
 import com.latticeengines.serviceflows.workflow.export.ExportModelToS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -25,6 +26,9 @@ public class PMMLModelWorkflow extends AbstractWorkflow<PMMLModelWorkflowConfigu
     private CreatePMMLModel createPMMLModel;
 
     @Inject
+    private SetPythonVersion setPythonVersion;
+
+    @Inject
     private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
 
     @Inject
@@ -37,6 +41,7 @@ public class PMMLModelWorkflow extends AbstractWorkflow<PMMLModelWorkflowConfigu
     public Workflow defineWorkflow(PMMLModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(createPMMLModel) //
+                .next(setPythonVersion) //
                 .next(downloadAndProcessModelSummaries) //
                 .next(modelExportToS3) //
                 .listener(sendEmailAfterModelCompletionListener) //
