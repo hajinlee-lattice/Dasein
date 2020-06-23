@@ -20,14 +20,14 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("MatchedDunsAttr")
     private String matchedDunsAttr;
 
-    @JsonProperty("MatchedCountryAttr")
-    private String matchedCountryAttr;
+    @JsonProperty("countryAttr")
+    private String countryAttr;
 
-    @JsonProperty("CountryCode")
-    private String countryCode;
+    @JsonProperty("CountryCodeAttr")
+    private String countryCodeAttr;
 
-    @JsonProperty("ConfidenceCode")
-    private String confidenceCode;
+    @JsonProperty("ConfidenceCodeAttr")
+    private String confidenceCodeAttr;
 
     @JsonProperty("TotalCount")
     private long totalCount;
@@ -67,28 +67,28 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
         this.matchedDunsAttr = matchedDunsAttr;
     }
 
-    public String getMatchedCountryAttr() {
-        return matchedCountryAttr;
+    public String getCountryAttr() {
+        return countryAttr;
     }
 
-    public void setMatchedCountryAttr(String matchedCountryAttr) {
-        this.matchedCountryAttr = matchedCountryAttr;
+    public void setCountryAttr(String countryAttr) {
+        this.countryAttr = countryAttr;
     }
 
-    public String getCountryCode() {
-        return countryCode;
+    public String getCountryCodeAttr() {
+        return countryCodeAttr;
     }
 
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
+    public void setCountryCodeAttr(String countryCodeAttr) {
+        this.countryCodeAttr = countryCodeAttr;
     }
 
-    public String getConfidenceCode() {
-        return confidenceCode;
+    public String getConfidenceCodeAttr() {
+        return confidenceCodeAttr;
     }
 
-    public void setConfidenceCode(String confidenceCode) {
-        this.confidenceCode = confidenceCode;
+    public void setConfidenceCodeAttr(String confidenceCodeAttr) {
+        this.confidenceCodeAttr = confidenceCodeAttr;
     }
 
     public long getTotalCount() {

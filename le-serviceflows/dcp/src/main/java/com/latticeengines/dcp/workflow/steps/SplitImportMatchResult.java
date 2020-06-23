@@ -91,6 +91,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setCountryCode("LDC_CountryCode");
         jobConfig.setConfidenceCode("LDC_ConfidenceCode");
 
+
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
         List<ColumnMetadata> rejectedCms = cms.stream().filter(cm -> {

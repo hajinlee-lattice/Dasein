@@ -19,13 +19,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val config: SplitImportMatchResultConfig = lattice.config
     val input: DataFrame = lattice.input.head
 
-    val matchedCountryAttr: String = config.getMatchedCountryAttr
-    val countryCodeName: String = config.getCountryCode
+    val countryAttr: String = config.getCountryAttr
+    val countryCodeAttr: String = config.getCountryCodeAttr
     val totalCnt: Long = config.getTotalCount
-    val geoReport = generateGeoReport(input, matchedCountryAttr, countryCodeName, totalCnt)
+    val geoReport = generateGeoReport(input, countryAttr, countryCodeAttr, totalCnt)
 
-    val cc = config.getConfidenceCode
-    val matchToDUNSReport = generateMatchToDunsReport(input, cc, totalCnt)
+    val ccAttr = config.getConfidenceCodeAttr
+    val matchToDUNSReport = generateMatchToDunsReport(input, ccAttr, totalCnt)
 
     val matchedDunsAttr: String = config.getMatchedDunsAttr
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
@@ -54,19 +54,19 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
   }
 
-  private def generateGeoReport(input: DataFrame, matchedCountryAttr: String, countryCodeName: String,
+  private def generateGeoReport(input: DataFrame, countryAttr: String, countryCodeAttr: String,
                                 totalCnt: Long):  DataReport.GeoDistributionReport = {
     val geoReport: DataReport.GeoDistributionReport = new DataReport.GeoDistributionReport
-    if (input.columns.contains(matchedCountryAttr)) {
+    if (input.columns.contains(countryAttr)) {
       // fake one country code column
-      val countryDF = input.withColumn(countryCodeName, col(matchedCountryAttr))
-        .groupBy(col(matchedCountryAttr), col(countryCodeName))
+      val countryDF = input.withColumn(countryCodeAttr, col(countryAttr))
+        .groupBy(col(countryAttr), col(countryCodeAttr))
         .agg(count("*").alias("cnt"))
         .persist(StorageLevel.DISK_ONLY)
       countryDF.collect().foreach(row => {
-        val countryVal: String = row.getAs(matchedCountryAttr)
+        val countryVal: String = row.getAs(countryAttr)
         val country: String = if (StringUtils.isEmpty(countryVal)) "undefined" else countryVal
-        val countryCodeVal: String = row.getAs(countryCodeName)
+        val countryCodeVal: String = row.getAs(countryCodeAttr)
         val countryCode: String = if (StringUtils.isEmpty(countryCodeVal)) "undefined" else countryCodeVal
         val count: Long = row.getAs("cnt")
         geoReport.addGeoDistribution(countryCode, country, count, totalCnt)
