@@ -878,6 +878,8 @@ public enum LedpCode {
     LEDP_40085("Display name of attribute group can't be empty."), //
     LEDP_40086("Attribute group name \"{0}\" already exists."), //
     LEDP_40087("Can't delete attribute group \"{0}\"."), //
+    LEDP_40088("Too few training records to learn from - the model needs at least {0} records, now has {1}. Try modeling on " //
+            + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
