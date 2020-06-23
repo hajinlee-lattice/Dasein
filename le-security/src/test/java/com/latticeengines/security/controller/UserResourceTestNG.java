@@ -136,15 +136,15 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
                 AccessLevel.INTERNAL_ADMIN.name() : AccessLevel.EXTERNAL_ADMIN.name());
         uReg.getUser().setEmail(email);
         uReg.getUser().setUsername(email);
-        uReg.getCredentials().setUsername(email);
+        uReg.setCredentials(null);
         uReg.setUseIDaaS(true);
-        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+        makeSureUserDoesNotExist(uReg.getUser().getUsername());
         String json = restTemplate.postForObject(usersApi, uReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
                 RegistrationResult.class);
         assertNotNull(response);
         assertTrue(response.isSuccess());
-        User user = userService.findByUsername(uReg.getCredentials().getUsername());
+        User user = userService.findByUsername(uReg.getUser().getUsername());
         Assert.assertNotNull(user);
         AccessLevel level = userService.getAccessLevel(testTenant.getId(), email);
         Assert.assertEquals(level.name(), String.valueOf(
@@ -152,7 +152,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(uReg.getUser().getEmail());
         Assert.assertNotNull(iDaaSUser);
 
-        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+        makeSureUserDoesNotExist(uReg.getUser().getUsername());
     }
 
     @Test(groups = { "functional", "deployment" }, dataProvider = "getAllUsersProvider")

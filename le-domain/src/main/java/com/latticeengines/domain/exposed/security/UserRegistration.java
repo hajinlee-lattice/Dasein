@@ -58,7 +58,9 @@ public class UserRegistration {
     public void toLowerCase() {
         this.user.setUsername(this.user.getUsername().toLowerCase());
         this.user.setEmail(this.user.getEmail().toLowerCase());
-        this.credentials.setUsername(this.credentials.getUsername().toLowerCase());
+        if (!useIDaaS) {
+            this.credentials.setUsername(this.credentials.getUsername().toLowerCase());
+        }
     }
 
 }
