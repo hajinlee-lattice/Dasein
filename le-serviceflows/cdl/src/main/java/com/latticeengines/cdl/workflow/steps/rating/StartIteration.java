@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
@@ -112,6 +114,22 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
 
             putObjectInContext(ITERATION_RATING_MODELS, containersInIteration);
             putObjectInContext(ITERATION_INACTIVE_ENGINES, inactiveEnginesInIteration);
+            putObjectInContext(ITERATION_AI_RATING_MODELS, getAIModels(containersInIteration));
+            putStringValueInContext(PYTHON_MAJOR_VERSION, "3");
+        }
+    }
+
+    private List<RatingModelContainer> getAIModels(List<RatingModelContainer> containersInIteration) {
+        if (CollectionUtils.isEmpty(containersInIteration)) {
+            return Collections.emptyList();
+        } else {
+            return containersInIteration.stream() //
+                    .filter(container -> {
+                        RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                        return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                                || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                    }) //
+                    .collect(Collectors.toList());
         }
     }
 

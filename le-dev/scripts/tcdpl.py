@@ -58,6 +58,7 @@ APP_URL = {
     'admin': "%s:9085" % APP_ROOT,
     'saml': "%s:9087" % APP_ROOT,
     'playmaker': "%s:9071" % APP_ROOT,
+    'oauth': "%s:9072" % APP_ROOT,
     'oauth2': "%s:9072" % APP_ROOT,
     'scoringapi': "%s:9073" % APP_ROOT,
     'api': "%s:9074" % APP_ROOT,

@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateLastActivityDateConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ConcatenateAIRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConfig;
@@ -125,6 +126,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CalcStatsConfig.class, name = CalcStatsConfig.NAME), //
         @JsonSubTypes.Type(value = AdvancedCalcStatsConfig.class, name = AdvancedCalcStatsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME), //
+        @JsonSubTypes.Type(value = ConcatenateAIRatingsConfig.class, name = ConcatenateAIRatingsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //

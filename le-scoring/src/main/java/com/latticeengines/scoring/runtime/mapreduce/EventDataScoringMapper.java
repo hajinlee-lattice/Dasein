@@ -3,7 +3,8 @@ package com.latticeengines.scoring.runtime.mapreduce;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -35,7 +37,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
 
     @Override
-    public void run(Context context) throws IOException, InterruptedException {
+    public void run(Context context) throws IOException {
         int taskId = context.getTaskAttemptID().getTaskID().getId();
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
@@ -47,15 +49,34 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             ScoreContext scoreContext = new ScoreContext(context);
             Map<String, List<Record>> recordsMap = scoreContext.buildRecords(context);
             Map<String, URI> uuidURIMap = ScoringMapperTransformUtil.getModelUris(uris);
+            List<String> p2Models = Arrays.asList(config.getStrings(ScoringProperty.MODEL_GUID_P2.name(), new String[]{}));
+            List<String> p3Models = Arrays.asList(config.getStrings(ScoringProperty.MODEL_GUID.name(), new String[]{}));
+            log.info("p2Models: [{}]", StringUtils.join(p2Models, "],["));
+            log.info("p3Models: [{}]", StringUtils.join(p3Models, "],["));
+            String p2CondaEnv = config.get(ScoringProperty.CONDA_ENV_P2.name());
+            String p3CondaEnv = config.get(ScoringProperty.CONDA_ENV.name());
             long scoringStartTime = System.currentTimeMillis();
             for (String uuid : scoreContext.uuidToModeId.keySet()) {
                 URI uri = uuidURIMap.get(uuid);
                 if (CollectionUtils.isEmpty(recordsMap.get(uuid))) {
                     log.warn("There's no records for model uuid=" + uuid);
                     continue;
+                } else {
+                    log.info("uuid={}, uri={}", uuid, uri.toString());
                 }
                 Map<String, JsonNode> models = transformRecords(dataType, scoreContext, recordsMap, uuid, uri);
-                ScoringMapperPredictUtil.evaluate(uuid, scoreContext, context);
+                String modelId = scoreContext.uuidToModeId.get(uuid);
+                String condaEnv;
+                if (p2Models.contains(modelId)) {
+                    condaEnv = p2CondaEnv;
+                } else if (p3Models.contains(modelId)) {
+                    condaEnv = p3CondaEnv;
+                } else {
+                    throw new IllegalArgumentException("Model [" + modelId //
+                            + "] is neither declared as python 2 nor python 3");
+                }
+                log.info("Using conda env {} for model {}", condaEnv, modelId);
+                ScoringMapperPredictUtil.evaluate(uuid, condaEnv, scoreContext, context);
                 if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(), false)) {
                     log.info("Using score derivation to generate percentile score.");
                     Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
@@ -85,7 +106,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                     ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
             File logFile = new File(config.get(ScoringProperty.LOG_DIR.name()) + "/" + UUID.randomUUID() + ".err");
-            FileUtils.write(logFile, errorMessage, Charset.forName("UTF-8"));
+            FileUtils.write(logFile, errorMessage, StandardCharsets.UTF_8);
             throw new LedpException(LedpCode.LEDP_20014, e);
         }
     }

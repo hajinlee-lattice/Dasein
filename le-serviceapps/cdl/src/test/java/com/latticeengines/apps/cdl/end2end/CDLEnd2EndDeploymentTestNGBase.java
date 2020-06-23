@@ -169,7 +169,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
     public static final int S3_CHECKPOINTS_VERSION = 25;
-    private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 24;
+    private static final int S3_RATING_CHECKPOINTS_VERSION = 25;
 
     private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
@@ -1229,7 +1229,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void resumeCrossSellCheckpoint(String checkpoint) throws IOException {
-        resumeCheckpoint(checkpoint, String.valueOf(S3_CROSS_SELL_CHECKPOINTS_VERSION));
+        resumeCheckpoint(checkpoint, String.valueOf(S3_RATING_CHECKPOINTS_VERSION));
     }
 
     void resumeCheckpoint(String checkpoint) throws IOException {

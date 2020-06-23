@@ -401,6 +401,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         copy.setPredictionType(original.getPredictionType());
         copy.setTrainingSegment(original.getTrainingSegment());
         copy.setRatingModelAttributes(original.getRatingModelAttributes());
+        copy.setPythonMajorVersion(original.getPythonMajorVersion());
         if (StringUtils.isNotBlank(original.getModelSummaryId())) {
             String tenantId = MultiTenantContext.getTenant().getId();
             String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, original.getModelSummaryId(),

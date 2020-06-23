@@ -5,12 +5,15 @@ import java.util.Arrays;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
@@ -25,6 +28,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/scoringjobs")
 public class ScoringResource {
 
+    private static final Logger log = LoggerFactory.getLogger(ScoringResource.class);
+
     @Inject
     private ScoringJobService scoringJobService;
 
@@ -35,6 +40,7 @@ public class ScoringResource {
     @ResponseBody
     @ApiOperation(value = "Create a scoring job")
     public AppSubmission createScoringJob(@RequestBody ScoringConfiguration scoringConfig) {
+        log.info("ScoringConfig={}", JsonUtils.serialize(scoringConfig));
         return new AppSubmission(Arrays.<ApplicationId> asList(scoringJobService.score(scoringConfig)));
     }
 

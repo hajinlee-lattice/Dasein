@@ -64,6 +64,15 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             featureImportanceProxy.upsertModelFeatureImportances(configuration.getCustomerSpace().toString(), modelId);
             saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
             putStringValueInContext(SCORING_MODEL_ID, modelId);
+            String pythonMajorVersion = getStringValueFromContext(PYTHON_MAJOR_VERSION);
+            if (StringUtils.isBlank(pythonMajorVersion)) {
+                throw new IllegalArgumentException("Must specify python major version in context!");
+            }
+            if ("3".equals(pythonMajorVersion)) {
+                putStringValueInContext(SCORING_MODEL_ID_P3, modelId);
+            } else {
+                putStringValueInContext(SCORING_MODEL_ID_P2, modelId);
+            }
             putStringValueInContext(SCORING_MODEL_TYPE, eventToModelSummary.get(event).getModelType());
         }
 
@@ -74,6 +83,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
                 AIModel aiModel = (AIModel) ratingModel;
                 for (String event : eventToModelId.keySet()) {
                     aiModel.setModelSummaryId(eventToModelSummary.get(event).getId());
+                    aiModel.setPythonMajorVersion(eventToModelSummary.get(event).getPythonMajorVersion());
                 }
                 ratingEngineProxy.updateRatingModel(configuration.getCustomerSpace().toString(),
                         configuration.getRatingEngineId(), configuration.getAiModelId(), aiModel);
