@@ -26,6 +26,9 @@ public class S3ChannelConfig implements ChannelConfig {
     @JsonProperty("includeExportAttributes")
     private boolean includeExportAttributes = false;
 
+    @JsonProperty("attributeSetName")
+    private String attributeSetName;
+
     public Long getAccountLimit() {
         return accountLimit;
     }
@@ -128,7 +131,15 @@ public class S3ChannelConfig implements ChannelConfig {
         s3ChannelConfig.setAccountLimit(newS3ChannelConfig.getAccountLimit());
         s3ChannelConfig.setS3CampaignExportDir(newS3ChannelConfig.getS3CampaignExportDir());
         s3ChannelConfig.setIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
+        s3ChannelConfig.setAttributeSetName(newS3ChannelConfig.getAttributeSetName());
         return this;
     }
 
+    public String getAttributeSetName() {
+        return attributeSetName;
+    }
+
+    public void setAttributeSetName(String attributeSetName) {
+        this.attributeSetName = attributeSetName;
+    }
 }

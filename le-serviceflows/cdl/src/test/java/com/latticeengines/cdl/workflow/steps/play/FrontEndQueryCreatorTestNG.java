@@ -85,7 +85,7 @@ public class FrontEndQueryCreatorTestNG {
         map.put(InterfaceName.FirstName.name(), true);
         map.put(InterfaceName.LastName.name(), true);
         when(servingStoreProxy.getAttrsUsage(any(String.class), any(BusinessEntity.class), any(Predefined.class),
-                anySet(), isNull())).thenReturn(map);
+                any(String.class), anySet(), isNull())).thenReturn(map);
     }
 
     @Test(groups = "functional")

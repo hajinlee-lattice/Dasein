@@ -100,7 +100,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Map<String, Boolean> getAttrsUsage(String customerSpace, BusinessEntity entity, @NotNull Predefined group,
-            Set<String> attributes, Version version) {
+                                              String attributeSetName, Set<String> attributes, Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/attrs-usage", //
                 shortenCustomerSpace(customerSpace), entity);
         url += getVersionGroupFilterParam(version, Collections.singleton(group), null);

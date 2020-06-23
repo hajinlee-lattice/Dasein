@@ -183,13 +183,13 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         List<String> contactAttrs = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name());
         Map<String, Boolean> attrUsage = servingStoreService.getAttributesUsage(mainCustomerSpace, //
                 BusinessEntity.Contact, new HashSet<>(contactAttrs), //
-                ColumnSelection.Predefined.Enrichment, null);
+                ColumnSelection.Predefined.Enrichment, null, null);
         Assert.assertFalse(attrUsage.get(InterfaceName.FirstName.name()));
         Assert.assertFalse(attrUsage.get(InterfaceName.LastName.name()));
 
         List<String> accountAttrs = Arrays.asList(InterfaceName.LDC_Name.name(), "LDC_Domain");
         attrUsage = servingStoreService.getAttributesUsage(mainCustomerSpace, //
-                BusinessEntity.Account, new HashSet<>(accountAttrs), ColumnSelection.Predefined.Enrichment, null);
+                BusinessEntity.Account, new HashSet<>(accountAttrs), ColumnSelection.Predefined.Enrichment, null, null);
         Assert.assertTrue(attrUsage.get(InterfaceName.LDC_Name.name()));
         Assert.assertTrue(attrUsage.get("LDC_Domain"));
     }

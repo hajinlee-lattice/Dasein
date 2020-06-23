@@ -99,13 +99,13 @@ public class ServingStoreResource {
     @PostMapping("/{entity}/attrs-usage")
     @ResponseBody
     @ApiOperation(value = "Get attributes usage")
-    public Map<String, Boolean> getAttrsUsage( //
-            @PathVariable String customerSpace, //
-            @PathVariable BusinessEntity entity, //
-            @RequestParam(name = "groups", required = true) ColumnSelection.Predefined group, //
-            @RequestParam(name = "version", required = false) DataCollection.Version version, //
-            @RequestBody Set<String> attrs) {
-        return servingStoreService.getAttributesUsage(customerSpace, entity, attrs, group, version);
+    public Map<String, Boolean> getAttrsUsage(@PathVariable String customerSpace, //
+                                               @PathVariable BusinessEntity entity, //
+                                               @RequestParam(name = "groups") ColumnSelection.Predefined group, //
+                                               @RequestParam(name = "attributeSetName", required = false) String attributeSetName, //
+                                               @RequestParam(name = "version", required = false) DataCollection.Version version, //
+                                               @RequestBody Set<String> attrs) {
+        return servingStoreService.getAttributesUsage(customerSpace, entity, attrs, group, attributeSetName, version);
     }
 
 }

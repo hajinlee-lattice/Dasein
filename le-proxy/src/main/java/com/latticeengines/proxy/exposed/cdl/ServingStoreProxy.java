@@ -38,8 +38,7 @@ public interface ServingStoreProxy {
             DataCollection.Version version);
 
     Map<String, Boolean> getAttrsUsage(String customerSpace, BusinessEntity entity, ColumnSelection.Predefined group,
-            Set<String> attributes, DataCollection.Version version);
-
+                                       String attributeSetName, Set<String> attributes, DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========
 
     // ========== BEGIN: Get Metadata From Cache ==========
