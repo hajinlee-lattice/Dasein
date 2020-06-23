@@ -148,6 +148,11 @@ public class ProjectServiceImpl implements ProjectService {
         return projectEntityMgr.findImportSystemByProjectId(projectId);
     }
 
+    @Override
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
+        return getDropBoxAccess();
+    }
+
     private void validateProjectId(String projectId) {
         if (StringUtils.isBlank(projectId)) {
             throw new RuntimeException("Cannot create DCP project with blank projectId!");
@@ -175,7 +180,6 @@ public class ProjectServiceImpl implements ProjectService {
         details.setProjectId(projectInfo.getProjectId());
         details.setProjectDisplayName(projectInfo.getProjectDisplayName());
         details.setProjectRootPath(projectInfo.getRootPath());
-        details.setDropFolderAccess(getDropBoxAccess());
         details.setDeleted(projectInfo.getDeleted());
         details.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
         details.setRecipientList(projectInfo.getRecipientList());

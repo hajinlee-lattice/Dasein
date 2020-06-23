@@ -94,7 +94,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID, Project.ProjectType.Type1);
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
-        GrantDropBoxAccessResponse response = details.getDropFolderAccess();
+
+        GrantDropBoxAccessResponse response = testProjectProxy.getDropFolderAccessByProjectId(PROJECT_ID);
         Assert.assertNotNull(response);
         String bucket = response.getBucket();
         Assert.assertTrue(StringUtils.isNotBlank(bucket));
@@ -152,7 +153,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertEquals(details.getProjectId(), PROJECT_ID);
         Assert.assertEquals(details.getProjectDisplayName(), PROJECT_NAME);
 
-        GrantDropBoxAccessResponse response = details.getDropFolderAccess();
+        GrantDropBoxAccessResponse response = testProjectProxy.getDropFolderAccessByProjectId(PROJECT_ID);
         List<Source> sources = details.getSources();
         Assert.assertNotNull(sources);
         Assert.assertEquals(sources.size(), 2);
