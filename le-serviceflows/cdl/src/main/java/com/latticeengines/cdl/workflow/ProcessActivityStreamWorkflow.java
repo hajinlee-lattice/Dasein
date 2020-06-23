@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteActivityStreamWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper;
+import com.latticeengines.cdl.workflow.steps.merge.MigrateActivityPartitionKey;
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
 import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
@@ -33,6 +34,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
 
     @Inject
     private PrepareForActivityStream prepareForActivityStream;
+
+    @Inject
+    private MigrateActivityPartitionKey migrateActivityPartitionKey;
 
     @Inject
     private SoftDeleteActivityStreamWrapper softDeleteActivityStreamWrapper;
@@ -71,6 +75,7 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(prepareForActivityStream) //
+                .next(migrateActivityPartitionKey) // FIXME: remove after all tenants' activity stores migrated
                 .next(softDeleteActivityStreamWrapper) //
                 .next(buildRawActivityStreamWrapper) //
                 .next(generateDimensionMetadata) //

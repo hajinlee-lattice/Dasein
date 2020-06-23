@@ -158,13 +158,15 @@ public class MetadataResolver {
                 if (fieldMapping.isMappedToLatticeField()) {
                     if (fieldMapping.getMappedField().equals(attribute.getName())) {
                         foundMatchingAttribute = true;
-                        if (standardAttrs.containsKey(attribute.getName())) {
+                        if (cdlResolve && standardAttrs.containsKey(attribute.getName())) {
                             Attribute standardAttr = standardAttrs.get(attribute.getName());
                             attribute.setDisplayName(standardAttr.getDisplayName());
                         } else {
                             attribute.setDisplayName(fieldMapping.getUserField());
                         }
-                        attribute.setSourceAttrName(fieldMapping.getUserField());
+                        if (cdlResolve) {
+                            attribute.setSourceAttrName(fieldMapping.getUserField());
+                        }
                         attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                         if (StringUtils.isNotEmpty(fieldMapping.getDateFormatString())) {
                             attribute.setDateFormatString(fieldMapping.getDateFormatString());
@@ -571,7 +573,9 @@ public class MetadataResolver {
         } else {
             attribute.setDisplayName(fieldMapping.getUserField());
         }
-        attribute.setSourceAttrName(fieldMapping.getUserField());
+        if (cdlResolve) {
+            attribute.setSourceAttrName(fieldMapping.getUserField());
+        }
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         attribute.setCategory(getCategoryBasedOnSchemaType(result.metadata.getInterpretation()));
         attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));

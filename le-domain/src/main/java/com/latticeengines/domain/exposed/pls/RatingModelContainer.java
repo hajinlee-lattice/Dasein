@@ -19,6 +19,9 @@ public class RatingModelContainer {
     @JsonProperty("engine")
     private RatingEngineSummary engineSummary;
 
+    @JsonProperty("pythonMajorVersion")
+    private String pythonMajorVersion;
+
     @JsonProperty("scoringBucketMetadata")
     private List<BucketMetadata> scoringBucketMetadata;
 
@@ -47,6 +50,14 @@ public class RatingModelContainer {
 
     public void setModel(RatingModel model) {
         this.model = model;
+    }
+
+    public String getPythonMajorVersion() {
+        return pythonMajorVersion;
+    }
+
+    public void setPythonMajorVersion(String pythonMajorVersion) {
+        this.pythonMajorVersion = pythonMajorVersion;
     }
 
     public RatingEngineSummary getEngineSummary() {

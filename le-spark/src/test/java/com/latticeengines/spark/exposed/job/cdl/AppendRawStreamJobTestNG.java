@@ -6,7 +6,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.InternalId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDateId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -59,7 +59,7 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
 
     static {
         WEB_ACTIVITY_MASTER_FIELDS.add(Pair.of(__StreamDate.name(), String.class));
-        WEB_ACTIVITY_MASTER_FIELDS.add(Pair.of(__StreamDateId.name(), Integer.class));
+        WEB_ACTIVITY_MASTER_FIELDS.add(Pair.of(StreamDateId.name(), Integer.class));
     }
 
     private static final String ID_DAY_1 = "2";

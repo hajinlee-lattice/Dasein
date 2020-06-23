@@ -94,7 +94,7 @@ public class OrphanRecordsServiceImpl implements OrphanRecordsService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         String filePath = dataCollectionProxy.getDataCollectionArtifactPath(customerSpace, exportId);
         if (StringUtils.isEmpty(filePath)) {
-            throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
+            throw new LedpException(LedpCode.LEDP_18243, new Object[]{exportId});
         }
         String filename = exportId + ".csv";
         ExportUtils.downloadS3ExportFile(filePath, filename, MediaType.APPLICATION_OCTET_STREAM, request, response, importFromS3Service, batonService);

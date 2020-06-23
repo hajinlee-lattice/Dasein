@@ -394,14 +394,12 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     @Override
     public String getTeamId() {
-        return targetSegment == null ? null : targetSegment.getTeamId();
+        return targetSegment.getTeamId();
     }
 
     @Override
     public void setTeamId(String teamId) {
-        if (targetSegment != null) {
-            targetSegment.setTeamId(teamId);
-        }
+        targetSegment.setTeamId(teamId);
     }
 
     @Override
@@ -419,13 +417,11 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     @Override
     public GlobalTeam getTeam() {
-        return targetSegment == null ? null : targetSegment.getTeam();
+        return  targetSegment.getTeam();
     }
 
     @Override
     public void setTeam(GlobalTeam team) {
-        if (targetSegment != null) {
-            targetSegment.setTeam(team);
-        }
+        targetSegment.setTeam(team);
     }
 }

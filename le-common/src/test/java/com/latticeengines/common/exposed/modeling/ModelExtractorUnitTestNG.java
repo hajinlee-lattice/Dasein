@@ -12,6 +12,8 @@ public class ModelExtractorUnitTestNG {
     private static final String TARGETDIR = "/tmp/modelfiles";
     private static final String path = ClassLoader
             .getSystemResource("com/latticeengines/common/exposed/modeling/model.json").getPath();
+    private static final String path2 = ClassLoader
+            .getSystemResource("com/latticeengines/common/exposed/modeling/model2.json").getPath();
 
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
@@ -34,6 +36,19 @@ public class ModelExtractorUnitTestNG {
         this.setup();
 
         extractor.extractModelArtifacts(path, TARGETDIR, (dir, name) -> !name.equals("STPipelineBinary.p"));
+        Assert.assertFalse(new File(TARGETDIR + ST_PIPELINE_BINARY_P).exists());
+        Assert.assertTrue(new File(TARGETDIR + "/pipeline.py").exists());
+    }
+
+    @Test(groups = "unit")
+    public void extractPython3ModelArtifacts() throws Exception {
+        ModelExtractor extractor = new ModelExtractor();
+
+        extractor.extractModelArtifacts(path2, TARGETDIR);
+        Assert.assertTrue(new File(TARGETDIR + ST_PIPELINE_BINARY_P).exists());
+        this.setup();
+
+        extractor.extractModelArtifacts(path2, TARGETDIR, (dir, name) -> !name.equals("STPipelineBinary.p"));
         Assert.assertFalse(new File(TARGETDIR + ST_PIPELINE_BINARY_P).exists());
         Assert.assertTrue(new File(TARGETDIR + "/pipeline.py").exists());
     }

@@ -46,7 +46,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLMTest1548550277029"; // LETest1528844192916-14
 
-    private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
+    private static final String LOADING_CHECKPOINT = UpdateTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
 
     private MetadataSegment targetSegment;
     private RatingEngine testModel;
@@ -232,7 +232,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         featureImportanceProxy.upsertModelFeatureImportances(mainTestTenant.getId(), modelSummary.getId());
         featureImportances = featureImportanceProxy.getFeatureImportanceByModelGuid(mainTestTenant.getId(),
                 modelSummary.getId());
-        Assert.assertEquals(featureImportances.size(), 50);
+        Assert.assertEquals(featureImportances.size(), 52);
     }
 
     private void verifyBucketMetadataGenerated(PredictionType predictionType) {
@@ -307,13 +307,13 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 + " trainingCount=" + trainingCount //
                 + " eventCount=" + eventCount;
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
-            Assert.assertEquals(targetCount, 22, errorMsg);
-            Assert.assertEquals(trainingCount, 232, errorMsg);
-            Assert.assertEquals(eventCount, 193, errorMsg);
+            Assert.assertEquals(targetCount, 20, errorMsg);
+            Assert.assertEquals(trainingCount, 223, errorMsg);
+            Assert.assertEquals(eventCount, 190, errorMsg);
         } else {
-            Assert.assertEquals(targetCount, 554, errorMsg);
-            Assert.assertEquals(trainingCount, 2618, errorMsg);
-            Assert.assertEquals(eventCount, 68, errorMsg);
+            Assert.assertEquals(targetCount, 506, errorMsg);
+            Assert.assertEquals(trainingCount, 2359, errorMsg);
+            Assert.assertEquals(eventCount, 66, errorMsg);
         }
     }
 

@@ -58,6 +58,8 @@ public class AIModel extends RatingModel {
 
     private String modelSummaryId;
 
+    private String pythonMajorVersion;
+
     public static String generateIdStr() {
         String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
         return String.format(AI_MODEL_FORMAT, AI_MODEL_PREFIX, uuid);
@@ -153,5 +155,15 @@ public class AIModel extends RatingModel {
 
     public void setModelSummaryId(String modelSummaryId) {
         this.modelSummaryId = modelSummaryId;
+    }
+
+    @Column(name = "PYTHON_MAJOR_VERSION", length = 5)
+    @JsonProperty("pythonMajorVersion")
+    public String getPythonMajorVersion() {
+        return pythonMajorVersion;
+    }
+
+    public void setPythonMajorVersion(String pythonMajorVersion) {
+        this.pythonMajorVersion = pythonMajorVersion;
     }
 }

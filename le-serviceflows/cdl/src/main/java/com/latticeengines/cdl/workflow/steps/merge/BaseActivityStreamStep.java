@@ -33,7 +33,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
         extends BaseMergeImports<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseActivityStreamStep.class);
-    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
+    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.StreamDateId.name());
 
     // streamId -> table prefix of raw streams processed by transformation request
     protected final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
@@ -47,7 +47,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
      */
     protected String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
         DataFeedTask.IngestionBehavior behavior = stream.getDataFeedTaskIngestionBehavior();
-        String activeTable = configuration.getActiveRawStreamTables().get(streamId);
+        String activeTable = getUpdatedActiveRawStreamTables().get(streamId);
         // ignore active table in replace mode or stream has replace ingestion behavior
         if (shouldReturnEmpty(streamId, behavior, activeTable)) {
             return null;
@@ -222,5 +222,12 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
 
     private boolean needAppendRawStream(String matchedImportTable, String activeBatchTable) {
         return StringUtils.isNotBlank(matchedImportTable) || StringUtils.isNotBlank(activeBatchTable);
+    }
+
+    private Map<String, String> getUpdatedActiveRawStreamTables() {
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
+            return getMapObjectFromContext(ACTIVITY_MIGRATED_RAW_STREAM, String.class, String.class);
+        }
+        return configuration.getActiveRawStreamTables();
     }
 }

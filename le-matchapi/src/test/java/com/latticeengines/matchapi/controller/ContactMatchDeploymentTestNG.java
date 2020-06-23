@@ -13,6 +13,8 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerC
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Email;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +54,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.matchapi.testframework.AdvancedMatchDeploymentTestNGBase;
 
 // dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
-public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
+public class
+
+ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ContactMatchDeploymentTestNG.class);
 
     private static final String TestId = "TestId";
@@ -61,7 +65,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
     private static final String[] DEFAULT_FIELDS = new String[] { TestId, //
             CDLTemplateName.name(), // input template
             // contact fields (email used in both)
-            CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), //
+            CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), Address_Street_1.name(), Address_Street_2.name(), //
             // account fields
             CustomerAccountId.name(), CompanyName.name(), Country.name(), State.name() };
     private static final String[] DEFAULT_MATCH_RESULT_FIELDS = ArrayUtils
@@ -75,43 +79,43 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
             // Google
             { //
                     "C0_01", "t1", //
-                    "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", //
+                    "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_02", "t1", //
-                    "C_CID_02", "h.finch@google.com", "Harold Finch", "888-888-8888", //
+                    "C_CID_02", "h.finch@google.com", "Harold Finch", "888-888-8888", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_03", "t2", //
-                    "C_CID_03", "l.fusco@google.com", "Lionel Fusco", "777-777-7777", //
+                    "C_CID_03", "l.fusco@google.com", "Lionel Fusco", "777-777-7777", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_04", "t1", //
-                    "C_CID_04", "s.shaw@google.com", "Sameen Shaw", "666-666-6666", //
+                    "C_CID_04", "s.shaw@google.com", "Sameen Shaw", "666-666-6666", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
                     "C0_05", "t3", //
-                    "C_CID_05", "s.groves@google.com", "Samantha Groves", "555-555-5555", //
+                    "C_CID_05", "s.groves@google.com", "Samantha Groves", "555-555-5555", "Street1", "Street2", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
                // netflix
             { //
                     "C0_11", "t4", //
-                    "C_CID_11", "j.greer@netflix.com", "John Greer", "444-444-4444", //
+                    "C_CID_11", "j.greer@netflix.com", "John Greer", "444-444-4444", "Street1", "Street2", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
             { //
                     "C0_12", "t3", //
-                    "C_CID_12", "k.stanton@netflix.com", "Kara Stanton", "333-333-3333", //
+                    "C_CID_12", "k.stanton@netflix.com", "Kara Stanton", "333-333-3333", "Street1", "Street2", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
             { //
                     "C0_13", "t3", //
-                    "C_CID_13", "j.lambert@netflix.com", "Jeremy Lambert", "222-222-2222", //
+                    "C_CID_13", "j.lambert@netflix.com", "Jeremy Lambert", "222-222-2222", "Street1", "Street2", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
     };
@@ -235,28 +239,28 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_01", "sdfsdf", //
-                                                "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", //
+                                                "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", "Street1", "Street2", //
                                                 "C_AID_01", "Google", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_01" //
                                 ), // match with CustomerAccountId & CustomerContactId
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_02", "sdfsdf", //
-                                                null, "j.reese@google.com", null, null, //
+                                                null, "j.reese@google.com", null, null, "Street1", "Street2", //
                                                 null, "Google", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_01" //
                                 ), // match with Name/Country for account & AccountEntityId + Email for contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_03", "sdfsdf", //
-                                                null, "l.fusco123@google.com", "Lionel Fusco", "777-777-7777", //
+                                                null, "l.fusco123@google.com", "Lionel Fusco", "777-777-7777", "Street1", "Street2", //
                                                 "C_AID_01", "Google Inc.", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_03" //
                                 ), // CustomerAccountId for account & AccountEntityId + N + P for contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_04", "t5", //
-                                                null, null, "Samantha Groves", "555-555-5555", //
+                                                null, null, "Samantha Groves", "555-555-5555", "Street1", "Street2", //
                                                 null, "Lyft", "USA", "CA", //
                                         }, null, null //
                                 ), // New account & New contact (no CustomerContactId, so AccountEntityId + N+P
@@ -264,49 +268,49 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_05", "t6", //
-                                                "C_CID_05", "s.groves@uber.com", "Samantha Groves", "555-555-5555", //
+                                                "C_CID_05", "s.groves@uber.com", "Samantha Groves", "555-555-5555", "Street1", "Street2", //
                                                 null, "Uber", "USA", "CA", //
                                         }, null, "C_CID_05" //
                                 ), // New account & CustomerContactId for contact (change company)
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_06", "t7", //
-                                                null, "bear@google.com", null, null, //
+                                                null, "bear@google.com", null, null, "Street1", "Street2", //
                                                 null, "Google", "USA", "CA", //
                                         }, "C_AID_01", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_07", "t8", //
-                                                "C_CID_999", "samaritan@netflix.com", null, null, //
+                                                "C_CID_999", "samaritan@netflix.com", null, null, "Street1", "Street2", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_08", "t9", //
-                                                null, null, "John Doe", "000-000-0000", //
+                                                null, null, "John Doe", "000-000-0000", "Street1", "Street2", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_09", "t10", //
-                                                null, null, null, null, //
+                                                null, null, null, null, "Street1", "Street2", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", ENTITY_ANONYMOUS_ID //
                                 ), // match with Name/Country for account & anonymous contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_10", "t11", //
-                                                null, null, null, null, //
+                                                null, null, null, null, "Street1", "Street2", //
                                                 null, null, null, null //
                                         }, ENTITY_ANONYMOUS_ID, ENTITY_ANONYMOUS_ID //
                                 ), // anonymous account & contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
                                                 "C1_11", "t12", //
-                                                "C_CID_13", null, "Jeremy Lambert", "222-222-2222", //
+                                                "C_CID_13", null, "Jeremy Lambert", "222-222-2222", "Street1", "Street2", //
                                                 null, null, null, null //
                                         }, ENTITY_ANONYMOUS_ID, "C_CID_13" //
                                 ), // anonymous account & match with CustomerContactId for contact (note that N+P
@@ -528,6 +532,8 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         map.addMatchKey(MatchKey.Email, MatchKey.Email.name());
         map.addMatchKey(Name, ContactName.name());
         map.addMatchKey(MatchKey.PhoneNumber, MatchKey.PhoneNumber.name());
+        map.addMatchKey(MatchKey.Address, Address_Street_1.name());
+        map.addMatchKey(MatchKey.Address2, Address_Street_2.name());
         return map;
     }
 

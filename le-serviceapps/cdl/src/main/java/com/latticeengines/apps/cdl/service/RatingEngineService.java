@@ -29,6 +29,8 @@ public interface RatingEngineService {
 
     List<RatingEngine> getAllDeletedRatingEngines();
 
+    List<RatingEngineSummary> getRatingEngineSummaries();
+
     List<RatingEngineSummary> getAllRatingEngineSummaries();
 
     List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status);

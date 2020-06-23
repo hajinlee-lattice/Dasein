@@ -21,11 +21,15 @@ public class ScoringConfiguration {
 
     private List<String> modelGuids = new ArrayList<>();
 
+    private List<String> p2ModelGuids = new ArrayList<>();
+
     private List<BucketMetadata> bucketMetadata;
 
     private boolean readModelIdFromRecord = true;
 
     private ScoringInputType scoreInputType = ScoringInputType.Json;
+
+    private String pythonMajorVersion;
 
     @JsonProperty("customer")
     public String getCustomer() {
@@ -77,6 +81,16 @@ public class ScoringConfiguration {
         this.modelGuids = modelGuids;
     }
 
+    @JsonProperty("p2_model_guids")
+    public List<String> getP2ModelGuids() {
+        return p2ModelGuids;
+    }
+
+    @JsonProperty("p2_model_guids")
+    public void setP2ModelGuids(List<String> p2ModelGuids) {
+        this.p2ModelGuids = p2ModelGuids;
+    }
+
     @JsonProperty("bucket_metadata")
     public List<BucketMetadata> getBucketMetadata() {
         return this.bucketMetadata;
@@ -114,6 +128,16 @@ public class ScoringConfiguration {
     @JsonProperty("read_modelid_from_record")
     public boolean readModelIdFromRecord() {
         return readModelIdFromRecord;
+    }
+
+    @JsonProperty("python_major_version")
+    public String getPythonMajorVersion() {
+        return pythonMajorVersion;
+    }
+
+    @JsonProperty("python_major_version")
+    public void setPythonMajorVersion(String pythonMajorVersion) {
+        this.pythonMajorVersion = pythonMajorVersion;
     }
 
     public void setModelIdFromRecord(boolean readModelIdFromRecord) {

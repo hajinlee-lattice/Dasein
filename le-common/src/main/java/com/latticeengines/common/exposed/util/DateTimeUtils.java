@@ -9,6 +9,11 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,4 +167,30 @@ public final class DateTimeUtils {
                 String.format("Failed to parse delete to date string %s", toDate));
         return Arrays.asList(startDayPeriod.longValue(), endDayPeriod.longValue());
     }
+
+    public static void main(String[] args) {
+        CommandLineParser parser = new DefaultParser();
+        Options options = new Options();
+        Option encrypt = new Option("encode", true, " - date to id");
+        Option decrypt = new Option("decode", true, " - id to date");
+        options.addOption(encrypt);
+        options.addOption(decrypt);
+        try {
+            CommandLine cmd = parser.parse(options, args);
+            if (cmd.hasOption("encode")) {
+                String dateStr = cmd.getOptionValue("encode");
+                Integer dateId = DateTimeUtils.dateToDayPeriod(dateStr);
+                System.out.println("Date : " + dateStr);
+                System.out.println("Date Id : " + dateId);
+            } else if (cmd.hasOption("decode")) {
+                int dateId = Integer.parseInt(cmd.getOptionValue("decode"));
+                String dateStr = DateTimeUtils.dayPeriodToDate(dateId);
+                System.out.println("Date Id : " + dateId);
+                System.out.println("Date  : " + dateStr);
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse command line.", e);
+        }
+    }
+
 }

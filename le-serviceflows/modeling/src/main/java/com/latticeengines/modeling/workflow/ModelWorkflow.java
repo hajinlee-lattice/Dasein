@@ -19,6 +19,7 @@ import com.latticeengines.modeling.workflow.steps.modeling.Profile;
 import com.latticeengines.modeling.workflow.steps.modeling.ReviewModel;
 import com.latticeengines.modeling.workflow.steps.modeling.Sample;
 import com.latticeengines.modeling.workflow.steps.modeling.SetMatchSelection;
+import com.latticeengines.modeling.workflow.steps.modeling.SetPythonVersion;
 import com.latticeengines.modeling.workflow.steps.modeling.WriteMetadataFiles;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -29,6 +30,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> {
+
+    @Inject
+    private SetPythonVersion setPythonVersion;
 
     @Inject
     private EventCounter eventCounter;
@@ -75,6 +79,7 @@ public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> 
     @Override
     public Workflow defineWorkflow(ModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config)//
+                .next(setPythonVersion) //
                 .next(eventCounter) //
                 .next(sample) //
                 .next(exportData) //
