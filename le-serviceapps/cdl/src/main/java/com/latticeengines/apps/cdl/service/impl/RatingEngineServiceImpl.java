@@ -110,6 +110,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.rating.crossell.minimum.events:50}")
     private Long minimumEvents;
 
+    @Value("${cdl.rating.crossell.minimum.rows:200}")
+    private Long minimumRows;
+
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
@@ -651,6 +654,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     null);
             if (noOfEvents < minimumEvents) {
                 errors.add(LedpException.buildMessage(LedpCode.LEDP_40046, new String[] { minimumEvents.toString() }));
+            }
+            Long noOfRows = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING,
+                    null);
+            if (noOfRows < minimumRows) {
+                errors.add(LedpException.buildMessage(LedpCode.LEDP_40088,
+                        new String[] { minimumRows.toString(), noOfRows.toString() }));
             }
             break;
         case CUSTOM_EVENT:
