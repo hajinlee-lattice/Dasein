@@ -83,7 +83,8 @@ public enum InterfaceName {
     TransactionTime, //
     TransactionDate, //
     TransactionDayPeriod, //
-    __StreamDateId, //
+    __StreamDateId, // legacy partition key
+    StreamDateId,
     __StreamDate, //
     TransactionCount, //
     Quantity, //

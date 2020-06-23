@@ -26,6 +26,9 @@ public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfigurat
     @JsonProperty("rebuild_activity_store")
     private boolean shouldRebuild;
 
+    @JsonProperty("active_raw_stream_table")
+    private Map<String, String> activeRawStreamTables;
+
     public Map<String, AtlasStream> getActivityStreamMap() {
         return activityStreamMap;
     }
@@ -64,5 +67,13 @@ public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfigurat
 
     public void setShouldRebuild(boolean shouldRebuild) {
         this.shouldRebuild = shouldRebuild;
+    }
+
+    public Map<String, String> getActiveRawStreamTables() {
+        return activeRawStreamTables;
+    }
+
+    public void setActiveRawStreamTables(Map<String, String> activeRawStreamTables) {
+        this.activeRawStreamTables = activeRawStreamTables;
     }
 }

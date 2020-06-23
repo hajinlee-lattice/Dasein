@@ -47,7 +47,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String LastModifiedDate = InterfaceName.LastModifiedDate.name();
     private static final String Count = InterfaceName.__Row_Count__.name();
     private static final String StreamDate = InterfaceName.__StreamDate.name();
-    private static final String StreamDateId = InterfaceName.__StreamDateId.name();
+    private static final String StreamDateId = InterfaceName.StreamDateId.name();
     private static final String LastActivityDate = InterfaceName.LastActivityDate.name();
     private static final String DATE_ATTR = InterfaceName.LastModifiedDate.name();
     private static final String PeriodIdForPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + PeriodId;

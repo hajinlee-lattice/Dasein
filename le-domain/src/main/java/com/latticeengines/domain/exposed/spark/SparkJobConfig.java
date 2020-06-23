@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeProductConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
+import com.latticeengines.domain.exposed.spark.cdl.MigrateActivityPartitionKeyJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
@@ -130,7 +131,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
-        @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME)
+        @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME), //
+        @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 
