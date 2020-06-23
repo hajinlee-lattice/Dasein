@@ -503,7 +503,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
         // 1. Check if there's Action already consumed by PA
         if (CollectionUtils.isNotEmpty(getPAConsumedActions(dataFeedTask.getUniqueId()))) {
-            throw new LedpException(LedpCode.LEDP_40092);
+            throw new LedpException(LedpCode.LEDP_40093);
         }
 
         // 2. Check if there's depending template
