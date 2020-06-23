@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobC
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JoinChangeListAccountBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
@@ -67,7 +68,6 @@ import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 
 import reactor.core.publisher.Flux;
-
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -131,7 +131,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
-        @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME), //
+        @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME),
+        @JsonSubTypes.Type(value = JoinChangeListAccountBatchConfig.class, name = JoinChangeListAccountBatchConfig.NAME), //
         @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {

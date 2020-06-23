@@ -1,16 +1,26 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.DataCloud.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
+    }
 
     public static class Builder {
         private RebuildAccountWorkflowConfiguration configuration = new RebuildAccountWorkflowConfiguration();

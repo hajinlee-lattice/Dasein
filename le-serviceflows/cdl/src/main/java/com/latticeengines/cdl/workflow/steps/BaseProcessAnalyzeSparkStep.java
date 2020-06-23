@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -222,4 +223,11 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         putObjectInContext(key, entitySet);
     }
 
+    protected boolean inMigrationMode() {
+        MigrationTrack.Status status = metadataProxy.getMigrationStatus(customerSpace.toString());
+        log.info("Tenant's migration status is {}.", status);
+        boolean migrationMode = MigrationTrack.Status.STARTED.equals(status);
+        log.info("Migration mode is {}", migrationMode ? "on" : "off");
+        return migrationMode;
+    }
 }

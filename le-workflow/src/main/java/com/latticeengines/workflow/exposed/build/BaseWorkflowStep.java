@@ -253,6 +253,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
     protected static final String ACCOUNT_CHANGELIST_TABLE_NAME = "ACCOUNT_CHANGELIST_TABLE_NAME";
+    protected static final String LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME = "LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME";
+    protected static final String FULL_CHANGELIST_TABLE_NAME = "FULL_CHANGELIST_TABLE_NAME";
     protected static final String ACCOUNT_REPORT_CHANGELIST_TABLE_NAME = "ACCOUNT_REPORT_CHANGELIST_TABLE_NAME";
     protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
@@ -359,6 +361,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //
             LATTICE_ACCOUNT_TABLE_NAME, //
+            FULL_CHANGELIST_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //
             ACCOUNT_FEATURE_TABLE_NAME, //
             ACCOUNT_PROFILE_TABLE_NAME, //
