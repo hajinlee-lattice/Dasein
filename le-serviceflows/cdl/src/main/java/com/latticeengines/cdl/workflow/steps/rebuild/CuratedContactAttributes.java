@@ -217,8 +217,11 @@ public class CuratedContactAttributes
             return false;
         }
         boolean calculateLastActivityDate = StringUtils.isNotBlank(contactLastActivityTempTableName);
-        if (!calculateLastActivityDate && BooleanUtils.isNotTrue(configuration.getRebuild())) {
-            log.info("No contact last activity date table and not in rebuild mode, skip curated contact step");
+        boolean calculateSystemLastUpdateTime = shouldCalculateSystemLastUpdateTime();
+        if (!calculateLastActivityDate && BooleanUtils.isNotTrue(configuration.getRebuild())
+                && !calculateSystemLastUpdateTime) {
+            log.info(
+                    "No need to calculating both last activity date and system last update time and not in rebuild mode, skip curated contact step");
             return false;
         }
         return true;
