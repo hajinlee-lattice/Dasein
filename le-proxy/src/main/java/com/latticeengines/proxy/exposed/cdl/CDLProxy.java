@@ -500,7 +500,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc.isSuccess()) {
             return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
-            throw new RuntimeException("Failed to register delete data: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
@@ -514,7 +514,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc.isSuccess()) {
             return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
-            throw new RuntimeException("Failed to register delete data: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
