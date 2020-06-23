@@ -16,6 +16,7 @@ public class TestProxy extends BaseRestApiProxy {
 
     public TestProxy() {
         super(PropertyUtils.getProperty("proxy.test.rest.endpoint.hostport"), "foo/{bar}", "baz");
+        setMaxAttempts(5);
     }
 
     public void testUrlExpansion() {
@@ -49,7 +50,7 @@ public class TestProxy extends BaseRestApiProxy {
             return exchange(url, verb, null, returnValueClazz, false, false).getBody();
         });
     }
-    
-    
+
+
 
 }
