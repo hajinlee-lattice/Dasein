@@ -110,7 +110,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.rating.crossell.minimum.events:50}")
     private Long minimumEvents;
 
-    @Value("${cdl.rating.crossell.minimum.rows:200}")
+    @Value("${cdl.rating.crossell.minimum.training.rows:200}")
     private Long minimumRows;
 
     @Inject
