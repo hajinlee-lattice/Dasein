@@ -291,11 +291,12 @@ public class CDLResource {
     @PostMapping("/s3/template/reset")
     @ApiOperation(value = "Reset template")
     @ResponseBody
-    public Map<String, UIAction> resetTemplate(@RequestBody S3ImportTemplateDisplay templateDisplay) {
+    public Map<String, UIAction> resetTemplate(@RequestParam(value = "forceReset", required = false, defaultValue = "false") Boolean forceReset,
+                                               @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
         try {
-            cdlService.resetTemplate(customerSpace.toString(), templateDisplay.getFeedType());
+            cdlService.resetTemplate(customerSpace.toString(), templateDisplay.getFeedType(), forceReset);
             UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
                     resetTemplateMsg);
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);

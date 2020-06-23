@@ -37,6 +37,7 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.aws.s3.S3Service;
@@ -73,12 +74,15 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
@@ -138,6 +142,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     @Inject
     private ImportWorkflowSpecService importWorkflowSpecService;
+
+    @Inject
+    private ActionService actionService;
 
     @Value("${aws.customer.s3.bucket}")
     private String customerBucket;
@@ -486,6 +493,108 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     public boolean validateGAEnabled(String customerSpace, boolean enableGA) {
         CustomerSpace customerSpace1 = MultiTenantContext.getCustomerSpace();
         return (batonService.isEntityMatchEnabled(customerSpace1) && !batonService.onlyEntityMatchGAEnabled(customerSpace1)) || (enableGA && batonService.onlyEntityMatchGAEnabled(customerSpace1));
+    }
+
+    @Override
+    public boolean resetTemplate(String customerSpace, String source, String feedType, Boolean forceDelete) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, source, feedType);
+        if (dataFeedTask == null) {
+            return false;
+        }
+        // 1. Check if there's Action already consumed by PA
+        if (CollectionUtils.isNotEmpty(getPAConsumedActions(dataFeedTask.getUniqueId()))) {
+            throw new LedpException(LedpCode.LEDP_40092);
+        }
+
+        // 2. Check if there's depending template
+        S3ImportSystem importSystem = dataFeedTask.getImportSystem();
+        if (importSystem == null) {
+            importSystem = dataFeedTaskService.getImportSystemByTaskId(customerSpace, dataFeedTask.getUniqueId());
+        }
+        Set<String> systemIds = new HashSet<>();
+        if (importSystem != null) {
+            if (importSystem.getSystemType().getPrimaryAccount().equals(EntityTypeUtils.matchFeedType(feedType))) {
+                if (StringUtils.isNotEmpty(importSystem.getAccountSystemId())) {
+                    systemIds.add(importSystem.getAccountSystemId());
+                }
+            }
+            if (importSystem.getSystemType().getPrimaryContact().equals(EntityTypeUtils.matchFeedType(feedType))) {
+                if (StringUtils.isNotEmpty(importSystem.getContactSystemId())) {
+                    systemIds.add(importSystem.getContactSystemId());
+                }
+            }
+        }
+        log.info("Get depending template based on id set: " + StringUtils.join(systemIds, ","));
+        List<String> dependingTemplates = getDependingTemplate(customerSpace, dataFeedTask.getUniqueId(), systemIds);
+        if (CollectionUtils.isNotEmpty(dependingTemplates)) {
+            throw new LedpException(LedpCode.LEDP_40089, new String[]{StringUtils.join(dependingTemplates, ",")});
+        }
+
+        // 3. try delete active actions
+        List<Long> actionPidList =
+                actionService.findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW,
+                        ActionStatus.ACTIVE, dataFeedTask.getUniqueId());
+        if (CollectionUtils.isNotEmpty(actionPidList)) {
+            if (Boolean.TRUE.equals(forceDelete)) {
+                actionPidList.forEach(actionPid -> actionService.delete(actionPid));
+            } else {
+                throw new LedpException(LedpCode.LEDP_40090);
+            }
+        }
+        // remove cancelled as well
+        actionPidList = actionService.findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW,
+                        ActionStatus.CANCELED, dataFeedTask.getUniqueId());
+        if (CollectionUtils.isNotEmpty(actionPidList)) {
+            actionPidList.forEach(actionPid -> actionService.delete(actionPid));
+        }
+        log.info(String.format("Delete template %s, template table name: %s", dataFeedTask.getUniqueId(),
+                dataFeedTask.getImportTemplate().getName()));
+        metadataProxy.deleteImportTable(customerSpace, dataFeedTask.getImportTemplate().getName());
+        return true;
+    }
+
+    @Override
+    public boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueName) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTaskByTaskName(customerSpace, taskUniqueName, false);
+        if (dataFeedTask != null) {
+            return CollectionUtils.isNotEmpty(getPAConsumedActions(dataFeedTask.getUniqueId()));
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasPAConsumedImportAction(String customerSpace, String source, String feedType) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, source, feedType);
+        if (dataFeedTask != null) {
+            return CollectionUtils.isNotEmpty(getPAConsumedActions(dataFeedTask.getUniqueId()));
+        }
+        return false;
+    }
+
+    private List<String> getDependingTemplate(String customerSpace, String uniqueTaskId, Set<String> systemIdSet) {
+        if (CollectionUtils.isEmpty(systemIdSet)) {
+            return Collections.emptyList();
+        }
+        DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
+        if (dataFeed == null || CollectionUtils.isEmpty(dataFeed.getTasks())) {
+            return Collections.emptyList();
+        }
+        List<String> dependingTemplate = new ArrayList<>();
+        for (DataFeedTask task: dataFeed.getTasks()) {
+            if (task.getUniqueId().equals(uniqueTaskId)) {
+                continue;
+            }
+            Set<String> attrSet = task.getImportTemplate().getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+            if (!Collections.disjoint(attrSet, systemIdSet)) {
+                dependingTemplate.add(task.getTemplateDisplayName());
+            }
+        }
+        return dependingTemplate;
+    }
+
+    private List<Long> getPAConsumedActions(String uniqueTaskId) {
+        return actionService.findPidByTypeAndConfigAndOwnerType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW,
+                ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME, uniqueTaskId);
     }
 
     private DataFeedTask createOpportunityTemplateOnly(String customerSpace, String systemName, EntityType entityType,

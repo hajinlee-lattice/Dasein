@@ -130,7 +130,7 @@ public interface CDLService {
      * @param customerSpace Identify current tenant.
      * @param feedType DataFeedTask.FeedType
      */
-    void resetTemplate(String customerSpace, String feedType);
+    void resetTemplate(String customerSpace, String feedType, Boolean forceReset);
 
     /**
      *
