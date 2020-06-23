@@ -163,7 +163,6 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         String targetTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
-        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         setTargetTable(step, targetTablePrefix);
         rawStreamsAfterDelete.put(streamId, targetTablePrefix);
 
@@ -171,9 +170,11 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         if (hasDeleteImport) {
             log.info("Add batch store table {} and delete import table for soft delete.", rawStreamTable);
             step.setInputSteps(Collections.singletonList(steps.size() - 1));
+            softDeleteConfig.setDeleteSourceIdx(0);
         } else {
             log.info("Add batch store table {} for soft delete by only time ranges.", rawStreamTable);
         }
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         steps.add(step);
     }
 
