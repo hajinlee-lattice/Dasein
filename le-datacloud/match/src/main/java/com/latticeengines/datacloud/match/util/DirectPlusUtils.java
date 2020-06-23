@@ -63,10 +63,10 @@ public final class DirectPlusUtils {
                     parts.add(String.format("telephoneNumber=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
                 }
                 if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet())) {
-                    parts.add(String.format("line1=%s", urlEncode(context.getInputNameLocation().getStreet())));
+                    parts.add(String.format("streetAddressLine1=%s", urlEncode(context.getInputNameLocation().getStreet())));
                 }
                 if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet2())) {
-                    parts.add(String.format("line2=%s", urlEncode(context.getInputNameLocation().getStreet2())));
+                    parts.add(String.format("streetAddressLine2=%s", urlEncode(context.getInputNameLocation().getStreet2())));
                 }
                 break;
             case REALTIME_EMAIL:
