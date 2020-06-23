@@ -43,13 +43,16 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
     static final Map<MatchKey, String> MATCH_KEYS_TO_INTERNAL_NAMES = new HashMap<>();
     static {
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Name, InterfaceName.CompanyName.name());
+        MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Address, InterfaceName.Address_Street_1.name());
+        MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Address2, InterfaceName.Address_Street_2.name());
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.City, InterfaceName.City.name());
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.State, InterfaceName.State.name());
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Country, InterfaceName.Country.name());
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Zipcode, InterfaceName.PostalCode.name());
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.DUNS, InterfaceName.DUNS.name());
-        MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.ExternalId, InterfaceName.Id.name());
+        MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Domain, InterfaceName.Website.name());
+        MATCH_KEYS_TO_INTERNAL_NAMES.put(MatchKey.Email, InterfaceName.Email.name());
     }
 
     private static final Logger log = LoggerFactory.getLogger(AnalyzeInput.class);
@@ -98,9 +101,8 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
                         .stream()
                         .reduce(new ArrayList<>(), (x, y) -> { x.addAll(y); return x;})
                         .stream()
-                        .filter(e -> StringUtils.isNotBlank(e.getFieldName())
-                                && StringUtils.isNotBlank(e.getScreenName()))
-                        .collect(Collectors.toMap(FieldDefinition::getFieldName, FieldDefinition::getScreenName));
+                        .filter(e -> StringUtils.isNotBlank(e.getFieldName()))
+                        .collect(Collectors.toMap(FieldDefinition::getFieldName, FieldDefinition::getFieldName));
 
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
         UploadStats.ImportStats importStats = stats.getImportStats();
