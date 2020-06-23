@@ -66,7 +66,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
 
         DataReport.GeoDistributionReport geoReport = report.getGeoDistributionReport();
         Map<String, DataReport.GeoDistributionReport.GeographicalItem> geoMap = geoReport.getGeographicalDistributionMap();
-        DataReport.GeoDistributionReport.GeographicalItem item1 = geoMap.get("USA");
+        DataReport.GeoDistributionReport.GeographicalItem item1 = geoMap.get("United States");
         Assert.assertNotNull(item1);
         Assert.assertEquals(item1.getCount(), Long.valueOf(4L));
         DataReport.GeoDistributionReport.GeographicalItem item2 = geoMap.get("China");
