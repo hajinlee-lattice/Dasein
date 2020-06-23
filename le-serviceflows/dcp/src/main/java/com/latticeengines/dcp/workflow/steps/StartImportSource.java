@@ -67,7 +67,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_STARTED, null);
-        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
         if (upload == null || upload.getUploadConfig() == null || StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath())) {
             throw new RuntimeException("Cannot start DCP import job due to lack of import info!");
         }
@@ -76,7 +76,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         // Build upload dir
         Source source = sourceProxy.getSource(customerSpace.toString(), configuration.getSourceId());
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
-                configuration.getProjectId());
+                configuration.getProjectId(), Boolean.FALSE);
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
         String uploadDir = UploadS3PathBuilderUtils.getUploadRoot(projectDetails.getProjectId(), source.getSourceId());

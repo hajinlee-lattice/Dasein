@@ -100,22 +100,22 @@ public class DataReport {
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
     public static class BasicStats {
 
-        @JsonProperty("total_submitted")
+        @JsonProperty("totalSubmitted")
         private Long totalSubmitted;
 
-        @JsonProperty("success_cnt")
+        @JsonProperty("successCnt")
         private Long successCnt;
 
-        @JsonProperty("error_cnt")
+        @JsonProperty("errorCnt")
         private Long errorCnt;
 
-        @JsonProperty("matched_cnt")
+        @JsonProperty("matchedCnt")
         private Long matchedCnt;
 
-        @JsonProperty("pending_review_cnt")
+        @JsonProperty("pendingReviewCnt")
         private Long pendingReviewCnt;
 
-        @JsonProperty("unmatched_cnt")
+        @JsonProperty("unmatchedCnt")
         private Long unmatchedCnt;
 
         public Long getTotalSubmitted() {

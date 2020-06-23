@@ -34,18 +34,20 @@ public class UploadResource {
     @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get uploads by sourceId")
-    public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status) {
-        return uploadService.getAllBySourceId(sourceId, status);
+    public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status,
+                                                @RequestParam(required = false, defaultValue = "false") Boolean includeConfig) {
+        return uploadService.getAllBySourceId(sourceId, status, includeConfig);
     }
 
     @GetMapping("/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation("Get upload by uploadID")
-    public UploadDetails getUpload(@PathVariable String uploadId) {
+    public UploadDetails getUpload(@PathVariable String uploadId,
+                                   @RequestParam(required = false, defaultValue = "false") Boolean includeConfig) {
         if (uploadId == null) {
             return null;
         } else {
-            return uploadService.getByUploadId(uploadId);
+            return uploadService.getByUploadId(uploadId, includeConfig);
         }
     }
 

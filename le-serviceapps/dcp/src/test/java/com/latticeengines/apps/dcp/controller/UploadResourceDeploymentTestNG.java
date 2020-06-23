@@ -103,7 +103,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadImportedFilePath(importedFilePath);
         config.setUploadTSPrefix(uploadTS);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
-        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null, Boolean.TRUE);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails retrievedUpload = uploads.get(0);
@@ -114,7 +114,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
         uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED, null);
-        uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED);
+        uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED, Boolean.FALSE);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         retrievedUpload = uploads.get(0);
@@ -131,7 +131,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
     public void testDownload() throws Exception {
-        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED, Boolean.TRUE);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails upload = uploads.get(0);
@@ -150,7 +150,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
 
         // drop file to another upload
-        List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW);
+        List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW, Boolean.TRUE);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
         UploadDetails upload2 = uploads2.get(0);

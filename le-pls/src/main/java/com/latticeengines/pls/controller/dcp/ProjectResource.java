@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,14 +71,14 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation("Get all projects")
     @PreAuthorize("hasRole('View_DCP_Projects')")
-    List<ProjectSummary> getAllProjects() {
+    List<ProjectSummary> getAllProjects(@RequestParam(required = false, defaultValue = "false") Boolean includeSources) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
 
         try {
-            return projectService.getAllProjects(customerSpace.toString());
+            return projectService.getAllProjects(customerSpace.toString(), includeSources);
         } catch (LedpException e) {
             log.error("Failed to get all projects: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -90,14 +91,15 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation("Get project by projectId")
     @PreAuthorize("hasRole('View_DCP_Projects')")
-    ProjectDetails getProjectByProjectId(@PathVariable String projectId) {
+    ProjectDetails getProjectByProjectId(@PathVariable String projectId,
+                                         @RequestParam(required = false, defaultValue = "false") Boolean includeSources) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
 
         try {
-            return projectService.getProjectByProjectId(customerSpace.toString(), projectId);
+            return projectService.getProjectByProjectId(customerSpace.toString(), projectId, includeSources);
         } catch (LedpException e) {
             log.error("Failed to get project by projectId: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,

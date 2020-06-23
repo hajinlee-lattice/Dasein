@@ -20,27 +20,27 @@ public class Source {
     private static final Pattern SOURCE_FULL_PATH_PATTERN = Pattern.compile("(.*)/dropfolder/([a-zA-Z0-9]{8})/" +
             "(Projects/[a-zA-Z0-9_]+/Source[s]?/[a-zA-Z0-9_]+/)");
 
-    @JsonProperty("source_id")
+    @JsonProperty("sourceId")
     private String sourceId;
 
-    @JsonProperty("source_display_name")
+    @JsonProperty("sourceDisplayName")
     private String sourceDisplayName;
 
-    @JsonProperty("relative_path")
+    @JsonProperty("sourceRelativePath")
     private String relativePath;
 
     // The dropfolder full path: {bucket}/dropfolder/{dropbox}/Projects/{projectId}/Sources/{sourceId}/drop/
-    @JsonProperty("full_path")
+    @JsonProperty("sourceFullPath")
     private String dropFullPath;
 
     // The source full path: {bucket}/dropfolder/{dropbox}/Projects/{projectId}/Sources/{sourceId}/
     @JsonIgnore
     private String sourceFullPath;
 
-    @JsonProperty("import_status")
+    @JsonProperty("importStatus")
     private DataFeedTask.S3ImportStatus importStatus;
 
-    @JsonProperty("basic_stats")
+    @JsonProperty("basicStats")
     private DataReport.BasicStats basicStats;
 
     public String getSourceId() {

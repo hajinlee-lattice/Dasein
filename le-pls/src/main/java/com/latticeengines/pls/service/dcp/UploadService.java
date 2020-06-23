@@ -11,9 +11,9 @@ import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 
 public interface UploadService {
 
-    List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status);
+    List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig);
 
-    UploadDetails getByUploadId(String uploadId);
+    UploadDetails getByUploadId(String uploadId, Boolean includeConfig);
 
     String generateToken(String uploadId);
 

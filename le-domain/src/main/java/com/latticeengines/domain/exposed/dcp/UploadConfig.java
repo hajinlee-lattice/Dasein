@@ -13,25 +13,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UploadConfig {
 
-    @JsonProperty("drop_file_path")
+    @JsonProperty("dropFilePath")
     private String dropFilePath;
 
-    @JsonProperty("upload_ts_prefix")
+    @JsonProperty("uploadTsPrefix")
     private String uploadTSPrefix;
 
-    @JsonProperty("upload_raw_file_path")
+    @JsonProperty("uploadRawFilePath")
     private String uploadRawFilePath;
 
-    @JsonProperty("upload_imported_file_path")
+    @JsonProperty("uploadImportedFilePath")
     private String uploadImportedFilePath;
 
-    @JsonProperty("upload_match_result_prefix")
+    @JsonProperty("uploadMatchResultPrefix")
     private String uploadMatchResultPrefix;
 
-    @JsonProperty("upload_imported_error_file_path")
+    @JsonProperty("uploadImportedErrorFilePath")
     private String uploadImportedErrorFilePath;
 
-    @JsonProperty("source_on_hdfs")
+    @JsonProperty("sourceOnHdfs")
     private Boolean sourceOnHdfs;
 
     public String getDropFilePath() {

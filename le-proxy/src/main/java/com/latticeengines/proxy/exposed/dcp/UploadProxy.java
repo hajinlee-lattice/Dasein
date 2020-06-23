@@ -38,18 +38,18 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return post("create upload", url, uploadConfig, UploadDetails.class);
     }
 
-    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
-        String url = constructUrl(baseUrl, customerSpace, sourceId);
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}?includeConfig={includeConfig}";
+        String url = constructUrl(baseUrl, customerSpace, sourceId, includeConfig.toString());
         if (status != null) {
             url = url + "?status=" + status;
         }
         return JsonUtils.convertList(get("get uploads", url, List.class), UploadDetails.class);
     }
 
-    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}?includeConfig={includeConfig}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, includeConfig.toString());
         return get("Get Upload by UploadId", url, UploadDetails.class);
     }
 

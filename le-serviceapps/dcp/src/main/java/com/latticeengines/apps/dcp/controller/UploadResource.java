@@ -61,22 +61,24 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "get upload list")
     public List<UploadDetails> getUploads(@PathVariable String customerSpace, @PathVariable String sourceId,
-                                  @RequestParam(value = "status", required = false) Upload.Status status) {
+                                  @RequestParam(value = "status", required = false) Upload.Status status,
+                                          @RequestParam(defaultValue = "true") Boolean includeConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (status != null) {
-            return uploadService.getUploads(customerSpace, sourceId, status);
+            return uploadService.getUploads(customerSpace, sourceId, status, includeConfig);
         } else {
-            return uploadService.getUploads(customerSpace, sourceId);
+            return uploadService.getUploads(customerSpace, sourceId, includeConfig);
         }
     }
 
     @GetMapping("/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by uploadId")
-    public UploadDetails getUploadByUploadId(@PathVariable String customerSpace, @PathVariable String uploadId) {
+    public UploadDetails getUploadByUploadId(@PathVariable String customerSpace, @PathVariable String uploadId,
+                                             @RequestParam(defaultValue = "true") Boolean includeConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Get upload for customer %s, with uploadId %s", customerSpace, uploadId));
-        return uploadService.getUploadByUploadId(customerSpace, uploadId);
+        return uploadService.getUploadByUploadId(customerSpace, uploadId, includeConfig);
     }
 
     @PutMapping("/update/{uploadId}/matchResult/{tableName}")

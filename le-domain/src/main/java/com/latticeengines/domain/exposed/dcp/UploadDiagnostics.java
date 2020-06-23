@@ -10,10 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UploadDiagnostics {
 
-    @JsonProperty("application_id")
+    @JsonProperty("applicationId")
     private String applicationId;
 
-    @JsonProperty("last_error_message")
+    @JsonProperty("lastErrorMessage")
     private String lastErrorMessage;
 
     public String getApplicationId() {

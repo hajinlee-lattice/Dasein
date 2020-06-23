@@ -65,7 +65,7 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
         recipientList.add("test@test.com");
 
         projectService.updateRecipientList(mainCustomerSpace, details.getProjectId(), recipientList);
-        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId());
+        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId(), Boolean.FALSE);
         Assert.assertNotNull(details.getRecipientList());
         Assert.assertEquals(details.getRecipientList().size(), 2);
 

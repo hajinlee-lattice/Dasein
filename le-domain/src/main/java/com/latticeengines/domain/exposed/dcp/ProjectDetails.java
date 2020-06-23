@@ -13,16 +13,19 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ProjectDetails {
 
-    @JsonProperty("project_id")
+    @JsonProperty("projectId")
     private String projectId;
 
-    @JsonProperty("project_display_name")
+    @JsonProperty("projectDisplayName")
     private String projectDisplayName;
 
-    @JsonProperty("project_root_path")
+    @JsonProperty("projectRelativePath")
     private String projectRootPath;
 
-    @JsonProperty("drop_folder_access")
+    @JsonProperty("projectFullPath")
+    private String projectFullPath;
+
+    @JsonProperty("dropFolderAccess")
     private GrantDropBoxAccessResponse dropFolderAccess;
 
     @JsonProperty("archived")
@@ -31,7 +34,7 @@ public class ProjectDetails {
     @JsonProperty("sources")
     private List<Source> sources;
 
-    @JsonProperty("recipient_list")
+    @JsonProperty("recipientList")
     private List<String> recipientList;
 
     @JsonProperty("created")
@@ -40,7 +43,7 @@ public class ProjectDetails {
     @JsonProperty("updated")
     private Long updated;
 
-    @JsonProperty("created_by")
+    @JsonProperty("createdBy")
     private String createdBy;
 
     public String getProjectId() {
@@ -65,6 +68,14 @@ public class ProjectDetails {
 
     public void setProjectRootPath(String projectRootPath) {
         this.projectRootPath = projectRootPath;
+    }
+
+    public String getProjectFullPath() {
+        return projectFullPath;
+    }
+
+    public void setProjectFullPath(String projectFullPath) {
+        this.projectFullPath = projectFullPath;
     }
 
     public GrantDropBoxAccessResponse getDropFolderAccess() {
