@@ -82,4 +82,11 @@ public class ValidateFieldDefinitionsResponse extends FieldDefinitionsRecord {
         }
         return messages.toString();
     }
+
+    public String toString() {
+        String output = super.toString();
+        output += "validationResult: " + validationResult.toString() + "\n";
+        output += "fieldValidationMessagesMap:\n" + validationMessagesToString();
+        return output;
+    }
 }
