@@ -57,7 +57,7 @@ public class AccountMasterRebuildRefreshTestNG extends PipelineTransformationTes
     @Inject
     private DataCloudVersionService dataCloudVersionService;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testTransformation() {
         prepareBaseSources();
         prepareKeyMap();
