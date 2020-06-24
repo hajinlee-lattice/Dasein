@@ -29,22 +29,22 @@ import com.google.common.base.Preconditions;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataReport {
 
-    @JsonProperty("basic_stats")
+    @JsonProperty("basicStats")
     private BasicStats basicStats;
 
-    @JsonProperty("input_presence_report")
+    @JsonProperty("inputPresenceReport")
     private InputPresenceReport inputPresenceReport;
 
-    @JsonProperty("geo_distribution_report")
+    @JsonProperty("geoDistributionReport")
     private GeoDistributionReport geoDistributionReport;
 
-    @JsonProperty("match_to_duns_report")
+    @JsonProperty("matchToDunsReport")
     private MatchToDUNSReport matchToDUNSReport;
 
-    @JsonProperty("duplication_report")
+    @JsonProperty("duplicationReport")
     private DuplicationReport duplicationReport;
 
-    @JsonProperty("refresh_timestamp")
+    @JsonProperty("refreshRimestamp")
     private Long refreshTimestamp;
 
     public BasicStats getBasicStats() {
@@ -100,22 +100,22 @@ public class DataReport {
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
     public static class BasicStats {
 
-        @JsonProperty("total_submitted")
+        @JsonProperty("totalSubmitted")
         private Long totalSubmitted;
 
-        @JsonProperty("success_cnt")
+        @JsonProperty("successCnt")
         private Long successCnt;
 
-        @JsonProperty("error_cnt")
+        @JsonProperty("errorCnt")
         private Long errorCnt;
 
-        @JsonProperty("matched_cnt")
+        @JsonProperty("matchedCnt")
         private Long matchedCnt;
 
-        @JsonProperty("pending_review_cnt")
+        @JsonProperty("pendingReviewCnt")
         private Long pendingReviewCnt;
 
-        @JsonProperty("unmatched_cnt")
+        @JsonProperty("unmatchedCnt")
         private Long unmatchedCnt;
 
         public Long getTotalSubmitted() {
@@ -183,7 +183,7 @@ public class DataReport {
             this.presenceMap = presenceMap;
         }
 
-        @JsonProperty("input_presence_list")
+        @JsonProperty("inputPresenceList")
         public List<PresenceItem> getPresenceList() {
             if (MapUtils.isNotEmpty(presenceMap)) {
                 List<PresenceItem> presenceList = new ArrayList<>(presenceMap.values());
@@ -194,7 +194,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("input_presence_list")
+        @JsonProperty("inputPresenceList")
         public void setPresenceList(List<PresenceItem> presenceList) {
             if (CollectionUtils.isNotEmpty(presenceList)) {
                 presenceMap = presenceList.stream().collect(Collectors.toMap(PresenceItem::getField, item -> item));
@@ -276,7 +276,7 @@ public class DataReport {
             this.geographicalDistributionMap = geographicalDistributionMap;
         }
 
-        @JsonProperty("geo_distribution_list")
+        @JsonProperty("geoDistributionList")
         public List<GeographicalItem> getGeographicalDistributionList() {
             if (MapUtils.isNotEmpty(geographicalDistributionMap)) {
                 List<GeographicalItem> geoDistributionList = new ArrayList<>(geographicalDistributionMap.values());
@@ -287,7 +287,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("geo_distribution_list")
+        @JsonProperty("geoDistributionList")
         public void setGeographicalDistributionList(List<GeographicalItem> geographicalItems) {
             if (CollectionUtils.isNotEmpty(geographicalItems)) {
                 geographicalDistributionMap =
@@ -321,10 +321,10 @@ public class DataReport {
         @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
         public static class GeographicalItem {
 
-            @JsonProperty("geo_code")
+            @JsonProperty("geoCode")
             private String geoCode;
 
-            @JsonProperty("geo_name")
+            @JsonProperty("geoName")
             private String geoName;
 
             @JsonProperty("count")
@@ -378,7 +378,7 @@ public class DataReport {
         @JsonProperty("unmatched")
         private Long unmatched;
 
-        @JsonProperty("no_match_cnt")
+        @JsonProperty("noMatchCnt")
         private Long noMatchCnt;
 
         private Map<Integer, ConfidenceItem> confidenceRateMap;
@@ -415,7 +415,7 @@ public class DataReport {
             this.confidenceRateMap = confidenceRateMap;
         }
 
-        @JsonProperty("confidence_rate_list")
+        @JsonProperty("confidenceRateList")
         public List<ConfidenceItem> getConfidenceRateList() {
             if (MapUtils.isNotEmpty(confidenceRateMap)) {
                 List<ConfidenceItem> confidenceRateList = new ArrayList<>(confidenceRateMap.values());
@@ -426,7 +426,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("confidence_rate_list")
+        @JsonProperty("confidenceRateList")
         public void setConfidenceRateList(List<ConfidenceItem> confidenceItems) {
             if (CollectionUtils.isNotEmpty(confidenceItems)) {
                 confidenceRateMap =
@@ -459,7 +459,7 @@ public class DataReport {
             confidenceRateMap.put(confidenceCode, confidenceItem);
         }
 
-        @JsonProperty("matched_rate")
+        @JsonProperty("matchedRate")
         public double getMatchedRate() {
             double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
@@ -471,7 +471,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("unmatched_rate")
+        @JsonProperty("unmatchedRate")
         public double getUnmatchedRate() {
             double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
@@ -483,7 +483,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("no_match_rate")
+        @JsonProperty("noMatchRate")
         public double getNoMatchRate() {
             double matchedCnt = matched != null ? matched.doubleValue() : 0.0;
             double unmatchedCnt = unmatched != null ? unmatched.doubleValue() : 0.0;
@@ -501,7 +501,7 @@ public class DataReport {
         @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
         public static class ConfidenceItem {
 
-            @JsonProperty("confidence_code")
+            @JsonProperty("confidenceCode")
             private Integer confidenceCode;
 
             @JsonProperty("count")
@@ -556,13 +556,13 @@ public class DataReport {
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
     public static class DuplicationReport {
 
-        @JsonProperty("unique_records")
+        @JsonProperty("uniqueRecords")
         private Long uniqueRecords;
 
-        @JsonProperty("duplicate_records")
+        @JsonProperty("duplicateRecords")
         private Long duplicateRecords;
 
-        @JsonProperty("distinct_records")
+        @JsonProperty("distinctRecords")
         private Long distinctRecords;
 
         public Long getUniqueRecords() {
@@ -589,7 +589,7 @@ public class DataReport {
             this.distinctRecords = distinctRecords;
         }
 
-        @JsonProperty("unique_rate")
+        @JsonProperty("uniqueRate")
         public double getUniqueRate() {
             double unique = uniqueRecords != null ? uniqueRecords.doubleValue() : 0.0;
             double duplicate = duplicateRecords != null ? duplicateRecords.doubleValue() : 0.0;
@@ -601,7 +601,7 @@ public class DataReport {
             }
         }
 
-        @JsonProperty("duplicate_rate")
+        @JsonProperty("duplicateRate")
         public double getDuplicateRate() {
             return getScaledDouble(100 - getUniqueRate());
         }
