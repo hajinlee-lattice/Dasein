@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -32,6 +35,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
@@ -44,6 +48,9 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
 
     // The date format pattern desired by the UI for Last Data Refresh Attribute field.
     private static final DateTimeFormatter REFRESH_DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+
+    @Inject
+    protected CDLProxy cdlProxy;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -229,5 +236,17 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         boolean migrationMode = MigrationTrack.Status.STARTED.equals(status);
         log.info("Migration mode is {}", migrationMode ? "on" : "off");
         return migrationMode;
+    }
+
+    /*-
+     * system name -> system object
+     */
+    protected Map<String, S3ImportSystem> getSystemMap() {
+        List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace.toString());
+        return CollectionUtils.emptyIfNull(systems) //
+                .stream() //
+                .filter(Objects::nonNull) //
+                .filter(sys -> StringUtils.isNotBlank(sys.getName())) //
+                .collect(Collectors.toMap(S3ImportSystem::getName, sys -> sys));
     }
 }
