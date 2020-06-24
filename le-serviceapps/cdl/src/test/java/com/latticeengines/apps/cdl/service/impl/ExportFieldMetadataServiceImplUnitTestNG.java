@@ -30,7 +30,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
     private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
     private List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
-    private List<ExportFieldMetadataDefaults> defaultGoogleExportFields;
+    private List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -73,6 +73,14 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
             defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
         } else {
             defaultOutreachExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Outreach);
+        }
+
+        defaultGoogleAdsExportFields = exportService.getAllAttributes(CDLExternalSystemName.GoogleAds);
+
+        if (defaultGoogleAdsExportFields.size() == 0) {
+            defaultGoogleAdsExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
+        } else {
+            defaultGoogleAdsExportFields = updateFieldMetadataDefault(CDLExternalSystemName.GoogleAds);
         }
 
     }
@@ -171,6 +179,19 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 34);
         assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 11);
+
+    }
+
+    @Test(groups = "functional")
+    public void testGoogleAds() {
+        defaultGoogleAdsExportFields = exportService.getAllAttributes(CDLExternalSystemName.GoogleAds);
+
+        assertEquals(defaultFacebookExportFields.size(), 41);
+        assertEquals(
+                defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
+                34);
+        assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
+                10);
 
     }
 

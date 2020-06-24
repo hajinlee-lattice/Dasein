@@ -6,7 +6,7 @@
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
   },
   {
@@ -56,7 +56,7 @@
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
   },
   {
@@ -348,7 +348,7 @@
     "externalSystemName": "GoogleAds",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": true
   },
   
   {
