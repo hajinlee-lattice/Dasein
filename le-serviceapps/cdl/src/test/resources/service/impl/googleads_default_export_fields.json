@@ -1,12 +1,12 @@
 [
   {
-    "attrName": "Country",
+    "attrName": "ContactCountry",
     "displayName": "Contact Country",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
   },
   {
@@ -50,13 +50,13 @@
     "historyEnabled": true
   },
   {
-    "attrName": "PostalCode",
+    "attrName": "ContactPostalCode",
     "displayName": "Contact Zip Code",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
   },
   {
@@ -342,13 +342,24 @@
 
   {
     "attrName": "Address_Street_1",
-    "displayName": "Contact Address",
+    "displayName": "Address Street 1",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
+  },
+  
+  {
+    "attrName": "Address_Street_2",
+    "displayName": "Address Street 2",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "GoogleAds",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": false
   },
 
   {
@@ -358,7 +369,7 @@
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
   },
 
@@ -380,7 +391,7 @@
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true
   },
   {
