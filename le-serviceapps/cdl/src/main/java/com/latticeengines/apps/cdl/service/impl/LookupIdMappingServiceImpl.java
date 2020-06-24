@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.remote.exposed.service.tray.TrayService;
@@ -188,16 +188,17 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     }
 
     @Override
-    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(CDLExternalSystemType externalSystemType) {
+    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIdsByAudienceType(
+            CDLExternalSystemType externalSystemType, AudienceType audienceType) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
         Map<String, List<CDLExternalSystemMapping>> result;
         try {
             if (externalSystemType == null) {
-                result = externalSystemService.getExternalSystemMap(space.toString(), BusinessEntity.Account);
+                result = externalSystemService.getExternalSystemMap(space.toString(), audienceType.asBusinessEntity());
             } else {
                 result = new HashMap<>();
                 result.put(externalSystemType.name(), externalSystemService.getExternalSystemByType( //
-                        space.toString(), externalSystemType, BusinessEntity.Account));
+                        space.toString(), externalSystemType, audienceType.asBusinessEntity()));
             }
         } catch (Exception ex) {
             result = new HashMap<>();
