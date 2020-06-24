@@ -30,6 +30,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
     private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
     private List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
+    private List<ExportFieldMetadataDefaults> defaultGoogleExportFields;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

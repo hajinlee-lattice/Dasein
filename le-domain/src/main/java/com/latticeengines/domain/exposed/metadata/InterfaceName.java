@@ -62,7 +62,9 @@ public enum InterfaceName {
     City, //
     State, //
     PostalCode, //
+    ContactPostalCode, //
     Country, //
+    ContactCountry, //
     PhoneNumber, //
     Address_Street_1, //
     Address_Street_2,
@@ -74,7 +76,7 @@ public enum InterfaceName {
     LeadSource, //
     IsClosed, //
     StageName, //
-    StageNameId,//
+    StageNameId, //
     AnnualRevenue, //
     NumberOfEmployees, //
     YearStarted, //
@@ -84,8 +86,7 @@ public enum InterfaceName {
     TransactionDate, //
     TransactionDayPeriod, //
     __StreamDateId, // legacy partition key
-    StreamDateId,
-    __StreamDate, //
+    StreamDateId, __StreamDate, //
     TransactionCount, //
     Quantity, //
     TotalQuantity, //
@@ -122,7 +123,7 @@ public enum InterfaceName {
     CDLBatchSource, // indicator if the source contribute the system batch
 
     CDLTemplateName, CDLCreatedTemplate,
-                       // store
+    // store
 
     ConsolidateReport, //
 
@@ -153,7 +154,7 @@ public enum InterfaceName {
     // Eloqua Activity
     ActivityType,
 
-    //Marketing Activity
+    // Marketing Activity
     ActivityDate, ActivityTypeId,
 
     OpportunityId,
