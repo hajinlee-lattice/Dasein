@@ -124,4 +124,19 @@ public interface CDLService {
                                            String systemName, EntityType entityType);
 
     List<ImportFileInfo> getAllImportFiles(String customerSpace);
+
+    /**
+     *
+     * @param customerSpace Identify current tenant.
+     * @param feedType DataFeedTask.FeedType
+     */
+    void resetTemplate(String customerSpace, String feedType, Boolean forceReset);
+
+    /**
+     *
+     * @param customerSpace Identify current tenant.
+     * @param systemList The full system list, and system priority will be calculated based on the sequence.
+     * @return true if validate pass and priority updated.
+     */
+    boolean validateAndUpdateS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList);
 }

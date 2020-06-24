@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -419,5 +420,30 @@ public class DataFeedTaskController {
             log.error("Stack trace is: {}", stacktrace);
             return ResponseDocument.failedResponse(e);
         }
+    }
+
+    @PostMapping("/resetTemplate")
+    @ResponseBody
+    @ApiOperation(value = "Reset template")
+    public ResponseDocument<Boolean> resetTemplate(@PathVariable String customerSpace,
+                                                   @RequestParam(value = "source") String source,
+                                                   @RequestParam(value = "feedType") String feedType,
+                                                   @RequestParam(value = "forceReset", required = false,
+                                                           defaultValue = "false") Boolean forceReset) {
+        if (!dataFeedTaskTemplateService.resetTemplate(customerSpace, source, feedType, forceReset)) {
+            return ResponseDocument.failedResponse(new IllegalArgumentException(
+                    String.format("Cannot find the template (source %s, feedType %s) to reset", source, feedType)));
+        } else {
+            return ResponseDocument.successResponse(Boolean.TRUE);
+        }
+    }
+
+    @GetMapping("/hasPAConsumedImportAction")
+    @ResponseBody
+    @ApiOperation(value = "Reset template")
+    public boolean hasPAConsumedImportAction(@PathVariable String customerSpace,
+                         @RequestParam(value = "source") String source,
+                         @RequestParam(value = "feedType") String feedType) {
+        return dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, source, feedType);
     }
 }

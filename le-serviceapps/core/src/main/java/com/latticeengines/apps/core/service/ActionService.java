@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
+import com.latticeengines.domain.exposed.pls.ActionType;
 
 public interface ActionService {
 
@@ -34,4 +35,9 @@ public interface ActionService {
     List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus);
 
     void registerAction(Action action, String user);
+
+    List<Long> findPidByTypeAndConfigAndOwnerType(ActionType actionType, String ownerType, String partialConfig);
+
+    List<Long> findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType actionType, ActionStatus actionStatus,
+                                                           String partialConfig);
 }
