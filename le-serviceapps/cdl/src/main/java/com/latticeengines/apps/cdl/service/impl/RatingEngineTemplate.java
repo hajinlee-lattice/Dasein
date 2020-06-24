@@ -78,6 +78,7 @@ abstract class RatingEngineTemplate {
         ratingEngineSummary.setId(ratingEngine.getId());
         ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
         ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
+        ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
         return ratingEngineSummary;
     }
 
