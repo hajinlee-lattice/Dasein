@@ -28,7 +28,7 @@ public interface ActionRepository extends BaseJpaRepository<Action, Long> {
     List<Action> findByOwnerIdAndActionStatus(@NonNull Long ownerId, ActionStatus actionStatus);
 
     @Query("SELECT a.pid FROM Action a JOIN WorkflowJob wj ON a.ownerId = wj.pid " +
-            "WHERE a.type = :actionType AND wj.TYPE = :workflowType AND a.actionConfiguration LIKE %:partialConfig%")
+            "WHERE a.type = :actionType AND wj.type = :workflowType AND a.actionConfiguration LIKE %:partialConfig%")
     List<Object[]> findActionPidByActionTypeAndOwnerWorkflowType(@Param("actionType") ActionType actionType,
                                                                  @Param("workflowType") String workflowType,
                                                                  @Param("partialConfig") String partialConfig);
