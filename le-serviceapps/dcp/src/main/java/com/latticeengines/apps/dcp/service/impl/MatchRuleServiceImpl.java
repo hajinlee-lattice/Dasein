@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -22,6 +24,8 @@ import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
 import com.latticeengines.redis.lock.RedisDistributedLock;
+
+import io.micrometer.core.instrument.util.StringUtils;
 
 @Service("matchRuleService")
 public class MatchRuleServiceImpl implements MatchRuleService {
@@ -36,44 +40,69 @@ public class MatchRuleServiceImpl implements MatchRuleService {
     @Inject
     private RedisDistributedLock redisDistributedLock;
 
+    @Value("${dcp.lock.namespace}")
+    private String lockNameSpace;
+
     @Override
     public MatchRule updateMatchRule(String customerSpace, MatchRule matchRule) {
-        if (matchRule == null) {
-            throw new IllegalArgumentException("Cannot update NULL match rule!");
+        Preconditions.checkNotNull(matchRule);
+        if (StringUtils.isEmpty(matchRule.getMatchRuleId())) {
+            throw new IllegalArgumentException("Cannot update match rule without matchRuleId!");
         }
-        MatchRuleRecord matchRuleRecord = matchRuleEntityMgr.findTopActiveMatchRule(matchRule.getMatchRuleId());
-        if (matchRuleRecord == null) {
-            throw new IllegalArgumentException("Cannot find active match rule to update with id: " + matchRule.getMatchRuleId());
+        String lockKey = getLockKey("", matchRule.getMatchRuleId(), false);
+        String requestId = UUID.randomUUID().toString();
+        if (redisDistributedLock.lock(lockKey, requestId, 30000, true)) {
+            try {
+                MatchRuleRecord matchRuleRecord = matchRuleEntityMgr.findTopActiveMatchRule(matchRule.getMatchRuleId());
+                if (matchRuleRecord == null) {
+                    throw new IllegalArgumentException("Cannot find active match rule to update with id: " + matchRule.getMatchRuleId());
+                }
+                if (!matchRuleRecord.getSourceId().equals(matchRule.getSourceId())) {
+                    throw new IllegalArgumentException(String.format("Cannot update Match Rule from source %s to source %s",
+                            matchRuleRecord.getSourceId(), matchRule.getSourceId()));
+                }
+                Pair<Boolean, Boolean> pair = onlyDisplayNameChange(matchRuleRecord, matchRule);
+                if (pair.getLeft()) {
+                    matchRuleEntityMgr.updateMatchRule(matchRule.getMatchRuleId(), matchRule.getDisplayName());
+                }
+                if (pair.getRight()) {
+                    // update top record to INACTIVE
+                    matchRuleRecord.setState(MatchRuleRecord.State.INACTIVE);
+                    matchRuleEntityMgr.update(matchRuleRecord);
+
+                    // create new Active record
+                    MatchRuleRecord newRecord = new MatchRuleRecord();
+                    newRecord.setMatchRuleId(matchRule.getMatchRuleId());
+                    newRecord.setSourceId(matchRule.getSourceId());
+                    newRecord.setDisplayName(matchRule.getDisplayName());
+                    newRecord.setRuleType(matchRule.getRuleType());
+                    newRecord.setMatchKey(matchRule.getMatchKey());
+                    newRecord.setAllowedValues(matchRule.getAllowedValues());
+                    newRecord.setExclusionCriterionList(matchRule.getExclusionCriterionList());
+                    newRecord.setAcceptCriterion(matchRule.getAcceptCriterion());
+                    newRecord.setReviewCriterion(matchRule.getReviewCriterion());
+
+                    newRecord.setVersionId(matchRuleRecord.getVersionId() + 1);
+                    newRecord.setState(MatchRuleRecord.State.ACTIVE);
+
+                    matchRuleEntityMgr.create(newRecord);
+                    return convertMatchRuleRecord(newRecord);
+
+                }
+                return convertMatchRuleRecord(matchRuleRecord);
+            } finally {
+                redisDistributedLock.releaseLock(lockKey, requestId);
+            }
         }
-        Pair<Boolean, Boolean> pair = onlyDisplayNameChange(matchRuleRecord, matchRule);
-        if (pair.getLeft()) {
-            matchRuleEntityMgr.updateMatchRule(matchRule.getMatchRuleId(), matchRule.getDisplayName());
+        throw new RuntimeException("Cannot get update lock, please try again later.");
+    }
+
+    private String getLockKey(String sourceId, String matchRuleId, boolean create) {
+        if (create) {
+            return lockNameSpace + "." + sourceId;
+        } else {
+            return lockNameSpace + "." + matchRuleId;
         }
-        if (pair.getRight()) {
-            // update top record to INACTIVE
-            matchRuleRecord.setState(MatchRuleRecord.State.INACTIVE);
-            matchRuleEntityMgr.update(matchRuleRecord);
-
-            // create new Active record
-            MatchRuleRecord newRecord = new MatchRuleRecord();
-            newRecord.setMatchRuleId(matchRule.getMatchRuleId());
-            newRecord.setSourceId(matchRule.getSourceId());
-            newRecord.setDisplayName(matchRule.getDisplayName());
-            newRecord.setRuleType(matchRule.getRuleType());
-            newRecord.setMatchKey(matchRule.getMatchKey());
-            newRecord.setAllowedValues(matchRule.getAllowedValues());
-            newRecord.setExclusionCriterionList(matchRule.getExclusionCriterionList());
-            newRecord.setAcceptCriterion(matchRule.getAcceptCriterion());
-            newRecord.setReviewCriterion(matchRule.getReviewCriterion());
-
-            newRecord.setVersionId(matchRuleRecord.getVersionId() + 1);
-            newRecord.setState(MatchRuleRecord.State.ACTIVE);
-
-            matchRuleEntityMgr.create(newRecord);
-            return convertMatchRuleRecord(newRecord);
-
-        }
-        return convertMatchRuleRecord(matchRuleRecord);
     }
 
     // Left : displayName change, right: other fields change.
@@ -135,27 +164,39 @@ public class MatchRuleServiceImpl implements MatchRuleService {
     @Override
     public MatchRule createMatchRule(String customerSpace, MatchRule matchRule) {
         Preconditions.checkNotNull(matchRule);
-        if (MatchRuleRecord.RuleType.BASE_RULE.equals(matchRule.getRuleType())) {
-            if (matchRuleEntityMgr.existMatchRule(matchRule.getSourceId(), matchRule.getRuleType())) {
-                throw new IllegalArgumentException("Already has an active Base Match Rule, cannot create a new one!");
+        if (StringUtils.isEmpty(matchRule.getSourceId())) {
+            throw new IllegalArgumentException("Cannot create Match Rule without source!");
+        }
+        String lockKey = getLockKey(matchRule.getSourceId(), "", true);
+        String requestId = UUID.randomUUID().toString();
+        if (redisDistributedLock.lock(lockKey, requestId, 30000, true)) {
+            try {
+                if (MatchRuleRecord.RuleType.BASE_RULE.equals(matchRule.getRuleType())) {
+                    if (matchRuleEntityMgr.existMatchRule(matchRule.getSourceId(), matchRule.getRuleType())) {
+                        throw new IllegalArgumentException("Already has an active Base Match Rule, cannot create a new one!");
+                    }
+                }
+                MatchRuleRecord matchRuleRecord = new MatchRuleRecord();
+                matchRuleRecord.setSourceId(matchRule.getSourceId());
+                matchRuleRecord.setDisplayName(matchRule.getDisplayName());
+                matchRuleRecord.setRuleType(matchRule.getRuleType());
+                matchRuleRecord.setMatchKey(matchRule.getMatchKey());
+                matchRuleRecord.setAllowedValues(matchRule.getAllowedValues());
+                matchRuleRecord.setExclusionCriterionList(matchRule.getExclusionCriterionList());
+                matchRuleRecord.setAcceptCriterion(matchRule.getAcceptCriterion());
+                matchRuleRecord.setReviewCriterion(matchRule.getReviewCriterion());
+
+                matchRuleRecord.setMatchRuleId(generateRandomMatchRuleId());
+                matchRuleRecord.setVersionId(1);
+                matchRuleRecord.setState(MatchRuleRecord.State.ACTIVE);
+
+                matchRuleEntityMgr.create(matchRuleRecord);
+                return convertMatchRuleRecord(matchRuleRecord);
+            } finally {
+                redisDistributedLock.releaseLock(lockKey, requestId);
             }
         }
-        MatchRuleRecord matchRuleRecord = new MatchRuleRecord();
-        matchRuleRecord.setSourceId(matchRule.getSourceId());
-        matchRuleRecord.setDisplayName(matchRule.getDisplayName());
-        matchRuleRecord.setRuleType(matchRule.getRuleType());
-        matchRuleRecord.setMatchKey(matchRule.getMatchKey());
-        matchRuleRecord.setAllowedValues(matchRule.getAllowedValues());
-        matchRuleRecord.setExclusionCriterionList(matchRule.getExclusionCriterionList());
-        matchRuleRecord.setAcceptCriterion(matchRule.getAcceptCriterion());
-        matchRuleRecord.setReviewCriterion(matchRule.getReviewCriterion());
-
-        matchRuleRecord.setMatchRuleId(generateRandomMatchRuleId());
-        matchRuleRecord.setVersionId(1);
-        matchRuleRecord.setState(MatchRuleRecord.State.ACTIVE);
-
-        matchRuleEntityMgr.create(matchRuleRecord);
-        return convertMatchRuleRecord(matchRuleRecord);
+        throw new RuntimeException("Cannot get create lock, please try again later.");
     }
 
     @Override
