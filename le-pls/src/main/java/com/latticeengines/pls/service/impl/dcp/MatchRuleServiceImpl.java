@@ -58,16 +58,15 @@ public class MatchRuleServiceImpl implements MatchRuleService {
     private List<MatchRule> getMockMatchRuleList(String sourceId) {
         MatchRule mockRule1 = new MatchRule();
         mockRule1.setSourceId(sourceId);
-        mockRule1.setDisplayName("MatchRule 1");
+        mockRule1.setDisplayName("Match Rule 1");
         mockRule1.setRuleType(MatchRuleRecord.RuleType.BASE_RULE);
-        mockRule1.setMatchKey(MatchKey.Country);
-        mockRule1.setAllowedValues(Arrays.asList("UK", "USA"));
+
         mockRule1.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.OutOfBusiness));
-        DplusMatchRule dplusMatchRule = new DplusMatchRule(8, 10, Arrays.asList("A", "B"))
+        DplusMatchRule dplusMatchRule = new DplusMatchRule(8, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(4, 6, Arrays.asList("C", "D"));
 
         mockRule1.setAcceptCriterion(dplusMatchRule.getAcceptCriterion());
-        mockRule1.setReviewCriterion(dplusMatchRule.getReviewCriterion());
+
 
         mockRule1.setMatchRuleId(String.format("MatchRule_%s",
                 RandomStringUtils.randomAlphanumeric(8).toLowerCase()));
@@ -76,16 +75,15 @@ public class MatchRuleServiceImpl implements MatchRuleService {
 
         MatchRule mockRule2 = new MatchRule();
         mockRule2.setSourceId(sourceId);
-        mockRule2.setDisplayName("MatchRule 2");
+        mockRule2.setDisplayName("Match Rule 2");
         mockRule2.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
         mockRule2.setMatchKey(MatchKey.DUNS);
         mockRule2.setAllowedValues(Arrays.asList("112233", "123123"));
         mockRule2.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
-        DplusMatchRule dplusMatchRule2 = new DplusMatchRule(4, 9, Arrays.asList("A", "B"))
+        DplusMatchRule dplusMatchRule2 = new DplusMatchRule(4, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(1, 10, Arrays.asList("C", "D"));
 
         mockRule2.setAcceptCriterion(dplusMatchRule2.getAcceptCriterion());
-        mockRule2.setReviewCriterion(dplusMatchRule2.getReviewCriterion());
 
         mockRule2.setMatchRuleId(String.format("MatchRule_%s",
                 RandomStringUtils.randomAlphanumeric(8).toLowerCase()));

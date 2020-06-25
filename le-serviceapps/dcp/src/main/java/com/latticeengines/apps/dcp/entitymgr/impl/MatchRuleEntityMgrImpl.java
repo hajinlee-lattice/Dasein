@@ -68,6 +68,12 @@ public class MatchRuleEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<MatchRuleRecord> findMatchRules(String sourceId, List<MatchRuleRecord.State> states) {
+        return getReadOrWriteRepository().findBySourceIdAndStates(sourceId, states);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean existMatchRule(String matchRuleId) {
         return getReadOrWriteRepository().existsByMatchRuleId(matchRuleId);
     }

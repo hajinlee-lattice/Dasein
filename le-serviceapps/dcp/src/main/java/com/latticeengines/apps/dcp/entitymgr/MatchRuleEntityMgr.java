@@ -11,7 +11,7 @@ public interface MatchRuleEntityMgr extends BaseEntityMgrRepository<MatchRuleRec
 
     List<MatchRuleRecord> findMatchRules(String sourceId, MatchRuleRecord.State state);
 
-//    MatchRuleRecord findActiveBaseMatchRule(String sourceId);
+    List<MatchRuleRecord> findMatchRules(String sourceId, List<MatchRuleRecord.State> states);
 
     boolean existMatchRule(String matchRuleId);
 

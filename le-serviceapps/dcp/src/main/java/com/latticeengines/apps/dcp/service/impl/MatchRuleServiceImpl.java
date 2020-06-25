@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -159,27 +160,25 @@ public class MatchRuleServiceImpl implements MatchRuleService {
 
     @Override
     public List<MatchRule> getMatchRuleList(String customerSpace, String sourceId, Boolean includeArchived, Boolean includeInactive) {
-        List<MatchRuleRecord> activeMatchRules = matchRuleEntityMgr.findMatchRules(sourceId,
-                MatchRuleRecord.State.ACTIVE);
-        List<MatchRuleRecord> inactiveMatchRules = null;
+        List<MatchRuleRecord.State> states = new ArrayList<>();
+        states.add(MatchRuleRecord.State.ACTIVE);
         if (Boolean.TRUE.equals(includeArchived)) {
-            inactiveMatchRules = matchRuleEntityMgr.findMatchRules(sourceId, MatchRuleRecord.State.INACTIVE);
+            states.add(MatchRuleRecord.State.INACTIVE);
         }
-        List<MatchRuleRecord> archivedMatchRules = null;
         if (Boolean.TRUE.equals(includeArchived)) {
-            archivedMatchRules = matchRuleEntityMgr.findMatchRules(sourceId, MatchRuleRecord.State.ARCHIVED);
+            states.add(MatchRuleRecord.State.ARCHIVED);
         }
-        List<MatchRule> result = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(activeMatchRules)) {
-            activeMatchRules.forEach(record -> result.add(convertMatchRuleRecord(record)));
+        List<MatchRuleRecord> matchRuleRecords;
+        if (states.size() == 1) {
+            matchRuleRecords = matchRuleEntityMgr.findMatchRules(sourceId, states.get(0));
+        } else {
+            matchRuleRecords = matchRuleEntityMgr.findMatchRules(sourceId, states);
         }
-        if (CollectionUtils.isNotEmpty(inactiveMatchRules)) {
-            inactiveMatchRules.forEach(record -> result.add(convertMatchRuleRecord(record)));
+        if (CollectionUtils.isEmpty(matchRuleRecords)) {
+            return Collections.emptyList();
+        } else {
+            return matchRuleRecords.stream().map(this::convertMatchRuleRecord).collect(Collectors.toList());
         }
-        if (CollectionUtils.isNotEmpty(archivedMatchRules)) {
-            archivedMatchRules.forEach(record -> result.add(convertMatchRuleRecord(record)));
-        }
-        return result;
     }
 
     @Override
