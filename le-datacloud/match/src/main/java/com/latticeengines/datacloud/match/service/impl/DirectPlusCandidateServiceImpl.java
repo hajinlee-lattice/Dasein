@@ -68,7 +68,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<String> candidateOutputFields() {
         // hard coded for now, need to in sync with SplitImportMatchResult
         return Arrays.asList(
-                "DunsNumber",
+                "MatchedDuns",
                 "ConfidenceCode",
                 "MatchGrade",
                 "MatchDataProfile",
@@ -80,7 +80,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<Pair<String, Class<?>>> candidateSchema() {
         return Arrays.asList( //
-                Pair.of("DunsNumber", String.class), //
+                Pair.of("MatchedDuns", String.class), //
                 Pair.of("ConfidenceCode", Integer.class), //
                 Pair.of("MatchGrade", String.class), //
                 Pair.of("MatchDataProfile", String.class), //

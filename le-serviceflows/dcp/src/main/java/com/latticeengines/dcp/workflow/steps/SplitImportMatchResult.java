@@ -235,7 +235,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     // to be changed to metadata driven
     public Map<String, String> candidateFieldDisplayNames() {
         Map<String, String> dispNames = new HashMap<>();
-        dispNames.put("DunsNumber", "D-U-N-S Number");
+        dispNames.put("MatchedDuns", "Matched D-U-N-S Number");
         dispNames.put("ConfidenceCode", "Confidence Code");
         dispNames.put("MatchGrade", "Match Grade");
         dispNames.put("MatchDataProfile", "Match Data Profile");
@@ -247,6 +247,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     // to be changed to metadata driven
     public Map<String, String> dataBlockFieldDisplayNames() {
         Map<String, String> dispNames = new HashMap<>();
+        dispNames.put("DunsNumber", "D-U-N-S Number");
         dispNames.put("PrimaryBusinessName", "Primary Business Name");
         dispNames.put("TradeStyleName", "Trade Style Name");
         dispNames.put("PrimaryAddressStreetLine1", "Primary Address Street Line 1");
@@ -255,7 +256,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         dispNames.put("PrimaryAddressRegionName", "Primary Address Region Name");
         dispNames.put("PrimaryAddressPostalCode", "Primary Address Postal Code");
         dispNames.put("PrimaryAddressCountyName", "Primary Address County Name");
-        dispNames.put("TelephoneNumber", "Telephone Numbe");
+        dispNames.put("TelephoneNumber", "Telephone Number");
         dispNames.put("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code");
         return dispNames;
     }

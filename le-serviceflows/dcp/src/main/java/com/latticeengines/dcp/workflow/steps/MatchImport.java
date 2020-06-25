@@ -68,6 +68,7 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     //FIXME: in alpha release, use a hard coded enrich list
     private List<String> getDCPEnrichAttrs() {
         return Arrays.asList(
+                "DunsNumber",
                 "PrimaryBusinessName",
                 "TradeStyleName",
                 "PrimaryAddressStreetLine1",
