@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.dcp.entitymgr.MatchRuleEntityMgr;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
 import com.latticeengines.redis.lock.RedisDistributedLock;
-
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Service("matchRuleService")
 public class MatchRuleServiceImpl implements MatchRuleService {
@@ -64,6 +64,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                 Pair<Boolean, Boolean> pair = onlyDisplayNameChange(matchRuleRecord, matchRule);
                 if (pair.getLeft()) {
                     matchRuleEntityMgr.updateMatchRule(matchRule.getMatchRuleId(), matchRule.getDisplayName());
+                    matchRuleRecord.setDisplayName(matchRule.getDisplayName());
                 }
                 if (pair.getRight()) {
                     // update top record to INACTIVE
@@ -84,6 +85,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
 
                     newRecord.setVersionId(matchRuleRecord.getVersionId() + 1);
                     newRecord.setState(MatchRuleRecord.State.ACTIVE);
+
+                    newRecord.setTenant(MultiTenantContext.getTenant());
 
                     matchRuleEntityMgr.create(newRecord);
                     return convertMatchRuleRecord(newRecord);
@@ -189,6 +192,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                 matchRuleRecord.setMatchRuleId(generateRandomMatchRuleId());
                 matchRuleRecord.setVersionId(1);
                 matchRuleRecord.setState(MatchRuleRecord.State.ACTIVE);
+                matchRuleRecord.setTenant(MultiTenantContext.getTenant());
 
                 matchRuleEntityMgr.create(matchRuleRecord);
                 return convertMatchRuleRecord(matchRuleRecord);
@@ -203,7 +207,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
     public List<MatchRule> getMatchRuleList(String customerSpace, String sourceId, Boolean includeArchived, Boolean includeInactive) {
         List<MatchRuleRecord.State> states = new ArrayList<>();
         states.add(MatchRuleRecord.State.ACTIVE);
-        if (Boolean.TRUE.equals(includeArchived)) {
+        if (Boolean.TRUE.equals(includeInactive)) {
             states.add(MatchRuleRecord.State.INACTIVE);
         }
         if (Boolean.TRUE.equals(includeArchived)) {

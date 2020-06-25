@@ -77,8 +77,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         mockRule2.setSourceId(sourceId);
         mockRule2.setDisplayName("Match Rule 2");
         mockRule2.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
-        mockRule2.setMatchKey(MatchKey.DUNS);
-        mockRule2.setAllowedValues(Arrays.asList("112233", "123123"));
+        mockRule2.setMatchKey(MatchKey.Country);
+        mockRule2.setAllowedValues(Arrays.asList("USA", "UK"));
         mockRule2.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
         DplusMatchRule dplusMatchRule2 = new DplusMatchRule(4, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(1, 10, Arrays.asList("C", "D"));
