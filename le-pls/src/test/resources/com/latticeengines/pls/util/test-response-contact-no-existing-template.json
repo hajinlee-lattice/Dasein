@@ -180,6 +180,8 @@
         }
     },
     "importWorkflowSpec": {
+        "systemType": "ImportFuncTest",
+        "systemObject": "Contacts",
         "fieldDefinitionsRecordsMap": {
             "Unique ID": [
                 {
@@ -431,8 +433,9 @@
             ],
             "Custom Fields": []
         },
-        "systemType": "ImportFuncTest",
-        "systemObject": "Contacts"
+        "sectionConfiguration" : {
+            "customFieldsSectionName" : "Custom Fields"
+        }
     },
     "existingFieldDefinitionsMap": {},
     "autodetectionResultsMap": {

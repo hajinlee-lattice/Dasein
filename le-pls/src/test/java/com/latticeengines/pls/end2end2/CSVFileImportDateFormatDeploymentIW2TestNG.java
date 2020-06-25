@@ -200,8 +200,10 @@ public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDep
                 dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                         DEFAULT_SYSTEM_TYPE, EntityType.Accounts.getDisplayName(), accountDateSF.getName());
         FieldDefinitionsRecord currentRecord = fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
+        String customFieldsSectionName = fetchFieldDefinitionsResponse.getImportWorkflowSpec()
+                .provideCustomFieldsSectionName();
         for (FieldDefinition definition :
-                currentRecord.getFieldDefinitionsRecords(FieldDefinitionSectionName.Custom_Fields.getName())) {
+                currentRecord.getFieldDefinitionsRecords(customFieldsSectionName)) {
             if (definition.getColumnName().equals("TestDate1")) {
                 Assert.assertEquals(definition.getFieldType(), UserDefinedType.DATE);
                 Assert.assertEquals(definition.getDateFormat(), dateFormatString1);
@@ -230,8 +232,7 @@ public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDep
         fetchFieldDefinitionsResponse = dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                 DEFAULT_SYSTEM_TYPE, EntityType.Accounts.getDisplayName(), accountDateSF.getName());
         currentRecord = fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
-        for (FieldDefinition fieldDefinition :
-                currentRecord.getFieldDefinitionsRecords(FieldDefinitionSectionName.Custom_Fields.getName())) {
+        for (FieldDefinition fieldDefinition : currentRecord.getFieldDefinitionsRecords(customFieldsSectionName)) {
             if (fieldDefinition.getColumnName().equals("TestDate1")) {
                 Assert.assertEquals(fieldDefinition.getDateFormat(), storedDateFormatString1);
                 Assert.assertEquals(fieldDefinition.getTimeZone(), timezone1);

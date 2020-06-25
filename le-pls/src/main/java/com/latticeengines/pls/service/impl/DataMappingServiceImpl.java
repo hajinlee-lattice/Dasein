@@ -212,8 +212,6 @@ public class DataMappingServiceImpl implements DataMappingService {
 
         // 5. Break up sections of ValidateFieldDefinitionsRequest.
         Map<String, FieldDefinition> autoDetectionResultsMap = validateRequest.getAutodetectionResultsMap();
-        Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap =
-                validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap();
         Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap =
                 validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap();
         Map<String, FieldDefinition> existingFieldDefinitionMap = validateRequest.getExistingFieldDefinitionsMap();
@@ -222,7 +220,8 @@ public class DataMappingServiceImpl implements DataMappingService {
         // 6. Run validation.
         ValidateFieldDefinitionsResponse response =
                 ImportWorkflowUtils.generateValidationResponse(fieldDefinitionsRecordsMap, autoDetectionResultsMap,
-                        specFieldDefinitionsRecordsMap, existingFieldDefinitionMap, otherTemplateDataMap, resolver);
+                        validateRequest.getImportWorkflowSpec(), existingFieldDefinitionMap, otherTemplateDataMap,
+                        resolver);
 
         // 7. Fill in fields of ValidateFieldDefinitionsResponse.
         response.setFieldDefinitionsRecordsMap(fieldDefinitionsRecordsMap);

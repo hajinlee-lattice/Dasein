@@ -225,4 +225,17 @@ public class FieldDefinitionsRecord {
         }
         return false;
     }
+
+    public String toString() {
+        String output = "";
+        output += "systemName: " + systemName + "\n";
+        output += "systemName: " + systemType + "\n";
+        output += "systemName: " + systemObject + "\n";
+        if (fieldDefinitionsRecordsMap == null) {
+            output += "fieldDefinitionsRecordsMap: null";
+        } else {
+            output += "fieldDefinitionsRecordsMap:\n" + fieldDefinitionsRecordsMap.toString() + "\n";
+        }
+        return output;
+    }
 }

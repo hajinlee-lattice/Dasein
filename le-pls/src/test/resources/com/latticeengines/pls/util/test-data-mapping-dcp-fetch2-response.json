@@ -1,0 +1,531 @@
+{
+    "currentFieldDefinitionsRecord": {
+        "systemName": "Default_DCP_System",
+        "systemType": "DCPTest",
+        "systemObject": "Accounts",
+        "fieldDefinitionsRecordsMap": {
+            "additionalInformation": [
+                {
+                    "fieldName": "PhoneNumber",
+                    "fieldType": "TEXT",
+                    "screenName": "Telephone Number",
+                    "columnName": "Phone",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Website",
+                    "fieldType": "TEXT",
+                    "screenName": "URL",
+                    "columnName": "Website",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Email",
+                    "fieldType": "TEXT",
+                    "screenName": "Email",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ],
+            "companyInformation": [
+                {
+                    "fieldName": "CompanyName",
+                    "fieldType": "TEXT",
+                    "screenName": "Company Name",
+                    "columnName": "Business Name",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Address_Street_1",
+                    "fieldType": "TEXT",
+                    "screenName": "Street Address Line 1",
+                    "columnName": "Street Address Line 1",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Address_Street_2",
+                    "fieldType": "TEXT",
+                    "screenName": "Street Address Line 2",
+                    "columnName": "Street Address Line 2",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "City",
+                    "fieldType": "TEXT",
+                    "screenName": "City / Town",
+                    "columnName": "city",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "State",
+                    "fieldType": "TEXT",
+                    "screenName": "State / Province",
+                    "columnName": "StAtE",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "PostalCode",
+                    "fieldType": "TEXT",
+                    "screenName": "Postal Code",
+                    "columnName": "Zip",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Country",
+                    "fieldType": "TEXT",
+                    "screenName": "Country",
+                    "columnName": "Country",
+                    "inCurrentImport": false,
+                    "required": true,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ],
+            "additionalData": [
+                {
+                    "fieldName": "user_Number_Of_Employees",
+                    "fieldType": "INTEGER",
+                    "columnName": "Number Of Employees",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "user_D_amp_B_SIC_Code__8_digit_",
+                    "fieldType": "INTEGER",
+                    "columnName": "D&amp;B SIC Code (8 digit)",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "user_D_amp_B_Site_Telephone_Number",
+                    "fieldType": "NUMBER",
+                    "columnName": "D&amp;B Site Telephone Number",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "user_Industry",
+                    "fieldType": "TEXT",
+                    "columnName": "Industry",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "user_Annual_Revenue",
+                    "fieldType": "NUMBER",
+                    "columnName": "Annual Revenue",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ],
+            "uniqueIds": [
+                {
+                    "fieldName": "CustomerId",
+                    "fieldType": "TEXT",
+                    "screenName": "Customer ID",
+                    "columnName": "Customer ID",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "DUNS",
+                    "fieldType": "TEXT",
+                    "screenName": "D-U-N-S Number ®",
+                    "columnName": "DUNS Number",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "RegistrationNumber",
+                    "fieldType": "TEXT",
+                    "screenName": "Registration Number",
+                    "inCurrentImport": false,
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ]
+        }
+    },
+    "importWorkflowSpec": {
+        "systemType": "DCP",
+        "systemObject": "Accounts",
+        "fieldDefinitionsRecordsMap": {
+            "companyInformation": [
+                {
+                    "fieldName": "CompanyName",
+                    "fieldType": "TEXT",
+                    "screenName": "Company Name",
+                    "matchingColumnNames": [
+                        "NAME",
+                        "ACCOUNT",
+                        "ACCOUNT NAME",
+                        "BUSINESS",
+                        "BUSINESS NAME",
+                        "COMPANY",
+                        "COMPANY NAME",
+                        "DISPLAY NAME"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Address_Street_1",
+                    "fieldType": "TEXT",
+                    "screenName": "Street Address Line 1",
+                    "matchingColumnNames": [
+                        "ADDRESS LINE 1",
+                        "BILLING ADDRESS LINE 1",
+                        "STREET ADDRESS LINE 1",
+                        "BILLING STREET ADDRESS LINE 1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Address_Street_2",
+                    "fieldType": "TEXT",
+                    "screenName": "Street Address Line 2",
+                    "matchingColumnNames": [
+                        "ADDRESS LINE 2",
+                        "BILLING ADDRESS LINE 2",
+                        "STREET ADDRESS LINE 2",
+                        "BILLING STREET ADDRESS LINE 2"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "City",
+                    "fieldType": "TEXT",
+                    "screenName": "City / Town",
+                    "matchingColumnNames": [
+                        "CITY",
+                        "BILLING CITY"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "State",
+                    "fieldType": "TEXT",
+                    "screenName": "State / Province",
+                    "matchingColumnNames": [
+                        "STATE",
+                        "PROVINCE",
+                        "STATE PROVINCE",
+                        "PROVINCE STATE",
+                        "BILLING STATE",
+                        "BILLING PROVINCE",
+                        "BILLING STATE PROVINCE",
+                        "BILLING PROVINCE STATE"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "PostalCode",
+                    "fieldType": "TEXT",
+                    "screenName": "Postal Code",
+                    "matchingColumnNames": [
+                        "ZIP",
+                        "ZIP CODE",
+                        "POSTAL",
+                        "POSTAL CODE",
+                        "BILLING ZIP",
+                        "BILLING ZIP CODE",
+                        "BILLING POSTAL",
+                        "BILLING POSTAL CODE"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Country",
+                    "fieldType": "TEXT",
+                    "screenName": "Country",
+                    "matchingColumnNames": [
+                        "COUNTRY",
+                        "COUNTRY CODE",
+                        "BILLING COUNTRY",
+                        "BILLING COUNTRY CODE"
+                    ],
+                    "required": true,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ],
+            "uniqueIds": [
+                {
+                    "fieldName": "CustomerId",
+                    "fieldType": "TEXT",
+                    "screenName": "Customer ID",
+                    "matchingColumnNames": [
+                        "ID",
+                        "ACCOUNT ID",
+                        "ACCOUNT NUMBER",
+                        "CUSTOMER ID",
+                        "CUSTOMER ACCOUNT ID",
+                        "CUSTOMER NUMBER",
+                        "EXTERNAL ID"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "DUNS",
+                    "fieldType": "TEXT",
+                    "screenName": "D-U-N-S Number ®",
+                    "matchingColumnNames": [
+                        "DUNS",
+                        "D-U-N-S",
+                        "DUNS NUMBER",
+                        "D-U-N-S NUMBER"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "RegistrationNumber",
+                    "fieldType": "TEXT",
+                    "screenName": "Registration Number",
+                    "matchingColumnNames": [
+                        "NATIONAL ID",
+                        "FEDERAL ID",
+                        "TAX ID",
+                        "FEDERAL TAX ID",
+                        "REGISTRATION NUMBER"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ],
+            "additionalInformation": [
+                {
+                    "fieldName": "PhoneNumber",
+                    "fieldType": "TEXT",
+                    "screenName": "Telephone Number",
+                    "matchingColumnNames": [
+                        "PHONE",
+                        "PHONE NUMBER",
+                        "TELEPHONE",
+                        "TELEPHONE NUMBER"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Website",
+                    "fieldType": "TEXT",
+                    "screenName": "URL",
+                    "matchingColumnNames": [
+                        "WEBSITE",
+                        "DOMAIN",
+                        "URL"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                },
+                {
+                    "fieldName": "Email",
+                    "fieldType": "TEXT",
+                    "screenName": "Email",
+                    "matchingColumnNames": [
+                        "EMAIL",
+                        "EMAIL ADDRESS"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "mappedToLatticeId": false
+                }
+            ],
+            "additionalData": []
+        },
+        "sectionConfiguration": {
+            "customFieldsSectionName": "additionalData"
+        }
+    },
+    "existingFieldDefinitionsMap": {
+        "user_Number_Of_Employees": {
+            "fieldName": "user_Number_Of_Employees",
+            "fieldType": "INTEGER",
+            "columnName": "Number Of Employees",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "user_D_amp_B_SIC_Code__8_digit_": {
+            "fieldName": "user_D_amp_B_SIC_Code__8_digit_",
+            "fieldType": "INTEGER",
+            "columnName": "D&amp;B SIC Code (8 digit)",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "user_D_amp_B_Site_Telephone_Number": {
+            "fieldName": "user_D_amp_B_Site_Telephone_Number",
+            "fieldType": "NUMBER",
+            "columnName": "D&amp;B Site Telephone Number",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "user_Industry": {
+            "fieldName": "user_Industry",
+            "fieldType": "TEXT",
+            "columnName": "Industry",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "Website": {
+            "fieldName": "Website",
+            "fieldType": "TEXT",
+            "columnName": "Website",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "PostalCode": {
+            "fieldName": "PostalCode",
+            "fieldType": "TEXT",
+            "columnName": "Zip",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "Address_Street_2": {
+            "fieldName": "Address_Street_2",
+            "fieldType": "TEXT",
+            "columnName": "Street Address Line 2",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "Address_Street_1": {
+            "fieldName": "Address_Street_1",
+            "fieldType": "TEXT",
+            "columnName": "Street Address Line 1",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "City": {
+            "fieldName": "City",
+            "fieldType": "TEXT",
+            "columnName": "city",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "CustomerId": {
+            "fieldName": "CustomerId",
+            "fieldType": "TEXT",
+            "columnName": "Customer ID",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "CompanyName": {
+            "fieldName": "CompanyName",
+            "fieldType": "TEXT",
+            "columnName": "Business Name",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "State": {
+            "fieldName": "State",
+            "fieldType": "TEXT",
+            "columnName": "StAtE",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "DUNS": {
+            "fieldName": "DUNS",
+            "fieldType": "TEXT",
+            "columnName": "DUNS Number",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "PhoneNumber": {
+            "fieldName": "PhoneNumber",
+            "fieldType": "TEXT",
+            "columnName": "Phone",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "Country": {
+            "fieldName": "Country",
+            "fieldType": "TEXT",
+            "columnName": "Country",
+            "required": true,
+            "nullable": true,
+            "mappedToLatticeId": false
+        },
+        "user_Annual_Revenue": {
+            "fieldName": "user_Annual_Revenue",
+            "fieldType": "NUMBER",
+            "columnName": "Annual Revenue",
+            "required": false,
+            "nullable": true,
+            "mappedToLatticeId": false
+        }
+    },
+    "autodetectionResultsMap": {},
+    "otherTemplateDataMap": {}
+}

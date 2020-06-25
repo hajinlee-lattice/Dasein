@@ -1,0 +1,185 @@
+{
+    "systemName": "Default_DCP_System",
+    "systemType": "DCPTest",
+    "systemObject": "Accounts",
+    "fieldDefinitionsRecordsMap": {
+        "additionalInformation": [
+            {
+                "fieldName": "PhoneNumber",
+                "fieldType": "TEXT",
+                "screenName": "Telephone Number",
+                "columnName": "Phone",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "Website",
+                "fieldType": "TEXT",
+                "screenName": "URL",
+                "columnName": "Website",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "Email",
+                "fieldType": "TEXT",
+                "screenName": "Email",
+                "inCurrentImport": false,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            }
+        ],
+        "companyInformation": [
+            {
+                "fieldName": "CompanyName",
+                "fieldType": "TEXT",
+                "screenName": "Company Name",
+                "columnName": "Business Name",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "Address_Street_1",
+                "fieldType": "TEXT",
+                "screenName": "Street Address Line 1",
+                "columnName": "Street Address Line 1",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "Address_Street_2",
+                "fieldType": "TEXT",
+                "screenName": "Street Address Line 2",
+                "columnName": "Street Address Line 2",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "City",
+                "fieldType": "TEXT",
+                "screenName": "City / Town",
+                "columnName": "city",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "State",
+                "fieldType": "TEXT",
+                "screenName": "State / Province",
+                "columnName": "StAtE",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "PostalCode",
+                "fieldType": "TEXT",
+                "screenName": "Postal Code",
+                "columnName": "Zip",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "Country",
+                "fieldType": "TEXT",
+                "screenName": "Country",
+                "columnName": "Country",
+                "inCurrentImport": true,
+                "required": true,
+                "nullable": true,
+                "mappedToLatticeId": false
+            }
+        ],
+        "additionalData": [
+            {
+                "fieldType": "NUMBER",
+                "columnName": "D&amp;B Site Telephone Number",
+                "inCurrentImport": true,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldType": "NUMBER",
+                "columnName": "Annual Revenue",
+                "inCurrentImport": true,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldType": "TEXT",
+                "columnName": "Industry",
+                "inCurrentImport": true,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldType": "INTEGER",
+                "columnName": "Number Of Employees",
+                "inCurrentImport": true,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldType": "INTEGER",
+                "columnName": "D&amp;B SIC Code (8 digit)",
+                "inCurrentImport": true,
+                "nullable": true,
+                "mappedToLatticeId": false
+            }
+        ],
+        "uniqueIds": [
+            {
+                "fieldName": "CustomerId",
+                "fieldType": "TEXT",
+                "screenName": "Customer ID",
+                "columnName": "Customer ID",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "DUNS",
+                "fieldType": "TEXT",
+                "screenName": "D-U-N-S Number ®",
+                "columnName": "DUNS Number",
+                "inCurrentImport": true,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            },
+            {
+                "fieldName": "RegistrationNumber",
+                "fieldType": "TEXT",
+                "screenName": "Registration Number",
+                "inCurrentImport": false,
+                "required": false,
+                "nullable": true,
+                "mappedToLatticeId": false
+            }
+        ]
+    },
+    "validationResult": "PASS",
+    "fieldValidationMessagesMap": {
+        "additionalInformation": [],
+        "companyInformation": [],
+        "additionalData": [],
+        "uniqueIds": []
+    }
+}

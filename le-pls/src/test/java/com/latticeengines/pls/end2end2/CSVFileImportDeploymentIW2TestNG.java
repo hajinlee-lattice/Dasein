@@ -187,7 +187,7 @@ public class CSVFileImportDeploymentIW2TestNG extends CSVFileImportDeploymentIW2
             cdlService.createS3ImportSystem(mainTestTenant.getId(), systemName,
                     S3ImportSystem.SystemType.Other, false);
         }
-        FetchFieldDefinitionsResponse fieldDefinitionsResponse  =
+        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse  =
                 dataMappingService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
                         EntityType.Accounts.getDisplayName(), accountFile.getName());
 
@@ -203,9 +203,11 @@ public class CSVFileImportDeploymentIW2TestNG extends CSVFileImportDeploymentIW2
         String dateFormatString4 = "YYYY-MM-DD";
         String timeFormatString4 = "00:00:00 24H";
         String timezone4 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE;
-        FieldDefinitionsRecord currentRecord = fieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
+        FieldDefinitionsRecord currentRecord = fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
+        String customFieldsSectionName = fetchFieldDefinitionsResponse.getImportWorkflowSpec()
+                .provideCustomFieldsSectionName();
         for (FieldDefinition definition :
-                currentRecord.getFieldDefinitionsRecords(FieldDefinitionSectionName.Custom_Fields.getName())) {
+                currentRecord.getFieldDefinitionsRecords(customFieldsSectionName)) {
             if (definition.getColumnName().equals("TestDate1")) {
                 definition.setFieldType(UserDefinedType.DATE);
                 definition.setDateFormat(dateFormatString1);

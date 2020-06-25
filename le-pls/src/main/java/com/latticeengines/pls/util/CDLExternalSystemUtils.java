@@ -40,37 +40,39 @@ public final class CDLExternalSystemUtils {
         List<String> erpIds = new ArrayList<>();
         List<String> otherIds = new ArrayList<>();
         List<Pair<String, String>> idMappings = new ArrayList<>();
-        for (FieldDefinition definition : otherIdDefinitions) {
-            if (definition.getExternalSystemType() != null && StringUtils.isNotBlank(definition.getFieldName())) {
-                String externalDisplayName = definition.getFieldName();
-                // setting for field name
-                if (!definition.getFieldName().toUpperCase().endsWith("ID")) {
-                    definition.setFieldName(definition.getFieldName() + "_ID");
+        if (CollectionUtils.isNotEmpty(otherIdDefinitions)) {
+            for (FieldDefinition definition : otherIdDefinitions) {
+                if (definition.getExternalSystemType() != null && StringUtils.isNotBlank(definition.getFieldName())) {
+                    String externalDisplayName = definition.getFieldName();
+                    // setting for field name
+                    if (!definition.getFieldName().toUpperCase().endsWith("ID")) {
+                        definition.setFieldName(definition.getFieldName() + "_ID");
+                    }
+                    String externalAttrName = getAvroFriendlyString(definition.getFieldName());
+                    if (!externalAttrName.startsWith(ImportWorkflowSpecUtils.USER_PREFIX)) {
+                        externalAttrName = ImportWorkflowSpecUtils.USER_PREFIX + externalAttrName;
+                    }
+                    idMappings.add(Pair.of(externalAttrName, externalDisplayName));
+                    switch (definition.getExternalSystemType()) {
+                        case CRM:
+                            crmIds.add(externalAttrName);
+                            break;
+                        case MAP:
+                            mapIds.add(externalAttrName);
+                            break;
+                        case ERP:
+                            erpIds.add(externalAttrName);
+                            break;
+                        case OTHER:
+                            otherIds.add(externalAttrName);
+                            break;
+                        default:
+                    }
+                    // at generating table step, the Attribute name for other field definitions should begin with "user_"
+                    definition.setFieldName(externalAttrName);
+                } else {
+                    log.info("skip the cdl external setting for " + definition.getColumnName());
                 }
-                String externalAttrName = getAvroFriendlyString(definition.getFieldName());
-                if (!externalAttrName.startsWith(ImportWorkflowSpecUtils.USER_PREFIX)) {
-                    externalAttrName = ImportWorkflowSpecUtils.USER_PREFIX + externalAttrName;
-                }
-                idMappings.add(Pair.of(externalAttrName, externalDisplayName));
-                switch (definition.getExternalSystemType()) {
-                    case CRM:
-                        crmIds.add(externalAttrName);
-                        break;
-                    case MAP:
-                        mapIds.add(externalAttrName);
-                        break;
-                    case ERP:
-                        erpIds.add(externalAttrName);
-                        break;
-                    case OTHER:
-                        otherIds.add(externalAttrName);
-                        break;
-                    default:
-                }
-                // at generating table step, the Attribute name for other field definitions should begin with "user_"
-                definition.setFieldName(externalAttrName);
-            } else {
-                log.info("skip the cdl external setting for " + definition.getColumnName());
             }
         }
         cdlExternalSystem.setCRMIdList(crmIds);
