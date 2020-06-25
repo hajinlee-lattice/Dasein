@@ -130,7 +130,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     private void verifyAccountProfile() {
-        Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.Profile);
+        Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.AccountProfile);
+        Assert.assertNotNull(table);
+        table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.LatticeAccountProfile);
         Assert.assertNotNull(table);
     }
 

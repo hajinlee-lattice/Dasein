@@ -89,7 +89,8 @@ public class StatsProfiler {
         }
         log.info("Classifying attributes...");
         try {
-            classifier = new AttrClassifier(jobConfig, amAttrsConfig, declaredAttrsConfig, encodeBits, maxAttrs);
+            classifier = new AttrClassifier(jobConfig, //
+                    jobConfig.getIncludeAttrs(), amAttrsConfig, declaredAttrsConfig, encodeBits, maxAttrs);
             classifier.classifyAttrs(cms);
         } catch (Exception ex) {
             throw new RuntimeException("Fail to classify attributes", ex);

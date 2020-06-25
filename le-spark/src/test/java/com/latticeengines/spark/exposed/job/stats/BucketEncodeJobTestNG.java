@@ -35,8 +35,8 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
+import com.latticeengines.spark.exposed.utils.BucketEncodeUtils;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
-import com.latticeengines.spark.utils.BucketEncodeUtils;
 
 public class BucketEncodeJobTestNG extends SparkJobFunctionalTestNGBase {
 

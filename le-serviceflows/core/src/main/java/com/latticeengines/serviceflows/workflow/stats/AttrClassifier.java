@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LAT
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +70,7 @@ public class AttrClassifier {
     private final ProfileJobConfig jobConfig;
     private final String stage;
     private final long evaluationTime;
+    private final Set<String> includeAttrs;
     private final Map<String, ProfileArgument> amAttrConfig;
     private final Map<String, ProfileParameters.Attribute> declaredAttrConfig;
     private final boolean detectCategorical;
@@ -77,7 +79,8 @@ public class AttrClassifier {
     private final int maxAttrs;
     private String idAttr;
 
-    public AttrClassifier(ProfileJobConfig jobConfig, Map<String, ProfileArgument> amAttrConfig,
+    public AttrClassifier(ProfileJobConfig jobConfig, Collection<String> includeAttrs,
+                          Map<String, ProfileArgument> amAttrConfig,
                           Map<String, ProfileParameters.Attribute> declaredAttrConfig,
                           int encodeBits, int maxAttrs) {
         this.jobConfig = jobConfig;
@@ -92,6 +95,7 @@ public class AttrClassifier {
             log.warn("Evaluation Date not set before SourceProfiler, setting to " + evalDate);
         }
         this.evaluationTime = jobConfig.getEvaluationDateAsTimestamp();
+        this.includeAttrs = includeAttrs == null ? null : new HashSet<>(includeAttrs);
         this.amAttrConfig = amAttrConfig;
         this.declaredAttrConfig = declaredAttrConfig;
         this.encAttrPrefix = jobConfig.getEncAttrPrefix();
@@ -145,10 +149,10 @@ public class AttrClassifier {
             boolean readyForNext;
             readyForNext = isIdAttr(cm);
             if (!readyForNext) {
-                readyForNext = isDeclaredAttr(cm);
+                readyForNext = isAttrToDiscard(cm);
             }
             if (!readyForNext) {
-                readyForNext = isAttrToDiscard(cm);
+                readyForNext = isDeclaredAttr(cm);
             }
             if (!readyForNext) {
                 readyForNext = isAttrNoBucket(cm);
@@ -178,6 +182,20 @@ public class AttrClassifier {
         return column.getAttrName().equals(idAttr);
     }
 
+
+
+    private boolean isAttrToDiscard(ColumnMetadata column) {
+        boolean discard = false;
+        if (CollectionUtils.isNotEmpty(includeAttrs) && !includeAttrs.contains(column.getAttrName())) {
+            discard = true;
+        } else if (amAttrConfig.containsKey(column.getAttrName()) &&
+                Boolean.FALSE.equals(amAttrConfig.get(column.getAttrName()).isProfile())) {
+            log.debug(String.format("Discarded attr: %s", column.getAttrName()));
+            discard = true;
+        }
+        return discard;
+    }
+
     private boolean isDeclaredAttr(ColumnMetadata column) {
         boolean declared = false;
         if (declaredAttrConfig.containsKey(column.getAttrName())) {
@@ -190,16 +208,6 @@ public class AttrClassifier {
             declared = true;
         }
         return declared;
-    }
-
-    private boolean isAttrToDiscard(ColumnMetadata column) {
-        boolean discard = false;
-        if (amAttrConfig.containsKey(column.getAttrName()) &&
-                Boolean.FALSE.equals(amAttrConfig.get(column.getAttrName()).isProfile())) {
-            log.debug(String.format("Discarded attr: %s", column.getAttrName()));
-            discard = true;
-        }
-        return discard;
     }
 
     private boolean isAttrNoBucket(ColumnMetadata column) {

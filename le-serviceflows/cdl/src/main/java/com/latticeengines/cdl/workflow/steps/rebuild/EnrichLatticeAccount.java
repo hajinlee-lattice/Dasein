@@ -65,17 +65,13 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     @Inject
     private BulkMatchService bulkMatchService;
 
-    private boolean shortCutMode = false;
     private Table accountChangeList;
     private Table oldLatticeAccountTable = null;
     private Table newLatticeAccountTable = null;
     private Table fullChangeListTable = null;
-    private Table fullAccountTable = null;
     private Table accountBatchStore = null;
     private String joinKey;
     private String ldcTablePrefix;
-    private String fullAccountTablePrefix = "FullAccount";
-    private String fullChangeListPrefix = "FullChangeList";
     private DataUnit accountChangeListDU;
     private DataUnit latticeAccountDU;
     private HdfsDataUnit deleted = null;
@@ -85,8 +81,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     public void execute() {
         bootstrap();
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(),
-                Arrays.asList(FULL_ACCOUNT_TABLE_NAME, LATTICE_ACCOUNT_TABLE_NAME, FULL_CHANGELIST_TABLE_NAME));
-        shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
+                Arrays.asList(LATTICE_ACCOUNT_TABLE_NAME, FULL_CHANGELIST_TABLE_NAME));
+        boolean shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
 
         if (shortCutMode) {
             log.info("Found Lattice account and full changelist table in context, go through short-cut mode.");
@@ -111,18 +107,11 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 HdfsDataUnit selected = select(accountTable);
 
                 // Build full LatticeAccount table
-                HdfsDataUnit fullLatticeAccount = fetch(selected);
-
-                // Build full account table as well since this is full rebuild
-                HdfsDataUnit fullAccount = join(accountTable, fullLatticeAccount);
+                HdfsDataUnit newLatticeAccount = fetch(selected);
 
                 // Upsert LatticeAccount tables
                 String latticeAccountTableName = NamingUtils.timestamp(ldcTablePrefix);
-                newLatticeAccountTable = toTable(latticeAccountTableName, fullLatticeAccount);
-
-                // Upsert full account tables
-                String fullAccountTableName = NamingUtils.timestamp(fullAccountTablePrefix);
-                fullAccountTable = toTable(fullAccountTableName, fullAccount);
+                newLatticeAccountTable = toTable(latticeAccountTableName, newLatticeAccount);
             } else {
                 log.info("EnrichLatticeAccount, deal with changelist from MergeAccount");
 
@@ -166,8 +155,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private void preExecution() {
-        joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name()
-                : InterfaceName.AccountId.name();
+        joinKey = InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
         ldcTablePrefix = TableRoleInCollection.LatticeAccount.name();
         accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
@@ -218,12 +206,6 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                     TableRoleInCollection.LatticeAccount, inactive);
             exportToS3AndAddToContext(oldLatticeAccountTable, LATTICE_ACCOUNT_TABLE_NAME);
         }
-
-        // Save full account table
-        if (fullAccountTable != null) {
-            exportToS3AndAddToContext(fullAccountTable, FULL_ACCOUNT_TABLE_NAME);
-            addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTable.getName(), String.class);
-        }
     }
 
     private Boolean shoudlRebuildLatticeAccount() {
@@ -239,25 +221,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         config.setInput(inputs);
         config.setSelectAttrs(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name()));
         SparkJobResult result = runSparkJob(CopyJob.class, config);
-        HdfsDataUnit output = result.getTargets().get(0);
 
-        return output;
-    }
-
-    private HdfsDataUnit join(HdfsDataUnit latticeAccount, HdfsDataUnit account) {
-        log.info("UpdateAccountExport, join step");
-
-        List<DataUnit> joinInputs = new LinkedList<>();
-        joinInputs.add(latticeAccount);
-        joinInputs.add(account);
-        MergeImportsConfig joinConfig = new MergeImportsConfig();
-        joinConfig.setInput(joinInputs);
-        joinConfig.setDedupSrc(true);
-        joinConfig.setJoinKey(joinKey);
-        SparkJobResult joinResult = runSparkJob(MergeImportsJob.class, joinConfig);
-        HdfsDataUnit joinOutput = joinResult.getTargets().get(0);
-
-        return joinOutput;
+        return result.getTargets().get(0);
     }
 
     private void filterChangelist() {
@@ -303,9 +268,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         MatchInput matchInput = constructMatchInput(avroDir);
         MatchCommand command = bulkMatchService.match(matchInput, null);
         log.info("Bulk match finished: {}", JsonUtils.serialize(command));
-        HdfsDataUnit output = bulkMatchService.getResultDataUnit(command, "MatchResult");
 
-        return output;
+        return bulkMatchService.getResultDataUnit(command, "MatchResult");
     }
 
     private void merge(HdfsDataUnit inputData) {
@@ -366,7 +330,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             HdfsDataUnit output = result.getTargets().get(0);
 
             // Create full change list
-            String tableName = NamingUtils.timestamp(fullChangeListPrefix);
+            String tableName = NamingUtils.timestamp("FullChangeList");
             fullChangeListTable = toTable(tableName, output);
         }
     }
