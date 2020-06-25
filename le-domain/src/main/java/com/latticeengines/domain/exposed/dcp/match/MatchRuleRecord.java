@@ -63,20 +63,20 @@ public class MatchRuleRecord implements HasPid, HasTenant, HasAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
-    @Column(name = "MATCH_RULE_ID")
+    @Column(name = "MATCH_RULE_ID", nullable = false)
     private String matchRuleId;
 
-    @Column(name = "SOURCE_ID")
+    @Column(name = "SOURCE_ID", nullable = false)
     private String sourceId;
 
-    @Column(name = "DISPLAY_NAME")
+    @Column(name = "DISPLAY_NAME", nullable = false)
     private String displayName;
 
-    @Column(name = "STATE", length = 30)
+    @Column(name = "STATE", length = 30, nullable = false)
     @Enumerated(EnumType.STRING)
     private State state;
 
-    @Column(name = "RULE_TYPE", length = 30)
+    @Column(name = "RULE_TYPE", length = 30, nullable = false)
     @Enumerated(EnumType.STRING)
     private RuleType ruleType;
 
@@ -84,7 +84,7 @@ public class MatchRuleRecord implements HasPid, HasTenant, HasAuditingFields {
     @Enumerated(EnumType.STRING)
     private MatchKey matchKey;
 
-    @Column(name = "VERSION_ID")
+    @Column(name = "VERSION_ID", nullable = false)
     private Integer versionId;
 
     @Column(name = "ALLOWED_VALUES", columnDefinition = "'JSON'")

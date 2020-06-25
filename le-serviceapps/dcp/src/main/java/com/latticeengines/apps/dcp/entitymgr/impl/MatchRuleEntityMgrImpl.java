@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -54,7 +56,38 @@ public class MatchRuleEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public MatchRuleRecord findMatchRule(String matchRuleId) {
-        return getReadOrWriteRepository().findByMatchRuleId(matchRuleId);
+    public MatchRuleRecord findTopActiveMatchRule(String matchRuleId) {
+        return getReadOrWriteRepository().findTopByMatchRuleIdAndStateOrderByVersionIdDesc(matchRuleId, MatchRuleRecord.State.ACTIVE);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<MatchRuleRecord> findMatchRules(String sourceId, MatchRuleRecord.State state) {
+        return getReadOrWriteRepository().findBySourceIdAndState(sourceId, state);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean existMatchRule(String matchRuleId) {
+        return getReadOrWriteRepository().existsByMatchRuleId(matchRuleId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean existMatchRule(String sourceId, MatchRuleRecord.RuleType ruleType) {
+        return getReadOrWriteRepository().existsBySourceIdAndRuleTypeAndState(sourceId, ruleType, MatchRuleRecord.State.ACTIVE);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateMatchRule(String matchRuleId, String displayName) {
+        matchRuleWriterRepository.updateMatchRule(matchRuleId, displayName);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateMatchRule(String matchRuleId, MatchRuleRecord.State state) {
+        matchRuleWriterRepository.updateMatchRule(matchRuleId, state);
+    }
+
 }

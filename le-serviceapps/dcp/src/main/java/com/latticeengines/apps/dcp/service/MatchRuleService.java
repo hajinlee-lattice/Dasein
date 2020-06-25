@@ -3,6 +3,7 @@ package com.latticeengines.apps.dcp.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
+import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 
 public interface MatchRuleService {
 
@@ -14,4 +15,6 @@ public interface MatchRuleService {
                                      Boolean includeInactive);
 
     void archiveMatchRule(String customerSpace, String matchRuleId);
+
+    MatchRuleConfiguration getMatchConfig(String customerSpace, String sourceId);
 }

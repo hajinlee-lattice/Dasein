@@ -1,6 +1,5 @@
 package com.latticeengines.apps.dcp.controller;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -17,7 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.MatchRuleService;
+import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
+import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,28 +35,37 @@ public class MatchRuleResource {
     @ResponseBody
     @ApiOperation(value = "Update Match Rule")
     public MatchRule updateMatchRule(@PathVariable String customerSpace, @RequestBody MatchRule matchRule) {
-        return null;
+        return matchRuleService.updateMatchRule(customerSpace, matchRule);
     }
 
     @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create Match Rule")
     public MatchRule createMatchRule(@PathVariable String customerSpace, @RequestBody MatchRule matchRule) {
-        return null;
+        return matchRuleService.createMatchRule(customerSpace, matchRule);
     }
 
     @DeleteMapping("/{matchRuleId}")
     @ApiOperation(value = "Create Match Rule")
     public void deleteMatchRule(@PathVariable String customerSpace, @PathVariable String matchRuleId) {
-
+        matchRuleService.archiveMatchRule(customerSpace, matchRuleId);
     }
 
     @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation(value = "List Match Rule")
+    @UseReaderConnection
     public List<MatchRule> getMatchRuleList(@PathVariable String customerSpace, @PathVariable String sourceId,
                                             @RequestParam(required = false, defaultValue = "false") Boolean includeArchived,
                                             @RequestParam(required = false, defaultValue = "false") Boolean includeInactive) {
-        return Collections.emptyList();
+        return matchRuleService.getMatchRuleList(customerSpace, sourceId, includeArchived, includeInactive);
+    }
+
+    @GetMapping("/sourceId/{sourceId}/matchconfig")
+    @ResponseBody
+    @ApiOperation(value = "Get Match Configuration")
+    @UseReaderConnection
+    public MatchRuleConfiguration getMatchConfig(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        return matchRuleService.getMatchConfig(customerSpace, sourceId);
     }
 }
