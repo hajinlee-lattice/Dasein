@@ -26,6 +26,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
             <version>${project.version}</version>
