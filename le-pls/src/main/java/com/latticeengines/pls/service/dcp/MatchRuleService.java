@@ -6,12 +6,12 @@ import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 
 public interface MatchRuleService {
 
-    MatchRule updateMatchRule(MatchRule matchRule);
+    MatchRule updateMatchRule(MatchRule matchRule, Boolean mock);
 
-    MatchRule createMatchRule(MatchRule matchRule);
+    MatchRule createMatchRule(MatchRule matchRule, Boolean mock);
 
     List<MatchRule> getMatchRuleList(String sourceId, Boolean includeArchived,
-                                     Boolean includeInactive);
+                                     Boolean includeInactive, Boolean mock);
 
-    void archiveMatchRule(String matchRuleId);
+    void archiveMatchRule(String matchRuleId, Boolean mock);
 }

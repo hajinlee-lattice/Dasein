@@ -34,4 +34,14 @@ public class TestMatchRuleProxy extends PlsRestApiProxyBase {
         String url = constructUrl();
         return put("Update match rule", url, matchRule, MatchRule.class);
     }
+
+    public MatchRule createMatchRule(MatchRule matchRule) {
+        String url = constructUrl();
+        return put("Create match rule", url, matchRule, MatchRule.class);
+    }
+
+    public void deleteMatchRule(String matchRuleId) {
+        String url = constructUrl("/{matchRuleId}", matchRuleId);
+        delete("Archive match rule", url);
+    }
 }

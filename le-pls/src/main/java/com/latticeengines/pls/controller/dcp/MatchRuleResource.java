@@ -35,21 +35,24 @@ public class MatchRuleResource {
     @PutMapping
     @ResponseBody
     @ApiOperation(value = "Update Match Rule")
-    public MatchRule updateMatchRule(@RequestBody MatchRule matchRule) {
-        return matchRuleService.updateMatchRule(matchRule);
+    public MatchRule updateMatchRule(@RequestBody MatchRule matchRule,
+                                     @RequestParam(required = false, defaultValue = "false") Boolean mock) {
+        return matchRuleService.updateMatchRule(matchRule, mock);
     }
 
     @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create Match Rule")
-    public MatchRule createMatchRule(@RequestBody MatchRule matchRule) {
-        return matchRuleService.createMatchRule(matchRule);
+    public MatchRule createMatchRule(@RequestBody MatchRule matchRule,
+                                     @RequestParam(required = false, defaultValue = "false") Boolean mock) {
+        return matchRuleService.createMatchRule(matchRule, mock);
     }
 
     @DeleteMapping("/{matchRuleId}")
     @ApiOperation(value = "Create Match Rule")
-    public void deleteMatchRule(@PathVariable String matchRuleId) {
-        matchRuleService.archiveMatchRule(matchRuleId);
+    public void deleteMatchRule(@PathVariable String matchRuleId,
+                                @RequestParam(required = false, defaultValue = "false") Boolean mock) {
+        matchRuleService.archiveMatchRule(matchRuleId, mock);
     }
 
     @GetMapping("/sourceId/{sourceId}")
@@ -57,7 +60,8 @@ public class MatchRuleResource {
     @ApiOperation(value = "List Match Rule")
     public List<MatchRule> getMatchRuleList(@PathVariable String sourceId,
                                             @RequestParam(required = false, defaultValue = "false") Boolean includeArchived,
-                                            @RequestParam(required = false, defaultValue = "false") Boolean includeInactive) {
-        return matchRuleService.getMatchRuleList(sourceId, includeArchived, includeInactive);
+                                            @RequestParam(required = false, defaultValue = "false") Boolean includeInactive,
+                                            @RequestParam(required = false, defaultValue = "false") Boolean mock) {
+        return matchRuleService.getMatchRuleList(sourceId, includeArchived, includeInactive, mock);
     }
 }

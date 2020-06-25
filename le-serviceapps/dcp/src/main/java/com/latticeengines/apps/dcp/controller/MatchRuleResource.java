@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.common.exposed.annotation.UseReaderConnection;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 
@@ -35,6 +36,7 @@ public class MatchRuleResource {
     @ResponseBody
     @ApiOperation(value = "Update Match Rule")
     public MatchRule updateMatchRule(@PathVariable String customerSpace, @RequestBody MatchRule matchRule) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return matchRuleService.updateMatchRule(customerSpace, matchRule);
     }
 
@@ -42,12 +44,14 @@ public class MatchRuleResource {
     @ResponseBody
     @ApiOperation(value = "Create Match Rule")
     public MatchRule createMatchRule(@PathVariable String customerSpace, @RequestBody MatchRule matchRule) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return matchRuleService.createMatchRule(customerSpace, matchRule);
     }
 
     @DeleteMapping("/{matchRuleId}")
     @ApiOperation(value = "Create Match Rule")
     public void deleteMatchRule(@PathVariable String customerSpace, @PathVariable String matchRuleId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         matchRuleService.archiveMatchRule(customerSpace, matchRuleId);
     }
 
@@ -58,6 +62,7 @@ public class MatchRuleResource {
     public List<MatchRule> getMatchRuleList(@PathVariable String customerSpace, @PathVariable String sourceId,
                                             @RequestParam(required = false, defaultValue = "false") Boolean includeArchived,
                                             @RequestParam(required = false, defaultValue = "false") Boolean includeInactive) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return matchRuleService.getMatchRuleList(customerSpace, sourceId, includeArchived, includeInactive);
     }
 
@@ -66,6 +71,7 @@ public class MatchRuleResource {
     @ApiOperation(value = "Get Match Configuration")
     @UseReaderConnection
     public MatchRuleConfiguration getMatchConfig(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return matchRuleService.getMatchConfig(customerSpace, sourceId);
     }
 }

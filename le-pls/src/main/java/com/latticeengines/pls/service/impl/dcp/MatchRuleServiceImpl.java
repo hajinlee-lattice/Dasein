@@ -3,38 +3,70 @@ package com.latticeengines.pls.service.impl.dcp;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
 import com.latticeengines.pls.service.dcp.MatchRuleService;
+import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 
 @Service("matchRuleService")
 public class MatchRuleServiceImpl implements MatchRuleService {
 
+    @Inject
+    private MatchRuleProxy matchRuleProxy;
+
     @Override
-    public MatchRule updateMatchRule(MatchRule matchRule) {
-        return getMockMatchRule(matchRule);
+    public MatchRule updateMatchRule(MatchRule matchRule, Boolean mock) {
+        if (Boolean.TRUE.equals(mock)) {
+            return getMockMatchRule(matchRule);
+        } else {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            Preconditions.checkNotNull(customerSpace);
+            return matchRuleProxy.updateMatchRule(customerSpace.toString(), matchRule);
+        }
     }
 
     @Override
-    public MatchRule createMatchRule(MatchRule matchRule) {
-        return getMockMatchRule(matchRule);
+    public MatchRule createMatchRule(MatchRule matchRule, Boolean mock) {
+        if (Boolean.TRUE.equals(mock)) {
+            return getMockMatchRule(matchRule);
+        } else {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            Preconditions.checkNotNull(customerSpace);
+            return matchRuleProxy.createMatchRule(customerSpace.toString(), matchRule);
+        }
     }
 
     @Override
-    public List<MatchRule> getMatchRuleList(String sourceId, Boolean includeArchived, Boolean includeInactive) {
-        return getMockMatchRuleList(sourceId);
+    public List<MatchRule> getMatchRuleList(String sourceId, Boolean includeArchived, Boolean includeInactive, Boolean mock) {
+        if (Boolean.TRUE.equals(mock)) {
+            return getMockMatchRuleList(sourceId);
+        } else {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            Preconditions.checkNotNull(customerSpace);
+            return matchRuleProxy.getMatchRuleList(customerSpace.toString(), sourceId, includeArchived,
+                    includeInactive);
+        }
     }
 
     @Override
-    public void archiveMatchRule(String matchRuleId) {
-
+    public void archiveMatchRule(String matchRuleId, Boolean mock) {
+        if (!Boolean.TRUE.equals(mock)) {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            Preconditions.checkNotNull(customerSpace);
+            matchRuleProxy.deleteMatchRule(customerSpace.toString(), matchRuleId);
+        }
     }
 
     private MatchRule getMockMatchRule(MatchRule matchRule) {
