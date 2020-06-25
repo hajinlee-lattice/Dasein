@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(SoftDeleteActivityStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -68,7 +69,10 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
 
     private Map<String, String> updateRawStreamTableEntries() {
         Map<String, String> updated = new HashMap<>(getActiveRawStreamTables());
+        log.info("original raw stream tables: {}", updated);
+        log.info("raw stream tables after delete: {}", rawStreamsAfterDelete);
         updated.putAll(rawStreamsAfterDelete);
+        log.info("updated raw stream tables entries: {}", updated);
         return updated;
     }
 
@@ -164,7 +168,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
         setTargetTable(step, targetTablePrefix);
-        rawStreamsAfterDelete.put(streamId, targetTablePrefix);
+        rawStreamsAfterDelete.put(streamId, TableUtils.getFullTableName(targetTablePrefix, pipelineVersion));
 
         addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), rawStreamTable);
         if (hasDeleteImport) {
