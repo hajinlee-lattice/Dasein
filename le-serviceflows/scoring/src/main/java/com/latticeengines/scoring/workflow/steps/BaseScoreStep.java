@@ -2,6 +2,8 @@ package com.latticeengines.scoring.workflow.steps;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -14,6 +16,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -92,10 +95,8 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         if (StringUtils.isBlank(pythonMajorVersion)) {
             throw new IllegalArgumentException("Must specify python major version in context!");
         }
-        String[] modelIds = getModelId(pythonMajorVersion).split("\\|");
-        scoringConfig.setModelGuids(Arrays.asList(modelIds));
-        String[] p2ModelIds = getP2ModelId(pythonMajorVersion).split("\\|");
-        scoringConfig.setP2ModelGuids(Arrays.asList(p2ModelIds));
+        scoringConfig.setModelGuids(getModelId(pythonMajorVersion));
+        scoringConfig.setP2ModelGuids(getP2ModelId(pythonMajorVersion));
         scoringConfig.setSourceDataDir(getSourceDir());
         scoringConfig.setUniqueKeyColumn(getUniqueKeyColumn());
         scoringConfig.setUseScorederivation(configuration.getUseScorederivation());
@@ -103,8 +104,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         scoringConfig.setPythonMajorVersion(pythonMajorVersion);
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), //
                 configuration.getCustomerSpace());
-        String tableName = String.format("ScoreResult_%s_%d", modelIds[0].replaceAll("-", "_"),
-                System.currentTimeMillis());
+        String tableName = getResultTableName();
         scoringConfig.setTargetResultDir(targetPath.toString() + "/" + tableName);
         if (getScoringInputType() != null) {
             scoringConfig.setScoreInputType(getScoringInputType());
@@ -112,20 +112,34 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         return Pair.of(scoringConfig, tableName);
     }
 
-    private String getModelId(String pythonMajorVersion) {
+    private String getResultTableName() {
         String modelId = getStringValueFromContext(SCORING_MODEL_ID_P3);
-        if (modelId == null && "3".equals(pythonMajorVersion)) {
+        if (StringUtils.isBlank(modelId)) {
             modelId = configuration.getModelId();
         }
-        return StringUtils.isBlank(modelId) ? "" : modelId;
+        if (StringUtils.isBlank(modelId)) {
+            String firstModelId = modelId.split("\\|")[0];
+            return String.format("ScoreResult_%s_%d", firstModelId.replaceAll("-", "_"),
+                    System.currentTimeMillis());
+        } else {
+            return NamingUtils.timestamp("ScoreResult");
+        }
     }
 
-    private String getP2ModelId(String pythonMajorVersion) {
-        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P2);
-        if (modelId == null && !"3".equals(pythonMajorVersion)) {
+    private List<String> getModelId(String pythonMajorVersion) {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P3);
+        if (StringUtils.isBlank(modelId) && "3".equals(pythonMajorVersion)) {
             modelId = configuration.getModelId();
         }
-        return StringUtils.isBlank(modelId) ? "" : modelId;
+        return StringUtils.isBlank(modelId) ? Collections.emptyList() : Arrays.asList(modelId.split("\\|"));
+    }
+
+    private List<String> getP2ModelId(String pythonMajorVersion) {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P2);
+        if (StringUtils.isBlank(modelId) && !"3".equals(pythonMajorVersion)) {
+            modelId = configuration.getModelId();
+        }
+        return StringUtils.isBlank(modelId) ? Collections.emptyList() : Arrays.asList(modelId.split("\\|"));
     }
 
     private String getSourceDir() {
