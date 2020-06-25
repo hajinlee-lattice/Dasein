@@ -99,6 +99,11 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         Table baseTable = getBaseTable();
         List<ColumnMetadata> cms = baseTable.getColumnMetadata();
         ProfileJobConfig jobConfig = new ProfileJobConfig();
+        List<ProfileParameters.Attribute> declaredAttrs = getDeclaredAttrs();
+        if (CollectionUtils.isNotEmpty(declaredAttrs)) {
+            jobConfig.setDeclaredAttrs(declaredAttrs);
+        }
+
         statsProfiler.initProfileConfig(jobConfig);
         statsProfiler.classifyAttrs(cms, jobConfig);
 
@@ -107,10 +112,6 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         setEvaluationDateStrAndTimestamp();
         jobConfig.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);
         jobConfig.setConsiderAMAttrs(false);
-        List<ProfileParameters.Attribute> declaredAttrs = getDeclaredAttrs();
-        if (CollectionUtils.isNotEmpty(declaredAttrs)) {
-            jobConfig.setDeclaredAttrs(declaredAttrs);
-        }
 
         HdfsDataUnit inputData = baseTable.toHdfsDataUnit(getBaseTableRole().name());
         jobConfig.setInput(Collections.singletonList(inputData));

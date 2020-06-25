@@ -11,6 +11,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLas
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -264,6 +267,40 @@ public final class CuratedAttributeUtils {
                 enrichSystemAttributes(attr, entity, category, templateSystemMap, systemMap);
             }
         });
+    }
+
+    /**
+     * Return list of curated attributes that should be treated as categorical
+     *
+     * @param entity
+     *            target entity of these curated attributes
+     * @param systemNames
+     *            all possible {@link S3ImportSystem#getName()} values
+     * @return non {@code null} list of {@link ProfileParameters.Attribute}
+     */
+    public static List<ProfileParameters.Attribute> getCategoricalAttributes(@NotNull BusinessEntity entity,
+            Set<String> systemNames) {
+        // created source
+        CategoricalBucket sysNameBkt = new CategoricalBucket();
+        sysNameBkt.setCategories(new ArrayList<>(CollectionUtils.emptyIfNull(systemNames)));
+        ProfileParameters.Attribute createdSourceAttr = new ProfileParameters.Attribute(
+                formatEntityAttribute(entity.name(), EntityCreatedSource.name()), null, null, sysNameBkt);
+
+        // created type (all subtype + BusinessEntity + EntityType.WebVisit for legacy
+        // reason)
+        List<String> entityTypes = Arrays //
+                .stream(DataFeedTask.SubType.values()) //
+                .map(Enum::name) //
+                .collect(Collectors.toList());
+        // TODO fix this if we ever add subType to WebVisit
+        entityTypes.add(EntityType.WebVisit.name());
+        entityTypes.addAll(Arrays.stream(BusinessEntity.values()).map(Enum::name).collect(Collectors.toList()));
+
+        CategoricalBucket typeBkt = new CategoricalBucket();
+        typeBkt.setCategories(entityTypes);
+        ProfileParameters.Attribute createdTypeAttr = new ProfileParameters.Attribute(
+                formatEntityAttribute(entity.name(), EntityCreatedType.name()), null, null, typeBkt);
+        return Arrays.asList(createdSourceAttr, createdTypeAttr);
     }
 
     private static String formatSystemEntityAttribute(@NotNull String template, @NotNull String entity,

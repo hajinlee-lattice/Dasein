@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActiv
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.CuratedAccount;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
@@ -44,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -132,9 +136,11 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
                 MASTER_STORE_ENTITY, templateSystemMap, systemMap);
         metadataProxy.updateTable(customerSpace.toString(), servingStoreTableName, servingStoreTable);
 
-        TableRoleInCollection servingRole = CalculatedCuratedAccountAttribute;
-        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, servingRole, inactive);
-        exportToDynamo(servingStoreTableName, servingRole.getPartitionKey(), servingRole.getRangeKey());
+        // rename table to strip invalid characters
+        renameServingStoreTable(servingStoreTable);
+
+        servingStoreTableName = servingStoreTable.getName();
+        finishing(servingStoreTableName);
         exportToS3AndAddToContext(servingStoreTableName, CURATED_ACCOUNT_SERVING_TABLE_NAME);
     }
 
@@ -162,6 +168,14 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         return request;
     }
 
+    private void finishing(String servingStoreTableName) {
+        TableRoleInCollection servingRole = CalculatedCuratedAccountAttribute;
+        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName,
+                CalculatedCuratedAccountAttribute, inactive);
+        updateDCStatusForCuratedAccountAttributes();
+        exportToDynamo(servingStoreTableName, servingRole.getPartitionKey(), servingRole.getRangeKey());
+    }
+
     private TransformationStepConfig numberOfContacts() {
         TransformationStepConfig step = new TransformationStepConfig();
         // Set up the Account and Contact tables as inputs for counting contacts.
@@ -182,6 +196,16 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
+    }
+
+    private String renameServingStoreTable(Table servingStoreTable) {
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+        String prefix = String.join("_", customerSpace.getTenantId(), CuratedAccount.name());
+        String cleanName = NamingUtils.timestamp(prefix);
+        log.info("Renaming curated account table from {} to {}", servingStoreTable.getName(), cleanName);
+        metadataProxy.renameTable(customerSpace.toString(), servingStoreTable.getName(), cleanName);
+        servingStoreTable.setName(cleanName);
+        return cleanName;
     }
 
     /*-
@@ -263,8 +287,11 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         servingStoreTablePrefix = BusinessEntity.CuratedAccount.getServingStore().name();
 
         if (isShortCutMode()) {
-            log.info("In short cut mode, skip generating curated account attribute");
+            String servingTableName = getStringValueFromContext(CURATED_ACCOUNT_SERVING_TABLE_NAME);
+            log.info("In short cut mode, skip generating curated account attribute. Serving table name = {}",
+                    servingTableName);
             skipTransformation = true;
+            finishing(servingTableName);
             return;
         }
 
@@ -434,6 +461,34 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             return true;
         } else {
             return false;
+        }
+    }
+
+    private void updateDCStatusForCuratedAccountAttributes() {
+        // Get the data collection status map and set the last data refresh time for
+        // Curated Accounts to the more
+        // recent of the data collection times of Accounts and Contacts.
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, Long> dateMap = status.getDateMap();
+        if (MapUtils.isEmpty(dateMap)) {
+            log.error("No data in DataCollectionStatus Date Map despite running Curated Account Attributes step");
+        } else {
+            Long accountCollectionTime = 0L;
+            if (dateMap.containsKey(Category.ACCOUNT_ATTRIBUTES.getName())) {
+                accountCollectionTime = dateMap.get(Category.ACCOUNT_ATTRIBUTES.getName());
+            }
+            Long contactCollectionTime = 0L;
+            if (dateMap.containsKey(Category.CONTACT_ATTRIBUTES.getName())) {
+                contactCollectionTime = dateMap.get(Category.CONTACT_ATTRIBUTES.getName());
+            }
+            long curatedAccountCollectionTime = Long.max(accountCollectionTime, contactCollectionTime);
+            if (curatedAccountCollectionTime == 0L) {
+                log.error("No Account or Contact DataCollectionStatus dates despite running Curated Account "
+                        + "Attributes step");
+            } else {
+                dateMap.put(Category.CURATED_ACCOUNT_ATTRIBUTES.getName(), curatedAccountCollectionTime);
+                putObjectInContext(CDL_COLLECTION_STATUS, status);
+            }
         }
     }
 

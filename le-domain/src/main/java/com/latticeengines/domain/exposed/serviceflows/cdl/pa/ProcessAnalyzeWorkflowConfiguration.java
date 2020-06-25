@@ -328,6 +328,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             convertBatchStoreToDataTableWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            curatedAttributesWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
