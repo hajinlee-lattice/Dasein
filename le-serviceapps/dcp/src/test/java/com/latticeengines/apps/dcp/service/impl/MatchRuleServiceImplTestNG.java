@@ -93,7 +93,7 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
         String specialMatchRuleId2 = specialRule2.getMatchRuleId();
         Assert.assertTrue(StringUtils.isNotBlank(specialMatchRuleId2));
 
-        // Check list
+        // Check list, expected 3 active rules.(1 base + 2 special)
         List<MatchRule> matchRules = matchRuleService.getMatchRuleList(mainCustomerSpace, "Source_1231231", false,
                 false);
         Assert.assertNotNull(matchRules);
@@ -116,7 +116,7 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
         specialRule2 = matchRuleService.updateMatchRule(mainCustomerSpace, specialRule2);
         Assert.assertEquals(specialRule2.getVersionId().intValue(), 2);
 
-        // Check list again
+        // Check list again, expected 4 rules, (1 active base + 2 active special + 1 inactive special)
         matchRules = matchRuleService.getMatchRuleList(mainCustomerSpace, "Source_1231231", false,
                 true);
         Assert.assertNotNull(matchRules);
@@ -130,12 +130,13 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
         // archive special rule 2
         matchRuleService.archiveMatchRule(mainCustomerSpace, specialMatchRuleId2);
 
-        // Check list
+        // Check list, expected 2 active rules (1 base + 1 special)
         matchRules = matchRuleService.getMatchRuleList(mainCustomerSpace, "Source_1231231", false,
                 false);
         Assert.assertNotNull(matchRules);
         Assert.assertEquals(matchRules.size(), 2);
 
+        // Check list, expected 4 rules, (1 active base + 1 active special + 2 archived special)
         matchRules = matchRuleService.getMatchRuleList(mainCustomerSpace, "Source_1231231", true,
                 false);
         Assert.assertNotNull(matchRules);
@@ -154,6 +155,7 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
         // Exception when delete BaseRule
         Assert.assertThrows(() -> matchRuleService.archiveMatchRule(mainCustomerSpace, baseMatchRuleId));
 
+        // Exception expected when create another base rule under same source.
         MatchRule anotherBaseRule = new MatchRule();
         anotherBaseRule.setSourceId("Source_1231231");
         anotherBaseRule.setDisplayName("Match Rule 1");
