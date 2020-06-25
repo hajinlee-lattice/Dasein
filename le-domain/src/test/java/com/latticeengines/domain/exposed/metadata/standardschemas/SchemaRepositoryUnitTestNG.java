@@ -10,8 +10,14 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AnnualRev
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AnnualRevenueCurrency;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.City;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactCity;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactCountry;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactPostalCode;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactState;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Contact_Address_Street_1;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Contact_Address_Street_2;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Cost;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CreatedDate;
@@ -37,12 +43,19 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfEmployees;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OpportunityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OrderId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.OtherEmail;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.OtherMobileDeviceID;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.OtherPhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PostalCode;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PrimaryMobileDeviceID;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Quantity;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.SecondaryEmail;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.SecondaryMobileDeviceID;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.SecondaryPhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMedium;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SpendAnalyticsSegment;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageName;
@@ -96,7 +109,12 @@ public class SchemaRepositoryUnitTestNG {
     private static final List<InterfaceName> CONTACT_ATTRS = Arrays.asList(ContactId, ContactName, FirstName, LastName,
             AccountId, Title, LeadSource, AnnualRevenue, NumberOfEmployees, Industry, DoNotMail, DoNotCall, LeadStatus,
             LeadType, CreatedDate, LastModifiedDate, Email, CompanyName, Website, Address_Street_1, Address_Street_2,
-            City, State, Country, PostalCode, PhoneNumber, DUNS);
+            City, State, Country, PostalCode, PhoneNumber, DUNS, //
+            ContactCity, ContactState, ContactCountry, ContactPostalCode, Contact_Address_Street_1,
+            Contact_Address_Street_2, //
+            SecondaryEmail, OtherEmail, SecondaryPhoneNumber, OtherPhoneNumber, //
+            PrimaryMobileDeviceID, SecondaryMobileDeviceID, OtherMobileDeviceID //
+    );
 
     private static final List<InterfaceName> CONTACT_ENTITY_MATCH_ATTRS = CONTACT_ATTRS.stream()
             .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr))
