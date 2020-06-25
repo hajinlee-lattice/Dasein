@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -200,7 +199,7 @@ public class DataLakeAccountResource {
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "customlist-dante", measurment = "ulysses", instrument = INSTRUMENT_CL)
-    public FrontEndResponse<String> getAccountsAndTalkingpoints(
+    public FrontEndResponse<AccountAndTalkingPoints> getAccountsAndTalkingpoints(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @PathVariable String playId, //
@@ -228,11 +227,8 @@ public class DataLakeAccountResource {
                         customerSpace));
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
-
-            List<String> toReturn = talkingPointDanteFormatter
-                    .format(JsonUtils.convertList(tps, TalkingPointDTO.class));
-            return new FrontEndResponse<>(JsonUtils.serialize(
-                    new AccountAndTalkingPoints(accountFormatter.format(accountRawData.getData().get(0)), toReturn)));
+            accountFormatter.enrichForDante(accountRawData.getData().get(0));
+            return new FrontEndResponse<>(new AccountAndTalkingPoints(accountRawData.getData().get(0), tps));
         } catch (LedpException le) {
             log.error("Failed to populate talkingpoints and accounts for " + customerSpace, le);
             return new FrontEndResponse<>(le.getErrorDetails());
@@ -285,22 +281,22 @@ public class DataLakeAccountResource {
     }
 
     private class AccountAndTalkingPoints {
-        private String accountStr;
-        private List<String> talkingpointstrs;
+        private Map<String, Object> account;
+        private List<TalkingPointDTO> talkingPoints;
 
-        AccountAndTalkingPoints(String accountStr, List<String> talkingpointstrs) {
-            this.accountStr = accountStr;
-            this.talkingpointstrs = talkingpointstrs;
+        AccountAndTalkingPoints(Map<String, Object> account, List<TalkingPointDTO> talkingPoints) {
+            this.account = account;
+            this.talkingPoints = talkingPoints;
         }
 
         @JsonProperty("account")
-        public String getAccountStr() {
-            return accountStr;
+        public Map<String, Object> getAccount() {
+            return account;
         }
 
         @JsonProperty("talkingPoints")
-        public List<String> getTalkingpointstrs() {
-            return talkingpointstrs;
+        public List<TalkingPointDTO> getTalkingPoints() {
+            return talkingPoints;
         }
 
     }
