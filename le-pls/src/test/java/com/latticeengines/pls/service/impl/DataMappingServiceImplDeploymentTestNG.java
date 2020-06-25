@@ -7,14 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
-import com.latticeengines.domain.exposed.modeling.Field;
-import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.query.EntityTypeUtils;
-import com.latticeengines.pls.util.ImportWorkflowUtils;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +22,10 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
@@ -41,12 +36,15 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.DataMappingService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.util.ImportWorkflowUtilsTestNG;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 
 public class DataMappingServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {

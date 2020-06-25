@@ -17,12 +17,14 @@
                 ],
                 "FundamentalType": "alpha",
                 "Category": null,
+                "SourceAttrName" : null,
                 "Required": false,
                 "Subcategory": null,
                 "ApprovedUsage": [
                     "None"
                 ],
-                "InterfaceName": "CustomerContactId"
+                "InterfaceName": "CustomerContactId",
+                "DefaultValueStr" : null
             },
             "validatorWrappers": []
         }
