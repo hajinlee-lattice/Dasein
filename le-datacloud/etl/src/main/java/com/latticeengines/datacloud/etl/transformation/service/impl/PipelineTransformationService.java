@@ -59,6 +59,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.monitor.MsTeamsSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -445,6 +446,8 @@ public class PipelineTransformationService extends AbstractTransformationService
             }
             sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                     SlackSettings.Color.NORMAL, transConf);
+            sendMsTeams(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
+                    MsTeamsSettings.Color.NORMAL, transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
             Span stepSpan = null;
@@ -484,6 +487,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                             DurationFormatUtils.formatDurationHMS(stepDuration));
                     sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                             SlackSettings.Color.DANGER, transConf);
+                    sendMsTeams(transConf.getName() + " [" + progress.getYarnAppId() + "]",
+                            slackMessage, MsTeamsSettings.Color.DANGER, transConf);
                     updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
                     return false;
                 }
@@ -492,6 +497,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                         DurationFormatUtils.formatDurationHMS(stepDuration));
                 sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                         SlackSettings.Color.GOOD, transConf);
+                sendMsTeams(transConf.getName() + " [" + progress.getYarnAppId() + "]",
+                        slackMessage, MsTeamsSettings.Color.GOOD, transConf);
 
                 if (i == steps.length - 1) {
                     slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:",
@@ -499,6 +506,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                             DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - pipelineStarTime));
                     sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                             SlackSettings.Color.GOOD, transConf);
+                    sendMsTeams(transConf.getName() + " [" + progress.getYarnAppId() + "]",
+                            slackMessage, MsTeamsSettings.Color.GOOD, transConf);
                 }
 
                 if (reportEnabled) {
@@ -877,6 +886,13 @@ public class PipelineTransformationService extends AbstractTransformationService
             PipelineTransformationConfiguration transConf) {
         if (transConf.isEnableSlack()) {
             notificationService.sendSlack(title, text, SLACK_BOT, color);
+        }
+    }
+
+    private void sendMsTeams(String title, String text, MsTeamsSettings.Color color,
+            PipelineTransformationConfiguration transConf) {
+        if (transConf.isEnableMsTeams()) {
+            notificationService.sendMsTeams(title, text, color);
         }
     }
 
