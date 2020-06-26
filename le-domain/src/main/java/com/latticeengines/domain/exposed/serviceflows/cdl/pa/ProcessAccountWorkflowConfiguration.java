@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,6 +63,11 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     rebuildAccountWorkflowBuilder.rebuildEntities(entities);
                 }
             }
+            return this;
+        }
+
+        public Builder systemIdMap(Map<String, List<String>> systemIds) {
+            processAccountStepConfiguration.setSystemIdMap(systemIds);
             return this;
         }
 
