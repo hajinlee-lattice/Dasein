@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 @ContextConfiguration(locations = { "classpath:test-auth-context.xml" })
 public class AuthFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-
     @Inject
     protected GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
@@ -28,6 +27,7 @@ public class AuthFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         GlobalAuthUser gAuthUser = new GlobalAuthUser();
         gAuthUser.setFirstName("Lattice" + System.currentTimeMillis());
         gAuthUser.setLastName("TestUser");
+        gAuthUser.setEmail(gAuthUser.getFirstName() + "." + gAuthUser.getLastName() + "@example.com");
         gaUserEntityMgr.create(gAuthUser);
         return gAuthUser;
     }
