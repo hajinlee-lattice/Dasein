@@ -7,7 +7,8 @@ import com.google.common.collect.ImmutableSet;
 public enum InterfaceName {
     Id, //
     InternalId, //
-    DUNS, //
+    DUNS, // mostly as match input/key
+    DunsNumber, // mostly as match result
     Event, //
     Domain, //
 

@@ -110,6 +110,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         uploadId = upload.getUploadId();
 
         verifyImport();
+
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testImport")

@@ -3,7 +3,10 @@ package com.latticeengines.datacloud.match.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,6 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
@@ -21,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchDataProfile;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockColumn;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -90,6 +99,43 @@ public final class DirectPlusUtils {
         }
         return StringUtils.join(parts, "&");
     }
+
+    public static Map<String, Object> parseDataBlock(String response) {
+        Map<String, Object> result = new HashMap<>();
+        Configuration config = Configuration.defaultConfiguration().addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+        DocumentContext ctx = JsonPath.using(config).parse(response);
+        List<DataBlockColumn> mds = getDataBlockMetadata();
+        mds.forEach(md -> {
+            String jsonPath = md.getJsonPath();
+            String value = null;
+            try {
+                value = ctx.read(jsonPath, String.class);
+            } catch (PathNotFoundException e) {
+                log.warn("Cannot find json path {}", jsonPath);
+            }
+            String attrName = md.getAttrName();
+            result.put(attrName, value);
+        });
+        return result;
+    }
+
+    // to be changed to metadata driven
+    public static List<DataBlockColumn> getDataBlockMetadata() {
+        return Arrays.asList(
+                new DataBlockColumn("DunsNumber", "D-U-N-S Number", "organization.duns"),
+                new DataBlockColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryAddress.addressCounty.name"),
+                new DataBlockColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames[0].name"),
+                new DataBlockColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1"),
+                new DataBlockColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2"),
+                new DataBlockColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name"),
+                new DataBlockColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name"),
+                new DataBlockColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
+                new DataBlockColumn("PrimaryAddressCountyName", "Primary Address County Name", "organization.primaryAddress.addressCounty.name"),
+                new DataBlockColumn("TelephoneNumber", "Telephone Number", "organization.telephone[0].telephoneNumber"),
+                new DataBlockColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4")
+        );
+    }
+
 
     public static void parseJsonResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);
@@ -185,6 +231,8 @@ public final class DirectPlusUtils {
 
     private static DnBMatchInsight parseMatchInsight(JsonNode insightNode) {
         DnBMatchInsight matchInsight = new DnBMatchInsight();
+        Double nameMatchScore = JsonUtils.parseDoubleValueAtPath(insightNode, "nameMatchScore");
+        matchInsight.setNameMatchScore(nameMatchScore);
         Integer confidenceCode = JsonUtils.parseIntegerValueAtPath(insightNode, "confidenceCode");
         matchInsight.setConfidenceCode(confidenceCode);
         String matchGrade = JsonUtils.parseStringValueAtPath(insightNode, "matchGrade");

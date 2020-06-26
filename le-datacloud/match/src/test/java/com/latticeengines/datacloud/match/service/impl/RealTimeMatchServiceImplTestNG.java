@@ -94,22 +94,19 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testSimpleMatchWithDplusConfig() {
         Object[][] data = new Object[][] {
-                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", null, null },
-                { 2, "google.com", "Google", null, "California", "USA", null, null },
-                { 3, "google.com", "Google", null, null, "UK", null, null },
-                { 4, "bp.com", "British Petroleum", "London", "London", "UK", null, null }
+                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
+                { 2, "google.com", "Google", null, "California", "USA" },
+                { 3, "google.com", "Google", null, null, "UK" },
+                { 4, "bp.com", "British Petroleum", "London", "London", "UK"}
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         input.setTargetEntity(BusinessEntity.PrimeAccount.name());
 
         List<Column> columns = Stream.of(
-                DataCloudConstants.ATTR_LDC_DUNS,
-                DataCloudConstants.ATTR_LDC_NAME,
-                DataCloudConstants.ATTR_CITY,
-                DataCloudConstants.ATTR_STATE,
-                DataCloudConstants.ATTR_ZIPCODE,
-                DataCloudConstants.ATTR_COUNTRY,
-                InterfaceName.LatticeAccountId.name()
+                "PrimaryBusinessName",
+                "TradeStyleName",
+                "TelephoneNumber",
+                "IndustryCodeUSSicV4Code"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
@@ -126,7 +123,6 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         DplusMatchConfig dplusMatchConfig = new DplusMatchConfig(baseRule) //
                 .when(Country, Collections.singleton("UK")).apply(ukRule);
         input.setDplusMatchConfig(dplusMatchConfig);
-        input.setUseDirectPlus(true);
 
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
