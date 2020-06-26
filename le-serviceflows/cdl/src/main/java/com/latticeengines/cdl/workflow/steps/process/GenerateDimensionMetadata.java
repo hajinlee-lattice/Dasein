@@ -407,7 +407,7 @@ public class GenerateDimensionMetadata
     private int addTableAndGetDataUnitIdx(String id, Map<String, Table> tables, String unitAliasPrefix) {
         if (!unitIdxMap.containsKey(id)) {
             unitIdxMap.put(id, units.size());
-            units.add(tables.get(id).partitionedToHdfsDataUnit(unitAliasPrefix + id, Collections.singletonList(InterfaceName.__StreamDateId.name())));
+            units.add(tables.get(id).partitionedToHdfsDataUnit(unitAliasPrefix + id, Collections.singletonList(InterfaceName.StreamDateId.name())));
         }
         return unitIdxMap.get(id);
     }

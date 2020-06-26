@@ -14,11 +14,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -365,7 +362,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         // If AccountLookup table is populated for this tenant,
         // skip both special cache and redshift, go straight to match api
-        // special cach lookup should be removed soon
+        // special cache lookup should be removed soon
         String internalAccountId;
         if (Boolean.TRUE.equals(hasAccountLookupCache.get(customerSpace))) {
             internalAccountId = matchProxy.lookupInternalAccountId(customerSpace, lookupIdColumn, accountId, null);
@@ -474,6 +471,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return AccountExtensionUtil.extractAccountIds(entityData);
     }
 
+    // No Date attribute formatting for attribute group based lookups
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId,
             ColumnSelection.Predefined predefined) {
 
@@ -488,41 +486,12 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
 
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
-        Future<List<ColumnMetadata>> dateAttrsFuture = getWorkers().submit(() -> {
-            try (PerformanceTimer timer = new PerformanceTimer("Get date attributes for "
-                    + CustomerSpace.shortenCustomerSpace(customerSpace))) {
-                return servingStoreProxy.getDateAttrsFromCache(customerSpace, BusinessEntity.Account);
-            }
-        });
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
-        DataPage datapage;
+        DataPage datapage = createEmptyDataPage();
         if (wasMatchFound(matchOutput)) {
-            try (PerformanceTimer timer = new PerformanceTimer()) {
-                // avoiding expensive metadata retrieval if match failed
-                List<ColumnMetadata> dateAttributesMetadata = new ArrayList<>();
-                if (batonService.shouldWaitDataAttrs(customerSpace)) {
-                    try {
-                        dateAttributesMetadata = dateAttrsFuture.get();
-                    } catch (InterruptedException| ExecutionException e) {
-                        throw new RuntimeException("Failed to get date attributes metadata");
-                    }
-                } else {
-                    try {
-                        dateAttributesMetadata = dateAttrsFuture.get(1, TimeUnit.SECONDS);
-                    } catch (TimeoutException e) {
-                        log.warn("Time out to get date attributes from a background thread.", e);
-                    } catch (Exception e) {
-                        log.warn("Failed to get date attributes from a background thread.", e);
-                    }
-                }
-                datapage = AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata,
-                        matchOutput);
-                timer.setTimerMessage("Processed Date Attributes for account: " + internalAccountId + " for tenant: "
-                        + customerSpace);
-            }
+            datapage = convertToDataPage(matchOutput);
         } else {
             log.info("No match on MatchApi, for Id: " + internalAccountId + " on CustomerSpace: " + customerSpace);
-            datapage = convertToDataPage(matchOutput);
         }
         return datapage;
     }
@@ -547,38 +516,43 @@ public class DataLakeServiceImpl implements DataLakeService {
         matchInput.setDataCloudVersion(dataCloudVersion);
 
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
-        Future<List<ColumnMetadata>> dateAttrsFuture = getWorkers().submit(() -> {
-            try (PerformanceTimer timer = new PerformanceTimer("Get date attributes for "
-                    + CustomerSpace.shortenCustomerSpace(customerSpace))) {
-                return servingStoreProxy.getDateAttrsFromCache(customerSpace, BusinessEntity.Account);
-            }
-        });
+        // Future<List<ColumnMetadata>> dateAttrsFuture = getWorkers().submit(() -> {
+        // try (PerformanceTimer timer = new PerformanceTimer(
+        // "Get date attributes for " +
+        // CustomerSpace.shortenCustomerSpace(customerSpace))) {
+        // return servingStoreProxy.getDateAttrsFromCache(customerSpace,
+        // BusinessEntity.Account);
+        // }
+        // });
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
         DataPage datapage;
         if (wasMatchFound(matchOutput)) {
             // avoiding expensive metadata retrieval if match failed
-            try (PerformanceTimer timer = new PerformanceTimer()) {
-                List<ColumnMetadata> dateAttributesMetadata = new ArrayList<>();
-                if (batonService.shouldWaitDataAttrs(customerSpace)) {
-                    try {
-                        dateAttributesMetadata = dateAttrsFuture.get();
-                    } catch (InterruptedException| ExecutionException e) {
-                        throw new RuntimeException("Failed to get date attributes metadata");
-                    }
-                } else {
-                    try {
-                        dateAttributesMetadata = dateAttrsFuture.get(1, TimeUnit.SECONDS);
-                    } catch (TimeoutException e) {
-                        log.warn("Time out to get date attributes from a background thread.", e);
-                    } catch (Exception e) {
-                        log.warn("Failed to get date attributes from a background thread.", e);
-                    }
-                }
-                datapage = AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata,
-                        matchOutput);
-                timer.setTimerMessage("Processed Date Attributes for account: " + internalAccountId + " for tenant: "
-                        + customerSpace);
-            }
+            // try (PerformanceTimer timer = new PerformanceTimer()) {
+            // List<ColumnMetadata> dateAttributesMetadata = new ArrayList<>();
+            // if (batonService.shouldWaitDataAttrs(customerSpace)) {
+            // try {
+            // dateAttributesMetadata = dateAttrsFuture.get();
+            // } catch (InterruptedException | ExecutionException e) {
+            // throw new RuntimeException("Failed to get date attributes metadata");
+            // }
+            // } else {
+            // try {
+            // dateAttributesMetadata = dateAttrsFuture.get(1, TimeUnit.SECONDS);
+            // } catch (TimeoutException e) {
+            // log.warn("Time out to get date attributes from a background thread.", e);
+            // } catch (Exception e) {
+            // log.warn("Failed to get date attributes from a background thread.", e);
+            // }
+            // }
+            // datapage = AccountExtensionUtil.processMatchOutputResults(customerSpace,
+            // dateAttributesMetadata,
+            // matchOutput);
+            // timer.setTimerMessage("Processed Date Attributes for account: " +
+            // internalAccountId + " for tenant: "
+            // + customerSpace);
+            // }
+            datapage = convertToDataPage(matchOutput);
         } else {
             log.info("No match on MatchApi, for Id: " + internalAccountId + " on CustomerSpace: " + customerSpace);
             datapage = convertToDataPage(matchOutput);
@@ -596,10 +570,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     private DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         Map<String, Object> data = null;
-        if (matchOutput != null //
-                && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
-                && matchOutput.getResult().get(0) != null
-                && matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
+        if (wasMatchFound(matchOutput)) {
             final Map<String, Object> tempDataRef = new HashMap<>();
             List<String> fields = matchOutput.getOutputFields();
             List<Object> values = matchOutput.getResult().get(0).getOutput();

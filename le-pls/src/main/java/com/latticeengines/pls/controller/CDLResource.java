@@ -87,6 +87,14 @@ public class CDLResource {
     private static final String editS3TemplateMsg = "<p>%s template has been edited.</p>";
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
+    private static final String resetTemplateMsg = "<p>Your import template has been reset.</p>";
+    private static final String resetTemplateErrorMsg = "<p>The template cannot be reset. %s Please contact support for further assistent</p>";
+    private static final String resetTemplateWarningMsg = "<p>%s Please confirm need to reset template.</p>";
+    private static final String validateAndUpdatePriorityMsg = "<p>System priorities has been updated.</p>";
+    private static final String validateAndUpdatePriorityErrorMsg = "<p>Update system priorities error!</p>";
+    private static final String validateAndUpdatePriorityWarningMsg = "<p>Updating the priorities of the " +
+            "following systems will update the matching and the merging behavior of data. This will affect the data " +
+            "imported going forward. <br> %s.</p>";
     private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
     private static final String updateS3ImportSystemPriorityMsg = "System priority has been updated.</p>";
 
@@ -287,6 +295,38 @@ public class CDLResource {
         }
     }
 
+    @PostMapping("/s3/template/reset")
+    @ApiOperation(value = "Reset template")
+    @ResponseBody
+    public Map<String, UIAction> resetTemplate(@RequestParam(value = "forceReset", required = false, defaultValue = "false") Boolean forceReset,
+                                               @RequestBody S3ImportTemplateDisplay templateDisplay) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+        try {
+            cdlService.resetTemplate(customerSpace.toString(), templateDisplay.getFeedType(), forceReset);
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    resetTemplateMsg);
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        } catch (LedpException e) {
+            log.error(String.format("Failed to reset import template: %s", e.getMessage()));
+            if (LedpCode.LEDP_40093.equals(e.getCode()) || LedpCode.LEDP_40089.equals(e.getCode())) {
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Modal, Status.Error,
+                        String.format(resetTemplateErrorMsg, e.getMessage()));
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+            } else if (LedpCode.LEDP_40090.equals(e.getCode()) || LedpCode.LEDP_40092.equals(e.getCode())) {
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Modal, Status.Warning,
+                        String.format(resetTemplateWarningMsg, e.getMessage()));
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+            } else {
+                log.error("Unknown error code: " + e.getCode());
+                throw e;
+            }
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to reset import template: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18245, new String[]{e.getMessage()});
+        }
+    }
+
     @PostMapping("/soft-delete")
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> softDelete(@RequestBody DeleteRequest deleteRequest) {
@@ -449,6 +489,34 @@ public class CDLResource {
         } catch (RuntimeException e) {
             log.error("Failed to Update system priority: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18223, new String[] {e.getMessage()});
+        }
+    }
+
+    @PostMapping("/s3import/system/list/validateandupdate")
+    @ResponseBody
+    @ApiOperation("Try update import system priority based on sequence with validation")
+    public Map<String, UIAction> validateAndUpdateSystemPriority(@RequestBody List<S3ImportSystem> systemList) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+        try {
+            if (cdlService.validateAndUpdateS3ImportSystemPriority(customerSpace.toString(), systemList)) {
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                        validateAndUpdatePriorityMsg);
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+            } else {
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error,
+                        validateAndUpdatePriorityErrorMsg);
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+            }
+        } catch (LedpException e) {
+            if (LedpCode.LEDP_40091.equals(e.getCode())) {
+                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Modal, Status.Info,
+                        String.format(validateAndUpdatePriorityWarningMsg, e.getMessage()));
+                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+            } else {
+                log.error("Unknown exception code: " + e.getCode());
+                throw e;
+            }
         }
     }
 

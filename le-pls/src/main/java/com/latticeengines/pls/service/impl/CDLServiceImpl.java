@@ -501,6 +501,7 @@ public class CDLServiceImpl implements CDLService {
                     display.setS3ImportSystem(
                             getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
                     display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
+                    display.setDataLoaded(Boolean.FALSE);
                     templates.add(display);
                 }
             } else {
@@ -522,6 +523,7 @@ public class CDLServiceImpl implements CDLService {
                         getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
                 display.setImportStatus(task.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
                         : task.getS3ImportStatus());
+                display.setDataLoaded(cdlProxy.hasPAConsumedActions(customerSpace, task.getSource(), task.getFeedType()));
                 templates.add(display);
             }
         }
@@ -1149,6 +1151,19 @@ public class CDLServiceImpl implements CDLService {
                 .collect(Collectors.toList());
         return importActions.stream().map(action -> getImportFile(customerSpace, action)).
                 filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    @Override
+    public void resetTemplate(String customerSpace, String feedType, Boolean forceReset) {
+        if (!cdlProxy.resetTemplate(customerSpace, "File", feedType, forceReset)) {
+            // could not locate template.
+            throw new RuntimeException("Cannot reset template!");
+        }
+    }
+
+    @Override
+    public boolean validateAndUpdateS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        return cdlProxy.validateAndUpdateSystemPriority(customerSpace, systemList);
     }
 
     private ImportFileInfo getImportFile(String customerSpace, Action action) {

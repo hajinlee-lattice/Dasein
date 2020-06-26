@@ -82,7 +82,7 @@ public abstract class BaseRestApiProxy {
 
     private long initialWaitMsec = 500;
     private double multiplier = 2D;
-    private int maxAttempts = 20;
+    private int maxAttempts = 10;
     private boolean useUri = false; // when using URI, url request parameters
                                     // need to be url-encoded.
 

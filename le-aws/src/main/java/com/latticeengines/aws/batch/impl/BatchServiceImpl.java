@@ -1,7 +1,7 @@
 package com.latticeengines.aws.batch.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,7 +34,13 @@ public class BatchServiceImpl implements BatchService {
     @Value("${hadoop.leds.version}")
     private String ledsVersion;
 
-    private AWSBatch awsBatch = null;
+    @Value("${hadoop.leds.version.p2}")
+    private String ledsP2Version;
+
+    @Value("${dataplatform.default.python.version}")
+    private String pythonVersion;
+
+    private AWSBatch awsBatch;
 
     @Inject
     public BatchServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.region}") String region) {
@@ -54,7 +60,7 @@ public class BatchServiceImpl implements BatchService {
     private SubmitJobRequest toJobRequest(JobRequest request) {
         SubmitJobRequest submitJobRequest = new SubmitJobRequest();
         submitJobRequest.setJobName(request.getJobName());
-        String definitionName = request.getJobDefinition() + "-" + ledsVersion.replaceAll("[.]", "-");
+        String definitionName = request.getJobDefinition() + "-" + getLedsVersion().replaceAll("[.]", "-");
         submitJobRequest.setJobDefinition(definitionName);
         submitJobRequest.setJobQueue(request.getJobQueue());
         submitJobRequest.setParameters(request.getParameters());
@@ -76,7 +82,7 @@ public class BatchServiceImpl implements BatchService {
     public boolean waitForCompletion(String jobId, long maxWaitTime) {
         long startTime = System.currentTimeMillis();
         DescribeJobsRequest describeJobsRequest = new DescribeJobsRequest();
-        describeJobsRequest.setJobs(Arrays.asList(jobId));
+        describeJobsRequest.setJobs(Collections.singletonList(jobId));
         String status = null;
         do {
             DescribeJobsResult jobResult = awsBatch.describeJobs(describeJobsRequest);
@@ -106,12 +112,20 @@ public class BatchServiceImpl implements BatchService {
     @Override
     public String getJobStatus(String jobId) {
         DescribeJobsRequest describeJobsRequest = new DescribeJobsRequest();
-        describeJobsRequest.setJobs(Arrays.asList(jobId));
+        describeJobsRequest.setJobs(Collections.singletonList(jobId));
         DescribeJobsResult jobResult = awsBatch.describeJobs(describeJobsRequest);
         JobDetail jobDetail = jobResult.getJobs().get(0);
         log.info(String.format("Job Id=%s Job Name=%s, Status=%s, Log Stream Name=%s", jobDetail.getJobId(),
                 jobDetail.getJobName(), jobDetail.getStatus(),
                 jobDetail.getContainer() != null ? jobDetail.getContainer().getLogStreamName() : ""));
         return jobDetail.getStatus();
+    }
+
+    private String getLedsVersion() {
+        if ("3".equals(pythonVersion)) {
+            return ledsVersion;
+        } else {
+            return ledsP2Version;
+        }
     }
 }

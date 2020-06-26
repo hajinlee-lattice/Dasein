@@ -1,6 +1,10 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +20,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -65,6 +70,7 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         result.setTeamId(metadataSegment.getTeamId());
         result.setName(metadataSegment.getName());
         result.setDisplayName(metadataSegment.getDisplayName());
+        result.setUpdated(metadataSegment.getUpdated());
         return result;
     }
 
@@ -72,29 +78,59 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         Play result = new Play();
         result.setName(play.getName());
         result.setDisplayName(play.getDisplayName());
+        result.setUpdated(play.getUpdated());
         return result;
+    }
+
+    private Map<String, TeamInfo> extractTeamMap(List<? extends HasTeamInfo> hasTeamInfos) {
+        Map<String, TeamInfo> teamMap = new HashMap<>();
+        for (HasTeamInfo hasTeamInfo : hasTeamInfos) {
+            String teamId = hasTeamInfo.getTeamId();
+            if (!TeamUtils.isGlobalTeam(teamId)) {
+                teamMap.putIfAbsent(teamId, new TeamInfo(Long.MIN_VALUE, new ArrayList<>()));
+                teamMap.get(teamId).getHasTeamInfos().add(hasTeamInfo);
+                if (hasTeamInfo instanceof HasAuditingFields) {
+                    HasAuditingFields hasAuditingFields = (HasAuditingFields) hasTeamInfo;
+                    long updated = hasAuditingFields.getUpdated().getTime();
+                    if (teamMap.get(teamId).getLastUsed() < updated) {
+                        teamMap.get(teamId).setLastUsed(updated);
+                    }
+                }
+            }
+        }
+        return teamMap;
+    }
+
+    private TeamInfo getTeamInfo(String teamId, Map<String, TeamInfo> teamInfoMap, List<TeamInfo> teamInfos) {
+        TeamInfo teamInfo = teamInfoMap.getOrDefault(teamId, new TeamInfo(Long.MIN_VALUE, new ArrayList<>()));
+        teamInfos.add(teamInfo);
+        return teamInfo;
     }
 
     @Override
     public List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
         String tenantId = MultiTenantContext.getTenant().getId();
         List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
-        List<MetadataSegment> metadataSegments = segmentProxy.getMetadataSegments(tenantId).stream()
-                .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())).map(metadataSegment -> simplifySegment(metadataSegment)).collect(Collectors.toList());
+        List<MetadataSegment> metadataSegments = segmentProxy.getMetadataSegments(tenantId);
         List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getAllRatingEngineSummaries(tenantId);
         List<Play> plays = playProxy.getPlays(tenantId);
-        Map<String, List<MetadataSegment>> teamMapForSegment = metadataSegments.stream()
-                .filter(metadataSegment -> !TeamUtils.isGlobalTeam(metadataSegment.getTeamId())).collect(Collectors.groupingBy(MetadataSegment::getTeamId));
-        Map<String, List<RatingEngineSummary>> teamMapForRatingEngine = ratingEngineSummaries.stream()
-                .filter(ratingEngineSummary -> !TeamUtils.isGlobalTeam(ratingEngineSummary.getTeamId())).collect(Collectors.groupingBy(RatingEngineSummary::getTeamId));
-        Map<String, List<Play>> teamMapForPlay = plays.stream().filter(play -> !TeamUtils.isGlobalTeam(play.getTeamId()))
-                .collect(Collectors.groupingBy(Play::getTeamId));
-        teamMapForPlay = teamMapForPlay.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(),
-                entry -> entry.getValue().stream().map(value -> simplifyPlay(value)).collect(Collectors.toList())));
+        Map<String, TeamInfo> teamMapForSegment = extractTeamMap(metadataSegments);
+        Map<String, TeamInfo> teamMapForRatingEngine = extractTeamMap(ratingEngineSummaries);
+        Map<String, TeamInfo> teamMapForPlay = extractTeamMap(plays);
         for (GlobalTeam globalTeam : globalTeams) {
-            globalTeam.setMetadataSegments(teamMapForSegment.getOrDefault(globalTeam.getTeamId(), new ArrayList<>()));
-            globalTeam.setRatingEngineSummaries(teamMapForRatingEngine.getOrDefault(globalTeam.getTeamId(), new ArrayList<>()));
-            globalTeam.setPlays(teamMapForPlay.getOrDefault(globalTeam.getTeamId(), new ArrayList<>()));
+            String teamId = globalTeam.getTeamId();
+            List<TeamInfo> teamInfos = new ArrayList<>();
+            TeamInfo segmentValue = getTeamInfo(teamId, teamMapForSegment, teamInfos);
+            globalTeam.setMetadataSegments(Arrays.asList(segmentValue.getHasTeamInfos().toArray(new MetadataSegment[0])).stream()
+                    .map(metadataSegment -> simplifySegment(metadataSegment)).collect(Collectors.toList()));
+            TeamInfo ratingEngineValue = getTeamInfo(teamId, teamMapForRatingEngine, teamInfos);
+            globalTeam.setRatingEngineSummaries(Arrays.asList(ratingEngineValue.getHasTeamInfos().toArray(new RatingEngineSummary[0])));
+            TeamInfo playValue = getTeamInfo(teamId, teamMapForPlay, teamInfos);
+            globalTeam.setPlays(Arrays.asList(playValue.getHasTeamInfos().toArray(new Play[0])).stream().map(play -> simplifyPlay(play)).collect(Collectors.toList()));
+            long lastUsed = teamInfos.stream().max(Comparator.comparing(teamInfo -> teamInfo.getLastUsed())).get().getLastUsed();
+            if (lastUsed > 0) {
+                globalTeam.setLastUsed(new Date(lastUsed));
+            }
         }
         return globalTeams;
     }
@@ -151,6 +187,34 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
                 TeamUtils.fillTeamId(hasTeamInfo);
                 TeamUtils.fillTeamInfo(hasTeamInfo, globalTeamMap.get(hasTeamInfo.getTeamId()), teamIds);
             }
+        }
+    }
+
+    private class TeamInfo {
+
+        private long lastUsed;
+
+        private List<HasTeamInfo> hasTeamInfos;
+
+        TeamInfo(long lastUsed, List<HasTeamInfo> hasTeamInfos) {
+            this.lastUsed = lastUsed;
+            this.hasTeamInfos = hasTeamInfos;
+        }
+
+        public long getLastUsed() {
+            return lastUsed;
+        }
+
+        public void setLastUsed(long lastUsed) {
+            this.lastUsed = lastUsed;
+        }
+
+        public List<HasTeamInfo> getHasTeamInfos() {
+            return hasTeamInfos;
+        }
+
+        public void setHasTeamInfos(List<HasTeamInfo> hasTeamInfos) {
+            this.hasTeamInfos = hasTeamInfos;
         }
     }
 }

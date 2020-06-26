@@ -158,7 +158,7 @@ public class FrontEndQueryCreator {
         if (cs != null) {
             log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, additionalContactAttrs, null);
+                    Predefined.Enrichment, null, additionalContactAttrs, null);
             log.info("attrsUsage for firstName & lastName=" + map);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> contactAttrs.add(key));
             log.info("temContactLookupFields=" + temContactLookupFields);

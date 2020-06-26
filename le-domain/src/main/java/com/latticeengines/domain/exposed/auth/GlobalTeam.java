@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.security.User;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GlobalTeam {
 
@@ -26,6 +27,11 @@ public class GlobalTeam {
 
     @JsonProperty("created")
     private Date created;
+
+    // this is different with last update time, last used time means
+    // latest update time on entity that associated with team.
+    @JsonProperty("lastUsed")
+    private Date lastUsed;
 
     @JsonProperty("TeamMembers")
     private List<User> teamMembers;
@@ -113,5 +119,13 @@ public class GlobalTeam {
 
     public void setRatingEngineSummaries(List<RatingEngineSummary> ratingEngineSummaries) {
         this.ratingEngineSummaries = ratingEngineSummaries;
+    }
+
+    public Date getLastUsed() {
+        return lastUsed;
+    }
+
+    public void setLastUsed(Date lastUsed) {
+        this.lastUsed = lastUsed;
     }
 }

@@ -2,6 +2,7 @@ package com.latticeengines.scoring.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,7 +33,6 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("scoringJobService")
@@ -45,9 +45,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Inject
     private Configuration yarnConfiguration;
-
-    @Inject
-    private EMREnvService emrEnvService;
 
     @Inject
     private S3Service s3Service;
@@ -73,19 +70,21 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
-    @Value("${dataplatform.python.conda.env}")
-    private String condaEnv;
-
-    @Value("${dataplatform.python.conda.env.ambari}")
-    private String condaEnvAmbari;
-
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${dataplatform.python.conda.env}")
+    private String condaEnv;
+
+    @Value("${dataplatform.python2.conda.env}")
+    private String condaEnvP2;
+
     @Value("${scoring.mapreduce.memory}")
     private int memory;
+
     @Value("${scoring.mapreduce.tasks.maximum}")
     private int maxTasks;
+
     @Inject
     private ManifestService manifestService;
 
@@ -93,7 +92,18 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public ApplicationId score(Properties properties) {
-        properties.setProperty(ScoringProperty.CONDA_ENV.name(), getCondaEnv());
+        if (StringUtils.isBlank(properties.getProperty(ScoringProperty.CONDA_ENV.name()))) {
+            properties.setProperty(ScoringProperty.CONDA_ENV.name(), condaEnv);
+            log.info("Conda env was not specified, set it to the default value {}", condaEnv);
+        } else {
+            log.info("Using specified conda env {}", properties.getProperty(ScoringProperty.CONDA_ENV.name()));
+        }
+        if (StringUtils.isBlank(properties.getProperty(ScoringProperty.CONDA_ENV_P2.name()))) {
+            properties.setProperty(ScoringProperty.CONDA_ENV_P2.name(), condaEnvP2);
+            log.info("Python 2 conda env was not specified, set it to the default value {}", condaEnv);
+        } else {
+            log.info("Using specified python 2 conda env {}", properties.getProperty(ScoringProperty.CONDA_ENV.name()));
+        }
         return jobService.submitMRJob(ScoringDaemonService.SCORING_JOB_TYPE, properties);
     }
 
@@ -147,20 +157,32 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name(), scoringConfig.getUniqueKeyColumn());
         properties.setProperty(ScoringProperty.TENANT_ID.name(), tenant);
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
-        properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
+        properties.setProperty(ScoringProperty.MODEL_GUID.name(), //
+                StringUtils.join(scoringConfig.getModelGuids(), ","));
+        properties.setProperty(ScoringProperty.MODEL_GUID_P2.name(), //
+                StringUtils.join(scoringConfig.getP2ModelGuids(), ","));
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
         properties.setProperty(ScoringProperty.SCORE_INPUT_TYPE.name(), scoringConfig.getScoreInputType().name());
         properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
                 String.valueOf(scoringConfig.readModelIdFromRecord()));
-        properties.setProperty(ScoringProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
+        properties.setProperty(ScoringProperty.CONDA_ENV_P2.name(), condaEnvP2);
+        properties.setProperty(ScoringProperty.CONDA_ENV.name(), condaEnv);
 
         List<String> cacheFiles;
         try {
             syncModelsFromS3ToHdfs(tenant);
             cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration, manifestService.getLedpStackVersion(), //
                     manifestService.getLedsVersion());
+            List<String> allGuids = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(scoringConfig.getModelGuids())) {
+                allGuids.addAll(scoringConfig.getModelGuids());
+            }
+            if (CollectionUtils.isNotEmpty(scoringConfig.getP2ModelGuids())) {
+                allGuids.addAll(scoringConfig.getP2ModelGuids());
+            }
             cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                    scoringConfig.getModelGuids(), Boolean.TRUE));
+                    allGuids, Boolean.TRUE));
+            log.info("cacheFiles={}", cacheFiles);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -216,11 +238,4 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         });
     }
 
-    private String getCondaEnv() {
-        if (Boolean.TRUE.equals(useEmr)) {
-            return condaEnv;
-        } else {
-            return condaEnvAmbari;
-        }
-    }
 }

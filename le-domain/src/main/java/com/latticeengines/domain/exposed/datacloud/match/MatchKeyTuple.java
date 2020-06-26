@@ -52,6 +52,12 @@ public class MatchKeyTuple implements Fact {
     @JsonProperty("Email")
     private String email;
 
+    @JsonProperty("Address")
+    private String address;
+
+    @JsonProperty("Address2")
+    private String address2;
+
     // A list of pairs of System Id name and value.
     @JsonProperty("SystemIds")
     private List<Pair<String, String>> systemIds;
@@ -170,6 +176,27 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
+    @MetricField(name = MatchConstants.ADDRESS_FIELD)
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+        refreshCachedStrings();
+    }
+
+    @MetricField(name = MatchConstants.ADDRESS2_FIELD)
+    public String getAddress2() {
+        return address2;
+    }
+
+    public void setAddress2(String address2) {
+        this.address2 = address2;
+        refreshCachedStrings();
+    }
+
+
     public List<Pair<String, String>> getSystemIds() {
         return systemIds;
     }
@@ -221,6 +248,14 @@ public class MatchKeyTuple implements Fact {
 
     public boolean hasEmail() {
         return StringUtils.isNotEmpty(email);
+    }
+
+    public boolean hasAddress() {
+        return StringUtils.isNotEmpty(address);
+    }
+
+    public boolean hasAddress2() {
+        return StringUtils.isNotEmpty(address2);
     }
 
     public boolean hasSystemIds() {
@@ -311,6 +346,12 @@ public class MatchKeyTuple implements Fact {
         if (CollectionUtils.isNotEmpty(systemIds)) {
             sb.append(String.format("%s=%s, ", MatchKey.SystemId.name(), systemIds.toString()));
         }
+        if (StringUtils.isNotEmpty(address)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.ADDRESS_FIELD, address));
+        }
+        if (StringUtils.isNotEmpty(address2)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.ADDRESS2_FIELD, address2));
+        }
         sb.append(")");
         serializedFormat = sb.toString();
     }
@@ -349,6 +390,15 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(email)) {
             appendKey(sb, MatchKey.Email.name());
         }
+        if (StringUtils.isNotEmpty(email)) {
+            appendKey(sb, MatchKey.Email.name());
+        }
+        if (StringUtils.isNotEmpty(address)) {
+            appendKey(sb, MatchKey.Address.name());
+        }
+        if (StringUtils.isNotEmpty(address)) {
+            appendKey(sb, MatchKey.Address2.name());
+        }
         uniqueIdForKey = sb.toString();
     }
 
@@ -385,6 +435,12 @@ public class MatchKeyTuple implements Fact {
         }
         if (StringUtils.isNotEmpty(email)) {
             appendKeyValue(sb, MatchKey.Email.name(), email);
+        }
+        if (StringUtils.isNotEmpty(address)) {
+            appendKeyValue(sb, MatchKey.Address.name(), address);
+        }
+        if (StringUtils.isNotEmpty(address)) {
+            appendKeyValue(sb, MatchKey.Address2.name(), address2);
         }
         uniqueIdForValue = sb.toString();
     }
@@ -465,6 +521,16 @@ public class MatchKeyTuple implements Fact {
 
         public Builder withSystemIds(List<Pair<String, String>> systemIds) {
             matchKeyTuple.setSystemIds(systemIds);
+            return this;
+        }
+
+        public Builder withAddress(String address) {
+            matchKeyTuple.setAddress(address);
+            return this;
+        }
+
+        public Builder withAddress2(String address2) {
+            matchKeyTuple.setAddress2(address2);
             return this;
         }
 

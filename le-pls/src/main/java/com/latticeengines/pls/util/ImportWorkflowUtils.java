@@ -57,10 +57,6 @@ public final class ImportWorkflowUtils {
     }
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowUtils.class);
 
-    // TODO(jwinter): Reconsider if the Spec section for Custom Fields should be indicated in a different manner
-    //     rather than hard coded.
-    // String representing the section of the template reserved for non-standard customer generated fields.
-
     protected static final String ENTITY_ACCOUNT = "Account";
     protected static final String ENTITY_CONTACT = "Contact";
     protected static final String ENTITY_TRANSACTION = "Transaction";
@@ -68,16 +64,11 @@ public final class ImportWorkflowUtils {
 
     protected static final String SPLIT_CHART = "_";
 
-
-
-
     public static void validateFieldDefinitionRequestParameters(
             String requestType, String systemName, String systemType, String systemObject, String fileImportId)
             throws LedpException {
         log.info("Field Definition Request Parameters:\n   systemName: " + systemName + "\n   systemType: " +
                 systemType + "\n   systemObject: " + systemObject + "\n   fileImportId: " + fileImportId);
-
-        // TODO(jwinter): Figure out what validation is needed.
 
         if (StringUtils.isBlank(systemName)) {
             log.error("systemName is null or blank");
@@ -252,6 +243,9 @@ public final class ImportWorkflowUtils {
             return fieldDefinitionsRecord;
         }
 
+        // Get the name of the Spec Section for putting Custom (user-defined) columns.
+        String customFieldsSectionName = spec.provideCustomFieldsSectionName();
+
         // Get column header names from imported file.
         Set<String> columnHeaderNames = resolver.getHeaderFields();
 
@@ -366,7 +360,7 @@ public final class ImportWorkflowUtils {
         // Spec and add them to the FieldDefinitionRecord as Custom Fields.
         log.info("Add existing Custom Fields to FieldDefinitionsRecord:");
         for (FieldDefinition existingDefinition : existingFieldNameToDefinitionMap.values()) {
-            addFieldDefinitionToRecord(existingDefinition, FieldDefinitionSectionName.Custom_Fields.getName(), fieldDefinitionsRecord);
+            addFieldDefinitionToRecord(existingDefinition, customFieldsSectionName, fieldDefinitionsRecord);
         }
 
         String schemaInterpretationString = getSchemaInterpretationFromSpec(spec).name();
@@ -377,7 +371,7 @@ public final class ImportWorkflowUtils {
         for (String columnName : columnHeaderNames) {
             FieldDefinition recordDefinition = createNewCustomFieldDefinition(resolver, columnName,
                     schemaInterpretationString);
-            addFieldDefinitionToRecord(recordDefinition, FieldDefinitionSectionName.Custom_Fields.getName(), fieldDefinitionsRecord);
+            addFieldDefinitionToRecord(recordDefinition, customFieldsSectionName, fieldDefinitionsRecord);
         }
         return fieldDefinitionsRecord;
     }
@@ -417,6 +411,8 @@ public final class ImportWorkflowUtils {
 
         // Iteration through all the sections in the Spec.
         ImportWorkflowSpec spec = fetchResponse.getImportWorkflowSpec();
+        // Get the name of the Spec Section for putting Custom (user-defined) columns.
+        String customFieldsSectionName = spec.provideCustomFieldsSectionName();
         log.info("Processing Spec for SystemType {} and SystemObject {}", spec.getSystemType(), spec.getSystemObject());
         for (Map.Entry<String, List<FieldDefinition>> section : spec.getFieldDefinitionsRecordsMap().entrySet()) {
             if (CollectionUtils.isEmpty(section.getValue())) {
@@ -475,7 +471,7 @@ public final class ImportWorkflowUtils {
             FieldDefinition recordDefinition = createDefinitionFromExisting(existingMap.get(fieldName), null,
                     Boolean.FALSE,
                     autodetectionMap.get(existingMap.get(fieldName).getColumnName()));
-            addFieldDefinitionToRecord(recordDefinition, FieldDefinitionSectionName.Custom_Fields.getName(), record);
+            addFieldDefinitionToRecord(recordDefinition, customFieldsSectionName, record);
         }
 
         // Iterate through the remaining column header names, which did not match any field in the Spec, and add them
@@ -483,7 +479,7 @@ public final class ImportWorkflowUtils {
         log.info("Add new Custom Fields to FieldDefinitionsRecord:");
         for (String columnName : columnHeaderNamesForNewFields) {
             FieldDefinition recordDefinition = createNewCustomFieldDefinition(autodetectionMap.get(columnName));
-            addFieldDefinitionToRecord(recordDefinition, FieldDefinitionSectionName.Custom_Fields.getName(), record);
+            addFieldDefinitionToRecord(recordDefinition, customFieldsSectionName, record);
         }
     }
 
@@ -719,6 +715,9 @@ public final class ImportWorkflowUtils {
             return fieldDefinitionsRecord;
         }
 
+        // Get the name of the Spec Section for putting Custom (user-defined) columns.
+        String customFieldsSectionName = spec.provideCustomFieldsSectionName();
+
         // Get column header names from imported file.
         Set<String> columnHeaderNames = resolver.getHeaderFields();
         // Track all the column header names that match with field definitions from the Spec.
@@ -790,7 +789,7 @@ public final class ImportWorkflowUtils {
         for (String columnName : columnHeaderNames) {
             FieldDefinition recordDefinition = createNewCustomFieldDefinition(resolver, columnName,
                     schemaInterpretationString);
-            addFieldDefinitionToRecord(recordDefinition, FieldDefinitionSectionName.Custom_Fields.getName(), fieldDefinitionsRecord);
+            addFieldDefinitionToRecord(recordDefinition, customFieldsSectionName, fieldDefinitionsRecord);
         }
         return fieldDefinitionsRecord;
     }
@@ -798,19 +797,26 @@ public final class ImportWorkflowUtils {
     public static ValidateFieldDefinitionsResponse generateValidationResponse(
             Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap,
             Map<String, FieldDefinition> autoDetectionResultsMap,
-            Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap,
+            ImportWorkflowSpec importWorkflowSpec,
             Map<String, FieldDefinition> existingFieldDefinitionMap,
             Map<String, OtherTemplateData> otherTemplateDataMap,
             MetadataResolver resolver) {
 
-        boolean skipAutoDetectionCheck = resolver == null || MapUtils.isEmpty(autoDetectionResultsMap);
-                existingFieldDefinitionMap = existingFieldDefinitionMap == null ? new HashMap<>() : existingFieldDefinitionMap;
-        otherTemplateDataMap = otherTemplateDataMap == null ? new HashMap<>() : otherTemplateDataMap;
-        autoDetectionResultsMap = autoDetectionResultsMap == null ? new HashMap<>() : autoDetectionResultsMap;
+        boolean skipAutoDetectionCheck = (resolver == null || MapUtils.isEmpty(autoDetectionResultsMap));
+        autoDetectionResultsMap = (autoDetectionResultsMap == null ? new HashMap<>() : autoDetectionResultsMap);
+        Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap =
+                importWorkflowSpec.getFieldDefinitionsRecordsMap();
+        existingFieldDefinitionMap = (existingFieldDefinitionMap == null ?
+                new HashMap<>() : existingFieldDefinitionMap);
+        otherTemplateDataMap = (otherTemplateDataMap == null ? new HashMap<>() : otherTemplateDataMap);
+
+        // Get the name of the Spec Section for putting Custom (user-defined) columns.
+        String customFieldsSectionName = importWorkflowSpec.provideCustomFieldsSectionName();
 
         ValidateFieldDefinitionsResponse response = new ValidateFieldDefinitionsResponse();
-        Set<String> unMappedColumnNames = fieldDefinitionsRecordsMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(),
-                new ArrayList<>()).stream().filter(definition -> Boolean.TRUE.equals(definition.isInCurrentImport()) &&
+        Set<String> unMappedColumnNames = fieldDefinitionsRecordsMap.getOrDefault(
+                customFieldsSectionName, new ArrayList<>())
+                .stream().filter(definition -> Boolean.TRUE.equals(definition.isInCurrentImport()) &&
                 StringUtils.isNotBlank(definition.getColumnName()) && !Boolean.TRUE.equals(definition.getIgnored()))
                 .map(FieldDefinition::getColumnName).collect(Collectors.toSet());
 
@@ -823,7 +829,8 @@ public final class ImportWorkflowUtils {
             String sectionName = entry.getKey();
             List<FieldDefinition> definitions = entry.getValue();
             List<FieldValidationMessage> validations = new ArrayList<>();
-            if (FieldDefinitionSectionName.Custom_Fields.getName().equals(sectionName) || FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)
+            // First check fields in the customer provided sections, ie. Custom Fields and user provided IDs.
+            if (customFieldsSectionName.equals(sectionName) || FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)
                     || FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName)) {
                 // field type and date/time format for customer field, Warning
                 for (FieldDefinition definition : definitions) {
@@ -832,23 +839,25 @@ public final class ImportWorkflowUtils {
                     if (!Boolean.TRUE.equals(definition.getIgnored()) && Boolean.TRUE.equals(definition.isInCurrentImport())) {
                         if (StringUtils.isBlank(columnName)) {
                             validations.add(new FieldValidationMessage(fieldName,
-                                    definition.getColumnName(), String.format("Column name shouldn't be empty in " +
-                                            "section %s.", sectionName), FieldValidationMessage.MessageLevel.ERROR));
+                                    definition.getColumnName(), String.format(
+                                            "Column name shouldn't be empty in section %s.", sectionName),
+                                    FieldValidationMessage.MessageLevel.ERROR));
                             continue;
                         }
                         FieldDefinition autoDetectedFieldDefinition =
                                 autoDetectionResultsMap.get(columnName);
                         if (!skipAutoDetectionCheck && autoDetectedFieldDefinition == null) {
                             validations.add(new FieldValidationMessage(fieldName,
-                                    definition.getColumnName(), String.format("auto-detected field definition " +
-                                    "doesn't exist for column %s.", columnName),
+                                    definition.getColumnName(), String.format(
+                                            "auto-detected field definition doesn't exist for column %s.", columnName),
                                     FieldValidationMessage.MessageLevel.ERROR));
                             continue;
                         }
                         // check type consistence
-                        if (!skipAutoDetectionCheck && !checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
-                                definition) && !FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName)
-                                && !FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)) {
+                        if (!skipAutoDetectionCheck && !checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(
+                                autoDetectedFieldDefinition, definition) &&
+                                !FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName) &&
+                                !FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)) {
                             String message = String.format("column %s is set as %s but appears to only have %s values",
                                     columnName, definition.getFieldType(),
                                     autoDetectedFieldDefinition.getFieldType());
@@ -868,11 +877,11 @@ public final class ImportWorkflowUtils {
                     checkMultipleCustomFieldMappedToLatticeField(validations, mappedLatticeField,
                             fieldName, columnName);
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
-                            validations, fieldNameInExistingAndCurrentTemplate, sectionName);
+                            validations, fieldNameInExistingAndCurrentTemplate, sectionName, customFieldsSectionName);
                     checkIDFields(definition, sectionName, validations);
                 }
             } else {
-                // check for lattice attribute
+                // Run checks for Standard (Lattice) Fields.
                 List<FieldDefinition> specDefinitions = specFieldDefinitionsRecordsMap.getOrDefault(sectionName,
                         new ArrayList<>());
                 Set<String> requiredFieldNames =
@@ -897,12 +906,14 @@ public final class ImportWorkflowUtils {
                     if (specDefinition == null) {
                         // check field in template not in spec should be moved
                         if (MapUtils.isNotEmpty(existingFieldDefinitionMap) && existingFieldDefinitionMap.get(fieldName) != null) {
-                            String message = String.format("field name %s of %s in template not in spec should be " +
-                                    "moved to Custom Fields section.", fieldName, sectionName);
+                            String message = String.format(
+                                    "field name %s of %s in template not in spec should be moved to Custom Fields section.",
+                                    fieldName, sectionName);
                             validations.add(new FieldValidationMessage(fieldName,
                                     definition.getColumnName(), message, FieldValidationMessage.MessageLevel.ERROR));
                         } else {
-                            String message = String.format("field name %s not in spec is in %s section.", fieldName, sectionName);
+                            String message = String.format("field name %s not in spec is in %s section.", fieldName,
+                                    sectionName);
                             validations.add(new FieldValidationMessage(fieldName,
                                     definition.getColumnName(), message, FieldValidationMessage.MessageLevel.ERROR));
                         }
@@ -914,35 +925,35 @@ public final class ImportWorkflowUtils {
                     if (Boolean.TRUE.equals(definition.isInCurrentImport())) {
                         if (StringUtils.isBlank(columnName)) {
                             validations.add(new FieldValidationMessage(fieldName,
-                                    definition.getColumnName(), String.format("Column name shouldn't be empty for " +
-                                    "%s in section %s.", fieldName, sectionName),
+                                    definition.getColumnName(), String.format(
+                                            "Column name shouldn't be empty for %s in section %s.", fieldName,
+                                    sectionName),
                                     FieldValidationMessage.MessageLevel.ERROR));
                             continue;
                         }
                         FieldDefinition autoDetectedFieldDefinition = autoDetectionResultsMap.get(columnName);
                         if (!skipAutoDetectionCheck && autoDetectedFieldDefinition == null) {
                             validations.add(new FieldValidationMessage(fieldName,
-                                    definition.getColumnName(), String.format("auto-detected field definition " +
-                                    "doesn't exist for column %s in section %s.", columnName, sectionName),
+                                    definition.getColumnName(),
+                                    String.format("auto-detected field definition doesn't exist for column %s in section %s.",
+                                            columnName, sectionName),
                                     FieldValidationMessage.MessageLevel.ERROR));
                             continue;
                         }
-                        // Error/Warning if the auto-detected fieldType based on column data doesn’t match the Spec
-                        // defined fieldType of a Lattice Field
-                        if (!skipAutoDetectionCheck && !checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
-                                definition) && !FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName)
-                                && !FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
+                        // Generate ERROR if the auto-detected fieldType based on column data does not match the Spec
+                        // defined fieldType of a Standard Field.
+                        if (!skipAutoDetectionCheck &&
+                                !checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
+                                        specDefinition) &&
+                                !FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName) &&
+                                !FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
                             String message = String.format("auto-detected fieldType %s based on column data %s " +
-                                            "doesn’t match the fieldType %s of %s in current template in " +
-                                            "section %s.",
+                                            "doesn’t match the fieldType %s of %s in the Spec in section %s.",
                                     autoDetectedFieldDefinition.getFieldType(),
-                                    autoDetectedFieldDefinition.getColumnName(), definition.getFieldType(),
-                                    definition.getFieldName(), sectionName);
-                            if (checkLegalFieldTypeConversions(autoDetectedFieldDefinition.getFieldType(),
-                                    definition.getFieldType()))  {
-                                validations.add(new FieldValidationMessage(fieldName,
-                                        columnName, message, FieldValidationMessage.MessageLevel.WARNING));
-                            } else {
+                                    autoDetectedFieldDefinition.getColumnName(), specDefinition.getFieldType(),
+                                    specDefinition.getFieldName(), sectionName);
+                            if (!checkLegalFieldTypeConversions(autoDetectedFieldDefinition.getFieldType(),
+                                    specDefinition.getFieldType()))  {
                                 validations.add(new FieldValidationMessage(fieldName,
                                         columnName, message, FieldValidationMessage.MessageLevel.ERROR));
                             }
@@ -959,8 +970,9 @@ public final class ImportWorkflowUtils {
                         for (String unMappedColumnName : unMappedColumnNames) {
                             if (ImportWorkflowUtils.doesColumnNameMatch(unMappedColumnName,
                                     specDefinition.getMatchingColumnNames())) {
-                                String message = String.format("Column name %s matched Lattice Field %s, but they are" +
-                                        " not mapped to each other", unMappedColumnName, fieldName);
+                                String message = String.format(
+                                        "Column name %s matched Lattice Field %s, but they are not mapped to each other",
+                                        unMappedColumnName, fieldName);
                                 validations.add(new FieldValidationMessage(fieldName,
                                         columnName, message, FieldValidationMessage.MessageLevel.WARNING));
                                 break;
@@ -983,8 +995,9 @@ public final class ImportWorkflowUtils {
                     }
                     // change field type for standard field , Error
                     if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(specDefinition, definition)) {
-                        String message = String.format("the current template has fieldType %s while the Spec has " +
-                                "fieldType %s for field %s", definition.getFieldType(), specDefinition.getFieldType(),
+                        String message = String.format(
+                                "the current template has fieldType %s while the Spec has fieldType %s for field %s",
+                                definition.getFieldType(), specDefinition.getFieldType(),
                                 specDefinition.getScreenName());
                         validations.add(new FieldValidationMessage(fieldName,
                                 columnName, message, FieldValidationMessage.MessageLevel.ERROR));
@@ -992,7 +1005,7 @@ public final class ImportWorkflowUtils {
                     // check multiple custom field mapped to the same lattice field(standard)
                     checkMultipleCustomFieldMappedToLatticeField(validations, mappedLatticeField, fieldName, columnName);
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
-                            validations, fieldNameInExistingAndCurrentTemplate, sectionName);
+                            validations, fieldNameInExistingAndCurrentTemplate, sectionName, customFieldsSectionName);
                     checkIDFields(definition, sectionName, validations);
 
                 }
@@ -1010,8 +1023,8 @@ public final class ImportWorkflowUtils {
             }
             response.addFieldValidationMessages(sectionName, validations, true);
         }
-        generateValidationForMissingDefinitionInTemplate(existingFieldDefinitionMap, fieldNameInExistingAndCurrentTemplate,
-                response);
+        generateValidationForMissingDefinitionInTemplate(existingFieldDefinitionMap,
+                fieldNameInExistingAndCurrentTemplate, response, customFieldsSectionName);
 
         setValidationResult(response);
         return response;
@@ -1216,14 +1229,16 @@ public final class ImportWorkflowUtils {
      * must match other template and/or batch store.  If not, issue error.
      */
     private static void checkInExistingAndOtherTemplate(FieldDefinition definition,
-                                                Map<String, FieldDefinition> existingFieldDefinitionMap,
-                                                Map<String, OtherTemplateData> otherTemplateDataMap,
-                                                List<FieldValidationMessage> validations,
-                                                Set<String> fieldNameInExistingAndCurrentTemplate, String sectionName) {
+                                                        Map<String, FieldDefinition> existingFieldDefinitionMap,
+                                                        Map<String, OtherTemplateData> otherTemplateDataMap,
+                                                        List<FieldValidationMessage> validations,
+                                                        Set<String> fieldNameInExistingAndCurrentTemplate,
+                                                        String sectionName,
+                                                        String customFieldsSectionName) {
         String fieldName = definition.getFieldName();
         String columnName = definition.getColumnName();
         UserDefinedType type = definition.getFieldType();
-        if (FieldDefinitionSectionName.Custom_Fields.getName().equals(sectionName) && StringUtils.isBlank(fieldName)) {
+        if (customFieldsSectionName.equals(sectionName) && StringUtils.isBlank(fieldName)) {
             fieldName = ImportWorkflowSpecUtils.USER_PREFIX + columnName;
         }
         OtherTemplateData otherTemplateData = otherTemplateDataMap.get(fieldName);
@@ -1261,8 +1276,9 @@ public final class ImportWorkflowUtils {
      */
     private static void generateValidationForMissingDefinitionInTemplate(Map<String, FieldDefinition> existingFieldDefinitionMap,
                                                                          Set<String> fieldNameInExistingAndCurrentTemplate,
-                                                                         ValidateFieldDefinitionsResponse response) {
-        //No existing field should be removed.
+                                                                         ValidateFieldDefinitionsResponse response,
+                                                                         String customFieldsSectionName) {
+        // No existing field should be removed.
         if (MapUtils.isNotEmpty(existingFieldDefinitionMap)) {
             Set<String> allFieldNamesInExistingTemplate = existingFieldDefinitionMap.keySet();
             Set<String> fieldNameInExistingTemplateNotInCurrent =
@@ -1270,8 +1286,8 @@ public final class ImportWorkflowUtils {
                             .collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(fieldNameInExistingTemplateNotInCurrent)) {
                 List<FieldValidationMessage> validations =
-                        response.getFieldValidationMessages(FieldDefinitionSectionName.Custom_Fields.getName()) == null ? new ArrayList<>() :
-                                response.getFieldValidationMessages(FieldDefinitionSectionName.Custom_Fields.getName());
+                        response.getFieldValidationMessages(customFieldsSectionName) == null ? new ArrayList<>() :
+                                response.getFieldValidationMessages(customFieldsSectionName);
                 fieldNameInExistingTemplateNotInCurrent.forEach(fieldName -> {
                     FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.get(fieldName);
                     String columnName = existingFieldDefinition.getColumnName();
@@ -1281,7 +1297,7 @@ public final class ImportWorkflowUtils {
                             columnName, message,
                             FieldValidationMessage.MessageLevel.ERROR));
                 });
-                response.addFieldValidationMessages(FieldDefinitionSectionName.Custom_Fields.getName(), validations, true);
+                response.addFieldValidationMessages(customFieldsSectionName, validations, true);
             }
         }
     }

@@ -154,7 +154,12 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
     SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
-        jobConfig.setWorkspace(getRandomWorkspace());
+        if (customerSpace == null) {
+            customerSpace = parseCustomerSpace(configuration);
+        }
+        if (StringUtils.isBlank(jobConfig.getWorkspace())) {
+            jobConfig.setWorkspace(getRandomWorkspace());
+        }
         String configStr = JsonUtils.serialize(jobConfig);
         if (configStr.length() > 1000) {
             configStr = "long string";
@@ -184,6 +189,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         String workSpace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
         workSpaces.add(workSpace);
         return workSpace;
+    }
+
+    protected void keepRandomWorkspace(String workSpace) {
+        workSpaces.remove(workSpace);
     }
 
     protected void clearTempData(DataUnit tempData) {

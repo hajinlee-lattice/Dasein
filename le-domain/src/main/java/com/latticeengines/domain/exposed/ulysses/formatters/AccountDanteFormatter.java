@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
@@ -69,6 +70,14 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
 
     @Override
     public String format(Map<String, Object> entity) {
+        enrichForDante(entity);
+        return JsonUtils.serialize(entity);
+    }
+
+    public void enrichForDante(Map<String, Object> entity) {
+        if (MapUtils.isEmpty(entity))
+            return;
+
         if (!entity.containsKey(accountIdColumnName) && !entity.containsKey(accountIdColumnName.toLowerCase())) {
             throw new LedpException(LedpCode.LEDP_39004);
         }
@@ -108,7 +117,6 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
             entity.remove(DanteAccountSegmentProperty.IsSegment.toLowerCase());
         }
         resetIsEntityMatchEnabled();
-        return JsonUtils.serialize(entity);
     }
 
     private void resetIsEntityMatchEnabled() {

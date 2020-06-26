@@ -16,6 +16,7 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -121,7 +122,8 @@ public class HdfsS3ImporterExporter implements Runnable {
 
     private Configuration createConfiguration() {
         Configuration hadoopConfiguration = ConfigurationUtils.createFrom(distCpConfiguration, new Properties());
-        String jobName = StringUtils.isNotBlank(tableName) ? tenantId + "~" + tableName : tenantId;
+        String jobName = StringUtils.isNotBlank(tableName) ? //
+                tenantId + "~" + tableName : NamingUtils.timestamp(tenantId);
         hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
         return hadoopConfiguration;
     }

@@ -371,6 +371,11 @@ public enum LedpCode {
     LEDP_18242("Team name can't be empty."), //
     LEDP_18243("Could not download result of export job {0}, download path can't be found, please try to export and download it again."), //
 
+    LEDP_18244("Template(s) {0} need to be reset before reset template {1}"), //
+    LEDP_18245("Cannot reset template {0}."), //
+    LEDP_18246("You have made changes to the System Priority that may affect the match and merge behavior. New data from these systems could be matched differently then previous data."), //
+    LEDP_18247("Template {0} already has data imported, cannot be reset!"), //
+
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
     LEDP_19001("Unauthorized."), //
@@ -878,6 +883,13 @@ public enum LedpCode {
     LEDP_40085("Display name of attribute group can't be empty."), //
     LEDP_40086("Attribute group name \"{0}\" already exists."), //
     LEDP_40087("Can't delete attribute group \"{0}\"."), //
+    LEDP_40088("Too few training records to learn from - the model needs at least {0} records, now has {1}. Try modeling on " //
+            + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."), //
+    LEDP_40089("Current template is being reference by {0}."), //
+    LEDP_40090("Template has unconsumed actions."), //
+    LEDP_40091("{0}"), //
+    LEDP_40092("Template linked to {0}."), //
+    LEDP_40093("Current template has import action consumed by PA."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //

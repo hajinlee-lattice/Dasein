@@ -4,12 +4,10 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.OR
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -35,7 +33,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
@@ -213,9 +210,7 @@ public class PivotScoreAndEventDataFlow
             }
         });
         if (!Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
-            putObjectInContext(BUCKETED_SCORE_SUMMARIES, bucketedScoreSummaryMap);
-            putObjectInContext(MODEL_GUID_ENGINE_ID_MAP, modelGuidToEngineIdMap);
-            mergeAggregatedMaps();
+            mergeAggregatedMaps(bucketedScoreSummaryMap);
         }
     }
 
@@ -353,23 +348,10 @@ public class PivotScoreAndEventDataFlow
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
-                RatingModelContainer.class);
-        if (allContainers == null) {
-            return Collections.emptyList();
-        }
-        return allContainers.stream() //
-                .filter(container -> {
-                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-                }).collect(Collectors.toList());
+        return getListObjectFromContext(ITERATION_AI_RATING_MODELS, RatingModelContainer.class);
     }
 
-    private void mergeAggregatedMaps() {
-        Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = //
-                getMapObjectFromContext(BUCKETED_SCORE_SUMMARIES, String.class, BucketedScoreSummary.class);
-
+    private void mergeAggregatedMaps(Map<String, BucketedScoreSummary> bucketedScoreSummaryMap) {
         if (MapUtils.isNotEmpty(bucketedScoreSummaryMap)) {
             Map<String, BucketedScoreSummary> bucketedScoreSummaryMapAgg = getMapObjectFromContext(//
                     BUCKETED_SCORE_SUMMARIES_AGG, String.class, BucketedScoreSummary.class);

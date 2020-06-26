@@ -22,8 +22,8 @@
       {
         "fieldName": "StageName",
         "fieldType": "TEXT",
-        "columnName": "Stage Name",
-        "screenName": "Stage Name",
+        "columnName": "StageName",
+        "screenName": "StageName",
         "matchingColumnNames": [
           "StageName",
           "STAGE",

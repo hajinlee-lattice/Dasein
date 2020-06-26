@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
@@ -43,5 +44,9 @@ public class ProjectServiceImpl implements ProjectService {
         projectProxy.deleteProject(customerSpace, projectId);
     }
 
+    @Override
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
+        return projectProxy.getDropFolderAccessByProjectId(customerSpace, projectId);
+    }
 
 }

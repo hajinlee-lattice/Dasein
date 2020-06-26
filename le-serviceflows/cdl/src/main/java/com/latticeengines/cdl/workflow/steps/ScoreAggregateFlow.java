@@ -1,11 +1,9 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJobConfig;
@@ -46,7 +43,7 @@ public class ScoreAggregateFlow extends RunSparkJob<ScoreAggregateFlowConfigurat
 
     @Override
     protected ScoreAggregateJobConfig configureJob(ScoreAggregateFlowConfiguration stepConfiguration) {
-    
+
         ScoreAggregateJobConfig jobConfig = new ScoreAggregateJobConfig();
         jobConfig.scoreResultsTableName = getScoreResultTableName();
         Table scoreResultTable = metadataProxy.getTable(customerSpace.toString(), jobConfig.scoreResultsTableName);
@@ -68,13 +65,13 @@ public class ScoreAggregateFlow extends RunSparkJob<ScoreAggregateFlowConfigurat
             jobConfig.scoreFieldMap = scoreFieldMap;
             jobConfig.modelGuidField = MODEL_GUID_FIELD;
         }
-        
+
         List<DataUnit> inputUnits = new ArrayList<>();
         inputUnits.add(scoreResultTable.toHdfsDataUnit("scoreResult"));
         jobConfig.setInput(inputUnits);
         return jobConfig;
     }
-    
+
     @Override
     protected void postJobExecution(SparkJobResult result) {
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration,
@@ -107,17 +104,7 @@ public class ScoreAggregateFlow extends RunSparkJob<ScoreAggregateFlowConfigurat
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
-        if (CollectionUtils.isEmpty(allContainers)) {
-            return Collections.emptyList();
-        }
-        return allContainers.stream() //
-                .filter(container -> {
-                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-                }) //
-                .collect(Collectors.toList());
+        return getListObjectFromContext(ITERATION_AI_RATING_MODELS, RatingModelContainer.class);
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -49,6 +50,12 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         String urlPattern = "/{projectId}";
         String url = constructUrl(urlPattern, projectId);
         delete("deleteProject", url);
+    }
+
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String projectId) {
+        String urlPattern = "/projectId/{projectId}/dropFolderAccess";
+        String url = constructUrl(urlPattern, projectId);
+        return get("getDropFolderAccessByProjectId", url, null, GrantDropBoxAccessResponse.class);
     }
 
 }

@@ -54,9 +54,15 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
                     properties.getProperty(ScoringProperty.USE_SCOREDERIVATION.name()));
             config.set(ScoringProperty.CONDA_ENV.name(),
                     properties.getProperty(ScoringProperty.CONDA_ENV.name()));
+            config.set(ScoringProperty.CONDA_ENV_P2.name(),
+                    properties.getProperty(ScoringProperty.CONDA_ENV_P2.name()));
             if (properties.containsKey(ScoringProperty.MODEL_GUID.name())) {
                 config.set(ScoringProperty.MODEL_GUID.name(),
                         properties.getProperty(ScoringProperty.MODEL_GUID.name()));
+            }
+            if (properties.containsKey(ScoringProperty.MODEL_GUID_P2.name())) {
+                config.set(ScoringProperty.MODEL_GUID_P2.name(),
+                        properties.getProperty(ScoringProperty.MODEL_GUID_P2.name()));
             }
 
             config.set(ScoringProperty.SCORE_INPUT_TYPE.name(),
@@ -77,9 +83,9 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
             AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
             AvroKeyInputFormat.setMaxInputSplitSize(mrJob,
-                    Long.valueOf(properties.getProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name())));
+                    Long.parseLong(properties.getProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name())));
             AvroKeyInputFormat.setMinInputSplitSize(mrJob,
-                    Long.valueOf(properties.getProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name())));
+                    Long.parseLong(properties.getProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name())));
 
             List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, ".*.avro$");
             String filename = files.size() > 0 ? files.get(0) : null;

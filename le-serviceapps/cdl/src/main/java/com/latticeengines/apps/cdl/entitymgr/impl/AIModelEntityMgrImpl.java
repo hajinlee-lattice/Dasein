@@ -113,6 +113,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
                 aiModel.getModelingYarnJobId() != null ? aiModel.getModelingYarnJobId().toString() : null);
         retrievedAIModel.setModelingJobStatus(aiModel.getModelingJobStatus());
         retrievedAIModel.setModelSummaryId(aiModel.getModelSummaryId());
+        retrievedAIModel.setPythonMajorVersion(aiModel.getPythonMajorVersion());
         retrievedAIModel.getAdvancedModelingConfig().copyConfig(aiModel.getAdvancedModelingConfig());
     }
 

@@ -77,7 +77,7 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
 
     private ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testTransformation() {
         dataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
         prepareMatch();

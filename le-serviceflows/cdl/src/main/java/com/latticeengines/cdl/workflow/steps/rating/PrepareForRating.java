@@ -94,15 +94,28 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     .filter(container -> container.getModel() != null) //
                     .sequential().collectList().block();
             if (CollectionUtils.isNotEmpty(activeModels)) {
-                List<String> modelGuids = activeModels.stream().filter(container -> {
+                List<RatingModelContainer> aiContainers = activeModels.stream().filter(container -> {
                     RatingEngineType engineType = container.getEngineSummary().getType();
                     return RatingEngineType.CUSTOM_EVENT.equals(engineType)
                             || RatingEngineType.CROSS_SELL.equals(engineType);
-                }).map(container -> {
-                    AIModel aiModel = (AIModel) container.getModel();
-                    return aiModel.getModelSummaryId();
                 }).collect(Collectors.toList());
+                List<String> modelGuids = aiContainers.stream() //
+                        .map(container -> (AIModel) container.getModel()) //
+                        .map(AIModel::getModelSummaryId) //
+                        .collect(Collectors.toList());
                 putStringValueInContext(SCORING_MODEL_ID, StringUtils.join(modelGuids, "|"));
+                List<String> p2ModelGuids = aiContainers.stream() //
+                        .map(container -> (AIModel) container.getModel()) //
+                        .filter(aiModel -> !"3".equals(aiModel.getPythonMajorVersion())) //
+                        .map(AIModel::getModelSummaryId) //
+                        .collect(Collectors.toList());
+                putStringValueInContext(SCORING_MODEL_ID_P2, StringUtils.join(p2ModelGuids, "|"));
+                List<String> p3ModelGuids = aiContainers.stream() //
+                        .map(container -> (AIModel) container.getModel()) //
+                        .filter(aiModel -> "3".equals(aiModel.getPythonMajorVersion())) //
+                        .map(AIModel::getModelSummaryId) //
+                        .collect(Collectors.toList());
+                putStringValueInContext(SCORING_MODEL_ID_P3, StringUtils.join(p3ModelGuids, "|"));
             }
             Set<String> existingEngineIds = new HashSet<>();
             DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);

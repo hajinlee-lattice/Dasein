@@ -142,13 +142,13 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     + ", the columnMetadata size is=" + fieldMappingMetadata.size());
         }
 
-        Set<Lookup> accountLookups = buildLookupsByEntity(BusinessEntity.Account, fieldMappingMetadata);
+        Set<Lookup> accountLookups = buildLookupsByEntity(BusinessEntity.Account, fieldMappingMetadata, channel);
         if (StringUtils.isNotBlank(lookupId)) {
             accountLookups.add(new AttributeLookup(BusinessEntity.Account, lookupId));
         }
         accountLookups = addRatingLookups(play.getRatingEngine(), accountLookups);
 
-        Set<Lookup> contactLookups = buildLookupsByEntity(BusinessEntity.Contact, fieldMappingMetadata);
+        Set<Lookup> contactLookups = buildLookupsByEntity(BusinessEntity.Contact, fieldMappingMetadata, channel);
 
         log.info("Account Lookups: " + accountLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
         log.info("Contact Lookups: " + contactLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
@@ -317,8 +317,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
-    private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata) {
-        Set<String> entityLookups = getBaseLookupFieldsByEntity(mainEntity);
+    private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata, PlayLaunchChannel playLaunchChannel) {
+        Set<String> entityLookups = getBaseLookupFieldsByEntity(mainEntity, playLaunchChannel);
         return mergeWithExportFields(mainEntity, entityLookups, fieldMappingMetadata);
     }
 
@@ -378,7 +378,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         return false;
     }
 
-    private Set<String> getBaseLookupFieldsByEntity(BusinessEntity entity) {
+    private Set<String> getBaseLookupFieldsByEntity(BusinessEntity entity, PlayLaunchChannel playLaunchChannel) {
         switch (entity) {
         case Account:
             return new HashSet<>(Arrays.asList(InterfaceName.AccountId.name(), //
@@ -402,10 +402,12 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             /*
              * PLS-16386 Add FirstName and LastName
              */
+            String attributeSetName = null;
             CustomerSpace cs = configuration.getCustomerSpace();
-            log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
+            log.info("Trying to get the attrsUsage with {} for tenant {}.", attributeSetName, cs.getTenantId());
+
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, additionalContactAttr, null);
+                    Predefined.Enrichment, attributeSetName, additionalContactAttr, null);
             log.info("attrsUsage for firstName & lastName=" + map);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> set.add(key));
             log.info("set=" + set);

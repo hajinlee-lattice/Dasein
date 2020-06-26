@@ -103,9 +103,8 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        String[] expectedIds = new String[] { "12885634", "12221764", "17145445", "11417478",
-                "13262799", "11352808", "11108077", "17149076", "48010954", "50304275", "50727776",
-                "59621453", "61932862" };
+        String[] expectedIds = new String[] { "11417478", "17145445", "12438907", "13262799",
+                "12682624", "12885634", "17149076", "48010954", "50304275" };
         Set<String> expectedIdSet = new HashSet<>(Arrays.asList(expectedIds));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -114,7 +113,7 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(expectedIdSet.contains(orbNum));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 13);
+        Assert.assertEquals(rowNum, 9);
     }
 
 }

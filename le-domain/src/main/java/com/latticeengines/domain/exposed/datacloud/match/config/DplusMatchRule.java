@@ -197,5 +197,22 @@ public class DplusMatchRule {
             }
         }
 
+        public boolean equalTo(ClassificationCriterion classificationCriterion) {
+            if (this.lowestConfidenceCode != classificationCriterion.getLowestConfidenceCode()) {
+                return false;
+            }
+            if (this.highestConfidenceCode != classificationCriterion.getHighestConfidenceCode()) {
+                return false;
+            }
+            if (CollectionUtils.size(this.matchGradePatterns) != CollectionUtils.size(classificationCriterion.getMatchGradePatterns())) {
+                return false;
+            }
+            if (this.matchGradePatterns != null) {
+                return CollectionUtils.isEqualCollection(this.matchGradePatterns,
+                        classificationCriterion.getMatchGradePatterns());
+            }
+            return true;
+        }
+
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
@@ -63,5 +64,11 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         String url = "/customerspaces/{customerSpace}/project/{projectId}";
         url = constructUrl(url, customerSpace, projectId);
         delete("delete dcp project by projectId", url);
+    }
+
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
+        String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}/dropFolderAccess";
+        url = constructUrl(url, customerSpace, projectId);
+        return get("get dropFolderAccess by projectId", url, GrantDropBoxAccessResponse.class);
     }
 }

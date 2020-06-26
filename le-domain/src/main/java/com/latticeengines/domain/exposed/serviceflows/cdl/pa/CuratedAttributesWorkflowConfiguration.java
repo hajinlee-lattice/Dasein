@@ -16,7 +16,7 @@ public class CuratedAttributesWorkflowConfiguration extends BaseCDLWorkflowConfi
     public static class Builder {
         private CuratedAttributesWorkflowConfiguration configuration = new CuratedAttributesWorkflowConfiguration();
         private CuratedAccountAttributesStepConfiguration curatedAccountAttributesStepConfiguration = new CuratedAccountAttributesStepConfiguration();
-        private CuratedContactAttributesStepConfiguration curatedContactAttributesStepConfiguration= new CuratedContactAttributesStepConfiguration();
+        private CuratedContactAttributesStepConfiguration curatedContactAttributesStepConfiguration = new CuratedContactAttributesStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -59,6 +59,12 @@ public class CuratedAttributesWorkflowConfiguration extends BaseCDLWorkflowConfi
                     curatedContactAttributesStepConfiguration.setRebuild(true);
                 }
             }
+            return this;
+        }
+
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            // skip curated contact for legacy tenants, those attrs are not useful for them
+            curatedContactAttributesStepConfiguration.setSkipStep(!entityMatchEnabled);
             return this;
         }
 

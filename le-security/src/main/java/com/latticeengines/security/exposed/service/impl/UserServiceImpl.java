@@ -179,14 +179,25 @@ public class UserServiceImpl implements UserService {
             LOGGER.error("User cannot be null.");
             return false;
         }
-        if (userRegistration.getCredentials() == null) {
+        if (!userRegistration.isUseIDaaS() && userRegistration.getCredentials() == null) {
             LOGGER.error("Credentials cannot be null.");
             return false;
         }
-
         userRegistration.toLowerCase();
         User user = userRegistration.getUser();
-        Credentials creds = userRegistration.getCredentials();
+        boolean useIDaaS = userRegistration.isUseIDaaS();
+        Credentials creds;
+        if (useIDaaS) {
+            if (userRegistration.getCredentials() != null) {
+                LOGGER.warn("Credential block is not empty using IDaaS.");
+            }
+            // fake one credential to complete the user registration
+            creds = new Credentials();
+            creds.setUsername(user.getEmail());
+            creds.setPassword("WillBeResetImmediately");
+        } else {
+            creds = userRegistration.getCredentials();
+        }
 
         User userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
 

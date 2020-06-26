@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -36,9 +37,20 @@ public class DirectPlusUtilsUnitTestNG {
                 Assert.assertNotNull(nameLocation.getPhoneNumber());
                 Assert.assertNotEquals(nameLocation.getPhoneNumber(), "null");
             }
+            Assert.assertNotNull(candidate.getOperatingStatus());
+            System.out.println(candidate.getOperatingStatus());
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             Assert.assertNotNull(matchInsight);
+            Assert.assertNotNull(matchInsight.getConfidenceCode());
+            Assert.assertNotNull(matchInsight.getNameMatchScore());
         }
+    }
+
+    @Test
+    public void parseDataBlock() {
+        String response = readMockResponse("compinfo");
+        Map<String, Object> result = DirectPlusUtils.parseDataBlock(response);
+        Assert.assertNotNull(result.get("TradeStyleName"));
     }
 
     private String readMockResponse(String name) {

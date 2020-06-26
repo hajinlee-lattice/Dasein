@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -23,6 +25,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(CSVFileImportEntityMatchSchemaDeploymentTestNG.class);
 
     private static final String ACCOUNT_ENTITY_MATCH_FILE = "Account_base.csv";
     private static final String CONTACT_ENTITY_MATCH_FILE = "Contact_Entity_Match.csv";
@@ -72,9 +76,18 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
+            // now name/location will be map to contact level location fields
             if (fieldMapping.getUserField().equals("City")) {
                 Assert.assertTrue(fieldMapping.isMappedToLatticeField());
-                Assert.assertEquals(fieldMapping.getMappedField(), InterfaceName.City.name());
+                Assert.assertEquals(fieldMapping.getMappedField(), InterfaceName.ContactCity.name());
+            }
+            if (fieldMapping.getUserField().equals(InterfaceName.Country.name())) {
+                Assert.assertTrue(fieldMapping.isMappedToLatticeField());
+                Assert.assertEquals(fieldMapping.getMappedField(), InterfaceName.ContactCountry.name());
+            }
+            if (fieldMapping.getUserField().equals(InterfaceName.Address_Street_1.name())) {
+                Assert.assertTrue(fieldMapping.isMappedToLatticeField());
+                Assert.assertEquals(fieldMapping.getMappedField(), InterfaceName.Contact_Address_Street_1.name());
             }
             if (fieldMapping.getUserField().equals("ID")) {
                 Assert.assertTrue(fieldMapping.isMappedToLatticeField());

@@ -22,7 +22,10 @@ public enum MatchKey {
     SystemId, // Use one MatchKey for all system IDs, eg. (user provided) AccountId, or external ID such as SfdcId,
               // MktoId, etc.
     EntityId, // for entity match, internal id for quicker lookup in entity seed
-    PreferredEntityId; // preferred ID if we need to allocate new entity
+    PreferredEntityId, // preferred ID if we need to allocate new entity
+
+    Address,
+    Address2;
 
     public static final Map<MatchKey, String> LDC_MATCH_KEY_STD_FLDS = ImmutableMap.<MatchKey, String> builder()
             .put(Domain, InterfaceName.Website.name()) //
@@ -33,5 +36,7 @@ public enum MatchKey {
             .put(Zipcode, InterfaceName.PostalCode.name()) //
             .put(PhoneNumber, InterfaceName.PhoneNumber.name()) //
             .put(DUNS, InterfaceName.DUNS.name()) //
+            .put(Address, InterfaceName.Address_Street_1.name()) //
+            .put(Address2, InterfaceName.Address_Street_2.name()) //
             .build();
 }

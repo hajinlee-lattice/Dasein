@@ -30,7 +30,6 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
-import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -87,9 +86,6 @@ public class PlayServiceImpl implements PlayService {
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
-
-    @Inject
-    private PlayTypeService playTypeService;
 
     private ForkJoinPool tpForParallelStream;
 

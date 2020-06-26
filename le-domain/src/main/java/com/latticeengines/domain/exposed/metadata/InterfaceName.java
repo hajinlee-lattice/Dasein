@@ -7,7 +7,8 @@ import com.google.common.collect.ImmutableSet;
 public enum InterfaceName {
     Id, //
     InternalId, //
-    DUNS, //
+    DUNS, // mostly as match input/key
+    DunsNumber, // mostly as match result
     Event, //
     Domain, //
 
@@ -53,7 +54,7 @@ public enum InterfaceName {
     LastName, //
     Name, //
     Title, //
-    Email, //
+    Email, SecondaryEmail, OtherEmail, //
     Salutation, //
     BirthDate, //
     DoNotMail, //
@@ -63,9 +64,12 @@ public enum InterfaceName {
     State, //
     PostalCode, //
     Country, //
-    PhoneNumber, //
+    PhoneNumber, SecondaryPhoneNumber, OtherPhoneNumber, //
     Address_Street_1, //
     Address_Street_2,
+    ContactCity, ContactState, ContactCountry, ContactPostalCode, //
+    Contact_Address_Street_1, Contact_Address_Street_2, //
+    PrimaryMobileDeviceID, SecondaryMobileDeviceID, OtherMobileDeviceID, //
 
     Website, //
 
@@ -74,7 +78,7 @@ public enum InterfaceName {
     LeadSource, //
     IsClosed, //
     StageName, //
-    StageNameId,//
+    StageNameId, //
     AnnualRevenue, //
     NumberOfEmployees, //
     YearStarted, //
@@ -83,8 +87,8 @@ public enum InterfaceName {
     TransactionTime, //
     TransactionDate, //
     TransactionDayPeriod, //
-    __StreamDateId, //
-    __StreamDate, //
+    __StreamDateId, // legacy partition key
+    StreamDateId, __StreamDate, //
     TransactionCount, //
     Quantity, //
     TotalQuantity, //
@@ -121,7 +125,7 @@ public enum InterfaceName {
     CDLBatchSource, // indicator if the source contribute the system batch
 
     CDLTemplateName, CDLCreatedTemplate,
-                       // store
+    // store
 
     ConsolidateReport, //
 
@@ -152,7 +156,7 @@ public enum InterfaceName {
     // Eloqua Activity
     ActivityType,
 
-    //Marketing Activity
+    // Marketing Activity
     ActivityDate, ActivityTypeId,
 
     OpportunityId,

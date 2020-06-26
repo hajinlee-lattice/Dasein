@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,6 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
@@ -83,14 +84,15 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         SplitImportMatchResultConfig jobConfig = new SplitImportMatchResultConfig();
         jobConfig.setInput(Collections.singletonList(input));
 
-        jobConfig.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
+        jobConfig.setMatchedDunsAttr("DunsNumber");
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
         List<ColumnMetadata> rejectedCms = cms.stream().filter(cm -> {
-            boolean isInternal = (cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL);
+            boolean isCustomer = (cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL);
             boolean isIdToExclude = isAttrToExclude(cm);
-            return isInternal && !isIdToExclude;
+            boolean isFromDataBlock = isFromDataBlock(cm);
+            return isCustomer && !isIdToExclude && !isFromDataBlock;
         }).collect(Collectors.toList());
         Map<String, String> rejectedAttrs = convertToDispMap(rejectedCms);
         jobConfig.setRejectedAttrsMap(rejectedAttrs);
@@ -178,13 +180,44 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {
-        return cms.stream().collect(Collectors.toMap(ColumnMetadata::getAttrName, cm -> {
-            if (cm.getTagList() != null && cm.getTagList().contains(Tag.EXTERNAL)) {
-                return "D&B " + cm.getDisplayName();
+        Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
+        Map<String, String> dataBlockDisNames = dataBlockFieldDisplayNames();
+        Map<String, String> dispNames = cms.stream().collect(Collectors.toMap(ColumnMetadata::getAttrName, cm -> {
+            if (dataBlockDisNames.containsKey(cm.getAttrName())) {
+                return dataBlockDisNames.get(cm.getAttrName());
+            } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
+                return candidateFieldDispNames.get(cm.getAttrName());
             } else {
                 return cm.getDisplayName();
             }
         }));
+        Map<String, List<String>> reversMap = dispNames.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getValue, e -> Collections.singletonList(e.getKey()),
+                        (l1, l2) -> {
+                            CollectionUtils.addAll(l1, l2);
+                            return l1;
+                        }));
+        reversMap.forEach((name, cols) -> {
+            if (cols.size() > 1) {
+                log.info("There are {} columns competing display name {}: {}", cols.size(), name, cols);
+                if (cols.size() > 2) {
+                    throw new RuntimeException("Do not know how to resolve display name conflict.");
+                }
+                List<String> customerCols = cols.stream() //
+                        .filter(c -> !dataBlockDisNames.containsKey(c) && !candidateFieldDispNames.containsKey(c)) //
+                        .collect(Collectors.toList());
+                if (customerCols.size() == 1) {
+                    String customerCol = customerCols.get(0);
+                    String dispName = dispNames.get(customerCol);
+                    String newDispName = "(Input) " + dispName;
+                    dispNames.put(customerCol, newDispName);
+                    log.info("Rename customer column [{}] to [{}]", dispName, newDispName);
+                } else {
+                    throw new RuntimeException("Do not know how to resolve display name conflict.");
+                }
+            }
+        });
+        return dispNames;
     }
 
     private boolean isAttrToExclude(ColumnMetadata cm) {
@@ -193,6 +226,39 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 InterfaceName.CustomerAccountId.name(),
                 InterfaceName.LatticeAccountId.name()
         ).contains(cm.getAttrName());
+    }
+
+    private boolean isFromDataBlock(ColumnMetadata cm) {
+        return dataBlockFieldDisplayNames().containsKey(cm.getAttrName());
+    }
+
+    // to be changed to metadata driven
+    public Map<String, String> candidateFieldDisplayNames() {
+        Map<String, String> dispNames = new HashMap<>();
+        dispNames.put("MatchedDuns", "Matched D-U-N-S Number");
+        dispNames.put("ConfidenceCode", "Confidence Code");
+        dispNames.put("MatchGrade", "Match Grade");
+        dispNames.put("MatchDataProfile", "Match Data Profile");
+        dispNames.put("NameMatchScore", "Name Match Score");
+        dispNames.put("OperatingStatusText", "Operating Status Text");
+        return dispNames;
+    }
+
+    // to be changed to metadata driven
+    public Map<String, String> dataBlockFieldDisplayNames() {
+        Map<String, String> dispNames = new HashMap<>();
+        dispNames.put("DunsNumber", "D-U-N-S Number");
+        dispNames.put("PrimaryBusinessName", "Primary Business Name");
+        dispNames.put("TradeStyleName", "Trade Style Name");
+        dispNames.put("PrimaryAddressStreetLine1", "Primary Address Street Line 1");
+        dispNames.put("PrimaryAddressStreetLine2", "Primary Address Street Line 2");
+        dispNames.put("PrimaryAddressLocalityName", "Primary Address Locality Name");
+        dispNames.put("PrimaryAddressRegionName", "Primary Address Region Name");
+        dispNames.put("PrimaryAddressPostalCode", "Primary Address Postal Code");
+        dispNames.put("PrimaryAddressCountyName", "Primary Address County Name");
+        dispNames.put("TelephoneNumber", "Telephone Number");
+        dispNames.put("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code");
+        return dispNames;
     }
 
 }

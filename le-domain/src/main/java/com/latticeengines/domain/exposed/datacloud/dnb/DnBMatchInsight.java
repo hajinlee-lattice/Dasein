@@ -16,6 +16,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 )
 public class DnBMatchInsight {
 
+    @JsonProperty("NameMatchScore")
+    private Double nameMatchScore;
+
     @JsonProperty("MatchGrade")
     private DnBMatchGrade matchGrade;
 
@@ -24,6 +27,14 @@ public class DnBMatchInsight {
 
     @JsonProperty("MatchDataProfile")
     private DnBMatchDataProfile matchDataProfile;
+
+    public Double getNameMatchScore() {
+        return nameMatchScore;
+    }
+
+    public void setNameMatchScore(Double nameMatchScore) {
+        this.nameMatchScore = nameMatchScore;
+    }
 
     public DnBMatchGrade getMatchGrade() {
         return matchGrade;

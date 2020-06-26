@@ -1,9 +1,12 @@
 package com.latticeengines.apps.core.entitymgr.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +23,7 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
+import com.latticeengines.domain.exposed.pls.ActionType;
 
 @Component("actionEntityMgr")
 public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Long> implements ActionEntityMgr {
@@ -109,5 +113,31 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus) {
         return actionRepository.findByOwnerIdAndActionStatus(ownerId, actionStatus);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Long> findPidByTypeAndConfigAndOwnerType(ActionType actionType, String ownerType, String partialConfig) {
+        List<Object[]> rawResult = actionRepository.findActionPidByActionTypeAndOwnerWorkflowType(actionType,
+                ownerType, partialConfig);
+        return getPid(rawResult);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Long> findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType actionType, ActionStatus actionStatus,
+                                                         String partialConfig) {
+        List<Object[]> rawResult = actionRepository.findActionPidWithoutOwnerByTypeAndStatus(actionType,
+                actionStatus, partialConfig);
+        return getPid(rawResult);
+    }
+
+    private List<Long> getPid(List<Object[]> rawResult) {
+        if (CollectionUtils.isEmpty(rawResult)) {
+            return Collections.emptyList();
+        }
+        List<Long> result = new ArrayList<>();
+        rawResult.forEach(columns -> result.add((Long) columns[0]));
+        return result;
     }
 }

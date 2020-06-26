@@ -15,9 +15,12 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -45,6 +48,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(PrimeMatchYarnTestNG.class);
 
     private static final String avroDir = "/tmp/PrimeMatchYarnTestNG";
     private static final String podId = "PrimeMatchYarnTestNG";
@@ -83,6 +88,9 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
+        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
+        log.info("Fields: {}", StringUtils.join(schema.getFields().stream() //
+                .map(Schema.Field::name).collect(Collectors.toList()), ","));
         Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
         long count = 0L;
         while (records.hasNext()) {

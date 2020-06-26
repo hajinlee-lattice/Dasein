@@ -4,7 +4,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __StreamDate, __StreamDateId}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __StreamDate, StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
@@ -24,7 +24,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
     val hasImport = config.matchedRawStreamInputIdx != null
     val hasMaster = config.masterInputIdx != null
     // partition by dateId
-    setPartitionTargets(0, Seq(__StreamDateId.name()), lattice)
+    setPartitionTargets(0, Seq(StreamDateId.name()), lattice)
 
     // calculation
     var df: DataFrame = if (hasImport) {
@@ -38,7 +38,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       // add date & dateId
       var mdf: DataFrame = lattice.input(config.matchedRawStreamInputIdx)
       mdf = mdf.withColumn(__StreamDate.name, getDate(mdf.col(config.dateAttr)))
-        .withColumn(__StreamDateId.name, getDateId(mdf.col(config.dateAttr)))
+        .withColumn(StreamDateId.name, getDateId(mdf.col(config.dateAttr)))
         .withColumn(LastActivityDate.name, mdf.col(config.dateAttr))
       if (hasMaster) {
         mdf = MergeUtils.concat2(mdf, lattice.input(config.masterInputIdx))
@@ -49,7 +49,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
     }
     if (config.retentionDays != null) {
       // apply retention policy and remove old data (keep the entire day for now)
-      df = df.filter(df.col(__StreamDateId.name).geq(getStartDateId(config.retentionDays, config.currentEpochMilli)))
+      df = df.filter(df.col(StreamDateId.name).geq(getStartDateId(config.retentionDays, config.currentEpochMilli)))
     }
 
     if (Option(config.reducer).isDefined) {

@@ -182,15 +182,12 @@ public final class AccountExtensionUtil {
 
     public static MatchInput constructMatchInput(String customerSpace, List<String> internalAccountIds,
             ColumnSelection.Predefined predefined, String dataCloudVersion) {
-
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace));
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
-
-        Tenant tenant = new Tenant(customerSpace);
-        MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(tenant);
-        matchInput.setFields(LOOKUP_FIELDS);
         matchInput.setData(data);
+        matchInput.setFields(LOOKUP_FIELDS);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.LookupId, LOOKUP_FIELDS);
         matchInput.setKeyMap(keyMap);
@@ -204,7 +201,9 @@ public final class AccountExtensionUtil {
     public static MatchInput constructEntityMatchInput(String customerSpace, List<String> internalAccountIds,
             ColumnSelection.Predefined predefined, String dataCloudVersion) {
         MatchInput matchInput = new MatchInput();
+
         matchInput.setTenant(new Tenant(customerSpace));
+
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
         matchInput.setData(data);

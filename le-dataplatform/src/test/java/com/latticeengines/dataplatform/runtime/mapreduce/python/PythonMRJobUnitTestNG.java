@@ -67,6 +67,11 @@ public class PythonMRJobUnitTestNG {
             }
 
             @Override
+            public String getLedsVersion(String pythonVersion) {
+                return "1.0.1";
+            }
+
+            @Override
             public String getLedsPath() {
                 return "/datascience/1.0.1";
             }

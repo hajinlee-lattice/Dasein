@@ -19,8 +19,11 @@ public class ServiceflowsCoreEmrEnvServiceImpl implements EMREnvService {
     @Value("${dataplatform.python.conda.env}")
     private String condaEnv;
 
-    @Value("${dataplatform.python.conda.env.ambari}")
-    private String condaEnvAmbari;
+    @Value("${dataplatform.python.conda2.env}")
+    private String condaEnvP2;
+
+    @Value("${dataplatform.default.python.version}")
+    private String pythonVersion;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -30,10 +33,10 @@ public class ServiceflowsCoreEmrEnvServiceImpl implements EMREnvService {
 
     @Override
     public String getLatticeCondaEnv() {
-        if (Boolean.TRUE.equals(useEmr)) {
+        if ("3".equals(pythonVersion)) {
             return condaEnv;
         } else {
-            return condaEnvAmbari;
+            return condaEnvP2;
         }
     }
 

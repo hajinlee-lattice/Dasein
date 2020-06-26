@@ -31,7 +31,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.support.RetryTemplate;
@@ -46,6 +45,7 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
@@ -60,7 +60,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component("bulkMatchProcessorExecutor")
@@ -81,7 +81,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             "Parsed to a public domain" //
     };
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Resource(name = "bulkMatchPlanner")
@@ -90,22 +90,22 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     @Resource(name = "bulkMatchExecutor")
     protected MatchExecutor matchExecutor;
 
-    @Autowired
+    @Inject
     protected MatchProxy matchProxy;
 
-    @Autowired
-    private MetricService metricService;
+    @Inject
+    private DirectPlusCandidateService directPlusCandidateService;
 
-    @Autowired
+    @Inject
     private DomainCollectService domainCollectService;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private DedupeHelper dedupeHelper;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
     @Inject
@@ -224,6 +224,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
             if (processorContext.isMatchDebugEnabled()) {
                 appendDebugValues(allValues, outputRecord);
+            }
+            if (BusinessEntity.PrimeAccount.name().equals(processorContext.getOriginalInput().getTargetEntity())) {
+                appendCandidateValues(allValues, outputRecord);
             }
             GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
             List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
@@ -440,6 +443,17 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             Arrays.fill(values, "");
             allValues.addAll(Arrays.asList(values));
         }
+    }
+
+    private void appendCandidateValues(List<Object> allValues, OutputRecord outputRecord) {
+        List<Object> candidateVals;
+        if (CollectionUtils.isNotEmpty(outputRecord.getCandidateOutput()) && //
+                CollectionUtils.isNotEmpty(outputRecord.getCandidateOutput().get(0))) {
+            candidateVals = outputRecord.getCandidateOutput().get(0);
+        } else {
+            candidateVals = directPlusCandidateService.emptyCandidate();
+        }
+        allValues.addAll(candidateVals);
     }
 
     private Object convertToClaimedType(Schema.Type avroType, Object value, String columnName) {

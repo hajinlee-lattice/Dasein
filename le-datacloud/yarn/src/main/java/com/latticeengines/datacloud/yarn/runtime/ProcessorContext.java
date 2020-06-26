@@ -10,7 +10,6 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.I
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,11 +48,11 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -86,6 +85,9 @@ public class ProcessorContext {
 
     @Inject
     private BeanDispatcherImpl beanDispatcher;
+
+    @Inject
+    private DirectPlusCandidateService directPlusCandidateService;
 
     @Inject
     private MatchProxy matchProxy;
@@ -498,6 +500,9 @@ public class ProcessorContext {
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);
         }
+        if (BusinessEntity.PrimeAccount.name().equals(originalInput.getTargetEntity())) {
+            outputSchema = appendCandidateSchema(outputSchema);
+        }
 
         disableDunsValidation = originalInput.isDisableDunsValidation();
         log.info(String.format("Duns validation is disabled: %b", disableDunsValidation));
@@ -528,6 +533,14 @@ public class ProcessorContext {
         Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
         Schema debugSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
         return (Schema) AvroUtils.combineSchemas(schema, debugSchema)[0];
+    }
+
+    private Schema appendCandidateSchema(Schema schema) {
+        Schema candidateSchema = getCandidateSchema();
+        Schema combined = (Schema) AvroUtils.combineSchemas(schema, candidateSchema)[0];
+        log.info("Combining {} base schema and {} candidate schema in to {} combined schema",
+                schema.getFields().size(), candidateSchema.getFields().size(), combined.getFields().size());
+        return combined;
     }
 
     Schema appendErrorSchema(Schema schema) {
@@ -568,22 +581,7 @@ public class ProcessorContext {
     }
 
     Schema getCandidateSchema() {
-        // need to in sync with MatchExecutorBase.candidateOutputFields
-        List<Pair<String, Class<?>>> attrs = Arrays.asList( //
-                Pair.of(InterfaceName.InternalId.name(), String.class), //
-                Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class), //
-                Pair.of(DataCloudConstants.ATTR_LDC_NAME, String.class), //
-                Pair.of("LDC_Street", String.class), //
-                Pair.of("STREET_ADDRESS_2", String.class), //
-                Pair.of(DataCloudConstants.ATTR_CITY, String.class), //
-                Pair.of(DataCloudConstants.ATTR_STATE, String.class), //
-                Pair.of(DataCloudConstants.ATTR_ZIPCODE, String.class), //
-                Pair.of("DnB_COUNTRY_CODE", String.class), //
-                Pair.of("TELEPHONE_NUMBER", String.class), //
-                Pair.of("ConfidenceCode", Integer.class), //
-                Pair.of("MatchGrade", String.class), //
-                Pair.of("MatchDataProfile", String.class) //
-        );
+        List<Pair<String, Class<?>>> attrs = directPlusCandidateService.candidateSchema();
         return AvroUtils.constructSchema("MatchCandidate", attrs);
     }
 
@@ -649,10 +647,17 @@ public class ProcessorContext {
             } else {
                 log.info("Generating output schema using custom/union selection with "
                         + columnSelection.getColumns().size() + " columns");
-                metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
-                outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
-                        dataCloudVersion);
-                metadataFields = parseMetadataFields();
+                if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
+                    //FIXME: to be moved to metadata driven
+                    List<Pair<String, Class<?>>> pairs = new ArrayList<>();
+                    columnSelection.getColumnIds().forEach(cid -> pairs.add(Pair.of(cid, String.class)));
+                    outputSchema = AvroUtils.constructSchema("PrimeAccount", pairs);
+                } else {
+                    metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
+                    outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
+                            dataCloudVersion);
+                    metadataFields = parseMetadataFields();
+                }
             }
             log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
         } else if (OperationalMode.isEntityMatch(input.getOperationalMode())) {

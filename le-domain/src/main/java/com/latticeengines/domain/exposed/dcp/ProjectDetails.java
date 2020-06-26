@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -24,9 +23,6 @@ public class ProjectDetails {
 
     @JsonProperty("projectFullPath")
     private String projectFullPath;
-
-    @JsonProperty("dropFolderAccess")
-    private GrantDropBoxAccessResponse dropFolderAccess;
 
     @JsonProperty("archived")
     private Boolean deleted;
@@ -76,14 +72,6 @@ public class ProjectDetails {
 
     public void setProjectFullPath(String projectFullPath) {
         this.projectFullPath = projectFullPath;
-    }
-
-    public GrantDropBoxAccessResponse getDropFolderAccess() {
-        return dropFolderAccess;
-    }
-
-    public void setDropFolderAccess(GrantDropBoxAccessResponse dropFolderAccess) {
-        this.dropFolderAccess = dropFolderAccess;
     }
 
     public Boolean getDeleted() {

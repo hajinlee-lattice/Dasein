@@ -91,8 +91,15 @@ public final class ThreadPoolUtils {
         }
     }
 
+
     public static <T> List<T> callInParallel(ExecutorService executorService, Collection<Callable<T>> callables,
                                              int timeoutInMinutes, int intervalInSeconds) {
+        return callInParallel(executorService, callables, //
+                timeoutInMinutes, TimeUnit.MINUTES, intervalInSeconds, TimeUnit.SECONDS);
+    }
+
+    public static <T> List<T> callInParallel(ExecutorService executorService, Collection<Callable<T>> callables,
+                                             int timeout, TimeUnit timeoutUnit, int interval, TimeUnit intervalTimeUnit) {
         if (CollectionUtils.isNotEmpty(callables)) {
             int numTasks = CollectionUtils.size(callables);
             List<Callable<T>> wrappedCallables = callables.stream() //
@@ -101,15 +108,15 @@ public final class ThreadPoolUtils {
                     .collect(Collectors.toList());
             List<T> results = new ArrayList<>();
             long startTime = System.currentTimeMillis();
-            long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
+            long timeoutMills = timeoutUnit.toMillis(timeout);
             while (CollectionUtils.isNotEmpty(futures)) {
-                if (System.currentTimeMillis() - startTime > timeout) {
+                if (System.currentTimeMillis() - startTime > timeoutMills) {
                     throw new RuntimeException("Cannot finish all callables within timeout.");
                 }
                 List<Future<T>> toBeRemoved = new ArrayList<>();
                 futures.forEach(future -> {
                     try {
-                        T result = future.get(intervalInSeconds, TimeUnit.SECONDS);
+                        T result = future.get(interval, intervalTimeUnit);
                         results.add(result);
                         toBeRemoved.add(future);
                     } catch (TimeoutException ignore) {

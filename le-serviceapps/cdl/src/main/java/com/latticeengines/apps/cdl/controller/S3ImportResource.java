@@ -100,6 +100,15 @@ public class S3ImportResource {
         }
     }
 
+    @PostMapping("/system/list/validateAndUpdate")
+    @ResponseBody
+    @ApiOperation(value = "Validate and Update All System priority")
+    public ResponseDocument<Boolean> validateAndUpdatePriority(@PathVariable String customerSpace,
+                                                             @RequestBody List<S3ImportSystem> systemList) {
+        s3ImportSystemService.validateAndUpdateSystemPriority(customerSpace, systemList);
+        return ResponseDocument.successResponse(Boolean.TRUE);
+    }
+
     @GetMapping("/system/idList")
     @ResponseBody
     @ApiOperation(value = "Get All system ids")

@@ -59,6 +59,9 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${dataplatform.default.python.version}")
+    private String pythonVersion;
+
     @Inject
     private ManifestService manifestService;
 
@@ -111,6 +114,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.setProperty(MapReduceProperty.QUEUE.name(),
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
         properties.put(MapReduceProperty.JOB_TYPE.name(), jobType);
+        properties.put(MapReduceProperty.PYTHON_MAJOR_VERSION.name(), pythonVersion);
         properties.put(MapReduceProperty.INPUT.name(), inputDir);
         properties.put(MapReduceProperty.OUTPUT.name(), classifier.getModelHdfsDir());
         properties.put(MapReduceProperty.CACHE_ARCHIVE_PATH.name(), cacheArchivePath);

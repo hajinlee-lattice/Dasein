@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -118,7 +119,10 @@ public class CuratedContactAttributes
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
         if (isShortCutMode()) {
-            log.info("In short cut mode, skip generating curated contact attribute");
+            String servingTableName = getStringValueFromContext(CURATED_CONTACT_SERVING_TABLE_NAME);
+            log.info("In short cut mode, skip generating curated contact attribute. serving table name = {}",
+                    servingTableName);
+            finishing(servingTableName);
             return null;
         }
 
@@ -198,9 +202,14 @@ public class CuratedContactAttributes
         CuratedAttributeUtils.enrichTableSchema(resultTable, Category.CURATED_CONTACT_ATTRIBUTES, MASTER_STORE_ENTITY,
                 templateSystemMap, systemMap);
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);
-        dataCollectionProxy.upsertTable(customerSpace.toString(), resultTableName, TABLE_ROLE, inactive);
-        exportToDynamo(resultTableName, TABLE_ROLE.getPartitionKey(), TABLE_ROLE.getRangeKey());
+        finishing(resultTableName);
         exportToS3AndAddToContext(resultTable, CURATED_CONTACT_SERVING_TABLE_NAME);
+    }
+
+    private void finishing(String servingStoreTableName) {
+        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, TABLE_ROLE, inactive);
+        updateLastRefreshDate();
+        exportToDynamo(servingStoreTableName, TABLE_ROLE.getPartitionKey(), TABLE_ROLE.getRangeKey());
     }
 
     private boolean isShortCutMode() {
@@ -217,8 +226,11 @@ public class CuratedContactAttributes
             return false;
         }
         boolean calculateLastActivityDate = StringUtils.isNotBlank(contactLastActivityTempTableName);
-        if (!calculateLastActivityDate && BooleanUtils.isNotTrue(configuration.getRebuild())) {
-            log.info("No contact last activity date table and not in rebuild mode, skip curated contact step");
+        boolean calculateSystemLastUpdateTime = shouldCalculateSystemLastUpdateTime();
+        if (!calculateLastActivityDate && BooleanUtils.isNotTrue(configuration.getRebuild())
+                && !calculateSystemLastUpdateTime) {
+            log.info(
+                    "No need to calculating both last activity date and system last update time and not in rebuild mode, skip curated contact step");
             return false;
         }
         return true;
@@ -314,6 +326,15 @@ public class CuratedContactAttributes
             log.info("Found {} (role={}) in inactive version {}", name, role, inactive);
         }
         return tableName;
+    }
+
+    private void updateLastRefreshDate() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, Long> dateMap = status.getDateMap();
+        long currTime = System.currentTimeMillis();
+        log.info("Updating last refresh date for curated contact attribute to current time {}", currTime);
+        dateMap.put(Category.CURATED_CONTACT_ATTRIBUTES.getName(), currTime);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 
     private boolean shouldPublishDynamo() {

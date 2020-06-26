@@ -5,17 +5,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.S3ImportSystemEntityMgr;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -35,6 +39,12 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private DataFeedTaskService dataFeedTaskService;
+
+    @Inject
+    private DataFeedTaskTemplateService dataFeedTaskTemplateService;
 
     @Override
     public void createS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
@@ -188,6 +198,67 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
                 s3ImportSystemEntityMgr.update(importSystem);
             }
         }
+    }
+
+    @Override
+    public void validateAndUpdateSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        if (CollectionUtils.isEmpty(systemList)) {
+            return;
+        }
+        List<S3ImportSystem> currentSystems = s3ImportSystemEntityMgr.findAll();
+        if (currentSystems.size() != systemList.size()) {
+            throw new LedpException(LedpCode.LEDP_40062, new String[] {String.valueOf(currentSystems.size()),
+                    String.valueOf(systemList.size())});
+        }
+        Map<String, S3ImportSystem> systemMap = systemList.stream()
+                .collect(Collectors.toMap(S3ImportSystem::getName, system -> system));
+        for (S3ImportSystem importSystem : currentSystems) {
+            if (!systemMap.containsKey(importSystem.getName())) {
+                throw new LedpException(LedpCode.LEDP_40063, new String[] {importSystem.getName()});
+            }
+        }
+        Optional<S3ImportSystem> primarySystem = currentSystems.stream().filter(system -> system.getPriority() == 1).findFirst();
+        Optional<S3ImportSystem> newPrimarySystem = systemList.stream().filter(system -> system.getPriority() == 1).findFirst();
+        if (primarySystem.isPresent() && newPrimarySystem.isPresent()) {
+            if (!primarySystem.get().getName().equals(newPrimarySystem.get().getName())
+                    && (primarySystem.get().isMapToLatticeAccount())) {
+                throw new LedpException(LedpCode.LEDP_40061, new String[] {primarySystem.get().getDisplayName()});
+            }
+        }
+
+        List<S3ImportSystem> changedSystems = new ArrayList<>();
+        for (S3ImportSystem importSystem : currentSystems) {
+            S3ImportSystem newSystem = systemMap.get(importSystem.getName());
+            if (newSystem.getPriority() != importSystem.getPriority()) {
+                importSystem.setPriority(newSystem.getPriority());
+                changedSystems.add(importSystem);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(changedSystems)) {
+            List<String> warningSystems = validatePriorityChange(customerSpace, changedSystems);
+            if (CollectionUtils.isEmpty(warningSystems)) {
+                changedSystems.forEach(importSystem -> s3ImportSystemEntityMgr.update(importSystem));
+            } else {
+                throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems, ",")});
+            }
+        }
+    }
+
+    private List<String> validatePriorityChange(String customerSpace, List<S3ImportSystem> changedSystems) {
+        Set<String> changedSystemNames =
+                changedSystems.stream().map(S3ImportSystem::getName).collect(Collectors.toSet());
+        Map<String, S3ImportSystem> taskSystemMap = dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
+        List<String> warningSystems = new ArrayList<>();
+        if (MapUtils.isNotEmpty(taskSystemMap)) {
+            taskSystemMap.forEach((taskName, importSystem) -> {
+                if (changedSystemNames.contains(importSystem.getName())) {
+                    if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, taskName)) {
+                        warningSystems.add(importSystem.getName());
+                    }
+                }
+            });
+        }
+        return warningSystems;
     }
 
     @Override

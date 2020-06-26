@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
@@ -14,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class InternalOutputRecord extends OutputRecord {
@@ -48,6 +51,7 @@ public class InternalOutputRecord extends OutputRecord {
     private String lookupIdValue;
 
     private LatticeAccount latticeAccount;
+    private PrimeAccount primeAccount;
     private Map<String, Object> customAccount;
     private String originalContextId;
 
@@ -249,6 +253,22 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setLatticeAccount(LatticeAccount latticeAccount) {
         this.latticeAccount = latticeAccount;
+    }
+
+    public String getPrimeDuns() {
+        if (CollectionUtils.isNotEmpty(candidates)) {
+            return candidates.get(0).getDuns();
+        } else {
+            return null;
+        }
+    }
+
+    public PrimeAccount getPrimeAccount() {
+        return primeAccount;
+    }
+
+    public void setPrimeAccount(PrimeAccount primeAccount) {
+        this.primeAccount = primeAccount;
     }
 
     public Map<String, Object> getCustomAccount() {

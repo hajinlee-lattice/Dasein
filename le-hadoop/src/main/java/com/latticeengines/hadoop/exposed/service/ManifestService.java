@@ -4,6 +4,8 @@ public interface ManifestService {
 
     String getLedsVersion();
 
+    String getLedsVersion(String pythonVersion);
+
     String getLedsPath();
 
     String getLedpStackVersion();

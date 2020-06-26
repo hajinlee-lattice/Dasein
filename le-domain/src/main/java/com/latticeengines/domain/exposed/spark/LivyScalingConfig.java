@@ -4,7 +4,7 @@ public class LivyScalingConfig {
 
     public final int scalingMultiplier;
 
-    public final int  partitionMultiplier;
+    public final int partitionMultiplier;
 
     public LivyScalingConfig(int scalingMultiplier, int partitionMultiplier) {
         this.scalingMultiplier = scalingMultiplier;

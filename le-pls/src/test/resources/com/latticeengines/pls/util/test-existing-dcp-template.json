@@ -1,0 +1,172 @@
+{
+    "attributes": [
+        {
+            "name": "CompanyName",
+            "display_name": "Account Name",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Account Name",
+                "Required": false,
+                "ApprovedUsage": null,
+                "InterfaceName": "CompanyName"
+            }
+        },
+        {
+            "name": "Address_Street_1",
+            "display_name": "Street Address Line 1",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Street Address Line 1",
+                "Required": false,
+                "ApprovedUsage": null,
+                "InterfaceName": "Address_Street_1"
+            }
+        },
+        {
+            "name": "City",
+            "display_name": "billing city",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "billing city",
+                "Required": false,
+                "ApprovedUsage": null,
+                "InterfaceName": "City"
+            }
+        },
+        {
+            "name": "PostalCode",
+            "display_name": "Zip",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Zip",
+                "Required": false,
+                "ApprovedUsage": null,
+                "InterfaceName": "PostalCode"
+            }
+        },
+        {
+            "name": "Country",
+            "display_name": "Country",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Country",
+                "Required": true,
+                "ApprovedUsage": null,
+                "InterfaceName": "Country"
+            }
+        },
+        {
+            "name": "CustomerId",
+            "display_name": "ID",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "ID",
+                "Required": false,
+                "ApprovedUsage": null
+            }
+        },
+        {
+            "name": "RegistrationNumber",
+            "display_name": "Federal ID",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Federal ID",
+                "Required": false,
+                "ApprovedUsage": null
+            }
+        },
+        {
+            "name": "PhoneNumber",
+            "display_name": "Phone",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Phone",
+                "Required": false,
+                "ApprovedUsage": null,
+                "InterfaceName": "PhoneNumber"
+            }
+        },
+        {
+            "name": "Email",
+            "display_name": "Email Address",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Email Address",
+                "Required": false,
+                "ApprovedUsage": null,
+                "InterfaceName": "Email"
+            }
+        },
+        {
+            "name": "user_Annual_Revenue",
+            "display_name": "Annual Revenue",
+            "nullable": true,
+            "physical_data_type": "DOUBLE",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Annual Revenue",
+                "Required": null,
+                "ApprovedUsage": null
+            }
+        },
+        {
+            "name": "user_Industry",
+            "display_name": "Industry",
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Industry",
+                "Required": null,
+                "ApprovedUsage": null
+            }
+        },
+        {
+            "name": "user_Number_Of_Employees",
+            "display_name": "Number Of Employees",
+            "nullable": true,
+            "physical_data_type": "INT",
+            "properties": {
+                "FundamentalType": null,
+                "SourceAttrName": "Number Of Employees",
+                "Required": null,
+                "ApprovedUsage": null
+            }
+        },
+        {
+            "name": "user_Extra_Existing_Custom_Field",
+            "display_name": "Extra Existing Custom Field",
+            "nullable": true,
+            "physical_data_type": "long",
+            "logicalDataType": "Date",
+            "properties": {
+                "FundamentalType": null,
+                "FundamentalType": "DATE",
+                "DateFormatString": "DD/MM/YYYY",
+                "TimeFormatString": "00-00-00.000 24H",
+                "Timezone": "America/Chicago",
+                "SourceAttrName": "D&amp;B SIC Code (8 digit)",
+                "Required": null,
+                "ApprovedUsage": null
+            }
+        }
+    ]
+}
