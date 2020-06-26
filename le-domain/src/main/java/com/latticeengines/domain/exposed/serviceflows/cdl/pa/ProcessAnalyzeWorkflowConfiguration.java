@@ -310,6 +310,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder systemIdMap(Map<String, List<String>> systemIds) {
             matchEntityWorkflowBuilder.systemIdMap(systemIds);
+            processAccountWorkflowBuilder.systemIdMap(systemIds);
+            processContactWorkflowBuilder.systemIdMap(systemIds);
             return this;
         }
 

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +54,11 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             rebuildContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
+        public Builder systemIdMap(Map<String, List<String>> systemIds) {
+            processContactStepConfiguration.setSystemIdMap(systemIds);
             return this;
         }
 
