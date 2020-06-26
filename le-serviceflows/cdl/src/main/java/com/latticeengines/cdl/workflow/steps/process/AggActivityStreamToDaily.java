@@ -196,15 +196,15 @@ public class AggActivityStreamToDaily
     }
 
     private Map<String, Table> getRawStreamTables() {
-        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_MIGRATED_RAW_STREAM, Boolean.class))) {
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
             return getTablesFromMapCtxKey(customerSpace.toString(), ACTIVITY_MIGRATED_RAW_STREAM);
         }
         return getTablesFromMapCtxKey(customerSpace.toString(), RAW_ACTIVITY_STREAM_TABLE_NAME);
     }
 
     private Map<String, String> getActiveDailyStoreTableNames(List<String> streamIds) {
-        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_MIGRATED_RAW_STREAM, Boolean.class))) {
-            return getMapObjectFromContext(ACTIVITY_MIGRATED_RAW_STREAM, String.class, String.class);
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
+            return getMapObjectFromContext(ACTIVITY_MIGRATED_DAILY_STREAM, String.class, String.class);
         }
         return dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), AggregatedActivityStream, inactive.complement(), streamIds);
     }
