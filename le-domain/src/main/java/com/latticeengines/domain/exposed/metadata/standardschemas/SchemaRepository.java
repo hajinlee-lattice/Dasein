@@ -1502,7 +1502,7 @@ public class SchemaRepository {
         Attribute postalCode = attrPostalCode();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "COMPANY", "ACCOUNT_COMPANY_NAME")) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "COMPANY")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1543,20 +1543,24 @@ public class SchemaRepository {
             if (schema == SchemaInterpretation.ContactEntityMatch) {
                 email.setDefaultValueStr("");
             }
-            // add "ACCOUNT" to allowed display name for account fields in contact to
-            // prevent confusion/conflict with corresponding contact info
-            Attribute accountWebsite = addAllowedDisplayName(website, "ACCOUNT_WEBSITE");
-            Attribute accountDuns = addAllowedDisplayName(duns, "ACCOUNT_DUNS", "ACCOUNT_DUNS_NUMBER");
-            // attrs have contact counterpart
-            prefixAccountLocationFields(address1, address2, city, state, country, postalCode);
+            if (schema != SchemaInterpretation.SalesforceLead) {
+                addAllowedDisplayName(contactCompanyName, "ACCOUNT_COMPANY_NAME");
+            }
 
             attrs.add(email);
             attrs.add(contactCompanyName);
             if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.ContactEntityMatch) {
+                // add "ACCOUNT" to allowed display name for account fields in contact to
+                // prevent confusion/conflict with corresponding contact info
+                Attribute accountWebsite = addAllowedDisplayName(website, "ACCOUNT_WEBSITE");
+                addAllowedDisplayName(duns, "ACCOUNT_DUNS", "ACCOUNT_DUNS_NUMBER");
+                // attrs have contact counterpart
+                prefixAccountLocationFields(address1, address2, city, state, country, postalCode);
+
                 attrs.add(accountWebsite);
                 attrs.addAll(Arrays.asList(address1, address2));
             }
-            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, accountDuns));
+            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
             if (SchemaInterpretation.SalesforceLead.equals(schema)) {
                 // needed for CSV downloads in LPI
                 attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
