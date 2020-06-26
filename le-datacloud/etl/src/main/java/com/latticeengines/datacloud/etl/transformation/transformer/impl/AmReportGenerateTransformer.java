@@ -19,9 +19,11 @@ import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep
 import com.latticeengines.domain.exposed.datacloud.dataflow.AmReportGenerateParams;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccMastrManChkReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.monitor.MsTeamsSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings.Color;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.monitor.exposed.service.MsTeamsService;
 import com.latticeengines.monitor.exposed.service.SlackService;
 
 @Component(AccMastrManChkReportGenFlow.TRANSFORMER_NAME)
@@ -31,6 +33,7 @@ public class AmReportGenerateTransformer
     private static final Logger log = LoggerFactory.getLogger(AmReportGenerateTransformer.class);
     private static final String SLACK_BOT = AccMastrManChkReportGenFlow.TRANSFORMER_NAME;
     private static final Color SLACK_COLOR_DANGER = Color.DANGER;
+    private static final com.latticeengines.domain.exposed.monitor.MsTeamsSettings.Color TEAMS_COLOR_DANGER = com.latticeengines.domain.exposed.monitor.MsTeamsSettings.Color.DANGER;
 
     @Inject
     private EmailService emailService;
@@ -38,12 +41,18 @@ public class AmReportGenerateTransformer
     @Inject
     private SlackService slackService;
 
+    @Inject
+    private MsTeamsService msTeamsService;
+
     //TODO: remove default value after fixing properties file
     @Value("${datacloud.notification.email:}")
     private String email;
 
     @Value("${datacloud.slack.webhook.url}")
     private String slackWebHookUrl;
+
+    @Value("${datacloud.msteams.webhook.url}")
+    private String msteamsWebHookUrl;
 
     @Value("${common.le.environment}")
     private String leEnv;
@@ -106,6 +115,8 @@ public class AmReportGenerateTransformer
                     String pretext = "[" + leEnv + "-" + leStack + "]";
                     slackService.sendSlack(
                             new SlackSettings(slackWebHookUrl, title, pretext, message, SLACK_BOT, SLACK_COLOR_DANGER));
+                    msTeamsService.sendMsTeams(new MsTeamsSettings(msteamsWebHookUrl, title,
+                            pretext, message, TEAMS_COLOR_DANGER));
                 }
                 if (StringUtils.isNotBlank(email)) {
                     log.info("Send email notification");
