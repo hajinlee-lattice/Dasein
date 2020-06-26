@@ -59,16 +59,18 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation(value = "Get all projects")
     @UseReaderConnection
-    public List<ProjectSummary> getAllProject(@PathVariable String customerSpace) {
-        return projectService.getAllProject(customerSpace);
+    public List<ProjectSummary> getAllProject(@PathVariable String customerSpace,
+                                              @RequestParam(defaultValue = "false") Boolean includeSources) {
+        return projectService.getAllProject(customerSpace, includeSources);
     }
 
     @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
     @UseReaderConnection
-    public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
-        return projectService.getProjectDetailByProjectId(customerSpace, projectId);
+    public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId,
+                                                @RequestParam(defaultValue = "true") Boolean includeSources) {
+        return projectService.getProjectDetailByProjectId(customerSpace, projectId, includeSources);
     }
 
     @DeleteMapping("/{projectId}")

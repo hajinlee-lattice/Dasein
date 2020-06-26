@@ -30,13 +30,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectSummary> getAllProjects(String customerSpace) {
-        return projectProxy.getAllDCPProject(customerSpace);
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources) {
+        return projectProxy.getAllDCPProject(customerSpace, includeSources);
     }
 
     @Override
-    public ProjectDetails getProjectByProjectId(String customerSpace, String projectId) {
-        return projectProxy.getDCPProjectByProjectId(customerSpace, projectId);
+    public ProjectDetails getProjectByProjectId(String customerSpace, String projectId, Boolean includeSources) {
+        return projectProxy.getDCPProjectByProjectId(customerSpace, projectId, includeSources);
     }
 
     @Override

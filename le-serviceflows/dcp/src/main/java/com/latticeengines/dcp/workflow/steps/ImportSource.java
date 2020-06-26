@@ -81,7 +81,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
     public void execute() {
         log.info("Start import DCP file");
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), configuration.getUploadId());
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), configuration.getUploadId(), Boolean.TRUE);
         if (upload == null || upload.getUploadConfig() == null) {
             throw new RuntimeException("Cannot find upload configuration for import!");
         }

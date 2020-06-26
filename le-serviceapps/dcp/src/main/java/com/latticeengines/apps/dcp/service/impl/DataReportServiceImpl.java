@@ -272,7 +272,7 @@ public class DataReportServiceImpl implements DataReportService {
                 }
                 break;
             case Upload:
-                UploadDetails uploadDetails = uploadService.getUploadByUploadId(customerSpace, ownerId);
+                UploadDetails uploadDetails = uploadService.getUploadByUploadId(customerSpace, ownerId, Boolean.FALSE);
                 if (uploadDetails != null) {
                     return uploadDetails.getSourceId();
                 } else {

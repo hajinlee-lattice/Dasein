@@ -13,23 +13,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UploadDetails {
 
-    @JsonProperty("upload_id")
+    @JsonProperty("uploadId")
     private String uploadId;
 
-    @JsonProperty("source_id")
+    @JsonProperty("sourceId")
     private String sourceId;
 
     @JsonProperty("status")
     @Enumerated(EnumType.STRING)
     private Upload.Status status;
 
-    @JsonProperty("upload_config")
+    @JsonProperty("uploadConfig")
     private UploadConfig uploadConfig;
 
-    @JsonProperty("upload_stats")
+    @JsonProperty("uploadStats")
     public UploadStats statistics;
 
-    @JsonProperty("upload_Diagnostics")
+    @JsonProperty("uploadDiagnostics")
     public UploadDiagnostics uploadDiagnostics;
 
     public String getUploadId() {

@@ -68,7 +68,7 @@ public class SourceImportListener extends LEJobListener {
         String projectId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.PROJECT_ID);
         String sourceId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.SOURCE_ID);
 
-        ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId);
+        ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId, Boolean.FALSE);
 
         BatchStatus jobStatus = jobExecution.getStatus();
         UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();

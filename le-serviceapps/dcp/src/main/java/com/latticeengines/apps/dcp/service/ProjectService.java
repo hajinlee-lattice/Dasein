@@ -17,9 +17,9 @@ public interface ProjectService {
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
                                  Project.ProjectType projectType, String user);
 
-    List<ProjectSummary> getAllProject(String customerSpace);
+    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources);
 
-    ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId);
+    ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources);
 
     Boolean deleteProject(String customerSpace, String projectId);
 

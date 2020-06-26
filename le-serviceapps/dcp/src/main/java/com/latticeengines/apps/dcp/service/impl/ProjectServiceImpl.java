@@ -42,6 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String PROJECT_ROOT_PATH_PATTERN = "Projects/%s/";
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
     private static final String SYSTEM_NAME_PATTERN = "ProjectSystem_%s";
+    private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project path}
     private static final int MAX_RETRY = 3;
 
     @Inject
@@ -71,7 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
         dropBoxService.createFolderUnderDropFolder(project.getRootPath());
-        return getProjectDetails(customerSpace, project);
+        return getProjectDetails(customerSpace, project, Boolean.FALSE);
     }
 
     @Override
@@ -86,30 +87,30 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
         dropBoxService.createFolderUnderDropFolder(project.getRootPath());
-        return getProjectDetails(customerSpace, project);
+        return getProjectDetails(customerSpace, project, Boolean.FALSE);
     }
 
     @Override
-    public List<ProjectSummary> getAllProject(String customerSpace) {
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources) {
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);
-            return projectInfoList.stream().map(projectInfo -> getProjectSummary(projectInfo,
-                    basicStatsMap.get(projectInfo.getProjectId()))).collect(Collectors.toList());
+            return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo,
+                    basicStatsMap.get(projectInfo.getProjectId()), includeSources)).collect(Collectors.toList());
         }
     }
 
     @Override
-    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
+    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources) {
         ProjectInfo projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
         if (projectInfo == null) {
             log.warn("No project found with id: " + projectId);
             return null;
         }
-        return getProjectDetails(customerSpace, projectInfo);
+        return getProjectDetails(customerSpace, projectInfo, includeSources);
     }
 
     @Override
@@ -175,13 +176,17 @@ public class ProjectServiceImpl implements ProjectService {
         return randomProjectId;
     }
 
-    private ProjectDetails getProjectDetails(String customerSpace, ProjectInfo projectInfo) {
+    private ProjectDetails getProjectDetails(String customerSpace, ProjectInfo projectInfo, Boolean includeSources) {
         ProjectDetails details = new ProjectDetails();
         details.setProjectId(projectInfo.getProjectId());
         details.setProjectDisplayName(projectInfo.getProjectDisplayName());
         details.setProjectRootPath(projectInfo.getRootPath());
+        details.setProjectFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+                dropBoxService.getDropBoxPrefix(), projectInfo.getRootPath()));
         details.setDeleted(projectInfo.getDeleted());
-        details.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+        if (includeSources) {
+            details.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+        }
         details.setRecipientList(projectInfo.getRecipientList());
         details.setCreated(projectInfo.getCreated().getTime());
         details.setUpdated(projectInfo.getUpdated().getTime());
@@ -189,11 +194,15 @@ public class ProjectServiceImpl implements ProjectService {
         return details;
     }
 
-    private ProjectSummary getProjectSummary(ProjectInfo projectInfo, DataReport.BasicStats basicStats) {
+    private ProjectSummary getProjectSummary(String customerSpace, ProjectInfo projectInfo,
+                                             DataReport.BasicStats basicStats, Boolean includeSources) {
         ProjectSummary summary = new ProjectSummary();
         summary.setProjectId(projectInfo.getProjectId());
         summary.setProjectDisplayName(projectInfo.getProjectDisplayName());
         summary.setArchieved(projectInfo.getDeleted());
+        if(includeSources) {
+            summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+        }
         summary.setRecipientList(projectInfo.getRecipientList());
         summary.setBasicStats(basicStats);
         summary.setCreated(projectInfo.getCreated().getTime());

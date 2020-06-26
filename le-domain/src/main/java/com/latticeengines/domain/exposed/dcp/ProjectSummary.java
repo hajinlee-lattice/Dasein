@@ -12,19 +12,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ProjectSummary {
 
-    @JsonProperty("project_id")
+    @JsonProperty("projectId")
     private String projectId;
 
-    @JsonProperty("project_display_name")
+    @JsonProperty("projectDisplayName")
     private String projectDisplayName;
 
     @JsonProperty("archived")
     private Boolean archieved;
 
-    @JsonProperty("basic_stats")
+    @JsonProperty("sources")
+    private List<Source> sources;
+
+    @JsonProperty("basicStats")
     private DataReport.BasicStats basicStats;
 
-    @JsonProperty("recipient_list")
+    @JsonProperty("recipientList")
     private List<String> recipientList;
 
     @JsonProperty("created")
@@ -33,7 +36,7 @@ public class ProjectSummary {
     @JsonProperty("updated")
     private Long updated;
 
-    @JsonProperty("created_by")
+    @JsonProperty("createdBy")
     private String createdBy;
 
     public String getProjectId() {
@@ -58,6 +61,14 @@ public class ProjectSummary {
 
     public void setArchieved(Boolean archieved) {
         this.archieved = archieved;
+    }
+
+    public List<Source> getSources() {
+        return sources;
+    }
+
+    public void setSources(List<Source> sources) {
+        this.sources = sources;
     }
 
     public DataReport.BasicStats getBasicStats() {

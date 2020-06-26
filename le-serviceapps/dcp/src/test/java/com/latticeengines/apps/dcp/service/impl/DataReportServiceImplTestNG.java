@@ -42,7 +42,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         uploadDetails.setSourceId("sourceUID");
         uploadDetails.setUploadId("uploadUID");
         when(projectService.getProjectBySourceId(anyString(), anyString())).thenReturn(projectInfo);
-        when(uploadService.getUploadByUploadId(anyString(), anyString())).thenReturn(uploadDetails);
+        when(uploadService.getUploadByUploadId(anyString(), anyString(), Boolean.TRUE)).thenReturn(uploadDetails);
         ReflectionTestUtils.setField(dataReportService, "projectService", projectService);
         ReflectionTestUtils.setField(dataReportService, "uploadService", uploadService);
     }

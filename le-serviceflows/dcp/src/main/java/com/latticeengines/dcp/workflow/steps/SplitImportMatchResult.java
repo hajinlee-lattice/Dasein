@@ -110,10 +110,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     protected void postJobExecution(SparkJobResult result) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
-        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
         Source source = sourceProxy.getSource(customerSpace.toString(), configuration.getSourceId());
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
-                configuration.getProjectId());
+                configuration.getProjectId(), Boolean.FALSE);
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
 
         // create match result folder
