@@ -21,7 +21,7 @@ public class MatchRuleProxy extends MicroserviceRestApiProxy implements ProxyInt
 
     public MatchRule createMatchRule(String customerSpace, MatchRule matchRule) {
         String url = constructUrl("/customerspaces/{customerSpace}/matchrules", shortenCustomerSpace(customerSpace));
-        return put("Create match rule", url, matchRule, MatchRule.class);
+        return post("Create match rule", url, matchRule, MatchRule.class);
     }
 
     public MatchRule updateMatchRule(String customerSpace, MatchRule matchRule) {
