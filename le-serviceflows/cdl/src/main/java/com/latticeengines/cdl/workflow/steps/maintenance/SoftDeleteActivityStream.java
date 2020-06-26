@@ -69,7 +69,10 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
 
     private Map<String, String> updateRawStreamTableEntries() {
         Map<String, String> updated = new HashMap<>(getActiveRawStreamTables());
+        log.info("current pipeline version: {}", pipelineVersion);
         log.info("original raw stream tables: {}", updated);
+        rawStreamsAfterDelete = rawStreamsAfterDelete.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> TableUtils.getFullTableName(entry.getValue(), pipelineVersion)));
         log.info("raw stream tables after delete: {}", rawStreamsAfterDelete);
         updated.putAll(rawStreamsAfterDelete);
         log.info("updated raw stream tables entries: {}", updated);
@@ -168,7 +171,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
         setTargetTable(step, targetTablePrefix);
-        rawStreamsAfterDelete.put(streamId, TableUtils.getFullTableName(targetTablePrefix, pipelineVersion));
+        rawStreamsAfterDelete.put(streamId, targetTablePrefix);
 
         addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), rawStreamTable);
         if (hasDeleteImport) {
