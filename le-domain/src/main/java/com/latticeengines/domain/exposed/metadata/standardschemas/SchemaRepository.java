@@ -6,12 +6,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeBuilder;
@@ -116,7 +120,25 @@ public class SchemaRepository {
                     stdAttrs.add(InterfaceName.CustomerContactId);
                 }
                 stdAttrs.add(InterfaceName.ContactId);
+
+                // email, phone number, mobile device id
                 stdAttrs.add(InterfaceName.Email);
+                stdAttrs.add(InterfaceName.SecondaryEmail);
+                stdAttrs.add(InterfaceName.OtherEmail);
+                stdAttrs.add(InterfaceName.SecondaryPhoneNumber);
+                stdAttrs.add(InterfaceName.OtherPhoneNumber);
+                stdAttrs.add(InterfaceName.PrimaryMobileDeviceID);
+                stdAttrs.add(InterfaceName.SecondaryMobileDeviceID);
+                stdAttrs.add(InterfaceName.OtherMobileDeviceID);
+
+                // contact level location info
+                stdAttrs.add(InterfaceName.ContactCity);
+                stdAttrs.add(InterfaceName.ContactState);
+                stdAttrs.add(InterfaceName.ContactCountry);
+                stdAttrs.add(InterfaceName.ContactPostalCode);
+                stdAttrs.add(InterfaceName.Contact_Address_Street_1);
+                stdAttrs.add(InterfaceName.Contact_Address_Street_2);
+
                 break;
             default:
             }
@@ -853,6 +875,15 @@ public class SchemaRepository {
                 .logicalDataType(LogicalDataType.Date) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+        // additional email/phone number/mobile device ID fields
+        table.addAttributes(Arrays.asList( //
+                attrSecondaryEmail(), attrOtherEmail(), //
+                attrSecondaryPhoneNumber(), attrOtherPhoneNumber(), //
+                attrPrimaryMobileDeviceID(), attrSecondaryMobileDeviceID(), attrOtherMobileDeviceID()));
+        // contact level location info
+        table.addAttributes(Arrays.asList( //
+                attrContactAddress1(), attrContactAddress2(), //
+                attrContactCity(), attrContactState(), attrContactCountry(), attrContactPostalCode()));
         return table;
     }
 
@@ -1464,21 +1495,14 @@ public class SchemaRepository {
 
     public List<Attribute> getMatchingAttributes(SchemaInterpretation schema) {
         Attribute website = attrWebsite();
-        Attribute email = attr("Email") //
-                .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL_ADDRESS")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Email) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_EMAIL) //
-                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .build();
+        Attribute email = addAllowedDisplayName(attrEmail(), "PRIMARY_EMAIL");
         Attribute city = attrCity();
         Attribute state = attrState();
         Attribute country = attrCountry();
         Attribute postalCode = attrPostalCode();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "COMPANY")) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "COMPANY", "ACCOUNT_COMPANY_NAME")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1493,31 +1517,12 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build();
 
-        Attribute phoneNumber = attr("PhoneNumber") //
-                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE_NUMBER")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
+        Attribute phoneNumber = attrPhoneNumber();
 
         Attribute duns = attrDUNS();
 
-        Attribute address1 = attr(InterfaceName.Address_Street_1.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ADDRESS1", "ADDRESS_STREET_1", "ADDRESS_1")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Address_Street_1) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .build();
-
-        Attribute address2 = attr(InterfaceName.Address_Street_2.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ADDRESS2", "ADDRESS_STREET_2", "ADDRESS_2")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Address_Street_2) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .build();
+        Attribute address1 = attrAddress1();
+        Attribute address2 = attrAddress2();
 
         List<Attribute> attrs = new ArrayList<>();
         if (schema == SchemaInterpretation.SalesforceAccount) {
@@ -1530,25 +1535,34 @@ public class SchemaRepository {
                     Arrays.asList(website, accountCompanyName, duns, city, state, country, postalCode, phoneNumber));
             attrs.addAll(Arrays.asList(address1, address2));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_ATTRIBUTES));
-        } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
+        } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead
+                || schema == SchemaInterpretation.ContactEntityMatch) {
+            // TODO looks like phone number was overloaded in contact, used as both phone
+            // number for contact/account match. Prioritize for the contact use case first.
+            addAllowedDisplayName(attrPhoneNumber(), "PRIMARY_PHONE_NUMBER");
+            if (schema == SchemaInterpretation.ContactEntityMatch) {
+                email.setDefaultValueStr("");
+            }
+            // add "ACCOUNT" to allowed display name for account fields in contact to
+            // prevent confusion/conflict with corresponding contact info
+            Attribute accountWebsite = addAllowedDisplayName(website, "ACCOUNT_WEBSITE");
+            Attribute accountDuns = addAllowedDisplayName(duns, "ACCOUNT_DUNS", "ACCOUNT_DUNS_NUMBER");
+            // attrs have contact counterpart
+            prefixAccountLocationFields(address1, address2, city, state, country, postalCode);
+
             attrs.add(email);
             attrs.add(contactCompanyName);
-            if (schema == SchemaInterpretation.Contact) {
-                attrs.add(website);
+            if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.ContactEntityMatch) {
+                attrs.add(accountWebsite);
                 attrs.addAll(Arrays.asList(address1, address2));
             }
-            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
+            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, accountDuns));
             if (SchemaInterpretation.SalesforceLead.equals(schema)) {
                 // needed for CSV downloads in LPI
                 attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
             } else {
                 attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
             }
-        } else if (schema == SchemaInterpretation.ContactEntityMatch) {
-            email.setDefaultValueStr("");
-            attrs.addAll(Arrays.asList(email, website, contactCompanyName, duns, city, state, country, postalCode,
-                    phoneNumber, address1, address2));
-            attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
         }
         return attrs;
     }
@@ -1807,6 +1821,26 @@ public class SchemaRepository {
                 .build();
     }
 
+    private Attribute attrAddress1() {
+        return attr(InterfaceName.Address_Street_1.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ADDRESS1", "ADDRESS_STREET_1", "ADDRESS_1")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Address_Street_1) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build();
+    }
+
+    private Attribute attrAddress2() {
+        return attr(InterfaceName.Address_Street_2.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ADDRESS2", "ADDRESS_STREET_2", "ADDRESS_2")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Address_Street_2) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build();
+    }
+
     private Attribute attrDUNS() {
         return attr(InterfaceName.DUNS.name()) //
                 .allowedDisplayNames(Arrays.asList("DUNS", "DUNS_NUMBER")) //
@@ -1845,5 +1879,158 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE)
                 .fundamentalType(ModelingMetadata.FT_ALPHA)
                 .required().notNull().build();
+    }
+
+    /*-
+     * fields for contact
+     */
+    private Attribute attrEmail() {
+        return attr(InterfaceName.Email.name()) //
+                .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL_ADDRESS")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Email) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_EMAIL) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .build();
+    }
+
+    private Attribute attrSecondaryEmail() {
+        Attribute attr = attrEmail();
+        prefixAllowedDisplayNames(attr, "SECONDARY");
+        return changeNames(attr, InterfaceName.SecondaryEmail);
+    }
+
+    private Attribute attrOtherEmail() {
+        Attribute attr = attrEmail();
+        prefixAllowedDisplayNames(attr, "OTHER");
+        return changeNames(attr, InterfaceName.OtherEmail);
+    }
+
+    private Attribute attrPhoneNumber() {
+        return attr(InterfaceName.PhoneNumber.name()) //
+                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE_NUMBER")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PhoneNumber) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrSecondaryPhoneNumber() {
+        Attribute attr = attrPhoneNumber();
+        prefixAllowedDisplayNames(attr, "SECONDARY");
+        return changeNames(attr, InterfaceName.SecondaryPhoneNumber);
+    }
+
+    private Attribute attrOtherPhoneNumber() {
+        Attribute attr = attrPhoneNumber();
+        prefixAllowedDisplayNames(attr, "OTHER");
+        return changeNames(attr, InterfaceName.OtherPhoneNumber);
+    }
+
+    private Attribute attrMobileDeviceID() {
+        return attr(InterfaceName.PrimaryMobileDeviceID.name()) //
+                .allowedDisplayNames(Sets.newHashSet("MOBILE_DEVICE_ID")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PrimaryMobileDeviceID) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrPrimaryMobileDeviceID() {
+        return addAllowedDisplayName(attrMobileDeviceID(), "PRIMARY_MOBILE_DEVICE_ID");
+    }
+
+    private Attribute attrSecondaryMobileDeviceID() {
+        Attribute attr = attrMobileDeviceID();
+        prefixAllowedDisplayNames(attr, "SECONDARY");
+        return changeNames(attr, InterfaceName.SecondaryMobileDeviceID);
+    }
+
+    private Attribute attrOtherMobileDeviceID() {
+        Attribute attr = attrMobileDeviceID();
+        prefixAllowedDisplayNames(attr, "OTHER");
+        return changeNames(attr, InterfaceName.OtherMobileDeviceID);
+    }
+
+    /*-
+     * location info for contact. use the same allowed display name as account's location info for now
+     */
+    private Attribute attrContactCity() {
+        return changeNames(attrCity(), InterfaceName.ContactCity);
+    }
+
+    private Attribute attrContactState() {
+        return changeNames(attrState(), InterfaceName.ContactState);
+    }
+
+    private Attribute attrContactCountry() {
+        return changeNames(attrCountry(), InterfaceName.ContactCountry);
+    }
+
+    private Attribute attrContactPostalCode() {
+        return changeNames(attrPostalCode(), InterfaceName.ContactPostalCode);
+    }
+
+    private Attribute attrContactAddress1() {
+        return changeNames(attrAddress1(), InterfaceName.Contact_Address_Street_1);
+    }
+
+    private Attribute attrContactAddress2() {
+        return changeNames(attrAddress2(), InterfaceName.Contact_Address_Street_2);
+    }
+
+    private Attribute addAllowedDisplayName(@NotNull Attribute attr, @NotNull String displayName,
+            String... displayNames) {
+        List<String> names = new ArrayList<>(attr.getAllowedDisplayNames());
+        names.add(displayName);
+        if (displayNames != null) {
+            names.addAll(Arrays.asList(displayNames));
+        }
+        attr.setAllowedDisplayNames(names);
+        return attr;
+    }
+
+    private Attribute changeNames(@NotNull Attribute attr, @NotNull InterfaceName name) {
+        attr.setName(name.name());
+        attr.setDisplayName(name.name());
+        attr.setInterfaceName(name);
+        return attr;
+    }
+
+    private void prefixAccountLocationFields(Attribute... attrs) {
+        if (attrs != null) {
+            for (Attribute attr : attrs) {
+                prefixDisplayName(attr, BusinessEntity.Account.name());
+                prefixAllowedDisplayNames(attr, "ACCOUNT");
+            }
+        }
+    }
+
+    private void prefixDisplayName(@NotNull Attribute attr, @NotNull String prefix) {
+        attr.setDisplayName(prefix + attr.getDisplayName());
+    }
+
+    private void prefixAllowedDisplayNames(@NotNull Attribute attr, @NotNull String prefix) {
+        modifyAllowedDisplayNames(attr, (attrName) -> {
+            if (attrName.contains(" ")) {
+                return prefix + " " + attrName;
+            } else {
+                return prefix + "_" + attrName;
+            }
+        });
+    }
+
+    private void modifyAllowedDisplayNames(@NotNull Attribute attr, @NotNull Function<String, String> modifyAttrName) {
+        List<String> names = attr.getAllowedDisplayNames();
+        if (CollectionUtils.isNotEmpty(names)) {
+            List<String> modifiedNames = names //
+                    .stream() //
+                    .map(modifyAttrName) //
+                    .collect(Collectors.toList());
+            attr.setAllowedDisplayNames(modifiedNames);
+        }
     }
 }

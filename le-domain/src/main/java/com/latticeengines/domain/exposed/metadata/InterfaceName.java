@@ -54,7 +54,7 @@ public enum InterfaceName {
     LastName, //
     Name, //
     Title, //
-    Email, //
+    Email, SecondaryEmail, OtherEmail, //
     Salutation, //
     BirthDate, //
     DoNotMail, //
@@ -63,12 +63,13 @@ public enum InterfaceName {
     City, //
     State, //
     PostalCode, //
-    ContactPostalCode, //
     Country, //
-    ContactCountry, //
-    PhoneNumber, //
+    PhoneNumber, SecondaryPhoneNumber, OtherPhoneNumber, //
     Address_Street_1, //
     Address_Street_2,
+    ContactCity, ContactState, ContactCountry, ContactPostalCode, //
+    Contact_Address_Street_1, Contact_Address_Street_2, //
+    PrimaryMobileDeviceID, SecondaryMobileDeviceID, OtherMobileDeviceID, //
 
     Website, //
 
