@@ -40,6 +40,11 @@ public class MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Collections.singletonList(entityManager));
     }
 
+    public void enableMultiTenantFilter(JoinPoint joinPoint,
+                                        TenantEntityMgr tenantEntityMgr, List<EntityManager> entityManagers) {
+        enableMultiTenantFilter(joinPoint, null, tenantEntityMgr, entityManagers);
+    }
+
     public void enableMultiTenantFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
                                         TenantEntityMgr tenantEntityMgr, List<EntityManager> entityManagers) {
 
@@ -73,8 +78,10 @@ public class MultiTenantEntityMgrAspect {
             throw new RuntimeException("Problem with multi-tenancy framework");
         }
 
-        sessionFactory.getCurrentSession().enableFilter("tenantFilter")
-                .setParameter("tenantFilterId", tenant.getPid());
+        if (sessionFactory != null) {
+            sessionFactory.getCurrentSession().enableFilter("tenantFilter")
+                    .setParameter("tenantFilterId", tenant.getPid());
+        }
 
         if (CollectionUtils.isNotEmpty(entityManagers)) {
             entityManagers.forEach(entityManager -> {
