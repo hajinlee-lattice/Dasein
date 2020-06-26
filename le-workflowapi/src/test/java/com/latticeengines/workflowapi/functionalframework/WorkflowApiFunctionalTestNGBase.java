@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -123,4 +124,34 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
         JobStatus status = workflowService.sleepForCompletionWithStatus(workflowId);
         assertEquals(status, JobStatus.COMPLETED);
     }
+
+    protected JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
+        int retryOnException = 4;
+        Job job;
+        while (true) {
+            try {
+                job = workflowJobService.getJobByApplicationId(tenant.getId(), applicationId, false);
+            } catch (Exception e) {
+                log.error(String.format("Workflow job exception: %s", e.getMessage()), e);
+
+                job = null;
+                if (--retryOnException == 0)
+                    throw new RuntimeException(e);
+            }
+
+            if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
+                if (job.getJobStatus() == JobStatus.FAILED || job.getJobStatus() == JobStatus.PENDING_RETRY) {
+                    log.error(applicationId + " Failed with ErrorCode " + job.getErrorCode() + ". \n"
+                            + job.getErrorMsg());
+                }
+                return job.getJobStatus();
+            }
+            try {
+                Thread.sleep(30000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 }
