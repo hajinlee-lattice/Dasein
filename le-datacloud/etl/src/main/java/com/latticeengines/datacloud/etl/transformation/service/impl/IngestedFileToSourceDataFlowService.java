@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculati
 import com.latticeengines.domain.exposed.datacloud.transformation.config.source.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.MsTeamsSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 
 @Component("ingestedFileToSourceDataFlowService")
@@ -238,6 +239,7 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
         String content = "Fail to uncompress file " + file + ". Current job has skipped the file to proceed. "
                 + "No need manual operation now, but please pay attention or contact data provider.";
         notificationService.sendSlack(subject, content, "IngestedFileToSourceTransformer", SlackSettings.Color.DANGER);
+        notificationService.sendMsTeams(subject, content, MsTeamsSettings.Color.DANGER);
         notificationService.sendEmail(subject, content, null);
     }
 }
