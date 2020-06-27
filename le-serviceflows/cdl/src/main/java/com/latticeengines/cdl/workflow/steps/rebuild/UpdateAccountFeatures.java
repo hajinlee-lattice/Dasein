@@ -53,7 +53,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     private ColumnMetadataProxy columnMetadataProxy;
 
     private boolean shortCutMode = false;
-    private Table latticeAccountTable;
+    private Table fullAccountTable;
     private Table oldAccountFeaturesTable;
     private Table newAccountFeaturesTable;
     private Table fullChangelistTable;
@@ -71,40 +71,42 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
                     TableRoleInCollection.AccountFeatures, inactive);
         } else {
             preExecution();
-            if (oldAccountFeaturesTable == null) {
-                // Old table doesn't exist, use LatticeAccount table to generate AccountFeatures
-                if (latticeAccountTable != null) {
-                    log.info("LatticeAccount table name is {}, path is {} ", latticeAccountTable.getName(),
-                            latticeAccountTable.getExtracts().get(0).getPath());
-                    HdfsDataUnit input = latticeAccountTable.toHdfsDataUnit("LatticeAccount");
-                    HdfsDataUnit features = select(input);
 
-                    postExecution();
+            if (shouldRebuild()) {
+                log.info("UpdateAccountFeatures, rebuild AccountFeatures table");
+
+                if (fullAccountTable != null) {
+                    log.info("FullAccount table name is {}, path is {} ", fullAccountTable.getName(),
+                            fullAccountTable.getExtracts().get(0).getPath());
+                    HdfsDataUnit fullAccount = fullAccountTable.toHdfsDataUnit("FullAccount");
+                    // Select from the full account table
+                    select(fullAccount);
                 } else {
-                    throw new RuntimeException("Even LatticeAccount table doesn't exist, can't continue");
+                    throw new RuntimeException("Full account table doesn't exist, can't rebuild");
                 }
             } else {
-                // Old table exists, apply AccountFeatures related changelist into existing table
-                log.info("Existing AccountFeatures table name is {}, path is {} ",
-                        oldAccountFeaturesTable.getName(), oldAccountFeaturesTable.getExtracts().get(0).getPath());
-                HdfsDataUnit input = oldAccountFeaturesTable.toHdfsDataUnit("OldAccountFeatures");
-                HdfsDataUnit applied = applyChangelist(input);
-
-                postExecution();
+                // Apply changelists to generate new AccountFeatures table
+                if (fullChangelistTable != null) {
+                    log.info("Existing AccountFeatures table name is {}, path is {} ", oldAccountFeaturesTable.getName(),
+                            oldAccountFeaturesTable.getExtracts().get(0).getPath());
+                    HdfsDataUnit input = oldAccountFeaturesTable.toHdfsDataUnit("OldAccountFeatures");
+                    applyChangelist(input);
+                } else {
+                    throw new RuntimeException("Full changelist doesn't exist, can't continue");
+                }
             }
+
+            postExecution();
         }
     }
 
     private void preExecution() {
-        latticeAccountTable = attemptGetTableRole(TableRoleInCollection.LatticeAccount, false);
-        fullChangelistTable = getTableSummaryFromKey(customerSpace.toString(), FULL_CHANGELIST_TABLE_NAME);
-        oldAccountFeaturesTable = attemptGetTableRole(TableRoleInCollection.AccountFeatures, false);
-        if (fullChangelistTable == null) {
-            throw new RuntimeException("Full changelist doesn't exist, can't continue");
-        }
         joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name()
                 : InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
+        fullAccountTable = getTableSummaryFromKey(customerSpace.toString(), FULL_ACCOUNT_TABLE_NAME);
+        fullChangelistTable = getTableSummaryFromKey(customerSpace.toString(), FULL_CHANGELIST_TABLE_NAME);
+        oldAccountFeaturesTable = attemptGetTableRole(TableRoleInCollection.AccountFeatures, false);
     }
 
     protected void postExecution() {
@@ -118,20 +120,23 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         }
     }
 
-    private HdfsDataUnit select(HdfsDataUnit input) {
+    private boolean shouldRebuild() {
+        return (oldAccountFeaturesTable == null) || getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class);
+    }
+
+    private void select(HdfsDataUnit input) {
         log.info("UpdateAccountFeatures, select step");
-        CopyConfig config = getFeaturesCopyConfig();
-        List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(input);
-        config.setInput(inputs);
-        SparkJobResult result = runSparkJob(CopyJob.class, config);
+
+        CopyConfig slectConfig = getFeaturesCopyConfig();
+        List<DataUnit> selectInputs = new LinkedList<>();
+        selectInputs.add(input);
+        slectConfig.setInput(selectInputs);
+        SparkJobResult result = runSparkJob(CopyJob.class, slectConfig);
         HdfsDataUnit output = result.getTargets().get(0);
 
         // Upsert AccountFeatures table
         String tableName = NamingUtils.timestamp("AccountFeatures");
         newAccountFeaturesTable = toTable(tableName, output);
-
-        return output;
     }
 
     private CopyConfig getFeaturesCopyConfig() {
@@ -156,11 +161,12 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         return config;
     }
 
-    private HdfsDataUnit applyChangelist(HdfsDataUnit input) {
+    private void applyChangelist(HdfsDataUnit input) {
         log.info("UpdateAccountFeatures, apply changelist step");
         ChangeListConfig config = new ChangeListConfig();
         List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(input);
+        inputs.add(toDataUnit(fullChangelistTable, "FullChangelist")); // changelist
+        inputs.add(input); // source table
         config.setInput(inputs);
         config.setJoinKey(joinKey);
         SparkJobResult result = runSparkJob(MergeChangeListJob.class, config);
@@ -169,8 +175,6 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         // Upsert AccountFeature table
         String tableName = NamingUtils.timestamp("AccountFeatures");
         newAccountFeaturesTable = toTable(tableName, output);
-
-        return output;
     }
 
     private void setAccountFeatureTableSchema(Table table) {

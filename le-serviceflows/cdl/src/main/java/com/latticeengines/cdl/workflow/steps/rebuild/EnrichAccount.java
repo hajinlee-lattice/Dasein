@@ -32,11 +32,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Ma
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -64,12 +62,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     private boolean shouldExcludeDataCloudAttrs;
     private boolean shortCutMode;
 
-    private boolean useChangeList = false;
-    protected DataCollection.Version active;
-    protected DataCollection.Version inactive;
-    private List<Column> allCols;
-    private String ldcTablePrefix;
-
     @Override
     protected BusinessEntity getEntity() {
         return BusinessEntity.Account;
@@ -77,8 +69,8 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
-        initializeConfiguration();
-        List<String> tables = Arrays.asList(FULL_ACCOUNT_TABLE_NAME, LATTICE_ACCOUNT_TABLE_NAME);
+        customerSpace = configuration.getCustomerSpace();
+        List<String> tables = Arrays.asList(FULL_ACCOUNT_TABLE_NAME);
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), tables);
         shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
 
@@ -89,7 +81,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
             return null;
 
         } else {
-
             masterTableName = ensureInactiveBatchStoreExists();
             if (StringUtils.isBlank(masterTableName)) {
                 throw new IllegalStateException("Cannot find the master table in default collection");
@@ -108,15 +99,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
             PipelineTransformationRequest request = getTransformRequest();
             return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
-
         }
-    }
-
-    protected void initializeConfiguration() {
-        customerSpace = configuration.getCustomerSpace();
-        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        ldcTablePrefix = TableRoleInCollection.LatticeAccount.name();
     }
 
     @Override
@@ -124,14 +107,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         String fullAccountTableName = TableUtils.getFullTableName(fullAccountTablePrefix, pipelineVersion);
         exportToS3AndAddToContext(fullAccountTableName, FULL_ACCOUNT_TABLE_NAME);
         addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
-
-        if (!shouldExcludeDataCloudAttrs && useChangeList) {
-            String ldcTableName = TableUtils.getFullTableName(ldcTablePrefix, pipelineVersion);
-            exportToS3AndAddToContext(ldcTableName, LATTICE_ACCOUNT_TABLE_NAME);
-            dataCollectionProxy.upsertTable(customerSpace.toString(), ldcTableName,
-                    TableRoleInCollection.LatticeAccount, inactive);
-        }
-
     }
 
     private PipelineTransformationRequest getTransformRequest() {
@@ -142,24 +117,15 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         request.setEnableSlack(false);
 
         TransformationStepConfig match;
-        TransformationStepConfig copyLdc = null;
         if (shouldExcludeDataCloudAttrs) {
             match = copy(customerSpace, masterTableName);
         } else {
             match = match(customerSpace, masterTableName);
-            if (useChangeList) {
-                String joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode())
-                        ? InterfaceName.EntityId.name()
-                        : InterfaceName.AccountId.name();
-                copyLdc = copyLdc(customerSpace, 0, joinKey);
-            }
         }
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(match);
-        if (copyLdc != null) {
-            steps.add(copyLdc);
-        }
+
         // There was an old step to merge fetched result with slim batch store
         // Which can be found in branch-4.14
         request.setSteps(steps);
@@ -192,15 +158,15 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         }
 
         List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
-        allCols = new ArrayList<>();
+        List<Column> cols = new ArrayList<>();
         boolean useInternalAttrs = useInternalAttrs();
         for (ColumnMetadata cm : dcCols) {
             if (useInternalAttrs || canBeUsedInModelOrSegment(cm) || isNotInternalAttr(cm)) {
-                allCols.add(new Column(cm.getAttrName()));
+                cols.add(new Column(cm.getAttrName()));
             }
         }
         ColumnSelection cs = new ColumnSelection();
-        cs.setColumns(allCols);
+        cs.setColumns(cols);
 
         matchInput.setCustomSelection(cs);
         matchInput.setUnionSelection(null);
@@ -233,25 +199,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         return step;
     }
 
-    private TransformationStepConfig copyLdc(CustomerSpace customerSpace, int inputStep, String joinKey) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_COPY_TXFMR);
-        step.setInputSteps(Collections.singletonList(inputStep));
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(ldcTablePrefix);
-        step.setTargetTable(targetTable);
-
-        CopyConfig conf = new CopyConfig();
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        List<String> ldcColumns = new ArrayList<>();
-        ldcColumns.add(joinKey);
-        allCols.forEach(c -> ldcColumns.add(c.getColumnName()));
-        conf.setSelectAttrs(ldcColumns);
-        step.setConfiguration(confStr);
-        return step;
-    }
-
     private Map<MatchKey, List<String>> getKeyMap() {
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
@@ -270,5 +217,4 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         return columnMetadata.isEnabledFor(ColumnSelection.Predefined.Model)
                 || columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment);
     }
-
 }
