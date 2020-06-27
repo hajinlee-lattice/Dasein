@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -43,6 +44,8 @@ public class PlsValidateTeamMemberRightsAspect {
     @Inject
     private BatonService batonService;
 
+    private static final String updateRatingEngineMethod = "createOrUpdateRatingEngine";
+
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentServiceImpl.createOrUpdateSegment(..))")
     public void createOrUpdateSegment(JoinPoint joinPoint) {
         MetadataSegment segment = (MetadataSegment) joinPoint.getArgs()[0];
@@ -50,10 +53,24 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithSegment(MetadataSegment segment) {
-        if (teamFeatureEnabled()) {
-            if (segment != null) {
-                checkTeamInContext(segment.getTeamId());
+        if (teamFeatureEnabled() && segment != null) {
+            if (StringUtils.isNotEmpty(segment.getName()) && segment.getTeamId() != null) {
+                String loginUser = getLoginUser();
+                MetadataSegment orgSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segment.getName());
+                if (orgSegment != null && TeamUtils.shouldFailWhenAssignTeam(orgSegment.getCreatedBy(), loginUser, orgSegment.getTeamId(), segment.getTeamId())) {
+                    throw new AccessDeniedException("Access denied.");
+                }
             }
+            checkTeamInContext(segment.getTeamId());
+        }
+    }
+
+    private String getLoginUser() {
+        Session session = MultiTenantContext.getSession();
+        if (session != null) {
+            return session.getEmailAddress();
+        } else {
+            return null;
         }
     }
 
@@ -130,7 +147,16 @@ public class PlsValidateTeamMemberRightsAspect {
             " || execution(public * com.latticeengines.pls.service.impl.RatingEngineServiceImpl.setScoringIteration(..))")
     public void crudForRatingEngine(JoinPoint joinPoint) {
         if (joinPoint.getArgs()[0] instanceof RatingEngine) {
+            String methodName = joinPoint.getSignature().getName();
             RatingEngine ratingEngine = (RatingEngine) joinPoint.getArgs()[0];
+            if (updateRatingEngineMethod.equals(methodName) && ratingEngine.getId() != null && ratingEngine.getTeamId() != null) {
+                String loginUser = getLoginUser();
+                RatingEngine oldRatingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getShortTenantId(), ratingEngine.getId());
+                if (oldRatingEngine != null && TeamUtils.shouldFailWhenAssignTeam(oldRatingEngine.getCreatedBy(),
+                        loginUser, oldRatingEngine.getTeamId(), ratingEngine.getTeamId())) {
+                    throw new AccessDeniedException("Access denied.");
+                }
+            }
             if (StringUtils.isNotEmpty(ratingEngine.getTeamId())) {
                 checkTeamWithRatingEngine(ratingEngine);
             } else if (StringUtils.isNotEmpty(ratingEngine.getId())) {

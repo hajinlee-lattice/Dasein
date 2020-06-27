@@ -69,4 +69,18 @@ public final class TeamUtils {
         }
     }
 
+    public static boolean shouldFailWhenAssignTeam(String createdBy, String currentUser, String orgTeamId, String teamId) {
+        if (createdBy.equals(currentUser)) {
+            return false;
+        }
+        if (StringUtils.isEmpty(orgTeamId)) {
+            orgTeamId = GLOBAL_TEAM_ID;
+        }
+        if (orgTeamId.equals(teamId)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }
