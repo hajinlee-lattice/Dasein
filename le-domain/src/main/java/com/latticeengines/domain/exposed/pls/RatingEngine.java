@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditUser;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -72,7 +73,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable, HasTeamInfo {
+public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable, HasTeamInfo, HasAuditUser {
 
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
@@ -346,12 +347,14 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.segment = segment;
     }
 
+    @Override
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     public String getCreatedBy() {
         return this.createdBy;
     }
 
+    @Override
     @JsonProperty("createdBy")
     public void setCreatedBy(String user) {
         this.createdBy = user;

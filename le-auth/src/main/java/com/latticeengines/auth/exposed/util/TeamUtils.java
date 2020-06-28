@@ -2,6 +2,7 @@ package com.latticeengines.auth.exposed.util;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,6 +14,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamId;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
+import com.latticeengines.domain.exposed.db.HasAuditUser;
 import com.latticeengines.domain.exposed.security.Session;
 
 public final class TeamUtils {
@@ -69,18 +71,37 @@ public final class TeamUtils {
         }
     }
 
-    public static boolean shouldFailWhenAssignTeam(String createdBy, String currentUser, String orgTeamId, String teamId) {
-        if (createdBy.equals(currentUser)) {
-            return false;
-        }
-        if (StringUtils.isEmpty(orgTeamId)) {
-            orgTeamId = GLOBAL_TEAM_ID;
-        }
-        if (orgTeamId.equals(teamId)) {
-            return false;
+    public static boolean shouldFailWhenAssignTeam(String id, Function<String, HasTeamInfo> queryFuc, HasTeamInfo current) {
+        HasTeamInfo old = queryFuc.apply(id);
+        if (old != null) {
+            String loginUser = getLoginUser();
+            HasAuditUser hasAuditUser = (HasAuditUser) old;
+            String createdBy = hasAuditUser.getCreatedBy();
+            if (createdBy.equals(loginUser)) {
+                return false;
+            }
+            String oldTeamId = old.getTeamId();
+            String teamId = current.getTeamId();
+            if (StringUtils.isEmpty(oldTeamId)) {
+                oldTeamId = GLOBAL_TEAM_ID;
+            }
+            if (oldTeamId.equals(teamId)) {
+                return false;
+            } else {
+                log.info("Action that user {} want to assign team from teamId {} to teamId {} on entity {} failed.", loginUser, oldTeamId, teamId, id);
+                return true;
+            }
         } else {
-            return true;
+            return false;
         }
     }
 
+    public static String getLoginUser() {
+        Session session = MultiTenantContext.getSession();
+        if (session != null) {
+            return session.getEmailAddress();
+        } else {
+            return null;
+        }
+    }
 }
