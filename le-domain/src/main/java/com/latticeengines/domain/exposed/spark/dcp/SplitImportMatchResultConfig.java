@@ -23,14 +23,26 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("countryAttr")
     private String countryAttr;
 
-    @JsonProperty("CountryCodeAttr")
-    private String countryCodeAttr;
-
     @JsonProperty("ConfidenceCodeAttr")
     private String confidenceCodeAttr;
 
     @JsonProperty("TotalCount")
     private long totalCount;
+
+    @JsonProperty("URL")
+    private String url;
+
+    @JsonProperty("User")
+    private String user;
+
+    @JsonProperty("Password")
+    private String password;
+
+    @JsonProperty("EncryptionKey")
+    private String encryptionKey;
+
+    @JsonProperty("SaltHint")
+    private String saltHint;
 
     @Override
     @JsonProperty("Name")
@@ -75,12 +87,44 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
         this.countryAttr = countryAttr;
     }
 
-    public String getCountryCodeAttr() {
-        return countryCodeAttr;
+    public String getUrl() {
+        return url;
     }
 
-    public void setCountryCodeAttr(String countryCodeAttr) {
-        this.countryCodeAttr = countryCodeAttr;
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEncryptionKey() {
+        return encryptionKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
+    public String getSaltHint() {
+        return saltHint;
+    }
+
+    public void setSaltHint(String saltHint) {
+        this.saltHint = saltHint;
     }
 
     public String getConfidenceCodeAttr() {

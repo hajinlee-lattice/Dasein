@@ -5,9 +5,9 @@ import com.latticeengines.domain.exposed.dcp.DataReport
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.CSVUtils
+import com.latticeengines.spark.util.{CSVUtils, CountryCodeUtils}
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.functions.{col, count, sum, rand, round}
+import org.apache.spark.sql.functions.{col, count, rand, round, sum}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
@@ -20,9 +20,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val input: DataFrame = lattice.input.head
 
     val countryAttr: String = config.getCountryAttr
-    val countryCodeAttr: String = config.getCountryCodeAttr
+    val url: String = config.getUrl
+    val user: String = config.getUser
+    val password: String = config.getPassword
+    val encryptionKey: String = config.getEncryptionKey
+    val saltHint: String = config.getSaltHint
     val totalCnt: Long = config.getTotalCount
-    val geoReport = generateGeoReport(input, countryAttr, countryCodeAttr, totalCnt)
+    val geoReport = generateGeoReport(input, countryAttr, totalCnt, url, user, password, encryptionKey, saltHint)
 
     val ccAttr = config.getConfidenceCodeAttr
     val matchToDUNSReport = generateMatchToDunsReport(input, ccAttr, totalCnt)
@@ -54,12 +58,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
   }
 
-  private def generateGeoReport(input: DataFrame, countryAttr: String, countryCodeAttr: String,
-                                totalCnt: Long):  DataReport.GeoDistributionReport = {
+  private def generateGeoReport(input: DataFrame, countryAttr: String, totalCnt: Long, url: String, user: String,
+                                password: String, key: String, salt: String): DataReport.GeoDistributionReport = {
     val geoReport: DataReport.GeoDistributionReport = new DataReport.GeoDistributionReport
     if (input.columns.contains(countryAttr)) {
       // fake one country code column
-      val countryDF = input.withColumn(countryCodeAttr, col(countryAttr))
+      val countryCodeAttr: String = "CountryCodeAttr"
+      val countryDF = CountryCodeUtils.convert(input, countryAttr, countryCodeAttr, url, user, password, key, salt)
         .groupBy(col(countryAttr), col(countryCodeAttr))
         .agg(count("*").alias("cnt"))
         .persist(StorageLevel.DISK_ONLY)

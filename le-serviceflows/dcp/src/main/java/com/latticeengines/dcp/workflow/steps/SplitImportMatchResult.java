@@ -15,11 +15,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -72,6 +74,15 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     @Inject
     private DataReportProxy dataReportProxy;
 
+    @Value("${datacloud.manage.url}")
+    private String url;
+
+    @Value("${datacloud.manage.user}")
+    private String user;
+
+    @Value("${datacloud.manage.password.encrypted}")
+    private String password;
+
     @Override
     protected Class<SplitImportMatchResultJob> getJobClz() {
         return SplitImportMatchResultJob.class;
@@ -87,10 +98,15 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setTotalCount(input.getCount());
 
         jobConfig.setMatchedDunsAttr("DunsNumber");
-        jobConfig.setMatchedCountryAttr(DataCloudConstants.ATTR_COUNTRY);
-        jobConfig.setCountryCode("LDC_CountryCode");
-        jobConfig.setConfidenceCode("LDC_ConfidenceCode");
-
+        jobConfig.setCountryAttr(DataCloudConstants.ATTR_COUNTRY);
+        jobConfig.setUrl(url);
+        jobConfig.setUser(user);
+        String encryptionKey = CipherUtils.generateKey();
+        jobConfig.setEncryptionKey(encryptionKey);
+        String saltHint = CipherUtils.generateKey();
+        jobConfig.setSaltHint(saltHint);
+        jobConfig.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+        jobConfig.setConfidenceCodeAttr("LDC_ConfidenceCode");
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));

@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +22,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
-<<<<<<< HEAD
-import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
-||||||| merged common ancestors
-import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
-import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
-=======
-import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
->>>>>>> DCP-761 BE: Add Workflow Step or Augment Existing Steps to Provide Country-Level Basic Stats
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.InputPresenceJob;

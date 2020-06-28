@@ -8,9 +8,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -33,6 +35,15 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
             Pair.of("LDC_ConfidenceCode", Integer.class)
     );
 
+    @Value("${datacloud.manage.url}")
+    private String url;
+
+    @Value("${datacloud.manage.user}")
+    private String user;
+
+    @Value("${datacloud.manage.password.encrypted}")
+    private String password;
+
     @Test(groups = "functional")
     public void test() {
         List<Runnable> threads = Arrays.asList(this::testDataReport, this::testNoDunsDuplicate);
@@ -47,7 +58,13 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
         config.setCountryAttr(InterfaceName.Country.name());
-        config.setCountryCodeAttr("LDC_CountryCode");
+        config.setUrl(url);
+        config.setUser(user);
+        String key = CipherUtils.generateKey();
+        config.setEncryptionKey(key);
+        String salt = CipherUtils.generateKey();
+        config.setSaltHint(salt);
+        config.setPassword(CipherUtils.encrypt(password, key, salt));
         config.setConfidenceCodeAttr( "LDC_ConfidenceCode");
         config.setTotalCount(8L);
         SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
@@ -66,10 +83,10 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
 
         DataReport.GeoDistributionReport geoReport = report.getGeoDistributionReport();
         Map<String, DataReport.GeoDistributionReport.GeographicalItem> geoMap = geoReport.getGeographicalDistributionMap();
-        DataReport.GeoDistributionReport.GeographicalItem item1 = geoMap.get("United States");
+        DataReport.GeoDistributionReport.GeographicalItem item1 = geoMap.get("US");
         Assert.assertNotNull(item1);
         Assert.assertEquals(item1.getCount(), Long.valueOf(4L));
-        DataReport.GeoDistributionReport.GeographicalItem item2 = geoMap.get("China");
+        DataReport.GeoDistributionReport.GeographicalItem item2 = geoMap.get("CN");
         Assert.assertNotNull(item2);
         Assert.assertEquals(item2.getCount(), Long.valueOf(2L));
 
