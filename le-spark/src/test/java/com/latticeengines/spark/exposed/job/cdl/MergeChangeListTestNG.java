@@ -89,12 +89,12 @@ public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
                 { 1, "entityId5", null, "String", true, null, null, null, null }, //
                 { 2, null, "first", "String", true, null, null, null, null }, //
 
-                { 3, "entityId1", "first", "String", false, null, "john12", null, null }, //
-                { 4, "entityId1", "last", "String", false, null, "smith12", null, null }, //
-                { 5, "entityId2", "last", "String", false, "dummy", "ann22", null, null }, //
-                { 6, "entityId2", "age", "Integer", false, null, null, -1, 22 }, //
-                { 7, "entityId3", "age", "Integer", false, null, null, 3, 33 }, //
-                { 8, "entityId4", "age2", "Integer", false, null, null, 4, 44 } //
+                { 3, "entityId1", "first", "String", null, null, "john12", null, null }, //
+                { 4, "entityId1", "last", "String", null, null, "smith12", null, null }, //
+                { 5, "entityId2", "last", "String", null, "dummy", "ann22", null, null }, //
+                { 6, "entityId2", "age", "Integer", null, null, null, -1, 22 }, //
+                { 7, "entityId3", "age", "Integer", null, null, null, 3, 33 }, //
+                { 8, "entityId4", "age2", "Integer", null, null, null, 4, 44 } //
         };
         return data;
     }

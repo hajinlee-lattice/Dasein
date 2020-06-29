@@ -34,10 +34,10 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConf
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.FilterChangelistConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
-import com.latticeengines.domain.exposed.spark.cdl.JoinChangeListAccountBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
@@ -132,9 +132,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
         @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME),
-        @JsonSubTypes.Type(value = JoinChangeListAccountBatchConfig.class, name = JoinChangeListAccountBatchConfig.NAME), //
-        @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME)
-})
+        @JsonSubTypes.Type(value = FilterChangelistConfig.class, name = FilterChangelistConfig.NAME), //
+        @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME) })
 public abstract class SparkJobConfig implements Serializable {
 
     /**
