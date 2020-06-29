@@ -50,10 +50,12 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithSegment(MetadataSegment segment) {
-        if (teamFeatureEnabled()) {
-            if (segment != null) {
-                checkTeamInContext(segment.getTeamId());
+        if (teamFeatureEnabled() && segment != null) {
+            if (StringUtils.isNotEmpty(segment.getName()) && segment.getTeamId() != null &&
+                    TeamUtils.shouldFailWhenAssignTeam(segment.getName(), ((id) -> segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), id)), segment)) {
+                throw new AccessDeniedException("Access denied.");
             }
+            checkTeamInContext(segment.getTeamId());
         }
     }
 
@@ -131,6 +133,11 @@ public class PlsValidateTeamMemberRightsAspect {
     public void crudForRatingEngine(JoinPoint joinPoint) {
         if (joinPoint.getArgs()[0] instanceof RatingEngine) {
             RatingEngine ratingEngine = (RatingEngine) joinPoint.getArgs()[0];
+            if (ratingEngine.getId() != null && ratingEngine.getTeamId() != null
+                    && TeamUtils.shouldFailWhenAssignTeam(ratingEngine.getId(),
+                    ((id) -> ratingEngineProxy.getRatingEngine(MultiTenantContext.getTenant().getId(), id)), ratingEngine)) {
+                throw new AccessDeniedException("Access denied.");
+            }
             if (StringUtils.isNotEmpty(ratingEngine.getTeamId())) {
                 checkTeamWithRatingEngine(ratingEngine);
             } else if (StringUtils.isNotEmpty(ratingEngine.getId())) {
