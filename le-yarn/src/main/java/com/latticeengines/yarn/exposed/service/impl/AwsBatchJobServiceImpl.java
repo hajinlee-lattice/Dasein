@@ -58,6 +58,9 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
     @Value("${dataplatform.model.aws.batch.local.enabled}")
     private boolean batchLocal;
 
+    @Value("${dataplatform.default.python.version}")
+    private String pythonVersion;
+
     @Inject
     private Configuration yarnConfiguration;
 
@@ -152,10 +155,9 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
             envs.put("AWS_BATCH_JOB_ID", applicationId.getJobId());
         }
 
-        // envs.put(PythonContainerProperty.CONDA_ENV.name(),
-        // containerProperties.getProperty(PythonContainerProperty.CONDA_ENV.name()));
-        envs.put(PythonContainerProperty.CONDA_ENV.name(),
-                "lattice");
+        // conda env installed in AWS Batch is fixed.
+        String condaEvn = ("3".equals(pythonVersion)) ? "lattice3" : "lattice";
+        envs.put(PythonContainerProperty.CONDA_ENV.name(), condaEvn);
         envs.put(PythonContainerProperty.SHDP_HD_FSWEB.name(),
                 containerProperties.getProperty(PythonContainerProperty.WEBHDFS_URL.name()));
         envs.put(PythonContainerProperty.PYTHONPATH.name(),
