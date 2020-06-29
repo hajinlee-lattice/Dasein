@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,12 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.sns.SNSService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ExportFileConfig;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
@@ -40,6 +44,8 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
 
     private static final Logger log = LoggerFactory.getLogger(DeltaCampaignLaunchExportPublishToSNSStep.class);
 
+    @Inject
+    private BatonService batonService;
     @Inject
     private SNSService snsService;
     @Inject
@@ -98,6 +104,7 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());
+        messageBody.setEnableAcxiom(checkAcxiomFeatureFlag(lookupIdMap.getExternalSystemName(), config.getCustomerSpace()));
         channelConfigProcessor.updateSnsMessageWithChannelConfig(config.getChannelConfig(), messageBody);
 
         Map<String, Object> jsonMessage = new HashMap<>();
@@ -141,4 +148,12 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         this.dropBoxProxy = dropBoxProxy;
     }
 
+    private boolean checkAcxiomFeatureFlag(CDLExternalSystemName extSysName, CustomerSpace customerSpace) {
+        ArrayList<CDLExternalSystemName> adPlatforms = new ArrayList<CDLExternalSystemName>(Arrays.asList(CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook, CDLExternalSystemName.LinkedIn));
+        boolean isAdPlatform = adPlatforms.contains(extSysName);
+        boolean acxiomFlag = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACXIOM);
+        log.info("Setting enableAcxiom as: " + (isAdPlatform && acxiomFlag));
+
+        return isAdPlatform && acxiomFlag;
+    }
 }
