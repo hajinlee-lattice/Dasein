@@ -106,7 +106,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         String saltHint = CipherUtils.generateKey();
         jobConfig.setSaltHint(saltHint);
         jobConfig.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
-        jobConfig.setConfidenceCodeAttr("LDC_ConfidenceCode");
+        jobConfig.setConfidenceCodeAttr("ConfidenceCode");
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));

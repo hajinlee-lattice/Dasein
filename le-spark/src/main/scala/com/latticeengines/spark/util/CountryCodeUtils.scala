@@ -1,21 +1,21 @@
 package com.latticeengines.spark.util
 
+import java.util
 import java.util.concurrent.ConcurrentHashMap
-import java.util.Map
 
 import com.latticeengines.common.exposed.util.{CipherUtils, LocationUtils}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{col, udf}
 
 private[spark] object CountryCodeUtils {
-  @volatile var map: Map[String, String]= _
+  @volatile var map: util.Map[String, String]= _
 
   def convert(input: DataFrame, countryName: String, countryCodeName: String, url: String, user: String,
               passwd: String, key: String, salt: String)
   : DataFrame = {
     // load data into map once
     initMap(url, user, passwd, key, salt)
-    val nameFunc: Map[String, String] => (String => String) = (countryCodeMap: Map[String, String])
+    val nameFunc: util.Map[String, String] => (String => String) = (countryCodeMap: util.Map[String, String])
     => {
       name => {
         val cleanName = LocationUtils.getStandardCountry(name)
