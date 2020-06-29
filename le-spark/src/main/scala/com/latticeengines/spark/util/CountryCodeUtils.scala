@@ -8,7 +8,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{col, udf}
 
 private[spark] object CountryCodeUtils {
-  @volatile var map: util.Map[String, String]= _
+  @volatile var map: util.Map[String, String] = _
 
   def convert(input: DataFrame, countryName: String, countryCodeName: String, url: String, user: String,
               passwd: String, key: String, salt: String)
@@ -19,7 +19,8 @@ private[spark] object CountryCodeUtils {
     => {
       name => {
         val cleanName = LocationUtils.getStandardCountry(name)
-        countryCodeMap.get(cleanName)
+        val result = if (cleanName == null) null else countryCodeMap.get(cleanName)
+        result
       }
     }
     val nameUDF = udf(nameFunc(map))

@@ -107,7 +107,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
                 {"4", "234-888", "Guangdong", "China", "qq.com", "456789", 4},
                 {"5", "222-333", "Paris", "France", "accor.com", "456789", 5},
                 {"6", "666-999", "UC", "United States", "3i.com", "456789", 6},
-                {"7", "888-056", " ", "Switzerland", "adecco.com", "123456", 7},
+                {"7", "888-056", " ", null, "adecco.com", "123456", 7},
                 {"8", "777-056", "Zhejiang", "China", "alibaba.com", null, 0}
         };
         return uploadHdfsDataUnit(data, FIELDS);

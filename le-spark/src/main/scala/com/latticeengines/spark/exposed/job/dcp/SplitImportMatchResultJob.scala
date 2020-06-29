@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{CSVUtils, CountryCodeUtils}
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.functions.{col, count, rand, round, sum}
+import org.apache.spark.sql.functions.{col, count, sum}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
