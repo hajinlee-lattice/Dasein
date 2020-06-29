@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -18,12 +19,14 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsActionConfiguration;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 
@@ -181,6 +184,23 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         }
         List<Action> retrievedActions = findAll();
         Assert.assertEquals(retrievedActions.size(), 0);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testDelete"})
+    public void testGetWithNameQuery() {
+        Action action = generateCDLImportAction();
+        ImportActionConfiguration ac = new ImportActionConfiguration();
+        String dftUUID = NamingUtils.uuid("DataFeedTask");
+        ac.setDataFeedTaskId(dftUUID);
+        ac.setImportCount(100L);
+        action.setActionConfiguration(ac);
+        createAction(action);
+
+        List<Long> actionPidList =
+                actionEntityMgr.findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW,
+                        ActionStatus.ACTIVE, dftUUID);
+        Assert.assertEquals(CollectionUtils.size(actionPidList), 1);
+        Assert.assertEquals(actionPidList.get(0), action.getPid());
     }
 
     protected void createAction(Action action) {
