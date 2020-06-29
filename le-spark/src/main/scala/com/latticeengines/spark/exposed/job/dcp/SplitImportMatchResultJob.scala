@@ -20,7 +20,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val input: DataFrame = lattice.input.head
 
     val countryAttr: String = config.getCountryAttr
-    val url: String = config.getUrl
+    val url: String = config.getManageDbUrl
     val user: String = config.getUser
     val password: String = config.getPassword
     val encryptionKey: String = config.getEncryptionKey

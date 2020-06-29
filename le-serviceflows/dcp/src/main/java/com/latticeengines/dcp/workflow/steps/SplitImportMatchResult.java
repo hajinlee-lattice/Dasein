@@ -25,7 +25,6 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
@@ -98,8 +97,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setTotalCount(input.getCount());
 
         jobConfig.setMatchedDunsAttr("DunsNumber");
-        jobConfig.setCountryAttr(DataCloudConstants.ATTR_COUNTRY);
-        jobConfig.setUrl(url);
+        jobConfig.setCountryAttr(InterfaceName.Country.name());
+        jobConfig.setManageDbUrl(url);
         jobConfig.setUser(user);
         String encryptionKey = CipherUtils.generateKey();
         jobConfig.setEncryptionKey(encryptionKey);

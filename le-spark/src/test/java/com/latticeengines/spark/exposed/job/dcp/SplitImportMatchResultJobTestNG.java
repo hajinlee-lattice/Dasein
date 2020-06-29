@@ -58,7 +58,7 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
         config.setCountryAttr(InterfaceName.Country.name());
-        config.setUrl(url);
+        config.setManageDbUrl(url);
         config.setUser(user);
         String key = CipherUtils.generateKey();
         config.setEncryptionKey(key);

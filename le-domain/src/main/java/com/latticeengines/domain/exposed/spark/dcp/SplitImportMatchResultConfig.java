@@ -29,8 +29,8 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("TotalCount")
     private long totalCount;
 
-    @JsonProperty("URL")
-    private String url;
+    @JsonProperty("ManageDbUrl")
+    private String manageDbUrl;
 
     @JsonProperty("User")
     private String user;
@@ -87,12 +87,12 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
         this.countryAttr = countryAttr;
     }
 
-    public String getUrl() {
-        return url;
+    public String getManageDbUrl() {
+        return manageDbUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setManageDbUrl(String manageDbUrl) {
+        this.manageDbUrl = manageDbUrl;
     }
 
     public String getUser() {
