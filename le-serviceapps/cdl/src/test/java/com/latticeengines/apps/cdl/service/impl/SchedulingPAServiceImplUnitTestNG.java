@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -20,11 +21,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantGroup;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAServiceImplUnitTestNG {
@@ -52,7 +56,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getNoRunningSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertEquals(result.getRetryPATenants().size(), 0);
         Assert.assertEquals(result.getNewPATenants().size(), 10);
@@ -64,7 +68,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getNoRunningSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getRetryPATenants().size(), 3);
@@ -79,7 +83,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getScheduleNowLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertEquals(result.getRetryPATenants().size(), 0);
         Assert.assertEquals(result.getNewPATenants().size(), 5);
@@ -91,7 +95,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getScheduleNowLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertEquals(result.getRetryPATenants().size(), 3);
         Assert.assertEquals(result.getNewPATenants().size(), 2);
@@ -105,7 +109,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getLargeLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertEquals(result.getRetryPATenants().size(), 0);
         Assert.assertEquals(result.getNewPATenants().size(), 5);
@@ -119,7 +123,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getLargeLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertEquals(result.getRetryPATenants().size(), 2);
         Assert.assertEquals(result.getNewPATenants().size(), 3);
@@ -133,39 +137,175 @@ public class SchedulingPAServiceImplUnitTestNG {
     private void testLargeTxnConcurrencyLimit(int total, int scheduleNow, int large, int largeTxn,
             TenantActivity[] activities, String[] expectedTenantsToScheduleNewPA,
             String[] expectedTenantsToScheduleRetryPA) {
-        Map<String, Object> map = new HashMap<>();
         SystemStatus systemStatus = newStatus(total, scheduleNow, large, largeTxn);
-        map.put(SYSTEM_STATUS, systemStatus);
-        map.put(TENANT_ACTIVITY_LIST, Arrays.asList(activities));
-        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
-        Assert.assertEquals(result.getRetryPATenants().size(), expectedTenantsToScheduleRetryPA.length);
-        Assert.assertEquals(result.getRetryPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleRetryPA)));
-        Assert.assertEquals(result.getNewPATenants().size(), expectedTenantsToScheduleNewPA.length);
-        Assert.assertEquals(result.getNewPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleNewPA)));
+        systemStatus.setTenantGroups(randomGroups());
+        scheduleAndVerify(systemStatus, activities, expectedTenantsToScheduleNewPA, expectedTenantsToScheduleRetryPA);
+    }
+
+    @Test(groups = "unit", dataProvider = "singleTenantGroup")
+    private void testSingleTenantGroup(TenantGroup group, String[] runningPATenantIds, TenantActivity[] activities,
+            String[] expectedTenantsToScheduleNewPA, String[] expectedTenantsToScheduleRetryPA) {
+        for (String tenantId : runningPATenantIds) {
+            group.addTenant(tenantId);
+        }
+        // give unlimited quota to test tenant group only
+        SystemStatus systemStatus = newStatus(10000, 10000, 10000, 10000);
+        systemStatus.setTenantGroups(ImmutableMap.of(group.getGroupName(), group));
+        scheduleAndVerify(systemStatus, activities, expectedTenantsToScheduleNewPA, expectedTenantsToScheduleRetryPA);
+    }
+
+    @DataProvider(name = "singleTenantGroup")
+    private Object[][] singleTenantGroupTestData() {
+        return new Object[][] { //
+                /*-
+                 * no current PA running
+                 */
+
+                /*-
+                 * only one of t1 & t2 can run (t2 has higher priority), t3 is fine
+                 */
+                { //
+                        new TenantGroup("g1", 1, ImmutableSet.of("t1", "t2")), //
+                        new String[0], //
+                        new TenantActivity[] { //
+                                largeCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                        }, //
+                        new String[] { "t2", "t3" }, new String[0] //
+                }, //
+                /*-
+                 * quota is 2
+                 */
+                { //
+                        new TenantGroup("g2", 2, ImmutableSet.of("t1", "t2")), //
+                        new String[0], //
+                        new TenantActivity[] { //
+                                largeCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                        }, //
+                        new String[] { "t1", "t2", "t3" }, new String[0] //
+                }, //
+                /*-
+                 * quota > no. tenant in queue
+                 */
+                { //
+                        new TenantGroup("g3", 5, ImmutableSet.of("t1", "t2")), //
+                        new String[0], //
+                        new TenantActivity[] { //
+                                largeCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                        }, //
+                        new String[] { "t1", "t2", "t3" }, new String[0] //
+                }, //
+
+                /*-
+                 * some PA is currently running
+                 */
+
+                /*-
+                 * quota=1, already one tenant running
+                 */
+                { //
+                        new TenantGroup("g11", 1, ImmutableSet.of("t1", "t2")), //
+                        new String[] { "t1" }, //
+                        new TenantActivity[] { //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                        }, //
+                        new String[] { "t3" }, new String[0] //
+                }, //
+                /*-
+                 * make sure quota also apply to retry
+                 */
+                { //
+                        new TenantGroup("g11", 1, ImmutableSet.of("t1", "t2")), //
+                        new String[] { "t1" }, //
+                        new TenantActivity[] { //
+                                retry("t2"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                        }, //
+                        new String[] { "t3" }, new String[0] //
+                }, //
+
+                /*-
+                 * quota=1, running tenant is not in group, still can schedule
+                 */
+                { //
+                        new TenantGroup("g12", 1, ImmutableSet.of("t1", "t2")), //
+                        new String[] { "t3" }, //
+                        new TenantActivity[] { //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                largeTxnCustomerScheduleNow("t4"), //
+                        }, //
+                        new String[] { "t2", "t4" }, new String[0] //
+                }, //
+
+                /*-
+                 * quota=2, only one in group running, can schedule
+                 */
+                { //
+                        new TenantGroup("g13", 2, ImmutableSet.of("t1", "t2")), //
+                        new String[] { "t1", "t3" }, //
+                        new TenantActivity[] { //
+                                retry("t2"), //
+                                largeTxnAutoSchedule("t4", 1L), //
+                        }, //
+                        new String[] { "t4" }, new String[] { "t2" } //
+                }, //
+
+                /*-
+                 * quota=2, one in group already running, only one of two in queue can be scheduled.
+                 * retry one has priority
+                 */
+                { //
+                        new TenantGroup("g14", 2, ImmutableSet.of("t1", "t2", "t3")), //
+                        new String[] { "t1" }, //
+                        new TenantActivity[] { //
+                                retry("t2"), //
+                                customerScheduleNow("t3"), //
+                                largeTxnAutoSchedule("t4", 1L), //
+                        }, //
+                        new String[] { "t4" }, new String[] { "t2" } //
+                }, //
+
+                /*-
+                 * quota=2, two from the same queue fighting for the spot
+                 */
+                { //
+                        new TenantGroup("g15", 2, ImmutableSet.of("t1", "t2", "t3")), //
+                        new String[] { "t1", "t4" }, //
+                        new TenantActivity[] { //
+                                largeTxnAutoSchedule("t2", 1L), //
+                                largeTxnAutoSchedule("t3", 2L), //
+                        }, //
+                        new String[] { "t2" }, new String[0] //
+                }, //
+        }; //
+
     }
 
     @DataProvider(name = "largeTxnLimit")
     private Object[][] largeTxnConcurrencyLimitNewPATestData() {
         return new Object[][] { //
                 /*-
-                 * one large txn, one normal large tenant and one normal tenant competing for one slot
-                 * large txn one should get priority since they have less quota
+                 * one large txn & one large tenant, both can schedule since they don't share quota anymore
                  */
                 { //
-                        1, 1, 1, 1, //
+                        2, 2, 1, 1, //
                         new TenantActivity[] { //
                                 largeCustomerScheduleNow("t1"), //
                                 largeTxnCustomerScheduleNow("t2"), //
-                                customerScheduleNow("t3"), //
                         }, //
-                        new String[] { "t2" }, new String[0] //
+                        new String[] { "t1", "t2" }, new String[0] //
                 }, //
                 /*-
                  * a lot of normal large tenant, still should schedule for large txn tenant
                  */
                 { //
-                        1, 1, 1, 1, //
+                        1, 1, 0, 1, //
                         new TenantActivity[] { //
                                 largeCustomerScheduleNow("t1"), //
                                 largeCustomerScheduleNow("t2"), //
@@ -179,19 +319,6 @@ public class SchedulingPAServiceImplUnitTestNG {
                                 customerScheduleNow("t10"), //
                         }, //
                         new String[] { "t5" }, new String[0] //
-                }, //
-                /*-
-                 * large tenant quota = 10, but since large txn quota is 1,
-                 * only one large txn tenant will be scheduled.
-                 * t1 comes first since it's in schedule now queue
-                 */
-                { //
-                        10, 10, 10, 1, //
-                        new TenantActivity[] { //
-                                largeTxnCustomerScheduleNow("t1"), //
-                                largeTxnAutoSchedule("t2", 1L) //
-                        }, //
-                        new String[] { "t1" }, new String[0] //
                 }, //
                 /*-
                  * only two large txn tenant from schedule now queue can run
@@ -283,6 +410,28 @@ public class SchedulingPAServiceImplUnitTestNG {
         }; //
     }
 
+    private void scheduleAndVerify(SystemStatus systemStatus, TenantActivity[] activities,
+            String[] expectedTenantsToScheduleNewPA, String[] expectedTenantsToScheduleRetryPA) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(SYSTEM_STATUS, systemStatus);
+        map.put(TENANT_ACTIVITY_LIST, Arrays.asList(activities));
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
+        Assert.assertEquals(result.getRetryPATenants().size(), expectedTenantsToScheduleRetryPA.length);
+        Assert.assertEquals(result.getRetryPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleRetryPA)));
+        Assert.assertEquals(result.getNewPATenants().size(), expectedTenantsToScheduleNewPA.length);
+        Assert.assertEquals(result.getNewPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleNewPA)));
+    }
+
+    // add a random group that doesn't contain any existing test tenant name
+    // just to make sure this new constraint won't break any existing functionality
+    private Map<String, TenantGroup> randomGroups() {
+        List<TenantGroup> groups = Arrays.asList( //
+                new TenantGroup("g1", 2, ImmutableSet.of("t99999", "t99998", "t99997")),
+                new TenantGroup("g2", 1, ImmutableSet.of("t99996", "t99995")));
+        return groups.stream().collect(Collectors.toMap(TenantGroup::getGroupName, g -> g));
+    }
+
     private SystemStatus getNoRunningSystemStatus() {
         SystemStatus systemStatus = new SystemStatus();
         systemStatus.setCanRunJobCount(10);
@@ -301,6 +450,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         largeJobTenantId.add("Tenant7");
         largeJobTenantId.add("Tenant8");
         largeJobTenantId.add("Tenant17");
+        systemStatus.setTenantGroups(randomGroups());
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         return systemStatus;
     }
@@ -322,6 +472,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         largeJobTenantId.add("Tenant7");
         largeJobTenantId.add("Tenant8");
         largeJobTenantId.add("Tenant17");
+        systemStatus.setTenantGroups(randomGroups());
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         return systemStatus;
     }
@@ -343,6 +494,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         largeJobTenantId.add("Tenant7");
         largeJobTenantId.add("Tenant8");
         largeJobTenantId.add("Tenant17");
+        systemStatus.setTenantGroups(randomGroups());
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         return systemStatus;
     }
@@ -819,7 +971,6 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withTenantId(tenantId) //
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
-                .large() //
                 .largeTxn() //
                 .withTenantType(TenantType.CUSTOMER) //
                 .build();
@@ -832,7 +983,6 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withInvokeTime(MOCK_CURRENT_TIME) //
                 .withFirstActionTime(firstActionTime) //
                 .withLastActionTime(MOCK_CURRENT_TIME - 86400 * 1000) //
-                .large() //
                 .largeTxn() //
                 .withTenantType(TenantType.CUSTOMER) //
                 .build();

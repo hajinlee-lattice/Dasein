@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
@@ -175,6 +176,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     private PlsHealthCheckProxy plsHealthCheckProxy;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+
+    private AtomicLong schedulingCycle = new AtomicLong();
 
     @PostConstruct
     public void init() {
@@ -390,7 +393,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             return;
         }
 
-        SchedulingResult result = schedulingPAService.getSchedulingResult(schedulerName);
+        long cycle = schedulingCycle.incrementAndGet();
+        SchedulingResult result = schedulingPAService.getSchedulingResult(schedulerName, cycle);
         log.info(
                 "Scheduled new PAs for tenants = {}, retry PAs for tenants = {}. schedulerName={}, dryRun={}, totalSize={}",
                 result.getNewPATenants(), result.getRetryPATenants(), schedulerName, dryRun,
