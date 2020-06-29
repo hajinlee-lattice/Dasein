@@ -16,7 +16,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.util.SessionUtils;
-import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -89,10 +88,10 @@ public class SessionServiceImpl implements SessionService {
             log.info("Saml Login response is missing required information. " + samlLoginResp);
             throw new LedpException(LedpCode.LEDP_19005);
         }
-        // PLS-6543. Do not allow usernames with lattice-email id.
-        if (EmailUtils.isInternalUser(samlLoginResp.getUserId())) {
-            throw new LedpException(LedpCode.LEDP_19004);
-        }
+        // PLS-17389. Remove isInternalUser check from PLS-6543 to allow internal emails.
+        // if (EmailUtils.isInternalUser(samlLoginResp.getUserId())) {
+        // throw new LedpException(LedpCode.LEDP_19004);
+        // }
     }
 
     @Override
