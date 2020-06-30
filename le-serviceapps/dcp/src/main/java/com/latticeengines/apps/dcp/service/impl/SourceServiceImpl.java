@@ -21,11 +21,14 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceInfo;
+import com.latticeengines.domain.exposed.dcp.match.MatchRule;
+import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -35,6 +38,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -72,6 +76,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private DataReportService dataReportService;
+
+    @Inject
+    private MatchRuleProxy matchRuleProxy;
 
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId,
@@ -112,6 +119,16 @@ public class SourceServiceImpl implements SourceService {
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + DROP_FOLDER);
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + UPLOAD_FOLDER);
         }
+
+        // Generate default base rule for new source
+        MatchRule defaultRule = new MatchRule();
+        defaultRule.setSourceId(source.getSourceId());
+        defaultRule.setDisplayName("Base Rule");
+        defaultRule.setRuleType(MatchRuleRecord.RuleType.BASE_RULE);
+        defaultRule.setState(MatchRuleRecord.State.ACTIVE);
+        defaultRule.setAcceptCriterion(new DplusMatchRule(6,10).getAcceptCriterion());
+        matchRuleProxy.createMatchRule(customerSpace, defaultRule);
+
         return source;
     }
 
