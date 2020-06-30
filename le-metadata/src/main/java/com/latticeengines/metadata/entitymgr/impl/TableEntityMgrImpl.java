@@ -116,7 +116,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Value("${common.le.environment}")
     private String leEnv;
 
-    private static final int NUM_THREADS = 8;
+    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors() * 2;
 
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("table-mgr", NUM_THREADS);
 

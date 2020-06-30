@@ -32,4 +32,6 @@ public interface PlayLaunchChannelService {
                                                boolean autoLaunch);
 
     PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId);
+
+    void updateAttributeSetNameToDefault(String attributeSetName);
 }

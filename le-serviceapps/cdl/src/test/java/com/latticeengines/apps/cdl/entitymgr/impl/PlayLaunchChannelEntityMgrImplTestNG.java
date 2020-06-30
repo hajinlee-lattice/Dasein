@@ -3,14 +3,17 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -19,10 +22,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -35,8 +38,10 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.security.exposed.service.TenantService;
 public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -52,9 +57,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Inject
-    private PlayLaunchEntityMgr playLaunchEntityMgr;
-
-    @Inject
     private PlayTypeService playTypeService;
 
     @Inject
@@ -65,9 +67,11 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private LookupIdMap lookupIdMap1;
     private LookupIdMap lookupIdMap2;
     private LookupIdMap lookupIdMap3;
+    private LookupIdMap lookupIdMap4;
     private PlayLaunchChannel channel1;
     private PlayLaunchChannel channel2;
     private PlayLaunchChannel channel3;
+    private PlayLaunchChannel channel4;
 
     private List<PlayType> types;
 
@@ -79,6 +83,9 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     private String orgId3 = "org3";
     private String orgName3 = "outreach_org";
+
+    private String orgId4 = "org4";
+    private String orgName4 = "s3_org";
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
@@ -109,48 +116,48 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         playEntityMgr.create(play);
         Assert.assertNotNull(play);
 
-        lookupIdMap1 = new LookupIdMap();
-        lookupIdMap1.setExternalSystemType(CDLExternalSystemType.CRM);
-        lookupIdMap1.setExternalSystemName(CDLExternalSystemName.Salesforce);
-        lookupIdMap1.setOrgId(orgId1);
-        lookupIdMap1.setOrgName(orgName1);
-        lookupIdMap1 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap1);
+        lookupIdMap1 = createLookupIdMap(CDLExternalSystemType.CRM, CDLExternalSystemName.Salesforce, orgId1, orgName1);
         Assert.assertNotNull(lookupIdMap1);
-
-        lookupIdMap2 = new LookupIdMap();
-        lookupIdMap2.setExternalSystemType(CDLExternalSystemType.MAP);
-        lookupIdMap2.setExternalSystemName(CDLExternalSystemName.Marketo);
-        lookupIdMap2.setOrgId(orgId2);
-        lookupIdMap2.setOrgName(orgName2);
-
-        lookupIdMap2 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap2);
-        Assert.assertNotNull(lookupIdMap2);
-
         channel1 = createPlayLaunchChannel(play, lookupIdMap1);
-        channel2 = createPlayLaunchChannel(play, lookupIdMap2);
-
         channel1.setIsAlwaysOn(true);
-        channel2.setIsAlwaysOn(false);
         channel1.setChannelConfig(new SalesforceChannelConfig());
 
+        lookupIdMap2 = createLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Marketo, orgId2, orgName2);
+        Assert.assertNotNull(lookupIdMap2);
+        channel2 = createPlayLaunchChannel(play, lookupIdMap2);
+        channel2.setIsAlwaysOn(false);
         MarketoChannelConfig config = new MarketoChannelConfig();
         config.setAudienceName("something");
         channel2.setChannelConfig(config);
 
         // Create Outreach
-        lookupIdMap3 = new LookupIdMap();
-        lookupIdMap3.setExternalSystemType(CDLExternalSystemType.MAP);
-        lookupIdMap3.setExternalSystemName(CDLExternalSystemName.Outreach);
-        lookupIdMap3.setOrgId(orgId3);
-        lookupIdMap3.setOrgName(orgName3);
-
-        lookupIdMap3 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap3);
+        lookupIdMap3 = createLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Outreach, orgId3, orgName3);
         Assert.assertNotNull(lookupIdMap3);
-
         channel3 = createPlayLaunchChannel(play, lookupIdMap3);
         OutreachChannelConfig outreachConfig = new OutreachChannelConfig();
         outreachConfig.setAudienceName("something");
         channel3.setChannelConfig(outreachConfig);
+
+        // Create S3
+        lookupIdMap4 = createLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, orgId4, orgName4);
+        Assert.assertNotNull(lookupIdMap4);
+        channel4 = createPlayLaunchChannel(play, lookupIdMap4);
+        S3ChannelConfig s3ChannelConfig = new S3ChannelConfig();
+        s3ChannelConfig.setAudienceName("something");
+        s3ChannelConfig.setAttributeSetName("attribute_set_name_s3");
+        channel4.setIsAlwaysOn(true);
+        channel4.setCronScheduleExpression("0 0 12 ? * WED *");
+        channel4.setExpirationPeriodString("P3M");
+        channel4.setChannelConfig(s3ChannelConfig);
+    }
+
+    private LookupIdMap createLookupIdMap(CDLExternalSystemType externalSystemType, CDLExternalSystemName externalSystemName, String orgId, String orgName) {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setExternalSystemType(externalSystemType);
+        lookupIdMap.setExternalSystemName(externalSystemName);
+        lookupIdMap.setOrgId(orgId);
+        lookupIdMap.setOrgName(orgName);
+        return lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
     }
 
     @Test(groups = "functional")
@@ -228,11 +235,13 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertTrue(playLaunchChannel2Pid > playLaunchChannel1Pid);
         Assert.assertNotNull(channel1.getId());
         Assert.assertNotNull(channel2.getId());
+
+        playLaunchChannelEntityMgr.createPlayLaunchChannel(channel4);
+        Thread.sleep(1000);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateChannel" })
     public void testBasicOperations() {
-
         PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(channel1.getId());
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel1.getId());
@@ -243,7 +252,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
         List<PlayLaunchChannel> retrievedList = playLaunchChannelEntityMgr.findByIsAlwaysOnTrue();
         Assert.assertNotNull(retrievedList);
-        Assert.assertEquals(retrievedList.size(), 1);
+        Assert.assertEquals(retrievedList.size(), 2);
 
         retrieved = retrievedList.get(0);
         Assert.assertNotNull(retrieved);
@@ -251,7 +260,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
         retrievedList = playLaunchChannelEntityMgr.findByPlayName(play.getName());
         Assert.assertNotNull(retrievedList);
-        Assert.assertEquals(retrievedList.size(), 2);
+        Assert.assertEquals(retrievedList.size(), 3);
 
         retrieved = playLaunchChannelEntityMgr.findByPlayNameAndLookupIdMapId(play.getName(), lookupIdMap1.getId());
         Assert.assertNotNull(retrieved);
@@ -261,6 +270,22 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel2.getId());
 
+        List<Play> plays = playEntityMgr.findByAlwaysOnChannelAndAttributeSetName("attribute_set_name_s3");
+        Assert.assertEquals(plays.size(), 1);
+        plays = playEntityMgr.findByAlwaysOnChannelAndAttributeSetName("test_attribute_set_name_s3");
+        Assert.assertEquals(plays.size(), 0);
+        channel4.setIsAlwaysOn(false);
+        playLaunchChannelEntityMgr.update(channel4);
+        SleepUtils.sleep(1000l);
+        playLaunchChannelEntityMgr.updateAttributeSetNameToDefault("attribute_set_name_s3");
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class), null);
+        AtomicReference<PlayLaunchChannel> updatedChannel = new AtomicReference<>();
+        retry.execute(context -> {
+            updatedChannel.set(playLaunchChannelEntityMgr.findById(channel4.getId()));
+            Assert.assertNotNull(updatedChannel.get());
+            Assert.assertEquals(((S3ChannelConfig) updatedChannel.get().getChannelConfig()).getAttributeSetName(), AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+            return true;
+        });
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
@@ -366,6 +391,9 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         }
         if (channel2 != null && channel2.getId() != null) {
             playLaunchChannelEntityMgr.deleteByChannelId(channel2.getId(), true);
+        }
+        if (channel4 != null && channel4.getId() != null) {
+            playLaunchChannelEntityMgr.deleteByChannelId(channel4.getId(), true);
         }
         Tenant tenant1 = tenantService.findByTenantId("testTenant1");
         if (tenant1 != null) {

@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
@@ -34,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -53,6 +56,12 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     private DataCollectionService dataCollectionService;
 
     @Inject
+    private PlayService playService;
+
+    @Inject
+    private PlayLaunchChannelService playLaunchChannelService;
+
+    @Inject
     private ServingStoreService servingStoreService;
 
     @Inject
@@ -62,6 +71,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     private AttributeSetEntityMgr attributeSetEntityMgr;
 
     private static int ATTRIBUTE_SET_LIMITATION = 50;
+
+    private static int CAMPAIGN_LIMIT = 50;
 
     @Override
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
@@ -202,7 +213,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     }
 
     private void generateAttrConfigRequestByCategory(List<AttrConfig> attrConfigs, Set<String> attributes,
-                                                             Category category, String property, Boolean selectThisAttr) {
+                                                     Category category, String property, Boolean selectThisAttr) {
         for (String attrName : attributes) {
             BusinessEntity entity = getEntity(category, attrName);
             generateAttrConfigRequestForUsage(attrConfigs, attrName, entity, selectThisAttr, property);
@@ -279,7 +290,13 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         if (AttributeUtils.isDefaultAttributeSet(name)) {
             throw new LedpException(LedpCode.LEDP_40087, new String[]{AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME});
         }
+        List<Play> plays = playService.findByAlwaysOnAndAttributeSetName(name);
+        if (CollectionUtils.isNotEmpty(plays)) {
+            throw new LedpException(LedpCode.LEDP_40094,
+                    new String[]{plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))});
+        }
         attributeSetEntityMgr.deleteByName(name);
+        playLaunchChannelService.updateAttributeSetNameToDefault(name);
     }
 
 }

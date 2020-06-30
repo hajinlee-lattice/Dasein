@@ -35,7 +35,12 @@ public final class UIActionUtils {
         } else {
             code = LedpCode.LEDP_00002;
         }
-        uiAction = generateUIAction(title, View.Banner, Status.Error, ex.getMessage());
+        String removeStartingText = code.name() + ": ";
+        String message = ex.getMessage();
+        if (message.startsWith(removeStartingText)) {
+            message = message.substring(removeStartingText.length());
+        }
+        uiAction = generateUIAction(title, View.Banner, Status.Error, message);
         return new UIActionException(uiAction, code);
     }
 }

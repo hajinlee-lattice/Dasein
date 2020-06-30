@@ -24,9 +24,12 @@ import com.latticeengines.apps.cdl.entitymgr.PlayGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayRepository;
+import com.latticeengines.apps.cdl.repository.reader.PlayReaderRepository;
+import com.latticeengines.apps.cdl.repository.writer.PlayWriterRepository;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
@@ -61,10 +64,10 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     private PlayGroupEntityMgr playGroupEntityMgr;
 
     @Resource(name = "playWriterRepository")
-    private PlayRepository playWriterRepository;
+    private PlayWriterRepository playWriterRepository;
 
     @Resource(name = "playReaderRepository")
-    private PlayRepository playReaderRepository;
+    private PlayReaderRepository playReaderRepository;
 
     @Override
     protected PlayRepository getReaderRepo() {
@@ -237,6 +240,13 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<String> getAllDeletedPlayIds(boolean forCleanupOnly) {
         return playDao.findAllDeletedPlayIds(forCleanupOnly);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Play> findByAlwaysOnChannelAndAttributeSetName(String attributeSetName) {
+        String attributeSetName2 = "\"attributeSetName\":\"" + attributeSetName + "\"";
+        return playReaderRepository.findByIsAlwaysOnAnAndLookupIdMap(CDLExternalSystemName.AWS_S3, attributeSetName2);
     }
 
     @Override

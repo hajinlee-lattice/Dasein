@@ -25,4 +25,6 @@ public interface PlayLaunchChannelEntityMgr extends BaseEntityMgrRepository<Play
     PlayLaunchChannel createPlayLaunchChannel(PlayLaunchChannel playLaunchChannel);
 
     List<PlayLaunchChannel> getAllValidScheduledChannels();
+
+    void updateAttributeSetNameToDefault(String attributeSetName);
 }

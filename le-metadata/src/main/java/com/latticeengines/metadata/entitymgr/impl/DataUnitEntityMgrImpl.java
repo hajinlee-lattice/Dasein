@@ -51,7 +51,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return repository;
     }
 
-    private static final int NUM_THREADS = 8;
+    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors() * 2;
 
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", NUM_THREADS);
 

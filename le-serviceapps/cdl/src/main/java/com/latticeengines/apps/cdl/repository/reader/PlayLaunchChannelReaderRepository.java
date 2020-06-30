@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.latticeengines.apps.cdl.repository.PlayLaunchChannelRepository;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepository {
@@ -24,5 +25,11 @@ public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepo
             + "ORDER BY c.nextScheduledLaunch")
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
+
+    @Query("SELECT c FROM PlayLaunchChannel c WHERE " +
+            "c.lookupIdMap.externalSystemName = :externalSystemName AND c.isAlwaysOn = false " +
+            "AND c.channelConfig LIKE %:attributeSetName%")
+    List<PlayLaunchChannel> findByIsAlwaysOnAnAndLookupIdMap(@Param("externalSystemName") CDLExternalSystemName externalSystemName,
+                                                             @Param("attributeSetName") String attributeSetName);
 
 }
