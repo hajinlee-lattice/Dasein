@@ -137,8 +137,9 @@ public class DynamoPublishService extends AbstractPublishService
         log.info("Creating dynamo table " + tableName);
         long readCapacity = configuration.getLoadingReadCapacity();
         long writeCapacity = configuration.getLoadingWriteCapacity();
+        String configCMK = configuration.getCustomerCMK();
         dynamoService.createTable(tableName, readCapacity, writeCapacity, PARTITION_KEY, ScalarAttributeType.S.name(),
-                null, null);
+                null, null, configCMK);
         log.info("Created dynamo table " + tableName);
         String environment = "dev";
         switch (configuration.getAlias()) {

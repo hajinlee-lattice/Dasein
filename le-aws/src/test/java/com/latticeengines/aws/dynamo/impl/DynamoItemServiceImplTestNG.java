@@ -51,7 +51,7 @@ public class DynamoItemServiceImplTestNG extends AbstractTestNGSpringContextTest
         String partitionKeyType = ScalarAttributeType.S.name();
         String sortKeyType = ScalarAttributeType.S.name();
         dynamoService.createTable(tableName, readCapacityUnits, writeCapacityUnits, PARTITION_KEY, partitionKeyType,
-                SORT_KEY, sortKeyType);
+                SORT_KEY, sortKeyType, null);
     }
 
     @AfterClass(groups = "functional")

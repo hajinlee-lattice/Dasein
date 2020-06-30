@@ -158,7 +158,7 @@ public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestN
         HdfsUtils.mkdir(miniclusterConfiguration, sourceDir);
 
         dynamoService.deleteTable(tableName);
-        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
+        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null, null);
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
     }

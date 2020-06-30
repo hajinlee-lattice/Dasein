@@ -135,7 +135,7 @@ public class DataUnitCrossTenantServiceImplTestNG extends MetadataFunctionalTest
         String sortKeyType = ScalarAttributeType.S.name();
 
         dynamoService.createTable(dynamoTablename, readCapacityUnits, writeCapacityUnits, partitionKeyName, partitionKeyType,
-                sortKeyName, sortKeyType);
+                sortKeyName, sortKeyType, null);
 
         DynamoDataUnit dynamoDataUnit = new DynamoDataUnit();
         dynamoDataUnit.setLinkedTable(dynamoTablename);
