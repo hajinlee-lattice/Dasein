@@ -103,8 +103,8 @@ public class PrimeMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private Map<MatchKey, List<String>> prepareKeyMap() {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(MatchKey.City, Collections.singletonList("City"));
         keyMap.put(MatchKey.State, Collections.singletonList("State"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
         return keyMap;
