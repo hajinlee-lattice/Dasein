@@ -44,17 +44,19 @@ public class UploadResource {
     @Inject
     private DCPSourceImportWorkflowSubmitter importSubmitter;
 
-    @PostMapping("/sourceId/{sourceId}")
+    @PostMapping("/sourceId/{sourceId}/userId/{userId}")
     @ResponseBody
     @ApiOperation(value = "create an upload")
     public UploadDetails createUpload(@PathVariable String customerSpace,
-                                      @PathVariable String sourceId, @RequestBody UploadConfig uploadConfig) {
+                                      @PathVariable String sourceId,
+                                      @PathVariable String userId,
+                                      @RequestBody UploadConfig uploadConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (uploadConfig == null) {
             log.error("Create Upload with empty uploadConfig!");
             throw new RuntimeException("Cannot create upload with empty create upload config input!");
         }
-        return uploadService.createUpload(customerSpace, sourceId, uploadConfig);
+        return uploadService.createUpload(customerSpace, sourceId, uploadConfig, userId);
     }
 
     @GetMapping("/sourceId/{sourceId}")

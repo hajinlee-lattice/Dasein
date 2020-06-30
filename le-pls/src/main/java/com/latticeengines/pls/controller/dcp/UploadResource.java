@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
@@ -62,6 +63,7 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "Invoke DCP import workflow. Returns the upload details.")
     public UploadDetails startImport(@RequestBody DCPImportRequest importRequest) {
+        importRequest.setUserId(MultiTenantContext.getEmailAddress());
         return uploadService.startImport(importRequest);
     }
 }

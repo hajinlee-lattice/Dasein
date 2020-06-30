@@ -32,9 +32,9 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         super(hostPort, "dcp");
     }
 
-    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
-        String url = constructUrl(baseUrl, customerSpace, sourceId);
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig, String userId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}/userId/{userId}";
+        String url = constructUrl(baseUrl, customerSpace, sourceId, userId);
         return post("create upload", url, uploadConfig, UploadDetails.class);
     }
 

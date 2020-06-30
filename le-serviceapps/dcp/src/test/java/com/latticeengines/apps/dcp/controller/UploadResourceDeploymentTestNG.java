@@ -69,8 +69,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = {"deployment"})
     public void testCRUD() {
+        String userId = "test@dnb.com";
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com");
+                Project.ProjectType.Type1, userId);
         projectId = details.getProjectId();
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
@@ -91,8 +92,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String importedFilePath = uploadDirKey + uploadTS + "/processed/file2.csv";
         String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
-        UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
+        UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config, userId);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
+        Assert.assertEquals(upload.getCreatedBy(), userId);
         UploadConfig returnedConfig = upload.getUploadConfig();
         Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertNull(returnedConfig.getUploadImportedFilePath());
@@ -125,7 +127,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String uploadTS2 = "2020-04-21-02-02-52.645";
         String rawPath2 = uploadDirKey + uploadTS2 + "/raw/file3.csv";
         config2.setUploadRawFilePath(rawPath2);
-        uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config2);
+        uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config2, userId);
     }
 
 

@@ -206,6 +206,7 @@ public class S3ImportServiceImpl implements S3ImportService {
         request.setProjectId(projectId);
         request.setSourceId(sourceId);
         request.setS3FileKey(key);
+        request.setUserId("s3 user");
         try {
             UploadProxy uploadProxy = new UploadProxy(hostUrl);
             ApplicationId applicationId = uploadProxy.startImport(tenantId, request);

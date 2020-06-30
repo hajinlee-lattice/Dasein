@@ -69,9 +69,9 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
     private List<UploadDetails> createUploads() {
         String sourceId1 = "sourceId1";
         String sourceId2 = "sourceId2";
-        UploadDetails upload1 = uploadService.createUpload(mainCustomerSpace, sourceId1, null);
-        UploadDetails upload2 = uploadService.createUpload(mainCustomerSpace, sourceId1, null);
-        UploadDetails upload3 = uploadService.createUpload(mainCustomerSpace, sourceId2, null);
+        UploadDetails upload1 = uploadService.createUpload(mainCustomerSpace, sourceId1, null, "test@dnb.com");
+        UploadDetails upload2 = uploadService.createUpload(mainCustomerSpace, sourceId1, null, "test@dnb.com");
+        UploadDetails upload3 = uploadService.createUpload(mainCustomerSpace, sourceId2, null, "test@dnb.com");
         Assert.assertNotNull(upload1.getUploadId());
         Assert.assertNotNull(upload2.getUploadId());
         Assert.assertNotNull(upload3.getUploadId());

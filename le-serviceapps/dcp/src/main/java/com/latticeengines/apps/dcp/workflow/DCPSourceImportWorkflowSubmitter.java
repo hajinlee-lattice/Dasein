@@ -43,7 +43,8 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
     public ApplicationId submit(CustomerSpace customerSpace, DCPImportRequest importRequest,
                                 WorkflowPidWrapper pidWrapper) {
         UploadConfig uploadConfig = generateUploadConfig(customerSpace, importRequest);
-        UploadDetails upload = uploadService.createUpload(customerSpace.toString(), importRequest.getSourceId(), uploadConfig);
+        UploadDetails upload = uploadService.createUpload(customerSpace.toString(), importRequest.getSourceId(),
+                uploadConfig, importRequest.getUserId());
         UploadStatsContainer container = new UploadStatsContainer();
         container = uploadService.appendStatistics(upload.getUploadId(), container);
         DCPSourceImportWorkflowConfiguration configuration =

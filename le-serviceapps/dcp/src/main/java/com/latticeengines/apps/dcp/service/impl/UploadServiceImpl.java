@@ -62,7 +62,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig, String userId) {
         if (StringUtils.isEmpty(sourceId)) {
             throw new RuntimeException("Cannot create upload bind with empty sourceId!");
         }
@@ -70,6 +70,7 @@ public class UploadServiceImpl implements UploadService {
         Upload upload = new Upload();
         upload.setUploadId(uploadId);
         upload.setSourceId(sourceId);
+        upload.setCreatedBy(userId);
         upload.setTenant(MultiTenantContext.getTenant());
         upload.setStatus(Upload.Status.NEW);
         upload.setUploadConfig(uploadConfig);
@@ -234,6 +235,7 @@ public class UploadServiceImpl implements UploadService {
             details.setUploadConfig(upload.getUploadConfig());
         }
         details.setSourceId(upload.getSourceId());
+        details.setCreatedBy(upload.getCreatedBy());
         return details;
     }
 }
