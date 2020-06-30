@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
@@ -142,11 +143,11 @@ public class SchedulingPAServiceImplUnitTestNG {
         scheduleAndVerify(systemStatus, activities, expectedTenantsToScheduleNewPA, expectedTenantsToScheduleRetryPA);
     }
 
-    @Test(groups = "unit", dataProvider = "singleTenantGroup")
+    @Test(groups = "unit", dataProvider = "singleTenantGroup", singleThreaded = true)
     private void testSingleTenantGroup(TenantGroup group, String[] runningPATenantIds, TenantActivity[] activities,
             String[] expectedTenantsToScheduleNewPA, String[] expectedTenantsToScheduleRetryPA) {
         for (String tenantId : runningPATenantIds) {
-            group.addTenant(tenantId);
+            group.addTenant(CustomerSpace.parse(tenantId).toString());
         }
         // give unlimited quota to test tenant group only
         SystemStatus systemStatus = newStatus(10000, 10000, 10000, 10000);
@@ -418,9 +419,15 @@ public class SchedulingPAServiceImplUnitTestNG {
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
         SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         Assert.assertEquals(result.getRetryPATenants().size(), expectedTenantsToScheduleRetryPA.length);
-        Assert.assertEquals(result.getRetryPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleRetryPA)));
+        Assert.assertEquals(result.getRetryPATenants(), new HashSet<>(Arrays //
+                .stream(expectedTenantsToScheduleRetryPA) //
+                .map(tenantId -> CustomerSpace.parse(tenantId).toString()) //
+                .collect(Collectors.toList())));
         Assert.assertEquals(result.getNewPATenants().size(), expectedTenantsToScheduleNewPA.length);
-        Assert.assertEquals(result.getNewPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleNewPA)));
+        Assert.assertEquals(result.getNewPATenants(), new HashSet<>(Arrays //
+                .stream(expectedTenantsToScheduleNewPA) //
+                .map(tenantId -> CustomerSpace.parse(tenantId).toString()) //
+                .collect(Collectors.toList())));
     }
 
     // add a random group that doesn't contain any existing test tenant name
@@ -918,7 +925,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
     private TenantActivity retry(String tenantId) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withTenantType(TenantType.CUSTOMER) //
                 .withLastFinishTime(1L) //
                 .retry() //
@@ -927,7 +934,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
     private TenantActivity largeRetry(String tenantId) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withTenantType(TenantType.CUSTOMER) //
                 .withLastFinishTime(1L) //
                 .large() //
@@ -937,7 +944,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
     private TenantActivity largeTxnRetry(String tenantId) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withTenantType(TenantType.CUSTOMER) //
                 .withLastFinishTime(1L) //
                 .large() //
@@ -949,7 +956,7 @@ public class SchedulingPAServiceImplUnitTestNG {
     // ordinary schedule now tenant
     private TenantActivity customerScheduleNow(String tenantId) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
                 .withTenantType(TenantType.CUSTOMER) //
@@ -958,7 +965,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
     private TenantActivity largeCustomerScheduleNow(String tenantId) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
                 .large() //
@@ -968,7 +975,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
     private TenantActivity largeTxnCustomerScheduleNow(String tenantId) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
                 .largeTxn() //
@@ -978,7 +985,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
     private TenantActivity largeTxnAutoSchedule(String tenantId, long firstActionTime) {
         return TenantActivity.Builder.newInstance() //
-                .withTenantId(tenantId) //
+                .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .autoSchedule() //
                 .withInvokeTime(MOCK_CURRENT_TIME) //
                 .withFirstActionTime(firstActionTime) //
