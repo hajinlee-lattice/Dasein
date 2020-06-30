@@ -2,8 +2,10 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 /**
  * Group of tenants that share common PA quota
@@ -33,7 +36,10 @@ public class TenantGroup {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(tenantIds), "Tenants in group should not be empty");
         this.groupName = groupName;
         this.quota = quota;
-        this.tenantIds = ImmutableSet.copyOf(tenantIds);
+        this.tenantIds = ImmutableSet.copyOf(tenantIds.stream() //
+                .filter(StringUtils::isNotBlank) //
+                .map(id -> CustomerSpace.parse(id).toString()) //
+                .collect(Collectors.toList()));
     }
 
     @JsonProperty("group_name")
