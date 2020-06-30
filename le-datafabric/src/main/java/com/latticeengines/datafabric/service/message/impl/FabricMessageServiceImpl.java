@@ -312,8 +312,8 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     }
 
     private void buildKeySchema() {
-        try {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("avro/MessageKey.avsc");
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("avro/MessageKey.avsc")) {
             Schema.Parser parser = new Schema.Parser();
             msgKeySchema = parser.parse(is);
         } catch (IOException e) {
@@ -323,9 +323,8 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     }
 
     private void buildRequestSchema() {
-        try {
-            InputStream is = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("avro/MessageRequest.avsc");
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("avro/MessageRequest.avsc")) {
             Schema.Parser parser = new Schema.Parser();
             msgRequestSchema = parser.parse(is);
         } catch (IOException e) {

@@ -30,15 +30,15 @@ public class HttpClientWithOptionalRetryUtils {
     private HttpClientWithOptionalRetryUtils() {}
 
     private static String parseHttpResponse(HttpResponse response) throws IllegalStateException, IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+        try (BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())))) {
+            String output;
+            StringBuilder responseMessage = new StringBuilder();
+            while ((output = br.readLine()) != null) {
+                responseMessage.append(output);
+            }
 
-        String output;
-        StringBuilder responseMessage = new StringBuilder("");
-        while ((output = br.readLine()) != null) {
-            responseMessage.append(output);
+            return responseMessage.toString();
         }
-
-        return responseMessage.toString();
     }
 
     public static String sendGetRequest(String requestUrl, boolean retry, List<BasicNameValuePair> headers,

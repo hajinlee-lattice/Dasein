@@ -85,13 +85,11 @@ public final class SSLUtils {
             System.out.println("Usage: " + SSLUtils.class.getName() + " <host> <port>");
             System.exit(1);
         }
-        try {
-            SSLSocketFactory defaultSSLSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            SSLSocket sslsocket = (SSLSocket) defaultSSLSocketFactory.createSocket(args[0], Integer.parseInt(args[1]));
 
-            InputStream in = sslsocket.getInputStream();
-            OutputStream out = sslsocket.getOutputStream();
-
+        SSLSocketFactory defaultSSLSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        try (SSLSocket sslsocket = (SSLSocket) defaultSSLSocketFactory.createSocket(args[0], Integer.parseInt(args[1]));
+                InputStream in = sslsocket.getInputStream();
+                OutputStream out = sslsocket.getOutputStream()) {
             // Write a test byte to get a reaction :)
             out.write(1);
 
