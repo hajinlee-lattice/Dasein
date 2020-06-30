@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
 
 // a front-end object
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +20,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
         setterVisibility = JsonAutoDetect.Visibility.NONE //
 )
 public class DataBlock {
+
+    private static final ImmutableMap<String, String> blockNameMap = ImmutableMap.<String, String>builder() //
+            .put("companyfinancials", "Company Financials") //
+            .put("companyinfo", "Company Information") //
+            .put("diversityinsight", "Diversity Insights") //
+            .put("eventfilings", "Filings and Events") //
+            .put("financialstrengthinsight", "Financial Strength Insights") //
+            .put("hierarchyconnections", "Hierarchies and Connections") //
+            .put("ownershipinsight", "Ownership Insights") //
+            .put("paymentinsight", "Payment Insights") //
+            .put("principalscontacts", "Principal and Contacts") //
+            .put("salesmarketinginsight", "Sales and Marketing Insights") //
+            .put("thirdpartyriskinsight", "Third-Party Risk Insights") //
+            .build();
 
     @JsonProperty("blockId")
     private String blockId;
@@ -41,45 +56,11 @@ public class DataBlock {
     }
 
     public static String getBlockName(String blockId) {
-        String blockName;
-        switch (blockId.toLowerCase()) {
-            case "companyfinancials":
-                blockName = "Company Financials";
-                break;
-            case "companyinfo":
-                blockName = "Company Information";
-                break;
-            case "diversityinsight":
-                blockName = "Diversity Insights";
-                break;
-            case "eventfilings":
-                blockName = "Filings & Events";
-                break;
-            case "financialstrengthinsight":
-                blockName = "Financial Strength Insights";
-                break;
-            case "hierarchyconnections":
-                blockName = "Hierarchies & Connections";
-                break;
-            case "ownershipinsight":
-                blockName = "Ownership Insights";
-                break;
-            case "paymentinsight":
-                blockName = "Payment Insights";
-                break;
-            case "principalscontacts":
-                blockName = "Principal & Contacts";
-                break;
-            case "salesmarketinginsight":
-                blockName = "Sales & Marketing Insights";
-                break;
-            case "thirdpartyriskinsight":
-                blockName = "Third-Party Risk Insights";
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown block id " + blockId);
+        if (blockNameMap.containsKey(blockId)) {
+            return blockNameMap.get(blockId);
+        } else {
+            throw new UnsupportedOperationException("Unknown block id " + blockId);
         }
-        return blockName;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
