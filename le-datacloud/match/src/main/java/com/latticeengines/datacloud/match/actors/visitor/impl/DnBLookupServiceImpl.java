@@ -100,9 +100,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private long bulkRetryWait;
 
-    @Value("${datacloud.dnb.bulk.retry.pendingrecord.threshold}")
-    private int bulkRetryPendingRecordThreshold;
-
     @Value("${datacloud.dnb.dispatcher.frequency.sec:30}")
     private int dispatcherFrequency;
 
@@ -188,20 +185,12 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         bulkTimeout = bulkTimeoutMinute * 60 * 1000;
         bulkRetryWait = bulkRetryWaitMinute * 60 * 1000;
 
-        dnbTimerDispatcher.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                dnbBatchDispatchRequest();
-            }
-        }, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(dispatcherFrequency)),
+        dnbTimerDispatcher.scheduleWithFixedDelay(this::dnbBatchDispatchRequest, //
+                new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(dispatcherFrequency)),
                 TimeUnit.SECONDS.toMillis(dispatcherFrequency));
 
-        dnbTimerStatus.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                dnbBatchCheckStatus();
-            }
-        }, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(statusFrequency)),
+        dnbTimerStatus.scheduleWithFixedDelay(this::dnbBatchCheckStatus, //
+                new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(statusFrequency)),
                 TimeUnit.SECONDS.toMillis(statusFrequency));
     }
 
