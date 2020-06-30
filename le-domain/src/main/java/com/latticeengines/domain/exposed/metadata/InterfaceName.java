@@ -163,6 +163,9 @@ public enum InterfaceName {
 
     ModelName, ModelNameId, HasIntent,
 
+    //timeline column
+    Detail2, Detail1,
+
     PartitionKey, SortKey,
 
     // Internal

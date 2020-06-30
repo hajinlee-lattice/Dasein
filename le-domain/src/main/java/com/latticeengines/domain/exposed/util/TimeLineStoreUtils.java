@@ -59,7 +59,7 @@ public final class TimeLineStoreUtils {
                         new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.EventType.getColumnName(),
                         new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Constant).withMappingValue("Page Visit").build());
-                timelineStandardMapping.put(TimelineStandardColumn.ActivityDetail.getColumnName(),
+                timelineStandardMapping.put(TimelineStandardColumn.Detail1.getColumnName(),
                         new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.WebVisitPageUrl.name()).build());
                 break;
             case Opportunity:
@@ -69,7 +69,7 @@ public final class TimeLineStoreUtils {
                         new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.EventType.getColumnName(),
                         new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Constant).withMappingValue("Opportunity Update").build());
-                timelineStandardMapping.put(TimelineStandardColumn.ActivityDetail.getColumnName(),
+                timelineStandardMapping.put(TimelineStandardColumn.Detail1.getColumnName(),
                         new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.StageName.name()).build());
                 break;
             case MarketingActivity:
@@ -106,14 +106,16 @@ public final class TimeLineStoreUtils {
     }
 
     public enum TimelineStandardColumn {
-        RecordId("recordId", "String"),
-        EventDate("eventTimestamp", "Long"),
-        AccountId("accountId", "String"),
-        ContactId("contactId", "String"),
-        EventType("eventType", "String"),
-        ActivityDetail("detail1", "String"),
-        TrackedBySystem("source", "String"),
-        ContactName("contactName", "String");
+        RecordId(InterfaceName.Id.name(), "String"),
+        EventDate("EventTimestamp", "Long"),
+        AccountId(InterfaceName.AccountId.name(), "String"),
+        ContactId(InterfaceName.ContactId.name(), "String"),
+        EventType("EventType", "String"),
+        StreamType("StreamType", "String"),
+        Detail1(InterfaceName.Detail1.name(), "String"),
+        Detail2(InterfaceName.Detail2.name(), "String"),
+        TrackedBySystem("Source", "String"),
+        ContactName(InterfaceName.ContactName.name(), "String");
 
         private String columnName;
         private String dataType;

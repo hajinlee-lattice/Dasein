@@ -10,11 +10,14 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactNa
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.InternalId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__Row_Count__;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -40,6 +43,8 @@ import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -59,6 +64,24 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String Stage = "Stage";
     private static final String PARTITION_KEY = "partitionKey";
     private static final String SORT_KEY = "sortKey";
+    private static final String ALL_CTN_PAGE_PTN_NAME = "all content pages";
+    private static final String ALL_CTN_PAGE_PTN_HASH = DimensionGenerator.hashDimensionValue(ALL_CTN_PAGE_PTN_NAME);
+    private static final String ALL_CTN_PAGE_PTN_ID = "1";
+    private static final String VIDEO_CTN_PAGE_PTN_NAME = "all video content pages";
+    private static final String VIDEO_CTN_PAGE_PTN_HASH = DimensionGenerator
+            .hashDimensionValue(VIDEO_CTN_PAGE_PTN_NAME);
+    private static final String VIDEO_CTN_PAGE_PTN_ID = "2";
+    private static final String GOOGLE_PAID_SRC = "Google/Paid";
+    private static final String GOOGLE_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(GOOGLE_PAID_SRC);
+    private static final String GOOGLE_PAID_SRC_ID = "3";
+    private static final String GOOGLE_ORGANIC_SRC = "Google/Organic";
+    private static final String GOOGLE_ORGANIC_SRC_HASH = DimensionGenerator.hashDimensionValue(GOOGLE_ORGANIC_SRC);
+    private static final String GOOGLE_ORGANIC_SRC_ID = "4";
+    private static final String FACEBOOK_PAID_SRC = "Facebook/Paid";
+    private static final String FACEBOOK_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(FACEBOOK_PAID_SRC);
+    private static final String FACEBOOK_PAID_SRC_ID = "5";
+    private static final Map<String, String> WEBVISIT_DIMENSION_HASH_ID_MAP = new HashMap<>();
+
     private static final List<Pair<String, Class<?>>> WEB_STREAM_IMPORT_FIELDS = Arrays.asList( //
             Pair.of(InternalId.name(), Long.class), //
             Pair.of(EntityId.name(), String.class), //
@@ -111,6 +134,16 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
     private TimeLine timeLine3;
     private Map<String, String> templateToSystemTypeMap = new HashMap<>();
     private Map<String, String> timelineVersionMap = new HashMap<>();
+    private Map<String, String> tableNameToStreamIdMap = new HashMap<>();
+    private Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap = new HashMap<>();
+
+    static {
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(ALL_CTN_PAGE_PTN_HASH, ALL_CTN_PAGE_PTN_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(VIDEO_CTN_PAGE_PTN_HASH, VIDEO_CTN_PAGE_PTN_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(GOOGLE_PAID_SRC_HASH, GOOGLE_PAID_SRC_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(GOOGLE_ORGANIC_SRC_HASH, GOOGLE_ORGANIC_SRC_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(FACEBOOK_PAID_SRC_HASH, FACEBOOK_PAID_SRC_ID);
+    }
 
     @Test(groups = "functional")
     private void test() {
@@ -160,16 +193,20 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         String ctkTableName = uploadHdfsDataUnit(importData, CTK_STREAM_IMPORT_FIELDS);
         rawStreamInputIdx.put(ctkTableName, 0);
         streamTypeWithTableNameMap.put(ctkTableName, AtlasStream.StreamType.MarketingActivity.name());
+        tableNameToStreamIdMap.put(ctkTableName, "maketing_00q1");
 
         Object[][] importWeb = new Object[][]{ //
-                testWebRow(100L, 1), //
-                testWebRow(101L, 8), //
-                testWebRow(102L, 5), //
-                testWebRow(103L, 7), //
+                testWebRow(100L, 1, "https://dnb.com/contents/audios/1"), //
+                testWebRow(101L, 8, "https://dnb.com/contents/videos/1"), //
+                testWebRow(102L, 5, "https://dnb.com/contents/videos/2"), //
+                testWebRow(103L, 7, "https://dnb.com/contents/audios/5"), //
         };
         String webTableName = uploadHdfsDataUnit(importWeb, WEB_STREAM_IMPORT_FIELDS);
         rawStreamInputIdx.put(webTableName, 1);
         streamTypeWithTableNameMap.put(webTableName, AtlasStream.StreamType.WebVisit.name());
+        String streamId = "web_00q1";
+        tableNameToStreamIdMap.put(webTableName, streamId);
+        dimensionMetadataMap.put(streamId, webVisitMetadata());
 
         Object[][] inputOpp = new Object[][]{ //
                 testOppRow(111L, "opp1", "open", 0),
@@ -180,6 +217,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         String oppTableName = uploadHdfsDataUnit(inputOpp, OPP_STREAM_IMPORT_FIELDS);
         rawStreamInputIdx.put(oppTableName, 2);
         streamTypeWithTableNameMap.put(oppTableName, AtlasStream.StreamType.Opportunity.name());
+        tableNameToStreamIdMap.put(oppTableName, "opp_00q1");
 
         // ContactId, AccountId, ContactName, PhoneNumber
         Object[][] ctkBatchStore = new Object[][] { //
@@ -226,7 +264,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         return row.toArray();
     }
 
-    private Object[] testWebRow(long id, int nDaysBeforeNow) {
+    private Object[] testWebRow(long id, int nDaysBeforeNow, String pathPattern) {
         long time = Instant.ofEpochMilli(now).minus(nDaysBeforeNow, ChronoUnit.DAYS).toEpochMilli();
         String dateStr = DateTimeUtils.toDateOnlyFromMillis(String.valueOf(time));
         Integer datePeriod = DateTimeUtils.dateToDayPeriod(dateStr);
@@ -234,7 +272,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         String templateName = String.format("tempalte_%s", dateStr);
         templateToSystemTypeMap.put(templateName, S3ImportSystem.SystemType.Website.name());
         List<Object> row = Lists.newArrayList(id, accountId, accountId, String.format("Company %d", id),
-                String.format("/contents/%d", id), time, dateStr, datePeriod, templateName);
+                pathPattern, time, dateStr, datePeriod, templateName);
         return row.toArray();
     }
 
@@ -247,6 +285,30 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         templateToSystemTypeMap.put(templateName, S3ImportSystem.SystemType.Salesforce.name());
         List<Object> row = Lists.newArrayList(id, oppId, accountId, stage, time, dateStr, datePeriod, templateName);
         return row.toArray();
+    }
+
+    private Map<String, DimensionMetadata> webVisitMetadata() {
+        Map<String, DimensionMetadata> metadataMap = new HashMap<>();
+        metadataMap.put(PathPatternId.name(), ptnMetadata());
+        return metadataMap;
+    }
+
+    private DimensionMetadata ptnMetadata() {
+        DimensionMetadata metadata = new DimensionMetadata();
+        Map<String, Object> content = pathPtnValue("*dnb.com/contents/*", ALL_CTN_PAGE_PTN_NAME);
+        Map<String, Object> video = pathPtnValue("*dnb.com/contents/videos/*", VIDEO_CTN_PAGE_PTN_NAME);
+        metadata.setDimensionValues(Arrays.asList(content, video));
+        metadata.setCardinality(2);
+        return metadata;
+    }
+
+    private Map<String, Object> pathPtnValue(String pathPattern, String pathPatternName) {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(PathPatternId.name(),
+                WEBVISIT_DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(pathPatternName)));
+        valueMap.put(PathPatternName.name(), pathPatternName);
+        valueMap.put(PathPattern.name(), pathPattern);
+        return valueMap;
     }
 
     private void preparetimeline1() {
@@ -317,6 +379,8 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         config.needRebuild = true;
         config.timelineRelatedMasterTables = new HashMap<>();
         config.tableRoleSuffix = "TEST_ROLE";
+        config.tableNameToStreamIdMap = tableNameToStreamIdMap;
+        config.dimensionMetadataMap = dimensionMetadataMap;
         return config;
     }
 }

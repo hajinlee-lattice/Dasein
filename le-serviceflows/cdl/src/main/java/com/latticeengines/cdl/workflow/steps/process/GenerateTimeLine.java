@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -35,6 +36,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -66,6 +68,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();
     private static final String SUFFIX = "_TABLE_ROLE";
     static final String BEAN_NAME = "generateTimeline";
+    private static final TypeReference<Map<String, Map<String, DimensionMetadata>>> METADATA_MAP_TYPE = new TypeReference<Map<String, Map<String, DimensionMetadata>>>() {
+    };
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -120,6 +124,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         config.sortKey = SORT_KEY_NAME;
         config.needRebuild = needRebuild;
         config.tableRoleSuffix = SUFFIX;
+        // set dimensions
+        config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
 
         //no atlasStreamTable, will skip
         // streamId -> table name
@@ -158,6 +164,11 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                         .filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && configuration.getActivityStreamMap().get(entry.getKey()).getStreamType() != null))
                         .map(entry -> Pair.of(entry.getValue(),
                                 configuration.getActivityStreamMap().get(entry.getKey()).getStreamType().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        //TableName -> StreamId
+        config.tableNameToStreamIdMap =
+                sourceTables.entrySet().stream().filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && configuration.getActivityStreamMap().get(entry.getKey()).getStreamId() != null))
+                .map(entry -> Pair.of(entry.getValue(),
+                        configuration.getActivityStreamMap().get(entry.getKey()).getStreamId())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         config.timelineVersionMap = timelineVersionMap;
         return config;
     }
