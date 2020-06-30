@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
+import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -38,6 +40,9 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private SourceFileProxy sourceFileProxy;
+
+    @Inject
+    private MatchRuleService matchRuleService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DCPImportRequest importRequest,
@@ -90,14 +95,39 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(DCPSourceImportWorkflowConfiguration.SOURCE_ID, sourceId) //
                         .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
                         .build()) //
-                .matchConfig(hardCodedMatchConfig()) //
+                .matchConfig(getMatchConfig(customerSpace.toString(), sourceId)) //
                 .build();
     }
 
-    // to be changed to read from Match Configuration management
-    private DplusMatchConfig hardCodedMatchConfig() {
-        DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
-        return new DplusMatchConfig(baseRule);
+    private DplusMatchConfig getMatchConfig(String customerSpace, String sourceId) {
+        MatchRuleConfiguration matchRuleConfiguration = matchRuleService.getMatchConfig(customerSpace, sourceId);
+        if(matchRuleConfiguration == null) {
+            DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+            return new DplusMatchConfig(baseRule);
+        }
+
+        DplusMatchRule baseRule = new DplusMatchRule();
+        baseRule.setAcceptCriterion(matchRuleConfiguration.getBaseRule().getAcceptCriterion());
+        baseRule.setExclusionCriteria(matchRuleConfiguration.getBaseRule().getExclusionCriterionList());
+        baseRule.setReviewCriterion(matchRuleConfiguration.getBaseRule().getReviewCriterion());
+
+        DplusMatchConfig dplusMatchConfig =  new DplusMatchConfig(baseRule);
+
+        matchRuleConfiguration.getSpecialRules().stream().forEach(matchRule -> {
+            DplusMatchConfig.SpeicalRule specialRule = new DplusMatchConfig.SpeicalRule();
+            specialRule.setMatchKey(matchRule.getMatchKey());
+            specialRule.setAllowedValues(matchRule.getAllowedValues());
+            if(matchRule.getAcceptCriterion() != null || matchRule.getExclusionCriterionList() != null ||
+                    matchRule.getReviewCriterion() != null){
+                DplusMatchRule rule = new DplusMatchRule();
+                rule.setAcceptCriterion(matchRule.getAcceptCriterion());
+                rule.setExclusionCriteria(matchRule.getExclusionCriterionList());
+                rule.setReviewCriterion(matchRule.getReviewCriterion());
+                specialRule.setSpecialRule(rule);
+            }
+            dplusMatchConfig.addSpecialRule(specialRule);
+        });
+        return dplusMatchConfig;
     }
 
 }

@@ -51,7 +51,7 @@ public class DplusMatchConfig {
         this.specialRules = specialRules;
     }
 
-    void addSpecialRule(SpeicalRule newRule) {
+    public void addSpecialRule(SpeicalRule newRule) {
         List<SpeicalRule> sRules = getSpecialRules();
         if (CollectionUtils.isEmpty(sRules)) {
             sRules = new ArrayList<>();
@@ -95,7 +95,7 @@ public class DplusMatchConfig {
             return matchKey;
         }
 
-        private void setMatchKey(MatchKey matchKey) {
+        public void setMatchKey(MatchKey matchKey) {
             this.matchKey = matchKey;
         }
 
@@ -103,7 +103,7 @@ public class DplusMatchConfig {
             return allowedValues;
         }
 
-        private void setAllowedValues(Collection<String> allowedValues) {
+        public void setAllowedValues(Collection<String> allowedValues) {
             this.allowedValues = allowedValues;
         }
 
@@ -111,7 +111,7 @@ public class DplusMatchConfig {
             return specialRule;
         }
 
-        void setSpecialRule(DplusMatchRule specialRule) {
+        public void setSpecialRule(DplusMatchRule specialRule) {
             this.specialRule = specialRule;
         }
     }
