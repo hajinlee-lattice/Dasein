@@ -435,6 +435,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private void logRunningTenantIdsIfChanged(@NotNull ConcurrentMap<String, Set<String>> cache, Set<String> currList,
             @NotNull String schedulerName, @NotNull String msg) {
         if (CollectionUtils.isEmpty(currList)) {
+            // log a empty record to clear out the dashboard
+            log.info(" {}. schedulerName = {}.", msg, schedulerName);
             return;
         }
 
