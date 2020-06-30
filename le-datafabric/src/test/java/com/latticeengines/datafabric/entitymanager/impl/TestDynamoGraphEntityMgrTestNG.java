@@ -53,7 +53,8 @@ public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBa
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         dynamoService.deleteTable(tableName);
 
-        dynamoService.createTable(tableName, 10, 10, "parentKey", ScalarAttributeType.S.name(), "entityId",  ScalarAttributeType.S.name());
+        dynamoService.createTable(tableName, 10, 10, "parentKey", ScalarAttributeType.S.name(), "entityId",
+                ScalarAttributeType.S.name(), null);
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
 

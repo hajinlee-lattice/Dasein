@@ -115,7 +115,7 @@ public class AtlasLookupCacheExportServiceImplTestNG extends EaiMiniClusterFunct
         dynamoService.switchToLocal(true);
         dynamoService.deleteTable(dynamoTableName);
         dynamoService.createTable(dynamoTableName, 10, 10, //
-                DYNAMO_PK_FIELD, ScalarAttributeType.S.name(), null, null);
+                DYNAMO_PK_FIELD, ScalarAttributeType.S.name(), null, null, null);
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
 

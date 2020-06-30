@@ -36,6 +36,9 @@ public class PublishToDynamoConfiguration extends PublicationConfiguration {
     @JsonProperty("AwsRegion")
     private String awsRegion;
 
+    @JsonProperty("CustomerCMK")
+    private String customerCMK;
+
     @Override
     @JsonProperty("ConfigurationType")
     public String getConfigurationType() {
@@ -120,6 +123,14 @@ public class PublishToDynamoConfiguration extends PublicationConfiguration {
 
     public void setAwsRegion(String awsRegion) {
         this.awsRegion = awsRegion;
+    }
+
+    public String getCustomerCMK() {
+        return customerCMK;
+    }
+
+    public void setCustomerCMK(String customerCMK) {
+        this.customerCMK = customerCMK;
     }
 
     public enum Alias {
