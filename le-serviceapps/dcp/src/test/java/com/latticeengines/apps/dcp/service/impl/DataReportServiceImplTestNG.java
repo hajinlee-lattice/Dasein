@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +43,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         uploadDetails.setSourceId("sourceUID");
         uploadDetails.setUploadId("uploadUID");
         when(projectService.getProjectBySourceId(anyString(), anyString())).thenReturn(projectInfo);
-        when(uploadService.getUploadByUploadId(anyString(), anyString(), Boolean.TRUE)).thenReturn(uploadDetails);
+        when(uploadService.getUploadByUploadId(anyString(), anyString(), anyBoolean())).thenReturn(uploadDetails);
         ReflectionTestUtils.setField(dataReportService, "projectService", projectService);
         ReflectionTestUtils.setField(dataReportService, "uploadService", uploadService);
     }
