@@ -4,6 +4,7 @@ import java.util
 import java.util.concurrent.ConcurrentHashMap
 
 import com.latticeengines.common.exposed.util.{CipherUtils, LocationUtils}
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{col, udf}
 
@@ -15,15 +16,14 @@ private[spark] object CountryCodeUtils {
   : DataFrame = {
     // load data into map once
     initMap(url, user, passwd, key, salt)
-    val nameFunc: util.Map[String, String] => (String => String) = (countryCodeMap: util.Map[String, String])
-    => {
-      name => {
-        val cleanName = LocationUtils.getStandardCountry(name)
-        val result = if (cleanName == null) null else countryCodeMap.get(cleanName)
-        result
-      }
+    val spark = SparkSession.builder().appName("reading country code").getOrCreate()
+    val broadCastDictionary = spark.sparkContext.broadcast(map)
+    val nameFunc:  String => String = name => {
+      val cleanName = LocationUtils.getStandardCountry(name)
+      val result = if (cleanName == null) null else broadCastDictionary.value.get(cleanName)
+      result
     }
-    val nameUDF = udf(nameFunc(map))
+    val nameUDF = udf(nameFunc)
     input.withColumn(countryCodeName, nameUDF(col(countryName)))
   }
 
@@ -44,6 +44,7 @@ private[spark] object CountryCodeUtils {
             val isoCountryCode2Char: String = row.getAs("ISOCountryCode2Char")
             map.put(name, isoCountryCode2Char)
           })
+
         }
       }
     }
