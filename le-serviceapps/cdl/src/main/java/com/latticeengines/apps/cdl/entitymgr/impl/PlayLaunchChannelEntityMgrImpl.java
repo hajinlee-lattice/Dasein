@@ -93,7 +93,7 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunchChannel> findByAlwaysOnFalseAndAttributeSetName(String attributeSetName) {
-        return readerRepository.findByIsAlwaysOnAnAndLookupIdMap(CDLExternalSystemName.AWS_S3, attributeSetName);
+        return readerRepository.findByIsAlwaysOnFalseAnAndLookupIdMap(CDLExternalSystemName.AWS_S3, attributeSetName);
     }
 
     @Override

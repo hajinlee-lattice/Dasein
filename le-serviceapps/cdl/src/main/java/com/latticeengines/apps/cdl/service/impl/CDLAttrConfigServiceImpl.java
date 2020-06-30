@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -27,6 +28,7 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -39,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
@@ -69,6 +72,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Inject
     private AttributeSetEntityMgr attributeSetEntityMgr;
+
+    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("cdl-attr-config", ThreadPoolUtils.NUM_CORES * 2);
 
     private static int ATTRIBUTE_SET_LIMITATION = 50;
 
@@ -296,7 +301,11 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
                     new String[]{plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))});
         }
         attributeSetEntityMgr.deleteByName(name);
-        playLaunchChannelService.updateAttributeSetNameToDefault(name);
+        Tenant tenant = MultiTenantContext.getTenant();
+        service.submit(() -> {
+            MultiTenantContext.setTenant(tenant);
+            playLaunchChannelService.updateAttributeSetNameToDefault(name);
+        });
     }
 
 }

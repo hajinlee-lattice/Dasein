@@ -51,9 +51,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return repository;
     }
 
-    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors() * 2;
-
-    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", NUM_THREADS);
+    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", ThreadPoolUtils.NUM_CORES * 2);
 
     @Override
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {

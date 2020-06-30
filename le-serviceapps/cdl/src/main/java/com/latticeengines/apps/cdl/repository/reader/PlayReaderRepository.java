@@ -11,9 +11,12 @@ import com.latticeengines.domain.exposed.pls.Play;
 
 public interface PlayReaderRepository extends PlayRepository {
 
-    @Query("SELECT p FROM Play p WHERE p.pid in (SELECT DISTINCT c.play.pid FROM PlayLaunchChannel c WHERE " +
-            "c.lookupIdMap.externalSystemName = :externalSystemName AND c.isAlwaysOn = true " +
+    @Query("SELECT p FROM Play p " + //
+            "WHERE p.deleted = false " + //
+            "AND p.pid in (SELECT DISTINCT c.play.pid FROM PlayLaunchChannel c " + //
+            "WHERE c.lookupIdMap.externalSystemName = :externalSystemName " + //
+            "AND c.isAlwaysOn = true " + //
             "AND c.channelConfig LIKE %:attributeSetName%)")
     List<Play> findByIsAlwaysOnAnAndLookupIdMap(@Param("externalSystemName") CDLExternalSystemName externalSystemName,
-                                                    @Param("attributeSetName") String attributeSetName);
+                                                @Param("attributeSetName") String attributeSetName);
 }

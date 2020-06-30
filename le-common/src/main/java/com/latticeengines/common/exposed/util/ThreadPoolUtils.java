@@ -34,7 +34,7 @@ public final class ThreadPoolUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolUtils.class);
     private static final String DEBUG_GATEWAY = "DebugGateway";
-    private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
+    public static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
 
     private static ExecutorService sharedPool;
 

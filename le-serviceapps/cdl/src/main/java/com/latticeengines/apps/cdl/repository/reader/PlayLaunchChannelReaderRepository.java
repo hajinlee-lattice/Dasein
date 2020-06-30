@@ -26,10 +26,12 @@ public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepo
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
 
-    @Query("SELECT c FROM PlayLaunchChannel c WHERE " +
-            "c.lookupIdMap.externalSystemName = :externalSystemName AND c.isAlwaysOn = false " +
+    @Query("SELECT c FROM PlayLaunchChannel c INNER JOIN c.play p WHERE " + //
+            "p.deleted = false " + //
+            "AND c.lookupIdMap.externalSystemName = :externalSystemName " + //
+            "AND c.isAlwaysOn = false " +
             "AND c.channelConfig LIKE %:attributeSetName%")
-    List<PlayLaunchChannel> findByIsAlwaysOnAnAndLookupIdMap(@Param("externalSystemName") CDLExternalSystemName externalSystemName,
-                                                             @Param("attributeSetName") String attributeSetName);
+    List<PlayLaunchChannel> findByIsAlwaysOnFalseAnAndLookupIdMap(@Param("externalSystemName") CDLExternalSystemName externalSystemName,
+                                                                  @Param("attributeSetName") String attributeSetName);
 
 }
