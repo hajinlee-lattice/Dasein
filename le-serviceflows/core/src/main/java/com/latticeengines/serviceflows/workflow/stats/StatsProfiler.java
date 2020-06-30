@@ -1,6 +1,9 @@
 package com.latticeengines.serviceflows.workflow.stats;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +11,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroRecordIterator;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
@@ -105,6 +110,43 @@ public class StatsProfiler {
             AvroUtils.createAvroFileByData(yarnConfiguration, columns, data, outputDir, "Profile.avro");
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void appendResult(HdfsDataUnit dataUnit, Collection<HdfsDataUnit> extraProfileUnits, Collection<String> removeAttrs) {
+        List<GenericRecord> previousRecords = new ArrayList<>();
+        for (HdfsDataUnit extraProfile: extraProfileUnits) {
+            String avroGlob = PathUtils.toAvroGlob(extraProfile.getPath());
+            AvroRecordIterator itr = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
+            while(itr.hasNext()) {
+                GenericRecord record = itr.next();
+                String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
+                if (!removeAttrs.contains(attrName)) {
+                    previousRecords.add(record);
+                }
+            }
+            previousRecords = classifier.interceptEncodedPreviousRecord(previousRecords);
+        }
+        Object[][] data = classifier.parseResult();
+        List<Pair<String, Class<?>>> columns = ProfileUtils.getProfileSchema();
+        String outputDir = PathUtils.toParquetOrAvroDir(dataUnit.getPath());
+        try {
+            AvroUtils.createAvroFileByData(yarnConfiguration, columns, data, outputDir, "Profile.avro");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (CollectionUtils.isNotEmpty(previousRecords)) {
+            try {
+                List<Object[]> alignedRecords = new ArrayList<>();
+                for (GenericRecord record: previousRecords) {
+                    Object[] row = ProfileUtils.convertAvroRecord(record);
+                    alignedRecords.add(row);
+                }
+                AvroUtils.createAvroFileByData(yarnConfiguration, columns, alignedRecords.toArray(new Object[0][]), //
+                        outputDir, "PreviousProfile.avro");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

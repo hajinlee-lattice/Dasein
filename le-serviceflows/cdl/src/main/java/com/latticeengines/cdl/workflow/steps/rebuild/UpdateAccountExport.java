@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountExport;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccount;
 
@@ -7,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,19 +29,18 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
+import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
-import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
-import com.latticeengines.spark.exposed.job.cdl.MergeChangeListJob;
+import com.latticeengines.spark.exposed.job.cdl.JoinAccountStores;
+import com.latticeengines.spark.exposed.job.common.ApplyChangeListJob;
 import com.latticeengines.spark.exposed.job.common.CopyJob;
-import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
 @Lazy
 @Component(UpdateAccountExport.BEAN_NAME)
@@ -57,7 +56,8 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
 
     private Table oldAccountExportTable;
     private Table newAccountExportTable;
-    private Table fullChangelistTable;
+    private Table customerAccountChangelistTable;
+    private Table latticeAccountChangelistTable;
     private List<ColumnMetadata> exportSchema;
     private String joinKey;
 
@@ -70,6 +70,8 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
             log.info("Found AccountExport table in context, go through short-cut mode.");
             dataCollectionProxy.upsertTable(customerSpace.toString(), tableInCtx.getName(), //
                     TableRoleInCollection.AccountExport, inactive);
+        } else if (shouldDoNothing()) {
+            linkInactiveTable(AccountExport);
         } else {
             preExecution();
 
@@ -83,15 +85,16 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
                     // Select from the customer account table
                     output = select(customerAccount.toHdfsDataUnit("Account"));
                 } else {
-                    HdfsDataUnit output1 = select(customerAccount.toHdfsDataUnit("CustomerAccount"));
-                    HdfsDataUnit output2 = select(latticeAccount.toHdfsDataUnit("LatticeAccount"));
-                    output = merge(output1, output2);
+                    output = join( //
+                            customerAccount.toHdfsDataUnit("CustomerAccount"), //
+                            latticeAccount.toHdfsDataUnit("LatticeAccount") //
+                    );
                 }
                 String tableName = NamingUtils.timestamp("AccountExport");
                 newAccountExportTable = toTable(tableName, output);
             } else {
                 // apply changelists to generate new AccountExport table
-                if (fullChangelistTable != null) {
+                if (customerAccountChangelistTable != null || latticeAccountChangelistTable != null) {
                     log.info("Existing AccountExport table name is {}, path is {} ", oldAccountExportTable.getName(),
                             oldAccountExportTable.getExtracts().get(0).getPath());
                     HdfsDataUnit input = oldAccountExportTable.toHdfsDataUnit("OldAccountExport");
@@ -109,7 +112,8 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         joinKey = InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
         oldAccountExportTable = attemptGetTableRole(TableRoleInCollection.AccountExport, false);
-        fullChangelistTable = getTableSummaryFromKey(customerSpace.toString(), FULL_CHANGELIST_TABLE_NAME);
+        customerAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+        latticeAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
         exportSchema = getExportSchema();
     }
 
@@ -124,8 +128,19 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     }
 
     private boolean shouldRebuild() {
-        return (oldAccountExportTable == null)
-                || getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class);
+//        return (oldAccountExportTable == null) ||
+//                Boolean.TRUE.equals(getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class));
+        // always rebuild due to an issue in ApplyChangeList spark job
+        return true;
+    }
+
+    private boolean shouldDoNothing() {
+        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount);
+        boolean latticeAccountHasChanged = isChanged(LatticeAccount);
+        boolean shouldDoNothing = !(customerAccountHasChanged || latticeAccountHasChanged);
+        log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldDoNothing={}",
+                customerAccountHasChanged, latticeAccountHasChanged, shouldDoNothing);
+        return shouldDoNothing;
     }
 
     private HdfsDataUnit select(HdfsDataUnit input) {
@@ -137,11 +152,12 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         return result.getTargets().get(0);
     }
 
-    private HdfsDataUnit merge(HdfsDataUnit input1, HdfsDataUnit input2) {
-        UpsertConfig config = new UpsertConfig();
-        config.setJoinKey(joinKey);
-        config.setInput(Arrays.asList(input1, input2));
-        SparkJobResult result = runSparkJob(UpsertJob.class, config);
+    private HdfsDataUnit join(HdfsDataUnit customerInput, HdfsDataUnit latticeInput) {
+        List<String> retainAttrs = exportSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        JoinAccountStoresConfig config = new JoinAccountStoresConfig();
+        config.setRetainAttrs(retainAttrs);
+        config.setInput(Arrays.asList(customerInput, latticeInput));
+        SparkJobResult result = runSparkJob(JoinAccountStores.class, config);
         return result.getTargets().get(0);
     }
 
@@ -165,15 +181,18 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
 
     private void applyChangelist(HdfsDataUnit input) {
         log.info("UpdateAccountExport, apply changelist step");
-        ChangeListConfig config = new ChangeListConfig();
-        List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(toDataUnit(fullChangelistTable, "FullChangelist")); // changelist
-        inputs.add(input); // source table
-        config.setInput(inputs);
+        List<String> retainAttrs = exportSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        ApplyChangeListConfig config = new ApplyChangeListConfig();
+        config.setInput(Arrays.asList( //
+                input, // source table
+                toDataUnit(customerAccountChangelistTable, "Changelist1"), // changelist of customer account
+                toDataUnit(latticeAccountChangelistTable, "Changelist2") // changelist of lattice account
+        ));
+        config.setHasSourceTbl(true);
         config.setJoinKey(joinKey);
-        SparkJobResult result = runSparkJob(MergeChangeListJob.class, config);
+        config.setIncludeAttrs(retainAttrs);
+        SparkJobResult result = runSparkJob(ApplyChangeListJob.class, config);
         HdfsDataUnit output = result.getTargets().get(0);
-
         // Upsert AccountExport table
         String tableName = NamingUtils.timestamp("AccountExport");
         newAccountExportTable = toTable(tableName, output);

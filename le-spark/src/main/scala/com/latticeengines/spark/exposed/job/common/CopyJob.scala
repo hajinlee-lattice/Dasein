@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.common
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.common.CopyConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CopyUtils
@@ -17,7 +18,14 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
     val config: CopyConfig = lattice.config
     val inputs: List[DataFrame] = lattice.input
     val concatenated = CopyUtils.copy(config, inputs)
-    lattice.output = concatenated :: Nil
+
+    val result = if (config.getFillTimestamps == true) {
+      CopyUtils.fillTimestamps(concatenated)
+    } else {
+      concatenated
+    }
+
+    lattice.output = result :: Nil
   }
 
 }

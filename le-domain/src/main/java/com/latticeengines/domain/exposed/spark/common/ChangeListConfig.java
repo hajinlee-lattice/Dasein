@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.spark.cdl;
+package com.latticeengines.domain.exposed.spark.common;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,6 +16,10 @@ public class ChangeListConfig extends SparkJobConfig implements Serializable {
     @JsonProperty("ExclusionColumns")
     private List<String> exclusionColumns;
 
+    // left=fromTable, right=toTable, default is outer join
+    @JsonProperty("JoinType")
+    private String joinType;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -28,6 +32,14 @@ public class ChangeListConfig extends SparkJobConfig implements Serializable {
 
     public void setJoinKey(String joinKey) {
         this.joinKey = joinKey;
+    }
+
+    public String getJoinType() {
+        return joinType;
+    }
+
+    public void setJoinType(String joinType) {
+        this.joinType = joinType;
     }
 
     public List<String> getExclusionColumns() {

@@ -22,6 +22,10 @@ public class CopyConfig extends SparkJobConfig {
     @JsonProperty("RenameAttrs")
     private Map<String, String> renameAttrs;
 
+    // fill CDLCreateTime and CDLUpdateTime if missing columns or values
+    @JsonProperty("FillTimestamps")
+    private Boolean fillTimestamps;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -50,5 +54,13 @@ public class CopyConfig extends SparkJobConfig {
 
     public void setRenameAttrs(Map<String, String> renameAttrs) {
         this.renameAttrs = renameAttrs;
+    }
+
+    public Boolean getFillTimestamps() {
+        return fillTimestamps;
+    }
+
+    public void setFillTimestamps(Boolean fillTimestamps) {
+        this.fillTimestamps = fillTimestamps;
     }
 }

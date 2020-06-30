@@ -1615,6 +1615,22 @@ public final class AvroUtils {
         AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroDir + "/" + fileName, records);
     }
 
+    public static void createAvroFileByRecords(Configuration yarnConfiguration, List<Pair<String, Class<?>>> columns,
+                                               List<GenericRecord> records, String avroDir, String avroFile) throws Exception {
+        Map<String, Class<?>> schemaMap = new HashMap<>();
+        for (Pair<String, Class<?>> column : columns) {
+            schemaMap.put(column.getKey(), column.getValue());
+        }
+        Schema schema = AvroUtils.constructSchema(avroFile, schemaMap);
+        String fileName = avroFile;
+        if (!fileName.endsWith(".avro"))
+            fileName = avroFile + ".avro";
+        if (HdfsUtils.fileExists(yarnConfiguration, avroDir + "/" + fileName)) {
+            HdfsUtils.rmdir(yarnConfiguration, avroDir + "/" + fileName);
+        }
+        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroDir + "/" + fileName, records);
+    }
+
     public static void uploadAvro(Configuration yarnConfiguration, //
             Object[][] data, //
             List<Pair<String, Class<?>>> columns, //

@@ -7,15 +7,12 @@ import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.inject.Inject;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -23,7 +20,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -38,12 +34,12 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
+import com.latticeengines.domain.exposed.spark.common.GetRowChangesConfig;
 import com.latticeengines.spark.exposed.job.cdl.RemoveOrphanJob;
+import com.latticeengines.spark.exposed.job.common.GetRowChangesJob;
 
 @Lazy
 @Component("removeOrphanContact")
@@ -51,9 +47,6 @@ import com.latticeengines.spark.exposed.job.cdl.RemoveOrphanJob;
 public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessContactStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(RemoveOrphanContact.class);
-
-    @Inject
-    private BatonService batonService;
 
     private Table contactTable;
 
@@ -144,27 +137,17 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
 
     // has account change that might impact orphan contact
     private boolean hasAccountChange() {
-        if (isATTHotFix()) {
-            return hasAccountDeletion();
+        if (isChanged(ConsolidatedAccount)) { // has potential changes
+            Table accountTable = attemptGetTableRole(ConsolidatedAccount, true);
+            GetRowChangesConfig jobConfig = new GetRowChangesConfig();
+            jobConfig.setInput(Collections.singletonList(accountTable.toHdfsDataUnit("Account")));
+            SparkJobResult result = runSparkJob(GetRowChangesJob.class, jobConfig);
+            boolean hasNewAccounts = result.getTargets().get(0).getCount() > 0;
+            boolean hasDeletedAccounts = result.getTargets().get(1).getCount() > 0;
+            return hasNewAccounts || hasDeletedAccounts;
         } else {
-            return isChanged(ConsolidatedAccount) || isToReset(Account);
+            return false;
         }
-    }
-
-    private boolean hasAccountDeletion() {
-        List<Action> softDeletes = getListObjectFromContext(SOFT_DELETE_ACTIONS, Action.class);
-        boolean hasAccountSoftDeletion = CollectionUtils.isNotEmpty(softDeletes) && softDeletes.stream().anyMatch(action -> {
-            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
-            return configuration.hasEntity(Account);
-        });
-
-        Set<Action> actions = getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
-        boolean hasLegacyAccountDeletion = CollectionUtils.isNotEmpty(actions);
-        return hasLegacyAccountDeletion && hasAccountSoftDeletion;
-    }
-
-    private boolean isATTHotFix() {
-        return batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId());
     }
 
     private void enrichTableSchema(Table table) {

@@ -1,30 +1,25 @@
-package com.latticeengines.spark.exposed.job.cdl
+package com.latticeengines.spark.aggregation
 
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-
-import org.apache.spark.sql.expressions.MutableAggregationBuffer
-import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.types.DataType
-import org.apache.spark.sql.types.StructField
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
+import org.apache.spark.sql.types.{DataType, StructType}
 
-import util.control.Breaks.break
-import util.control.Breaks.breakable
+import scala.util.control.Breaks.{break, breakable}
 
-class MergeInGroup(schema: StructType, overwriteByNull: Boolean) extends UserDefinedAggregateFunction {
+private[spark] class MergeInGroup(schema: StructType, overwriteByNull: Boolean) extends UserDefinedAggregateFunction {
     override def inputSchema: StructType = schema
     override def bufferSchema: StructType = schema
     override def dataType: DataType = schema
     override def deterministic: Boolean = true
-    
+
     override def initialize(buffer: MutableAggregationBuffer): Unit = {
         for (idx <- 0 to schema.length - 1) {
             buffer(idx) = null
         }
     }
-    
+
     override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
         for (idx <- 0 to schema.length - 1) {
             breakable {
@@ -36,11 +31,11 @@ class MergeInGroup(schema: StructType, overwriteByNull: Boolean) extends UserDef
                 }
                 if (overwriteByNull || input.getAs[Any](idx) != null) {
                     buffer(idx) = input.getAs[Any](idx)
-                }                
+                }
             }
         }
     }
-    
+
     override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
         for (idx <- 0 to schema.length - 1) {
             breakable {
@@ -52,15 +47,15 @@ class MergeInGroup(schema: StructType, overwriteByNull: Boolean) extends UserDef
                 }
                 if (overwriteByNull || buffer2.getAs[Any](idx) != null) {
                     buffer1(idx) = buffer2.getAs[Any](idx)
-                }                
+                }
             }
         }
     }
-    
+
     override def evaluate(buffer: Row): Any = {
         buffer
     }
-    
+
     private def overwriteEntityId(currId: String, newId: String): Boolean = {
         if (newId == null) {
             return false

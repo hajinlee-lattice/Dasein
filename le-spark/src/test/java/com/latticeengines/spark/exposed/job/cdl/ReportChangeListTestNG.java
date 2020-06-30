@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class ReportChangeListTestNG extends SparkJobFunctionalTestNGBase {

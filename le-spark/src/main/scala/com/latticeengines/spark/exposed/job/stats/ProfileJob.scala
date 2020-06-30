@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig
 import com.latticeengines.spark.aggregation.{DiscreteProfileAggregation, NumberProfileAggregation, StringProfileAggregation}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.{BitEncodeUtils, NumericProfiler}
+import com.latticeengines.spark.util.{BitEncodeUtils, NumericProfiler, ProfileUtils}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.{col, explode, lit}
 import org.apache.spark.sql.types._
@@ -58,15 +58,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
       .withColumn(DataCloudConstants.PROFILE_ATTR_ENCATTR, lit(null).cast("string"))
       .withColumn(DataCloudConstants.PROFILE_ATTR_LOWESTBIT, lit(null).cast("integer"))
       .withColumn(DataCloudConstants.PROFILE_ATTR_NUMBITS, lit(null).cast("integer"))
-      .select(List(
-        DataCloudConstants.PROFILE_ATTR_ATTRNAME,
-        DataCloudConstants.PROFILE_ATTR_SRCATTR,
-        DataCloudConstants.PROFILE_ATTR_DECSTRAT,
-        DataCloudConstants.PROFILE_ATTR_ENCATTR,
-        DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
-        DataCloudConstants.PROFILE_ATTR_NUMBITS,
-        DataCloudConstants.PROFILE_ATTR_BKTALGO
-      ).map(col): _*)
+      .select(ProfileUtils.colsInOrder(): _*)
 
     lattice.output = result :: Nil
   }
@@ -242,7 +234,6 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
         }
         val profiler = new NumericProfiler(values, numBuckets, minBucketSize, randomSeed)
         val bnds = profiler.findBoundaries()
-        slice.unpersist()
         val bkt = new IntervalBucket
         field.dataType match {
           case IntegerType => bkt.setBoundaries(bnds.map(_.toInt).asJava.asInstanceOf[java.util.List[Number]])

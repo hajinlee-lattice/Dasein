@@ -175,6 +175,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     public static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
+    public static final String HAS_DATA_CLOUD_MAJOR_CHANGE = "HAS_DATA_CLOUD_MAJOR_CHANGE";
+    public static final String HAS_DATA_CLOUD_MINOR_CHANGE = "HAS_DATA_CLOUD_MINOR_CHANGE";
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
     protected static final String PA_TIMESTAMP = WorkflowContextConstants.Inputs.PA_TIMESTAMP;
     protected static final String NEW_RECORD_CUT_OFF_TIME = "NEW_RECORD_CUT_OFF_TIME";
@@ -256,7 +258,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
     protected static final String ACCOUNT_CHANGELIST_TABLE_NAME = "ACCOUNT_CHANGELIST_TABLE_NAME";
     protected static final String LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME = "LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME";
-    protected static final String FULL_CHANGELIST_TABLE_NAME = "FULL_CHANGELIST_TABLE_NAME";
     protected static final String ACCOUNT_REPORT_CHANGELIST_TABLE_NAME = "ACCOUNT_REPORT_CHANGELIST_TABLE_NAME";
     protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
@@ -366,7 +367,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             FULL_ACCOUNT_TABLE_NAME, //
             LATTICE_ACCOUNT_TABLE_NAME, //
             LATTICE_ACCOUNT_PROFILE_TABLE_NAME, //
-            FULL_CHANGELIST_TABLE_NAME, //
+            LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //
             ACCOUNT_FEATURE_TABLE_NAME, //
             ACCOUNT_PROFILE_TABLE_NAME, //
@@ -414,6 +415,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     // above
     protected static final Set<String> EXTRA_KEYS_FOR_PA_RETRY = Sets.newHashSet( //
             PA_TIMESTAMP, //
+            REBUILD_LATTICE_ACCOUNT, //
             ENTITY_MATCH_COMPLETED, //
             NEW_ENTITY_MATCH_ENVS, //
             FULL_REMATCH_PA, //

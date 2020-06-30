@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.spark.cdl;
+package com.latticeengines.domain.exposed.spark.common;
 
 import java.util.List;
 

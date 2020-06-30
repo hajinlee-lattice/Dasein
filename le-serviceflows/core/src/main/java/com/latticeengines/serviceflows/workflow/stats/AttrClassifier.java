@@ -2,6 +2,9 @@ package com.latticeengines.serviceflows.workflow.stats;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ACCOUNT_ID;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ID;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_BKTALGO;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_NUMBITS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -423,6 +427,34 @@ public class AttrClassifier {
                     attr.getAttr()));
             attrsToRetain.add(attr);
         }
+    }
+
+    // read thru previous records, add those to be encoded into getAmAttrsToEnc() and getExAttrsToEnc()
+    // return remaining records to be directly appended to profile result
+    public List<GenericRecord> interceptEncodedPreviousRecord(List<GenericRecord> previousRecords) {
+        List<GenericRecord> remainingRecords = new ArrayList<>();
+        for (GenericRecord record: previousRecords) {
+            String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
+            boolean intercepted = false;
+            if (record.get(PROFILE_ATTR_BKTALGO) != null) {
+                BucketAlgorithm algo = //
+                        JsonUtils.deserialize(record.get(PROFILE_ATTR_BKTALGO).toString(), BucketAlgorithm.class);
+                if (amAttrConfig.containsKey(attrName) && record.get(PROFILE_ATTR_NUMBITS) != null) {
+                    int nBits = (int) record.get(PROFILE_ATTR_NUMBITS);
+                    getAmAttrsToEnc().add( //
+                            new ProfileParameters.Attribute(attrName, nBits, null, algo));
+                    intercepted = true;
+                } else if (algo instanceof BooleanBucket) {
+                    getExAttrsToEnc().add( //
+                            new ProfileParameters.Attribute(attrName, 2, null, algo));
+                    intercepted = true;
+                }
+            }
+            if (!intercepted) {
+                remainingRecords.add(record);
+            }
+        }
+        return remainingRecords;
     }
 
     public Object[][] parseResult() {

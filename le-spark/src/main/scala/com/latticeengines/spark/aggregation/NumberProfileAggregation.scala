@@ -1,6 +1,5 @@
 package com.latticeengines.spark.aggregation
 
-
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.datacloud.dataflow.{DiscreteBucket, IntervalBucket}
 import com.latticeengines.spark.util.NumericProfiler

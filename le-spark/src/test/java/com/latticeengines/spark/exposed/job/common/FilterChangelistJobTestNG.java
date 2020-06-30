@@ -1,4 +1,4 @@
-package com.latticeengines.spark.exposed.job.cdl;
+package com.latticeengines.spark.exposed.job.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +15,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.FilterChangelistConfig;
+import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class FilterChangelistJobTestNG extends SparkJobFunctionalTestNGBase {
