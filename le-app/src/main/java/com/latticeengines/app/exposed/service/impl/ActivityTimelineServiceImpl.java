@@ -94,44 +94,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         query.setStartTimeStamp(timeWindow.getLeft());
         query.setEndTimeStamp(timeWindow.getRight());
 
-        return populateProductPatternNames(activityProxy.getData(customerSpace, null, query));
-    }
-
-    // This is a hack to populate product path names for web visit activity data
-    // To be removes once this is natively populated in timeline batch store by PA
-    private DataPage populateProductPatternNames(DataPage accountActivityData) {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        if (CollectionUtils.isEmpty(accountActivityData.getData())) {
-            return accountActivityData;
-        }
-        Map<String, DimensionMetadata> dimensionMetadata = activityStoreProxy
-                .getDimensionMetadataInStream(customerSpace, AtlasStream.StreamType.WebVisit.name(), null);
-        if (MapUtils.isEmpty(dimensionMetadata) || !dimensionMetadata.containsKey(InterfaceName.PathPatternId.name())
-                || CollectionUtils
-                        .isEmpty(dimensionMetadata.get(InterfaceName.PathPatternId.name()).getDimensionValues())) {
-            log.info(String.format("No Webvisit stream metadata found for cannot populate Detail2, CustomerSpace,: %s",
-                    customerSpace));
-            return accountActivityData;
-        }
-        List<Map<String, Object>> pathPatterns = dimensionMetadata.get(InterfaceName.PathPatternId.name())
-                .getDimensionValues();
-        pathPatterns.forEach(p -> p.put(InterfaceName.PathPattern.name(),
-                fixRegex((String) p.get(InterfaceName.PathPattern.name()))));
-        Map<String, String> pathPatternMap = pathPatterns.stream()
-                .collect(Collectors.toMap(p -> (String) p.get(InterfaceName.PathPattern.name()),
-                        p -> (String) p.get(InterfaceName.PathPatternName.name())));
-
-        for (Map<String, Object> row : accountActivityData.getData()) {
-            if (!row.containsKey(ActivityInterfaceName.Detail1))
-                continue;
-
-            String pathPatterName = getPathPatternName((String) row.get(ActivityInterfaceName.Detail1), pathPatternMap);
-            if (StringUtils.isNotBlank(pathPatterName)) {
-                row.put(ActivityInterfaceName.Detail2, pathPatterName);
-            }
-        }
-
-        return accountActivityData;
+        return activityProxy.getData(customerSpace, null, query);
     }
 
     @Override
