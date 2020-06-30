@@ -44,7 +44,7 @@ public class DataReport {
     @JsonProperty("duplicationReport")
     private DuplicationReport duplicationReport;
 
-    @JsonProperty("refreshRimestamp")
+    @JsonProperty("refreshTimestamp")
     private Long refreshTimestamp;
 
     public BasicStats getBasicStats() {
