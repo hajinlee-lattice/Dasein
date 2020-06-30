@@ -17,7 +17,7 @@ public interface SchedulingPAService {
 
     List<SchedulingPAQueue> initQueue(@NotNull String schedulerName);
 
-    SchedulingResult getSchedulingResult(@NotNull String schedulerName);
+    SchedulingResult getSchedulingResult(@NotNull String schedulerName, long schedulingCycle);
 
     Map<String, List<String>> showQueue(@NotNull String schedulerName);
 
