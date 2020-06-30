@@ -31,16 +31,17 @@ public final class JarUtils {
 
         if (dirURL.getProtocol().equals("jar")) {
             String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!"));
-            JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
-            Enumeration<JarEntry> entries = jar.entries();
-            Set<String> result = new HashSet<String>();
-            while (entries.hasMoreElements()) {
-                String name = entries.nextElement().getName();
-                if (name.startsWith(path)) {
-                    result.add(name);
+            try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"))) {
+                Enumeration<JarEntry> entries = jar.entries();
+                Set<String> result = new HashSet<String>();
+                while (entries.hasMoreElements()) {
+                    String name = entries.nextElement().getName();
+                    if (name.startsWith(path)) {
+                        result.add(name);
+                    }
                 }
+                return result.toArray(new String[result.size()]);
             }
-            return result.toArray(new String[result.size()]);
         }
 
         throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,27 +49,39 @@ public final class SftpUtils {
         validateSftpConfig(config);
         Preconditions.checkArgument(StringUtils.isNotBlank(fileName));
 
+        InputStream is = null;
+        ChannelSftp sftpChannel = null;
+        Session session = null;
         try {
             log.info("Connecting to SFTP...");
             JSch jsch = new JSch();
-            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(), config.getSftpPort());
+            session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(), config.getSftpPort());
             session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
             session.connect();
             Channel channel = session.openChannel("sftp");
             channel.connect();
-            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            sftpChannel = (ChannelSftp) channel;
             sftpChannel.cd("." + getSanityPath(config.getSftpDir(), true));
 
-            InputStream is = sftpChannel.get(fileName);
-            boolean existed = is != null;
-
-            sftpChannel.exit();
-            session.disconnect();
-
-            return existed;
+            is = sftpChannel.get(fileName);
+            return is != null;
         } catch (JSchException | SftpException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    log.error("Failed to close input stream for file " + fileName, e);
+                }
+            }
+            if (sftpChannel != null) {
+                sftpChannel.exit();
+            }
+            if (session != null) {
+                session.disconnect();
+            }
         }
 
     }

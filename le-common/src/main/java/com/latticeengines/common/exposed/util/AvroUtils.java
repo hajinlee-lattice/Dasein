@@ -140,8 +140,7 @@ public final class AvroUtils {
 
     public static DataFileStream<GenericRecord> getAvroFileStream(Configuration config, Path path) {
         DataFileStream<GenericRecord> streamReader;
-        try {
-            FSDataInputStream input = new FSDataInputStream(HdfsUtils.getInputStream(config, path.toString()));
+        try (FSDataInputStream input = new FSDataInputStream(HdfsUtils.getInputStream(config, path.toString()))) {
             GenericDatumReader<GenericRecord> reader = new GenericDatumReader<>();
             streamReader = new DataFileStream<>(input, reader);
         } catch (IOException e) {

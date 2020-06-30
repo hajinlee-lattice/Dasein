@@ -24,15 +24,15 @@ public class CommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Comman
     public Commands createCommandByStoredProcedure(String sourceTable, String contractExternalID, String destTables) {
         try {
             Connection conn = ((SessionImpl) sessionFactory.getCurrentSession()).connection();
-            CallableStatement cstmt = conn.prepareCall("{call dbo.MatcherClient_CreateCommand(?, ?, ?, ?)}");
-            cstmt.setString("inputSourceTableName", sourceTable);
-            cstmt.setString("contractExternalID", contractExternalID);
-            cstmt.setString("destTables", destTables);
-            cstmt.registerOutParameter("commandID", java.sql.Types.INTEGER);
-            cstmt.execute();
-            Long commandId = cstmt.getLong("commandID");
-            cstmt.close();
-            return findByKey(getEntityClass(), commandId);
+            try (CallableStatement cstmt = conn.prepareCall("{call dbo.MatcherClient_CreateCommand(?, ?, ?, ?)}")) {
+                cstmt.setString("inputSourceTableName", sourceTable);
+                cstmt.setString("contractExternalID", contractExternalID);
+                cstmt.setString("destTables", destTables);
+                cstmt.registerOutParameter("commandID", java.sql.Types.INTEGER);
+                cstmt.execute();
+                Long commandId = cstmt.getLong("commandID");
+                return findByKey(getEntityClass(), commandId);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to create a command by stored procedure.", e);
         }
@@ -42,13 +42,13 @@ public class CommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Comman
     public MatchCommandStatus getMatchCommandStatus(Long commandID) {
         try {
             Connection conn = ((SessionImpl) sessionFactory.getCurrentSession()).connection();
-            CallableStatement cstmt = conn.prepareCall("{call dbo.MatcherClient_GetCommandStatus(?, ?)}");
-            cstmt.setLong("commandID", commandID);
-            cstmt.registerOutParameter("status", java.sql.Types.NVARCHAR);
-            cstmt.execute();
-            String status = cstmt.getString("status");
-            cstmt.close();
-            return MatchCommandStatus.fromStatus(status);
+            try (CallableStatement cstmt = conn.prepareCall("{call dbo.MatcherClient_GetCommandStatus(?, ?)}")) {
+                cstmt.setLong("commandID", commandID);
+                cstmt.registerOutParameter("status", java.sql.Types.NVARCHAR);
+                cstmt.execute();
+                String status = cstmt.getString("status");
+                return MatchCommandStatus.fromStatus(status);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get command status by stored procedure.", e);
         }
