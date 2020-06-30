@@ -445,7 +445,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 // no change
                 return;
             }
-            currIds.forEach(tenantId -> log.info("{} {}. schedulerName = {}.", tenantId, msg, schedulerName));
+            currIds.forEach(tenantId -> log.info("{} {}. schedulerName = {}.",
+                    CustomerSpace.shortenCustomerSpace(tenantId), msg, schedulerName));
             cache.put(schedulerName, currList);
         } catch (Exception e) {
             log.error("Failed to log running tenant Ids", e);
@@ -460,7 +461,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         try {
             snapshot.forEach((queueName, tenantIds) -> log.info(
                     "pa scheduler queue name = {} has tenants {}. cycle = {}. schedulerName = {}.", queueName,
-                    String.join(" -> ", tenantIds), cycle, schedulerName));
+                    tenantIds.stream().map(CustomerSpace::shortenCustomerSpace).collect(Collectors.joining(" -> ")),
+                    cycle, schedulerName));
         } catch (Exception e) {
             // just in case
             log.error("Failed to log queue snapshot", e);
