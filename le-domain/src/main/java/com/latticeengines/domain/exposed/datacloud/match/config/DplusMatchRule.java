@@ -113,11 +113,11 @@ public class DplusMatchRule {
     }
 
     public DplusMatchRule review(int lowCode) {
-        return accept(lowCode, HIGHEST_CODE);
+        return review(lowCode, HIGHEST_CODE);
     }
 
     public DplusMatchRule review(int lowCode, int highCode) {
-        return accept(lowCode, highCode, Collections.emptyList());
+        return review(lowCode, highCode, Collections.emptyList());
     }
 
     // can be called multiple times. overwrite previous setting
@@ -140,7 +140,7 @@ public class DplusMatchRule {
         private int lowestConfidenceCode;
 
         @JsonProperty("HighestConfidenceCode")
-        private int highestConfidenceCode;
+        private int highestConfidenceCode = 10;
 
         @JsonProperty("MatchGradePatterns")
         private Collection<String> matchGradePatterns;
