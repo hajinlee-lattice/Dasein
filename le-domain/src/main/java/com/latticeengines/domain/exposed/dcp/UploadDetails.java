@@ -32,6 +32,9 @@ public class UploadDetails {
     @JsonProperty("uploadDiagnostics")
     public UploadDiagnostics uploadDiagnostics;
 
+    @JsonProperty("created")
+    private Long created;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -78,5 +81,13 @@ public class UploadDetails {
 
     public void setUploadDiagnostics(UploadDiagnostics uploadDiagnostics) {
         this.uploadDiagnostics = uploadDiagnostics;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
