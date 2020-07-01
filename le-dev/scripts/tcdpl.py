@@ -92,6 +92,11 @@ PRESETS = {
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi',
                  'lp', 'quartz', 'modelquality']
     },
+    'core': {
+            'apps': ['admin', 'pls', 'lp', 'cdl', 'matchapi', 'metadata',
+                     'dataflowapi', 'workflowapi', 'objectapi', 'eai',
+                     'datacloudapi']
+        },
     'all': {
         'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml',
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz',
