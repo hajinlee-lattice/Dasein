@@ -15,14 +15,14 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     if [[ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]]; then
         TOMCAT_TGZ_ARCHIVE_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         TOMCAT_TGZ="${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
-	      # if active apache mirror cannot find the version, fall back to archive server
+        # if active apache mirror cannot find the version, fall back to archive server
         wget ${TOMCAT_TGZ_URL} -O ${TOMCAT_TGZ} || wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
-	      wget "${TOMCAT_TGZ_ARCHIVE_URL}.sha512" -O "${TOMCAT_TGZ}.sha512" || wget "${TOMCAT_TGZ_ARCHIVE_URL}.sha512" -O "${TOMCAT_TGZ}.sha512"
-	      pushd "${ARTIFACT_DIR}"
-	      if command -v shasum &> /dev/null ; then
-	        shasum -a 512 -c "${TOMCAT_TGZ}.sha512"
-	      fi
-      	popd
+        wget "${TOMCAT_TGZ_ARCHIVE_URL}.sha512" -O "${TOMCAT_TGZ}.sha512" || wget "${TOMCAT_TGZ_ARCHIVE_URL}.sha512" -O "${TOMCAT_TGZ}.sha512"
+        pushd "${ARTIFACT_DIR}"
+        if command -v shasum &> /dev/null ; then
+           shasum -a 512 -c "${TOMCAT_TGZ}.sha512"
+        fi
+        popd
     fi
 
     rm -rf "${ARTIFACT_DIR}"/apache-tomcat-${TOMCAT_VERSION} || true
