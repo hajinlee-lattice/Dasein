@@ -102,7 +102,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
                 .getPlay(playCreationHelper.getCustomerSpace(), play.getName(), false, true).getLaunchHistory()
                 .getMostRecentLaunch();
         Assert.assertNotNull(testPlayLaunch);
-        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Launching);
+        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.PreProcessing);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
