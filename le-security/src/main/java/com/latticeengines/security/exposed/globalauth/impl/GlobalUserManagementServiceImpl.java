@@ -51,8 +51,8 @@ import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalUserManagementService")
-    public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
-        GlobalUserManagementService {
+public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl
+        implements GlobalUserManagementService {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImpl.class);
 
@@ -104,7 +104,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
             return globalAuthRegisterUser(userName, user, creds);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18004, e, new String[]{creds.getUsername()});
+            throw new LedpException(LedpCode.LEDP_18004, e, new String[] { creds.getUsername() });
         }
     }
 
@@ -117,7 +117,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         } catch (LedpException le) {
             throw le;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18004, e, new String[]{"External: " + user.getEmail()});
+            throw new LedpException(LedpCode.LEDP_18004, e, new String[] { "External: " + user.getEmail() });
         }
     }
 
@@ -157,9 +157,10 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     }
 
     protected GlobalAuthUser createGlobalAuthUser(String userName, User user, boolean externalIntegUser) {
-        if (externalIntegUser && EmailUtils.isInternalUser(user.getEmail())) {
-            throw new LedpException(LedpCode.LEDP_19004);
-        }
+        // PLS-17389. Remove isInternalUser check to allow IDaaS for internal emails.
+        // if (externalIntegUser && EmailUtils.isInternalUser(user.getEmail())) {
+        // throw new LedpException(LedpCode.LEDP_19004);
+        // }
         GlobalAuthUser userData;
         userData = new GlobalAuthUser();
         userData.setEmail(user.getEmail());
@@ -176,30 +177,27 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     @Override
     public Boolean grantRight(String right, String tenant, String username) {
         try {
-            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
-                    tenant));
+            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username, tenant));
             return globalAuthGrantRight(right, tenant, username, null, null, null);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18005, e,
-                    new String[]{right, username, tenant});
+            throw new LedpException(LedpCode.LEDP_18005, e, new String[] { right, username, tenant });
         }
     }
 
     @Override
     public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser,
-                                           Long expirationDate, List<GlobalAuthTeam> globalAuthTeams) {
+            Long expirationDate, List<GlobalAuthTeam> globalAuthTeams) {
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s with expiration period %s.", right,
                     username, tenant, expirationDate));
             return globalAuthGrantRight(right, tenant, username, createdByUser, expirationDate, globalAuthTeams);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18005, e,
-                    new String[]{right, username, tenant});
+            throw new LedpException(LedpCode.LEDP_18005, e, new String[] { right, username, tenant });
         }
     }
 
     public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser,
-                                        Long expirationDate, List<GlobalAuthTeam> globalAuthTeams) throws Exception {
+            Long expirationDate, List<GlobalAuthTeam> globalAuthTeams) throws Exception {
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
         if (tenantData == null) {
@@ -240,14 +238,15 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         return findGlobalAuthUserByUsername(username, false);
     }
 
-    protected GlobalAuthUser findGlobalAuthUserByUsername(String username, boolean assertUserExistence) throws Exception {
+    protected GlobalAuthUser findGlobalAuthUserByUsername(String username, boolean assertUserExistence)
+            throws Exception {
         GlobalAuthUser globalAuthUser = findByEmailNoJoin(username);
         if (globalAuthUser != null) {
             return globalAuthUser;
         }
-        // This is the corner case for admin User. Other than that, for all other users username and email are same.
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsernameJoinUser(username);
+        // This is the corner case for admin User. Other than that, for all other users
+        // username and email are same.
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsernameJoinUser(username);
         if (latticeAuthenticationData != null) {
             globalAuthUser = latticeAuthenticationData.getGlobalAuthUser();
             return globalAuthUser;
@@ -272,7 +271,8 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         }
     }
 
-    private GlobalAuthUserTenantRight globalUserRightsByUsername(String username, String tenantId, boolean inflate) throws Exception {
+    private GlobalAuthUserTenantRight globalUserRightsByUsername(String username, String tenantId, boolean inflate)
+            throws Exception {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             return null;
@@ -316,7 +316,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     }
 
     @Override
-    public String getRight(GlobalAuthUserTenantRight rightsData){
+    public String getRight(GlobalAuthUserTenantRight rightsData) {
         if (rightsData != null) {
             return rightsData.getOperationName();
         } else {
@@ -327,17 +327,14 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     @Override
     public synchronized Boolean revokeRight(String right, String tenant, String username) {
         try {
-            log.info(String.format("Revoking right %s from user %s for tenant %s.", right,
-                    username, tenant));
+            log.info(String.format("Revoking right %s from user %s for tenant %s.", right, username, tenant));
             return globalAuthRevokeRight(right, tenant, username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18006, e,
-                    new String[]{right, username, tenant});
+            throw new LedpException(LedpCode.LEDP_18006, e, new String[] { right, username, tenant });
         }
     }
 
-    private Boolean globalAuthRevokeRight(String right, String tenant, String username)
-            throws Exception {
+    private Boolean globalAuthRevokeRight(String right, String tenant, String username) throws Exception {
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
 
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
@@ -346,9 +343,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         }
 
         GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantIdAndOperationName(
-                        globalAuthUser.getPid(),
-                        tenantData.getPid(), right);
+                .findByUserIdAndTenantIdAndOperationName(globalAuthUser.getPid(), tenantData.getPid(), right);
         if (rightData == null) {
             return true;
         }
@@ -370,7 +365,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     public synchronized Boolean forgotLatticeCredentials(String username) {
 
         if (getUserByUsername(username) == null) {
-            throw new LedpException(LedpCode.LEDP_18018, new String[]{username});
+            throw new LedpException(LedpCode.LEDP_18018, new String[] { username });
         }
 
         EmailSettings emailsettings = new EmailSettings();
@@ -385,23 +380,22 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             log.info(String.format("Resetting credentials for user %s.", username));
             return globalAuthForgotLatticeCredentials(username, emailsettings);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[]{username});
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
     }
 
-    private Boolean globalAuthForgotLatticeCredentials(String username, EmailSettings emailsettings)
-            throws Exception {
-        // For forgot password we should check for User Existence in "GlobalAuthentication" instead of "GlobalUser"
-        // Because, for SAML auto provisioned users, we should not allow them to change / create password in GlobalAuth system.
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
+    private Boolean globalAuthForgotLatticeCredentials(String username, EmailSettings emailsettings) throws Exception {
+        // For forgot password we should check for User Existence in
+        // "GlobalAuthentication" instead of "GlobalUser"
+        // Because, for SAML auto provisioned users, we should not allow them to change
+        // / create password in GlobalAuth system.
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsername(username);
         if (latticeAuthenticationData == null) {
             throw new Exception("Unable to find the user requested.");
         }
 
         GlobalAuthUser userData = gaUserEntityMgr
-                .findByUserIdWithTenantRightsAndAuthentications(latticeAuthenticationData
-                        .getGlobalAuthUser().getPid());
+                .findByUserIdWithTenantRightsAndAuthentications(latticeAuthenticationData.getGlobalAuthUser().getPid());
         if (userData == null) {
             throw new Exception("Unable to find the user requested.");
         }
@@ -411,38 +405,36 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         }
         String userEmail = userData.getEmail();
         if (userEmail == null || userEmail.isEmpty() || userEmail.trim().isEmpty()) {
-            throw new Exception("The specified user does not have an email address specified: "
-                    + userData.getPid().toString());
+            throw new Exception(
+                    "The specified user does not have an email address specified: " + userData.getPid().toString());
         }
 
         String password = GlobalAuthPasswordUtils.getSecureRandomString(16);
-        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils
-                .encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
+        latticeAuthenticationData
+                .setPassword(GlobalAuthPasswordUtils.encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
 
-        if (isZendeskEnabled(userData.getEmail()) && userData.getUserTenantRights() != null &&
-                !userData.getUserTenantRights().isEmpty()) {
+        if (isZendeskEnabled(userData.getEmail()) && userData.getUserTenantRights() != null
+                && !userData.getUserTenantRights().isEmpty()) {
             // user has tenant rights, make sure zendesk account exists and set password
             ZendeskUser zendeskUser = upsertZendeskUser(userData);
             log.info(String.format("Resetting credentials for zendesk user %s.", userData.getEmail()));
             zendeskService.setUserPassword(zendeskUser.getId(), password);
         }
 
-        emailService.sendGlobalAuthForgetCredsEmail(userData.getFirstName(),
-                userData.getLastName(), userData.getAuthentications().get(0)
-                        .getUsername(), password, userData.getEmail(), emailsettings);
+        emailService.sendGlobalAuthForgetCredsEmail(userData.getFirstName(), userData.getLastName(),
+                userData.getAuthentications().get(0).getUsername(), password, userData.getEmail(), emailsettings);
         return true;
     }
 
     @Override
-    public synchronized Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds,
-                                                         Credentials newCreds) {
+    public synchronized Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
         try {
             log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
             return globalAuthModifyLatticeCredentials(ticket, oldCreds, newCreds, null);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18010, e, new String[]{oldCreds.getUsername()});
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
         }
     }
 
@@ -465,30 +457,30 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
                 }
             });
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18010, e, new String[]{oldCreds.getUsername()});
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
         }
     }
 
-    private Boolean globalAuthModifyLatticeCredentials(
-            Ticket ticket, Credentials oldCreds, Credentials newCreds, Consumer<GlobalAuthUser> callback) throws Exception {
+    private Boolean globalAuthModifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds,
+            Consumer<GlobalAuthUser> callback) throws Exception {
         GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
         if (ticketData == null) {
             throw new Exception("Unable to find the ticket requested.");
         }
-        GlobalAuthUser userData = gaUserEntityMgr.findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
+        GlobalAuthUser userData = gaUserEntityMgr
+                .findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
         GlobalAuthAuthentication latticeAuthenticationData = userData.getAuthentications().get(0);
         if (latticeAuthenticationData == null) {
             throw new Exception("Unable to find the credentials requested.");
         }
-        if (!latticeAuthenticationData.getPassword().equals(GlobalAuthPasswordUtils
-                .encryptPassword(oldCreds.getPassword()))) {
+        if (!latticeAuthenticationData.getPassword()
+                .equals(GlobalAuthPasswordUtils.encryptPassword(oldCreds.getPassword()))) {
             throw new Exception("Old password is incorrect for password change.");
         }
         if (oldCreds.getPassword().equals(newCreds.getPassword())) {
             throw new Exception("The new password cannot be the same as the old password.");
         }
-        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils.encryptPassword(newCreds
-                .getPassword()));
+        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils.encryptPassword(newCreds.getPassword()));
         latticeAuthenticationData.setMustChangePassword(false);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
 
@@ -504,13 +496,12 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             log.info(String.format("Resetting credentials for %s.", username));
             return globalAuthResetLatticeCredentials(username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[]{username});
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
     }
 
     private String globalAuthResetLatticeCredentials(String username) throws Exception {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsername(username);
         if (latticeAuthenticationData == null) {
             throw new Exception("Unable to find the user requested.");
         }
@@ -524,12 +515,12 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         }
         String userEmail = userData.getEmail();
         if (userEmail == null || userEmail.isEmpty() || userEmail.trim().isEmpty()) {
-            throw new Exception("The specified user does not have an email address specified: "
-                    + userData.getPid().toString());
+            throw new Exception(
+                    "The specified user does not have an email address specified: " + userData.getPid().toString());
         }
         String password = GlobalAuthPasswordUtils.getSecureRandomString(16);
-        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils
-                .encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
+        latticeAuthenticationData
+                .setPassword(GlobalAuthPasswordUtils.encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
         userData.setInvalidLoginAttempts(0);
@@ -649,7 +640,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             log.info(String.format("Deleting user %s success = %s", username, result));
             return result;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18015, e, new String[]{username});
+            throw new LedpException(LedpCode.LEDP_18015, e, new String[] { username });
         }
     }
 
@@ -710,7 +701,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
             return globalFindAllUserRightsByTenant(tenantId, null, withTeam);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18016, e, new String[]{tenantId});
+            throw new LedpException(LedpCode.LEDP_18016, e, new String[] { tenantId });
         }
     }
 
@@ -720,7 +711,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
             return globalFindAllUserRightsByTenant(tenantId, emails, withTeam);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18016, e, new String[]{tenantId});
+            throw new LedpException(LedpCode.LEDP_18016, e, new String[] { tenantId });
         }
     }
 
@@ -741,8 +732,8 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         return teamIds;
     }
 
-    private List<Pair<User, String>> globalFindAllUserRightsByTenant(
-            String tenantId, Set<String> emails, boolean withTeam) throws Exception {
+    private List<Pair<User, String>> globalFindAllUserRightsByTenant(String tenantId, Set<String> emails,
+            boolean withTeam) throws Exception {
         List<Pair<User, String>> userRightsList = new ArrayList<>();
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
@@ -768,8 +759,8 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             if (userRights.containsKey(userData.getPid())) {
                 log.error(String.format("Multiple rights found for user %s, tenant %s", userData.getPid(),
                         userRightData.getGlobalAuthTenant().getPid()));
-                throw new RuntimeException(String.format("Multiple rights found for user %s, tenant %s", userData.getPid(),
-                        userRightData.getGlobalAuthTenant().getPid()));
+                throw new RuntimeException(String.format("Multiple rights found for user %s, tenant %s",
+                        userData.getPid(), userRightData.getGlobalAuthTenant().getPid()));
             } else {
                 User user = new User();
                 user.setUsername(userIdToUsername.get(userData.getPid()));
@@ -945,7 +936,8 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         if (globalAuthUserTenantRight == null) {
             return true;
         }
-        return globalAuthUserTenantRight.getExpirationDate() != null && currentTime >= globalAuthUserTenantRight.getExpirationDate();
+        return globalAuthUserTenantRight.getExpirationDate() != null
+                && currentTime >= globalAuthUserTenantRight.getExpirationDate();
     }
 
     private boolean isZendeskEnabled(String email) {
@@ -957,9 +949,11 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     }
 
     /**
-     * Make sure a zendesk user with specified email exists and update its name/verified/suspended properties
+     * Make sure a zendesk user with specified email exists and update its
+     * name/verified/suspended properties
      *
-     * @param user target zendesk user info
+     * @param user
+     *            target zendesk user info
      * @return entire zendesk user after the operation
      */
     private ZendeskUser upsertZendeskUser(GlobalAuthUser user) {
@@ -1001,9 +995,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
             if (tenantData != null) {
                 GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
-                        .findByUserIdAndTenantIdAndOperationName(
-                                globalAuthUser.getPid(),
-                                tenantData.getPid(), right);
+                        .findByUserIdAndTenantIdAndOperationName(globalAuthUser.getPid(), tenantData.getPid(), right);
                 Long before = rightData == null ? null : rightData.getExpirationDate();
                 return expireDateChanged(before, expirationDate);
             }
@@ -1019,7 +1011,8 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             GlobalAuthUser userData = findGlobalAuthUserByUsername(username, true);
             return userData.getPid();
         } catch (Exception e) {
-            log.error(String.format("Failed to get user pid by username %s and  error is %s.", username, e.getMessage()));
+            log.error(
+                    String.format("Failed to get user pid by username %s and  error is %s.", username, e.getMessage()));
             return null;
         }
     }
