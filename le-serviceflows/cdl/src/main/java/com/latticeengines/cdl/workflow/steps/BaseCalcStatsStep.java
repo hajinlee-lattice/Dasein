@@ -79,53 +79,64 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
     protected void prepare() {
         bootstrap();
         if (StringUtils.isNotBlank(getStatsTableCtxKey())) {
-            Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), getStatsTableCtxKey());
+            Table tableInCtx = getTableSummaryFromKey(customerSpaceStr, getStatsTableCtxKey());
             if (tableInCtx != null) {
                 statsTableName = tableInCtx.getName();
             }
         }
     }
-
     protected HdfsDataUnit profileBaseTable() {
         if (StringUtils.isNotBlank(getProfileTableCtxKey())) {
-            Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), getProfileTableCtxKey());
+            Table tableInCtx = getTableSummaryFromKey(customerSpaceStr, getProfileTableCtxKey());
             if (tableInCtx != null) {
                 log.info("Found profile table in context, skip profiling.");
                 return tableInCtx.toHdfsDataUnit(getProfileRole().name());
             }
         }
-
         Table baseTable = getBaseTable();
+        List<ProfileParameters.Attribute> declaredAttrs = getDeclaredAttrs();
+        return profile(baseTable, getProfileRole(), getProfileTableCtxKey(), null, //
+                declaredAttrs, false, autoDetectCategorical, autoDetectDiscrete);
+    }
+
+    protected HdfsDataUnit profile(Table baseTable, TableRoleInCollection profileRole,
+                                   String ctxKeyForRetry,
+                                   List<String> includeAttrs,
+                                   List<ProfileParameters.Attribute> declaredAttrs,
+                                   boolean considerAMAttrs,
+                                   boolean autoDetectCategorical, boolean autoDetectDiscrete) {
         List<ColumnMetadata> cms = baseTable.getColumnMetadata();
         ProfileJobConfig jobConfig = new ProfileJobConfig();
-        List<ProfileParameters.Attribute> declaredAttrs = getDeclaredAttrs();
+        HdfsDataUnit inputData = baseTable.toHdfsDataUnit("BaseTable");
+        jobConfig.setInput(Collections.singletonList(inputData));
+
+        statsProfiler.initProfileConfig(jobConfig);
         if (CollectionUtils.isNotEmpty(declaredAttrs)) {
             jobConfig.setDeclaredAttrs(declaredAttrs);
         }
-
-        statsProfiler.initProfileConfig(jobConfig);
-        statsProfiler.classifyAttrs(cms, jobConfig);
-
         jobConfig.setAutoDetectCategorical(autoDetectCategorical);
         jobConfig.setAutoDetectDiscrete(autoDetectDiscrete);
         setEvaluationDateStrAndTimestamp();
         jobConfig.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);
-        jobConfig.setConsiderAMAttrs(false);
+        jobConfig.setConsiderAMAttrs(considerAMAttrs);
+        jobConfig.setIncludeAttrs(includeAttrs);
+        statsProfiler.classifyAttrs(cms, jobConfig);
 
-        HdfsDataUnit inputData = baseTable.toHdfsDataUnit(getBaseTableRole().name());
-        jobConfig.setInput(Collections.singletonList(inputData));
         SparkJobResult profileResult = runSparkJob(ProfileJob.class, jobConfig);
         HdfsDataUnit profileData =  profileResult.getTargets().get(0);
         statsProfiler.appendResult(profileData);
 
-        if (getProfileRole() != null) {
+        if (profileRole != null) {
             // save profile table
-            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
-            String profileTableName = NamingUtils.timestamp(getProfileRole().name());
+            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpaceStr);
+            String profileTableName = NamingUtils.timestamp(profileRole.name());
             Table profileTable = toTable(profileTableName, PROFILE_ATTR_ATTRNAME, profileData);
             profileData = profileTable.toHdfsDataUnit("Profile");
             metadataProxy.createTable(tenantId, profileTableName, profileTable);
-            exportToS3AndAddToContext(profileTable, getProfileTableCtxKey());
+            dataCollectionProxy.upsertTable(customerSpaceStr, profileTableName, profileRole, inactive);
+            if (StringUtils.isNotBlank(ctxKeyForRetry)) {
+                exportToS3AndAddToContext(profileTable, ctxKeyForRetry);
+            }
         }
 
         return profileData;
@@ -135,25 +146,27 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         if (StringUtils.isNotBlank(statsTableName)) {
             log.info("Found stats table in context, skip caculating stats.");
         } else {
-            Table baseTable = getBaseTable();
-            HdfsDataUnit inputData = baseTable.toHdfsDataUnit(getBaseTableRole().name());
-
-            CalcStatsConfig jobConfig = new CalcStatsConfig();
-            jobConfig.setInput(Arrays.asList(inputData, profileData));
-
-            SparkJobResult statsResult = runSparkJob(CalcStatsJob.class, jobConfig);
+            HdfsDataUnit statsResult = calcStats(getBaseTable(), profileData);
             if (getProfileRole() == null) {
                 // not saving profile data
                 clearTempData(profileData);
             }
-            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
+            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpaceStr);
             statsTableName = NamingUtils.timestamp(getServingEntity().name() + "Stats");
-            Table statsTable = toTable(statsTableName, PROFILE_ATTR_ATTRNAME, statsResult.getTargets().get(0));
+            Table statsTable = toTable(statsTableName, PROFILE_ATTR_ATTRNAME, statsResult);
             metadataProxy.createTable(tenantId, statsTableName, statsTable);
             if (StringUtils.isNotBlank(getStatsTableCtxKey())) {
                 exportToS3AndAddToContext(statsTable, getStatsTableCtxKey());
             }
         }
+    }
+
+    protected HdfsDataUnit calcStats(Table baseTable, HdfsDataUnit profileData) {
+        HdfsDataUnit inputData = baseTable.toHdfsDataUnit("BaseTable");
+        CalcStatsConfig jobConfig = new CalcStatsConfig();
+        jobConfig.setInput(Arrays.asList(inputData, profileData));
+        SparkJobResult statsResult = runSparkJob(CalcStatsJob.class, jobConfig);
+        return statsResult.getTargets().get(0);
     }
 
     // attrs with declared profile strategy

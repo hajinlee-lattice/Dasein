@@ -81,7 +81,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             return !shouldMerge(step);
         }
 
-        if (isCloneStep(step)) {
+        if (isDecisionStep(step)) {
             checkSchemaChange(step);
             checkManyUpdate(step);
             reset = shouldReset(step);
@@ -121,7 +121,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         if (skipsStepInSubWorkflow(step, seq)) {
             log.info(msg + " is in skipped workflow");
             return true;
-
         }
 
         return false;
@@ -179,6 +178,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         } else {
             return step.name().endsWith(softDeleteStep().name());
         }
+    }
+
+    protected boolean isDecisionStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return isCloneStep(step);
     }
 
     private boolean isMergeStep(AbstractStep<? extends BaseStepConfiguration> step) {

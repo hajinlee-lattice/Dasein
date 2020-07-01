@@ -121,13 +121,13 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return null;
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"manual", "functional"})
     public void setup() {
         setupLivyEnvironment();
         // reuseLivyEnvironment(7);
     }
 
-    @AfterClass(groups = "functional", alwaysRun = true)
+    @AfterClass(groups = {"manual", "functional"}, alwaysRun = true)
     public void teardown() {
         tearDownLivyEnvironment();
     }

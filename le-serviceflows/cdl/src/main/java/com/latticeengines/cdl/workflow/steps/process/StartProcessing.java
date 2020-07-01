@@ -203,6 +203,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setAttributeQuotaLimit();
         setDataQuotaLimit();
         reachTransactionLimit();
+
+        log.info("Evict attr repo cache for inactive version " + inactiveVersion);
+        dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactiveVersion);
     }
 
     /*-

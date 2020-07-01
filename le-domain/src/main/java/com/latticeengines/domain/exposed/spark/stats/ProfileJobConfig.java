@@ -76,6 +76,10 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("IDAttr")
     private String idAttr;
 
+    // restrict attributes to be considered in profile
+    @JsonProperty("IncludeAttrs")
+    private List<String> includeAttrs;
+
     // attributes with declared profile strategy
     @JsonProperty("DeclaredAttrs")
     private List<ProfileParameters.Attribute> declaredAttrs;
@@ -228,6 +232,14 @@ public class ProfileJobConfig extends SparkJobConfig {
 
     public void setIdAttr(String idAttr) {
         this.idAttr = idAttr;
+    }
+
+    public List<String> getIncludeAttrs() {
+        return includeAttrs;
+    }
+
+    public void setIncludeAttrs(List<String> includeAttrs) {
+        this.includeAttrs = includeAttrs;
     }
 
     public List<ProfileParameters.Attribute> getDeclaredAttrs() {

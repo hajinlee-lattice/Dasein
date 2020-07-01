@@ -23,6 +23,7 @@ public class CalcContactStats extends BaseCalcStatsStep<ProcessContactStepConfig
         autoDetectDiscrete = true;
         executeFullCalculation();
     }
+
     @Override
     protected TableRoleInCollection getProfileRole() {
         return ContactProfile;

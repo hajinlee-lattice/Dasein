@@ -104,7 +104,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
     private void postJobExecution(SparkJobResult result) {
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         TableRoleInCollection servingRole = SortedContact;
-        String servingTableName = tenantId + "_" + NamingUtils.timestamp(servingRole.name());
+        String servingTableName = tenantId + "_" + NamingUtils.timestamp(Contact.name());
         Table servingTable = toTable(servingTableName, InterfaceName.ContactId.name(), result.getTargets().get(0));
         enrichTableSchema(servingTable);
         metadataProxy.createTable(tenantId, servingTableName, servingTable);

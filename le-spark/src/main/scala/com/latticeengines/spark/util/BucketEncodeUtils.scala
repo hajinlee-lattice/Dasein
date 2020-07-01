@@ -8,7 +8,7 @@ import scala.collection.JavaConversions._
 
 private[spark] object BucketEncodeUtils {
 
-  import com.latticeengines.spark.utils.BucketEncodeUtils
+  import com.latticeengines.spark.exposed.utils.BucketEncodeUtils
 
   private def log: Logger = LoggerFactory.getLogger(classOf[BucketEncodeUtils])
 

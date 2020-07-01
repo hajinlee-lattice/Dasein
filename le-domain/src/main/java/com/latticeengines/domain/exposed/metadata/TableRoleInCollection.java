@@ -26,6 +26,8 @@ public enum TableRoleInCollection {
     PivotedRating, //
 
     Profile, //
+    AccountProfile, //
+    LatticeAccountProfile, //
     ContactProfile, //
     PurchaseHistoryProfile, //
 
