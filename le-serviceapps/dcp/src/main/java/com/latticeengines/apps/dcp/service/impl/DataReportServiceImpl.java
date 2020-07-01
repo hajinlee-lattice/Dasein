@@ -83,11 +83,21 @@ public class DataReportServiceImpl implements DataReportService {
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
-            dataReportRecord.setBasicStats(dataReport.getBasicStats());
-            dataReportRecord.setInputPresenceReport(dataReport.getInputPresenceReport());
-            dataReportRecord.setGeoDistributionReport(dataReport.getGeoDistributionReport());
-            dataReportRecord.setMatchToDUNSReport(dataReport.getMatchToDUNSReport());
-            dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
+            if (dataReport.getBasicStats() != null) {
+                dataReportRecord.setBasicStats(dataReport.getBasicStats());
+            }
+            if (dataReport.getInputPresenceReport() != null) {
+                dataReportRecord.setInputPresenceReport(dataReport.getInputPresenceReport());
+            }
+            if (dataReport.getGeoDistributionReport() != null) {
+                dataReportRecord.setGeoDistributionReport(dataReport.getGeoDistributionReport());
+            }
+            if (dataReport.getMatchToDUNSReport() != null) {
+                dataReportRecord.setMatchToDUNSReport(dataReport.getMatchToDUNSReport());
+            }
+            if (dataReport.getDuplicationReport() != null) {
+                dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
+            }
             dataReportRecord.setRefreshTime(new Date());
             dataReportEntityMgr.update(dataReportRecord);
         } else {

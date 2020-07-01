@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +18,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.InputPresenceJob;
@@ -46,6 +50,9 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
     }
 
     private static final Logger log = LoggerFactory.getLogger(AnalyzeInput.class);
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     @Override
     protected Class<? extends AbstractSparkJob<InputPresenceConfig>> getJobClz() {
@@ -82,6 +89,7 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
         DataReport.InputPresenceReport inputPresenceReport = new DataReport.InputPresenceReport();
         map.forEach((name, populated) -> inputPresenceReport.addPresence(name, populated, ingested));
 
-        putObjectInContext(INPUT_PRESENCE_REPORT, inputPresenceReport);
+        dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
+                configuration.getUploadId(), inputPresenceReport);
     }
 }

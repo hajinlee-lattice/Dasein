@@ -189,9 +189,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         putObjectInContext(UPLOAD_STATS, stats);
         DataReport report = JsonUtils.deserialize(result.getOutput(), DataReport.class);
 
-        DataReport.InputPresenceReport inputPresenceReport = getObjectFromContext(INPUT_PRESENCE_REPORT,
-                DataReport.InputPresenceReport.class);
-        report.setInputPresenceReport(inputPresenceReport);
         // set matched/unmatched count for report
         DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
         matchToDUNSReport.setMatched(matchedCnt);
