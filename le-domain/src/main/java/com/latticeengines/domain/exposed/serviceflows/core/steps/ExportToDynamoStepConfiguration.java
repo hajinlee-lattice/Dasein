@@ -4,6 +4,8 @@ import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
 
 public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
+    public static final String NAME = "ExportToDynamoStepConfiguration";
+
     @Override
     public Class<?> getEntityClass() {
         return GenericTableEntity.class;

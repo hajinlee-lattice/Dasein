@@ -1,6 +1,8 @@
 package com.latticeengines.eai.dynamodb.runtime;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +12,6 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -37,19 +38,33 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
-public class AtlasLookupCacheExportMapper extends AvroExportMapper implements AvroRowHandler {
+public class AtlasAccountLookupExportMapper extends AvroExportMapper implements AvroRowHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AtlasLookupCacheExportMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportMapper.class);
 
     private static final int BUFFER_SIZE = 25;
-    private static final String ATTR_PARTITION_KEY = "Key";
+    private static final String ATTR_PARTITION_KEY = InterfaceName.AtlasLookupKey.name();
     private static final String ATTR_ACCOUNT_ID = "AccountId";
+
+    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s__%s"; // tenantId__ver__lookupId__lookIdVal
+
+    private static final String CHANGELIST_ACCOUNT_ID = "RowId";
+    private static final String CHANGELIST_LOOKUP_NAME = "ColumnId";
+    private static final String CHANGELIST_FROM_STRING = "FromString";
+    private static final String CHANGELIST_TO_STRING = "ToString";
+    private static final String CHANGELIST_DELETED = "Deleted";
+    private static final String CHANGED = "__Changed__";
+    private static final String DELETED = "__Deleted__";
+    private static final String TTLAttr = "EXP";
+    private static final String SortKey = "SortKey"; // dummy
 
     private String tenant;
     private String tableName;
-    private List<String> lookupIds = new ArrayList<>();
-    private List<Pair<String, String>> recordBuffer = new ArrayList<>();
+    private Integer currentVersion = 0;
+    private final List<String> lookupIds = new ArrayList<>();
+    private final List<DynamoLookupRecord> recordBuffer = new ArrayList<>();
     private DynamoItemService dynamoItemService;
+    private long expTime;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -87,8 +102,7 @@ public class AtlasLookupCacheExportMapper extends AvroExportMapper implements Av
                     .decrypt(config.get(HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED))
                     .replace("\n", "");
             String secretKey = CipherUtils
-                    .decrypt(config.get(HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED))
-                    .replace("\n", "");
+                    .decrypt(config.get(HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED)).replace("\n", "");
             log.info("Instantiate AmazonDynamoDBClient using BasicAWSCredentials");
             AWSCredentialsProvider credsProvider = new AWSStaticCredentialsProvider(
                     new BasicAWSCredentials(accessKey, secretKey));
@@ -97,8 +111,18 @@ public class AtlasLookupCacheExportMapper extends AvroExportMapper implements Av
                     .build();
             dynamoItemService = new DynamoItemServiceImpl(new DynamoDB(client));
         }
+        currentVersion = parseTargetVersion(config.get(HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION));
+        expTime = Long.parseLong(config.get(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL));
 
         return this;
+    }
+
+    private long getExpirationTime() {
+        return Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
+    }
+
+    private Integer parseTargetVersion(String targetVersion) {
+        return StringUtils.isBlank(targetVersion) ? 0 : Integer.parseInt(targetVersion);
     }
 
     @Override
@@ -146,19 +170,69 @@ public class AtlasLookupCacheExportMapper extends AvroExportMapper implements Av
     }
 
     private void loadToBuffer(GenericRecord record) {
-        String accountId = record.get(InterfaceName.AccountId.name()).toString();
-        for (String lookupId: lookupIds) {
-            Object obj = record.get(lookupId);
-            if (obj != null) {
-                String lookupIdVal = obj.toString();
-                String pk = String.format("%s_%s_%s", tenant, lookupId, lookupIdVal.toLowerCase());
-                recordBuffer.add(Pair.of(pk, accountId));
-                if (!InterfaceName.AccountId.name().equals(lookupId)) {
-                    pk = String.format("%s_%s_%s", tenant, lookupId, accountId.toLowerCase());
-                    recordBuffer.add(Pair.of(pk, accountId));
-                }
+        if (lookupIdModified(record)) {
+            String lookupId = record.get(CHANGELIST_LOOKUP_NAME).toString();
+            if (lookupIdCreated(record)) {
+                String lookupIdVal = record.get(CHANGELIST_TO_STRING).toString();
+                String key = constructLookupKey(tenant, lookupId, lookupIdVal);
+                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                        .key(key) //
+                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
+                        .build() //
+                );
+            } else if (lookupIdChanged(record)) {
+                // mark accountId_oldLookupId record deleted, create and mark
+                // accountId_newLookupId changed
+                String oldLookupIdVal = record.get(CHANGELIST_FROM_STRING).toString();
+                String oldKey = constructLookupKey(tenant, lookupId, oldLookupIdVal);
+                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                        .key(oldKey) //
+                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
+                        .deleted(true) //
+                        .build() //
+                );
+                String newLookupIdVal = record.get(CHANGELIST_TO_STRING).toString();
+                String newKey = constructLookupKey(tenant, lookupId, newLookupIdVal);
+                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                        .key(newKey) //
+                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
+                        .changed(true) //
+                        .build() //
+                );
+            } else if (lookupIdDeleted(record)) {
+                // mark accountId_lookupId record deleted
+                String lookupIdVal = record.get(CHANGELIST_FROM_STRING).toString();
+                String key = constructLookupKey(tenant, lookupId, lookupIdVal);
+                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                        .key(key) //
+                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
+                        .deleted(true) //
+                        .build() //
+                );
             }
         }
+    }
+
+    private boolean lookupIdModified(GenericRecord record) {
+        return record.get(CHANGELIST_ACCOUNT_ID) != null && record.get(CHANGELIST_LOOKUP_NAME) != null
+                && lookupIds.contains(record.get(CHANGELIST_LOOKUP_NAME).toString());
+    }
+
+    private boolean lookupIdCreated(GenericRecord record) {
+        return record.get(CHANGELIST_FROM_STRING) == null && record.get(CHANGELIST_TO_STRING) != null;
+    }
+
+    private boolean lookupIdChanged(GenericRecord record) {
+        return record.get(CHANGELIST_FROM_STRING) != null && record.get(CHANGELIST_TO_STRING) != null;
+    }
+
+    private boolean lookupIdDeleted(GenericRecord record) {
+        return record.get(CHANGELIST_DELETED) != null
+                && Boolean.parseBoolean(record.get(CHANGELIST_DELETED).toString());
+    }
+
+    private String constructLookupKey(String tenant, String lookupId, String lookupVal) {
+        return String.format(KEY_FORMAT, tenant, currentVersion, lookupId, lookupVal);
     }
 
     private void commitBuffer(Counter whiteCounter, Counter blackCounter) {
@@ -176,16 +250,59 @@ public class AtlasLookupCacheExportMapper extends AvroExportMapper implements Av
         }
     }
 
-    private List<Item> convertRecordBufferToItems(List<Pair<String, String>> pairs) {
+    private List<Item> convertRecordBufferToItems(List<DynamoLookupRecord> records) {
         List<Item> items = new ArrayList<>();
-        for (Pair<String, String> pair: pairs) {
-            PrimaryKey key = new PrimaryKey(ATTR_PARTITION_KEY, pair.getKey());
-            Item item =  new Item()
-                    .withPrimaryKey(key)
-                    .withString(ATTR_ACCOUNT_ID, pair.getValue());
+        for (DynamoLookupRecord record : records) {
+            PrimaryKey key = new PrimaryKey(ATTR_PARTITION_KEY, record.key);
+            Item item = new Item() //
+                    .withPrimaryKey(key) //
+                    .withString(ATTR_ACCOUNT_ID, record.accountId) //
+                    .withBoolean(CHANGED, record.changed) //
+                    .withBoolean(DELETED, record.deleted) //
+                    .withLong(TTLAttr, expTime) //
+                    .withInt(SortKey, 0);
             items.add(item);
         }
         return items;
     }
 
+    private static class DynamoLookupRecord {
+        public String key;
+        public String accountId;
+        public boolean changed;
+        public boolean deleted;
+
+        public static final class Builder {
+
+            private DynamoLookupRecord lookupRecord;
+
+            Builder() {
+                lookupRecord = new DynamoLookupRecord();
+            }
+
+            public Builder key(String key) {
+                lookupRecord.key = key;
+                return this;
+            }
+
+            public Builder accountId(String accountId) {
+                lookupRecord.accountId = accountId;
+                return this;
+            }
+
+            public Builder changed(boolean changed) {
+                lookupRecord.changed = changed;
+                return this;
+            }
+
+            public Builder deleted(boolean deleted) {
+                lookupRecord.deleted = deleted;
+                return this;
+            }
+
+            public DynamoLookupRecord build() {
+                return lookupRecord;
+            }
+        }
+    }
 }

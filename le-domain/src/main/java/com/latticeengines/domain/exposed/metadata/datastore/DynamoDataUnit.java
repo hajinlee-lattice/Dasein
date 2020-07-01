@@ -26,6 +26,9 @@ public class DynamoDataUnit extends DataUnit {
         return StorageType.Dynamo;
     }
 
+    @JsonProperty("version")
+    private Integer version;
+
     public String getSignature() {
         return signature;
     }
@@ -72,5 +75,13 @@ public class DynamoDataUnit extends DataUnit {
 
     public void setEntityClass(String entityClass) {
         this.entityClass = entityClass;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

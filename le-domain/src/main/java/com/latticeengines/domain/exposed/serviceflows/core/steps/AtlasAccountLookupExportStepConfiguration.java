@@ -1,10 +1,8 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
-import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
+public class AtlasAccountLookupExportStepConfiguration extends BaseExportToDynamoConfiguration {
 
-public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
-
-    public static final String NAME = "ExportTimelineRawTableToDynamoStepConfiguration";
+    public static final String NAME = "atlasAccountLookupExportStepConfiguration";
 
     @Override
     public boolean needEmptyFailed() {
@@ -13,17 +11,17 @@ public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportT
 
     @Override
     public Class<?> getEntityClass() {
-        return GenericTableActivity.class;
+        return null;
     }
 
     @Override
     public String getRepoName() {
-        return "GenericTable";
+        return null;
     }
 
     @Override
     public String getContextKey() {
-        return "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
+        return "ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO";
     }
 
     @Override
@@ -33,6 +31,6 @@ public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportT
 
     @Override
     public boolean registerDataUnit() {
-        return false;
+        return true;
     }
 }
