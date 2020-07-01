@@ -71,7 +71,6 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
             if (StringUtils.isBlank(statsTableName)) {
                 HdfsDataUnit profileData = profileBaseTable();
                 calcFullStats(profileData);
-                clearAllWorkspacesAsync();
             }
             addStatsTableToCtx();
         }
