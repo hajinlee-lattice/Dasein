@@ -22,6 +22,9 @@ public class DataBlockEntitlementContainer {
     @JsonProperty("domains")
     private List<Domain> domains;
 
+    // for jackson
+    private DataBlockEntitlementContainer() {}
+
     public DataBlockEntitlementContainer(List<Domain> domains) {
         this.domains = domains;
     }
@@ -41,6 +44,9 @@ public class DataBlockEntitlementContainer {
 
         @JsonProperty("recordTypes")
         private Map<DataRecordType, List<Block>> recordTypes;
+
+        // for jackson
+        private Domain() {}
 
         public Domain(DataDomain domain, Map<DataRecordType, List<Block>> recordTypes) {
             this.domain = domain;
@@ -71,6 +77,9 @@ public class DataBlockEntitlementContainer {
 
         @JsonProperty("levels")
         private List<DataBlockLevel> levels;
+
+        // for jackson
+        private Block() {}
 
         public Block(String blockId, List<DataBlockLevel> levels) {
             this.blockId = blockId;

@@ -196,6 +196,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DataLakeStatsCubesCache, dataLakeStatsCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DnBRealTimeLookup, dnbRealTimeLookupCacheConfig);
+        cacheConfigs.put(CacheName.Constants.PrimeMetadataCacheName, primeMetadataCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);

@@ -41,6 +41,9 @@ public class DataBlock {
     @JsonProperty("levels")
     private List<Level> levels;
 
+    // for jackson
+    private DataBlock() {}
+
     public DataBlock(String blockId, Collection<Level> levels) {
         this.blockId = blockId;
         this.levels = new ArrayList<>(levels);
@@ -82,6 +85,9 @@ public class DataBlock {
         @JsonProperty("elements")
         private List<Element> elements;
 
+        // for jackson
+        private Level() {}
+
         public Level(DataBlockLevel level, String description, Collection<Element> elements) {
             this.level = level;
             this.description = description;
@@ -113,6 +119,9 @@ public class DataBlock {
 
         @JsonProperty("displayName")
         private String displayName;
+
+        // for jackson
+        private Element() {}
 
         public Element(PrimeColumn primeColumn) {
             this.elementId = primeColumn.getColumnId();
