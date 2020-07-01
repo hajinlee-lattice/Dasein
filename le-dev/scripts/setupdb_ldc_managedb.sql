@@ -114,6 +114,34 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/PrimeColumn.csv' INTO TABLE `PrimeColumn`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,Description,DisplayName,JavaClass,JsonPath,PrimeColumnId);
+
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockElement.csv' INTO TABLE `DataBlockElement`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,BlockID,Block,Level,Version,Element);
+
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv' INTO TABLE `DataBlockLevelMetadata`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,Block,Level,Description);
+
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv' INTO TABLE `DataBlockDomainEntitlement`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,Domain,RecordType,DataBlockLevel);
+
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges, Description, JunctionGraphs, Entity, Retries)
 VALUES
   ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', '0', '0:1|1:2', NULL, NULL, 'LatticeAccount', NULL),
@@ -241,7 +269,7 @@ SET
   `AccountLookupHdfsVersion` = '2020-06-13_04-13-10_UTC',
   `DunsGuideBookHdfsVersion` = '2020-06-16_01-17-11_UTC',
   `EnrichmentStatsVersion`   = '2020-06-18_17-34-39_UTC',
-  `DynamoTableSignature`     = '20200617' 
+  `DynamoTableSignature`     = '20200617'
 WHERE `Version` = '2.0.23';
 
 SET SQL_SAFE_UPDATES = 1;

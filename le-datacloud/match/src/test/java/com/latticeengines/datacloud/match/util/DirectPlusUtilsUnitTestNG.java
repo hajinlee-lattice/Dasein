@@ -11,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -38,7 +39,6 @@ public class DirectPlusUtilsUnitTestNG {
                 Assert.assertNotEquals(nameLocation.getPhoneNumber(), "null");
             }
             Assert.assertNotNull(candidate.getOperatingStatus());
-            System.out.println(candidate.getOperatingStatus());
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             Assert.assertNotNull(matchInsight);
             Assert.assertNotNull(matchInsight.getConfidenceCode());
@@ -51,6 +51,7 @@ public class DirectPlusUtilsUnitTestNG {
         String response = readMockResponse("compinfo");
         Map<String, Object> result = DirectPlusUtils.parseDataBlock(response);
         Assert.assertNotNull(result.get("TradeStyleName"));
+        System.out.println(JsonUtils.pprint(result));
     }
 
     private String readMockResponse(String name) {

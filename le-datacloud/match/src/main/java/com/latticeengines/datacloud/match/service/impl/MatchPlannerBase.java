@@ -42,8 +42,8 @@ import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
@@ -400,9 +400,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             }
             if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
                 // FIXME: should move to metadata driven
-                List<DataBlockColumn> columns = DirectPlusUtils.getDataBlockMetadata();
+                List<PrimeColumn> columns = DirectPlusUtils.getDataBlockMetadata();
                 Set<String> requestedCols = new HashSet<>(columnSelection.getColumnIds());
-                List<ColumnMetadata> cms = columns.stream().map(DataBlockColumn::toColumnMetadata) //
+                List<ColumnMetadata> cms = columns.stream().map(PrimeColumn::toColumnMetadata) //
                         .filter(cm -> requestedCols.contains(cm.getAttrName())) //
                         .collect(Collectors.toList());
                 output.setMetadata(cms);

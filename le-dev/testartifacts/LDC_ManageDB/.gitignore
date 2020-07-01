@@ -4,3 +4,7 @@ CategoricalAttribute.csv
 CustomerSourceAttribute.csv
 SourceAttribute.csv
 SourceColumn.csv
+PrimeColumn.csv
+DataBlockElement.csv
+DataBlockLevelMetadata.csv
+DataBlockDomainEntitlement.csv

@@ -16,6 +16,8 @@ public enum CacheName {
     TableRoleMetadataCache(Constants.TableRoleMetadataCacheName), //
     DantePreviewTokenCache(Constants.DantePreviewTokenCacheName), //
 
+    PrimeMetadataCache(Constants.PrimeMetadataCacheName), //
+
     DataCloudCMCache(Constants.DataCloudCMCacheName), //
     DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
     DataCloudProfileCache(Constants.DataCloudProfileCacheName), //
@@ -79,6 +81,7 @@ public enum CacheName {
         public static final String SessionCacheName = "SessionCache";
         public static final String AttrRepoCacheName = "AttrRepoCache";
         public static final String TimeTranslatorCacheName = "TimeTranslatorCache";
+        public static final String PrimeMetadataCacheName = "PrimeMetadataCache";
         public static final String DataCloudCMCacheName = "DataCloudCMCache";
         public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
         public static final String DataCloudProfileCacheName = "DataCloudProfileCache";
