@@ -186,7 +186,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
         Set<String> largeJobTenantId = new HashSet<>();
         Set<String> runningPATenantId = new HashSet<>();
-        Set<String> largeTransactionTenantId = new HashSet<>();
+        Set<String> runningLargePATenantIds = new HashSet<>();
+        Set<String> runningLargeTxnPATenantIds = new HashSet<>();
 
         setSchedulerQuotaLimit();
 
@@ -244,9 +245,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     runningScheduleNowCount++;
                 }
                 if (isLarge(tenantId, largeTenantExemptionList, dcStatus)) {
+                    runningLargePATenantIds.add(tenantId);
                     runningLargeJobCount++;
                 }
                 if (isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus)) {
+                    runningLargeTxnPATenantIds.add(tenantId);
                     runningLargeTxnJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
@@ -258,9 +261,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setTenantType(tenant.getTenantType());
                 tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus));
                 tenantActivity.setLargeTransaction(isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus));
-                if (tenantActivity.isLargeTransaction()) {
-                    largeTransactionTenantId.add(tenantId);
-                }
                 if (tenantActivity.isLarge()) {
                     largeJobTenantId.add(tenantId);
                 }
@@ -321,9 +321,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
 
         logRunningTenantIdsIfChanged(tenantIdsWithRunningPA, runningPATenantId, schedulerName, "is running pa");
-        logRunningTenantIdsIfChanged(largeTenantIdsWithRunningPA, largeJobTenantId, schedulerName,
+        logRunningTenantIdsIfChanged(largeTenantIdsWithRunningPA, runningLargePATenantIds, schedulerName,
                 "is running large pa");
-        logRunningTenantIdsIfChanged(largeTxnTenantIdsWithRunningPA, largeTransactionTenantId, schedulerName,
+        logRunningTenantIdsIfChanged(largeTxnTenantIdsWithRunningPA, runningLargeTxnPATenantIds, schedulerName,
                 "is running large txn pa");
 
         int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
@@ -349,11 +349,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
         log.info(
                 "There are {} running PAs({} ScheduleNow PAs, {} large PAs, {} large Txn PAs). Tenants = {}. Large PA Tenants = {}, "
-                        +
-                        "Large Transaction Tenants = {}. schedulerName={}",
+                        + "Large Transaction Tenants = {}. schedulerName={}",
                 runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningLargeTxnJobCount,
-                runningPATenantId, largeJobTenantId
-                , largeTransactionTenantId, schedulerName);
+                runningPATenantId, runningLargePATenantIds, runningLargeTxnPATenantIds, schedulerName);
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, systemStatus);
         map.put(TENANT_ACTIVITY_LIST, tenantActivityList);
@@ -437,6 +435,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         if (CollectionUtils.isEmpty(currList)) {
             // log a empty record to clear out the dashboard
             log.info(" {}. schedulerName = {}.", msg, schedulerName);
+            cache.put(schedulerName, currList);
             return;
         }
 
@@ -503,7 +502,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         try {
             if (execution == null || !DataFeedExecution.Status.Failed.equals(execution.getStatus())
                     || execution.getUpdated() == null || !checkRetryPendingTime(execution.getUpdated().getTime())) {
-                log.warn("execution is invalid to retry PA.");
+                log.debug("execution is invalid to retry PA.");
                 return false;
             }
 
@@ -514,13 +513,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             }
 
             if (execution.getWorkflowId() == null) {
-                log.warn("cannot find workflowId, tenant {} cannot be retry.", tenantId);
+                log.debug("cannot find workflowId, tenant {} cannot be retry.", tenantId);
                 return false;
             }
             Job job = getFailedPAJob(execution, tenantId);
             if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
                 updateRetryCount(execution);
-                log.warn("due to user error, tenant {} cannot be retry.", tenantId);
+                log.debug("due to user error, tenant {} cannot be retry.", tenantId);
                 return false;
             }
             return true;
