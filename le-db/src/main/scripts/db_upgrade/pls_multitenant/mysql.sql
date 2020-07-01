@@ -81,6 +81,8 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `DCP_MATCH_RULE`
         ADD CONSTRAINT `FK_DCPMATCHRULE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`
         ) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+        
+      ALTER TABLE `LOOKUP_ID_MAP` ADD COLUMN `CONTACT_ID` VARCHAR(255);
 
   END //
 -- ##############################################################
