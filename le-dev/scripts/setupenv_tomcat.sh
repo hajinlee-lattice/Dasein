@@ -6,7 +6,7 @@ ARTIFACT_DIR="${WSHOME}"/le-dev/artifacts
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.33
+    TOMCAT_VERSION=9.0.35
 
     sudo rm -rf "${CATALINA_HOME}"
     sudo mkdir -p "${CATALINA_HOME}" || true
@@ -47,7 +47,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
         ./configure \
             --with-java-home="${JAVA_HOME}" \
             --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
-            --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
+            --with-ssl="${OPENSSL_PATH}"/ \
             --prefix="${CATALINA_HOME}"
         make && make install
         popd
