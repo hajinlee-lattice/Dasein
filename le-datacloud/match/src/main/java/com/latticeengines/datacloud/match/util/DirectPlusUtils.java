@@ -166,14 +166,14 @@ public final class DirectPlusUtils {
     public static List<PrimeColumn> getDataBlockMetadata() {
         return Arrays.asList(
                 new PrimeColumn("DunsNumber", "D-U-N-S Number", "organization.duns"),
-                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryAddress.addressCounty.name"),
+                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryName"),
                 new PrimeColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames.name"),
                 new PrimeColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1"),
                 new PrimeColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2"),
                 new PrimeColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name"),
                 new PrimeColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name"),
                 new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
-                new PrimeColumn("PrimaryAddressCountyName", "Primary Address County Name", "organization.primaryAddress.addressCounty.name"),
+                new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name"),
                 new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
                 new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4")
         );
