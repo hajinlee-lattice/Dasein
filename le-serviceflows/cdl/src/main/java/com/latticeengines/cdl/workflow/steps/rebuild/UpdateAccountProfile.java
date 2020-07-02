@@ -72,7 +72,6 @@ public class UpdateAccountProfile extends BaseCalcStatsStep<ProcessAccountStepCo
             HdfsDataUnit customerStats = updateCustomerStats();
             HdfsDataUnit latticeStats = updateLatticeStats();
             mergeStats(customerStats, latticeStats);
-            clearAllWorkspacesAsync();
         }
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
