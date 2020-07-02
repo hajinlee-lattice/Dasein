@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,12 +101,8 @@ public final class TimeLineStoreUtils {
         return String.format(PARTITIONKEY_FORMAT, timelineId, version, entityId);
     }
 
-    public static String generateSortKey(String recordId) {
-        return String.format(SORTKEY_FORMAT, String.valueOf(getCurrentTimestamp()), recordId);
-    }
-
-    private static Long getCurrentTimestamp() {
-        return Instant.now().toEpochMilli();
+    public static String generateSortKey(Long eventTimeStamp, String recordId) {
+        return String.format(SORTKEY_FORMAT, String.valueOf(eventTimeStamp), recordId);
     }
 
     public enum TimelineStandardColumn {
