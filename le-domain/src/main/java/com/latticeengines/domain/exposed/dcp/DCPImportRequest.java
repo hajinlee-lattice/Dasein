@@ -28,7 +28,7 @@ public class DCPImportRequest {
     @ApiModelProperty(required = false, value = "fileImportId")
     private String fileImportId;
 
-    @JsonProperty("user_id")
+    @JsonProperty("userId")
     @ApiModelProperty(required = false, value = "userID")
     private String userId;
 
