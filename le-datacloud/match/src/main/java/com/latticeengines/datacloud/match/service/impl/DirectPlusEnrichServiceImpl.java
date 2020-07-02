@@ -64,7 +64,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                 chunk.clear();
             }
         }
-        if (chunk.size() >= chunkSize) {
+        if (!chunk.isEmpty()) {
             List<PrimeAccount> chunkResult = fetchChunk(chunk);
             results.addAll(chunkResult);
             chunk.clear();
