@@ -588,12 +588,7 @@ public class InternalResource extends InternalResourceBase {
         TenantEmailNotificationLevel jobLevelFlag = jobLevelFlags.containsKey(jobType)
                 ? tenant.getJobNotificationLevels().get(jobType)
                 : TenantEmailNotificationLevel.NONE;
-        if (tenantLevelFlag.compareTo(notificationLevel) >= 0 && jobLevelFlag.compareTo(notificationLevel) >= 0) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return tenantLevelFlag.compareTo(notificationLevel) >= 0 && jobLevelFlag.compareTo(notificationLevel) >= 0;
     }
 
     private Tenant manufactureSecurityContextForInternalAccess(String tenantId) {
