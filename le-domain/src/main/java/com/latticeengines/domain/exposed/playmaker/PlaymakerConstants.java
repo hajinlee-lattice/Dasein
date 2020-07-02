@@ -36,6 +36,8 @@ public final class PlaymakerConstants {
     public static final String Name = "Name";
     public static final String FirstName = "FirstName";
     public static final String LastName = "LastName";
+    public static final String CreatedDate = "CreatedDate";
+    public static final String LastModifiedDate = "LastModifiedDate";
     public static final String DisplayName = "DisplayName";
     public static final String Type = "Type";
     public static final String StringLength = "StringLength";
