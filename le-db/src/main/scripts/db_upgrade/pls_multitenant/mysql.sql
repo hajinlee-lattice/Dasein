@@ -84,6 +84,8 @@ CREATE PROCEDURE `UpdateSchema`()
         
       ALTER TABLE `LOOKUP_ID_MAP` ADD COLUMN `CONTACT_ID` VARCHAR(255);
 
+      ALTER TABLE `DCP_UPLOAD` ADD COLUMN `CREATED_BY` varchar(255)
+
   END //
 -- ##############################################################
 

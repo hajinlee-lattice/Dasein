@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
+import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -32,10 +33,10 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         super(hostPort, "dcp");
     }
 
-    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadRequest uploadRequest) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
-        return post("create upload", url, uploadConfig, UploadDetails.class);
+        return post("create upload", url, uploadRequest, UploadDetails.class);
     }
 
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
