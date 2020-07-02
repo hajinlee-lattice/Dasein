@@ -3,7 +3,9 @@ package com.latticeengines.apps.dcp.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.parquet.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,10 +25,13 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.apps.dcp.entitymgr.MatchRuleEntityMgr;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
 import com.latticeengines.redis.lock.RedisDistributedLock;
+
+import avro.shaded.com.google.common.collect.Sets;
 
 @Service("matchRuleService")
 public class MatchRuleServiceImpl implements MatchRuleService {
@@ -60,6 +66,15 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                 if (!matchRuleRecord.getSourceId().equals(matchRule.getSourceId())) {
                     throw new IllegalArgumentException(String.format("Cannot update Match Rule from source %s to source %s",
                             matchRuleRecord.getSourceId(), matchRule.getSourceId()));
+                }
+                validateMatchRuleForUpdate(matchRule, matchRuleRecord);
+                if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(matchRule.getRuleType())) {
+                    List<MatchRuleRecord> currentRecords = matchRuleEntityMgr.findMatchRules(matchRule.getSourceId(),
+                            MatchRuleRecord.State.ACTIVE);
+                    if (CollectionUtils.isNotEmpty(currentRecords)) {
+                        currentRecords.removeIf(record -> record.getMatchRuleId().equals(matchRule.getMatchRuleId()));
+                    }
+                    checkIntersection(matchRule, currentRecords);
                 }
                 Pair<Boolean, Boolean> pair = onlyDisplayNameChange(matchRuleRecord, matchRule);
                 if (pair.getLeft()) {
@@ -98,6 +113,105 @@ public class MatchRuleServiceImpl implements MatchRuleService {
             }
         }
         throw new RuntimeException("Cannot get update lock, please try again later.");
+    }
+
+    /**
+     * Check if the AllowedValues in new Rule intersect with current active rules.
+     * @param newRule The Match rule to be updated or created, needs to be a SPECIAL_RULE
+     * @param activeRuleRecords Current Active MatchRules but not include the newRule matchId (if there's one)
+     */
+    private void checkIntersection(MatchRule newRule, List<MatchRuleRecord> activeRuleRecords) {
+        if (CollectionUtils.isEmpty(activeRuleRecords)
+                || newRule.getMatchKey() == null
+                || CollectionUtils.isEmpty(newRule.getAllowedValues())) {
+            return;
+        }
+        List<String> allowedValues = activeRuleRecords.stream()
+                .filter(record -> MatchRuleRecord.RuleType.SPECIAL_RULE.equals(record.getRuleType())
+                        && newRule.getMatchKey().equals(record.getMatchKey()))
+                .map(MatchRuleRecord::getAllowedValues)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(allowedValues)) {
+            return;
+        }
+        Set<String> interSection = newRule.getAllowedValues().stream().distinct().filter(allowedValues::contains).collect(Collectors.toSet());
+
+        if (CollectionUtils.isNotEmpty(interSection)) {
+            throw new IllegalArgumentException("Already contains following allowed values: " + Strings.join(interSection, ","));
+        }
+    }
+
+    /**
+     * Validate Rule for update
+     * 1. MatchKey cannot be null for Special rule and must be null for Base rule.
+     * 2. AllowedValues cannot be empty for Special rule and must be empty for Base rule.
+     * 3. RuleType cannot be changed.
+     * 4. If MatchKey is Country, AllowedValues should be ISO-3166 alpha-2 code
+     * @param newRule The new match rule
+     * @param oldRuleRecord The original match rule
+     */
+    private void validateMatchRuleForUpdate(MatchRule newRule, MatchRuleRecord oldRuleRecord) {
+        if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(newRule.getRuleType())) {
+            if (newRule.getMatchKey() == null) {
+                throw new IllegalArgumentException("Match Key cannot be NULL for a special match rule!");
+            }
+            if (CollectionUtils.isEmpty(newRule.getAllowedValues())) {
+                throw new IllegalArgumentException("AllowedValues cannot be empty for a special match rule!");
+            }
+        } else if (MatchRuleRecord.RuleType.BASE_RULE.equals(newRule.getRuleType())) {
+            if (newRule.getMatchKey() != null) {
+                throw new IllegalArgumentException("Base match rule cannot have MatchKey!");
+            }
+            if (CollectionUtils.isNotEmpty(newRule.getAllowedValues())) {
+                throw new IllegalArgumentException("Base match rule cannot have allowed values!");
+            }
+        }
+        if (!newRule.getRuleType().equals(oldRuleRecord.getRuleType())) {
+            throw new IllegalArgumentException(String.format("Cannot update match rule type from %s to %s",
+                    oldRuleRecord.getRuleType(), newRule.getRuleType()));
+        }
+        if (MatchKey.Country.equals(newRule.getMatchKey())) {
+            validateCountryCode(newRule.getAllowedValues());
+        }
+    }
+
+    /**
+     * Validate Rule for create
+     * 1. MatchKey cannot be null for Special rule and must be null for Base rule.
+     * 2. AllowedValues cannot be empty for Special rule and must be empty for Base rule.
+     * 3. If MatchKey is Country, AllowedValues should be ISO-3166 alpha-2 code
+     * @param matchRule Match Rule to be created
+     */
+    private void validateMatchRuleForCreate(MatchRule matchRule) {
+        if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(matchRule.getRuleType())) {
+            if (matchRule.getMatchKey() == null) {
+                throw new IllegalArgumentException("Match Key cannot be NULL for a special match rule!");
+            }
+            if (CollectionUtils.isEmpty(matchRule.getAllowedValues())) {
+                throw new IllegalArgumentException("AllowedValues cannot be empty for a special match rule!");
+            }
+        } else if (MatchRuleRecord.RuleType.BASE_RULE.equals(matchRule.getRuleType())) {
+            if (matchRule.getMatchKey() != null) {
+                throw new IllegalArgumentException("Base match rule cannot have MatchKey!");
+            }
+            if (CollectionUtils.isNotEmpty(matchRule.getAllowedValues())) {
+                throw new IllegalArgumentException("Base match rule cannot have allowed values!");
+            }
+        }
+        if (MatchKey.Country.equals(matchRule.getMatchKey())) {
+            validateCountryCode(matchRule.getAllowedValues());
+        }
+    }
+
+    private void validateCountryCode(List<String> values) {
+        String[] isoAlpha2Countries = Locale.getISOCountries();
+        Set<String> countryCodeSet = Sets.newHashSet(isoAlpha2Countries);
+        values.forEach(code -> {
+            if (code.length() != 2 || !countryCodeSet.contains(code.toUpperCase())) {
+                throw new IllegalArgumentException("Unrecognized ISO-3166 alpha-2 code: " + code);
+            }
+        });
     }
 
     private String getLockKey(String sourceId, String matchRuleId, boolean create) {
@@ -170,6 +284,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (StringUtils.isEmpty(matchRule.getSourceId())) {
             throw new IllegalArgumentException("Cannot create Match Rule without source!");
         }
+        validateMatchRuleForCreate(matchRule);
         String lockKey = getLockKey(matchRule.getSourceId(), "", true);
         String requestId = UUID.randomUUID().toString();
         if (redisDistributedLock.lock(lockKey, requestId, 30000, true)) {
@@ -178,6 +293,10 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                     if (matchRuleEntityMgr.existMatchRule(matchRule.getSourceId(), matchRule.getRuleType())) {
                         throw new IllegalArgumentException("Already has an active Base Match Rule, cannot create a new one!");
                     }
+                } else if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(matchRule.getRuleType())) {
+                    List<MatchRuleRecord> currentRecords = matchRuleEntityMgr.findMatchRules(matchRule.getSourceId(),
+                            MatchRuleRecord.State.ACTIVE);
+                    checkIntersection(matchRule, currentRecords);
                 }
                 MatchRuleRecord matchRuleRecord = new MatchRuleRecord();
                 matchRuleRecord.setSourceId(matchRule.getSourceId());

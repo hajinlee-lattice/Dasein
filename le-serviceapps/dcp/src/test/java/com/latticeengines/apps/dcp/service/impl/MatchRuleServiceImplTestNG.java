@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
@@ -58,7 +59,7 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
         specialRule.setDisplayName("Match Rule 2");
         specialRule.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
         specialRule.setMatchKey(MatchKey.Country);
-        specialRule.setAllowedValues(Arrays.asList("USA", "UK"));
+        specialRule.setAllowedValues(Arrays.asList("US", "GB"));
         specialRule.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
         DplusMatchRule dplusMatchRule2 = new DplusMatchRule(4, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(1, 10, Arrays.asList("C", "D"));
@@ -78,7 +79,7 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
         specialRule2.setDisplayName("Match Rule 3");
         specialRule2.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
         specialRule2.setMatchKey(MatchKey.Country);
-        specialRule2.setAllowedValues(Arrays.asList("USA", "UK"));
+        specialRule2.setAllowedValues(Arrays.asList("CA", "CC"));
         specialRule2.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
         DplusMatchRule dplusMatchRule3 = new DplusMatchRule(2, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(1, 10, Arrays.asList("E", "F"));
@@ -129,6 +130,7 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         // archive special rule 2
         matchRuleService.archiveMatchRule(mainCustomerSpace, specialMatchRuleId2);
+        SleepUtils.sleep(500L);
 
         // Check list, expected 2 active rules (1 base + 1 special)
         matchRules = matchRuleService.getMatchRuleList(mainCustomerSpace, "Source_1231231", false,
@@ -168,5 +170,63 @@ public class MatchRuleServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         Assert.assertThrows(() -> matchRuleService.createMatchRule(mainCustomerSpace, anotherBaseRule));
 
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCRUD")
+    public void testValidationRules() {
+        // 1. create rule with out match key throws exception.
+        MatchRule specialRuleWithoutMatchKey = new MatchRule();
+        specialRuleWithoutMatchKey.setSourceId("Source_1231231");
+        specialRuleWithoutMatchKey.setDisplayName("Match Rule 1");
+        specialRuleWithoutMatchKey.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
+
+        specialRuleWithoutMatchKey.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.OutOfBusiness));
+        DplusMatchRule dplusMatchRule = new DplusMatchRule(8, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
+                .review(4, 6, Arrays.asList("C", "D"));
+
+        specialRuleWithoutMatchKey.setAcceptCriterion(dplusMatchRule.getAcceptCriterion());
+        specialRuleWithoutMatchKey.setReviewCriterion(dplusMatchRule.getReviewCriterion());
+
+        Assert.assertThrows(() -> matchRuleService.createMatchRule(mainCustomerSpace, specialRuleWithoutMatchKey));
+
+        // 2. create rule with intersection on allowed values throws exception
+        MatchRule specialRuleHasIntersection = new MatchRule();
+        specialRuleHasIntersection.setSourceId("Source_1231231");
+        specialRuleHasIntersection.setDisplayName("Match Rule Error");
+        specialRuleHasIntersection.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
+        specialRuleHasIntersection.setMatchKey(MatchKey.Country);
+        specialRuleHasIntersection.setAllowedValues(Arrays.asList("CN", "GB"));
+        specialRuleHasIntersection.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
+        DplusMatchRule dplusMatchRule2 = new DplusMatchRule(4, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
+                .review(1, 10, Arrays.asList("C", "D"));
+
+        specialRuleHasIntersection.setAcceptCriterion(dplusMatchRule2.getAcceptCriterion());
+
+        Assert.assertThrows(() -> matchRuleService.createMatchRule(mainCustomerSpace, specialRuleHasIntersection));
+
+        MatchRule specialRule = new MatchRule();
+        specialRule.setSourceId("Source_1231231");
+        specialRule.setDisplayName("Match Rule 4");
+        specialRule.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
+        specialRule.setMatchKey(MatchKey.Country);
+        specialRule.setAllowedValues(Arrays.asList("AD", "AE"));
+        specialRule.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
+
+        specialRule.setAcceptCriterion(dplusMatchRule2.getAcceptCriterion());
+
+        specialRule = matchRuleService.createMatchRule(mainCustomerSpace, specialRule);
+        Assert.assertNotNull(specialRule);
+        Assert.assertEquals(specialRule.getVersionId().intValue(), 1);
+        Assert.assertEquals(specialRule.getState(), MatchRuleRecord.State.ACTIVE);
+        String specialMatchRuleId = specialRule.getMatchRuleId();
+        Assert.assertTrue(StringUtils.isNotBlank(specialMatchRuleId));
+
+        specialRule.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.Undeliverable, ExclusionCriterion.Unreachable));
+        specialRule = matchRuleService.updateMatchRule(mainCustomerSpace, specialRule);
+        Assert.assertEquals(specialRule.getVersionId().intValue(), 2);
+
+        specialRule.setAllowedValues(Arrays.asList("AD", "GB"));
+        MatchRule finalSpecialRule = specialRule;
+        Assert.assertThrows(() -> matchRuleService.updateMatchRule(mainCustomerSpace, finalSpecialRule));
     }
 }

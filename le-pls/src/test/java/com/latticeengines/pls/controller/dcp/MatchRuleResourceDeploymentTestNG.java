@@ -61,7 +61,7 @@ public class MatchRuleResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         specialRule.setDisplayName("Match Rule 2");
         specialRule.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
         specialRule.setMatchKey(MatchKey.Country);
-        specialRule.setAllowedValues(Arrays.asList("USA", "UK"));
+        specialRule.setAllowedValues(Arrays.asList("US", "GB"));
         specialRule.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
         DplusMatchRule dplusMatchRule2 = new DplusMatchRule(4, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(1, 10, Arrays.asList("C", "D"));
@@ -81,7 +81,7 @@ public class MatchRuleResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         specialRule2.setDisplayName("Match Rule 3");
         specialRule2.setRuleType(MatchRuleRecord.RuleType.SPECIAL_RULE);
         specialRule2.setMatchKey(MatchKey.Country);
-        specialRule2.setAllowedValues(Arrays.asList("USA", "UK"));
+        specialRule2.setAllowedValues(Arrays.asList("CA", "CC"));
         specialRule2.setExclusionCriterionList(Arrays.asList(ExclusionCriterion.NonHeadQuarters, ExclusionCriterion.Unreachable));
         DplusMatchRule dplusMatchRule3 = new DplusMatchRule(2, 10, Arrays.asList("AAZZABB", "AAZZABF", "AAZZABZ"))
                 .review(1, 10, Arrays.asList("E", "F"));
