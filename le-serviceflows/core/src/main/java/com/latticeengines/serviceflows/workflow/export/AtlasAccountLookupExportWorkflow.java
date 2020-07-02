@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -47,6 +48,9 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
 
     private static Long expTime;
 
+    @Value("${eai.export.dynamo.accountlookup.signature}")
+    private String accountLookupSignature;
+
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
@@ -54,8 +58,9 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
     public void execute() {
         log.info("Using account changelist to populate account lookup.");
         lookupIds = getLookupIds();
-        if (!lookupIds.contains(InterfaceName.AccountId.name())) { // TODO - remove me
-            lookupIds.add(InterfaceName.AccountId.name());
+        if (CollectionUtils.isEmpty(lookupIds)) {
+            log.info("No lookup IDs in new account batch store");
+            return;
         }
         curVersion = getCurrentVersion();
         expTime = Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
@@ -64,11 +69,8 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             log.info("No change list needs to populate, skip execution.");
             return;
         }
-        if (CollectionUtils.isEmpty(lookupIds)) {
-            log.info("No lookup IDs in new account batch store");
-            return;
-        }
         log.info("Going to populate changelist to account lookup: " + configs);
+        log.info("Using dynamo table {}", String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
         List<AccountLookupExporter> exporters = getLookupExporters(configs);
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
@@ -82,7 +84,6 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
                         Collections.singletonList(ColumnSelection.Predefined.LookupId), inactive)
                 .map(ColumnMetadata::getAttrName).collectList().block();
         if (CollectionUtils.isEmpty(ids)) {
-            log.warn("No lookup Id found in new account batch store"); // TODO - remove this log
             return new ArrayList<>();
         } else {
             log.info("Found lookup IDs in new account batch store: {}", ids);
@@ -119,7 +120,7 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_REGION, awsRegion);
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS, String.join(",", lookupIds));
             properties.put(HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION, curVersion.toString());
-            properties.put(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME, ACCOUNT_LOOKUP_DATA_UNIT_NAME);
+            properties.put(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME, String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL, expTime.toString());
             properties.put(ExportProperty.NUM_MAPPERS, String.valueOf(numMappers));
 

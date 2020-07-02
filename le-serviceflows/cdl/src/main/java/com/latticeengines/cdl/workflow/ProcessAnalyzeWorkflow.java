@@ -135,7 +135,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(exportProcessAnalyzeToS3) //
                 .next(commitEntityMatchWorkflow) //
                 .next(exportTimelineRawTableToDynamo) //
-                // .next(atlasAccountLookupExportWorkflow) // TODO - enable in next PR
+                .next(atlasAccountLookupExportWorkflow) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
                 .choreographer(choreographer) //
