@@ -401,7 +401,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.PhoneNumber.name(), //
                     InterfaceName.Title.name(), //
                     InterfaceName.Address_Street_1.name()));
-
             /*
              * PLS-16386 Add FirstName and LastName
              */
@@ -410,7 +409,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             log.info("Trying to get the attrsUsage with {} for tenant {}.", attributeSetName, cs.getTenantId());
 
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, getAttributeSetName(playLaunchChannel), additionalContactAttr, null);
+                    Predefined.Enrichment, attributeSetName, additionalContactAttr, null);
             log.info("attrsUsage for firstName & lastName=" + map);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> set.add(key));
             log.info("set=" + set);
