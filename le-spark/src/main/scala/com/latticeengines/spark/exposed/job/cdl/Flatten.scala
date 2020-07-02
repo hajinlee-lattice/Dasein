@@ -61,7 +61,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
       			  PlaymakerConstants.DoNotCall -> getInputValue(input, InterfaceName.DoNotCall.name()), //
       			  PlaymakerConstants.DoNotMail -> getInputValue(input, InterfaceName.DoNotMail.name()), //
       			  PlaymakerConstants.CreatedDate -> getInputValue(input, InterfaceName.CreatedDate.name()), //
-      			  PlaymakerConstants.LastModifiedDate -> getInputValue(input, InterfaceName.LastModifiedDate.name()), //)
+      			  PlaymakerConstants.LastModifiedDate -> getInputValue(input, InterfaceName.LastModifiedDate.name()))
 
     } 
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
