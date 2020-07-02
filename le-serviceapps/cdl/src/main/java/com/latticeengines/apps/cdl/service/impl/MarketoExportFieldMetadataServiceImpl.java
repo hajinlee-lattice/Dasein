@@ -20,6 +20,8 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC ID";
 
+    private static final String TRAY_CONTACT_ID_COLUMN_NAME = "SFDC CONTACT ID";
+
     protected MarketoExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Marketo);
     }
@@ -47,12 +49,20 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
                     contactAttributesMap);
         }
 
-        String lookupId = channel.getLookupIdMap().getAccountId();
-        log.info("Marketo lookupId " + lookupId);
-        if (lookupId != null && accountAttributesMap.containsKey(lookupId)) {
-            ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
-            lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
-            exportColumnMetadataList.add(lookupIdColumnMetadata);
+        String accountId = channel.getLookupIdMap().getAccountId();
+        log.info("Marketo accountId " + accountId);
+        if (accountId != null && accountAttributesMap.containsKey(accountId)) {
+            ColumnMetadata accountIdColumnMetadata = accountAttributesMap.get(accountId);
+            accountIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(accountIdColumnMetadata);
+        }
+
+        String contactId = channel.getLookupIdMap().getContactId();
+        log.info("Marketo contactId " + contactId);
+        if (contactId != null && contactAttributesMap.containsKey(contactId)) {
+            ColumnMetadata contactIdColumnMetadata = contactAttributesMap.get(contactId);
+            contactIdColumnMetadata.setDisplayName(TRAY_CONTACT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(contactIdColumnMetadata);
         }
 
         return exportColumnMetadataList;
