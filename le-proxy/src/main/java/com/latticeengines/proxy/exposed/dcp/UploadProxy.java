@@ -2,8 +2,6 @@ package com.latticeengines.proxy.exposed.dcp;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -17,6 +15,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
+import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -34,15 +33,10 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         super(hostPort, "dcp");
     }
 
-    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig, String userId) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}/userId/{userId}";
-        String url;
-        try {
-            url = constructUrl(baseUrl, customerSpace, sourceId, URLEncoder.encode(userId, "UTF-8"));
-        } catch(UnsupportedEncodingException e) {
-            throw new RuntimeException("can't encode user id " + userId);
-        }
-        return post("create upload", url, uploadConfig, UploadDetails.class);
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadRequest uploadRequest) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
+        String url = constructUrl(baseUrl, customerSpace, sourceId);
+        return post("create upload", url, uploadRequest, UploadDetails.class);
     }
 
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
