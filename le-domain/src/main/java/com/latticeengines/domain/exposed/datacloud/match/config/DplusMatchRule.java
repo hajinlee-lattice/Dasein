@@ -58,6 +58,10 @@ public class DplusMatchRule {
         this.acceptCriterion = new ClassificationCriterion(lowCode, highCode, gradePatterns);
     }
 
+    public static ClassificationCriterion getDefaultAcceptCriterion() {
+        return new ClassificationCriterion(6, 10, null);
+    }
+
     public Collection<ExclusionCriterion> getExclusionCriteria() {
         return exclusionCriteria;
     }

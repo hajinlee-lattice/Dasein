@@ -97,6 +97,8 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         MatchRule baseRule = matchRules.get(0);
         Assert.assertEquals(baseRule.getSourceId(), source.getSourceId());
         Assert.assertEquals(baseRule.getRuleType(), MatchRuleRecord.RuleType.BASE_RULE);
+        Assert.assertEquals(baseRule.getAcceptCriterion().getLowestConfidenceCode(), 6);
+        Assert.assertEquals(baseRule.getAcceptCriterion().getHighestConfidenceCode(), 10);
 
         // create another source under same project
         Source source2 = sourceService.createSource(mainCustomerSpace, "TestSource2", projectId,
