@@ -62,7 +62,7 @@ public class DplusMatchRule {
         return exclusionCriteria;
     }
 
-    void setExclusionCriteria(Collection<ExclusionCriterion> exclusionCriteria) {
+    private void setExclusionCriteria(Collection<ExclusionCriterion> exclusionCriteria) {
         this.exclusionCriteria = exclusionCriteria;
     }
 
@@ -70,7 +70,7 @@ public class DplusMatchRule {
         return acceptCriterion;
     }
 
-    void setAcceptCriterion(ClassificationCriterion acceptCriterion) {
+    private void setAcceptCriterion(ClassificationCriterion acceptCriterion) {
         this.acceptCriterion = acceptCriterion;
     }
 
@@ -78,7 +78,7 @@ public class DplusMatchRule {
         return reviewCriterion;
     }
 
-    void setReviewCriterion(ClassificationCriterion reviewCriterion) {
+    private void setReviewCriterion(ClassificationCriterion reviewCriterion) {
         this.reviewCriterion = reviewCriterion;
     }
 

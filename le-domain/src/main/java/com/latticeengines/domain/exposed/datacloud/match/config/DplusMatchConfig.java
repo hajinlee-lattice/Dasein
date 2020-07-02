@@ -95,7 +95,7 @@ public class DplusMatchConfig {
             return matchKey;
         }
 
-        void setMatchKey(MatchKey matchKey) {
+        private void setMatchKey(MatchKey matchKey) {
             this.matchKey = matchKey;
         }
 
@@ -103,7 +103,7 @@ public class DplusMatchConfig {
             return allowedValues;
         }
 
-        void setAllowedValues(Collection<String> allowedValues) {
+        private void setAllowedValues(Collection<String> allowedValues) {
             this.allowedValues = allowedValues;
         }
 
