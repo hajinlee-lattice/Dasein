@@ -65,6 +65,9 @@ public class TenantServiceImpl implements TenantService {
         oldTenant.setTenantType(tenant.getTenantType());
         oldTenant.setStatus(tenant.getStatus());
         oldTenant.setContract(tenant.getContract());
+        oldTenant.setNotificationLevel(tenant.getNotificationLevel());
+        oldTenant.setNotificationType(tenant.getNotificationType());
+        oldTenant.setJobNotificationLevels(tenant.getJobNotificationLevels());
         if (tenant.getRegisteredTime() == null) {
             oldTenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         } else {

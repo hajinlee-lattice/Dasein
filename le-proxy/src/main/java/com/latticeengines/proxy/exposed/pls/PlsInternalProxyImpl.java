@@ -237,31 +237,31 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         return url;
     }
 
-    public void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
+    public boolean sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3import/result", result, tenantId));
             log.info(String.format("Putting to %s", url));
-            put("sendS3ImportEmail", url, emailInfo);
+            return put("sendS3ImportEmail", url, emailInfo, Boolean.class);
         } catch (Exception e) {
             throw new RuntimeException("sendS3ImportEmail: Remote call failure", e);
         }
     }
 
-    public void sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
+    public boolean sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3template/update", tenantId));
             log.info(String.format("Putting to %s", url));
-            put("sendS3TemplateUpdateEmail", url, emailInfo);
+            return put("sendS3TemplateUpdateEmail", url, emailInfo, Boolean.class);
         } catch (Exception e) {
             throw new RuntimeException("sendS3TemplateUpdateEmail: Remote call failure", e);
         }
     }
 
-    public void sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
+    public boolean sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3template/create", tenantId));
             log.info(String.format("Putting to %s", url));
-            put("sendS3TemplateCreateEmail", url, emailInfo);
+            return put("sendS3TemplateCreateEmail", url, emailInfo, Boolean.class);
         } catch (Exception e) {
             throw new RuntimeException("sendS3TemplateCreateEmail: Remote call failure", e);
         }
@@ -294,11 +294,11 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
     }
 
     @Override
-    public void sendCDLProcessAnalyzeEmail(String result, String tenantId, AdditionalEmailInfo info) {
+    public boolean sendCDLProcessAnalyzeEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl(combine("/internal/emails/processanalyze/result", result, tenantId));
             log.info(String.format("Putting to %s", url));
-            put("sendCDLProcessAnalyzeEmail", url, info);
+            return put("sendCDLProcessAnalyzeEmail", url, info, Boolean.class);
         } catch (Exception e) {
             throw new RuntimeException("sendProcessAnalyzeEmail: Remote call failure", e);
         }

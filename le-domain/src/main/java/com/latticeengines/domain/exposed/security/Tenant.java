@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.security;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.persistence.Access;
@@ -34,8 +36,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Access(AccessType.FIELD)
 @Table(name = "TENANT")
 public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss.SSS z");
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
     private static final long serialVersionUID = 3412997313415383107L;
 
     static {
@@ -95,15 +96,20 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "EXPIRED_TIME")
     private Long expiredTime;
 
-    @JsonProperty("notification_level")
+    @JsonProperty("NotificationLevel")
     @Column(name = "NOTIFICATION_LEVEL", length = 20)
     @Enumerated(EnumType.STRING)
     private TenantEmailNotificationLevel notificationLevel = TenantEmailNotificationLevel.ERROR;
 
-    @JsonProperty("notification_type")
+    @JsonProperty("NotificationType")
     @Column(name = "NOTIFICATION_TYPE", length = 40)
     @Enumerated(EnumType.STRING)
     private TenantEmailNotificationType notificationType = TenantEmailNotificationType.ALL_USER;
+
+    @JsonProperty("JobNotificationLevel")
+    @Column(name = "JOB_NOTIFICATION_LEVEL", columnDefinition = "'JSON'")
+    @org.hibernate.annotations.Type(type = "json")
+    private Map<String, TenantEmailNotificationLevel> jobNotificationLevels = new HashMap<String, TenantEmailNotificationLevel>();
 
     public Tenant() {
     }
@@ -262,4 +268,21 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     public void setNotificationType(TenantEmailNotificationType notificationType) {
         this.notificationType = notificationType;
     }
+
+    public Map<String, TenantEmailNotificationLevel> getJobNotificationLevels() {
+        return jobNotificationLevels;
+    }
+
+    public void setJobNotificationLevels(Map<String, TenantEmailNotificationLevel> jobNotificationLevels) {
+        this.jobNotificationLevels = jobNotificationLevels;
+    }
+
+    public void putJobLevel(String jobType, TenantEmailNotificationLevel jobLevel) {
+        if (jobNotificationLevels.containsKey(jobType)) {
+            jobNotificationLevels.replace(jobType, jobLevel);
+        } else {
+            jobNotificationLevels.put(jobType, jobLevel);
+        }
+    }
+
 }
