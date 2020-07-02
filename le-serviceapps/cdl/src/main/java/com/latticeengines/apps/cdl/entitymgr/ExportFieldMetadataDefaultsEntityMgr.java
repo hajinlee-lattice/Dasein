@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface ExportFieldMetadataDefaultsEntityMgr {
@@ -16,6 +17,9 @@ public interface ExportFieldMetadataDefaultsEntityMgr {
 
     List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadataForEntity(CDLExternalSystemName systemName,
             BusinessEntity entity);
+
+    List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadataForAudienceType(
+            CDLExternalSystemName systemName, AudienceType audienceType);
 
     List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName);
 

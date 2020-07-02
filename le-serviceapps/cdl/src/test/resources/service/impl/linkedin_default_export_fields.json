@@ -7,7 +7,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "EXTERNAL_ID",
@@ -17,7 +18,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "AccountId",
@@ -27,7 +29,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LE_ACCOUNT_EXTERNAL_ID",
@@ -37,7 +40,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "PLAY_ID",
@@ -47,7 +51,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LAUNCH_ID",
@@ -57,7 +62,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DESCRIPTION",
@@ -67,7 +73,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LAUNCH_DATE",
@@ -77,7 +84,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LAST_UPDATED_TIMESTAMP",
@@ -87,7 +95,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "MONETARY_VALUE",
@@ -97,7 +106,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LIKELIHOOD",
@@ -107,7 +117,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "CompanyName",
@@ -117,7 +128,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS", "CONTACTS"]
   },
   {
     "attrName": "LDC_Name",
@@ -127,7 +139,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS", "CONTACTS"]
   },
   {
     "attrName": "SFDC_ACCOUNT_ID",
@@ -137,7 +150,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "PRIORITY_ID",
@@ -147,7 +161,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "PRIORITY_DISPLAY_NAME",
@@ -157,7 +172,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "MONETARY_VALUE_ISO4217_ID",
@@ -167,7 +183,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LIFT",
@@ -177,7 +194,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "RATING_MODEL_ID",
@@ -187,7 +205,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "MODEL_SUMMARY_ID",
@@ -197,7 +216,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "SYNC_DESTINATION",
@@ -207,7 +227,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DESTINATION_ORG_ID",
@@ -217,7 +238,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DESTINATION_SYS_TYPE",
@@ -227,7 +249,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "TENANT_ID",
@@ -237,7 +260,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DELETED",
@@ -247,7 +271,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "Website",
@@ -257,17 +282,19 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["ACCOUNTS"]
   },
   {
-      "attrName":"LDC_Domain",
-      "displayName":"Lattice Account Domain",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"LinkedIn",
-      "standardField":true,
-      "exportEnabled":true,
-      "historyEnabled":false
+    "attrName":"LDC_Domain",
+    "displayName":"Lattice Account Domain",
+	"entity":"Account",
+	"javaClass":"String",
+	"externalSystemName":"LinkedIn",
+	"standardField":true,
+	"exportEnabled":true,
+	"historyEnabled":false,
+	"audienceType": ["ACCOUNTS"]
   },
   {
     "attrName": "DESTINATION_SYS_NAME",
@@ -277,7 +304,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": []
   },
   {
     "attrName": "PLAY_NAME",
@@ -287,7 +315,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": []
   },
   {
     "attrName": "RATING_MODEL_NAME",
@@ -297,7 +326,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": []
   },
   {
     "attrName": "SEGMENT_NAME",
@@ -307,7 +337,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": []
   },
   {
     "attrName": "Email",
@@ -317,17 +348,30 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
-    "attrName": "Address_Street_1",
-    "displayName": "Contact Address",
+    "attrName": "Contact_Address_Street_1",
+    "displayName": "Contact Address Street 1",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": true
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
+  },
+  {
+    "attrName": "Contact_Address_Street_2",
+    "displayName": "Contact Address Street 2",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "PhoneNumber",
@@ -336,38 +380,108 @@
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": true
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "State",
+    "displayName": "Account State",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "LDC_State",
+    "displayName": "Lattice Account State",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "ContactState",
     "displayName": "Contact State",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": true
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "PostalCode",
-    "displayName": "Contact ZipCode",
+    "displayName": "Account Zip Code",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "LDC_PostalCode",
+    "displayName": "Lattice Account Zip Code",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "ContactPostalCode",
+    "displayName": "Contact Zip Code",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": true
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "Country",
+    "displayName": "Account Country",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "LDC_Country",
+    "displayName": "Lattice Account Country",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "ContactCountry",
     "displayName": "Contact Country",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": true
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "SFDC_CONTACT_ID",
@@ -377,17 +491,41 @@
     "externalSystemName": "LinkedIn",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "City",
+    "displayName": "Account City",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "LDC_City",
+    "displayName": "Lattice Account City",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "ContactCity",
     "displayName": "Contact City",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": true
+    "exportEnabled": true,
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "ContactId",
@@ -397,7 +535,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "ContactName",
@@ -407,7 +546,8 @@
     "externalSystemName": "LinkedIn",
     "standardField": true,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "FirstName",
@@ -416,8 +556,9 @@
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": false
+    "exportEnabled": true,
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "LastName",
@@ -426,7 +567,41 @@
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
     "standardField": true,
-    "exportEnabled": false,
-    "historyEnabled": false
+    "exportEnabled": true,
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
+  },
+  {
+    "attrName": "Industry",
+    "displayName": "Account Industry",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": false,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "LDC_Industry",
+    "displayName": "Lattice Account Industry",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": false,
+    "audienceType": ["ACCOUNTS"]
+  },
+  {
+    "attrName": "Title",
+    "displayName": "Contact Title",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   }
 ]

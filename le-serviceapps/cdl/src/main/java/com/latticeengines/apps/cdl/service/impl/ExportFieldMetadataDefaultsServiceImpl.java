@@ -11,6 +11,7 @@ import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataDefaultsEntityMg
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("exportFieldMetadataDefaultsService")
@@ -39,6 +40,13 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     public List<ExportFieldMetadataDefaults> getExportEnabledAttributesForEntity(CDLExternalSystemName systemName,
             BusinessEntity entity) {
         return exportFieldMetadataDefaultsEntityMgr.getExportEnabledDefaultFieldMetadataForEntity(systemName, entity);
+    }
+
+    @Override
+    public List<ExportFieldMetadataDefaults> getExportEnabledAttributesForAudienceType(CDLExternalSystemName systemName,
+            AudienceType audienceType) {
+        return exportFieldMetadataDefaultsEntityMgr.getExportEnabledDefaultFieldMetadataForAudienceType(systemName,
+                audienceType);
     }
 
     @Override

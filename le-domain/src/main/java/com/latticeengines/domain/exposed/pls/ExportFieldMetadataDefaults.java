@@ -1,13 +1,18 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.List;
+
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -16,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Entity
@@ -63,6 +69,13 @@ public class ExportFieldMetadataDefaults implements HasPid {
     @JsonProperty("historyEnabled")
     @Column(name = "HISTORY_ENABLED", nullable = false)
     private Boolean historyEnabled;
+
+    @JsonProperty("audienceType")
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "EXPORT_FIELD_METADATA_DEFAULTS_AUDIENCE_TYPE", joinColumns = @JoinColumn(name = "EXPORT_FIELD_METADATA_DEFAULTS_PID"))
+    @ElementCollection(targetClass = AudienceType.class)
+    @Column(name = "AUDIENCE_TYPE", nullable = false)
+    private List<AudienceType> audienceTypes;
 
     public ExportFieldMetadataDefaults() {
 
@@ -154,6 +167,14 @@ public class ExportFieldMetadataDefaults implements HasPid {
 
     public void setHistoryEnabled(Boolean historyEnabled) {
         this.historyEnabled = historyEnabled;
+    }
+
+    public List<AudienceType> getAudienceTypes() {
+        return audienceTypes;
+    }
+
+    public void setAudienceTypes(List<AudienceType> audienceTypes) {
+        this.audienceTypes = audienceTypes;
     }
 
 }

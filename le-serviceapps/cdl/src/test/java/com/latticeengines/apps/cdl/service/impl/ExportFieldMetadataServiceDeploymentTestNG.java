@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
@@ -210,7 +211,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         log.info("" + nonStandardFieldsCount);
-        assertEquals(nonStandardFieldsCount, 21);
+        assertEquals(nonStandardFieldsCount, 20);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
@@ -226,30 +227,53 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 84);
+        assertEquals(columnMetadata.size(), 132);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
-        assertEquals(nonStandardFields.size(), 21);
+        assertEquals(nonStandardFields.size(), 20);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
-    public void testLinkedInLaunch() {
+    public void testLinkedInAccountsLaunch() {
         registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.LinkedIn, "LinkedIn");
 
-        createPlayLaunchChannel(new LinkedInChannelConfig(), lookupIdMap);
+        LinkedInChannelConfig linkedInChannel = new LinkedInChannelConfig();
+        linkedInChannel.setAudienceType(AudienceType.ACCOUNTS);
+        createPlayLaunchChannel(linkedInChannel, lookupIdMap);
 
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 5);
+        assertEquals(columnMetadata.size(), 14);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
         log.info(JsonUtils.serialize(attrNames));
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 0);
+        assertEquals(nonStandardFields, 3);
+    }
+    
+    @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
+    public void testLinkedInContactsLaunch() {
+        registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.LinkedIn, "LinkedIn");
+
+        LinkedInChannelConfig linkedInChannel = new LinkedInChannelConfig();
+        linkedInChannel.setAudienceType(AudienceType.CONTACTS);
+        createPlayLaunchChannel(linkedInChannel, lookupIdMap);
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 13);
+
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        log.info(JsonUtils.serialize(attrNames));
+        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
+        assertEquals(nonStandardFields, 9);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testMarketoLaunch")
@@ -316,10 +340,10 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 4);
+        assertEquals(columnMetadata.size(), 10);
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 2);
+        assertEquals(nonStandardFields, 5);
     }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
