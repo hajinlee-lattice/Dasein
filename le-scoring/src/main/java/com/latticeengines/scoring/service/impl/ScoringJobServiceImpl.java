@@ -138,7 +138,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         if (StringUtils.isBlank(scoringConfig.getUniqueKeyColumn())) {
             throw new LedpException(LedpCode.LEDP_20025);
         }
-        if (CollectionUtils.isEmpty(scoringConfig.getModelGuids())) {
+        if (CollectionUtils.isEmpty(scoringConfig.getModelGuids()) && CollectionUtils.isEmpty(scoringConfig.getP2ModelGuids())) {
             throw new LedpException(LedpCode.LEDP_20026);
         }
     }
