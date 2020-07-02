@@ -34,46 +34,59 @@ public class UploadStats {
 
     public static class ImportStats {
 
-        @JsonProperty("success_cnt")
-        private Long successCnt;
+        @JsonProperty("submitted")
+        private Long submitted;
 
-        @JsonProperty("error_cnt")
-        private Long errorCnt;
+        @JsonProperty("successfullyIngested")
+        private Long successfullyIngested;
 
-        public Long getSuccessCnt() {
-            return successCnt;
+        @JsonProperty("failedIngested")
+        private Long failedIngested;
+
+        public Long getSubmitted() {
+            return submitted;
         }
 
-        public void setSuccessCnt(Long successCnt) {
-            this.successCnt = successCnt;
+        public void setSubmitted(Long submitted) {
+            this.submitted = submitted;
         }
 
-        public Long getErrorCnt() {
-            return errorCnt;
+        public Long getSuccessfullyIngested() {
+            return successfullyIngested;
         }
 
-        public void setErrorCnt(Long errorCnt) {
-            this.errorCnt = errorCnt;
+        public void setSuccessfullyIngested(Long successfullyIngested) {
+            this.successfullyIngested = successfullyIngested;
         }
+
+        public Long getFailedIngested() {
+            return failedIngested;
+        }
+
+        public void setFailedIngested(Long failedIngested) {
+            this.failedIngested = failedIngested;
+        }
+
     }
 
     public static class MatchStats {
 
-        @JsonProperty("accepted_cnt")
-        private Long acceptedCnt;
+        @JsonProperty("matched")
+        private Long matched;
 
-        @JsonProperty("pending_review_cnt")
+        @JsonProperty("pendingReviewCnt")
         private Long pendingReviewCnt;
 
-        @JsonProperty("rejected_cnt")
-        private Long rejectedCnt;
+        @JsonProperty("unmatched")
+        private Long unmatched;
 
-        public Long getAcceptedCnt() {
-            return acceptedCnt;
+
+        public Long getMatched() {
+            return matched;
         }
 
-        public void setAcceptedCnt(Long acceptedCnt) {
-            this.acceptedCnt = acceptedCnt;
+        public void setMatched(Long matched) {
+            this.matched = matched;
         }
 
         public Long getPendingReviewCnt() {
@@ -84,13 +97,12 @@ public class UploadStats {
             this.pendingReviewCnt = pendingReviewCnt;
         }
 
-        public Long getRejectedCnt() {
-            return rejectedCnt;
+        public Long getUnmatched() {
+            return unmatched;
         }
 
-        public void setRejectedCnt(Long rejectedCnt) {
-            this.rejectedCnt = rejectedCnt;
+        public void setUnmatched(Long unmatched) {
+            this.unmatched = unmatched;
         }
     }
-
 }

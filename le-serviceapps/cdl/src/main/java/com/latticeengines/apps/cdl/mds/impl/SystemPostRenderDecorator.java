@@ -25,7 +25,9 @@ public class SystemPostRenderDecorator implements Decorator {
         if (Boolean.TRUE.equals(cm.getShouldDeprecate())) {
             String displayName = cm.getDisplayName();
             if (StringUtils.isNotBlank(displayName)) {
-                cm.setDisplayName(displayName + " (DEPRECATED)");
+                if (displayName != null && !displayName.toLowerCase().contains("deprecate")) {
+                    cm.setDisplayName(displayName + " (DEPRECATED)");
+                }
             }
             // PLS-11145 set Export init value to false, for deprecated attr
             cm.disableGroup(ColumnSelection.Predefined.Enrichment);

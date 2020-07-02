@@ -99,11 +99,21 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
                 RatingModelContainer container = new RatingModelContainer(ratingModel, ratingEngineSummary,
                         BucketMetadataUtils.getDefaultMetadata());
                 putObjectInContext(ITERATION_RATING_MODELS, Collections.singletonList(container));
+                putObjectInContext(ITERATION_AI_RATING_MODELS, Collections.singletonList(container));
 
                 ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(customerSpace, modelGuid);
                 putObjectInContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, featureImportanceUtil.getFeatureImportance(customerSpace, modelSummary).keySet());
 
                 putStringValueInContext(SCORING_MODEL_ID, modelGuid);
+                String pythonMajorVersion = getStringValueFromContext(PYTHON_MAJOR_VERSION);
+                if (StringUtils.isBlank(pythonMajorVersion)) {
+                    throw new IllegalArgumentException("Must specify python major version in context!");
+                }
+                if ("3".equals(pythonMajorVersion)) {
+                    putStringValueInContext(SCORING_MODEL_ID_P3, modelGuid);
+                } else {
+                    putStringValueInContext(SCORING_MODEL_ID_P2, modelGuid);
+                }
             }
         }
     }

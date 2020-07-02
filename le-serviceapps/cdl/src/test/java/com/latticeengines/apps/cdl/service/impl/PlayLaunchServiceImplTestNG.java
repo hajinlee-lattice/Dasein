@@ -117,11 +117,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-
         setupTestEnvironmentWithDummySegment();
-
         cleanupPlayLaunches();
-
         Date timestamp = new Date(System.currentTimeMillis());
 
         playTypes = playTypeService.getAllPlayTypes(mainCustomerSpace);

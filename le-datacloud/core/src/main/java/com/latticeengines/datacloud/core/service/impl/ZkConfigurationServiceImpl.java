@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.base.Preconditions;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -73,17 +75,20 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     }
 
     private void bootstrapCamille() throws Exception {
-        String json = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("datasource/" + sourceDbsJson), Charset.defaultCharset());
-        Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
-        if (!camille.exists(poolPath)) {
-            log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");
-            camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        }
-        // Flag of UseRemoteDnBGlobal
-        Path useRemoteDnBPath = useRemoteDnBGlobalPath();
-        if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
-            camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("datasource/" + sourceDbsJson)) {
+            Preconditions.checkNotNull(is);
+            String json = IOUtils.toString(is, Charset.defaultCharset());
+            Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
+            if (!camille.exists(poolPath)) {
+                log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");
+                camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
+            // Flag of UseRemoteDnBGlobal
+            Path useRemoteDnBPath = useRemoteDnBGlobalPath();
+            if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
+                camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
         }
     }
 

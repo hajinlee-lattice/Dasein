@@ -14,7 +14,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumb
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__Row_Count__;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDateId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -67,7 +67,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(WebVisitPageUrl.name(), String.class), //
             Pair.of(DATE_ATTR, Long.class), //
             Pair.of(__StreamDate.name(), String.class), //
-            Pair.of(__StreamDateId.name(), Integer.class), //
+            Pair.of(StreamDateId.name(), Integer.class), //
             Pair.of(CDLTemplateName.name(), String.class)
             );
 
@@ -78,7 +78,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(Stage, String.class), //
             Pair.of(LastModifiedDate.name(), Long.class), //
             Pair.of(__StreamDate.name(), String.class), //
-            Pair.of(__StreamDateId.name(), Integer.class),
+            Pair.of(StreamDateId.name(), Integer.class),
             Pair.of(CDLTemplateName.name(), String.class));
 
     private static final List<Pair<String, Class<?>>> CTK_STREAM_IMPORT_FIELDS = Arrays.asList( //
@@ -87,7 +87,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(ActivityType.name(), String.class), //
             Pair.of(ActivityDate.name(), Long.class), //
             Pair.of(__StreamDate.name(), String.class), //
-            Pair.of(__StreamDateId.name(), Integer.class), //
+            Pair.of(StreamDateId.name(), Integer.class), //
             Pair.of(__Row_Count__.name(), Long.class), //
             Pair.of(CDLTemplateName.name(), String.class)
     );
@@ -143,7 +143,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private void prepareData() {
-        // ContactId, AccountId, ActivityType, ____StreamDate, __StreamDateId, __Row_Count__
+        // ContactId, AccountId, ActivityType, ____StreamDate, StreamDateId, __Row_Count__
         // AccountId is set to junk values intentionally to test contact batch store
         Object[][] importData = new Object[][] { //
                 testCTKRow("C1", "sldkfjkls", "Email Sent", 1L, 0), // last activity date for a1, c1

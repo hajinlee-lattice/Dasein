@@ -13,9 +13,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
+import com.latticeengines.domain.exposed.monitor.MsTeamsSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings.Color;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.monitor.exposed.service.MsTeamsService;
 import com.latticeengines.monitor.exposed.service.SlackService;
 
 @Component("dataCloudNotificationService")
@@ -29,8 +31,14 @@ public class DataCloudNotificationServiceImpl implements DataCloudNotificationSe
     @Inject
     private SlackService slackService;
 
+    @Inject
+    private MsTeamsService msTeamsService;
+
     @Value("${datacloud.slack.webhook.url}")
     private String slackWebHookUrl;
+
+    @Value("${datacloud.msteams.webhook.url}")
+    private String msteamsWebHookUrl;
 
     @Value("${common.le.environment}")
     private String leEnv;
@@ -64,6 +72,15 @@ public class DataCloudNotificationServiceImpl implements DataCloudNotificationSe
         if (CollectionUtils.isNotEmpty(recipients)) {
             emailService.sendSimpleEmail(subject, content, "text/plain", recipients);
             log.info(String.format("Sent notification email to %s", String.join(",", recipients)));
+        }
+    }
+
+    @Override
+    public void sendMsTeams(String title, String text,
+            com.latticeengines.domain.exposed.monitor.MsTeamsSettings.Color color) {
+        if (StringUtils.isNotEmpty(msteamsWebHookUrl)) {
+            msTeamsService.sendMsTeams(new MsTeamsSettings(msteamsWebHookUrl, title,
+                    "[" + leEnv + "-" + leStack + "]", text, color));
         }
     }
 

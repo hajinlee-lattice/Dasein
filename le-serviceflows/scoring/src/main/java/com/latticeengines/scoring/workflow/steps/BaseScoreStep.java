@@ -1,13 +1,14 @@
 package com.latticeengines.scoring.workflow.steps;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -41,15 +43,15 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
     @Override
     public void execute() {
         log.info("Inside Score execute()");
-        Map.Entry<ScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
-        ScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
+        Pair<ScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
+        ScoringConfiguration scoringConfig = scoringConfigAndTableName.getLeft();
         AppSubmission submission = scoringProxy.createScoringJob(scoringConfig);
         waitForAppId(submission.getApplicationIds().get(0));
         copyImportErrors(scoringConfig.getTargetResultDir());
 
         if (configuration.isRegisterScoredTable()) {
             try {
-                registerTable(scoringConfigAndTableName.getValue(), scoringConfig.getTargetResultDir());
+                registerTable(scoringConfigAndTableName.getRight(), scoringConfig.getTargetResultDir());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -86,33 +88,58 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         putStringValueInContext(SCORING_RESULT_TABLE_NAME, tableName);
     }
 
-    private Map.Entry<ScoringConfiguration, String> buildScoringConfig() {
+    private Pair<ScoringConfiguration, String> buildScoringConfig() {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(configuration.getCustomerSpace().toString());
-        String[] modelIds = getModelId().split("\\|");
-        log.info("Get model ids: " + StringUtils.join(modelIds, ", "));
-        scoringConfig.setModelGuids(Arrays.asList(modelIds));
+        String pythonMajorVersion = getStringValueFromContext(PYTHON_MAJOR_VERSION);
+        if (StringUtils.isBlank(pythonMajorVersion)) {
+            throw new IllegalArgumentException("Must specify python major version in context!");
+        }
+        scoringConfig.setModelGuids(getModelId(pythonMajorVersion));
+        scoringConfig.setP2ModelGuids(getP2ModelId(pythonMajorVersion));
         scoringConfig.setSourceDataDir(getSourceDir());
         scoringConfig.setUniqueKeyColumn(getUniqueKeyColumn());
         scoringConfig.setUseScorederivation(configuration.getUseScorederivation());
         scoringConfig.setModelIdFromRecord(configuration.getReadModelIdFromRecord());
-        Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), //
+        scoringConfig.setPythonMajorVersion(pythonMajorVersion);
+        Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), //
                 configuration.getCustomerSpace());
-        String tableName = String.format("ScoreResult_%s_%d", modelIds[0].replaceAll("-", "_"),
-                System.currentTimeMillis());
+        String tableName = getResultTableName();
         scoringConfig.setTargetResultDir(targetPath.toString() + "/" + tableName);
         if (getScoringInputType() != null) {
             scoringConfig.setScoreInputType(getScoringInputType());
         }
-        return new AbstractMap.SimpleEntry<>(scoringConfig, tableName);
+        return Pair.of(scoringConfig, tableName);
     }
 
-    private String getModelId() {
-        String modelId = getStringValueFromContext(SCORING_MODEL_ID);
-        if (modelId == null) {
+    private String getResultTableName() {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P3);
+        if (StringUtils.isBlank(modelId)) {
             modelId = configuration.getModelId();
         }
-        return modelId;
+        if (StringUtils.isNotBlank(modelId)) {
+            String firstModelId = modelId.split("\\|")[0];
+            return String.format("ScoreResult_%s_%d", firstModelId.replaceAll("-", "_"),
+                    System.currentTimeMillis());
+        } else {
+            return NamingUtils.timestamp("ScoreResult");
+        }
+    }
+
+    private List<String> getModelId(String pythonMajorVersion) {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P3);
+        if (StringUtils.isBlank(modelId) && "3".equals(pythonMajorVersion)) {
+            modelId = configuration.getModelId();
+        }
+        return StringUtils.isBlank(modelId) ? Collections.emptyList() : Arrays.asList(modelId.split("\\|"));
+    }
+
+    private List<String> getP2ModelId(String pythonMajorVersion) {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P2);
+        if (StringUtils.isBlank(modelId) && !"3".equals(pythonMajorVersion)) {
+            modelId = configuration.getModelId();
+        }
+        return StringUtils.isBlank(modelId) ? Collections.emptyList() : Arrays.asList(modelId.split("\\|"));
     }
 
     private String getSourceDir() {

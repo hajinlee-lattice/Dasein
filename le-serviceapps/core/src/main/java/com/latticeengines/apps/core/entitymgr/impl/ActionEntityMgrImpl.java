@@ -20,6 +20,7 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
+import com.latticeengines.domain.exposed.pls.ActionType;
 
 @Component("actionEntityMgr")
 public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Long> implements ActionEntityMgr {
@@ -109,5 +110,20 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus) {
         return actionRepository.findByOwnerIdAndActionStatus(ownerId, actionStatus);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Long> findPidByTypeAndConfigAndOwnerType(ActionType actionType, String ownerType, String partialConfig) {
+        return actionRepository.findActionPidByActionTypeAndOwnerWorkflowType(actionType,
+                ownerType, partialConfig);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Long> findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType actionType, ActionStatus actionStatus,
+                                                         String partialConfig) {
+        return actionRepository.findActionPidWithoutOwnerByTypeAndStatus(actionType,
+                actionStatus, partialConfig);
     }
 }

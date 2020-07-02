@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
@@ -34,18 +35,20 @@ public class UploadResource {
     @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get uploads by sourceId")
-    public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status) {
-        return uploadService.getAllBySourceId(sourceId, status);
+    public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status,
+                                                @RequestParam(required = false, defaultValue = "false") Boolean includeConfig) {
+        return uploadService.getAllBySourceId(sourceId, status, includeConfig);
     }
 
     @GetMapping("/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation("Get upload by uploadID")
-    public UploadDetails getUpload(@PathVariable String uploadId) {
+    public UploadDetails getUpload(@PathVariable String uploadId,
+                                   @RequestParam(required = false, defaultValue = "false") Boolean includeConfig) {
         if (uploadId == null) {
             return null;
         } else {
-            return uploadService.getByUploadId(uploadId);
+            return uploadService.getByUploadId(uploadId, includeConfig);
         }
     }
 
@@ -60,6 +63,7 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "Invoke DCP import workflow. Returns the upload details.")
     public UploadDetails startImport(@RequestBody DCPImportRequest importRequest) {
+        importRequest.setUserId(MultiTenantContext.getEmailAddress());
         return uploadService.startImport(importRequest);
     }
 }

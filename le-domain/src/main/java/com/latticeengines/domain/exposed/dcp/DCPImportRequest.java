@@ -28,6 +28,10 @@ public class DCPImportRequest {
     @ApiModelProperty(required = false, value = "fileImportId")
     private String fileImportId;
 
+    @JsonProperty("userId")
+    @ApiModelProperty(required = false, value = "userID")
+    private String userId;
+
     public String getProjectId() {
         return projectId;
     }
@@ -58,5 +62,13 @@ public class DCPImportRequest {
 
     public void setFileImportId(String fileImportId) {
         this.fileImportId = fileImportId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

@@ -164,6 +164,7 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
                 .tableName(tableName)
                 .filePath(filePath)
                 .userId(user)
+                .skipRenameAndMatch(true)
                 .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionPids))
                         .build())//

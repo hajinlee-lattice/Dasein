@@ -84,15 +84,15 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     }
 
     @Override
-    public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status) {
+    public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return uploadProxy.getUploads(customerSpace, sourceId, status);
+        return uploadProxy.getUploads(customerSpace, sourceId, status, includeConfig);
     }
 
     @Override
-    public UploadDetails getByUploadId(String uploadId) {
+    public UploadDetails getByUploadId(String uploadId, Boolean includeConfig) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return uploadProxy.getUploadByUploadId(customerSpace, uploadId);
+        return uploadProxy.getUploadByUploadId(customerSpace, uploadId, includeConfig);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "upload.zip" + "\"");
         String tenantId = MultiTenantContext.getShortTenantId();
         String uploadId = downloadConfig.getUploadId();
-        UploadDetails upload = uploadProxy.getUploadByUploadId(tenantId, uploadId);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(tenantId, uploadId, Boolean.TRUE);
 
         Preconditions.checkNotNull(upload, "object should't be null");
         UploadConfig config = upload.getUploadConfig();
@@ -206,7 +206,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
         String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
-        UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(customerSpace, uploadId);
+        UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(customerSpace, uploadId, Boolean.TRUE);
 
         uploadDetails.getUploadDiagnostics().setApplicationId(appId.toString());
         return uploadDetails;

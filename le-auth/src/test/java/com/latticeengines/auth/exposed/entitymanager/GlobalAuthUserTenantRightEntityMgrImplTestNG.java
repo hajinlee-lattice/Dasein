@@ -11,6 +11,7 @@ import com.latticeengines.auth.testframework.AuthFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+
 public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctionalTestNGBase {
 
     @Inject
@@ -34,7 +35,6 @@ public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctional
 
         tenant = gaTenantEntityMgr.findByTenantId(tenant.getId());
 
-
         GlobalAuthUserTenantRight tenantRight = new GlobalAuthUserTenantRight();
         tenantRight.setGlobalAuthTenant(tenant);
         tenantRight.setGlobalAuthUser(user);
@@ -57,12 +57,15 @@ public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctional
             Assert.assertNotNull(right.getGlobalAuthTenant());
         }
 
-        GlobalAuthUserTenantRight right = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
+        GlobalAuthUserTenantRight right = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(),
+                tenant.getPid());
         Assert.assertNotNull(right);
         Boolean delete = globalAuthUserTenantRightEntityMgr.deleteByUserId(user.getPid());
         Assert.assertTrue(delete);
         right = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
         Assert.assertNull(right);
+        user = gaUserEntityMgr.findByEmailJoinAuthentication(user.getEmail());
+        Assert.assertNotNull(user);
         gaUserEntityMgr.delete(user);
         gaUserEntityMgr.delete(user2);
         gaTenantEntityMgr.delete(tenant);

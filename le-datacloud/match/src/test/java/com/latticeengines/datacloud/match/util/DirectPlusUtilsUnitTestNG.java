@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -10,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -36,9 +38,20 @@ public class DirectPlusUtilsUnitTestNG {
                 Assert.assertNotNull(nameLocation.getPhoneNumber());
                 Assert.assertNotEquals(nameLocation.getPhoneNumber(), "null");
             }
+            Assert.assertNotNull(candidate.getOperatingStatus());
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             Assert.assertNotNull(matchInsight);
+            Assert.assertNotNull(matchInsight.getConfidenceCode());
+            Assert.assertNotNull(matchInsight.getNameMatchScore());
         }
+    }
+
+    @Test
+    public void parseDataBlock() {
+        String response = readMockResponse("compinfo");
+        Map<String, Object> result = DirectPlusUtils.parseDataBlock(response);
+        Assert.assertNotNull(result.get("TradeStyleName"));
+        System.out.println(JsonUtils.pprint(result));
     }
 
     private String readMockResponse(String name) {

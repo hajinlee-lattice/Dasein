@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
+import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -32,24 +33,24 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         super(hostPort, "dcp");
     }
 
-    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadRequest uploadRequest) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
-        return post("create upload", url, uploadConfig, UploadDetails.class);
+        return post("create upload", url, uploadRequest, UploadDetails.class);
     }
 
-    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
-        String url = constructUrl(baseUrl, customerSpace, sourceId);
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}?includeConfig={includeConfig}";
+        String url = constructUrl(baseUrl, customerSpace, sourceId, includeConfig.toString());
         if (status != null) {
-            url = url + "?status=" + status;
+            url = url + "&status=" + status;
         }
         return JsonUtils.convertList(get("get uploads", url, List.class), UploadDetails.class);
     }
 
-    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}?includeConfig={includeConfig}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, includeConfig.toString());
         return get("Get Upload by UploadId", url, UploadDetails.class);
     }
 

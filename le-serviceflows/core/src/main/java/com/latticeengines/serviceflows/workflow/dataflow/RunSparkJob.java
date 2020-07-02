@@ -42,7 +42,6 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
         } else {
             log.info("Spark job config is null, skip submitting spark job.");
         }
-        clearAllWorkspacesAsync();
     }
 
     protected void overlayTableSchema(Table resultTable, Map<String, Attribute> attributeMap) {

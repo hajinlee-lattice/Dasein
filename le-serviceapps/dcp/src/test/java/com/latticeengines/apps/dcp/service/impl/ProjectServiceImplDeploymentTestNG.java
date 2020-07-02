@@ -34,7 +34,6 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
                 Project.ProjectType.Type1, "test@dnb.com");
         Assert.assertNotNull(details);
         Assert.assertNotNull(details.getProjectId());
-        Assert.assertNotNull(details.getDropFolderAccess());
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, details.getProjectId(),
                 "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
 
@@ -56,7 +55,6 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
                 Project.ProjectType.Type1, "test@dnb.com");
         Assert.assertNotNull(details);
         Assert.assertNotNull(details.getProjectId());
-        Assert.assertNotNull(details.getDropFolderAccess());
         Assert.assertNotNull(details.getRecipientList());
         Assert.assertEquals(details.getRecipientList().size(), 1);
 
@@ -65,7 +63,7 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
         recipientList.add("test@test.com");
 
         projectService.updateRecipientList(mainCustomerSpace, details.getProjectId(), recipientList);
-        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId());
+        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId(), Boolean.FALSE);
         Assert.assertNotNull(details.getRecipientList());
         Assert.assertEquals(details.getRecipientList().size(), 2);
 

@@ -38,13 +38,15 @@ public interface ServingStoreProxy {
             DataCollection.Version version);
 
     Map<String, Boolean> getAttrsUsage(String customerSpace, BusinessEntity entity, ColumnSelection.Predefined group,
-            Set<String> attributes, DataCollection.Version version);
+                                       String attributeSetName, Set<String> attributes, DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========
 
     // ========== BEGIN: Get Metadata From Cache ==========
     // only use cache when you have performance needs.
     // otherwise using above non-cached apis gives more up-to-date info.
     List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity);
+
+    List<ColumnMetadata> getDateAttrsFromCache(String customerSpace, BusinessEntity entity);
 
     Set<String> getServingStoreColumnsFromCache(String customerSpace, BusinessEntity entity);
 

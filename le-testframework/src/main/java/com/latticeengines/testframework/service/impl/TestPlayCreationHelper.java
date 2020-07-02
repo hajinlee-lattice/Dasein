@@ -795,6 +795,7 @@ public class TestPlayCreationHelper {
         aiModel.setModelingJobId(modelSummary.getApplicationId());
         aiModel.setModelingJobStatus(JobStatus.COMPLETED);
         aiModel.setModelSummaryId(modelSummary.getId());
+        aiModel.setPythonMajorVersion(modelSummary.getPythonMajorVersion());
         aiModel.setPredictionType(PredictionType.EXPECTED_VALUE);
         ratingEngineProxy.updateRatingModel(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(), aiModel);
 

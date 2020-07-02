@@ -4,6 +4,8 @@ import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 
 public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
+    public static final String NAME = "ExportTimelineRawTableToDynamoStepConfiguration";
+
     @Override
     public boolean needEmptyFailed() {
         return false;

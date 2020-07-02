@@ -2,7 +2,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.HASH;
 import static com.latticeengines.domain.exposed.cdl.activity.StreamDimension.Usage.Dedup;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDateId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedActivityStream;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedActivityStreamDelta;
 
@@ -65,7 +65,7 @@ public class AggActivityStreamToDaily
 
     private static final Logger log = LoggerFactory.getLogger(AggActivityStreamToDaily.class);
 
-    static final String BEAN_NAME = "aggActivityStreamToDaily";
+    public static final String BEAN_NAME = "aggActivityStreamToDaily";
 
     private static final String DAILY_STORE_TABLE_FORMAT = "DailyStream_%s_%s";
     private static final String DAILY_STORE_DELTA_TABLE_FORMAT = "DailyStream_Delta_%s_%s";
@@ -92,8 +92,7 @@ public class AggActivityStreamToDaily
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
         Map<String, String> dailyDeltaTableNames = getMapObjectFromContext(DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME, String.class, String.class);
-        Map<String, Table> rawStreamTableNames = getTablesFromMapCtxKey(customerSpace.toString(),
-                RAW_ACTIVITY_STREAM_TABLE_NAME);
+        Map<String, Table> rawStreamTableNames = getRawStreamTables();
         Map<String, Table> rawStreamDeltaTables = getTablesFromMapCtxKey(customerSpace.toString(),
                 RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME); // unprocessed raw input. will be processed to raw in this step
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
@@ -171,18 +170,18 @@ public class AggActivityStreamToDaily
                     if (importDelta == null) {
                         throw new IllegalStateException(String.format("Stream %s is set to incremental update but no import delta table found", streamId));
                     }
-                    units.add(importDelta.partitionedToHdfsDataUnit(streamId, Collections.singletonList(__StreamDateId.name())));
+                    units.add(importDelta.partitionedToHdfsDataUnit(streamId, Collections.singletonList(StreamDateId.name())));
                     log.info(String.format("Added delta table %s to stream %s for incremental update.", importDelta.getName(), streamId));
                     Table dailyStoreBatch = metadataProxy.getTable(customerSpace.toString(), dailyStoreActiveBatchNames.get(streamId));
                     if (dailyStoreBatch == null) {
                         log.info("Stream {} is set to incremental update but no daily batch table found. Delta table will be taken as new batch store.", streamId);
                         details.setLabels(Collections.singletonList(ActivityMetricsGroupUtils.NO_BATCH));
                     } else {
-                        units.add(dailyStoreBatch.partitionedToHdfsDataUnit(streamId, Collections.singletonList(__StreamDateId.name())));
+                        units.add(dailyStoreBatch.partitionedToHdfsDataUnit(streamId, Collections.singletonList(StreamDateId.name())));
                     }
                 } else {
                     // stream going through normal rebuild path
-                    units.add(table.partitionedToHdfsDataUnit(streamId, Collections.singletonList(__StreamDateId.name())));
+                    units.add(table.partitionedToHdfsDataUnit(streamId, Collections.singletonList(StreamDateId.name())));
                 }
                 detailsMap.put(streamId, details);
             });
@@ -196,7 +195,17 @@ public class AggActivityStreamToDaily
         }
     }
 
+    private Map<String, Table> getRawStreamTables() {
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
+            return getTablesFromMapCtxKey(customerSpace.toString(), ACTIVITY_MIGRATED_RAW_STREAM);
+        }
+        return getTablesFromMapCtxKey(customerSpace.toString(), RAW_ACTIVITY_STREAM_TABLE_NAME);
+    }
+
     private Map<String, String> getActiveDailyStoreTableNames(List<String> streamIds) {
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
+            return getMapObjectFromContext(ACTIVITY_MIGRATED_DAILY_STREAM, String.class, String.class);
+        }
         return dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), AggregatedActivityStream, inactive.complement(), streamIds);
     }
 

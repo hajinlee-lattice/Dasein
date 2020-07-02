@@ -3,7 +3,12 @@ package com.latticeengines.datacloud.match.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchDataProfile;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -62,6 +68,12 @@ public final class DirectPlusUtils {
                 if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
                     parts.add(String.format("telephoneNumber=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
                 }
+                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet())) {
+                    parts.add(String.format("streetAddressLine1=%s", urlEncode(context.getInputNameLocation().getStreet())));
+                }
+                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet2())) {
+                    parts.add(String.format("streetAddressLine2=%s", urlEncode(context.getInputNameLocation().getStreet2())));
+                }
                 break;
             case REALTIME_EMAIL:
                 if (!StringUtils.isEmpty(context.getInputEmail())) {
@@ -84,6 +96,89 @@ public final class DirectPlusUtils {
         }
         return StringUtils.join(parts, "&");
     }
+
+    public static Map<String, Object> parseDataBlock(String response) {
+        Map<String, Object> result = new HashMap<>();
+        List<PrimeColumn> mds = getDataBlockMetadata();
+        JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
+        // cache of jsonPath -> jsonNode
+        ConcurrentMap<String, JsonNode> nodeCache = new ConcurrentHashMap<>();
+        mds.forEach(md -> {
+            String jsonPath = md.getJsonPath();
+            JsonNode jsonNode = nodeCache.computeIfAbsent(jsonPath, (key) -> getNodeAt(root, key, nodeCache));
+            String value = (String) toValue(jsonNode);
+            String attrName = md.getAttrName();
+            result.put(attrName, value);
+        });
+        return result;
+    }
+
+    private static Object toValue(JsonNode jsonNode) {
+        if (jsonNode == null) {
+            return null;
+        } else {
+            switch (jsonNode.getNodeType()) {
+                case NULL:
+                case MISSING:
+                    return null;
+                case BOOLEAN:
+                    return jsonNode.asBoolean();
+                case STRING:
+                    return jsonNode.asText();
+                case NUMBER:
+                    return jsonNode.asDouble();
+                default:
+                    throw new UnsupportedOperationException("Cannot convert json node of type " //
+                            + jsonNode.getNodeType() + " to a value object.");
+            }
+        }
+    }
+
+    private static JsonNode getNodeAt(JsonNode root, String path, ConcurrentMap<String, JsonNode> nodeCache) {
+        if (nodeCache.containsKey(path)) {
+            return nodeCache.get(path);
+        } else {
+            if (path.contains(".")) {
+                List<String> parts = Arrays.asList(path.split("\\."));
+                String parent = StringUtils.join(parts.subList(0, parts.size() - 1), '.');
+                JsonNode parentNode = nodeCache.computeIfAbsent(parent, (key) -> getNodeAt(root, key, nodeCache));
+                if (parentNode instanceof ArrayNode) {
+                    ArrayNode arrayNode = (ArrayNode) parentNode;
+                    if (arrayNode.size() == 0) {
+                        parentNode = null;
+                    } else {
+                        parentNode = parentNode.get(0);
+                    }
+                }
+                String tail = parts.get(parts.size() - 1);
+                if (parentNode != null && parentNode.has(tail)) {
+                    return parentNode.get(tail);
+                } else {
+                    return null;
+                }
+            } else {
+                return root.get(path);
+            }
+        }
+    }
+
+    // to be changed to metadata driven
+    public static List<PrimeColumn> getDataBlockMetadata() {
+        return Arrays.asList(
+                new PrimeColumn("DunsNumber", "D-U-N-S Number", "organization.duns"),
+                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryAddress.addressCounty.name"),
+                new PrimeColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames.name"),
+                new PrimeColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1"),
+                new PrimeColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2"),
+                new PrimeColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name"),
+                new PrimeColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name"),
+                new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
+                new PrimeColumn("PrimaryAddressCountyName", "Primary Address County Name", "organization.primaryAddress.addressCounty.name"),
+                new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
+                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4")
+        );
+    }
+
 
     public static void parseJsonResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);
@@ -113,7 +208,7 @@ public final class DirectPlusUtils {
         candidate.setDuns(duns);
         candidate.setOperatingStatus(JsonUtils.parseStringValueAtPath(jsonNode, "organization", "dunsControlStatus", "operatingStatus", "description"));
         JsonNode orgNode = JsonUtils.tryGetJsonNode(jsonNode, "organization");
-        NameLocation nameLocation = parseNameLocation(orgNode, duns);
+        NameLocation nameLocation = parseNameLocation(orgNode);
         candidate.setNameLocation(nameLocation);
 
         JsonNode insightNode = JsonUtils.tryGetJsonNode(jsonNode, "matchQualityInformation");
@@ -124,7 +219,7 @@ public final class DirectPlusUtils {
         return candidate;
     }
 
-    private static NameLocation parseNameLocation(JsonNode orgNode, String duns) {
+    private static NameLocation parseNameLocation(JsonNode orgNode) {
         NameLocation nameLocation = new NameLocation();
         String name = JsonUtils.parseStringValueAtPath(orgNode, "primaryName");
         nameLocation.setName(name);
@@ -138,18 +233,6 @@ public final class DirectPlusUtils {
                 }
             }
         }
-
-//        // trying to get an example of tradeStyleNames output
-//        if (orgNode.has("tradeStyleNames") && orgNode.get("tradeStyleNames").size() > 0) {
-//            ArrayNode nameNodes = (ArrayNode) orgNode.get("telephone");
-//            for (JsonNode nameNode: nameNodes) {
-//                String tradeStyleName = JsonUtils.parseStringValueAtPath(nameNode, "name");
-//                if (StringUtils.isNotBlank(tradeStyleName)) {
-//                    nameLocation.setTradeStyleName(tradeStyleName);
-//                    break;
-//                }
-//            }
-//        }
 
         JsonNode addrNode = JsonUtils.tryGetJsonNode(orgNode, "primaryAddress");
         String city = JsonUtils.parseStringValueAtPath(addrNode, "addressLocality", "name");
@@ -179,6 +262,8 @@ public final class DirectPlusUtils {
 
     private static DnBMatchInsight parseMatchInsight(JsonNode insightNode) {
         DnBMatchInsight matchInsight = new DnBMatchInsight();
+        Double nameMatchScore = JsonUtils.parseDoubleValueAtPath(insightNode, "nameMatchScore");
+        matchInsight.setNameMatchScore(nameMatchScore);
         Integer confidenceCode = JsonUtils.parseIntegerValueAtPath(insightNode, "confidenceCode");
         matchInsight.setConfidenceCode(confidenceCode);
         String matchGrade = JsonUtils.parseStringValueAtPath(insightNode, "matchGrade");

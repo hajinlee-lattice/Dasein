@@ -60,6 +60,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final String TEST_ACCOUNT_ERROR_FILE = "Account_dup_header.csv";
 
+    private static final String USER = "test@dnb.com";
+
     @Inject
     private DropBoxProxy dropBoxProxy;
 
@@ -99,17 +101,20 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         request.setProjectId(projectDetails.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
+        request.setUserId(USER);
         ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
 
-        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null, Boolean.FALSE);
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 1);
         UploadDetails upload = uploadList.get(0);
         uploadId = upload.getUploadId();
 
         verifyImport();
+
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testImport")
@@ -130,7 +135,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.FAILED);
-        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null, Boolean.FALSE);
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 2);
         UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
@@ -140,11 +145,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     private void verifyImport() {
-        UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId, Boolean.TRUE);
         log.info(JsonUtils.serialize(upload));
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
 
+        Assert.assertEquals(upload.getCreatedBy(), USER);
         Assert.assertEquals(upload.getStatus(), Upload.Status.FINISHED);
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
         Assert.assertNull(upload.getUploadDiagnostics().getLastErrorMessage());
@@ -152,8 +158,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
         // Only verify the Error File if there are errors during ingestion and thus the file exists.
-        if (upload.getStatistics().getImportStats().getErrorCnt() > 0) {
-            System.out.println("Found " + upload.getStatistics().getImportStats().getErrorCnt() +
+        if (upload.getStatistics().getImportStats().getFailedIngested() > 0) {
+            System.out.println("Found " + upload.getStatistics().getImportStats().getFailedIngested() +
                     " errors.  Verifying error file.");
             verifyErrorFile(upload);
         } else {
@@ -173,8 +179,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 upload.getUploadConfig().getUploadImportedErrorFilePath());
         System.out.println("Error file path=" + errorFileKey);
         Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
-        Assert.assertNotNull(upload.getStatistics().getImportStats().getErrorCnt());
-        Assert.assertEquals(upload.getStatistics().getImportStats().getErrorCnt().longValue(), 5L);
+        Assert.assertNotNull(upload.getStatistics().getImportStats().getFailedIngested());
+        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 5L);
     }
 
     private void prepareTenant() {
@@ -208,17 +214,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadStats uploadStats = upload.getStatistics();
         System.out.println(JsonUtils.serialize(uploadStats));
         Assert.assertNotNull(uploadStats);
-
         UploadStats.ImportStats importStats = uploadStats.getImportStats();
         Assert.assertNotNull(importStats);
-        Assert.assertTrue(importStats.getSuccessCnt() > 0);
+        Assert.assertTrue(importStats.getSuccessfullyIngested() > 0);
 
         UploadStats.MatchStats matchStats = uploadStats.getMatchStats();
         Assert.assertNotNull(matchStats);
-        Assert.assertTrue(matchStats.getAcceptedCnt() > 0);
+        Assert.assertTrue(matchStats.getMatched() > 0);
 
-        Assert.assertEquals(Long.valueOf(matchStats.getAcceptedCnt() + //
-                matchStats.getPendingReviewCnt() + matchStats.getRejectedCnt()), importStats.getSuccessCnt());
+        Assert.assertEquals(Long.valueOf(matchStats.getMatched() + //
+                matchStats.getPendingReviewCnt() + matchStats.getUnmatched()), importStats.getSuccessfullyIngested());
     }
 
     private void verifyMatchResult(UploadDetails upload) {
@@ -296,10 +301,28 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyDataReport() {
         DataReport report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadId);
-        System.out.println(JsonUtils.serialize(report));
         Assert.assertNotNull(report);
+        System.out.println(JsonUtils.serialize(report));
+        DataReport.BasicStats basicStats  = report.getBasicStats();
+        Assert.assertNotNull(basicStats);
+        Assert.assertTrue(basicStats.getSuccessCnt() > 0);
+        Assert.assertTrue(basicStats.getMatchedCnt() > 0);
+        Assert.assertEquals(Long.valueOf(basicStats.getMatchedCnt() + //
+                basicStats.getPendingReviewCnt() + basicStats.getUnmatchedCnt()), basicStats.getSuccessCnt());
+
         DataReport.InputPresenceReport inputPresenceReport  = report.getInputPresenceReport();
         Assert.assertNotNull(inputPresenceReport);
         Assert.assertTrue(CollectionUtils.isNotEmpty(inputPresenceReport.getPresenceList()));
+
+        DataReport.GeoDistributionReport geoDistributionReport = report.getGeoDistributionReport();
+        Assert.assertNotNull(geoDistributionReport);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(geoDistributionReport.getGeographicalDistributionList()));
+
+        DataReport.DuplicationReport duplicationReport = report.getDuplicationReport();
+        Assert.assertNotNull(duplicationReport);
+        Assert.assertTrue(duplicationReport.getDistinctRecords() > 0);
+
+        DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
+        Assert.assertNotNull(matchToDUNSReport);
     }
 }

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(SoftDeleteActivityStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -67,8 +68,14 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
     }
 
     private Map<String, String> updateRawStreamTableEntries() {
-        Map<String, String> updated = new HashMap<>(configuration.getActiveRawStreamTables());
+        Map<String, String> updated = new HashMap<>(getActiveRawStreamTables());
+        log.info("current pipeline version: {}", pipelineVersion);
+        log.info("original raw stream tables: {}", updated);
+        rawStreamsAfterDelete = rawStreamsAfterDelete.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> TableUtils.getFullTableName(entry.getValue(), pipelineVersion)));
+        log.info("raw stream tables after delete: {}", rawStreamsAfterDelete);
         updated.putAll(rawStreamsAfterDelete);
+        log.info("updated raw stream tables entries: {}", updated);
         return updated;
     }
 
@@ -112,7 +119,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
 
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        configuration.getActiveRawStreamTables().forEach((streamId, tableName) -> {
+        getActiveRawStreamTables().forEach((streamId, tableName) -> {
             List<DeleteActionConfiguration> deleteConfigsForStream = softDeleteActivityActions.stream().filter(action -> {
                 DeleteActionConfiguration config = (DeleteActionConfiguration) action.getActionConfiguration();
                 return config.hasStream(streamId);
@@ -143,6 +150,13 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         }
     }
 
+    private Map<String, String> getActiveRawStreamTables() {
+        if (Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))) {
+            return getMapObjectFromContext(ACTIVITY_MIGRATED_RAW_STREAM, String.class, String.class);
+        }
+        return configuration.getActiveRawStreamTables();
+    }
+
     private void appendSoftDeleteStreamStep(List<TransformationStepConfig> steps, boolean hasDeleteImport, List<DeleteActionConfiguration> deleteConfigsForStream, String idColumn, String streamId, String rawStreamTable) {
         SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
         softDeleteConfig.setIdColumn(idColumn);
@@ -156,7 +170,6 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         String targetTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
-        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         setTargetTable(step, targetTablePrefix);
         rawStreamsAfterDelete.put(streamId, targetTablePrefix);
 
@@ -164,9 +177,11 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         if (hasDeleteImport) {
             log.info("Add batch store table {} and delete import table for soft delete.", rawStreamTable);
             step.setInputSteps(Collections.singletonList(steps.size() - 1));
+            softDeleteConfig.setDeleteSourceIdx(0);
         } else {
             log.info("Add batch store table {} for soft delete by only time ranges.", rawStreamTable);
         }
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         steps.add(step);
     }
 
@@ -189,8 +204,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         step.setTransformer(TRANSFORMER_MERGE_TS_DELETE_TXFMR);
         Map<Integer, List<Long>> timeRanges = new HashMap<>();
         int timeRangeIdx = 0;
-        for (int i = 0; i < deleteConfigsForStream.size(); i++) {
-            DeleteActionConfiguration deleteConfig = deleteConfigsForStream.get(i);
+        for (DeleteActionConfiguration deleteConfig : deleteConfigsForStream) {
             if (StringUtils.isNotBlank(deleteConfig.getDeleteDataTable())) {
                 // only merge delete with delete import, skip ones deleting only by time range
                 addBaseTables(step, deleteConfig.getDeleteDataTable());

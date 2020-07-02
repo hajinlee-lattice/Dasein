@@ -29,7 +29,8 @@ public class DataReportResource {
     @ResponseBody
     @ApiOperation("Get data report")
     public DataReport getDataReport(@RequestParam(value = "level") DataReportRecord.Level level,
-                                    @RequestParam(value = "ownerId", required = false) String ownerId) {
-        return dataReportService.getDataReport(level, ownerId);
+                                    @RequestParam(value = "ownerId", required = false) String ownerId,
+                                    @RequestParam(value = "mock", required = false, defaultValue = "false") Boolean mock) {
+        return dataReportService.getDataReport(level, ownerId, mock);
     }
 }

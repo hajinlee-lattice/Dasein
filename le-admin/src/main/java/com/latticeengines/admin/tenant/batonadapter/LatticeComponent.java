@@ -1,6 +1,7 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
@@ -23,6 +25,7 @@ import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -123,15 +126,9 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     }
 
     public static DocumentDirectory constructConfigDirectory(String defaultJson, String metadataJson) {
-        try {
-            String configStr = IOUtils
-                    .toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
-            String metaStr = null;
-            if (metadataJson != null) {
-                metaStr = IOUtils.toString(
-                        Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataJson), "UTF-8");
-            }
-            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configStr, metaStr);
+        try (InputStream defaultIs = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson)) {
+            Preconditions.checkNotNull(defaultIs);
+            SerializableDocumentDirectory sDir = readDocumentDirectory(defaultIs, metadataJson);
             return SerializableDocumentDirectory.deserialize(sDir);
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
@@ -139,19 +136,28 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     }
 
     public static DocumentDirectory constructMetadataDirectory(String defaultJson, String metadataJson) {
-        try {
-            String configStr = IOUtils
-                    .toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
-            String metaStr = null;
-            if (metadataJson != null) {
-                metaStr = IOUtils.toString(
-                        Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataJson), "UTF-8");
-            }
-            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configStr, metaStr);
+        try (InputStream defaultIs = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson)) {
+            Preconditions.checkNotNull(defaultIs);
+            SerializableDocumentDirectory sDir = readDocumentDirectory(defaultIs, metadataJson);
             return sDir.getMetadataAsDirectory();
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
         }
+    }
+
+    private static SerializableDocumentDirectory readDocumentDirectory(@NotNull InputStream defaultIs,
+            @NotNull String metadataJson) throws IOException {
+        Preconditions.checkNotNull(defaultIs);
+        String configStr = IOUtils.toString(defaultIs, "UTF-8");
+        String metaStr = null;
+        if (metadataJson != null) {
+            try (InputStream metaIs = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream(metadataJson)) {
+                Preconditions.checkNotNull(metaIs);
+                metaStr = IOUtils.toString(metaIs, "UTF-8");
+            }
+        }
+        return new SerializableDocumentDirectory(configStr, metaStr);
     }
 
     public SerializableDocumentDirectory getSerializableDefaultConfiguration() {

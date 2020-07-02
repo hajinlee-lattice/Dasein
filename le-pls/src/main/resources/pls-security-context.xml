@@ -506,6 +506,15 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/data-blocks/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/pls/projects/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
@@ -553,6 +562,16 @@
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="/pls/datareport/**" access="hasRole('View_DCP_Projects')"/>
+    </security:http>
+
+    <security:http use-expressions="true"
+                   pattern="/pls/matchrules/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="/pls/matchrules/**" access="hasRole('Edit_DCP_Projects')"/>
     </security:http>
 
     <security:http use-expressions="true"

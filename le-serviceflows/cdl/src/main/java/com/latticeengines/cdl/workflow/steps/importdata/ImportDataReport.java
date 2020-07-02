@@ -57,6 +57,14 @@ public class ImportDataReport extends BaseReportStep<ImportDataReportConfigurati
                     .put("deduped_rows", 0L)
                     .putPOJO("product_summary", entityValidationSummary).put("total_failed_rows",
                     totalFailed);
+        } else {
+            totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
+            totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
+            getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords())
+                    .put("total_rows", totalRows)
+                    .put("ignored_rows", eaiImportJobDetail.getIgnoredRows())
+                    .put("imported_rows", eaiImportJobDetail.getProcessedRecords())
+                    .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
         }
         super.execute();
         failWorkflowIfNeeded(entity, errorLineInValidationStep, totalFailed, entityValidationSummary);

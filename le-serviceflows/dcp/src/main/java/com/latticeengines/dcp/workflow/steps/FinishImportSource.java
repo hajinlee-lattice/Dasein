@@ -8,9 +8,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 
@@ -23,6 +26,9 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
 
     @Inject
     private UploadProxy uploadProxy;
+
+    @Inject
+    private DataReportProxy dataReportProxy;
 
     private String uploadId;
     private String customerSpaceStr;
@@ -49,6 +55,17 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         long statsId = configuration.getStatsPid();
         uploadProxy.updateStatsContent(customerSpaceStr, uploadId, statsId, stats);
         uploadProxy.setLatestStats(customerSpaceStr, uploadId, statsId);
+
+        DataReport.BasicStats basicStats = new DataReport.BasicStats();
+        basicStats.setTotalSubmitted(stats.getImportStats().getSubmitted());
+        basicStats.setSuccessCnt(stats.getImportStats().getSuccessfullyIngested());
+        basicStats.setErrorCnt(stats.getImportStats().getFailedIngested());
+        basicStats.setMatchedCnt(stats.getMatchStats().getMatched());
+        basicStats.setUnmatchedCnt(stats.getMatchStats().getUnmatched());
+        basicStats.setPendingReviewCnt(stats.getMatchStats().getPendingReviewCnt());
+
+        dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
+                uploadId, basicStats);
     }
 
 }

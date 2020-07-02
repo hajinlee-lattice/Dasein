@@ -50,19 +50,19 @@ public class UploadServiceImpl implements UploadService {
     private WorkflowProxy workflowProxy;
 
     @Override
-    public List<UploadDetails> getUploads(String customerSpace, String sourceId) {
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
-        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
+        return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
-    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
-        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
+        return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
-    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig, String userId) {
         if (StringUtils.isEmpty(sourceId)) {
             throw new RuntimeException("Cannot create upload bind with empty sourceId!");
         }
@@ -70,12 +70,13 @@ public class UploadServiceImpl implements UploadService {
         Upload upload = new Upload();
         upload.setUploadId(uploadId);
         upload.setSourceId(sourceId);
+        upload.setCreatedBy(userId);
         upload.setTenant(MultiTenantContext.getTenant());
         upload.setStatus(Upload.Status.NEW);
         upload.setUploadConfig(uploadConfig);
         uploadEntityMgr.create(upload);
 
-        return getUploadDetails(upload);
+        return getUploadDetails(upload, Boolean.TRUE);
     }
 
     @Override
@@ -171,13 +172,13 @@ public class UploadServiceImpl implements UploadService {
         }
         statisticsEntityMgr.setAsLatest(container);
         upload.setStatistics(container.getStatistics());
-        return getUploadDetails(upload);
+        return getUploadDetails(upload, Boolean.TRUE);
     }
 
     @Override
-    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
-        return getUploadDetails(upload);
+        return getUploadDetails(upload, includeConfig);
     }
 
     @Override
@@ -220,7 +221,7 @@ public class UploadServiceImpl implements UploadService {
         return randomUploadId;
     }
 
-    private UploadDetails getUploadDetails(Upload upload) {
+    private UploadDetails getUploadDetails(Upload upload, Boolean includeConfig) {
         UploadDetails details = new UploadDetails();
         details.setUploadId(upload.getUploadId());
         details.setStatistics(upload.getStatistics());
@@ -230,8 +231,11 @@ public class UploadServiceImpl implements UploadService {
         } else {
             details.setUploadDiagnostics(new UploadDiagnostics());
         }
-        details.setUploadConfig(upload.getUploadConfig());
+        if(includeConfig) {
+            details.setUploadConfig(upload.getUploadConfig());
+        }
         details.setSourceId(upload.getSourceId());
+        details.setCreatedBy(upload.getCreatedBy());
         return details;
     }
 }

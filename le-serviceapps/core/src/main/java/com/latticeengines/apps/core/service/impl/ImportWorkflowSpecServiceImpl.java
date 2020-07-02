@@ -73,6 +73,11 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
             throw new IOException("Null Spec InputStream read from S3 bucket " + s3Bucket + " and path " + s3Path);
         }
 
+        // Set up the Section Configuration component of the the Spec with default values for backwards compatibility.
+        // This section allows the meaning of the Sections to be configured in the Spec rather than hard-coded but
+        // older Specs do not support this functionality, and thus default values must be set.
+        workflowSpec.setDefaultSectionConfiguration();
+
         return workflowSpec;
     }
 

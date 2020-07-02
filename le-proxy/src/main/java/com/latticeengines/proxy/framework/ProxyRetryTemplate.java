@@ -13,6 +13,8 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 public class ProxyRetryTemplate extends RetryTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(ProxyRetryTemplate.class);
@@ -23,6 +25,7 @@ public class ProxyRetryTemplate extends RetryTemplate {
     private HttpMethod verb;
     private String url;
     private Object bodyToLog;
+    private final int MAX_BODY_LOGGING_SIZE = 1000;
 
     public ProxyRetryTemplate(int maxAttempts, long initialWaitMsec, double multiplier) {
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
@@ -107,7 +110,8 @@ public class ProxyRetryTemplate extends RetryTemplate {
             boolean logPlayload) {
         String msg = String.format("Failed to invoke %s by %s url %s", method, verb, url);
         if (logPlayload) {
-            msg += String.format(" with body %s", payload == null ? "null" : payload.toString());
+            msg += String.format(" with body %s", payload == null ? "null"
+                    : StringUtils.truncate(JsonUtils.serialize(payload), MAX_BODY_LOGGING_SIZE));
         }
         if (attempt != null) {
             msg += String.format(".  (Attempt=%d)", attempt);

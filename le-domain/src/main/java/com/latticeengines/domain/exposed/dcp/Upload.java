@@ -63,6 +63,9 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "SOURCE_ID", nullable = false)
     private String sourceId;
 
+    @Column(name = "CREATED_BY")
+    private String createdBy;
+
     @Column(name = "STATUS", length = 40)
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -136,6 +139,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public Status getStatus() {

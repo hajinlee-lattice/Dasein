@@ -99,6 +99,7 @@ public final class JsonUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T deserialize(ObjectMapper objectMapper, String jsonStr, Class<T> clazz) {
         if (jsonStr == null) {
             return null;
@@ -106,13 +107,17 @@ public final class JsonUtils {
         if (objectMapper == null) {
             objectMapper = getObjectMapper();
         }
-        T deserializedSchema;
+        T deserializedValue;
         try {
-            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
+            if (JsonNode.class.equals(clazz)) {
+                deserializedValue = (T) objectMapper.readTree(jsonStr.getBytes());
+            } else {
+                deserializedValue = objectMapper.readValue(jsonStr.getBytes(), clazz);
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        return deserializedSchema;
+        return deserializedValue;
     }
 
     public static <T> T deserialize(String jsonStr, Class<T> clazz, Boolean allowUnquotedFieldName) {
@@ -308,6 +313,10 @@ public final class JsonUtils {
         return toReturn;
     }
 
+    public static Double parseDoubleValueAtPath(JsonNode root, String... paths) {
+        return parseValueAtPath(root, Double.class, paths);
+    }
+
     public static Integer parseIntegerValueAtPath(JsonNode root, String... paths) {
         return parseValueAtPath(root, Integer.class, paths);
     }
@@ -328,6 +337,9 @@ public final class JsonUtils {
                 case "Integer":
                     //noinspection unchecked
                     return (T) Integer.valueOf(node.asInt());
+                case "Double":
+                    //noinspection unchecked
+                    return (T) Double.valueOf(node.asDouble());
                 default:
                     throw new UnsupportedOperationException("Unknown json type " + clz);
             }
@@ -358,12 +370,9 @@ public final class JsonUtils {
                 throw new IOException(
                         "POJO was null. Failed to deserialize InputStream containing string: " + jsonString);
             }
-        } catch (IOException e1) {
+        } catch (IOException | IllegalStateException e1) {
             throw new IOException("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath,
                     e1);
-        } catch (IllegalStateException e2) {
-            throw new IOException("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath,
-                    e2);
         }
         return pojo;
     }

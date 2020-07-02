@@ -132,7 +132,7 @@ public class DynamoServiceImpl implements DynamoService {
 
     @Override
     public Table createTable(String tableName, long readCapacityUnits, long writeCapacityUnits, String partitionKeyName,
-            String partitionKeyType, String sortKeyName, String sortKeyType) {
+            String partitionKeyType, String sortKeyName, String sortKeyType, String configCMK) {
         ArrayList<KeySchemaElement> keySchema = new ArrayList<>();
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
 
@@ -148,6 +148,9 @@ public class DynamoServiceImpl implements DynamoService {
         ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
                 .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits);
         SSESpecification sseSpecification = new SSESpecification().withEnabled(true);
+        if (StringUtils.isNotBlank(configCMK)) {
+            customerCMK = configCMK;
+        }
         if (StringUtils.isNotBlank(customerCMK)) {
             sseSpecification.withKMSMasterKeyId(customerCMK).withSSEType(SSEType.KMS);
         }

@@ -154,7 +154,12 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
     SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
-        jobConfig.setWorkspace(getRandomWorkspace());
+        if (customerSpace == null) {
+            customerSpace = parseCustomerSpace(configuration);
+        }
+        if (StringUtils.isBlank(jobConfig.getWorkspace())) {
+            jobConfig.setWorkspace(getRandomWorkspace());
+        }
         String configStr = JsonUtils.serialize(jobConfig);
         if (configStr.length() > 1000) {
             configStr = "long string";
@@ -186,6 +191,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         return workSpace;
     }
 
+    protected void keepRandomWorkspace(String workSpace) {
+        workSpaces.remove(workSpace);
+    }
+
     protected void clearTempData(DataUnit tempData) {
         new Thread(() -> {
             if (tempData instanceof HdfsDataUnit) {
@@ -202,11 +211,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }).start();
     }
 
-    protected void clearAllWorkspacesAsync() {
-        new Thread(this::clearAllWorkspaces).start();
-    }
-
-    protected void clearAllWorkspaces() {
+    private void clearAllWorkspaces() {
         List<String> toBeRemoved = new ArrayList<>();
         for (String workSpace: workSpaces) {
             try {

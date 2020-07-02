@@ -97,7 +97,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected BusinessEntity[] getEntitiesInStats() {
         return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, //
-                BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount };
+                BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount, BusinessEntity.CuratedContact };
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {

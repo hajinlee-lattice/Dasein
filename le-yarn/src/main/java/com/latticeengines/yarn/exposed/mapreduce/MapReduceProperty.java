@@ -13,5 +13,6 @@ public enum MapReduceProperty {
     MIN_INPUT_SPLIT_SIZE, //
     MAP_MEMORY_SIZE, //
     REDUCE_MEMORY_SIZE, //
-    VERSION
+    VERSION, //
+    PYTHON_MAJOR_VERSION
 }

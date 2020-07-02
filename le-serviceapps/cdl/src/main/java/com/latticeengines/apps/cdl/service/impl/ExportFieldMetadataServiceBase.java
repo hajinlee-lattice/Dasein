@@ -206,6 +206,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     }
 
     protected Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities) {
+        return getServingMetadata(customerSpace, entities, null);
+    }
+
+    protected Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities, String attributeSetName) {
         Flux<ColumnMetadata> cms = Flux.empty();
         if (CollectionUtils.isNotEmpty(entities)) {
             List<ColumnMetadata> cmList;

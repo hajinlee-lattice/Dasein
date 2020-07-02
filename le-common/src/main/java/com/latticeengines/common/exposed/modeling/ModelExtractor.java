@@ -3,23 +3,25 @@ package com.latticeengines.common.exposed.modeling;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.net.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ModelExtractor {
     private static final Logger log = LoggerFactory.getLogger(ModelExtractor.class);
@@ -28,58 +30,38 @@ public class ModelExtractor {
         extractModelArtifacts(modelFilePath, targetDir, (dir, name) -> true);
     }
 
-    public void extractModelArtifacts(String modelFilePath, String targetDir, FilenameFilter filter) {
-        log.info(String.format("Extracting %s into %s", modelFilePath, targetDir));
-        JsonFactory f = new JsonFactory();
-        JsonParser parser = null;
-        boolean retrieveSupportFiles = false;
-        List<Map.Entry<String, String>> entries = new ArrayList<>();
-        try {
-            parser = f.createParser(new File(modelFilePath));
-            Map.Entry<String, String> entry = null;
-            while (parser.nextToken() != null) {
-                String fieldName = parser.getCurrentName();
-                if ("CompressedSupportFiles".equals(fieldName)) {
-                    retrieveSupportFiles = true;
+    public List<Pair<String, String>> extractModelArtifacts(InputStream modelFileIs, FilenameFilter filter) {
+        List<Pair<String, String>> pairs = new ArrayList<>();
+        JsonNode jsonNode = JsonUtils.deserialize(modelFileIs, JsonNode.class);
+        ArrayNode fileNodes = (ArrayNode) JsonUtils.tryGetJsonNode(jsonNode, "Model", "CompressedSupportFiles");
+        if (fileNodes != null) {
+            for (JsonNode fileNode : fileNodes) {
+                String fileName = fileNode.get("Key").asText();
+                if (filter.accept(null, fileName)) {
+                    pairs.add(Pair.of(fileName, fileNode.get("Value").asText()));
                 }
-
-                if (retrieveSupportFiles && "Key".equals(fieldName)) {
-                    String value = parser.getText();
-                    if (fieldName != null && !"Key".equals(value)) {
-                        if (entry == null) {
-                            entry = new AbstractMap.SimpleEntry<String, String>(value, null);
-                            entries.add(entry);
-                        }
-                    }
-                }
-                if (retrieveSupportFiles && "Value".equals(fieldName)) {
-                    String value = parser.getText();
-                    if (fieldName != null && !"Value".equals(value)) {
-                        entry.setValue(decodeValue(value));
-                        entry = null;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                parser.close();
-            } catch (IOException e) {
-                log.warn("Failed to close JsonParser!");
             }
         }
+        return pairs;
+    }
 
-        for (Map.Entry<String, String> entry : entries) {
+    public void extractModelArtifacts(String modelFilePath, String targetDir, FilenameFilter filter) {
+        log.info(String.format("Extracting %s into %s", modelFilePath, targetDir));
+        List<Pair<String, String>> entries = new ArrayList<>();
+        try {
+            FileInputStream is = new FileInputStream(new File(modelFilePath));
+            entries.addAll(extractModelArtifacts(is, filter));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse model.json", e);
+        }
+
+        for (Pair<String, String> entry: entries) {
             try {
-                if (filter != null && !filter.accept(null, entry.getKey())) {
-                    continue;
-                } else {
-                    FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue(),
-                            Charset.defaultCharset());
-                }
+                FileUtils.write(new File(targetDir + "/" + entry.getKey()), decodeValue(entry.getValue()),
+                        Charset.defaultCharset());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to write model artifact file " + entry.getKey() //
+                        + " to local path " + targetDir);
             }
         }
     }

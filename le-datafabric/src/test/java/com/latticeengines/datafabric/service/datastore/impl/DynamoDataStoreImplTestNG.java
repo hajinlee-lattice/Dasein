@@ -49,7 +49,7 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
         repo = leEnv + "_" + leStack + "_testRepo";
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         teardown();
-        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
+        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null, null);
         ListTablesResult result = client.listTables();
         System.out.println("Tables: " + result.getTableNames());
     }

@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditUser;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.pls.SoftDeletable;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -60,7 +61,7 @@ import io.swagger.annotations.ApiModelProperty;
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable, SoftDeletable, HasTeamInfo {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable, SoftDeletable, HasTeamInfo, HasAuditUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -313,10 +314,12 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         isMasterSegment = masterSegment;
     }
 
+    @Override
     public String getCreatedBy() {
         return createdBy;
     }
 
+    @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }

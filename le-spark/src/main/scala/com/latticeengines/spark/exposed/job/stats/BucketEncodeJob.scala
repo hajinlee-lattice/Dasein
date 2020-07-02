@@ -1,15 +1,13 @@
-package com.latticeengines.spark.exposed.job.stats;
+package com.latticeengines.spark.exposed.job.stats
 
 import com.latticeengines.common.exposed.util.BitCodecUtils
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
-import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{BitEncodeUtils, BucketEncodeUtils}
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
-import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.{LongType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -88,38 +86,6 @@ class BucketEncodeJob extends AbstractSparkJob[BucketEncodeConfig] {
             })
             Row.fromSeq(values)
         })(RowEncoder(StructType(outputSchema)))
-    }
-
-    private def getRetainAttrs(input: DataFrame, config: BucketEncodeConfig): Option[DataFrame] = {
-        val retainAttrs: Seq[String] = input.columns.intersect(if (config.retainAttrs == null) Seq() else config.retainAttrs.asScala)
-        if (retainAttrs.isEmpty) {
-            None
-        } else {
-            Some(input.select(retainAttrs.map(col) : _*))
-        }
-    }
-
-    private def encodeAll(input: DataFrame, config: BucketEncodeConfig): DataFrame = {
-        input
-    }
-
-    private def encode2(input: DataFrame, eAttr: DCEncodedAttr): DataFrame = {
-        val srcAttrs = eAttr.getBktAttrs.asScala.map(ba => ba.getNominalAttr).map(col)
-        val selected = input.select(srcAttrs: _*)
-        val bAttrsMap: Map[String, DCBucketedAttr] = eAttr.getBktAttrs.asScala.map(ba => (ba.getNominalAttr, ba)).toMap
-        val bAttrs: Seq[DCBucketedAttr] = selected.columns.map(bAttrsMap(_))
-        selected.map(r => {
-            var encoded: Long = 0L
-            (0 until r.length).foreach(idx => {
-                val obj = r.get(idx)
-                val ba = bAttrs(idx)
-                val bktIdx = BucketEncodeUtils.bucket(obj, ba.getBucketAlgo)
-                val lowestBit = ba.getLowestBit
-                val numBits = ba.getNumBits
-                encoded = BitCodecUtils.setBits(encoded, lowestBit, numBits, bktIdx)
-            })
-            Row.fromSeq(Seq(encoded))
-        })(RowEncoder(StructType(List(StructField(eAttr.getEncAttr, LongType)))))
     }
 
 }

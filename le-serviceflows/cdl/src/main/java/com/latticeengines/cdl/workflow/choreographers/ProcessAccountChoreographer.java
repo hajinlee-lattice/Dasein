@@ -23,6 +23,7 @@ import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccount;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
+import com.latticeengines.cdl.workflow.steps.rebuild.EnrichLatticeAccount;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
@@ -61,6 +62,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private ProfileAccount profileAccount;
+
+    @Inject
+    private EnrichLatticeAccount enrichLatticeAccount;
 
     protected boolean rebuildNotForDataCloudChange = false;
     protected boolean dataCloudChanged = false;
@@ -115,6 +119,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         super.doInitialize(step);
         checkDataCloudChange(step);
         checkAttrLifeCycleChange(step);
+        hasLegacyDelete = hasLegacyDeleteActions(step);
     }
 
     void checkDataCloudChange(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -248,6 +253,15 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     private boolean hasLegacyDeleteActions(AbstractStep<? extends BaseStepConfiguration> step) {
         Set<Action> actions = step.getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
         return CollectionUtils.isNotEmpty(actions);
+    }
+
+    @Override
+    protected boolean isDecisionStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return super.isDecisionStep(step) || isEnrichLatticeAccountStep(step);
+    }
+
+    private boolean isEnrichLatticeAccountStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(enrichLatticeAccount.name());
     }
 
 }

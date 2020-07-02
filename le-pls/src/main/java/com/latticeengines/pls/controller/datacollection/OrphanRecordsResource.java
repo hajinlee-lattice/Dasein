@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.util.UIActionUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.pls.service.OrphanRecordsService;
 
@@ -33,7 +34,11 @@ public class OrphanRecordsResource {
 
     @GetMapping("/orphanexport/{exportId}")
     public void downloadOrphanArtifact(@PathVariable String exportId, HttpServletRequest request, HttpServletResponse response) {
-        orphanRecordsService.downloadOrphanArtifact(exportId, request, response);
+        try {
+            orphanRecordsService.downloadOrphanArtifact(exportId, request, response);
+        } catch (Exception ex) {
+            throw UIActionUtils.handleException(ex);
+        }
     }
 
     @GetMapping("/count")

@@ -53,7 +53,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "LETest1561082636718"; // "JLM1533618545277";
 
-    private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
+    private static final String LOADING_CHECKPOINT = UpdateTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -85,30 +85,27 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private RatingEngine ai1;
     private RatingEngine ai2;
     private RatingEngine ai3;
+    private RatingEngine ai4;
+    private RatingEngine ai5;
+    private RatingEngine ai6;
 
     private String uuid1;
     private String uuid2;
     private String uuid3;
+    private String uuid4;
+    private String uuid5;
+    private String uuid6;
 
     private ModelSummary modelSummary1;
     private ModelSummary modelSummary2;
     private ModelSummary modelSummary3;
+    private ModelSummary modelSummary4;
+    private ModelSummary modelSummary5;
+    private ModelSummary modelSummary6;
 
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
-        setup(USE_EXISTING_TENANT, ENABLE_AI_RATINGS);
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-    }
-
-    @Test(groups = "end2end")
-    public void runTest() {
-        processAnalyze(constructRequest());
-        verifyProcess();
-    }
-
-    @SuppressWarnings("deprecation")
-    private void setup(boolean useExistingTenant, boolean enableAIRatings) throws Exception {
-        if (useExistingTenant) {
+        if (USE_EXISTING_TENANT) {
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
             MultiTenantContext.setTenant(mainTestTenant);
             testBed.switchToSuperAdmin();
@@ -116,11 +113,12 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
             mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
             initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
             attachPlsProxies();
+            testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         } else {
             setupEnd2EndTestEnvironment();
             setupBusinessCalendar();
             Thread setupAIModelsThread = null;
-            if (enableAIRatings) {
+            if (ENABLE_AI_RATINGS) {
                 setupAIModelsThread = new Thread(this::setupAIModels);
                 setupAIModelsThread.start();
             }
@@ -136,15 +134,13 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 activateRatingEngine(rule2.getId());
             }).start();
 
-            if (enableAIRatings) {
+            if (ENABLE_AI_RATINGS) {
                 createModelingSegment();
                 MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
                         SEGMENT_NAME_MODELING);
                 Assert.assertNotNull(segment);
 
-                if(setupAIModelsThread != null) {
-                    setupAIModelsThread.join();
-                }
+                setupAIModelsThread.join();
 
                 modelSummaryProxy.downloadModelSummary(mainCustomerSpace);
                 initModelSummaries();
@@ -166,8 +162,34 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 ai3 = createCustomEventEngine(segment, modelSummary3);
                 Assert.assertNotNull(ai3.getSegment());
                 activateRatingEngine(ai3.getId());
+
+                ai4 = createCrossSellEngine(segment, modelSummary4, PredictionType.EXPECTED_VALUE);
+                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
+                        ai4.getId(), ai4.getLatestIteration().getId(), ModelingQueryType.TARGET);
+                Assert.assertTrue(targetCount > 100);
+                Assert.assertNotNull(ai4.getSegment());
+                activateRatingEngine(ai4.getId());
+
+                ai5 = createCrossSellEngine(segment, modelSummary5, PredictionType.PROPENSITY);
+                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai5.getId(),
+                        ai5.getLatestIteration().getId(), ModelingQueryType.TARGET);
+                Assert.assertTrue(targetCount > 100);
+                Assert.assertNotNull(ai5.getSegment());
+                activateRatingEngine(ai5.getId());
+
+                ai6 = createCustomEventEngine(segment, modelSummary6);
+                Assert.assertNotNull(ai6.getSegment());
+                activateRatingEngine(ai6.getId());
+
+                // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
             }
         }
+    }
+
+    @Test(groups = "end2end")
+    public void runTest() {
+        processAnalyze(constructRequest());
+        verifyProcess();
     }
 
     private void initModelSummaries() {
@@ -181,23 +203,34 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                     modelSummary2 = summary;
                 } else if (summary.getId().contains(uuid3)) {
                     modelSummary3 = summary;
+                } else if (summary.getId().contains(uuid4)) {
+                    modelSummary4 = summary;
+                } else if (summary.getId().contains(uuid5)) {
+                    modelSummary5 = summary;
+                } else if (summary.getId().contains(uuid6)) {
+                    modelSummary6 = summary;
                 }
             }
         }
         Assert.assertNotNull(modelSummary1);
         Assert.assertNotNull(modelSummary2);
         Assert.assertNotNull(modelSummary3);
+        Assert.assertNotNull(modelSummary4);
+        Assert.assertNotNull(modelSummary5);
+        Assert.assertNotNull(modelSummary6);
     }
 
     private void setupAIModels() {
         testBed.attachProtectedProxy(plsModelSummaryProxy);
         testBed.switchToSuperAdmin();
-        uuid1 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model.tar.gz");
-        uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model.tar.gz");
-        uuid3 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model.tar.gz");
+        uuid1 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model_p3.tar.gz");
+        uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model_p3.tar.gz");
+        uuid3 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model_p3.tar.gz");
+        uuid4 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model_p2.tar.gz");
+        uuid5 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model_p2.tar.gz");
+        uuid6 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model_p2.tar.gz");
     }
 
-    @SuppressWarnings("deprecation")
     private RatingEngine createCrossSellEngine(MetadataSegment segment, ModelSummary modelSummary,
             PredictionType predictionType) throws InterruptedException {
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, segment);
@@ -212,6 +245,8 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         configureCrossSellModel(model, predictionType, ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, targetProducts,
                 targetProducts);
         model.setModelSummaryId(modelSummary.getId());
+        log.info("Model {} was in python version {}", modelSummary.getId(), modelSummary.getPythonMajorVersion());
+        model.setPythonMajorVersion(modelSummary.getPythonMajorVersion());
 
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
         log.info("Updated rating model " + model.getId());
@@ -224,7 +259,6 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
-    @SuppressWarnings("deprecation")
     private RatingEngine createCustomEventEngine(MetadataSegment segment, ModelSummary modelSummary)
             throws InterruptedException {
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CUSTOM_EVENT, segment);
@@ -238,6 +272,8 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         AIModel model = (AIModel) newEngine.getLatestIteration();
         configureCustomEventModel(model, "SomeFileName", CustomEventModelingType.CDL);
         model.setModelSummaryId(modelSummary.getId());
+        log.info("Model {} was in python version {}", modelSummary.getId(), modelSummary.getPythonMajorVersion());
+        model.setPythonMajorVersion(modelSummary.getPythonMajorVersion());
 
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
         log.info("Updated rating model " + model.getId());
@@ -267,14 +303,19 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         verifyRuleBasedEngines();
         verifyDecoratedMetadata();
         if (ENABLE_AI_RATINGS) {
-            verifyPublishedIterations(ai1);
-            verifyPublishedIterations(ai2);
-            verifyBucketMetadataByEngineId(ai1.getId());
-            verifyBucketMetadataByEngineId(ai2.getId());
-            verifyBucketMetadataByModelGuid(((AIModel) ai1.getPublishedIteration()).getModelSummaryId());
-            verifyBucketMetadataByModelGuid(((AIModel) ai2.getPublishedIteration()).getModelSummaryId());
+            verifyAIModelPublication(ai1);
+            verifyAIModelPublication(ai2);
+            verifyAIModelPublication(ai3);
+            verifyAIModelPublication(ai4);
+            verifyAIModelPublication(ai5);
+            verifyAIModelPublication(ai6);
         }
+    }
 
+    private void verifyAIModelPublication(RatingEngine ai) {
+        verifyPublishedIterations(ai);
+        verifyBucketMetadataByEngineId(ai.getId());
+        verifyBucketMetadataByModelGuid(((AIModel) ai.getPublishedIteration()).getModelSummaryId());
     }
 
     private void refreshRatingEngines() {
@@ -283,6 +324,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         rule3 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, rule3.getId());
         ai1 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai1.getId());
         ai2 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai2.getId());
+        ai3 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai3.getId());
+        ai4 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai4.getId());
+        ai5 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai5.getId());
+        ai6 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai6.getId());
     }
 
     private void verifyPublishedIterations(RatingEngine ratingEngine) {

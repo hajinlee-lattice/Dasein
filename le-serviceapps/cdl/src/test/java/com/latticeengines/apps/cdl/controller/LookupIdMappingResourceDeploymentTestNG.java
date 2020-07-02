@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
@@ -153,7 +154,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     @Test(groups = "deployment-app", enabled = false)
     public void getAllLookupIds() {
         Map<String, List<CDLExternalSystemMapping>> allLookupIds = lookupIdMappingProxy
-                .getAllLookupIds(mainCustomerSpace, null);
+                .getAllLookupIds(mainCustomerSpace, null, AudienceType.ACCOUNTS);
         Assert.assertNotNull(allLookupIds);
         Assert.assertTrue(allLookupIds.keySet().size() > 0);
 

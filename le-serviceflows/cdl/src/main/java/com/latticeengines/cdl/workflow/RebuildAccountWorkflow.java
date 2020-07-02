@@ -37,8 +37,8 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
     public Workflow defineWorkflow(RebuildAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(enrichAccount) //
-                .next(profileAccount) //
                 .next(splitAccountStores) //
+                .next(profileAccount) //
                 .next(generateBucketedAccount) //
                 .build();
     }

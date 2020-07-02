@@ -48,11 +48,14 @@ public class EMREnvServiceImpl implements EMREnvService {
     @Value("${dataplatform.python.conda.env}")
     private String condaEnv;
 
-    @Value("${dataplatform.python.conda.env.ambari}")
-    private String condaEnvAmbari;
+    @Value("${dataplatform.python2.conda.env}")
+    private String condaEnvP2;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    @Value("${dataplatform.default.python.version}")
+    private String pythonVersion;
 
     @Value("${dataplatform.queue.scheme}")
     private String ambariQueueScheme;
@@ -63,10 +66,10 @@ public class EMREnvServiceImpl implements EMREnvService {
 
     @Override
     public String getLatticeCondaEnv() {
-        if (Boolean.TRUE.equals(useEmr)) {
+        if ("3".equals(pythonVersion)) {
             return condaEnv;
         } else {
-            return condaEnvAmbari;
+            return condaEnvP2;
         }
     }
 

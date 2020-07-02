@@ -85,4 +85,7 @@ public interface BatonService {
     //FIXME: a hotfix for M36. ATT crisis
     boolean shouldSkipFuzzyMatchInPA(String tenantId);
 
+    //FIXME: a hotfix for M37. Citrix has high demand on date attribute formatting in TP
+    boolean shouldWaitDataAttrs(String tenantId);
+
 }

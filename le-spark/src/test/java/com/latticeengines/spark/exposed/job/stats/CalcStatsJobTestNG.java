@@ -21,8 +21,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
+import com.latticeengines.spark.exposed.utils.BucketEncodeUtils;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
-import com.latticeengines.spark.utils.BucketEncodeUtils;
 
 public class CalcStatsJobTestNG extends SparkJobFunctionalTestNGBase {
 

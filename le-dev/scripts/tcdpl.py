@@ -58,6 +58,7 @@ APP_URL = {
     'admin': "%s:9085" % APP_ROOT,
     'saml': "%s:9087" % APP_ROOT,
     'playmaker': "%s:9071" % APP_ROOT,
+    'oauth': "%s:9072" % APP_ROOT,
     'oauth2': "%s:9072" % APP_ROOT,
     'scoringapi': "%s:9073" % APP_ROOT,
     'api': "%s:9074" % APP_ROOT,
@@ -91,6 +92,11 @@ PRESETS = {
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi',
                  'lp', 'quartz', 'modelquality']
     },
+    'core': {
+            'apps': ['admin', 'pls', 'lp', 'cdl', 'matchapi', 'metadata',
+                     'dataflowapi', 'workflowapi', 'objectapi', 'eai',
+                     'datacloudapi']
+        },
     'all': {
         'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml',
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz',

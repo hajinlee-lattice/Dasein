@@ -100,6 +100,12 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.DnBRealTimeLookup));
+        RedisCacheConfiguration primeMetadataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(1)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.PrimeMetadataCacheName));
         // =========================
         // END: dnb match
         // =========================
@@ -190,6 +196,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DataLakeStatsCubesCache, dataLakeStatsCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DnBRealTimeLookup, dnbRealTimeLookupCacheConfig);
+        cacheConfigs.put(CacheName.Constants.PrimeMetadataCacheName, primeMetadataCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);

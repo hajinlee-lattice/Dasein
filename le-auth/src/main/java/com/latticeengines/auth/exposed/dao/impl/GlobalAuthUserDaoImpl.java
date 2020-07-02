@@ -37,9 +37,10 @@ public class GlobalAuthUserDaoImpl extends BaseDaoImpl<GlobalAuthUser> implement
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUser> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s as gauser left outer join fetch gauser.gaAuthentications where Email = '%s'",
-                entityClz.getSimpleName(), email);
+                "from %s as gauser left outer join fetch gauser.gaAuthentications where Email = :email",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setParameter("email", email);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -52,8 +53,8 @@ public class GlobalAuthUserDaoImpl extends BaseDaoImpl<GlobalAuthUser> implement
     public HashMap<Long, String> findUserInfoByTenant(GlobalAuthTenant tenant) {
         Session session = sessionFactory.getCurrentSession();
         String sqlStr = String.format("SELECT gaUser FROM %s as gaUser " //
-                        + "INNER JOIN gaUser.gaUserTenantRights as gaRight " //
-                        + "WHERE gaRight.globalAuthTenant = :tenant", //
+                + "INNER JOIN gaUser.gaUserTenantRights as gaRight " //
+                + "WHERE gaRight.globalAuthTenant = :tenant", //
                 getEntityClass().getSimpleName());
         Query<?> query = session.createQuery(sqlStr);
         query.setParameter("tenant", tenant);
@@ -62,7 +63,7 @@ public class GlobalAuthUserDaoImpl extends BaseDaoImpl<GlobalAuthUser> implement
         if (list.size() == 0) {
             return null;
         } else {
-            for (Object obj: list) {
+            for (Object obj : list) {
                 GlobalAuthUser user = (GlobalAuthUser) obj;
                 userInfos.put(user.getPid(), user.getEmail());
             }

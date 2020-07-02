@@ -93,6 +93,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
         }
 
         ParallelFlux<ColumnMetadata> servingStore;
+        StoreFilter filter = namespace.getCoord3();
         if (CollectionUtils.isNotEmpty(tableNames)) {
             Category category = CategoryUtils.getEntityCategory(entity);
             Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
@@ -114,6 +115,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
                         }
                         return cm;
                     }) //
+                    .filter(filter::accept) //
                     .doOnNext(cm -> {
                         if (counter.get() == null) {
                             counter.set(new AtomicLong(0));
@@ -136,7 +138,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
         if (BusinessEntity.Account.equals(entity) && !StoreFilter.NON_LDC.equals(namespace.getCoord3()) //
                 && !batonService.shouldExcludeDataCloudAttrs(tenantId)) {
             // merge serving store and AM, for Account
-            ParallelFlux<ColumnMetadata> amFlux = getLDCMetadataInParallel(version, amCounter);
+            ParallelFlux<ColumnMetadata> amFlux = getLDCMetadataInParallel(version, amCounter).filter(filter::accept);
             return ParallelFlux.from(servingStore, amFlux);
         } else {
             return servingStore;

@@ -61,7 +61,7 @@ public final class ScoringMapperPredictUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringMapperPredictUtil.class);
 
-    public static void evaluate(String uuid, ScoreContext scoreContext,
+    public static void evaluate(String uuid, String condaEnv, ScoreContext scoreContext,
             MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context)
             throws IOException, InterruptedException {
 
@@ -69,7 +69,6 @@ public final class ScoringMapperPredictUtil {
         String type = scoreContext.type;
         StringBuilder sb = new StringBuilder();
         sb.append(uuid);
-        String condaEnv = config.get(ScoringProperty.CONDA_ENV.name());
         if (StringUtils.isBlank(condaEnv)) {
             condaEnv = "lattice";
         }

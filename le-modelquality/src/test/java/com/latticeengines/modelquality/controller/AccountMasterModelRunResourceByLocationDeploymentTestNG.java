@@ -28,9 +28,11 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.monitor.MsTeamsSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
+import com.latticeengines.monitor.exposed.service.MsTeamsService;
 import com.latticeengines.monitor.exposed.service.SlackService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -54,6 +56,9 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
     private SlackService slackService;
 
     @Inject
+    private MsTeamsService msTeamsService;
+
+    @Inject
     private WorkflowProxy workflowProxy;
 
     @Value("${common.le.environment}")
@@ -64,6 +69,9 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
 
     @Value("${modelquality.test.slack.webhook.url:}")
     private String webhookUrl;
+
+    @Value("${modelquality.test.msteams.webhook.url:}")
+    private String teamsWebhookUrl;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -185,6 +193,9 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
         SlackSettings settings = new SlackSettings(webhookUrl, null, preText, message, "ModelQualityTestRunner",
                 SlackSettings.Color.NORMAL);
         slackService.sendSlack(settings);
+        MsTeamsSettings teamsSettings = new MsTeamsSettings(teamsWebhookUrl, null, preText, message,
+                MsTeamsSettings.Color.NORMAL);
+        msTeamsService.sendMsTeams(teamsSettings);
     }
 
     private void sendModelQualityTestResult(@NotNull String dataSetName, long durationInMillis, @NotNull Status status,

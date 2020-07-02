@@ -99,6 +99,7 @@ public class ModelSummary
     private String transformationGroupName;
     private String predefinedSelectionName;
     private String predefinedSelectionVersion;
+    private String pythonMajorVersion;
     private ColumnSelection customizedColumnSelection;
     private String pivotArtifactPath;
     private String modelType;
@@ -605,6 +606,17 @@ public class ModelSummary
     @JsonIgnore
     public void setModelSummaryConfiguration(ModelSummaryProvenance modelSummaryProvenance) {
         this.modelSummaryProvenanceProperties = modelSummaryProvenance.getBag();
+    }
+
+    @JsonProperty("PythonMajorVersion")
+    @Column(name = "PYTHON_MAJOR_VERSION", length = 5)
+    public String getPythonMajorVersion() {
+        return pythonMajorVersion;
+    }
+
+    @JsonProperty("PythonMajorVersion")
+    public void setPythonMajorVersion(String pythonMajorVersion) {
+        this.pythonMajorVersion = pythonMajorVersion;
     }
 
     @Transient

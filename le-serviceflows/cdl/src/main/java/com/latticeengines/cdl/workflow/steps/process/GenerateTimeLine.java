@@ -60,7 +60,7 @@ import com.latticeengines.spark.exposed.job.cdl.TimeLineJob;
 public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration, TimeLineJobConfig> {
 
     private static Logger log = LoggerFactory.getLogger(GenerateTimeLine.class);
-    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
+    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.StreamDateId.name());
     private static final String TIMELINE_TABLE_PREFIX = "Timeline_%s";
     private static final String PARTITION_KEY_NAME = InterfaceName.PartitionKey.name();
     private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();

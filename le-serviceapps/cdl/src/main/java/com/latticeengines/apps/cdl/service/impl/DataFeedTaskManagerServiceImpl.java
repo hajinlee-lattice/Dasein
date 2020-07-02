@@ -768,8 +768,13 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
         }
         if (!attr1.getRequired().equals(attr2.getRequired())) {
-            log.error("Required flag is not the same for attribute: " + attr1.getName());
-            return false;
+            // 2020-06-26 skip checking if CustomerAccountId required flag
+            if (InterfaceName.CustomerAccountId.equals(attr1.getInterfaceName())) {
+                log.warn("Required flag is not the same for CustomerAccountId.");
+            } else {
+                log.error("Required flag is not the same for attribute: " + attr1.getName());
+                return false;
+            }
         }
         if (attr1.getInterfaceName() == null || attr2.getInterfaceName() == null) {
             log.warn("Interface name is null for attribute : " + attr1.getName());

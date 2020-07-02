@@ -48,67 +48,68 @@ else
     mkdir -p ${ARTIFACT_DIR}
 fi
 
-LEDS_VERSION=$(cat ${WSHOME}/le-config/conf/env/dev/latticeengines.properties | grep hadoop.leds.version | cut -d= -f 2)
-echo "LEDS_VERSION=${LEDS_VERSION}"
+P3_LEDS_VERSION=$(cat ${WSHOME}/le-config/conf/env/dev/latticeengines.properties | grep hadoop.leds.version= | cut -d= -f 2)
+echo "P3_LEDS_VERSION=${P3_LEDS_VERSION}"
+P2_LEDS_VERSION=$(cat ${WSHOME}/le-config/conf/env/dev/latticeengines.properties | grep hadoop.leds.version.p2= | cut -d= -f 2)
+echo "P2_LEDS_VERSION=${P2_LEDS_VERSION}"
 
-DS_ROOT="/datascience/${LEDS_VERSION}"
+for LEDS_VERSION in "${P3_LEDS_VERSION}" "${P2_LEDS_VERSION}"; do
+  DS_ROOT="/datascience/${LEDS_VERSION}"
 
-S3_BUCKET="latticeengines-dev-buildartifacts"
-if [[ ${LEDS_VERSION} =~ .*SNAPSHOT ]]; then
-    echo "Downloading snapshot ${LEDS_VERSION} ..."
-    S3_DIR_0="snapshot/sklearn-pipeline/v${LEDS_VERSION}"
-    S3_DIR_1="snapshot/spark-scripts/v${LEDS_VERSION}"
-else
-    echo "Downloading release ${LEDS_VERSION} ..."
-    S3_DIR_0="release/sklearn-pipeline/v${LEDS_VERSION}"
-    S3_DIR_1="release/spark-scripts/v${LEDS_VERSION}"
-fi
+  S3_BUCKET="latticeengines-dev-buildartifacts"
+  if [[ ${LEDS_VERSION} =~ .*SNAPSHOT ]]; then
+      echo "Downloading snapshot ${LEDS_VERSION} ..."
+      S3_DIR_0="snapshot/sklearn-pipeline/v${LEDS_VERSION}"
+      S3_DIR_1="snapshot/spark-scripts/v${LEDS_VERSION}"
+  else
+      echo "Downloading release ${LEDS_VERSION} ..."
+      S3_DIR_0="release/sklearn-pipeline/v${LEDS_VERSION}"
+      S3_DIR_1="release/spark-scripts/v${LEDS_VERSION}"
+  fi
 
-HAS_CHANGE=""
-for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts' 'dpconda|na|na' 'spark|spark|scripts'; do
-    artifact=$(echo ${params} | cut -d \| -f 1)
-    dir1=$(echo ${params} | cut -d \| -f 2)
-    dir2=$(echo ${params} | cut -d \| -f 3)
-    if upload_artifact ${artifact}-${LEDS_VERSION}.zip ${DS_ROOT}; then
-        echo "No need to upload ${artifact}"
-    else
-        echo "Need to upload ${artifact}"
-        HAS_CHANGE="true"
-        pushd ${ARTIFACT_DIR}
-        unzip ${artifact}-${LEDS_VERSION}.zip
-        if [[ ${artifact} == "dpconda" ]]; then
-            if [[ ${LEDS_VERSION} < "1.6" ]]; then
-              # the original conda install script does not work now, because libraries are removed from conda
-              # use pre-build zip instead
-              if [[ -d "/opt/conda/envs/lattice" ]]; then
-                rm -rf /opt/conda/envs/lattice
-              fi
-              if [[ $(uname) == "Darwin" ]]; then
-                aws s3 cp s3://latticeengines-test-artifacts/artifacts/conda/lattice.zip .
-                unzip -q lattice.zip -d /opt/conda/envs/
-              else
-                aws s3 cp s3://latticeengines-dev-chef/conda/lattice_20181019.zip .
-                if [[ -d "/opt/conda/envs/lattice_20181019" ]]; then
-                  rm -rf /opt/conda/envs/lattice_20181019
+  for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts' 'dpconda|na|na' 'spark|spark|scripts'; do
+      artifact=$(echo ${params} | cut -d \| -f 1)
+      dir1=$(echo ${params} | cut -d \| -f 2)
+      dir2=$(echo ${params} | cut -d \| -f 3)
+      if upload_artifact ${artifact}-${LEDS_VERSION}.zip ${DS_ROOT}; then
+          echo "No need to upload ${artifact}"
+      else
+          echo "Need to upload ${artifact}"
+          pushd ${ARTIFACT_DIR} || exit
+          unzip ${artifact}-${LEDS_VERSION}.zip
+          if [[ ${artifact} == "dpconda" ]]; then
+              if [[ ${LEDS_VERSION} < "1.6" ]]; then
+                # the original conda install script does not work now, because libraries are removed from conda
+                # use pre-build zip instead
+                if [[ -d "/opt/conda/envs/lattice" ]]; then
+                  rm -rf /opt/conda/envs/lattice
                 fi
-                unzip -q lattice_20181019.zip -d /opt/conda/envs/
-                mv /opt/conda/envs/lattice_20181019 /opt/conda/envs/lattice
+                if [[ $(uname) == "Darwin" ]]; then
+                  aws s3 cp s3://latticeengines-test-artifacts/artifacts/conda/lattice.zip .
+                  unzip -q lattice.zip -d /opt/conda/envs/
+                else
+                  aws s3 cp s3://latticeengines-dev-chef/conda/lattice_20181019.zip .
+                  if [[ -d "/opt/conda/envs/lattice_20181019" ]]; then
+                    rm -rf /opt/conda/envs/lattice_20181019
+                  fi
+                  unzip -q lattice_20181019.zip -d /opt/conda/envs/
+                  mv /opt/conda/envs/lattice_20181019 /opt/conda/envs/lattice
+                fi
+              else
+                pushd dpconda || exit
+                bash setupenv_conda.sh
+                popd || exit
               fi
-            else
-              pushd dpconda
-              bash setupenv_conda.sh
-              popd
-            fi
-        else
-            hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
-            hdfs dfs -mkdir -p ${DS_ROOT}/${dir1}
-            hdfs dfs -copyFromLocal ${artifact} ${DS_ROOT}/${dir1}/${dir2}
-        fi
-        hdfs dfs -put -f ${ARTIFACT_DIR}/${artifact}-${LEDS_VERSION}.zip.md5 ${DS_ROOT}/
-        popd
-    fi
+          else
+              hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
+              hdfs dfs -mkdir -p ${DS_ROOT}/${dir1}
+              hdfs dfs -copyFromLocal ${artifact} ${DS_ROOT}/${dir1}/${dir2}
+          fi
+          hdfs dfs -put -f ${ARTIFACT_DIR}/${artifact}-${LEDS_VERSION}.zip.md5 ${DS_ROOT}/
+          popd || exit
+      fi
+  done
+
 done
 
-if [[ -n "${HAS_CHANGE}" ]]; then
-    hdfs dfs -ls -R -h ${DS_ROOT}
-fi
+

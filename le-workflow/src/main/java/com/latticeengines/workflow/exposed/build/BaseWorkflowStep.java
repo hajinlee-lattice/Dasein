@@ -101,6 +101,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SCORING_BUCKET_METADATA = "SCORING_BUCKET_METADATA";
     protected static final String SCORING_RESULT_TABLE_NAME = "SCORING_RESULT_TABLE_NAME";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";
+    protected static final String SCORING_MODEL_ID_P2 = "SCORING_MODEL_ID_P2";
+    protected static final String SCORING_MODEL_ID_P3 = "SCORING_MODEL_ID_P3";
     protected static final String SCORING_MODEL_TYPE = "SCORING_MODEL_TYPE";
     protected static final String SCORING_SOURCE_DIR = "SCORING_SOURCE_DIR";
     protected static final String SCORING_UNIQUEKEY_COLUMN = "SCORING_UNIQUEKEY_COLUMN";
@@ -145,17 +147,21 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
     public static final String TIMELINE_RAWTABLES_GOING_TO_DYNAMO = "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
+    public static final String ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO = "ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
     public static final String ACTION_IMPACTED_SEGMENTS = "ACTION_IMPACTED_SEGMENTS";
     public static final String ACTION_IMPACTED_ENGINES = "ACTION_IMPACTED_ENGINES";
+    public static final String ACCOUNT_LOOKUP_DATA_UNIT_NAME = "AccountLookup";
     public static final String RESCORE_ALL_RATINGS = "RESCORE_ALL_RATINGS";
     public static final String CURRENT_RATING_ITERATION = "CURRENT_RATING_ITERATION";
     public static final String INACTIVE_ENGINE_ATTRIBUTES = "INACTIVE_ENGINE_ATTRIBUTES";
     public static final String INACTIVE_ENGINES = "INACTIVE_ENGINES";
     public static final String ITERATION_RATING_MODELS = "ITERATION_RATING_MODELS";
+    public static final String ITERATION_AI_RATING_MODELS = "ITERATION_AI_RATING_MODELS";
+    public static final String PYTHON_MAJOR_VERSION = "PYTHON_MAJOR_VERSION";
     public static final String RATING_MODELS_BY_ITERATION = "RATING_MODELS_BY_ITERATION";
     protected static final String IMPACTED_ENTITIES = "IMPACTED_ENTITIES";
     protected static final String ITERATION_INACTIVE_ENGINES = "ITERATION_INACTIVE_ENGINES";
@@ -163,6 +169,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RATING_ENGINE_ID_TO_ACTIVATE = "RATING_ENGINE_ID_TO_ACTIVATE";
     protected static final String RULE_RAW_RATING_TABLE_NAME = "RULE_RAW_RATING_TABLE_NAME";
     protected static final String AI_RAW_RATING_TABLE_NAME = "AI_RAW_RATING_TABLE_NAME";
+    protected static final String AI_RAW_RATING_TABLE_NAME_P2 = "AI_RAW_RATING_TABLE_NAME_P2";
     protected static final String PIVOTED_RATINGS_TABLE_NAME = "PIVOTED_RATINGS_TABLE_NAME";
     protected static final String RATING_ITERATION_RESULT_TABLE_NAME = "RATING_ITERATION_RESULT_TABLE_NAME";
     public static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
@@ -184,7 +191,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String HAS_CROSS_SELL_MODEL = "HAS_CROSS_SELL_MODEL";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
-    protected static final String MODEL_GUID_ENGINE_ID_MAP = "MODEL_GUID_ENGINE_ID_MAP";
     protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
     protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
@@ -217,6 +223,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
     protected static final String PROCESS_ACCOUNT_FULL_PROFILE = "PROCESS_ACCOUNT_FULL_PROFILE";
     protected static final String ACTIVITY_STREAMS_NEED_REBUILD = "ACTIVITY_STREAMS_NEED_REBUILD";
+    protected static final String ACTIVITY_PARTITION_MIGRATION_PERFORMED = "ACTIVITY_PARTITION_MIGRATION_PERFORMED";
+    protected static final String ACTIVITY_MIGRATED_RAW_STREAM = "ACTIVITY_MIGRATED_RAW_STREAM";
+    protected static final String ACTIVITY_MIGRATED_DAILY_STREAM = "ACTIVITY_MIGRATED_DAILY_STREAM";
     protected static final String ACTIVITY_STREAMS_SKIP_AGG = "ACTIVITY_STREAMS_SKIP_AGG";
     protected static final String ACTIVITY_STREAM_METADATA_CACHE = "STREAM_METADATA_CACHE";
     protected static final String STREAM_DIMENSION_METADATA_MAP = "STREAM_DIMENSION_METADATA_MAP";
@@ -246,14 +255,18 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
     protected static final String ACCOUNT_CHANGELIST_TABLE_NAME = "ACCOUNT_CHANGELIST_TABLE_NAME";
+    protected static final String LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME = "LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME";
+    protected static final String FULL_CHANGELIST_TABLE_NAME = "FULL_CHANGELIST_TABLE_NAME";
     protected static final String ACCOUNT_REPORT_CHANGELIST_TABLE_NAME = "ACCOUNT_REPORT_CHANGELIST_TABLE_NAME";
     protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String LATTICE_ACCOUNT_TABLE_NAME = "LATTICE_ACCOUNT_TABLE_NAME";
+    protected static final String REBUILD_LATTICE_ACCOUNT = "REBUILD_LATTICE_ACCOUNT";
     protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
     protected static final String ACCOUNT_EXPORT_TABLE_NAME = "ACCOUNT_EXPORT_TABLE_NAME";
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
+    protected static final String LATTICE_ACCOUNT_PROFILE_TABLE_NAME = "LATTICE_ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
     protected static final String FULL_ACCOUNT_STATS_TABLE_NAME = "FULL_ACCOUNT_STATS_TABLE_NAME";
@@ -352,6 +365,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //
             LATTICE_ACCOUNT_TABLE_NAME, //
+            LATTICE_ACCOUNT_PROFILE_TABLE_NAME, //
+            FULL_CHANGELIST_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //
             ACCOUNT_FEATURE_TABLE_NAME, //
             ACCOUNT_PROFILE_TABLE_NAME, //
@@ -404,6 +419,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             FULL_REMATCH_PA, //
             ENTITY_MATCH_REMATCH_STAGING_VERSION, //
             NEW_RECORD_CUT_OFF_TIME, //
+            CONSOLIDATE_INPUT_TEMPLATES, //
             PROCESS_ACCOUNT_STATS_MERGE);
 
     @Autowired
@@ -644,10 +660,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      * @param tableNameStrCtxKeys
      *            list of context keys that contain a single table as string
      * @param tableNameListCtxKeys
-     *            list of context keys that contain a list of tables as
-     *            serialized list of string
-     * @return list of tables, null will be inserted if the corresponding table
-     *         does not exist
+     *            list of context keys that contain a list of tables as serialized
+     *            list of string
+     * @return list of tables, null will be inserted if the corresponding table does
+     *         not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
             List<String> tableNameListCtxKeys) {

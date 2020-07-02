@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -38,11 +40,16 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
  */
 public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(ProcessAccountDeploymentTestNG.class);
+
     static final String CHECK_POINT = "process1";
     static final String UNDER_SCORE = "_";
 
     @Value("${camille.zk.pod.id}")
     protected String podId;
+
+    @Value("${cdl.use.changelist}")
+    private boolean useChangeList;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -109,6 +116,10 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyAccountProfile();
         verifyDateAttrs();
         verifyNumberOfContacts();
+        if (useChangeList) {
+            // Verify changelist related outputs
+            verifyLatticeAccount();
+        }
 
         // Check that stats cubes only exist for the entities specified below.
         verifyStats(getEntitiesInStats());
@@ -119,7 +130,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     private void verifyAccountProfile() {
-        Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.Profile);
+        Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.AccountProfile);
+        Assert.assertNotNull(table);
+        table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.LatticeAccountProfile);
         Assert.assertNotNull(table);
     }
 
@@ -190,6 +203,14 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());
         List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
         Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
+    }
+
+    void verifyLatticeAccount() {
+        String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, TableRoleInCollection.LatticeAccount);
+        Assert.assertNotNull(tableName);
+        List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
+        log.info("LatticeAccount has {} columns, {} rows", CollectionUtils.size(cms),
+                countTableRole(TableRoleInCollection.LatticeAccount));
     }
 
     protected BusinessEntity[] getEntitiesInStats() {

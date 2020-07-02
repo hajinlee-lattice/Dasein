@@ -54,16 +54,16 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
     protected DataUnitProxy dataUnitProxy;
 
     @Value("${aws.region}")
-    private String awsRegion;
+    protected String awsRegion;
 
     @Value("${aws.default.access.key}")
-    private String awsAccessKey;
+    protected String awsAccessKey;
 
     @Value("${aws.default.secret.key.encrypted}")
-    private String awsSecretKey;
+    protected String awsSecretKey;
 
     @Value("${eai.export.dynamo.num.mappers}")
-    private int numMappers;
+    protected int numMappers;
 
     @Value("${eai.export.dynamo.signature}")
     protected String signature;
@@ -112,10 +112,10 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
         return true;
     }
 
-    private List<DynamoExportConfig> getExportConfigs() {
+    protected List<DynamoExportConfig> getExportConfigs() {
         List<DynamoExportConfig> tables = getListObjectFromContext(configuration.getContextKey(), DynamoExportConfig.class);
         if (CollectionUtils.isEmpty(tables) && configuration.needEmptyFailed()) {
-            throw new IllegalStateException("Cannot find tables to be published to dynamo.");
+            throw new IllegalStateException(String.format("Cannot find tables to be published to dynamo with context %s.", configuration.getContextKey()));
         }
         return tables;
     }
@@ -174,10 +174,17 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
             eaiConfig.setUsingDisplayName(false);
             eaiConfig.setExportTargetPath("/tmp/path");
 
-            String recordClass = configuration.getEntityClass().getCanonicalName();
-            String recordType = configuration.getEntityClass().getSimpleName() + "_" + configuration.getDynamoSignature();
+            Class<?> entityClass = configuration.getEntityClass();
+            String recordClass = entityClass != null ? entityClass.getCanonicalName() : "";
+            String recordType = entityClass != null ? entityClass.getSimpleName() + "_" + configuration.getDynamoSignature() : "";
             String tenantId = CustomerSpace.shortenCustomerSpace(configuration.getCustomerSpace().toString());
 
+            eaiConfig.setProperties(getProperties(recordClass, recordType, tenantId));
+
+            return eaiConfig;
+        }
+
+        protected Map<String, String> getProperties(String recordClass, String recordType, String tenantId) {
             Map<String, String> properties = new HashMap<>();
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
                     CipherUtils.encrypt(awsAccessKey));
@@ -187,15 +194,14 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
             properties.put(HdfsToDynamoConfiguration.CONFIG_REPOSITORY, configuration.getRepoName());
             properties.put(HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE, recordType);
             if (configuration.needKeyPrefix()) {
-                properties.put(HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX, tenantId + "_" + tableName);
+                properties.put(HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX, tenantId + "_" + config.getTableName());
             }
             properties.put(HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY, config.getPartitionKey());
             properties.put(HdfsToDynamoConfiguration.CONFIG_SORT_KEY, config.getSortKey());
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_REGION, awsRegion);
             properties.put(ExportProperty.NUM_MAPPERS, String.valueOf(numMappers));
-            eaiConfig.setProperties(properties);
 
-            return eaiConfig;
+            return properties;
         }
 
         void registerDataUnit() {

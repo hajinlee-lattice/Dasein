@@ -70,8 +70,20 @@ abstract class RatingEngineTemplate {
         return constructRatingEngineSummary(ratingEngine, tenantId, lastRefreshedDate, null);
     }
 
-    RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId, Date lastRefreshedDate,
-            Map<String, List<BucketMetadata>> modelSummaryToBucketListMap) {
+    protected RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine) {
+        if (ratingEngine == null) {
+            return null;
+        }
+        RatingEngineSummary ratingEngineSummary = new RatingEngineSummary();
+        ratingEngineSummary.setId(ratingEngine.getId());
+        ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
+        ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
+        ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
+        return ratingEngineSummary;
+    }
+
+    protected RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId, Date lastRefreshedDate,
+                                                               Map<String, List<BucketMetadata>> modelSummaryToBucketListMap) {
         if (ratingEngine == null) {
             return null;
         }

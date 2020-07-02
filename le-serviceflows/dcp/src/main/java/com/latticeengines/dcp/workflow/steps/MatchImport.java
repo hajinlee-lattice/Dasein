@@ -7,21 +7,25 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
+import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.serviceflows.workflow.match.BaseMatchStep;
 
@@ -30,8 +34,13 @@ import com.latticeengines.serviceflows.workflow.match.BaseMatchStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(MatchImport.class);
+
     @Inject
     private UploadProxy uploadProxy;
+
+    @Inject
+    private MatchRuleProxy matchRuleProxy;
 
     @Override
     protected String getInputAvroPath() {
@@ -54,12 +63,16 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
 
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_STARTED, null);
 
+        MatchRuleConfiguration matchRuleConfiguration = matchRuleProxy.getMatchConfig(customerSpace.toString(), configuration.getSourceId());
+
+        log.info("MatchRuleConfiguration of source " + configuration.getSourceId() + " : " + JsonUtils.serialize(matchRuleConfiguration));
+
+        log.info("After translate into DplusMatchConfig : " + JsonUtils.serialize(configuration.getMatchConfig()));
+
         matchInput.setUseDirectPlus(true);
         matchInput.setDplusMatchConfig(configuration.getMatchConfig());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
-        // matchInput.setExcludePublicDomain(false); // not sure if needed
-        // matchInput.setPartialMatchEnabled(true); // not sure if needed
 
         List<String> columnIds = getDCPEnrichAttrs();
         List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());
@@ -71,17 +84,17 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     //FIXME: in alpha release, use a hard coded enrich list
     private List<String> getDCPEnrichAttrs() {
         return Arrays.asList(
-                DataCloudConstants.ATTR_LDC_DUNS,
-                DataCloudConstants.ATTR_LDC_NAME,
-                "TRADESTYLE_NAME",
-                "LDC_Street",
-                "STREET_ADDRESS_2",
-                DataCloudConstants.ATTR_CITY,
-                DataCloudConstants.ATTR_STATE,
-                DataCloudConstants.ATTR_ZIPCODE,
-                DataCloudConstants.ATTR_COUNTRY,
-                "TELEPHONE_NUMBER",
-                "LE_SIC_CODE"
+                "DunsNumber",
+                "PrimaryBusinessName",
+                "TradeStyleName",
+                "PrimaryAddressStreetLine1",
+                "PrimaryAddressStreetLine2",
+                "PrimaryAddressLocalityName",
+                "PrimaryAddressRegionName",
+                "PrimaryAddressPostalCode",
+                "PrimaryAddressCountyName",
+                "TelephoneNumber",
+                "IndustryCodeUSSicV4Code"
         );
     }
 

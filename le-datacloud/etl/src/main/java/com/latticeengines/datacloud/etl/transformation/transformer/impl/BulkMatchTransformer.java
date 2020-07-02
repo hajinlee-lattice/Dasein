@@ -73,7 +73,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     @Override
     protected MatchCommand match(String inputAvroPath, Schema schema, String outputAvroPath,
             MatchTransformerConfig config) {
-        log.info("Using table schema: " + schema.toString(true));
+        log.debug("Using table schema: " + schema.toString(true));
         MatchInput input = constructMatchInput(inputAvroPath, schema, config);
         return match(input, outputAvroPath, config);
     }

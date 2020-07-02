@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
@@ -31,6 +32,7 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
+import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -40,6 +42,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
@@ -71,6 +74,9 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Inject
     private CDLLookupService cdlLookupService;
+
+    @Inject
+    private DirectPlusEnrichService directPlusEnrichService;
 
     @Inject
     private EntityMatchInternalService entityMatchInternalService;
@@ -211,7 +217,11 @@ public class FuzzyMatchHelper implements DbHelper {
                     updateLAIdLookupAfterEntityMatch(context);
                     lookupCustomAccount(context);
                 }
-                fetchLatticeAccount(context);
+                if (BusinessEntity.PrimeAccount.name().equals(context.getInput().getTargetEntity())) {
+                    fetchPrimeAccount(context);
+                } else {
+                    fetchLatticeAccount(context);
+                }
             }
         }
     }
@@ -274,6 +284,36 @@ public class FuzzyMatchHelper implements DbHelper {
         }
         log.info("Fetched records from entity seed table by entity id: Total={}, Unmatched={}, Duration={}",
                 context.getInternalResults().size(), unmatch, System.currentTimeMillis() - startTime);
+    }
+
+    private void fetchPrimeAccount(MatchContext context) {
+        Set<String> ids = new HashSet<>();
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            String duns = record.getPrimeDuns();
+            if (StringUtils.isNotBlank(duns)) {
+                ids.add(duns);
+            }
+        }
+
+        List<PrimeAccount> accounts;
+        try (PerformanceTimer timer = //
+                     new PerformanceTimer("Fetch " + ids.size() + " accounts from Direct+.")) {
+            accounts = directPlusEnrichService.fetch(ids);
+        }
+
+        Map<String, PrimeAccount> dunsAccountMap = accounts.stream() //
+                .filter(pa -> pa != null && StringUtils.isNotBlank(pa.getId())) //
+                .collect(Collectors.toMap(PrimeAccount::getId, pa -> pa));
+
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            String duns = record.getPrimeDuns();
+            if (StringUtils.isNotBlank(duns)) {
+                PrimeAccount primeAccount = dunsAccountMap.get(duns);
+                if (primeAccount != null) {
+                    record.setPrimeAccount(primeAccount.getDeepCopy());
+                }
+            }
+        }
     }
 
     /*
@@ -382,8 +422,12 @@ public class FuzzyMatchHelper implements DbHelper {
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> latticeAccount = parseLatticeAccount(record.getLatticeAccount(), columnSelection,
                 dataCloudVersion);
+        Map<String, Object> primeAccount = parsePrimeAccount(record.getPrimeAccount(), columnSelection);
         if (MapUtils.isNotEmpty(latticeAccount)) {
             queryResult.putAll(latticeAccount);
+        }
+        if (MapUtils.isNotEmpty(primeAccount)) {
+            queryResult.putAll(primeAccount);
         }
         if (MapUtils.isNotEmpty(record.getCustomAccount())) {
             queryResult.putAll(record.getCustomAccount());
@@ -391,7 +435,18 @@ public class FuzzyMatchHelper implements DbHelper {
         if (record.getLatticeAccount() != null && record.getLatticeAccount().getId() != null) {
             record.setMatched(true);
         }
+        if (record.getPrimeAccount() != null && record.getPrimeAccount().getId() != null) {
+            record.setMatched(true);
+        }
         record.setQueryResult(queryResult);
+    }
+
+    private Map<String, Object> parsePrimeAccount(PrimeAccount primeAccount, ColumnSelection columnSelection) {
+        if (primeAccount == null) {
+            return Collections.emptyMap();
+        } else {
+            return primeAccount.getResult();
+        }
     }
 
     private Map<String, Object> parseLatticeAccount(LatticeAccount account, ColumnSelection columnSelection,
@@ -435,6 +490,7 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private void setMatchedValues(InternalOutputRecord record) {
+        // FIXME: enhance by PrimeAccount
         Map<String, Object> amAttributes = (record.getLatticeAccount() == null) ? new HashMap<>()
                 : record.getLatticeAccount().getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD,

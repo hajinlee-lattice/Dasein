@@ -150,7 +150,8 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
 
     @Override
     protected BusinessEntity[] getEntitiesInStats() {
-        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount };
+        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount,
+                BusinessEntity.CuratedContact };
     }
 
     @Override

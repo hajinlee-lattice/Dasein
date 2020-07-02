@@ -93,6 +93,8 @@ public interface DataFeedTaskService {
      */
     Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(String customerSpace);
 
+    DataFeedTask getDataFeedTaskByTaskName(String customerSpace, String taskName, Boolean withTemplate);
+
     DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId);
 
     void setDataFeedTaskDelete(String customerSpace, Long pid, Boolean deleted);

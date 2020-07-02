@@ -2,6 +2,8 @@ package com.latticeengines.pls.service.impl.dcp;
 
 import java.time.Instant;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.slf4j.Logger;
@@ -9,21 +11,31 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.pls.service.dcp.DataReportService;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 
 @Service("dataReportService")
 public class DataReportServiceImpl implements DataReportService {
 
     private static final Logger log = LoggerFactory.getLogger(DataReportServiceImpl.class);
 
+    @Inject
+    private DataReportProxy dataReportProxy;
+
     @Override
-    public DataReport getDataReport(DataReportRecord.Level level, String ownerId) {
+    public DataReport getDataReport(DataReportRecord.Level level, String ownerId, Boolean mock) {
         Preconditions.checkNotNull(level);
         Preconditions.checkArgument(DataReportRecord.Level.Tenant.equals(level) || StringUtils.isNotEmpty(ownerId));
-
-        return mockReturn();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+        if (Boolean.TRUE.equals(mock)) {
+            return mockReturn();
+        }
+        return dataReportProxy.getDataReport(customerSpace.toString(), level, ownerId);
     }
 
     /**
@@ -52,12 +64,22 @@ public class DataReportServiceImpl implements DataReportService {
         Long p4 = new RandomDataGenerator().nextLong(0L, successCnt);
         Long p5 = new RandomDataGenerator().nextLong(0L, successCnt);
         Long p6 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p7 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p8 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p9 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p10 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p11 = new RandomDataGenerator().nextLong(0L, successCnt);
         inputPresenceReport.addPresence("CompanyName", p1, successCnt);
         inputPresenceReport.addPresence("Country", p2, successCnt);
         inputPresenceReport.addPresence("City", p3, successCnt);
         inputPresenceReport.addPresence("State", p4, successCnt);
-        inputPresenceReport.addPresence("Address", p5, successCnt);
-        inputPresenceReport.addPresence("Phone", p6, successCnt);
+        inputPresenceReport.addPresence("Address_Street_1", p5, successCnt);
+        inputPresenceReport.addPresence("Address_Street_2", p7, successCnt);
+        inputPresenceReport.addPresence("PhoneNumber", p6, successCnt);
+        inputPresenceReport.addPresence("DUNS", p8, successCnt);
+        inputPresenceReport.addPresence("Email", p9, successCnt);
+        inputPresenceReport.addPresence("PostalCode", p10, successCnt);
+        inputPresenceReport.addPresence("Website", p11, successCnt);
 
         DataReport.GeoDistributionReport geoDistributionReport = new DataReport.GeoDistributionReport();
         Long ct1 = new RandomDataGenerator().nextLong(1L, matchCnt / 4);

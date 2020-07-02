@@ -110,6 +110,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.rating.crossell.minimum.events:50}")
     private Long minimumEvents;
 
+    @Value("${cdl.rating.crossell.minimum.training.rows:200}")
+    private Long minimumRows;
+
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
@@ -200,6 +203,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public List<RatingEngine> getAllDeletedRatingEngines() {
         return ratingEngineEntityMgr.findAllDeleted();
+    }
+
+    @Override
+    public List<RatingEngineSummary> getRatingEngineSummaries() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("Get all the rating engine summaries for tenant %s.", tenant.getId()));
+        return ratingEngineEntityMgr.findAllByTypeAndStatus(null, null).stream()
+                .map(ratingEngine -> constructRatingEngineSummary(ratingEngine)).collect(Collectors.toList());
     }
 
     @Override
@@ -393,6 +404,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         copy.setPredictionType(original.getPredictionType());
         copy.setTrainingSegment(original.getTrainingSegment());
         copy.setRatingModelAttributes(original.getRatingModelAttributes());
+        copy.setPythonMajorVersion(original.getPythonMajorVersion());
         if (StringUtils.isNotBlank(original.getModelSummaryId())) {
             String tenantId = MultiTenantContext.getTenant().getId();
             String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, original.getModelSummaryId(),
@@ -643,6 +655,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     null);
             if (noOfEvents < minimumEvents) {
                 errors.add(LedpException.buildMessage(LedpCode.LEDP_40046, new String[] { minimumEvents.toString() }));
+            }
+            Long noOfRows = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING,
+                    null);
+            if (noOfRows < minimumRows) {
+                errors.add(LedpException.buildMessage(LedpCode.LEDP_40088,
+                        new String[] { minimumRows.toString(), noOfRows.toString() }));
             }
             break;
         case CUSTOM_EVENT:

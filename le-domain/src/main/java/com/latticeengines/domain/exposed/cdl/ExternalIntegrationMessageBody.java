@@ -28,6 +28,8 @@ public class ExternalIntegrationMessageBody {
 
     private String stack;
 
+    private Boolean enableAcxiom;
+
     public String getTrayTenantId() {
         return trayTenantId;
     }
@@ -111,4 +113,8 @@ public class ExternalIntegrationMessageBody {
     public String getStack() { return stack; }
 
     public void setStack(String stack) { this.stack = stack; }
+
+    public boolean getEnableAcxiom() { return enableAcxiom; }
+
+    public void setEnableAcxiom(boolean enableAcxiom) { this.enableAcxiom = enableAcxiom; }
 }

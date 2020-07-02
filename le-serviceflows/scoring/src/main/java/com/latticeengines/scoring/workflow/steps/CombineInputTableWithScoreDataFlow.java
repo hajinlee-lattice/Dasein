@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +21,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
@@ -122,15 +120,7 @@ public class CombineInputTableWithScoreDataFlow
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
-                RatingModelContainer.class);
-        return allContainers.stream() //
-                .filter(container -> {
-                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-                }) //
-                .collect(Collectors.toList());
+        return getListObjectFromContext(ITERATION_AI_RATING_MODELS, RatingModelContainer.class);
     }
 
     private String getInputTableName() {

@@ -121,4 +121,17 @@ public interface DataFeedTaskTemplateService {
      * @return true if success
      */
     boolean validateGAEnabled(String customerSpace, boolean enableGA);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param source Indicate the task source {VisiDB / File}
+     * @param feedType DataFeedTask feedType to be reset.
+     * @return true if success.
+     */
+    boolean resetTemplate(String customerSpace, String source, String feedType, Boolean forceDelete);
+
+    boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueName);
+
+    boolean hasPAConsumedImportAction(String customerSpace, String source, String feedType);
 }

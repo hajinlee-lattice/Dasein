@@ -46,9 +46,9 @@ public enum LatticeFeatureFlag {
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
-    ENABLE_DELTA_CALCULATION("EnableDeltaCalculation", "Enable Delta Calculation"), //
     ENABLE_ACCOUNT360("EnableAccount360", "Enable Account360 features"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //
+    ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
@@ -87,7 +87,9 @@ public enum LatticeFeatureFlag {
     ENABLE_LINKEDIN_INTEGRATION(true, "EnableLinkedInIntegration", "Enable LinkedIn integration"), //
     @Deprecated
     ADVANCED_FILTERING(true, "AdvancedFiltering",
-            "Enable Advanced filtering functionality for Segments, Models and Campaigns");
+            "Enable Advanced filtering functionality for Segments, Models and Campaigns"), //
+    @Deprecated
+    ENABLE_DELTA_CALCULATION(true, "EnableDeltaCalculation", "Enable Delta Calculation"); //
 
     private static Set<String> names;
 

@@ -92,7 +92,18 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|servingtable\", #customerSpace, #entity)", unless = "#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|dateattrs\", #customerSpace, #entity)", unless="#result == null")
+    public List<ColumnMetadata> getDateAttrs(String customerSpace, BusinessEntity entity) {
+        String key = customerSpace + "|" + entity.name();
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            List<ColumnMetadata> cms = getDateAttrsFromApi(key);
+            timer.setTimerMessage("Fetched " + CollectionUtils.size(cms) + " date attrs for " //
+                    + entity + " in " + customerSpace);
+            return cms;
+        }
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|servingtable\", #customerSpace, #entity)", unless = "#result == null")
     public Set<String> getServingTableColumns(String customerSpace, BusinessEntity entity) {
         Set<String> result = null;
         if (entity != null) {
@@ -121,6 +132,16 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         String keyPrefix = tenantId + "|" + entity.name();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
+    }
+
+    private List<ColumnMetadata> getDateAttrsFromApi(String key) {
+        String[] tokens = key.split("\\|");
+        String customerSpace = tokens[0];
+        BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
+        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/dateattrs", //
+                shortenCustomerSpace(customerSpace), entity);
+        List<?> list = get("date attributes", url, List.class);
+        return JsonUtils.convertList(list, ColumnMetadata.class);
     }
 
     private List<ColumnMetadata> getDecoratedMetadataFromApi(String key) {

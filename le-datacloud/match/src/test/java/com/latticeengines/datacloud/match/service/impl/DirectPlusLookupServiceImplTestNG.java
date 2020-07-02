@@ -52,6 +52,7 @@ public class DirectPlusLookupServiceImplTestNG extends DataCloudMatchFunctionalT
         input.setName(name);
         input.setState(state);
         input.setCity(city);
+        input.setPhoneNumber("11111");
         DnBMatchContext context = new DnBMatchContext();
         context.setInputNameLocation(input);
         context.setLookupRequestId(UUID.randomUUID().toString());

@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
+import com.latticeengines.domain.exposed.monitor.MsTeamsSettings;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -64,6 +65,11 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                     String.format("%s [%s]", publication.getPublicationName(), progress.getApplicationId()),
                     String.format("Version %s starts to publish", progress.getSourceVersion()), SLACK_BOT,
                     SlackSettings.Color.NORMAL);
+            notificationService.sendMsTeams(
+                    String.format("%s [%s]", publication.getPublicationName(),
+                            progress.getApplicationId()),
+                    String.format("Version %s starts to publish", progress.getSourceVersion()),
+                    MsTeamsSettings.Color.NORMAL);
 
             progress = progressService.update(progress).progress(0.05f).status(ProgressStatus.PROCESSING).commit();
 

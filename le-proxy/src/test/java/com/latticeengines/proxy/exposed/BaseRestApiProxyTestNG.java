@@ -117,6 +117,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     private Undertow getHttpServer(int port) throws Exception {
         HttpHandler retryHdlr = new ErrorHandler(new HttpHandler() {
             private AtomicLong counter = new AtomicLong();
+
             @Override
             public void handleRequest(HttpServerExchange exchange) throws Exception {
                 if (counter.getAndIncrement() < 3) {
@@ -172,7 +173,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 
-    private class ErrorHandler implements HttpHandler {
+    private static class ErrorHandler implements HttpHandler {
 
         private final HttpHandler next;
 

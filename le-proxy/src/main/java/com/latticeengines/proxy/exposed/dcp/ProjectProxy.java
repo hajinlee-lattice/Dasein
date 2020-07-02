@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
@@ -46,16 +47,16 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         return responseDoc.getResult();
     }
 
-    public List<ProjectSummary> getAllDCPProject(String customerSpace) {
-        String url = "/customerspaces/{customerSpace}/project/list";
-        url = constructUrl(url, customerSpace);
+    public List<ProjectSummary> getAllDCPProject(String customerSpace, Boolean includeSources) {
+        String url = "/customerspaces/{customerSpace}/project/list?includeSources={includeSources}";
+        url = constructUrl(url, customerSpace, includeSources.toString());
         List<?> results = get("get all dcp project", url, List.class);
         return JsonUtils.convertList(results, ProjectSummary.class);
     }
 
-    public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}";
-        url = constructUrl(url, customerSpace, projectId);
+    public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId, Boolean includeSources) {
+        String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}?includeSources={includeSources}";
+        url = constructUrl(url, customerSpace, projectId, includeSources.toString());
         return get("get dcp project by projectId", url, ProjectDetails.class);
     }
 
@@ -63,5 +64,11 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         String url = "/customerspaces/{customerSpace}/project/{projectId}";
         url = constructUrl(url, customerSpace, projectId);
         delete("delete dcp project by projectId", url);
+    }
+
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
+        String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}/dropFolderAccess";
+        url = constructUrl(url, customerSpace, projectId);
+        return get("get dropFolderAccess by projectId", url, GrantDropBoxAccessResponse.class);
     }
 }

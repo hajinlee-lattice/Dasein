@@ -11,13 +11,13 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 
 public interface UploadService {
 
-    List<UploadDetails> getUploads(String customerSpace, String sourceId);
+    List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig);
 
-    List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status);
+    List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig);
 
-    UploadDetails getUploadByUploadId(String customerSpace, String uploadId);
+    UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig);
 
-    UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig);
+    UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig, String userId);
 
     void registerMatchResult(String customerSpace, String uploadId, String tableName);
 

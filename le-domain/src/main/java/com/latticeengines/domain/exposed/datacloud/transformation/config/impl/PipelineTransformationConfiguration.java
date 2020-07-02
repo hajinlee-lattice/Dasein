@@ -28,6 +28,7 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     private boolean keepTemp;
     private boolean enableSlack;
+    private boolean enableMsTeams;
     private boolean isAMJob;
 
     @Override
@@ -124,6 +125,14 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     public void setEnableSlack(boolean enableSlack) {
         this.enableSlack = enableSlack;
+    }
+
+    public boolean isEnableMsTeams() {
+        return enableMsTeams;
+    }
+
+    public void setEnableMsTeams(boolean enableMsTeams) {
+        this.enableMsTeams = enableMsTeams;
     }
 
     public Integer getContainerMemMB() {

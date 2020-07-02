@@ -73,12 +73,13 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBBulkLookupDispatcherImpl
 
     @PostConstruct
     public void init() throws IOException {
-        InputStream is = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(DNB_BULK_BODY_FILE_NAME);
-        if (is == null) {
-            throw new RuntimeException("Cannot find resource " + DNB_BULK_BODY_FILE_NAME);
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(DNB_BULK_BODY_FILE_NAME)) {
+            if (is == null) {
+                throw new RuntimeException("Cannot find resource " + DNB_BULK_BODY_FILE_NAME);
+            }
+            dnBBulkApiBody = IOUtils.toString(is, Charset.defaultCharset());
         }
-        dnBBulkApiBody = IOUtils.toString(is, Charset.defaultCharset());
     }
 
     @Override

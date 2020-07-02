@@ -46,8 +46,18 @@ class DummyServingStoreService implements ServingStoreService {
     }
 
     @Override
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName) {
+        return null;
+    }
+
+    @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
                                                      DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
+        return null;
+    }
+
+    @Override
+    public List<ColumnMetadata> getDataAttributes(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
         return null;
     }
 
@@ -60,6 +70,16 @@ class DummyServingStoreService implements ServingStoreService {
     @Override
     public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
                                                    DataCollection.Version version) {
+        return null;
+    }
+
+    @Override
+    public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version) {
+        return null;
+    }
+
+    @Override
+    public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version) {
         return null;
     }
 
@@ -82,8 +102,8 @@ class DummyServingStoreService implements ServingStoreService {
     }
 
     @Override
-    public Map<String, Boolean> getAttributesUsage(String customerSpace, BusinessEntity entity,
-                                                   Set<String> attributes, ColumnSelection.Predefined group, DataCollection.Version version) {
+    public Map<String, Boolean> getAttributesUsage(String customerSpace, BusinessEntity entity, Set<String> attributes, ColumnSelection.Predefined group,
+                                                   String attributeSetName, DataCollection.Version version) {
         return null;
     }
 

@@ -34,6 +34,9 @@ gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2021.csv.
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2022.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2022.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2022.csv
 
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2023.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2023.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2023.csv
+
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv
 
@@ -48,6 +51,18 @@ gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceAttribute.csv.gz > $WS
 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv
+
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/PrimeColumn.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/PrimeColumn.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/PrimeColumn.csv
+
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockElement.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockElement.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockElement.csv
+
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv
+
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv
 
 source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 

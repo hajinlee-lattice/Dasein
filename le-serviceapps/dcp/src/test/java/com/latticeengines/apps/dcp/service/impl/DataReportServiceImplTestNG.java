@@ -1,10 +1,12 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -41,7 +43,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         uploadDetails.setSourceId("sourceUID");
         uploadDetails.setUploadId("uploadUID");
         when(projectService.getProjectBySourceId(anyString(), anyString())).thenReturn(projectInfo);
-        when(uploadService.getUploadByUploadId(anyString(), anyString())).thenReturn(uploadDetails);
+        when(uploadService.getUploadByUploadId(anyString(), anyString(), anyBoolean())).thenReturn(uploadDetails);
         ReflectionTestUtils.setField(dataReportService, "projectService", projectService);
         ReflectionTestUtils.setField(dataReportService, "uploadService", uploadService);
     }
@@ -101,13 +103,51 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
                 DataReportRecord.Level.Upload, "uploadUID");
         Assert.assertEquals(JsonUtils.serialize(basicStats1), JsonUtils.serialize(dataReportPersist.getBasicStats()));
 
+        DataReport tenantLevelReport = dataReportService.getDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Tenant, null);
+        DataReport projectLevelReport = dataReportService.getDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Project, "projectUID");
+        DataReport sourceLevelReport = dataReportService.getDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Source, "sourceUID");
+        DataReport uploadLevelReport = dataReportService.getDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Upload, "uploadUID");
+
+        tenantLevelReport.setRefreshTimestamp(0L);
+        projectLevelReport.setRefreshTimestamp(0L);
+        sourceLevelReport.setRefreshTimestamp(0L);
+        uploadLevelReport.setRefreshTimestamp(0L);
+        Assert.assertEquals(JsonUtils.serialize(tenantLevelReport), JsonUtils.serialize(projectLevelReport));
+        Assert.assertEquals(JsonUtils.serialize(projectLevelReport), JsonUtils.serialize(sourceLevelReport));
+        Assert.assertEquals(JsonUtils.serialize(sourceLevelReport), JsonUtils.serialize(uploadLevelReport));
+
+        dataReportPersist.setRefreshTimestamp(0L);
         String report1 = JsonUtils.serialize(dataReportPersist);
         DataReport newReport = getDataReport();
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", newReport);
-        String report2 = JsonUtils.serialize(dataReportService.getDataReport(mainCustomerSpace,
-                DataReportRecord.Level.Upload, "uploadUID"));
+        newReport = dataReportService.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID");
+        newReport.setRefreshTimestamp(0L);
+        String report2 = JsonUtils.serialize(newReport);
         Assert.assertNotEquals(report1, report2);
 
+        Assert.assertEquals(JsonUtils.serialize(tenantLevelReport), JsonUtils.serialize(projectLevelReport));
+        Assert.assertEquals(JsonUtils.serialize(projectLevelReport), JsonUtils.serialize(sourceLevelReport));
+        Assert.assertEquals(JsonUtils.serialize(sourceLevelReport), report1);
+        Assert.assertNotEquals(JsonUtils.serialize(sourceLevelReport), report2);
+
+        DataReport extraReport = getDataReport();
+        dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID2", extraReport);
+        Map<String, DataReport.BasicStats> uploadBasicStats =
+                dataReportService.getDataReportBasicStatsByParent(mainCustomerSpace, DataReportRecord.Level.Source,
+                        "sourceUID");
+        Assert.assertEquals(uploadBasicStats.size(), 2);
+        Assert.assertTrue(uploadBasicStats.containsKey("uploadUID"));
+        Assert.assertTrue(uploadBasicStats.containsKey("uploadUID2"));
+        Assert.assertEquals(JsonUtils.serialize(uploadBasicStats.get("uploadUID")), JsonUtils.serialize(newReport.getBasicStats()));
+
+        Map<String, DataReport.BasicStats> projectBasicStats =
+                dataReportService.getDataReportBasicStats(mainCustomerSpace, DataReportRecord.Level.Project);
+        Assert.assertNotNull(projectBasicStats);
+        Assert.assertEquals(projectBasicStats.size(), 1);
     }
 
     private DataReport getDataReport() {

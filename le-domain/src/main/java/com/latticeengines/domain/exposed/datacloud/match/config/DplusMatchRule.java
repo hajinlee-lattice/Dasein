@@ -113,11 +113,11 @@ public class DplusMatchRule {
     }
 
     public DplusMatchRule review(int lowCode) {
-        return accept(lowCode, HIGHEST_CODE);
+        return review(lowCode, HIGHEST_CODE);
     }
 
     public DplusMatchRule review(int lowCode, int highCode) {
-        return accept(lowCode, highCode, Collections.emptyList());
+        return review(lowCode, highCode, Collections.emptyList());
     }
 
     // can be called multiple times. overwrite previous setting
@@ -140,7 +140,7 @@ public class DplusMatchRule {
         private int lowestConfidenceCode;
 
         @JsonProperty("HighestConfidenceCode")
-        private int highestConfidenceCode;
+        private int highestConfidenceCode = 10;
 
         @JsonProperty("MatchGradePatterns")
         private Collection<String> matchGradePatterns;
@@ -195,6 +195,23 @@ public class DplusMatchRule {
                 compiledPatterns = matchGradePatterns.stream() //
                         .map(p -> Pattern.compile("^" + p + "$")).collect(Collectors.toList());
             }
+        }
+
+        public boolean equalTo(ClassificationCriterion classificationCriterion) {
+            if (this.lowestConfidenceCode != classificationCriterion.getLowestConfidenceCode()) {
+                return false;
+            }
+            if (this.highestConfidenceCode != classificationCriterion.getHighestConfidenceCode()) {
+                return false;
+            }
+            if (CollectionUtils.size(this.matchGradePatterns) != CollectionUtils.size(classificationCriterion.getMatchGradePatterns())) {
+                return false;
+            }
+            if (this.matchGradePatterns != null) {
+                return CollectionUtils.isEqualCollection(this.matchGradePatterns,
+                        classificationCriterion.getMatchGradePatterns());
+            }
+            return true;
         }
 
     }

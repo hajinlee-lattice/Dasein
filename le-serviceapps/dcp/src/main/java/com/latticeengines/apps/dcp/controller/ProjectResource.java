@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
@@ -58,16 +59,18 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation(value = "Get all projects")
     @UseReaderConnection
-    public List<ProjectSummary> getAllProject(@PathVariable String customerSpace) {
-        return projectService.getAllProject(customerSpace);
+    public List<ProjectSummary> getAllProject(@PathVariable String customerSpace,
+                                              @RequestParam(defaultValue = "false") Boolean includeSources) {
+        return projectService.getAllProject(customerSpace, includeSources);
     }
 
     @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
     @UseReaderConnection
-    public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
-        return projectService.getProjectDetailByProjectId(customerSpace, projectId);
+    public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId,
+                                                @RequestParam(defaultValue = "true") Boolean includeSources) {
+        return projectService.getProjectDetailByProjectId(customerSpace, projectId, includeSources);
     }
 
     @DeleteMapping("/{projectId}")
@@ -75,5 +78,13 @@ public class ProjectResource {
     @ApiOperation(value = "Delete project by projectId")
     public Boolean deleteProject(@PathVariable String customerSpace, @PathVariable String projectId) {
         return projectService.deleteProject(customerSpace, projectId);
+    }
+
+    @GetMapping("/projectId/{projectId}/dropFolderAccess")
+    @ResponseBody
+    @ApiOperation(value = "Get dropFolderAccess by projectId")
+    @UseReaderConnection
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
+        return projectService.getDropFolderAccessByProjectId(customerSpace, projectId);
     }
 }

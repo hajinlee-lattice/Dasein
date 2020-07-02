@@ -51,7 +51,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             .getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLM1540406334891";
-    private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
+    private static final String LOADING_CHECKPOINT = UpdateTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
 
     private MetadataSegment testSegment;
     private RatingEngine lpiCERatingEngine;
@@ -95,7 +95,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     @Test(groups = { "end2end", "precheckin" })
     public void end2endCDLStyleCustomEventModelTest() throws Exception {
         Map<String, Boolean> featureFlagMap = new HashMap<>();
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         resumeCheckpoint(LOADING_CHECKPOINT);
         bootstrap(testType);
@@ -156,7 +156,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         } else {
             Map<String, Boolean> featureFlagMap = new HashMap<>();
-            featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+            featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
             setupEnd2EndTestEnvironment(featureFlagMap);
             resumeCheckpoint(LOADING_CHECKPOINT);
         }

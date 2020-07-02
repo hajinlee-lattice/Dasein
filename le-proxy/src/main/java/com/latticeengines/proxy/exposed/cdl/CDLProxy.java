@@ -500,7 +500,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc.isSuccess()) {
             return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
-            throw new RuntimeException("Failed to register delete data: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
@@ -514,7 +514,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc.isSuccess()) {
             return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
-            throw new RuntimeException("Failed to register delete data: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
@@ -582,6 +582,17 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (!responseDoc.isSuccess()) {
             throw new RuntimeException(responseDoc.getErrors().get(0));
         }
+    }
+
+    public boolean validateAndUpdateSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/list/validateAndUpdate",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<?> responseDoc = post("validate and update all import system priority", url, systemList,
+                ResponseDocument.class);
+        if (responseDoc.isSuccess()) {
+            return JsonUtils.deserialize(JsonUtils.serialize(responseDoc.getResult()), Boolean.class);
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -735,6 +746,27 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException("Failed to submit migrate dynamo job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
+    }
+
+    public boolean resetTemplate(String customerSpace, String source, String feedType, Boolean forceReset) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/resetTemplate" +
+                        "?source={source}&feedType={feedType}", shortenCustomerSpace(customerSpace), source, feedType);
+        if (Boolean.TRUE.equals(forceReset)) {
+            url += "&forceReset=true";
+        }
+        ResponseDocument<?> rawResponse = post("reset template", url, null, ResponseDocument.class);
+        if (rawResponse.isSuccess()) {
+            return JsonUtils.deserialize(JsonUtils.serialize(rawResponse.getResult()), Boolean.class);
+        } else {
+            throw new RuntimeException(String.format("Cannot reset template (source=%s, feedType=%s)", source,
+                    feedType));
+        }
+    }
+
+    public boolean hasPAConsumedActions(String customerSpace, String source, String feedType) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/hasPAConsumedImportAction" +
+                "?source={source}&feedType={feedType}", shortenCustomerSpace(customerSpace), source, feedType);
+        return get("reset template", url, Boolean.class);
     }
 }
 

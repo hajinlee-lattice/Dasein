@@ -374,6 +374,15 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         return Collections.emptyMap();
     }
 
+    @Override
+    public DataFeedTask getDataFeedTaskByTaskName(String customerSpace, String taskName, Boolean withTemplate) {
+        DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (datafeed == null) {
+            return null;
+        }
+        return dataFeedTaskEntityMgr.getDataFeedTaskByTaskName(taskName, datafeed, withTemplate);
+    }
+
     private String getDataFeedTaskUniqueName(String customerSpace, DataFeedTask dataFeedTask) {
         if (StringUtils.isEmpty(dataFeedTask.getTaskUniqueName())) {
             dataFeedTask.setTaskUniqueName(generateTaskUniqueName(dataFeedTask.getDataFeed()));
