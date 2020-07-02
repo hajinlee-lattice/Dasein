@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.DropBoxService;
+import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
@@ -23,6 +24,8 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
+import com.latticeengines.domain.exposed.dcp.match.MatchRule;
+import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -36,6 +39,9 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private SourceService sourceService;
+
+    @Inject
+    private MatchRuleService matchRuleService;
 
     @Inject
     private S3Service s3Service;
@@ -84,6 +90,15 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(dropBoxSummary);
         s3Service.objectExist(dropBoxSummary.getBucket(),
                 dropBoxService.getDropBoxPrefix() + "/" + source.getRelativePathUnderDropfolder());
+
+        // check existence/correctness of base match rule
+        List<MatchRule> matchRules = matchRuleService.getMatchRuleList(mainCustomerSpace, source.getSourceId(), Boolean.FALSE, Boolean.FALSE);
+        Assert.assertEquals(matchRules.size(), 1);
+        MatchRule baseRule = matchRules.get(0);
+        Assert.assertEquals(baseRule.getSourceId(), source.getSourceId());
+        Assert.assertEquals(baseRule.getRuleType(), MatchRuleRecord.RuleType.BASE_RULE);
+        Assert.assertEquals(baseRule.getAcceptCriterion().getLowestConfidenceCode(), 6);
+        Assert.assertEquals(baseRule.getAcceptCriterion().getHighestConfidenceCode(), 10);
 
         // create another source under same project
         Source source2 = sourceService.createSource(mainCustomerSpace, "TestSource2", projectId,
