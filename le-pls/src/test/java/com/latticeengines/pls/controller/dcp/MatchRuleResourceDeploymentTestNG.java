@@ -10,6 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -131,6 +132,8 @@ public class MatchRuleResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         // archive special rule 2
         testMatchRuleProxy.deleteMatchRule(specialMatchRuleId2);
+
+        SleepUtils.sleep(1000L);
 
         // Check list, expected 2 active rules (1 base + 1 special)
         matchRules = testMatchRuleProxy.getMatchRuleList("Source_1231231", false,
