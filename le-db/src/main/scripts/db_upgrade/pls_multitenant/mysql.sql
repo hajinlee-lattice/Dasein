@@ -15,7 +15,7 @@ CREATE PROCEDURE `UpdateSchema`()
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
       ALTER TABLE `DCP_UPLOAD` ADD COLUMN `UPLOAD_DIAGNOSTICS` JSON;
 
-
+      ALTER TABLE `TENANT` ADD COLUMN `JOB_NOTIFICATION_LEVEL` JSON;
 
   END //
 -- ##############################################################

@@ -116,7 +116,7 @@ public class InternalResource extends InternalResourceBase {
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
 
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"  + TENANT_ID_PATH)
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
@@ -234,7 +234,8 @@ public class InternalResource extends InternalResourceBase {
         attributeService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation/" + TENANT_ID_PATH)
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation/"
+            + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request, //
@@ -257,7 +258,8 @@ public class InternalResource extends InternalResourceBase {
         return attributeService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
 
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count/" + TENANT_ID_PATH)
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count/"
+            + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request, //
@@ -388,22 +390,30 @@ public class InternalResource extends InternalResourceBase {
     @PutMapping("/emails/processanalyze/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after processanalyze")
-    public void sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
+    public boolean sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
             @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
+        boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
         boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
         for (User user : users) {
-            if ("COMPLETED".equals(result) && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
-                if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) || user.getEmail().equals(emailInfo.getUserId())) {
+            if ("COMPLETED".equals(result)
+                    && shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "CDLProcessAnalyze")) {
+                if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel()))
+                        || user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
+                    isSendEmail = true;
                 }
-            } else if ("FAILED".equals(result) && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
-                if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) || user.getEmail().equals(emailInfo.getUserId())) {
+            } else if ("FAILED".equals(result)
+                    && shouldSendEmail(tenant, TenantEmailNotificationLevel.ERROR, "CDLProcessAnalyze")) {
+                if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel()))
+                        || user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
+                    isSendEmail = true;
                 }
             }
         }
+        return isSendEmail;
     }
 
     @PutMapping("/emails/orphanexport/result/{result}/" + TENANT_ID_PATH)
@@ -423,15 +433,15 @@ public class InternalResource extends InternalResourceBase {
                             exportID);
                     log.info(String.format("URL=%s, result=%s", url, result));
                     switch (result) {
-                        case "READY":
-                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
-                                    exportID, exportType);
-                            break;
-                        case "GENERATING":
-                            emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
-                            break;
-                        default:
-                            log.warn("Unknown result {}", result);
+                    case "READY":
+                        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
+                                exportID, exportType);
+                        break;
+                    case "GENERATING":
+                        emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
+                        break;
+                    default:
+                        log.warn("Unknown result {}", result);
                     }
                 }
             }
@@ -442,7 +452,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendSegmentExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-                                       @RequestBody MetadataSegmentExport export) {
+            @RequestBody MetadataSegmentExport export) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
         AtlasExportType exportType = export.getType();
@@ -450,7 +460,7 @@ public class InternalResource extends InternalResourceBase {
     }
 
     private void sendEmail(AtlasExportType exportType, String exportID, List<User> users, String result,
-                           String tenantId, String createBy) {
+            String tenantId, String createBy) {
         String exportTypeStr = exportType.getDisplayName();
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
@@ -458,17 +468,17 @@ public class InternalResource extends InternalResourceBase {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
-                        case "COMPLETED":
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr, tenantName);
-                            break;
-                        case "FAILED":
-                            emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
-                            break;
-                        case "STARTED":
-                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
-                            break;
-                        default:
-                            log.warn("Unknown result {}", result);
+                    case "COMPLETED":
+                        emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr, tenantName);
+                        break;
+                    case "FAILED":
+                        emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
+                        break;
+                    case "STARTED":
+                        emailService.sendPlsExportSegmentRunningEmail(user, exportID);
+                        break;
+                    default:
+                        log.warn("Unknown result {}", result);
                     }
                 }
             }
@@ -479,7 +489,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendAtlasExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-                                     @RequestBody AtlasExport export) {
+            @RequestBody AtlasExport export) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getUuid();
         AtlasExportType exportType = export.getExportType();
@@ -489,74 +499,101 @@ public class InternalResource extends InternalResourceBase {
     @PutMapping("/emails/s3import/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 import")
-    public void sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
+    public boolean sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
             @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+        boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
-        log.info("tenant {} notification_level is: {}, notification_type is: {}.", tenant.getId(),
-                tenant.getNotificationLevel().name(), tenant.getNotificationType());
         boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
+        log.info("tenant {} , tenant level: {},  notification_type: {}.", tenant.getId(),
+                tenant.getNotificationLevel().name(), tenant.getNotificationType());
         for (User user : users) {
             if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser()))
                     || (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
                 switch (result.toUpperCase()) {
-                    case "FAILED":
-                        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
-                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
-                        }
-                        break;
-                    case "SUCCESS":
-                        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
-                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
-                        }
-                        break;
-                    case "IN_PROGRESS":
-                        if ((tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0 && StringUtils.isEmpty(emailInfo.getErrorMsg())) ||
-                                (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.WARNING) >= 0 && StringUtils.isNotEmpty(emailInfo.getErrorMsg()))) {
-                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
-                        }
-                        break;
-                    default: break;
+                case "FAILED":
+                    if (shouldSendEmail(tenant, TenantEmailNotificationLevel.ERROR, "S3Import")) {
+                        emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                        isSendEmail = true;
+                    }
+                    break;
+                case "SUCCESS":
+                    if (shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3Import")) {
+                        emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                        isSendEmail = true;
+                    }
+                    break;
+                case "IN_PROGRESS":
+                    if ((shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3Import")
+                            && StringUtils.isEmpty(emailInfo.getErrorMsg()))
+                            || (shouldSendEmail(tenant, TenantEmailNotificationLevel.WARNING, "S3Import")
+                                    && StringUtils.isNotEmpty(emailInfo.getErrorMsg()))) {
+                        emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                        isSendEmail = true;
+                    }
+                    break;
+                default:
+                    break;
                 }
             }
         }
+        return isSendEmail;
     }
 
     @PutMapping("/emails/s3template/create/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template created")
-    public void sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
+    public boolean sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
             @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+        boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
-        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+        if (shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3TemplateCreate")) {
             boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
             for (User user : users) {
                 if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser()))
                         || (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
                     emailService.sendS3TemplateCreateEmail(user, tenant, appPublicUrl, emailInfo);
+                    isSendEmail = true;
                 }
             }
         }
+        return isSendEmail;
     }
 
     @PutMapping("/emails/s3template/update/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
-    public void sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
+    public boolean sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
             @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+        boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
-
-        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+        if (shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3TemplateUpdate")) {
             boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
             for (User user : users) {
-                if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser())) ||
-                        (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
+                if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser()))
+                        || (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
                     emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, emailInfo);
+                    isSendEmail = true;
                 }
             }
         }
+        return isSendEmail;
+    }
+
+    private boolean shouldSendEmail(Tenant tenant, TenantEmailNotificationLevel notificationLevel, String jobType) {
+        TenantEmailNotificationLevel tenantLevelFlag = tenant.getNotificationLevel();
+        Map<String, TenantEmailNotificationLevel> jobLevelFlags = tenant.getJobNotificationLevels();
+        TenantEmailNotificationLevel jobLevelFlag = jobLevelFlags.containsKey(jobType)
+                ? tenant.getJobNotificationLevels().get(jobType)
+                : TenantEmailNotificationLevel.NONE;
+        if (tenantLevelFlag.compareTo(notificationLevel) >= 0 && jobLevelFlag.compareTo(notificationLevel) >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
     private Tenant manufactureSecurityContextForInternalAccess(String tenantId) {

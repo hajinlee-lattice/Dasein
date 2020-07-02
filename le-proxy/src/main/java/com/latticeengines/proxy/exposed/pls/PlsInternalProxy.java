@@ -14,16 +14,19 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface PlsInternalProxy {
 
     ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid);
 
-    void sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo);
+    boolean createTenant(Tenant tenant);
 
-    void sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo);
+    boolean sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo);
 
-    void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo);
+    boolean sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo);
+
+    boolean sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo);
 
     void sendMetadataSegmentExportEmail(String result, String tenantId, MetadataSegmentExport export);
 
@@ -34,7 +37,7 @@ public interface PlsInternalProxy {
     void sendPlsEnrichInternalAttributeEmail(String result, String tenantId,
                                              AdditionalEmailInfo info);
 
-    void sendCDLProcessAnalyzeEmail(String result, String tenantId, AdditionalEmailInfo info);
+    boolean sendCDLProcessAnalyzeEmail(String result, String tenantId, AdditionalEmailInfo info);
 
     void sendPlsScoreEmail(String result, String tenantId, AdditionalEmailInfo info);
 
