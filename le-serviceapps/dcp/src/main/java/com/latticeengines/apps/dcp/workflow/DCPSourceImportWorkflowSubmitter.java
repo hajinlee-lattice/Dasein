@@ -107,25 +107,42 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         }
 
         DplusMatchRule baseRule = new DplusMatchRule();
-        baseRule.setAcceptCriterion(matchRuleConfiguration.getBaseRule().getAcceptCriterion());
-        baseRule.setExclusionCriteria(matchRuleConfiguration.getBaseRule().getExclusionCriterionList());
-        baseRule.setReviewCriterion(matchRuleConfiguration.getBaseRule().getReviewCriterion());
+        if(matchRuleConfiguration.getBaseRule().getAcceptCriterion() != null) {
+            baseRule.accept(matchRuleConfiguration.getBaseRule().getAcceptCriterion().getLowestConfidenceCode(),
+                    matchRuleConfiguration.getBaseRule().getAcceptCriterion().getHighestConfidenceCode(),
+                    matchRuleConfiguration.getBaseRule().getAcceptCriterion().getMatchGradePatterns());
+        }
+        if(matchRuleConfiguration.getBaseRule().getExclusionCriterionList() != null) {
+            matchRuleConfiguration.getBaseRule().getExclusionCriterionList().stream().forEach(exclusionCriterion -> {
+                baseRule.exclude(exclusionCriterion);
+            });
+        }
+        if(matchRuleConfiguration.getBaseRule().getReviewCriterion() != null) {
+            baseRule.review(matchRuleConfiguration.getBaseRule().getReviewCriterion().getLowestConfidenceCode(),
+                    matchRuleConfiguration.getBaseRule().getReviewCriterion().getHighestConfidenceCode(),
+                    matchRuleConfiguration.getBaseRule().getReviewCriterion().getMatchGradePatterns());
+        }
 
         DplusMatchConfig dplusMatchConfig =  new DplusMatchConfig(baseRule);
 
         matchRuleConfiguration.getSpecialRules().stream().forEach(matchRule -> {
-            DplusMatchConfig.SpeicalRule specialRule = new DplusMatchConfig.SpeicalRule();
-            specialRule.setMatchKey(matchRule.getMatchKey());
-            specialRule.setAllowedValues(matchRule.getAllowedValues());
-            if(matchRule.getAcceptCriterion() != null || matchRule.getExclusionCriterionList() != null ||
-                    matchRule.getReviewCriterion() != null){
-                DplusMatchRule rule = new DplusMatchRule();
-                rule.setAcceptCriterion(matchRule.getAcceptCriterion());
-                rule.setExclusionCriteria(matchRule.getExclusionCriterionList());
-                rule.setReviewCriterion(matchRule.getReviewCriterion());
-                specialRule.setSpecialRule(rule);
+            DplusMatchRule rule = new DplusMatchRule();
+            if(matchRule.getAcceptCriterion() != null) {
+                rule.accept(matchRule.getAcceptCriterion().getLowestConfidenceCode(),
+                        matchRule.getAcceptCriterion().getHighestConfidenceCode(),
+                        matchRule.getAcceptCriterion().getMatchGradePatterns());
             }
-            dplusMatchConfig.addSpecialRule(specialRule);
+            if(matchRule.getExclusionCriterionList() != null){
+                matchRule.getExclusionCriterionList().stream().forEach(exclusionCriterion -> {
+                    rule.exclude(exclusionCriterion);
+                });
+            }
+            if(matchRule.getReviewCriterion() != null){
+                rule.review(matchRule.getReviewCriterion().getLowestConfidenceCode(),
+                        matchRule.getReviewCriterion().getHighestConfidenceCode(),
+                        matchRule.getReviewCriterion().getMatchGradePatterns());
+            }
+            dplusMatchConfig.when(matchRule.getMatchKey(), matchRule.getAllowedValues()).apply(rule);
         });
         return dplusMatchConfig;
     }
