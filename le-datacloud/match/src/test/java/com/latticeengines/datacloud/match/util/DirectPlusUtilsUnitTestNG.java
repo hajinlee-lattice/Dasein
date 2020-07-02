@@ -3,7 +3,12 @@ package com.latticeengines.datacloud.match.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -12,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -52,6 +58,21 @@ public class DirectPlusUtilsUnitTestNG {
         Map<String, Object> result = DirectPlusUtils.parseDataBlock(response);
         Assert.assertNotNull(result.get("TradeStyleName"));
         System.out.println(JsonUtils.pprint(result));
+
+        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("data-block-test", 8);
+        List<Callable<Map<String, Object>>> callables = new ArrayList<>();
+        for (int i = 0; i < 32; i++) {
+            callables.add(() -> {
+                try {
+                    return DirectPlusUtils.parseDataBlock(response);
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+        }
+        ThreadPoolUtils.callInParallel(tp, callables, //
+                10, TimeUnit.SECONDS, 250, TimeUnit.MILLISECONDS);
+        tp.shutdown();
     }
 
     private String readMockResponse(String name) {
