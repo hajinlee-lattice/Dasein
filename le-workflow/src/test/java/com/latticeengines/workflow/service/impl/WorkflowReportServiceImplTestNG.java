@@ -24,8 +24,8 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 public class WorkflowReportServiceImplTestNG extends WorkflowTestNGBase {
 
-    private static final String TENANT1 = "TENANT1";
-    private static final String TENANT2 = "TENANT2";
+    private static final String TENANT1 = "REPORT_TENANT1";
+    private static final String TENANT2 = "REPORT_TENANT2";
     private static final String REPORT_DATA = "{\"report\": \"abd\" }";
 
     @Inject
