@@ -234,7 +234,7 @@ public class UploadServiceImpl implements UploadService {
             details.setUploadConfig(upload.getUploadConfig());
         }
         details.setSourceId(upload.getSourceId());
-        details.setCreated(upload.getCreated().getTime());
+        details.setIngestionStartTime(upload.getCreated().getTime());
         return details;
     }
 }
