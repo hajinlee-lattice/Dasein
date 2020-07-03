@@ -17,11 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -33,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Service
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private static final Logger log = LoggerFactory.getLogger(DirectPlusEnrichServiceImpl.class);
@@ -76,21 +80,24 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
-                log.info("Retry attempt={} to fetch data block.", ctx.getRetryCount() + 1);
+                log.info("Retry attempt={} to fetch data block.", ctx.getRetryCount() + 1, ctx.getLastThrowable());
                 SleepUtils.sleep(5000); // sleep 5 seconds to avoid blast D+ rate limit
             }
-            List<Callable<PrimeAccount>> callables = new ArrayList<>();
-            dunsNumbers.forEach(dunsNumber -> //
-                    callables.add(() -> {
-                        try {
-                            return new PrimeAccount(fetch(dunsNumber));
-                        } catch (Exception e) {
-                            log.error("Failed to fetch data block for DUNS {}", dunsNumber, e);
-                            return null;
-                        }
-                    }));
-            return ThreadPoolUtils.callInParallel(fetchers(), callables, //
-                    2, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
+            try (PerformanceTimer timer = new PerformanceTimer("Fetch data block for " + //
+                    dunsNumbers.size() + " DUNS numbers.")) {
+                List<Callable<PrimeAccount>> callables = new ArrayList<>();
+                dunsNumbers.forEach(dunsNumber -> //
+                        callables.add(() -> {
+                            try {
+                                return new PrimeAccount(fetch(dunsNumber));
+                            } catch (Exception e) {
+                                log.error("Failed to fetch data block for DUNS {}", dunsNumber, e);
+                                return null;
+                            }
+                        }));
+                return ThreadPoolUtils.callInParallel(fetchers(), callables, //
+                        1, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
+            }
         });
     }
 

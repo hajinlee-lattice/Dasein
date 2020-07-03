@@ -105,7 +105,7 @@ public final class DirectPlusUtils {
         ConcurrentMap<String, JsonNode> nodeCache = new ConcurrentHashMap<>();
         mds.forEach(md -> {
             String jsonPath = md.getJsonPath();
-            JsonNode jsonNode = nodeCache.computeIfAbsent(jsonPath, (key) -> getNodeAt(root, key, nodeCache));
+            JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
             String value = (String) toValue(jsonNode);
             String attrName = md.getAttrName();
             result.put(attrName, value);
