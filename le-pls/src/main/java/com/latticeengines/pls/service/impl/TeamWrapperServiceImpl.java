@@ -20,6 +20,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
+import com.latticeengines.domain.exposed.auth.TeamEntities;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
@@ -27,9 +28,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.service.TeamWrapperService;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.TeamProxy;
 import com.latticeengines.security.exposed.service.TeamService;
 
 @Component("teamWrapperService")
@@ -42,13 +41,7 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     private BatonService batonService;
 
     @Inject
-    private SegmentProxy segmentProxy;
-
-    @Inject
-    private PlayProxy playProxy;
-
-    @Inject
-    private RatingEngineProxy ratingEngineProxy;
+    private TeamProxy teamProxy;
 
     @Override
     public Map<String, List<String>> getDependencies(String teamId) throws Exception {
@@ -111,9 +104,10 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     public List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
         String tenantId = MultiTenantContext.getTenant().getId();
         List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
-        List<MetadataSegment> metadataSegments = segmentProxy.getMetadataSegments(tenantId);
-        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getAllRatingEngineSummaries(tenantId);
-        List<Play> plays = playProxy.getPlays(tenantId);
+        TeamEntities teamEntities = teamProxy.getTeamEntities(tenantId);
+        List<MetadataSegment> metadataSegments = teamEntities.getMetadataSegments();
+        List<RatingEngineSummary> ratingEngineSummaries = teamEntities.getRatingEngineSummaries();
+        List<Play> plays = teamEntities.getPlays();
         Map<String, TeamInfo> teamMapForSegment = extractTeamMap(metadataSegments);
         Map<String, TeamInfo> teamMapForRatingEngine = extractTeamMap(ratingEngineSummaries);
         Map<String, TeamInfo> teamMapForPlay = extractTeamMap(plays);
