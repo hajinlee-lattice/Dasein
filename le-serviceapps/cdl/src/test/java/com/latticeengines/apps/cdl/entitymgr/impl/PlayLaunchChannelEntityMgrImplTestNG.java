@@ -237,7 +237,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(channel2.getId());
 
         playLaunchChannelEntityMgr.createPlayLaunchChannel(channel4);
-        Thread.sleep(1000);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateChannel" })
