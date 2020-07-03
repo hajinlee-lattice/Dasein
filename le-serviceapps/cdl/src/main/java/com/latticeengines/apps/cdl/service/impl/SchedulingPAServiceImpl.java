@@ -10,7 +10,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -58,6 +63,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantGroup;
 import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -163,6 +169,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private List<Long> jobQueryTime = new ArrayList<>();
 
+    // TODO add limit and eviction policy if we add more scheduler
+    // schedulerName -> cached item
+    private ConcurrentMap<String, Map<String, List<String>>> lastSchedulingQueueSnapshot = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Set<String>> tenantIdsWithRunningPA = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Set<String>> largeTenantIdsWithRunningPA = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Set<String>> largeTxnTenantIdsWithRunningPA = new ConcurrentHashMap<>();
+
     @Override
     public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
 
@@ -173,7 +186,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
         Set<String> largeJobTenantId = new HashSet<>();
         Set<String> runningPATenantId = new HashSet<>();
-        Set<String> largeTransactionTenantId = new HashSet<>();
+        Set<String> runningLargePATenantIds = new HashSet<>();
+        Set<String> runningLargeTxnPATenantIds = new HashSet<>();
 
         setSchedulerQuotaLimit();
 
@@ -230,11 +244,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 if (simpleDataFeed.isScheduleNow()) {
                     runningScheduleNowCount++;
                 }
-                if (isLarge(tenantId, largeTenantExemptionList, dcStatus) || isLargeTransaction(tenantId,
-                        largeTenantExemptionList, dcStatus)) {
+                if (isLarge(tenantId, largeTenantExemptionList, dcStatus)) {
+                    runningLargePATenantIds.add(tenantId);
                     runningLargeJobCount++;
                 }
                 if (isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus)) {
+                    runningLargeTxnPATenantIds.add(tenantId);
                     runningLargeTxnJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
@@ -244,12 +259,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 TenantActivity tenantActivity = new TenantActivity();
                 tenantActivity.setTenantId(tenantId);
                 tenantActivity.setTenantType(tenant.getTenantType());
-                tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus)
-                        || isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus));
+                tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus));
                 tenantActivity.setLargeTransaction(isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus));
-                if (tenantActivity.isLargeTransaction()) {
-                    largeTransactionTenantId.add(tenantId);
-                }
                 if (tenantActivity.isLarge()) {
                     largeJobTenantId.add(tenantId);
                 }
@@ -309,6 +320,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.info("query need retry workflowJob spend {} ms.", totalQueryTime);
         }
 
+        logRunningTenantIdsIfChanged(tenantIdsWithRunningPA, runningPATenantId, schedulerName, "is running pa");
+        logRunningTenantIdsIfChanged(largeTenantIdsWithRunningPA, runningLargePATenantIds, schedulerName,
+                "is running large pa");
+        logRunningTenantIdsIfChanged(largeTxnTenantIdsWithRunningPA, runningLargeTxnPATenantIds, schedulerName,
+                "is running large txn pa");
+
         int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
         int canRunLargeJobCount = maxLargeJobCount - runningLargeJobCount;
@@ -325,13 +342,16 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         systemStatus.setRunningScheduleNowCount(runningScheduleNowCount);
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         systemStatus.setRunningPATenantId(runningPATenantId);
+        systemStatus.setTenantGroups(getTenantGroups());
+        if (MapUtils.isNotEmpty(systemStatus.getTenantGroups())) {
+            runningPATenantId.forEach(tenantId -> systemStatus.getTenantGroups().values().stream()
+                    .filter(Objects::nonNull).forEach(group -> group.addTenant(tenantId)));
+        }
         log.info(
                 "There are {} running PAs({} ScheduleNow PAs, {} large PAs, {} large Txn PAs). Tenants = {}. Large PA Tenants = {}, "
-                        +
-                        "Large Transaction Tenants = {}. schedulerName={}",
+                        + "Large Transaction Tenants = {}. schedulerName={}",
                 runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningLargeTxnJobCount,
-                runningPATenantId, largeJobTenantId
-                , largeTransactionTenantId, schedulerName);
+                runningPATenantId, runningLargePATenantIds, runningLargeTxnPATenantIds, schedulerName);
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, systemStatus);
         map.put(TENANT_ACTIVITY_LIST, tenantActivityList);
@@ -351,8 +371,24 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     @Override
-    public SchedulingResult getSchedulingResult(@NotNull String schedulerName) {
+    public SchedulingResult getSchedulingResult(@NotNull String schedulerName, long cycle) {
         List<SchedulingPAQueue> schedulingPAQueues = initQueue(schedulerName);
+
+        // get all tenants in queue
+        Map<String, List<String>> queueSnapshot = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(schedulingPAQueues)) {
+            for (SchedulingPAQueue<?> queue : schedulingPAQueues) {
+                queueSnapshot.put(queue.getQueueName(), queue.getAll());
+            }
+        }
+        // no need to lock since it's just setting snapshot, no modification after read
+        Map<String, List<String>> lastSnapshot = lastSchedulingQueueSnapshot.get(schedulerName);
+        if (!queueSnapshot.equals(lastSnapshot)) {
+            // queue snapshot changed from last scheduling cycle, print result
+            lastSchedulingQueueSnapshot.put(schedulerName, queueSnapshot);
+            logQueueSnapshot(queueSnapshot, cycle, schedulerName);
+        }
+
         GreedyScheduler greedyScheduler = new GreedyScheduler();
         return greedyScheduler.schedule(schedulingPAQueues);
     }
@@ -394,6 +430,46 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 retryValidation(execution, customerSpace));
     }
 
+    private void logRunningTenantIdsIfChanged(@NotNull ConcurrentMap<String, Set<String>> cache, Set<String> currList,
+            @NotNull String schedulerName, @NotNull String msg) {
+        if (CollectionUtils.isEmpty(currList)) {
+            // log a empty record to clear out the dashboard
+            log.info(" {}. schedulerName = {}.", msg, schedulerName);
+            cache.put(schedulerName, currList);
+            return;
+        }
+
+        Set<String> prevIds = cache.get(schedulerName);
+        try {
+            Set<String> currIds = new HashSet<>(currList);
+            if (currIds.equals(prevIds)) {
+                // no change
+                return;
+            }
+            currIds.forEach(tenantId -> log.info("{} {}. schedulerName = {}.",
+                    CustomerSpace.shortenCustomerSpace(tenantId), msg, schedulerName));
+            cache.put(schedulerName, currList);
+        } catch (Exception e) {
+            log.error("Failed to log running tenant Ids", e);
+        }
+    }
+
+    private void logQueueSnapshot(Map<String, List<String>> snapshot, long cycle, @NotNull String schedulerName) {
+        if (MapUtils.isEmpty(snapshot)) {
+            return;
+        }
+
+        try {
+            snapshot.forEach((queueName, tenantIds) -> log.info(
+                    "pa scheduler queue name = {} has tenants {}. cycle = {}. schedulerName = {}.", queueName,
+                    tenantIds.stream().map(CustomerSpace::shortenCustomerSpace).collect(Collectors.joining(" -> ")),
+                    cycle, schedulerName));
+        } catch (Exception e) {
+            // just in case
+            log.error("Failed to log queue snapshot", e);
+        }
+    }
+
     private boolean isLarge(@NotNull String tenantId, @NotNull Set<String> largeTenantExemptionList,
             DataCollectionStatus status) {
         if (status == null || status.getDetail() == null) {
@@ -426,7 +502,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         try {
             if (execution == null || !DataFeedExecution.Status.Failed.equals(execution.getStatus())
                     || execution.getUpdated() == null || !checkRetryPendingTime(execution.getUpdated().getTime())) {
-                log.warn("execution is invalid to retry PA.");
+                log.debug("execution is invalid to retry PA.");
                 return false;
             }
 
@@ -437,13 +513,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             }
 
             if (execution.getWorkflowId() == null) {
-                log.warn("cannot find workflowId, tenant {} cannot be retry.", tenantId);
+                log.debug("cannot find workflowId, tenant {} cannot be retry.", tenantId);
                 return false;
             }
             Job job = getFailedPAJob(execution, tenantId);
             if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
                 updateRetryCount(execution);
-                log.warn("due to user error, tenant {} cannot be retry.", tenantId);
+                log.debug("due to user error, tenant {} cannot be retry.", tenantId);
                 return false;
             }
             return true;
@@ -686,6 +762,29 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("Failed to retrieve large tenant exemption list", e);
             return Collections.emptySet();
         }
+    }
+
+    private Map<String, TenantGroup> getTenantGroups() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            Path groupConfigPath = PathBuilder.buildSchedulerTenantGroupPath(CamilleEnvironment.getPodId());
+            if (c.exists(groupConfigPath)) {
+                String configStr = c.get(groupConfigPath).getData();
+
+                TypeReference<List<TenantGroup>> groupType = new TypeReference<List<TenantGroup>>() {
+                };
+                List<TenantGroup> groups = JsonUtils.deserialize(configStr, groupType);
+                log.info("Retrieving pa scheduler tenant group = {}", groups);
+                return CollectionUtils.emptyIfNull(groups) //
+                        .stream() //
+                        .filter(Objects::nonNull) //
+                        .filter(group -> group.getGroupName() != null) //
+                        .collect(Collectors.toMap(TenantGroup::getGroupName, group -> group, (g1, g2) -> g1));
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve PA scheduler tenant group config", e);
+        }
+        return Collections.emptyMap();
     }
 
     private void setSchedulerQuotaLimit() {

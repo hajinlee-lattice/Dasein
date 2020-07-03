@@ -18,6 +18,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
@@ -257,6 +259,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         if (!noImports) {
             if (StringUtils.isNotBlank(changeListTableName)) {
                 exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
+                exportAccountLookupChangeToDynamo(changeListTableName);
             }
             if (StringUtils.isNotBlank(reportChangeListTableName)) {
                 exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
@@ -266,6 +269,22 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
         TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
         exportToDynamo(batchStoreTableName, role.getPartitionKey(), role.getRangeKey());
+        log.info("Evict attr repo cache for inactive version " + inactive);
+        dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
+    }
+
+    private void exportAccountLookupChangeToDynamo(String changeListTableName) {
+        Table changeListTable = metadataProxy.getTableSummary(customerSpace.toString(), changeListTableName);
+        if (changeListTable == null) {
+            // ignore error for now
+            log.error("Failed to retrieve change list table with name: {}", changeListTableName);
+            return;
+        }
+        DynamoExportConfig config = new DynamoExportConfig();
+        config.setTableName(changeListTableName);
+        config.setInputPath(PathUtils.toAvroGlob(changeListTable.getExtracts().get(0).getPath()));
+        config.setPartitionKey(InterfaceName.AtlasLookupKey.name());
+        addToListInContext(ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     @Override

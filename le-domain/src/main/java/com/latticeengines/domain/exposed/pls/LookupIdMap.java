@@ -82,6 +82,10 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     @Column(name = "ACCOUNT_ID")
     private String accountId;
 
+    @JsonProperty("contactId")
+    @Column(name = "CONTACT_ID")
+    private String contactId;
+
     @JsonProperty("prospectOwner")
     @Column(name = "PROSPECT_OWNER")
     private String prospectOwner;
@@ -203,6 +207,14 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    public String getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(String contactId) {
+        this.contactId = contactId;
     }
 
     public String getProspectOwner() {

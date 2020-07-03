@@ -1,7 +1,11 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -39,11 +43,14 @@ public class SystemStatus {
     private Set<String> largeTransactionTenantId;
 
     @JsonProperty("running_pa_tenant_id")
-    private  Set<String> runningPATenantId;
+    private Set<String> runningPATenantId;
 
     @JsonProperty("schedule_tenants")
     private Set<String> scheduleTenants;//set of tenants that we already decide to schedule job.
 
+    // group name -> tenants that share quota
+    @JsonProperty("tenant_groups")
+    private Map<String, TenantGroup> tenantGroups;
 
     public int getCanRunJobCount() {
         return canRunJobCount;
@@ -141,7 +148,7 @@ public class SystemStatus {
     public void changeSystemState(TenantActivity tenantActivity) {
         this.canRunJobCount = this.canRunJobCount - 1;
         this.runningTotalCount = this.runningTotalCount + 1;
-        if (tenantActivity.isLarge() || tenantActivity.isLargeTransaction()) {
+        if (tenantActivity.isLarge()) {
             this.canRunLargeJobCount = this.canRunLargeJobCount - 1;
             this.runningLargeJobCount = this.runningLargeJobCount + 1;
         }
@@ -153,6 +160,10 @@ public class SystemStatus {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount - 1;
             this.runningScheduleNowCount = this.runningScheduleNowCount + 1;
         }
+        String tenantId = tenantActivity.getTenantId();
+        if (MapUtils.isNotEmpty(tenantGroups) && StringUtils.isNotBlank(tenantId)) {
+            tenantGroups.values().forEach(group -> group.addTenant(tenantId));
+        }
     }
 
     /**
@@ -162,7 +173,7 @@ public class SystemStatus {
     public void changeSystemStateAfterPAFinished(TenantActivity tenantActivity) {
         this.canRunJobCount = this.canRunJobCount + 1;
         this.runningTotalCount = this.runningTotalCount - 1;
-        if (tenantActivity.isLarge() || tenantActivity.isLargeTransaction()) {
+        if (tenantActivity.isLarge()) {
             this.canRunLargeJobCount = this.canRunLargeJobCount + 1;
             this.runningLargeJobCount = this.runningLargeJobCount - 1;
         }
@@ -173,6 +184,10 @@ public class SystemStatus {
         if (tenantActivity.isScheduledNow()) {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount + 1;
             this.runningScheduleNowCount = this.runningScheduleNowCount - 1;
+        }
+        String tenantId = tenantActivity.getTenantId();
+        if (MapUtils.isNotEmpty(tenantGroups) && StringUtils.isNotBlank(tenantId)) {
+            tenantGroups.values().forEach(group -> group.removeTenant(tenantId));
         }
     }
 
@@ -187,6 +202,14 @@ public class SystemStatus {
         this.scheduleTenants = scheduleTenants;
     }
 
+    public Map<String, TenantGroup> getTenantGroups() {
+        return tenantGroups;
+    }
+
+    public void setTenantGroups(Map<String, TenantGroup> tenantGroups) {
+        this.tenantGroups = tenantGroups;
+    }
+
     @Override
     public String toString() {
         return "SystemStatus{" + "canRunJobCount=" + canRunJobCount + ", canRunLargeJobCount=" + canRunLargeJobCount
@@ -195,6 +218,6 @@ public class SystemStatus {
                 + runningScheduleNowCount + ", runningLargeJobCount=" + runningLargeJobCount
                 + ", runningLargeTxnJobCount=" + runningLargeTxnJobCount + ", largeJobTenantId=" + largeJobTenantId
                 + ", largeTransactionTenantId=" + largeTransactionTenantId + ", runningPATenantId=" + runningPATenantId
-                + ", scheduleTenants=" + scheduleTenants + '}';
+                + ", scheduleTenants=" + scheduleTenants + ", tenantGroups=" + tenantGroups + '}';
     }
 }

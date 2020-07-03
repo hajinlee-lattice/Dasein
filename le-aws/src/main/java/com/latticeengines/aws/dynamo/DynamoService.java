@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.aws.DynamoOperation;
 public interface DynamoService {
 
     Table createTable(String tableName, long readCapacityUnits, long writeCapacityUnits, String partitionKeyName,
-            String partitionKeyType, String sortKeyName, String sortKeyType);
+            String partitionKeyType, String sortKeyName, String sortKeyType, String customerCMK);
 
     void deleteTable(String tableName);
 

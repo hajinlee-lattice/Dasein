@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatistic
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.AtlasAccountLookupExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineRawTableToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
@@ -70,6 +71,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
         private ExportTimelineRawTableToDynamoStepConfiguration exportTimelineRawTableToDynamo = new ExportTimelineRawTableToDynamoStepConfiguration();
+        private AtlasAccountLookupExportStepConfiguration atlasAccountLookupExportStepConfiguration = new AtlasAccountLookupExportStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
         private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
@@ -100,6 +102,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
             exportTimelineRawTableToDynamo.setCustomerSpace(customerSpace);
+            atlasAccountLookupExportStepConfiguration.setCustomerSpace(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
             importExportS3.setCustomerSpace(customerSpace);
@@ -111,6 +114,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToRedshift.setMicroServiceHostPort(microServiceHostPort);
             exportToDynamo.setMicroServiceHostPort(microServiceHostPort);
             exportTimelineRawTableToDynamo.setMicroServiceHostPort(microServiceHostPort);
+            atlasAccountLookupExportStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processRatingWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
@@ -135,6 +139,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToRedshift.setInternalResourceHostPort(internalResourceHostPort);
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             exportTimelineRawTableToDynamo.setInternalResourceHostPort(internalResourceHostPort);
+            atlasAccountLookupExportStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importExportS3.setInternalResourceHostPort(internalResourceHostPort);
@@ -224,6 +229,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder dynamoSignature(String signature) {
             exportToDynamo.setDynamoSignature(signature);
             processRatingWorkflowBuilder.dynamoSignature(signature);
+            atlasAccountLookupExportStepConfiguration.setDynamoSignature(signature);
             return this;
         }
 
@@ -354,6 +360,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder skipDynamoExport(boolean skipDynamoExport) {
             exportToDynamo.setSkipStep(skipDynamoExport);
             exportTimelineRawTableToDynamo.setSkipStep(skipDynamoExport);
+//            atlasAccountLookupExportStepConfiguration.setSkipStep(skipDynamoExport);
             return this;
         }
 
@@ -432,6 +439,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(exportToRedshift);
             configuration.add(exportToDynamo);
             configuration.add(exportTimelineRawTableToDynamo);
+            configuration.add(atlasAccountLookupExportStepConfiguration);
             configuration.add(awsPythonDataConfiguration);
             configuration.add(apsGenerationStepConfiguration);
             configuration.add(importExportS3);

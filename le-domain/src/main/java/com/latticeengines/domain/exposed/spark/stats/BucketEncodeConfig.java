@@ -15,6 +15,9 @@ public class BucketEncodeConfig extends SparkJobConfig {
 
     public static final String NAME = "bucketEncode";
 
+    @JsonProperty("IncludeAttrs")
+    public List<String> includeAttrs; // applied in the beginning as a filter
+
     @JsonProperty("EncAttrs")
     public List<DCEncodedAttr> encAttrs;
 
@@ -40,6 +43,14 @@ public class BucketEncodeConfig extends SparkJobConfig {
     @JsonProperty("Name")
     public String getName() {
         return NAME;
+    }
+
+    public List<String> getIncludeAttrs() {
+        return includeAttrs;
+    }
+
+    public void setIncludeAttrs(List<String> includeAttrs) {
+        this.includeAttrs = includeAttrs;
     }
 
     public List<DCEncodedAttr> getEncAttrs() {

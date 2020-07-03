@@ -44,7 +44,7 @@ public class DataReport {
     @JsonProperty("duplicationReport")
     private DuplicationReport duplicationReport;
 
-    @JsonProperty("refreshRimestamp")
+    @JsonProperty("refreshTimestamp")
     private Long refreshTimestamp;
 
     public BasicStats getBasicStats() {
@@ -440,7 +440,7 @@ public class DataReport {
             Preconditions.checkNotNull(recordCnt);
             Preconditions.checkNotNull(totalCnt);
             Preconditions.checkArgument(totalCnt >= recordCnt);
-            Preconditions.checkArgument(confidenceCode > 0);
+            Preconditions.checkArgument(confidenceCode >= 0);
             Preconditions.checkArgument(confidenceCode <= 10);
             if (confidenceRateMap == null) {
                 confidenceRateMap = new HashMap<>();

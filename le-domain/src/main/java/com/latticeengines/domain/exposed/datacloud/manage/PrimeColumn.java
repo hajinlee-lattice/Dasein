@@ -1,0 +1,153 @@
+package com.latticeengines.domain.exposed.datacloud.manage;
+
+import static com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn.JSON_PATH;
+import static com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn.PRIME_COLUMN_ID;
+import static com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn.TABLE_NAME;
+
+import java.util.List;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+
+@Entity
+@Access(AccessType.FIELD)
+@Table(name = TABLE_NAME, uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_PRIME_COLUMN_ID", columnNames = { PRIME_COLUMN_ID }), //
+        @UniqueConstraint(name = "UQ_PRIME_COLUMN_JSON_PATH", columnNames = { JSON_PATH })
+})
+public class PrimeColumn implements MetadataColumn {
+
+    public static final String TABLE_NAME = "PrimeColumn";
+    public static final String PRIME_COLUMN_ID = "PrimeColumnId";
+    public static final String JSON_PATH = "JsonPath";
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @Column(name = PRIME_COLUMN_ID, nullable = false, length = 64)
+    private String primeColumnId;
+
+    @Column(name = JSON_PATH, nullable = false, length = 256)
+    private String jsonPath;
+
+    @Column(name = "DisplayName", nullable = false, length = 256)
+    private String displayName;
+
+    @Column(name = "Description", length = 1024)
+    private String description;
+
+    @Column(name = "JavaClass", nullable = false, length = 16)
+    private String javaClass;
+
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @OneToMany(mappedBy = "primeColumn")
+    private List<DataBlockElement> dataBlocks;
+
+    public Long getPid() {
+        return pid;
+    }
+
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    public String getPrimeColumnId() {
+        return primeColumnId;
+    }
+
+    public void setPrimeColumnId(String primeColumnId) {
+        this.primeColumnId = primeColumnId;
+    }
+
+    public List<DataBlockElement> getDataBlocks() {
+        return dataBlocks;
+    }
+
+    public void setDataBlocks(List<DataBlockElement> dataBlocks) {
+        this.dataBlocks = dataBlocks;
+    }
+
+    public String getJsonPath() {
+        return jsonPath;
+    }
+
+    public void setJsonPath(String jsonPath) {
+        this.jsonPath = jsonPath;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getJavaClass() {
+        return javaClass;
+    }
+
+    public void setJavaClass(String javaClass) {
+        this.javaClass = javaClass;
+    }
+
+    private PrimeColumn(){}
+
+    public PrimeColumn(String attrName, String displayName, String jsonPath) {
+        this.primeColumnId = attrName;
+        this.displayName = displayName;
+        this.jsonPath = jsonPath;
+    }
+
+    public String getAttrName() {
+        return primeColumnId;
+    }
+
+    public void setAttrName(String attrName) {
+        this.primeColumnId = attrName;
+    }
+
+    @Override
+    public ColumnMetadata toColumnMetadata() {
+        ColumnMetadata cm = new ColumnMetadata();
+        cm.setAttrName(getColumnId());
+        cm.setDisplayName(getDisplayName());
+        cm.setJavaClass(String.class.getSimpleName());
+        return cm;
+    }
+
+    @Override
+    public String getColumnId() {
+        return primeColumnId;
+    }
+
+    @Override
+    public boolean containsTag(String tag) {
+        return false;
+    }
+
+}

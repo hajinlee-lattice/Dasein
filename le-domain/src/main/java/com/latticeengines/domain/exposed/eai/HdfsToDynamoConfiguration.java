@@ -18,4 +18,6 @@ public class HdfsToDynamoConfiguration extends ExportConfiguration {
     public static final String CONFIG_TABLE_NAME = "eai.export.dynamo.table.name";
     public static final String CONFIG_ATLAS_TENANT = "eai.export.dynamo.atlas.tenant";
     public static final String CONFIG_ATLAS_LOOKUP_IDS = "eai.export.dynamo.atlas.lookup.ids";
+    public static final String CONFIG_CURRENT_VERSION = "eai.export.dynamo.atlas.lookup.version";
+    public static final String CONFIG_ATLAS_LOOKUP_TTL = "eai.export.dynamo.atlas.lookup.ttl";
 }

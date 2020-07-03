@@ -147,12 +147,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
     public static final String TIMELINE_RAWTABLES_GOING_TO_DYNAMO = "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
+    public static final String ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO = "ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
     public static final String ACTION_IMPACTED_SEGMENTS = "ACTION_IMPACTED_SEGMENTS";
     public static final String ACTION_IMPACTED_ENGINES = "ACTION_IMPACTED_ENGINES";
+    public static final String ACCOUNT_LOOKUP_DATA_UNIT_NAME = "AccountLookup";
     public static final String RESCORE_ALL_RATINGS = "RESCORE_ALL_RATINGS";
     public static final String CURRENT_RATING_ITERATION = "CURRENT_RATING_ITERATION";
     public static final String INACTIVE_ENGINE_ATTRIBUTES = "INACTIVE_ENGINE_ATTRIBUTES";
@@ -260,9 +262,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String LATTICE_ACCOUNT_TABLE_NAME = "LATTICE_ACCOUNT_TABLE_NAME";
+    protected static final String REBUILD_LATTICE_ACCOUNT = "REBUILD_LATTICE_ACCOUNT";
     protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
     protected static final String ACCOUNT_EXPORT_TABLE_NAME = "ACCOUNT_EXPORT_TABLE_NAME";
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
+    protected static final String LATTICE_ACCOUNT_PROFILE_TABLE_NAME = "LATTICE_ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
     protected static final String FULL_ACCOUNT_STATS_TABLE_NAME = "FULL_ACCOUNT_STATS_TABLE_NAME";
@@ -361,6 +365,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //
             LATTICE_ACCOUNT_TABLE_NAME, //
+            LATTICE_ACCOUNT_PROFILE_TABLE_NAME, //
             FULL_CHANGELIST_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //
             ACCOUNT_FEATURE_TABLE_NAME, //

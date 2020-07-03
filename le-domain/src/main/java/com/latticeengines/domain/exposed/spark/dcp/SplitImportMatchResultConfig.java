@@ -20,6 +20,30 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("MatchedDunsAttr")
     private String matchedDunsAttr;
 
+    @JsonProperty("countryAttr")
+    private String countryAttr;
+
+    @JsonProperty("ConfidenceCodeAttr")
+    private String confidenceCodeAttr;
+
+    @JsonProperty("TotalCount")
+    private long totalCount;
+
+    @JsonProperty("ManageDbUrl")
+    private String manageDbUrl;
+
+    @JsonProperty("User")
+    private String user;
+
+    @JsonProperty("Password")
+    private String password;
+
+    @JsonProperty("EncryptionKey")
+    private String encryptionKey;
+
+    @JsonProperty("SaltHint")
+    private String saltHint;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -53,5 +77,69 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public void setMatchedDunsAttr(String matchedDunsAttr) {
         this.matchedDunsAttr = matchedDunsAttr;
+    }
+
+    public String getCountryAttr() {
+        return countryAttr;
+    }
+
+    public void setCountryAttr(String countryAttr) {
+        this.countryAttr = countryAttr;
+    }
+
+    public String getManageDbUrl() {
+        return manageDbUrl;
+    }
+
+    public void setManageDbUrl(String manageDbUrl) {
+        this.manageDbUrl = manageDbUrl;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEncryptionKey() {
+        return encryptionKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
+    public String getSaltHint() {
+        return saltHint;
+    }
+
+    public void setSaltHint(String saltHint) {
+        this.saltHint = saltHint;
+    }
+
+    public String getConfidenceCodeAttr() {
+        return confidenceCodeAttr;
+    }
+
+    public void setConfidenceCodeAttr(String confidenceCodeAttr) {
+        this.confidenceCodeAttr = confidenceCodeAttr;
+    }
+
+    public long getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(long totalCount) {
+        this.totalCount = totalCount;
     }
 }

@@ -67,11 +67,14 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
     // attribute profiling.
     protected Long evaluationDateAsTimestamp = null;
 
+
+    protected String customerSpaceStr;
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
 
     protected void bootstrap() {
         customerSpace = configuration.getCustomerSpace();
+        customerSpaceStr = customerSpace.toString();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         configureCloneService();

@@ -1,10 +1,12 @@
 package com.latticeengines.eai.service.impl.dynamodb;
 
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_TENANT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_REGION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX;
@@ -38,7 +40,7 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
-import com.latticeengines.eai.dynamodb.runtime.AtlasLookupCacheExportJob;
+import com.latticeengines.eai.dynamodb.runtime.AtlasAccountLookupExportJob;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
@@ -73,8 +75,8 @@ public class DynamoExportServiceImpl extends ExportService {
         Properties props = constructProperties(exportConfig, context);
         ApplicationId appId;
         if (toAtlasLookupCache) {
-            log.info("Submitting AtlasLookupCacheExportJob");
-            appId = eaiYarnService.submitMRJob(AtlasLookupCacheExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
+            log.info("Submitting AtlasAccountLookupExportJob");
+            appId = eaiYarnService.submitMRJob(AtlasAccountLookupExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
         } else {
             log.info("Submitting DynamoExportJob");
             appId = eaiYarnService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
@@ -115,6 +117,8 @@ public class DynamoExportServiceImpl extends ExportService {
             String tenant = CustomerSpace.shortenCustomerSpace(exportConfig.getCustomerSpace().toString());
             context.setProperty(CONFIG_ATLAS_TENANT, tenant);
             context.setProperty(CONFIG_ATLAS_LOOKUP_IDS, exportConfig.getProperties().get(CONFIG_ATLAS_LOOKUP_IDS));
+            context.setProperty(CONFIG_CURRENT_VERSION, exportConfig.getProperties().get(CONFIG_CURRENT_VERSION));
+            context.setProperty(CONFIG_ATLAS_LOOKUP_TTL, exportConfig.getProperties().get(CONFIG_ATLAS_LOOKUP_TTL));
         } else {
             context.setProperty(CONFIG_REPOSITORY, exportConfig.getProperties().get(CONFIG_REPOSITORY));
             context.setProperty(CONFIG_RECORD_TYPE, exportConfig.getProperties().get(CONFIG_RECORD_TYPE));
@@ -161,6 +165,8 @@ public class DynamoExportServiceImpl extends ExportService {
             props.setProperty(CONFIG_TABLE_NAME, ctx.getProperty(CONFIG_TABLE_NAME, String.class));
             props.setProperty(CONFIG_ATLAS_TENANT, ctx.getProperty(CONFIG_ATLAS_TENANT, String.class));
             props.setProperty(CONFIG_ATLAS_LOOKUP_IDS, ctx.getProperty(CONFIG_ATLAS_LOOKUP_IDS, String.class));
+            props.setProperty(CONFIG_CURRENT_VERSION, ctx.getProperty(CONFIG_CURRENT_VERSION, String.class));
+            props.setProperty(CONFIG_ATLAS_LOOKUP_TTL, ctx.getProperty(CONFIG_ATLAS_LOOKUP_TTL, String.class));
         } else {
             props.setProperty(CONFIG_RECORD_TYPE, ctx.getProperty(CONFIG_RECORD_TYPE, String.class));
             props.setProperty(CONFIG_REPOSITORY, ctx.getProperty(CONFIG_REPOSITORY, String.class));

@@ -60,6 +60,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final String TEST_ACCOUNT_ERROR_FILE = "Account_dup_header.csv";
 
+    private static final String USER = "test@dnb.com";
+
     @Inject
     private DropBoxProxy dropBoxProxy;
 
@@ -99,6 +101,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         request.setProjectId(projectDetails.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
+        request.setUserId(USER);
         ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
@@ -147,6 +150,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
 
+        Assert.assertEquals(upload.getCreatedBy(), USER);
         Assert.assertEquals(upload.getStatus(), Upload.Status.FINISHED);
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
         Assert.assertNull(upload.getUploadDiagnostics().getLastErrorMessage());
@@ -310,5 +314,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         DataReport.InputPresenceReport inputPresenceReport  = report.getInputPresenceReport();
         Assert.assertNotNull(inputPresenceReport);
         Assert.assertTrue(CollectionUtils.isNotEmpty(inputPresenceReport.getPresenceList()));
+
+        DataReport.GeoDistributionReport geoDistributionReport = report.getGeoDistributionReport();
+        Assert.assertNotNull(geoDistributionReport);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(geoDistributionReport.getGeographicalDistributionList()));
+
+        DataReport.DuplicationReport duplicationReport = report.getDuplicationReport();
+        Assert.assertNotNull(duplicationReport);
+        Assert.assertTrue(duplicationReport.getDistinctRecords() > 0);
+
+        DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
+        Assert.assertNotNull(matchToDUNSReport);
     }
 }

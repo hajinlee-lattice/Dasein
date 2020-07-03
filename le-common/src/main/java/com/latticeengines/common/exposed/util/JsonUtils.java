@@ -99,6 +99,7 @@ public final class JsonUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T deserialize(ObjectMapper objectMapper, String jsonStr, Class<T> clazz) {
         if (jsonStr == null) {
             return null;
@@ -106,13 +107,17 @@ public final class JsonUtils {
         if (objectMapper == null) {
             objectMapper = getObjectMapper();
         }
-        T deserializedSchema;
+        T deserializedValue;
         try {
-            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
+            if (JsonNode.class.equals(clazz)) {
+                deserializedValue = (T) objectMapper.readTree(jsonStr.getBytes());
+            } else {
+                deserializedValue = objectMapper.readValue(jsonStr.getBytes(), clazz);
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        return deserializedSchema;
+        return deserializedValue;
     }
 
     public static <T> T deserialize(String jsonStr, Class<T> clazz, Boolean allowUnquotedFieldName) {

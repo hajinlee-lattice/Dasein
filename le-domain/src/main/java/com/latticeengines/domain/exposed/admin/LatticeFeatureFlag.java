@@ -48,6 +48,7 @@ public enum LatticeFeatureFlag {
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
     ENABLE_ACCOUNT360("EnableAccount360", "Enable Account360 features"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //
+    ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

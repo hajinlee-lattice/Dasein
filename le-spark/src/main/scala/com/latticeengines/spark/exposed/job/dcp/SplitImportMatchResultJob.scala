@@ -5,7 +5,8 @@ import com.latticeengines.domain.exposed.dcp.DataReport
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.CSVUtils
+import com.latticeengines.spark.util.{CSVUtils, CountryCodeUtils}
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.{col, count, sum}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
@@ -18,25 +19,32 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val config: SplitImportMatchResultConfig = lattice.config
     val input: DataFrame = lattice.input.head
 
+    val countryAttr: String = config.getCountryAttr
+    val url: String = config.getManageDbUrl
+    val user: String = config.getUser
+    val password: String = config.getPassword
+    val encryptionKey: String = config.getEncryptionKey
+    val saltHint: String = config.getSaltHint
+    val totalCnt: Long = config.getTotalCount
+    val geoReport = generateGeoReport(input, countryAttr, totalCnt, url, user, password, encryptionKey, saltHint)
+
+    val ccAttr = config.getConfidenceCodeAttr
+    val matchToDUNSReport = generateMatchToDunsReport(input, ccAttr, totalCnt)
+
     val matchedDunsAttr: String = config.getMatchedDunsAttr
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
     val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
 
     val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
     val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
-    val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
-      .persist(StorageLevel.DISK_ONLY).checkpoint()
-    val uniqueDF: DataFrame = dunsCntDF.filter(col("cnt") === 1)
-    val uniqueCnt = if (uniqueDF == null) 0 else uniqueDF.count()
-    val duplicateDF: DataFrame = dunsCntDF.filter(col("cnt") > 1)
-    val duplicatedCnt = if (duplicateDF == null || duplicateDF.head(1).isEmpty) 0 else duplicateDF.agg(sum("cnt").cast("long")).first().getLong(0)
-    val distinctCount = dunsCntDF.count()
-    val duns = new DataReport.DuplicationReport
-    duns.setDistinctRecords(distinctCount)
-    duns.setUniqueRecords(uniqueCnt)
-    duns.setDuplicateRecords(duplicatedCnt)
+    val dupReport = generateDupReport(acceptedDF, matchedDunsAttr)
 
-    lattice.outputStr = JsonUtils.serialize(duns)
+    val report : DataReport = new DataReport
+    report.setGeoDistributionReport(geoReport)
+    report.setDuplicationReport(dupReport)
+    report.setMatchToDUNSReport(matchToDUNSReport)
+
+    lattice.outputStr = JsonUtils.serialize(report)
     lattice.output = acceptedCsv :: rejectedCsv :: Nil
   }
 
@@ -48,6 +56,59 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
   private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {
     selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
+  }
+
+  private def generateGeoReport(input: DataFrame, countryAttr: String, totalCnt: Long, url: String, user: String,
+                                password: String, key: String, salt: String): DataReport.GeoDistributionReport = {
+    val geoReport: DataReport.GeoDistributionReport = new DataReport.GeoDistributionReport
+    if (input.columns.contains(countryAttr)) {
+      // fake one country code column
+      val countryCodeAttr: String = "CountryCodeAttr"
+      val countryDF = CountryCodeUtils.convert(input, countryAttr, countryCodeAttr, url, user, password, key, salt)
+        .groupBy(col(countryAttr), col(countryCodeAttr))
+        .agg(count("*").alias("cnt"))
+        .persist(StorageLevel.DISK_ONLY)
+      countryDF.collect().foreach(row => {
+        val countryVal: String = row.getAs(countryAttr)
+        val country: String = if (StringUtils.isEmpty(countryVal)) "undefined" else countryVal
+        val countryCodeVal: String = row.getAs(countryCodeAttr)
+        val countryCode: String = if (StringUtils.isEmpty(countryCodeVal)) "undefined" else countryCodeVal
+        val count: Long = row.getAs("cnt")
+        geoReport.addGeoDistribution(countryCode, country, count, totalCnt)
+      })
+    }
+    geoReport
+  }
+
+  private def generateDupReport(acceptedDF: DataFrame, matchedDunsAttr: String): DataReport.DuplicationReport = {
+    val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
+      .persist(StorageLevel.DISK_ONLY).checkpoint()
+    val uniqueDF: DataFrame = dunsCntDF.filter(col("cnt") === 1)
+    val uniqueCnt = if (uniqueDF == null) 0 else uniqueDF.count()
+    val duplicateDF: DataFrame = dunsCntDF.filter(col("cnt") > 1)
+    val duplicatedCnt = if (duplicateDF == null || duplicateDF.head(1).isEmpty) 0 else duplicateDF.agg(sum("cnt").cast("long")).first().getLong(0)
+    val distinctCount = dunsCntDF.count()
+    val dupReport = new DataReport.DuplicationReport
+    dupReport.setDistinctRecords(distinctCount)
+    dupReport.setUniqueRecords(uniqueCnt)
+    dupReport.setDuplicateRecords(duplicatedCnt)
+    dupReport
+  }
+
+  private def generateMatchToDunsReport(input: DataFrame, cc: String, totalCnt: Long): DataReport.MatchToDUNSReport = {
+    val matchToDunsReport = new DataReport.MatchToDUNSReport
+    if (input.columns.contains(cc)) {
+      val cntDF: DataFrame = input.groupBy(cc).agg(count("*").alias("cnt")).persist(StorageLevel.DISK_ONLY)
+      cntDF.collect().foreach(row => {
+        val ccVal: Int = row.getAs(cc)
+        val ccCnt: Long = row.getAs("cnt")
+        if (ccVal == 0) {
+          matchToDunsReport.setNoMatchCnt(ccCnt)
+        }
+        matchToDunsReport.addConfidenceItem(ccVal, ccCnt, totalCnt)
+      })
+    }
+    matchToDunsReport
   }
 
   private def selectAndRename(input: DataFrame, attrNames: Map[String, String]): DataFrame = {

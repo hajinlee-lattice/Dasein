@@ -117,7 +117,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         if (StringUtils.isBlank(modelId)) {
             modelId = configuration.getModelId();
         }
-        if (StringUtils.isBlank(modelId)) {
+        if (StringUtils.isNotBlank(modelId)) {
             String firstModelId = modelId.split("\\|")[0];
             return String.format("ScoreResult_%s_%d", firstModelId.replaceAll("-", "_"),
                     System.currentTimeMillis());

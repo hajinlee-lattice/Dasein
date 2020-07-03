@@ -24,13 +24,14 @@ public class CommandParameterDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
     public void registerParameter(String uid, String key, String value) {
         try {
             Connection conn = ((SessionImpl) sessionFactory.getCurrentSession()).connection();
-            CallableStatement cstmt = conn.prepareCall("{call dbo.MatchFramework_RegisterCommandParameter(?, ?, ?, ?)}");
-            cstmt.setString("uid", uid);
-            cstmt.setString("key", key);
-            cstmt.setString("value", value);
-            cstmt.setBoolean("isInferred", false);
-            cstmt.execute();
-            cstmt.close();
+            try (CallableStatement cstmt = conn
+                    .prepareCall("{call dbo.MatchFramework_RegisterCommandParameter(?, ?, ?, ?)}")) {
+                cstmt.setString("uid", uid);
+                cstmt.setString("key", key);
+                cstmt.setString("value", value);
+                cstmt.setBoolean("isInferred", false);
+                cstmt.execute();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to register command parameters by stored procedure.", e);
         }

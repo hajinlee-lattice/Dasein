@@ -211,11 +211,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }).start();
     }
 
-    protected void clearAllWorkspacesAsync() {
-        new Thread(this::clearAllWorkspaces).start();
-    }
-
-    protected void clearAllWorkspaces() {
+    private void clearAllWorkspaces() {
         List<String> toBeRemoved = new ArrayList<>();
         for (String workSpace: workSpaces) {
             try {

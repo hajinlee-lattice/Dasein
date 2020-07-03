@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.etl.ingestion.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -74,7 +73,7 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
             }
             ApiConfiguration apiConfig = (ApiConfiguration) progress.getIngestion().getProviderConfiguration();
             log.info(String.format("Downloading from %s ...", apiConfig.getFileUrl()));
-            injestCopy(progress, apiConfig);
+            ingestCopy(progress, apiConfig);
             log.info("Download completed");
             Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
             progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
@@ -87,19 +86,17 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
         }
     }
 
-    public void injestCopy(IngestionProgress progress, ApiConfiguration apiConfig)
-            throws MalformedURLException, IOException {
+    public void ingestCopy(IngestionProgress progress, ApiConfiguration apiConfig) throws IOException {
         HttpClient client = new HttpClient();
         GetMethod method = new GetMethod(apiConfig.getFileUrl());
         int statusCode = client.executeMethod(method);
         log.info("Starting to download. status=" + statusCode);
-        InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
         FileSystem hdfs = FileSystem.get(yarnConfiguration);
-        FSDataOutputStream outStream = hdfs.create(new Path(progress.getDestination()));
-        long bytes = IOUtils.copy(in, outStream);
-        log.info("Downlowned files size=" + bytes);
-        in.close();
-        outStream.close();
+        try (InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
+                FSDataOutputStream outStream = hdfs.create(new Path(progress.getDestination()))) {
+            long bytes = IOUtils.copy(in, outStream);
+            log.info("Downloaded files size=" + bytes);
+        }
     }
 
     @Override

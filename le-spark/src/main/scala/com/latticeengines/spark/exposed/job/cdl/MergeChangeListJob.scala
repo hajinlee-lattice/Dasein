@@ -26,7 +26,7 @@ class MergeChangeListJob extends AbstractSparkJob[ChangeListConfig] {
       .select(col("ColumnId")).distinct
     val deletedColumnCount = deletedColumnIds.count()
     val deletedColumnNames = if (deletedColumnCount > 0) deletedColumnIds.as[String].collect.toList else List()
-    val updatedChangeList = changeList.filter(col("RowId").isNotNull && col("ColumnId").isNotNull && col("Deleted") =!= true)
+    val updatedChangeList = changeList.filter(col("RowId").isNotNull && col("ColumnId").isNotNull && col("Deleted").isNull)
 
     if (source == null) {
       lattice.output = pivotChangeList(updatedChangeList, joinKey) :: Nil

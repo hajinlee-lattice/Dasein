@@ -1,4 +1,4 @@
-package com.latticeengines.spark.utils;
+package com.latticeengines.spark.exposed.utils;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_BKTALGO;
@@ -70,7 +70,11 @@ public final class BucketEncodeUtils {
         List<String> retainFields = new ArrayList<>();
         records.forEach(record -> {
             if (record.get(PROFILE_ATTR_ENCATTR) == null) {
-                String srcAttr = record.get(PROFILE_ATTR_SRCATTR).toString();
+                String srcAttr = record.get(PROFILE_ATTR_ATTRNAME).toString();
+                if (record.get(PROFILE_ATTR_SRCATTR) != null && //
+                        StringUtils.isNotBlank(record.get(PROFILE_ATTR_SRCATTR).toString())) {
+                    srcAttr = record.get(PROFILE_ATTR_SRCATTR).toString();
+                }
                 retainFields.add(srcAttr);
             }
         });
@@ -96,7 +100,7 @@ public final class BucketEncodeUtils {
     public static Map<String, String> renameFields(List<GenericRecord> records) {
         Map<String, String> attrs = new HashMap<>();
         records.forEach(record -> {
-            if (record.get(PROFILE_ATTR_ENCATTR) == null) {
+            if (record.get(PROFILE_ATTR_ENCATTR) == null && record.get(PROFILE_ATTR_SRCATTR) != null) {
                 String srcAttr = record.get(PROFILE_ATTR_SRCATTR).toString();
                 String tgtAttr = record.get(PROFILE_ATTR_ATTRNAME).toString();
                 if (!tgtAttr.equals(srcAttr)) {

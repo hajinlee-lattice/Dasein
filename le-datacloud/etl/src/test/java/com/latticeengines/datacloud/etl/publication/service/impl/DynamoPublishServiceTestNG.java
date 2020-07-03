@@ -247,7 +247,7 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
 
         @Override
         public Table createTable(String tableName, long readCapacityUnits, long writeCapacityUnits, String partitionKeyName,
-                                 String partitionKeyType, String sortKeyName, String sortKeyType) {
+                String partitionKeyType, String sortKeyName, String sortKeyType, String configCMK) {
             MockDynamoTable dynamoTable = new MockDynamoTable(tableName, readCapacityUnits, writeCapacityUnits);
             dynamoTables.put(tableName, dynamoTable);
             return null;

@@ -86,7 +86,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     private Set<String> additionalContactAttr = new HashSet<>(Arrays.asList(InterfaceName.FirstName.name(),
             InterfaceName.LastName.name(), InterfaceName.Address_Street_2.name(), InterfaceName.DoNotCall.name(),
-            InterfaceName.DoNotMail.name()));
+            InterfaceName.DoNotMail.name(), InterfaceName.CreatedDate.name(), InterfaceName.LastModifiedDate.name()));
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -290,9 +290,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
 
         /*
-         * PLS-15540 Accumulative Launched = Add - Delete + Previous Accumulative
-         * Launched Suppressed = Selected - Accumulative Launched Incremental Launched =
-         * Add + Delete
+         * PLS-15540 Accumulative Launched = Add - Delete + Previous
+         * Accumulative Launched Suppressed = Selected - Accumulative Launched
+         * Incremental Launched = Add + Delete
          */
         accumulativeAccounts += accountsAdded - accountsDeleted;
         accumulativeContacts += contactsAdded - contactsDeleted;
@@ -317,7 +317,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
-    private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata, PlayLaunchChannel playLaunchChannel) {
+    private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata,
+            PlayLaunchChannel playLaunchChannel) {
         Set<String> entityLookups = getBaseLookupFieldsByEntity(mainEntity, playLaunchChannel);
         return mergeWithExportFields(mainEntity, entityLookups, fieldMappingMetadata);
     }

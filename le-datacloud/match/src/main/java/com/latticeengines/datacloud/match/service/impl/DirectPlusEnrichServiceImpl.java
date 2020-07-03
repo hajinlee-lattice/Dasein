@@ -14,12 +14,19 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
@@ -29,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Service
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private static final Logger log = LoggerFactory.getLogger(DirectPlusEnrichServiceImpl.class);
@@ -42,23 +50,55 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     @Inject
     private DirectPlusEnrichServiceImpl _self;
 
+    @Value("${datacloud.dnb.direct.plus.data.block.chunk.size}")
+    private int chunkSize;
+
     private volatile RestApiClient apiClient;
     private volatile ExecutorService fetchers;
 
     @Override
     public List<PrimeAccount> fetch(Collection<String> dunsNumbers) {
-        List<Callable<PrimeAccount>> callables = new ArrayList<>();
-        dunsNumbers.forEach(dunsNumber -> //
-                callables.add(() -> {
-                    try {
-                        return new PrimeAccount(fetch(dunsNumber));
-                    } catch (Exception e) {
-                        log.error("Failed to fetch data block for DUNS {}", dunsNumber, e);
-                        return null;
-                    }
-                }));
-        return ThreadPoolUtils.callInParallel(fetchers(), callables, //
-                10, TimeUnit.SECONDS, 250, TimeUnit.MILLISECONDS);
+        List<String> chunk = new ArrayList<>();
+        List<PrimeAccount> results = new ArrayList<>();
+        for (String dunsNumber: dunsNumbers) {
+            chunk.add(dunsNumber);
+            if (chunk.size() >= chunkSize) {
+                List<PrimeAccount> chunkResult = fetchChunk(chunk);
+                results.addAll(chunkResult);
+                chunk.clear();
+            }
+        }
+        if (!chunk.isEmpty()) {
+            List<PrimeAccount> chunkResult = fetchChunk(chunk);
+            results.addAll(chunkResult);
+            chunk.clear();
+        }
+        return results;
+    }
+
+    private List<PrimeAccount> fetchChunk(List<String> dunsNumbers) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("Retry attempt={} to fetch data block.", ctx.getRetryCount() + 1, ctx.getLastThrowable());
+                SleepUtils.sleep(5000); // sleep 5 seconds to avoid blast D+ rate limit
+            }
+            try (PerformanceTimer timer = new PerformanceTimer("Fetch data block for " + //
+                    dunsNumbers.size() + " DUNS numbers.")) {
+                List<Callable<PrimeAccount>> callables = new ArrayList<>();
+                dunsNumbers.forEach(dunsNumber -> //
+                        callables.add(() -> {
+                            try {
+                                return new PrimeAccount(fetch(dunsNumber));
+                            } catch (Exception e) {
+                                log.error("Failed to fetch data block for DUNS {}", dunsNumber, e);
+                                return null;
+                            }
+                        }));
+                return ThreadPoolUtils.callInParallel(fetchers(), callables, //
+                        1, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
+            }
+        });
     }
 
     private Map<String, Object> fetch(String duns) {

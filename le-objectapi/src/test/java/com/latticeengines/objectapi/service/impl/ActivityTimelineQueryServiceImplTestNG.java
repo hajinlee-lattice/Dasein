@@ -79,7 +79,7 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
             String sortKeyType = ScalarAttributeType.S.name();
             dynamoService.createTable(tableName, readCapacityUnits, writeCapacityUnits,
                     GenericTimeseriesRecord.PARTITION_KEY_ATTR, partitionKeyType,
-                    GenericTimeseriesRecord.RANGE_KEY_ATTR, sortKeyType);
+                    GenericTimeseriesRecord.RANGE_KEY_ATTR, sortKeyType, null);
 
             List<Item> events = new ArrayList<>();
             long start = Instant.now().minus(90, ChronoUnit.DAYS).toEpochMilli();

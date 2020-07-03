@@ -44,7 +44,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     }
 
     val generateSortKey = udf {
-      recordId: String => TimeLineStoreUtils.generateSortKey(recordId)
+      (eventTimeStamp: Long, recordId: String) => TimeLineStoreUtils.generateSortKey(eventTimeStamp, recordId)
     }
 
     val getSourceColumn = udf {
@@ -81,6 +81,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
           val timelineObj = timelineMap.getOrElse(timelineId, null)
           val timelineVersion = timelineVersionMap.getOrElse(timelineId, "")
           val recordIdColumn = TimelineStandardColumn.RecordId.getColumnName
+          val eventTimeStampColumn = TimelineStandardColumn.EventDate.getColumnName
           val entityIdColumnName = if (timelineObj.getEntity.equalsIgnoreCase("account")) {
             AccountId.name()
           } else {
@@ -96,8 +97,8 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
           }
           timelineRawStreamTable = timelineRawStreamTable.withColumn(partitionKey, generatePartitionKey
           (timelineRawStreamTable.col(entityIdColumnName)))
-          timelineRawStreamTable = timelineRawStreamTable.withColumn(sortKey, generateSortKey(timelineRawStreamTable
-            .col(recordIdColumn)))
+          timelineRawStreamTable = timelineRawStreamTable.withColumn(sortKey, generateSortKey
+          (timelineRawStreamTable.col(eventTimeStampColumn), timelineRawStreamTable.col(recordIdColumn)))
           (timelineId, timelineRawStreamTable)
       }.toSeq: _*)
     val timelineMasterStoreMap =

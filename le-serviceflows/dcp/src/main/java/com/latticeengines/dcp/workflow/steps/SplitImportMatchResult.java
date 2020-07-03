@@ -15,11 +15,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -71,6 +73,15 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     @Inject
     private DataReportProxy dataReportProxy;
 
+    @Value("${datacloud.manage.url}")
+    private String url;
+
+    @Value("${datacloud.manage.user}")
+    private String user;
+
+    @Value("${datacloud.manage.password.encrypted}")
+    private String password;
+
     @Override
     protected Class<SplitImportMatchResultJob> getJobClz() {
         return SplitImportMatchResultJob.class;
@@ -83,8 +94,18 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         HdfsDataUnit input = matchResult.toHdfsDataUnit("input");
         SplitImportMatchResultConfig jobConfig = new SplitImportMatchResultConfig();
         jobConfig.setInput(Collections.singletonList(input));
+        jobConfig.setTotalCount(input.getCount());
 
         jobConfig.setMatchedDunsAttr("DunsNumber");
+        jobConfig.setCountryAttr(InterfaceName.Country.name());
+        jobConfig.setManageDbUrl(url);
+        jobConfig.setUser(user);
+        String encryptionKey = CipherUtils.generateKey();
+        jobConfig.setEncryptionKey(encryptionKey);
+        String saltHint = CipherUtils.generateKey();
+        jobConfig.setSaltHint(saltHint);
+        jobConfig.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+        jobConfig.setConfidenceCodeAttr("ConfidenceCode");
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
@@ -158,16 +179,23 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     private void updateUploadStatistics(SparkJobResult result) {
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
         UploadStats.MatchStats matchStats = new UploadStats.MatchStats();
-        matchStats.setMatched(result.getTargets().get(0).getCount());
-        matchStats.setUnmatched(stats.getImportStats().getSuccessfullyIngested() - matchStats.getMatched());
+        long matchedCnt = result.getTargets().get(0).getCount();
+        matchStats.setMatched(matchedCnt);
+        long unmatchedCnt = stats.getImportStats().getSuccessfullyIngested() - matchStats.getMatched();
+        matchStats.setUnmatched(unmatchedCnt);
         matchStats.setPendingReviewCnt(0L);
         //matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
         stats.setMatchStats(matchStats);
         putObjectInContext(UPLOAD_STATS, stats);
-        DataReport.DuplicationReport duplicationReport = JsonUtils.deserialize(result.getOutput(),
-                DataReport.DuplicationReport.class);
+        DataReport report = JsonUtils.deserialize(result.getOutput(), DataReport.class);
+
+        // set matched/unmatched count for report
+        DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
+        matchToDUNSReport.setMatched(matchedCnt);
+        matchToDUNSReport.setUnmatched(unmatchedCnt);
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
-                configuration.getUploadId(), duplicationReport);
+                configuration.getUploadId(), report);
+
 
     }
 

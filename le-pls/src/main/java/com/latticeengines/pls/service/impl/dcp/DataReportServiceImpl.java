@@ -64,12 +64,22 @@ public class DataReportServiceImpl implements DataReportService {
         Long p4 = new RandomDataGenerator().nextLong(0L, successCnt);
         Long p5 = new RandomDataGenerator().nextLong(0L, successCnt);
         Long p6 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p7 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p8 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p9 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p10 = new RandomDataGenerator().nextLong(0L, successCnt);
+        Long p11 = new RandomDataGenerator().nextLong(0L, successCnt);
         inputPresenceReport.addPresence("CompanyName", p1, successCnt);
         inputPresenceReport.addPresence("Country", p2, successCnt);
         inputPresenceReport.addPresence("City", p3, successCnt);
         inputPresenceReport.addPresence("State", p4, successCnt);
-        inputPresenceReport.addPresence("Address", p5, successCnt);
-        inputPresenceReport.addPresence("Phone", p6, successCnt);
+        inputPresenceReport.addPresence("Address_Street_1", p5, successCnt);
+        inputPresenceReport.addPresence("Address_Street_2", p7, successCnt);
+        inputPresenceReport.addPresence("PhoneNumber", p6, successCnt);
+        inputPresenceReport.addPresence("DUNS", p8, successCnt);
+        inputPresenceReport.addPresence("Email", p9, successCnt);
+        inputPresenceReport.addPresence("PostalCode", p10, successCnt);
+        inputPresenceReport.addPresence("Website", p11, successCnt);
 
         DataReport.GeoDistributionReport geoDistributionReport = new DataReport.GeoDistributionReport();
         Long ct1 = new RandomDataGenerator().nextLong(1L, matchCnt / 4);

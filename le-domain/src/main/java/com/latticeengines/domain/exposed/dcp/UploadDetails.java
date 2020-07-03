@@ -23,6 +23,9 @@ public class UploadDetails {
     @Enumerated(EnumType.STRING)
     private Upload.Status status;
 
+    @JsonProperty("createdBy")
+    private String createdBy;
+
     @JsonProperty("uploadConfig")
     private UploadConfig uploadConfig;
 
@@ -57,6 +60,14 @@ public class UploadDetails {
 
     public void setStatus(Upload.Status status) {
         this.status = status;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public UploadConfig getUploadConfig() {

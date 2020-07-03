@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -69,8 +70,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = {"deployment"})
     public void testCRUD() {
+        String userId = "test@dnb.com";
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com");
+                Project.ProjectType.Type1, userId);
         projectId = details.getProjectId();
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
@@ -80,7 +82,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
                 fieldDefinitionsRecord);
         sourceId = source.getSourceId();
 
+        UploadRequest uploadRequest = new UploadRequest();
         UploadConfig config = new UploadConfig();
+        uploadRequest.setUploadConfig(config);
+        uploadRequest.setUserId(userId);
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
         String uploadDir = UploadS3PathBuilderUtils.getUploadRoot(details.getProjectId(), source.getSourceId());
@@ -91,8 +96,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String importedFilePath = uploadDirKey + uploadTS + "/processed/file2.csv";
         String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
-        UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
+        UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), uploadRequest);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
+        Assert.assertEquals(upload.getCreatedBy(), userId);
         UploadConfig returnedConfig = upload.getUploadConfig();
         Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertNull(returnedConfig.getUploadImportedFilePath());
@@ -122,10 +128,13 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         // create another upload
         UploadConfig config2 = new UploadConfig();
+        UploadRequest uploadRequest2 = new UploadRequest();
+        uploadRequest2.setUserId(userId);
+        uploadRequest2.setUploadConfig(config2);
         String uploadTS2 = "2020-04-21-02-02-52.645";
         String rawPath2 = uploadDirKey + uploadTS2 + "/raw/file3.csv";
         config2.setUploadRawFilePath(rawPath2);
-        uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config2);
+        uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), uploadRequest2);
     }
 
 

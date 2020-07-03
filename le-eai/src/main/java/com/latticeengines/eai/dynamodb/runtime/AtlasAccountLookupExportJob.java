@@ -1,10 +1,12 @@
 package com.latticeengines.eai.dynamodb.runtime;
 
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_TENANT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_REGION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_TABLE_NAME;
 
@@ -18,18 +20,18 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportJob;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 
-public class AtlasLookupCacheExportJob extends AvroExportJob {
+public class AtlasAccountLookupExportJob extends AvroExportJob {
 
-    public static final String DYNAMO_EXPORT_JOB_TYPE = "atlasLookupCacheExportJob";
+    public static final String DYNAMO_EXPORT_JOB_TYPE = "atlasAccountLookupExportJob";
 
     private int numMappers;
 
-    public AtlasLookupCacheExportJob(Configuration config) {
+    public AtlasAccountLookupExportJob(Configuration config) {
         super(config);
     }
 
-    public AtlasLookupCacheExportJob(Configuration config, //
-                           MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+    public AtlasAccountLookupExportJob(Configuration config, //
+                                       MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         super(config, mapReduceCustomizationRegistry);
     }
 
@@ -41,7 +43,7 @@ public class AtlasLookupCacheExportJob extends AvroExportJob {
     @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends Mapper> getMapperClass() {
-        return AtlasLookupCacheExportMapper.class;
+        return AtlasAccountLookupExportMapper.class;
     }
 
     @Override
@@ -55,13 +57,15 @@ public class AtlasLookupCacheExportJob extends AvroExportJob {
 
     @Override
     public void customize(Job mrJob, Properties properties) {
-        int numMappers = Integer.valueOf(properties.getProperty(ExportProperty.NUM_MAPPERS, "1"));
+        int numMappers = Integer.parseInt(properties.getProperty(ExportProperty.NUM_MAPPERS, "1"));
         setNumMappers(numMappers);
         super.customize(mrJob, properties);
         Configuration config = mrJob.getConfiguration();
         config.set(CONFIG_ATLAS_TENANT, (String) properties.get(CONFIG_ATLAS_TENANT));
         config.set(CONFIG_TABLE_NAME, (String) properties.get(CONFIG_TABLE_NAME));
         config.set(CONFIG_ATLAS_LOOKUP_IDS, (String) properties.get(CONFIG_ATLAS_LOOKUP_IDS));
+        config.set(CONFIG_CURRENT_VERSION, (String) properties.get(CONFIG_CURRENT_VERSION));
+        config.set(CONFIG_ATLAS_LOOKUP_TTL, (String) properties.get(CONFIG_ATLAS_LOOKUP_TTL));
 
         config.set(CONFIG_ENDPOINT, (String) properties.get(CONFIG_ENDPOINT));
         config.set(CONFIG_AWS_REGION, (String) properties.get(CONFIG_AWS_REGION));

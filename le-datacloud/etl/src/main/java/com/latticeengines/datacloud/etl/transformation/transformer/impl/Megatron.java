@@ -79,9 +79,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
         Schema seedSchema;
 
-        try {
-            InputStream is = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("schema/MockAmSeed.avsc");
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("schema/MockAmSeed.avsc")) {
             Schema.Parser parser = new Schema.Parser();
             seedSchema = parser.parse(is);
         } catch (IOException e) {

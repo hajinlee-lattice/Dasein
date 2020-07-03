@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.cdl.workflow.steps.merge.MatchUtils;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -33,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Ma
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
@@ -96,7 +100,28 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
     @Override
     protected void onPostTransformationCompleted() {
         String outputTableName = getOutputTableName();
-        log.info("RenameAndMatchStep, output table name {}", outputTableName);
+        // Validate the output to make sure the idEntity column has values,
+        // otherwise throw exception
+        Table outputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), outputTableName);
+        String path = outputTable.getExtracts().get(0).getPath();
+        log.info("RenameAndMatchStep, output table name {}, path is {}", outputTableName, path);
+        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, path);
+        int cnt = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String columnForDelete = idEntity.equals(BusinessEntity.Account) ? InterfaceName.AccountId.name()
+                    : InterfaceName.ContactId.name();
+            if (record.get(columnForDelete) != null) {
+                String value = record.get(columnForDelete).toString();
+                if (!StringUtils.isEmpty(value)) {
+                    cnt++;
+                }
+            }
+        }
+        if (cnt == 0) {
+            throw new RuntimeException("No ID is found after match, can't proceed. Please check the input!");
+        }
+
         // Save output table for downstream steps
         saveOutputValue(WorkflowContextConstants.Outputs.RENAME_AND_MATCH_TABLE, outputTableName);
 
@@ -235,7 +260,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
 
         List<String> accountSystemIds = Collections.singletonList(getSystemIdColumn(BusinessEntity.Account, idSystem));
         List<String> contactSystemIds = Collections.singletonList(getSystemIdColumn(BusinessEntity.Contact, idSystem));
-            log.info("RenameAndMatchStep, accountSystemIds {}, contactSystemIds {} ", accountSystemIds, contactSystemIds);
+        log.info("RenameAndMatchStep, accountSystemIds {}, contactSystemIds {} ", accountSystemIds, contactSystemIds);
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
         if (idEntity.equals(BusinessEntity.Account)) {
             MatchInput.EntityKeyMap accountKeyMap = new MatchInput.EntityKeyMap();

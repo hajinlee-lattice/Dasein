@@ -1,6 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccount;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,12 +37,14 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.spark.exposed.job.cdl.MergeChangeListJob;
 import com.latticeengines.spark.exposed.job.common.CopyJob;
+import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
-@Component(UpdateAccountExport.BEAN_NAME)
 @Lazy
+@Component(UpdateAccountExport.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAccountStepConfiguration> {
 
@@ -48,8 +55,6 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    private boolean shortCutMode = false;
-    private Table latticeAccountTable;
     private Table oldAccountExportTable;
     private Table newAccountExportTable;
     private Table fullChangelistTable;
@@ -60,49 +65,52 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     public void execute() {
         bootstrap();
         Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_EXPORT_TABLE_NAME);
-        shortCutMode = (tableInCtx != null);
+        boolean shortCutMode = (tableInCtx != null);
         if (shortCutMode) {
             log.info("Found AccountExport table in context, go through short-cut mode.");
             dataCollectionProxy.upsertTable(customerSpace.toString(), tableInCtx.getName(), //
                     TableRoleInCollection.AccountExport, inactive);
         } else {
             preExecution();
-            if (oldAccountExportTable == null) {
-                // Old table doesn't exist, use LatticeAccount table to generate AccountExport
-                if (latticeAccountTable != null) {
-                    log.info("LatticeAccount table name is {}, extract dir is {} ", latticeAccountTable.getName(),
-                            latticeAccountTable.getExtracts().get(0).getPath());
-                    HdfsDataUnit input = latticeAccountTable.toHdfsDataUnit("LaticeAccount");
-                    HdfsDataUnit export = select(input);
 
-                    postExecution();
+            if (shouldRebuild()) {
+                log.info("UpdateAccountExport, rebuild AccountExport table");
+                Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+                Table latticeAccount = attemptGetTableRole(LatticeAccount, false);
+                HdfsDataUnit output;
+                if (latticeAccount == null) {
+                    log.warn("This tenant does not have Lattice Account.");
+                    // Select from the customer account table
+                    output = select(customerAccount.toHdfsDataUnit("Account"));
                 } else {
-                    throw new RuntimeException("Even LatticeAccount table doesn't exist, can't continue");
+                    HdfsDataUnit output1 = select(customerAccount.toHdfsDataUnit("CustomerAccount"));
+                    HdfsDataUnit output2 = select(latticeAccount.toHdfsDataUnit("LatticeAccount"));
+                    output = merge(output1, output2);
                 }
+                String tableName = NamingUtils.timestamp("AccountExport");
+                newAccountExportTable = toTable(tableName, output);
             } else {
-                // Old table exists, apply AccountExport related changelist into existing table
-                log.info("Existing AccountExport table name is {}, path is {} ", oldAccountExportTable.getName(),
-                        oldAccountExportTable.getExtracts().get(0).getPath());
-                HdfsDataUnit input = oldAccountExportTable.toHdfsDataUnit("OldAccountExport");
-                HdfsDataUnit applied = applyChangelist(input);
-
-                postExecution();
+                // apply changelists to generate new AccountExport table
+                if (fullChangelistTable != null) {
+                    log.info("Existing AccountExport table name is {}, path is {} ", oldAccountExportTable.getName(),
+                            oldAccountExportTable.getExtracts().get(0).getPath());
+                    HdfsDataUnit input = oldAccountExportTable.toHdfsDataUnit("OldAccountExport");
+                    applyChangelist(input);
+                } else {
+                    throw new RuntimeException("Full changelist doesn't exist, can't continue");
+                }
             }
+
+            postExecution();
         }
     }
 
     private void preExecution() {
-        joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name()
-                : InterfaceName.AccountId.name();
+        joinKey = InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
-        latticeAccountTable = attemptGetTableRole(TableRoleInCollection.LatticeAccount, false);
         oldAccountExportTable = attemptGetTableRole(TableRoleInCollection.AccountExport, false);
-        String fullChangelistTableName = getStringValueFromContext(FULL_CHANGELIST_TABLE_NAME);
-        log.info("Full changelis table name {}", fullChangelistTableName);
-        fullChangelistTable = metadataProxy.getTableSummary(customerSpace.toString(), fullChangelistTableName);
-        if (fullChangelistTable == null) {
-            throw new RuntimeException("Full changelist doesn't exist, can't continue");
-        }
+        fullChangelistTable = getTableSummaryFromKey(customerSpace.toString(), FULL_CHANGELIST_TABLE_NAME);
+        exportSchema = getExportSchema();
     }
 
     protected void postExecution() {
@@ -115,24 +123,30 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         }
     }
 
-    private HdfsDataUnit select(HdfsDataUnit input) {
-        log.info("UpdateAccountExport, select step");
-        CopyConfig config = getExportCopyConfig();
-        List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(input);
-        config.setInput(inputs);
-        SparkJobResult result = runSparkJob(CopyJob.class, config);
-        HdfsDataUnit output = result.getTargets().get(0);
-
-        // Upsert AccountExport table
-        String tableName = NamingUtils.timestamp("AccountExport");
-        newAccountExportTable = toTable(tableName, output);
-
-        return output;
+    private boolean shouldRebuild() {
+        return (oldAccountExportTable == null)
+                || getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class);
     }
 
-    private CopyConfig getExportCopyConfig() {
-        exportSchema = servingStoreProxy
+    private HdfsDataUnit select(HdfsDataUnit input) {
+        List<String> retainAttrs = exportSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        CopyConfig config = new CopyConfig();
+        config.setSelectAttrs(retainAttrs);
+        config.setInput(Collections.singletonList(input));
+        SparkJobResult result = runSparkJob(CopyJob.class, config);
+        return result.getTargets().get(0);
+    }
+
+    private HdfsDataUnit merge(HdfsDataUnit input1, HdfsDataUnit input2) {
+        UpsertConfig config = new UpsertConfig();
+        config.setJoinKey(joinKey);
+        config.setInput(Arrays.asList(input1, input2));
+        SparkJobResult result = runSparkJob(UpsertJob.class, config);
+        return result.getTargets().get(0);
+    }
+
+    private List<ColumnMetadata> getExportSchema() {
+        List<ColumnMetadata> exportSchema = servingStoreProxy
                 .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive) //
                 .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
                 .filter(cm -> !(Boolean.FALSE.equals(cm.getCanSegment()) //
@@ -146,17 +160,15 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
-
-        CopyConfig config = new CopyConfig();
-        config.setSelectAttrs(retainAttrNames);
-        return config;
+        return exportSchema;
     }
 
-    private HdfsDataUnit applyChangelist(HdfsDataUnit input) {
+    private void applyChangelist(HdfsDataUnit input) {
         log.info("UpdateAccountExport, apply changelist step");
         ChangeListConfig config = new ChangeListConfig();
         List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(input);
+        inputs.add(toDataUnit(fullChangelistTable, "FullChangelist")); // changelist
+        inputs.add(input); // source table
         config.setInput(inputs);
         config.setJoinKey(joinKey);
         SparkJobResult result = runSparkJob(MergeChangeListJob.class, config);
@@ -165,8 +177,6 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         // Upsert AccountExport table
         String tableName = NamingUtils.timestamp("AccountExport");
         newAccountExportTable = toTable(tableName, output);
-
-        return output;
     }
 
     private void setAccountExportTableSchema(Table table) {
