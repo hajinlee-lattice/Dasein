@@ -276,7 +276,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(plays.size(), 0);
         channel4.setIsAlwaysOn(false);
         playLaunchChannelEntityMgr.update(channel4);
-        SleepUtils.sleep(1000l);
         playLaunchChannelEntityMgr.updateAttributeSetNameToDefault("attribute_set_name_s3");
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class), null);
         AtomicReference<PlayLaunchChannel> updatedChannel = new AtomicReference<>();
