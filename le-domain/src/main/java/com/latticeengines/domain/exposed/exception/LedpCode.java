@@ -377,6 +377,7 @@ public enum LedpCode {
             " data. This will affect the data imported going forward." + System.lineSeparator() + "{0}"), //
     LEDP_18247("{0}, Please confirm need to reset template."), //
     LEDP_18248("Cannot validate and update system priority."), //
+    LEDP_18249("previous standard field {0} is unmapped"),//
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

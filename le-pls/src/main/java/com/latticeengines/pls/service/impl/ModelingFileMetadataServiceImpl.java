@@ -403,6 +403,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
+        compareStandardFields(documentBestEffort, fieldMappingDocument, standardAttrNames, validations);
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
@@ -491,6 +492,29 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
         fieldValidationResult.setFieldValidations(validations);
         return fieldValidationResult;
+    }
+
+    private void compareStandardFields(FieldMappingDocument documentBestEffort,
+                                       FieldMappingDocument fieldMappingDocument,
+                                       Set<String> standardAttrNames,
+                                       List<FieldValidation> validations) {
+        Map<String, String> previousStandardFieldMapping = new HashMap<>();
+        documentBestEffort.getFieldMappings().stream().forEach(mapping -> {
+            if (standardAttrNames.contains(mapping.getMappedField())) {
+                previousStandardFieldMapping.put(mapping.getMappedField(), mapping.getUserField());
+            }
+        });
+        for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
+            if (standardAttrNames.contains(mapping.getMappedField())) {
+                String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
+                String userField = mapping.getUserField();
+                if (StringUtils.equals(preUserField, userField)) {
+                    String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
+                            preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
+                    validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.WARNING, message));
+                }
+            }
+        }
     }
 
     private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate,
@@ -836,6 +860,22 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getCdlExternalSystemType() != null) {
                 fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+        checkStandardFields(fieldMappingDocument, templateTable);
+    }
+
+    private void checkStandardFields(FieldMappingDocument fieldMappingDocument, Table templateTable) {
+        if (templateTable == null) {
+            return;
+        }
+        Map<String, String> map = templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName,
+                attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
+                        attr.getDisplayName()));
+        for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
+            String mappedField = mapping.getMappedField();
+            if (StringUtils.isBlank(mapping.getUserField()) && StringUtils.isNotBlank(map.get(mappedField))) {
+                throw new LedpException(LedpCode.LEDP_18248, new String[] { mappedField });
             }
         }
     }
