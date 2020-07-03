@@ -104,12 +104,6 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingEngineSummaries(type, status, publishedRatingsOnly);
     }
 
-    @GetMapping("/all")
-    @ApiOperation(value = "Get all Rating Engine summaries for a tenant, only used for teams")
-    public List<RatingEngineSummary> getRatingEngineSummaries(@PathVariable String customerSpace) {
-        return ratingEngineService.getRatingEngineSummaries();
-    }
-
     @GetMapping("/deleted")
     @ResponseBody
     @ApiOperation(value = "Get all Deleted Rating Engines")

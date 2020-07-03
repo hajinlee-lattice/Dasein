@@ -111,12 +111,6 @@ public class PlayResource {
         this.playLaunchChannelService = playLaunchChannelService;
     }
 
-    @GetMapping("/all")
-    @ApiOperation(value = "Get all plays for a tenant, only used for teams")
-    public List<Play> getAllPlays(@PathVariable String customerSpace) {
-        return playService.getAllPlays();
-    }
-
     // -----
     // Plays
     // -----
