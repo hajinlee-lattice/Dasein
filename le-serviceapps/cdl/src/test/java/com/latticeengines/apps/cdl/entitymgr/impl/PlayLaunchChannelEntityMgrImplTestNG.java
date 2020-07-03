@@ -270,9 +270,9 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel2.getId());
 
-        List<Play> plays = playEntityMgr.findByAlwaysOnChannelAndAttributeSetName("attribute_set_name_s3");
+        List<Play> plays = playEntityMgr.findByAlwaysOnAndAttrSetName("attribute_set_name_s3");
         Assert.assertEquals(plays.size(), 1);
-        plays = playEntityMgr.findByAlwaysOnChannelAndAttributeSetName("test_attribute_set_name_s3");
+        plays = playEntityMgr.findByAlwaysOnAndAttrSetName("test_attribute_set_name_s3");
         Assert.assertEquals(plays.size(), 0);
         channel4.setIsAlwaysOn(false);
         playLaunchChannelEntityMgr.update(channel4);

@@ -29,7 +29,6 @@ import com.latticeengines.apps.cdl.repository.writer.PlayWriterRepository;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
@@ -244,9 +243,9 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Play> findByAlwaysOnChannelAndAttributeSetName(String attributeSetName) {
+    public List<Play> findByAlwaysOnAndAttrSetName(String attributeSetName) {
         String attributeSetName2 = "\"attributeSetName\":\"" + attributeSetName + "\"";
-        return playReaderRepository.findByIsAlwaysOnAnAndLookupIdMap(CDLExternalSystemName.AWS_S3, attributeSetName2);
+        return playReaderRepository.findByAlwaysOnAndAttrSetName(attributeSetName2);
     }
 
     @Override

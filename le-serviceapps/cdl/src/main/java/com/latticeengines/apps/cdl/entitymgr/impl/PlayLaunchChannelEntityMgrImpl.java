@@ -92,8 +92,8 @@ public class PlayLaunchChannelEntityMgrImpl
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<PlayLaunchChannel> findByAlwaysOnFalseAndAttributeSetName(String attributeSetName) {
-        return readerRepository.findByIsAlwaysOnFalseAnAndLookupIdMap(CDLExternalSystemName.AWS_S3, attributeSetName);
+    public List<PlayLaunchChannel> findByNonAlwaysOnAndAttrSetName(String attributeSetName) {
+        return readerRepository.findByNonAlwaysAndExtSysNameAndAttrSetName(CDLExternalSystemName.AWS_S3, attributeSetName);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class PlayLaunchChannelEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateAttributeSetNameToDefault(String attributeSetName) {
-        List<PlayLaunchChannel> playLaunchChannels = _self.findByAlwaysOnFalseAndAttributeSetName(attributeSetName);
+        List<PlayLaunchChannel> playLaunchChannels = _self.findByNonAlwaysOnAndAttrSetName(attributeSetName);
         for (PlayLaunchChannel playLaunchChannel : playLaunchChannels) {
             S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunchChannel.getChannelConfig();
             s3ChannelConfig.setAttributeSetName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);

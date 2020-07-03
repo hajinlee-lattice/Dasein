@@ -28,6 +28,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -49,6 +51,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component
@@ -122,6 +125,16 @@ public class FrontEndQueryCreator {
                 contactFrontEndQuery);
     }
 
+    private String getAttributeSetName(PlayLaunchContext playLaunchContext) {
+        String attributeSetName = AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME;
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        if (CDLExternalSystemName.AWS_S3.equals(playLaunch.getDestinationSysName())) {
+            S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunch.getChannelConfig();
+            attributeSetName = s3ChannelConfig.getAttributeSetName();
+        }
+        return attributeSetName;
+    }
+
     @VisibleForTesting
     ProcessedFieldMappingMetadata prepareLookupsForFrontEndQueries(PlayLaunchContext playLaunchContext,
             boolean useSpark) {
@@ -154,7 +167,7 @@ public class FrontEndQueryCreator {
         if (cs != null) {
             log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, null, additionalContactAttrs, null);
+                    Predefined.Enrichment, getAttributeSetName(playLaunchContext), additionalContactAttrs, null);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> contactAttrs.add(key));
             log.info("temContactLookupFields=" + temContactLookupFields);
         }

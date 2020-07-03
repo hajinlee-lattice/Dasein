@@ -27,5 +27,5 @@ public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long> {
 
     Long countByPlayTypePid(Long pid);
 
-    List<Play> findByAlwaysOnChannelAndAttributeSetName(String attributeSetName);
+    List<Play> findByAlwaysOnAndAttrSetName(String attributeSetName);
 }

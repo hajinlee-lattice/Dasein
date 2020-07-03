@@ -31,7 +31,7 @@ public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepo
             "AND c.lookupIdMap.externalSystemName = :externalSystemName " + //
             "AND c.isAlwaysOn = false " +
             "AND c.channelConfig LIKE %:attributeSetName%")
-    List<PlayLaunchChannel> findByIsAlwaysOnFalseAnAndLookupIdMap(@Param("externalSystemName") CDLExternalSystemName externalSystemName,
-                                                                  @Param("attributeSetName") String attributeSetName);
+    List<PlayLaunchChannel> findByNonAlwaysAndExtSysNameAndAttrSetName(@Param("externalSystemName") CDLExternalSystemName externalSystemName,
+                                                                       @Param("attributeSetName") String attributeSetName);
 
 }

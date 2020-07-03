@@ -149,7 +149,7 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<Play> findByAlwaysOnAndAttributeSetName(String attributeSetName) {
-        return playEntityMgr.findByAlwaysOnChannelAndAttributeSetName(attributeSetName);
+        return playEntityMgr.findByAlwaysOnAndAttrSetName(attributeSetName);
     }
 
     @Override
