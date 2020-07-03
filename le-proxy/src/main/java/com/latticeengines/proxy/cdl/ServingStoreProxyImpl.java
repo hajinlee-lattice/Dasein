@@ -103,7 +103,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
                                               String attributeSetName, Set<String> attributes, Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/attrs-usage", //
                 shortenCustomerSpace(customerSpace), entity);
-        url += getVersionGroupFilterParam(version, Collections.singleton(group), null);
+        url += getVersionGroupFilterParam(version, Collections.singleton(group), null, attributeSetName);
         Map<?, ?> rawMap = post("getAttrsUsage", url, attributes, Map.class);
         return JsonUtils.convertMap(rawMap, String.class, Boolean.class);
     }

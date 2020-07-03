@@ -135,46 +135,6 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     }
 
     /*
-     * Enrich the default field metadata based on the entity
-     */
-    protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
-            BusinessEntity entity) {
-
-        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
-        Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMapForEntity(
-                systemName, entity);
-
-        defaultFieldsMetadataMap.values().forEach(defaultField -> {
-            String attrName = defaultField.getAttrName();
-            ColumnMetadata cm;
-            if (BusinessEntity.Account.equals(entity)) {
-                if (defaultField.getStandardField() && accountAttributesMap.containsKey(attrName)) {
-                    cm = accountAttributesMap.get(attrName);
-                    cm.setDisplayName(defaultField.getDisplayName());
-                    accountAttributesMap.remove(attrName);
-                } else {
-                    cm = constructCampaignDerivedColumnMetadata(defaultField);
-                }
-            } else if (BusinessEntity.Contact.equals(entity)) {
-                if (defaultField.getStandardField() && contactAttributesMap.containsKey(attrName)) {
-                    cm = contactAttributesMap.get(attrName);
-                    cm.setDisplayName(defaultField.getDisplayName());
-                    contactAttributesMap.remove(attrName);
-                } else {
-                    cm = constructCampaignDerivedColumnMetadata(defaultField);
-                }
-            } else {
-                throw new RuntimeException("entity can either be Account or Contact");
-            }
-
-            exportColumnMetadataList.add(cm);
-        });
-
-        return exportColumnMetadataList;
-    }
-
-    /*
      * Enrich the default field metadata for both account and contact entity
      */
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
@@ -215,10 +175,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             List<ColumnMetadata> cmList;
             if (entities.contains(BusinessEntity.Contact)) {
                 cmList = servingStoreService.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
-                        null);
+                        attributeSetName, null);
             } else {
                 cmList = servingStoreService.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
-                        null);
+                        attributeSetName, null);
             }
             if (CollectionUtils.isNotEmpty(cmList)) {
                 cms = Flux.fromIterable(cmList).filter(
@@ -230,6 +190,12 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     protected Map<String, ColumnMetadata> getServingMetadataMap(String customerSpace, List<BusinessEntity> entities) {
         return getServingMetadata(customerSpace, entities)
+                .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
+                .block();
+    }
+
+    protected Map<String, ColumnMetadata> getServingMetadataMap(String customerSpace, List<BusinessEntity> entities, String attributeSetName) {
+        return getServingMetadata(customerSpace, entities, attributeSetName)
                 .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
                 .block();
     }

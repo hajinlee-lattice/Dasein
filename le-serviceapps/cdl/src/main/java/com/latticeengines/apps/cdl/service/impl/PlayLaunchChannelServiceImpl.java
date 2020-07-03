@@ -415,4 +415,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
     }
 
+    @Override
+    public void updateAttributeSetNameToDefault(String attributeSetName) {
+        playLaunchChannelEntityMgr.updateAttributeSetNameToDefault(attributeSetName);
+    }
+
 }

@@ -116,9 +116,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Value("${common.le.environment}")
     private String leEnv;
 
-    private static final int NUM_THREADS = 8;
-
-    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("table-mgr", NUM_THREADS);
+    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("table-mgr", ThreadPoolUtils.NUM_CORES * 2);
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)

@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.PlayLaunchChannelDao;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayLaunchChannelRepository;
 import com.latticeengines.apps.cdl.repository.reader.PlayLaunchChannelReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.PlayLaunchChannelWriterRepository;
@@ -35,8 +33,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.proxy.exposed.quartz.QuartzSchedulerProxy;
 
 @Component("playLaunchChannelEntityMgr")
 public class PlayLaunchChannelEntityMgrImpl
@@ -53,15 +52,6 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Inject
     private PlayLaunchChannelEntityMgrImpl _self;
-
-    @Inject
-    private QuartzSchedulerProxy quartzSchedulerProxy;
-
-    @Inject
-    private PlayLaunchEntityMgr playLaunchEntityMgr;
-
-    @Inject
-    private PlayEntityMgr playEntityMgr;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -101,6 +91,11 @@ public class PlayLaunchChannelEntityMgrImpl
         return super.findAll();
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayLaunchChannel> findByNonAlwaysOnAndAttrSetName(String attributeSetName) {
+        return readerRepository.findByNonAlwaysAndExtSysNameAndAttrSetName(CDLExternalSystemName.AWS_S3, attributeSetName);
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunchChannel> findByIsAlwaysOnTrue() {
@@ -111,6 +106,18 @@ public class PlayLaunchChannelEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunchChannel> findByPlayName(String playName) {
         return readerRepository.findByPlayName(playName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateAttributeSetNameToDefault(String attributeSetName) {
+        List<PlayLaunchChannel> playLaunchChannels = _self.findByNonAlwaysOnAndAttrSetName(attributeSetName);
+        for (PlayLaunchChannel playLaunchChannel : playLaunchChannels) {
+            S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunchChannel.getChannelConfig();
+            s3ChannelConfig.setAttributeSetName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+            playLaunchChannel.setChannelConfig(s3ChannelConfig);
+        }
+        playLaunchChannelDao.update(playLaunchChannels, true);
     }
 
     @Override

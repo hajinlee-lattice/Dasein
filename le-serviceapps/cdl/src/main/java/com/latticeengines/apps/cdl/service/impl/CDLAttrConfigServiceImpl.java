@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,12 +20,15 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -34,8 +38,10 @@ import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
@@ -53,6 +59,12 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     private DataCollectionService dataCollectionService;
 
     @Inject
+    private PlayService playService;
+
+    @Inject
+    private PlayLaunchChannelService playLaunchChannelService;
+
+    @Inject
     private ServingStoreService servingStoreService;
 
     @Inject
@@ -61,7 +73,11 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Inject
     private AttributeSetEntityMgr attributeSetEntityMgr;
 
+    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("cdl-attr-config", ThreadPoolUtils.NUM_CORES * 2);
+
     private static int ATTRIBUTE_SET_LIMITATION = 50;
+
+    private static int CAMPAIGN_LIMIT = 50;
 
     @Override
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
@@ -202,7 +218,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     }
 
     private void generateAttrConfigRequestByCategory(List<AttrConfig> attrConfigs, Set<String> attributes,
-                                                             Category category, String property, Boolean selectThisAttr) {
+                                                     Category category, String property, Boolean selectThisAttr) {
         for (String attrName : attributes) {
             BusinessEntity entity = getEntity(category, attrName);
             generateAttrConfigRequestForUsage(attrConfigs, attrName, entity, selectThisAttr, property);
@@ -279,7 +295,17 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         if (AttributeUtils.isDefaultAttributeSet(name)) {
             throw new LedpException(LedpCode.LEDP_40087, new String[]{AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME});
         }
+        List<Play> plays = playService.findByAlwaysOnAndAttributeSetName(name);
+        if (CollectionUtils.isNotEmpty(plays)) {
+            throw new LedpException(LedpCode.LEDP_40094,
+                    new String[]{plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))});
+        }
         attributeSetEntityMgr.deleteByName(name);
+        Tenant tenant = MultiTenantContext.getTenant();
+        service.submit(() -> {
+            MultiTenantContext.setTenant(tenant);
+            playLaunchChannelService.updateAttributeSetNameToDefault(name);
+        });
     }
 
 }

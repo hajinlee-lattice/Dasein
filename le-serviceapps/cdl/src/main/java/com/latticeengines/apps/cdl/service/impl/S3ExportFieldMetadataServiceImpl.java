@@ -28,19 +28,16 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling S3ExportFieldMetadataService for channle " + channel.getId());
-
+        log.info("Calling S3ExportFieldMetadataService for channel " + channel.getId());
+        S3ChannelConfig channelConfig = (S3ChannelConfig) channel.getChannelConfig();
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Account));
+                Arrays.asList(BusinessEntity.Account), channelConfig.getAttributeSetName());
 
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Contact));
+                Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName());
 
         List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
                 accountAttributesMap, contactAttributesMap);
-
-        S3ChannelConfig channelConfig = (S3ChannelConfig) channel.getChannelConfig();
-
         String lookupId = channel.getLookupIdMap().getAccountId();
         log.info("S3 lookupId " + lookupId);
         if (lookupId != null && accountAttributesMap.containsKey(lookupId)) {
@@ -53,8 +50,8 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             exportColumnMetadataList.addAll(accountAttributesMap.values());
             exportColumnMetadataList.addAll(contactAttributesMap.values());
             exportColumnMetadataList.addAll(getServingMetadata(customerSpace,
-                    Arrays.asList(BusinessEntity.Rating, BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount))
-                            .collect(Collectors.toList()).block());
+                    Arrays.asList(BusinessEntity.Rating, BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount), channelConfig.getAttributeSetName())
+                    .collect(Collectors.toList()).block());
         }
 
         return exportColumnMetadataList;

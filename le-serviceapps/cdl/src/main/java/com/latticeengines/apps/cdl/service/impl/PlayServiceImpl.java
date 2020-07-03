@@ -148,6 +148,11 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
+    public List<Play> findByAlwaysOnAndAttributeSetName(String attributeSetName) {
+        return playEntityMgr.findByAlwaysOnAndAttrSetName(attributeSetName);
+    }
+
+    @Override
     public Play getPlayByName(String name, Boolean considerDeleted) {
         Tenant tenant = MultiTenantContext.getTenant();
 
@@ -512,12 +517,5 @@ public class PlayServiceImpl implements PlayService {
                 playIds.size(), customerSpace, stopWatch.getTime(TimeUnit.MILLISECONDS)));
 
         return CollectionUtils.isEmpty(playIds) ? new ArrayList<>() : new ArrayList<>(playIds);
-    }
-
-    private String sanitize(String attribute) {
-        if (StringUtils.isNotBlank(attribute)) {
-            attribute = attribute.trim();
-        }
-        return attribute;
     }
 }

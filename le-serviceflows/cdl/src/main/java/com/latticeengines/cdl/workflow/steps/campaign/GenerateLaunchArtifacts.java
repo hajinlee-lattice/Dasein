@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -54,6 +55,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchArtifactsStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.ExportFieldMetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -399,11 +401,10 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.PhoneNumber.name(), //
                     InterfaceName.Title.name(), //
                     InterfaceName.Address_Street_1.name()));
-
             /*
              * PLS-16386 Add FirstName and LastName
              */
-            String attributeSetName = null;
+            String attributeSetName = getAttributeSetName(playLaunchChannel);
             CustomerSpace cs = configuration.getCustomerSpace();
             log.info("Trying to get the attrsUsage with {} for tenant {}.", attributeSetName, cs.getTenantId());
 
@@ -417,6 +418,15 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             throw new LedpException(LedpCode.LEDP_32001,
                     new String[] { String.format("Entity %s not supported", entity.name()) });
         }
+    }
+
+    private String getAttributeSetName(PlayLaunchChannel playLaunchChannel) {
+        String attributeSetName = AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME;
+        if (CDLExternalSystemName.AWS_S3.equals(playLaunchChannel.getLookupIdMap().getExternalSystemName())) {
+            S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunchChannel.getChannelConfig();
+            attributeSetName = s3ChannelConfig.getAttributeSetName();
+        }
+        return attributeSetName;
     }
 
     @VisibleForTesting

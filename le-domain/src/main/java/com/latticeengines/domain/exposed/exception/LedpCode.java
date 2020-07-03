@@ -890,6 +890,8 @@ public enum LedpCode {
     LEDP_40091("{0}"), //
     LEDP_40092("Template linked to {0}."), //
     LEDP_40093("Current template has import action consumed by PA."), //
+    LEDP_40094("This attribute group is used with \"{0}\" always-on campaign. " +
+            "Please make the change to the campaign first and then try to delete the attribute campaign."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //

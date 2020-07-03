@@ -28,4 +28,6 @@ public interface PlayService {
     List<String> findDependantPlayDisplayNames(List<String> attributes);
 
     List<String> getAllDeletedPlayIds(boolean forCleanupOnly);
+
+    List<Play> findByAlwaysOnAndAttributeSetName(String attributeSetName);
 }

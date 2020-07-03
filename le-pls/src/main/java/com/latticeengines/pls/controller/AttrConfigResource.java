@@ -144,8 +144,12 @@ public class AttrConfigResource {
     @DeleteMapping("/attributeset/name/{name}")
     @ApiOperation(value = "Delete attribute set")
     public Boolean deleteAttributeSet(@PathVariable("name") String name) {
-        attrConfigService.deleteAttributeSet(name);
-        return true;
+        try {
+            attrConfigService.deleteAttributeSet(name);
+            return true;
+        } catch (Exception ex) {
+            throw UIActionUtils.handleException(ex);
+        }
     }
 
     @PostMapping("/attributeset/clone")
