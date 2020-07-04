@@ -43,7 +43,6 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
@@ -635,22 +634,6 @@ public class InternalResource extends InternalResourceBase {
                 (pids == null ? "{}" : JsonUtils.serialize(pids))));
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
-    }
-
-    @GetMapping("/external-scoring-config-context/{configUuid}")
-    @ResponseBody
-    @ApiOperation(value = "Get attributes within a predefined group for a tenant")
-    public ScoringRequestConfigContext getScoringRequestConfigContext(HttpServletRequest request,
-            @PathVariable(name = "configUuid") String configUuid) {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Retrieve ScoringRequestConfiguration metadata for ConfigId: %s", configUuid));
-        }
-        ScoringRequestConfigContext srcContext = scoringRequestConfigService
-                .retrieveScoringRequestConfigContext(configUuid);
-        if (srcContext == null) {
-            throw new LedpException(LedpCode.LEDP_18194, new String[] { configUuid });
-        }
-        return srcContext;
     }
 
     @PutMapping("/emails/upload")

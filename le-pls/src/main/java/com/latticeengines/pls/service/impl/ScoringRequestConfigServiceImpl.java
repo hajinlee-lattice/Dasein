@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
+import com.latticeengines.proxy.exposed.lp.ScoringRequestConfigProxy;
 
 /**
  * @author jadusumalli
@@ -29,6 +30,9 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
 
     @Inject
     private ScoringRequestConfigEntityManager scoringRequestConfigEntityMgr;
+
+    @Inject
+    private ScoringRequestConfigProxy scoringRequestConfigProxy;
 
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String webhookResource;
@@ -102,10 +106,7 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
 
     @Override
     public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
-        if (StringUtils.isBlank(configUuid)) {
-            throw new LedpException(LedpCode.LEDP_18194, new String[] {configUuid});
-        }
-        return scoringRequestConfigEntityMgr.retrieveScoringRequestConfigContext(configUuid);
+        return scoringRequestConfigProxy.retrieveScoringRequestConfigContext(configUuid);
     }
 
 }

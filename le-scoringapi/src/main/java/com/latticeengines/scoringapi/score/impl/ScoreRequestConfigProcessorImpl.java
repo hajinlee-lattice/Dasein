@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.lp.ScoringRequestConfigProxy;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.score.ScoreRequestConfigProcessor;
 
@@ -31,7 +31,7 @@ public class ScoreRequestConfigProcessorImpl implements ScoreRequestConfigProces
     private Cache<String, ScoringRequestConfigContext> scoringRequestConfigCache;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private ScoringRequestConfigProxy scoringRequestConfigProxy;
 
     @PostConstruct
     public void initialize() {
@@ -47,7 +47,7 @@ public class ScoreRequestConfigProcessorImpl implements ScoreRequestConfigProces
             return srcContext;
         }
         try {
-            srcContext = plsInternalProxy.retrieveScoringRequestConfigContext(configId);
+            srcContext = scoringRequestConfigProxy.retrieveScoringRequestConfigContext(configId);
         } catch (LedpException le) {
             if (LedpCode.LEDP_18194.equals(le.getCode())) {
                 throw new ScoringApiException(LedpCode.LEDP_18194, new String[] { configId });
