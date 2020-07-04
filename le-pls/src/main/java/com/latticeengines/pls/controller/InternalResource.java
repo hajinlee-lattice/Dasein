@@ -28,7 +28,6 @@ import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -36,7 +35,6 @@ import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -48,9 +46,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -86,9 +82,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private EmailService emailService;
-
-    @Inject
-    private WorkflowJobService workflowJobService;
 
     @Inject
     private UploadService uploadService;
@@ -614,22 +607,6 @@ public class InternalResource extends InternalResourceBase {
             }
         }
         return false;
-    }
-
-    @GetMapping("/jobs/all/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get actions for a tenant")
-    public List<Job> getJobsBasedOnActionIdsAndType( //
-            @PathVariable("tenantId") String customerSpace, //
-            @RequestParam(value = "pid") List<Long> pids, //
-            @RequestParam(value = "type") ActionType actionType, //
-            HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Retrieve Jobs for tenant: %s based on type %s. Pid list = %s", //
-                customerSpace, actionType, //
-                (pids == null ? "{}" : JsonUtils.serialize(pids))));
-        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
-        return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }
 
     @PutMapping("/emails/upload")
