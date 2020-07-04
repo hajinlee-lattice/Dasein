@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 /*
@@ -315,16 +314,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
             put("sendOrphanRecordsExportEmail", url, export);
         } catch (Exception e) {
             throw new RuntimeException("sendOrphanRecordsExportEmail: Remote call failure", e);
-        }
-    }
-
-    public boolean createTenant(Tenant tenant) {
-        try {
-            String url = constructUrl("/admin/tenants");
-            log.debug(String.format("Posting to %s", url));
-            return post("createTenant", url, tenant, Boolean.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createTenant: Remote call failure", e);
         }
     }
 

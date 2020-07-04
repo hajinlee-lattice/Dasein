@@ -13,11 +13,8 @@ import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface PlsInternalProxy {
-
-    boolean createTenant(Tenant tenant);
 
     boolean sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo);
 
