@@ -50,7 +50,6 @@ import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -90,9 +89,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private WorkflowJobService workflowJobService;
-
-    @Inject
-    private ScoringRequestConfigService scoringRequestConfigService;
 
     @Inject
     private UploadService uploadService;
