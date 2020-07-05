@@ -86,21 +86,6 @@ public class InternalResource extends InternalResourceBase {
     @Inject
     private UploadService uploadService;
 
-    @Value("${pls.test.contract}")
-    protected String contractId;
-
-    @Value("${common.pls.url}")
-    private String hostPort;
-
-    @Value("${common.admin.url}")
-    private String adminApi;
-
-    @Value("${pls.test.tenant.reg.json}")
-    private String testTenantRegJson;
-
-    @Value("${pls.test.deployment.reset.by.admin:true}")
-    private boolean resetByAdminApi;
-
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
 
@@ -488,7 +473,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 import")
     public boolean sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -531,8 +516,7 @@ public class InternalResource extends InternalResourceBase {
     @PutMapping("/emails/s3template/create/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template created")
-    public boolean sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+    public boolean sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId, @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -553,7 +537,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
     public boolean sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
