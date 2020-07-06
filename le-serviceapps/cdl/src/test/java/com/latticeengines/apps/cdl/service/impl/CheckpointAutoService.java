@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
+import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -496,11 +497,14 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         while (iter.hasNext()) {
             JsonNode json = iter.next();
             String hdfsPath = json.get("extracts_directory").asText();
+            String tableName = json.get("name").asText();
             if (StringUtils.isBlank(hdfsPath)) {
                 hdfsPath = json.get("extracts").get(0).get("path").asText();
                 if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
                     hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 }
+            } else {
+                hdfsPath = hdfsPath.replaceAll("\\$\\$TABLE_DATA_DIR\\$\\$", tableName);
             }
             log.info("Parse extract path {}.", hdfsPath);
             Pattern pattern = Pattern.compile(PATH_PATTERN);
@@ -521,7 +525,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
                 if (hdfsPathSegment2.contains(tenantNames[0])) {
                     String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
-                            + "/$$TABLE_DATA_DIR$$";
+                            + "/__TABLE_DATA_DIR__";
                     log.info("hdfsPath is {}", hdfsPath);
                     log.info("hdfsPathIntermediatePattern is {}.", hdfsPathIntermediatePattern);
                     String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
@@ -532,6 +536,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     str = str.replaceAll(tenantNames[0], testTenant);
                 }
             }
+            Assert.assertFalse(str.contains("__TABLE_DATA_DIR__"));
             tables.add(JsonUtils.deserialize(str, Table.class));
         }
 

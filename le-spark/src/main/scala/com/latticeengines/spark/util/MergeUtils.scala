@@ -18,7 +18,7 @@ private[spark] object MergeUtils {
            overwriteByNull: Boolean): DataFrame = {
     merge(lhs, rhs, joinKeys, colsFromLhs, Set(), Set(), overwriteByNull)
   }
-  
+
   def merge(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], minCols: Set[String], maxCols: Set[String], //
              overwriteByNull: Boolean): DataFrame = {
     val intersectCols = lhs.columns.intersect(rhs.columns).diff(joinKeys)
@@ -78,7 +78,7 @@ private[spark] object MergeUtils {
                 } else {
                   (maxV, minV)
                 }
-              } else 
+              } else
               if (colsFromLhs.contains(attr)) {
                 (row.get(lhsColPos(attr)), row.get(rhsColPos(attr)))
               } else {
@@ -145,20 +145,20 @@ private[spark] object MergeUtils {
     lhsWithMarker.join(rhsWithMarker, joinKeys, joinType)
   }
 
-  def getJoinMarkers(): (String, String) = {
+  def joinMarkers(): (String, String) = {
     (lhsMarker, rhsMarker)
   }
-  
+
   def getColPosOnBothSides(join: DataFrame): (Map[String, Int], Map[String, Int]) = {
     val lhsMarkerPos = join.columns.indexOf(lhsMarker)
     val (lhsCols, rhsCols) = join.columns.splitAt(lhsMarkerPos + 1)
-    val lhsColPos = lhsCols.view.zipWithIndex.toMap
-    val rhsColPos = rhsCols.view.zipWithIndex.toMap.mapValues(_ + lhsMarkerPos + 1).map(identity)
+    val lhsColPos = lhsCols.zipWithIndex.toMap
+    val rhsColPos = rhsCols.zipWithIndex.toMap.mapValues(_ + lhsMarkerPos + 1).map(identity)
     (lhsColPos, rhsColPos)
   }
 
   private def expand(df: DataFrame, expandedSchema: StructType): DataFrame = {
-    val colPos = df.columns.view.zipWithIndex.toMap
+    val colPos = df.columns.zipWithIndex.toMap
     df.map(row => {
       val values: Seq[Any] = expandedSchema.fieldNames map (attr => {
         if (colPos.contains(attr)) {

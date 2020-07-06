@@ -1,4 +1,4 @@
-package com.latticeengines.spark.exposed.job.cdl;
+package com.latticeengines.spark.exposed.job.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,12 +15,10 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(MergeChangeListTestNG.class);
+public class ApplyChangeListTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testUpsert() {
@@ -34,16 +30,18 @@ public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
 
     private void testMergeChangeList() {
         List<String> input = upload2Data();
-        ChangeListConfig config = getConfigForChangeList();
-        SparkJobResult result = runSparkJob(MergeChangeListJob.class, config, input,
+        ApplyChangeListConfig config = getConfigForChangeList();
+        config.setHasSourceTbl(true);
+        SparkJobResult result = runSparkJob(ApplyChangeListJob.class, config, input,
                 String.format("/tmp/%s/%s/changeList", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(this::verifyChangeList));
     }
 
     private void testNewChangeList() {
         List<String> input = upload1Data();
-        ChangeListConfig config = getConfigForChangeList();
-        SparkJobResult result = runSparkJob(MergeChangeListJob.class, config, input,
+        ApplyChangeListConfig config = getConfigForChangeList();
+        config.setHasSourceTbl(false);
+        SparkJobResult result = runSparkJob(ApplyChangeListJob.class, config, input,
                 String.format("/tmp/%s/%s/newChangeList", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(this::verifyNewChangeList));
     }
@@ -79,12 +77,12 @@ public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
         );
         Object[][] data = getInput2Data();
         input.add(uploadHdfsDataUnit(data, fields));
-
+        Collections.reverse(input);
         return input;
     }
 
     private Object[][] getInput1Data() {
-        Object[][] data = new Object[][] { //
+        return new Object[][] { //
                 { 0, "entityId66", null, "String", true, null, null, null, null }, //
                 { 1, "entityId5", null, "String", true, null, null, null, null }, //
                 { 2, null, "first", "String", true, null, null, null, null }, //
@@ -96,20 +94,18 @@ public class MergeChangeListTestNG extends SparkJobFunctionalTestNGBase {
                 { 7, "entityId3", "age", "Integer", null, null, null, 3, 33 }, //
                 { 8, "entityId4", "age2", "Integer", null, null, null, 4, 44 } //
         };
-        return data;
     }
 
     private Object[][] getInput2Data() {
-        Object[][] data = new Object[][] { //
+        return new Object[][] { //
                 { 1, "entityId1", "john", "smith", 11, 1000001L }, //
                 { 2, "entityId2", "mary", "ann", 18, 1000002L }, //
                 { 2, "entityId5", "mary5", "ann5", 55, 1000002L } //
         };
-        return data;
     }
 
-    private ChangeListConfig getConfigForChangeList() {
-        ChangeListConfig config = new ChangeListConfig();
+    private ApplyChangeListConfig getConfigForChangeList() {
+        ApplyChangeListConfig config = new ApplyChangeListConfig();
         config.setJoinKey("EntityId");
         return config;
     }

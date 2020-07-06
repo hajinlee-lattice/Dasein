@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountFeatures;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccount;
 
@@ -7,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -31,19 +32,18 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
+import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
-import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.spark.exposed.job.cdl.MergeChangeListJob;
+import com.latticeengines.spark.exposed.job.cdl.JoinAccountStores;
+import com.latticeengines.spark.exposed.job.common.ApplyChangeListJob;
 import com.latticeengines.spark.exposed.job.common.CopyJob;
-import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
 @Lazy
 @Component(UpdateAccountFeatures.BEAN_NAME)
@@ -61,7 +61,8 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
 
     private Table oldAccountFeaturesTable;
     private Table newAccountFeaturesTable;
-    private Table fullChangelistTable;
+    private Table customerAccountChangelistTable;
+    private Table latticeAccountChangelistTable;
     private List<ColumnMetadata> featureSchema;
     private String joinKey;
 
@@ -74,6 +75,8 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
             log.info("Found AccountFeatures table in context, go through short-cut mode.");
             dataCollectionProxy.upsertTable(customerSpace.toString(), tableInCtx.getName(), //
                     TableRoleInCollection.AccountFeatures, inactive);
+        } else if (shouldDoNothing()) {
+            linkInactiveTable(AccountFeatures);
         } else {
             preExecution();
 
@@ -87,15 +90,16 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
                     // Select from the customer account table
                     output = select(customerAccount.toHdfsDataUnit("Account"));
                 } else {
-                    HdfsDataUnit output1 = select(customerAccount.toHdfsDataUnit("CustomerAccount"));
-                    HdfsDataUnit output2 = select(latticeAccount.toHdfsDataUnit("LatticeAccount"));
-                    output = merge(output1, output2);
+                    output = join( //
+                            customerAccount.toHdfsDataUnit("CustomerAccount"), //
+                            latticeAccount.toHdfsDataUnit("LatticeAccount") //
+                    );
                 }
                 String tableName = NamingUtils.timestamp("AccountFeatures");
                 newAccountFeaturesTable = toTable(tableName, output);
             } else {
                 // Apply changelists to generate new AccountFeatures table
-                if (fullChangelistTable != null) {
+                if (customerAccountChangelistTable != null || latticeAccountChangelistTable != null) {
                     log.info("Existing AccountFeatures table name is {}, path is {} ", oldAccountFeaturesTable.getName(),
                             oldAccountFeaturesTable.getExtracts().get(0).getPath());
                     HdfsDataUnit input = oldAccountFeaturesTable.toHdfsDataUnit("OldAccountFeatures");
@@ -112,7 +116,8 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     private void preExecution() {
         joinKey = InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
-        fullChangelistTable = getTableSummaryFromKey(customerSpace.toString(), FULL_CHANGELIST_TABLE_NAME);
+        customerAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+        latticeAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
         oldAccountFeaturesTable = attemptGetTableRole(TableRoleInCollection.AccountFeatures, false);
         featureSchema = getFeatureSchema();
     }
@@ -129,7 +134,19 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     }
 
     private boolean shouldRebuild() {
-        return (oldAccountFeaturesTable == null) || getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class);
+//        return (oldAccountFeaturesTable == null) ||
+//                Boolean.TRUE.equals(getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class));
+        // always rebuild due to an issue in ApplyChangeList spark job
+        return true;
+    }
+
+    private boolean shouldDoNothing() {
+        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount);
+        boolean latticeAccountHasChanged = isChanged(LatticeAccount);
+        boolean shouldDoNothing = !(customerAccountHasChanged || latticeAccountHasChanged);
+        log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldDoNothing={}",
+                customerAccountHasChanged, latticeAccountHasChanged, shouldDoNothing);
+        return shouldDoNothing;
     }
 
     private HdfsDataUnit select(HdfsDataUnit input) {
@@ -141,11 +158,12 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         return result.getTargets().get(0);
     }
 
-    private HdfsDataUnit merge(HdfsDataUnit input1, HdfsDataUnit input2) {
-        UpsertConfig config = new UpsertConfig();
-        config.setJoinKey(joinKey);
-        config.setInput(Arrays.asList(input1, input2));
-        SparkJobResult result = runSparkJob(UpsertJob.class, config);
+    private HdfsDataUnit join(HdfsDataUnit customerInput, HdfsDataUnit latticeInput) {
+        List<String> retainAttrs = featureSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        JoinAccountStoresConfig config = new JoinAccountStoresConfig();
+        config.setRetainAttrs(retainAttrs);
+        config.setInput(Arrays.asList(customerInput, latticeInput));
+        SparkJobResult result = runSparkJob(JoinAccountStores.class, config);
         return result.getTargets().get(0);
     }
 
@@ -153,6 +171,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         List<ColumnMetadata> featureSchema = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
                 .collectList().block();
+        Preconditions.checkNotNull(featureSchema);
         List<String> retainAttrNames = featureSchema.stream().map(ColumnMetadata::getAttrName) //
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(retainAttrNames)) {
@@ -170,13 +189,17 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
 
     private void applyChangelist(HdfsDataUnit input) {
         log.info("UpdateAccountFeatures, apply changelist step");
-        ChangeListConfig config = new ChangeListConfig();
-        List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(toDataUnit(fullChangelistTable, "FullChangelist")); // changelist
-        inputs.add(input); // source table
-        config.setInput(inputs);
+        List<String> retainAttrs = featureSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        ApplyChangeListConfig config = new ApplyChangeListConfig();
+        config.setInput(Arrays.asList( //
+                input, // source table
+                toDataUnit(customerAccountChangelistTable, "Changelist1"), // changelist of customer account
+                toDataUnit(latticeAccountChangelistTable, "Changelist2") // changelist of lattice account
+        ));
+        config.setHasSourceTbl(true);
         config.setJoinKey(joinKey);
-        SparkJobResult result = runSparkJob(MergeChangeListJob.class, config);
+        config.setIncludeAttrs(retainAttrs);
+        SparkJobResult result = runSparkJob(ApplyChangeListJob.class, config);
         HdfsDataUnit output = result.getTargets().get(0);
 
         // Upsert AccountFeature table

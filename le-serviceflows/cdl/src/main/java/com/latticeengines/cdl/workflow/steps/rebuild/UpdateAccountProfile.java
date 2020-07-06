@@ -55,45 +55,115 @@ public class UpdateAccountProfile extends BaseCalcStatsStep<ProcessAccountStepCo
     @Override
     public void execute() {
         prepare();
-        Table fullChangeListTbl = getTableSummaryFromKey(customerSpaceStr, FULL_CHANGELIST_TABLE_NAME);
-        Preconditions.checkNotNull(fullChangeListTbl, "Must have full change list table");
         autoDetectCategorical = true;
         autoDetectDiscrete = true;
         if (shouldRecalculate()) {
-            fullRecalculate();
+            recalculate();
         } else {
             syncProfileTables();
         }
     }
 
-    private void fullRecalculate() {
+    private void recalculate() {
         if (StringUtils.isBlank(statsTableName)) {
             segmentAttrs = getRetrainAttrNames();
             HdfsDataUnit customerStats = updateCustomerStats();
             HdfsDataUnit latticeStats = updateLatticeStats();
             mergeStats(customerStats, latticeStats);
+        } else {
+            syncProfileTables();
         }
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
     private HdfsDataUnit updateCustomerStats() {
         Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
-        List<String> includeAttrs = new ArrayList<>(segmentAttrs);
-        includeAttrs.remove(LatticeAccountId.name());
-        HdfsDataUnit customerProfile = profile(customerAccount, AccountProfile, //
-                ACCOUNT_PROFILE_TABLE_NAME, includeAttrs, getDeclaredAttrs(), false, true, true);
+        HdfsDataUnit customerProfile = profileCustomerAccount(customerAccount);
         return calcStats(customerAccount, customerProfile);
     }
 
     private HdfsDataUnit updateLatticeStats() {
         Table latticeAccount = attemptGetTableRole(LatticeAccount, true);
-        List<String> includeAttrs = new ArrayList<>(segmentAttrs);
-        Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
-        includeAttrs.removeAll(Arrays.asList(customerAccount.getAttributeNames()));
-        includeAttrs.add(AccountId.name());
-        HdfsDataUnit latticeProfile = profile(latticeAccount, LatticeAccountProfile, //
-                LATTICE_ACCOUNT_PROFILE_TABLE_NAME, includeAttrs, getDeclaredAttrs(), true, true, true);
+        HdfsDataUnit latticeProfile = profileLatticeAccount(latticeAccount);
         return calcStats(latticeAccount, latticeProfile);
+    }
+
+    private HdfsDataUnit profileCustomerAccount(Table customerAccount) {
+        Table tblInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_PROFILE_TABLE_NAME);
+        if (tblInCtx != null) {
+            log.info("Found ACCOUNT_PROFILE_TABLE_NAME in context, going thru short-cut mode.");
+            dataCollectionProxy.upsertTable(customerSpaceStr, tblInCtx.getName(), AccountProfile, inactive);
+            return tblInCtx.toHdfsDataUnit("AccountProfile");
+        } else {
+            List<String> includeAttrs = new ArrayList<>(segmentAttrs);
+            includeAttrs.remove(LatticeAccountId.name());
+            if (shouldRecalculateCustomerProfile()) {
+                log.info("Should rebuild customer account profile.");
+                return profile(customerAccount, AccountProfile, //
+                        ACCOUNT_PROFILE_TABLE_NAME, includeAttrs, getDeclaredAttrs(), //
+                        false, true, true);
+            } else {
+                log.info("Should partial update customer account profile using change list.");
+                Table changeListTbl = getTableSummaryFromKey(customerSpaceStr, ACCOUNT_CHANGELIST_TABLE_NAME);
+                Preconditions.checkNotNull(changeListTbl, "Must have lattice account change list table");
+                Table oldProfileTbl = attemptGetTableRole(AccountProfile, true);
+                return profileWithChangeList(customerAccount, changeListTbl, oldProfileTbl, //
+                        AccountProfile, ACCOUNT_PROFILE_TABLE_NAME, includeAttrs, getDeclaredAttrs(), //
+                        false, true, true);
+            }
+        }
+    }
+
+    private boolean shouldRecalculateCustomerProfile() {
+        boolean shouldRecalculate = false;
+        if (attemptGetTableRole(AccountProfile, false) == null) {
+            log.info("Should recalculate customer account profile, " + //
+                    "because there was no AccountProfile in active version.");
+            shouldRecalculate = true;
+        }
+        return shouldRecalculate;
+    }
+
+    private HdfsDataUnit profileLatticeAccount(Table latticeAccount) {
+        Table tblInCtx = getTableSummaryFromKey(customerSpace.toString(), LATTICE_ACCOUNT_PROFILE_TABLE_NAME);
+        if (tblInCtx != null) {
+            log.info("Found LATTICE_ACCOUNT_PROFILE_TABLE_NAME in context, going thru short-cut mode.");
+            dataCollectionProxy.upsertTable(customerSpaceStr, tblInCtx.getName(), LatticeAccountProfile, inactive);
+            return tblInCtx.toHdfsDataUnit("LatticeProfile");
+        } else {
+            List<String> includeAttrs = new ArrayList<>(segmentAttrs);
+            Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+            includeAttrs.removeAll(Arrays.asList(customerAccount.getAttributeNames()));
+            includeAttrs.add(AccountId.name());
+            if (shouldRecalculateLatticeProfile()) {
+                log.info("Should rebuild lattice account profile.");
+                return profile(latticeAccount, LatticeAccountProfile, //
+                        LATTICE_ACCOUNT_PROFILE_TABLE_NAME, includeAttrs, getDeclaredAttrs(), //
+                        true, true, true);
+            } else {
+                log.info("Should partial update lattice account profile using change list.");
+                Table changeListTbl = getTableSummaryFromKey(customerSpaceStr, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
+                Preconditions.checkNotNull(changeListTbl, "Must have lattice account change list table");
+                Table oldProfileTbl = attemptGetTableRole(LatticeAccountProfile, true);
+                return profileWithChangeList(latticeAccount, changeListTbl, oldProfileTbl, //
+                        LatticeAccountProfile, LATTICE_ACCOUNT_PROFILE_TABLE_NAME, includeAttrs, getDeclaredAttrs(), //
+                        true, true, true);
+            }
+        }
+    }
+
+    private boolean shouldRecalculateLatticeProfile() {
+        boolean shouldRecalculate = false;
+        if (Boolean.TRUE.equals(getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class))) {
+            log.info("Should recalculate lattice account profile, " + //
+                    "because REBUILD_LATTICE_ACCOUNT is true.");
+            shouldRecalculate = true;
+        } else if (attemptGetTableRole(LatticeAccountProfile, false) == null) {
+            log.info("Should recalculate lattice account profile, " + //
+                    "because there was no LatticeAccountProfile in active version.");
+            shouldRecalculate = true;
+        }
+        return shouldRecalculate;
     }
 
     @Override
@@ -123,8 +193,11 @@ public class UpdateAccountProfile extends BaseCalcStatsStep<ProcessAccountStepCo
             log.info("No need to calc stats for {}, as it is to be reset.", getServingEntity());
             should = false;
         } else {
-            //TODO: change to not always re-calculate
-            should = true;
+            boolean customerAccountChanged = isChanged(ConsolidatedAccount);
+            boolean latticeAccountChanged = isChanged(LatticeAccount);
+            should = customerAccountChanged || latticeAccountChanged;
+            log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldRecalculate={}",
+                    customerAccountChanged, latticeAccountChanged, should);
         }
         return should;
     }

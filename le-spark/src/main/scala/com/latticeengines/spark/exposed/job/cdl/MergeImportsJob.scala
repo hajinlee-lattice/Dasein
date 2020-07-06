@@ -1,12 +1,11 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig
+import com.latticeengines.spark.aggregation.MergeInGroup
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.MergeUtils
-import org.apache.spark.sql.functions.{col, lit, when, count}
+import com.latticeengines.spark.util.{CopyUtils, MergeUtils}
+import org.apache.spark.sql.functions.{col, count, lit}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -51,11 +50,8 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
         } else {
           MergeUtils.concat2(lhsDf, rhsDf)
         }
-      if (lhsIdx % 50 == 0 && lhsIdx > 0) {
-        lhsDf.unpersist(blocking = false)
-      }
       if (rhsIdx % 50 == 0 && rhsIdx > 0) {
-        (merge2.persist(StorageLevel.DISK_ONLY).checkpoint(), rhsIdx)
+        (merge2.checkpoint(), rhsIdx)
       } else {
         (merge2, rhsIdx)
       }
@@ -72,10 +68,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
     val result =
       if (config.isAddTimestamps) {
-        val currentTime = System.currentTimeMillis()
-        addOrFill(
-          addOrFill(withRequiredCols, InterfaceName.CDLCreatedTime.name(), currentTime),
-          InterfaceName.CDLUpdatedTime.name(), currentTime)
+        CopyUtils.fillTimestamps(withRequiredCols)
       } else {
         withRequiredCols
       }
@@ -119,8 +112,8 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
   }
   private def doDedupe(df: DataFrame, joinKeys: Seq[String]): DataFrame = {
 
-    var keyDf = df.select(joinKeys map col: _*)
-    var dupKeyDf = keyDf.groupBy(joinKeys map col: _*)
+    val keyDf = df.select(joinKeys map col: _*)
+    val dupKeyDf = keyDf.groupBy(joinKeys map col: _*)
       .agg(count("*").alias("_cnt"))
       .filter(col("_cnt") > 1)
       .drop(col("_cnt"))
@@ -128,19 +121,19 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     if (dupDfCont == 0) {
       return df
     }
-    
-    var joinedDf = MergeUtils.joinWithMarkers(df, dupKeyDf, joinKeys, "left")
-    val (fromMarker, toMarker) = MergeUtils.getJoinMarkers()
-    
+
+    val joinedDf = MergeUtils.joinWithMarkers(df, dupKeyDf, joinKeys, "left")
+    val (fromMarker, toMarker) = MergeUtils.joinMarkers()
+
     var dupDf = joinedDf.filter(col(toMarker).isNotNull)
     val mergeInGrp = new MergeInGroup(dupDf.schema, false)
     dupDf = dupDf.groupBy(joinKeys map col: _*).
       agg(mergeInGrp(dupDf.columns map col: _*).as("ColumnStruct")).
       select(col("ColumnStruct.*"))
 
-    var distDf = joinedDf.filter(col(toMarker).isNull)
-    
-    distDf.union(dupDf).drop(Seq(fromMarker, toMarker): _*) 
+    val distDf = joinedDf.filter(col(toMarker).isNull)
+
+    distDf.union(dupDf).drop(Seq(fromMarker, toMarker): _*)
   }
 
   private def renameSrcFlds(src: DataFrame, renameFlds: Array[Array[String]]): DataFrame = {
@@ -177,14 +170,6 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     }
 
     result
-  }
-
-  private def addOrFill(df: DataFrame, tsCol: String, ts: Long): DataFrame = {
-    if (df.columns.contains(tsCol)) {
-      df.withColumn(tsCol, when(col(tsCol).isNull, lit(ts)).otherwise(col(tsCol)))
-    } else {
-      df.withColumn(tsCol, lit(ts))
-    }
   }
 
   private def addAllNullsIfMissing(df: DataFrame, requiredCol: String, colType: String): DataFrame = {

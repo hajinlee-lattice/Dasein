@@ -1,6 +1,23 @@
 package com.latticeengines.spark.util
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
+import org.apache.spark.sql.Column
+import org.apache.spark.sql.functions.col
+
 private[spark] object  ProfileUtils {
+
+  def colsInOrder(): Seq[Column] = {
+    List(
+      DataCloudConstants.PROFILE_ATTR_ATTRNAME,
+      DataCloudConstants.PROFILE_ATTR_SRCATTR,
+      DataCloudConstants.PROFILE_ATTR_DECSTRAT,
+      DataCloudConstants.PROFILE_ATTR_ENCATTR,
+      DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
+      DataCloudConstants.PROFILE_ATTR_NUMBITS,
+      DataCloudConstants.PROFILE_ATTR_BKTALGO
+    ).map(col)
+  }
+
   def roundTo5(x: Double): Double = {
     roundTo(x, sigDigits=1)
     if (math.abs(x)<= 10) {
@@ -51,4 +68,5 @@ private[spark] object  ProfileUtils {
       if (digits > 0) -digits + (sigDigits - 1) else -digits + sigDigits
     }
   }
+
 }

@@ -1,5 +1,13 @@
 package com.latticeengines.serviceflows.workflow.stats;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_BKTALGO;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_DECSTRAT;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ENCATTR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_LOWESTBIT;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_NUMBITS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_SRCATTR;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -9,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -47,7 +56,7 @@ public final class ProfileUtils {
      */
     static List<Pair<String, Class<?>>> getProfileSchema() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of(DataCloudConstants.PROFILE_ATTR_ATTRNAME, String.class));
+        columns.add(Pair.of(PROFILE_ATTR_ATTRNAME, String.class));
         columns.add(Pair.of(DataCloudConstants.PROFILE_ATTR_SRCATTR, String.class));
         columns.add(Pair.of(DataCloudConstants.PROFILE_ATTR_DECSTRAT, String.class));
         columns.add(Pair.of(DataCloudConstants.PROFILE_ATTR_ENCATTR, String.class));
@@ -208,6 +217,20 @@ public final class ProfileUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,
+    // BktAlgo
+    static Object[] convertAvroRecord(GenericRecord record) {
+        Object[] data = new Object[7];
+        data[0] = record.get(PROFILE_ATTR_ATTRNAME);
+        data[1] = record.get(PROFILE_ATTR_SRCATTR);
+        data[2] = record.get(PROFILE_ATTR_DECSTRAT);
+        data[3] = record.get(PROFILE_ATTR_ENCATTR);
+        data[4] = record.get(PROFILE_ATTR_LOWESTBIT);
+        data[5] = record.get(PROFILE_ATTR_NUMBITS);
+        data[6] = record.get(PROFILE_ATTR_BKTALGO);
+        return data;
     }
 
     // Schema: AttrName, SrcAttr, DecodeStrategy, EncAttr, LowestBit, NumBits,

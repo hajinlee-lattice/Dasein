@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateLastActivityDateConfig;
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ConcatenateAIRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
@@ -34,14 +33,15 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConf
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
-import com.latticeengines.domain.exposed.spark.cdl.FilterChangelistConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
+import com.latticeengines.domain.exposed.spark.cdl.MergeLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeProductConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
@@ -54,10 +54,16 @@ import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SplitSystemBatchStoreConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.TruncateLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ValidateProductConfig;
+import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig;
+import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
+import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
+import com.latticeengines.domain.exposed.spark.common.GetColumnChangesConfig;
+import com.latticeengines.domain.exposed.spark.common.GetRowChangesConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
@@ -66,6 +72,7 @@ import com.latticeengines.domain.exposed.spark.stats.AdvancedCalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
+import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
 
 import reactor.core.publisher.Flux;
 
@@ -100,6 +107,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CreateEventTableFilterJobConfig.class, name = CreateEventTableFilterJobConfig.NAME), //
         @JsonSubTypes.Type(value = MergeSystemBatchConfig.class, name = MergeSystemBatchConfig.NAME), //
         @JsonSubTypes.Type(value = ChangeListConfig.class, name = ChangeListConfig.NAME), //
+        @JsonSubTypes.Type(value = ApplyChangeListConfig.class, name = ApplyChangeListConfig.NAME), //
         @JsonSubTypes.Type(value = PivotScoreAndEventJobConfig.class, name = PivotScoreAndEventJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CalculateDeltaJobConfig.NAME), //
@@ -121,6 +129,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = SplitImportMatchResultConfig.class, name = SplitImportMatchResultConfig.NAME), //
         @JsonSubTypes.Type(value = SplitSystemBatchStoreConfig.class, name = SplitSystemBatchStoreConfig.NAME), //
         @JsonSubTypes.Type(value = ProfileJobConfig.class, name = ProfileJobConfig.NAME), //
+        @JsonSubTypes.Type(value = UpdateProfileConfig.class, name = UpdateProfileConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateCuratedAttributesConfig.class, name = GenerateCuratedAttributesConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateLastActivityDateConfig.class, name = CalculateLastActivityDateConfig.NAME), //
         @JsonSubTypes.Type(value = BucketEncodeConfig.class, name = BucketEncodeConfig.NAME), //
@@ -132,7 +141,12 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
         @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME),
+        @JsonSubTypes.Type(value = MergeLatticeAccountConfig.class, name = MergeLatticeAccountConfig.NAME), //
+        @JsonSubTypes.Type(value = TruncateLatticeAccountConfig.class, name = TruncateLatticeAccountConfig.NAME), //
+        @JsonSubTypes.Type(value = JoinAccountStoresConfig.class, name = JoinAccountStoresConfig.NAME), //
         @JsonSubTypes.Type(value = FilterChangelistConfig.class, name = FilterChangelistConfig.NAME), //
+        @JsonSubTypes.Type(value = GetColumnChangesConfig.class, name = GetColumnChangesConfig.NAME), //
+        @JsonSubTypes.Type(value = GetRowChangesConfig.class, name = GetRowChangesConfig.NAME), //
         @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME) })
 public abstract class SparkJobConfig implements Serializable {
 

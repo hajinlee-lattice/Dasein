@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{BitEncodeUtils, BucketEncodeUtils}
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.types.{LongType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -28,7 +29,7 @@ class BucketEncodeJob extends AbstractSparkJob[BucketEncodeConfig] {
         val profileAttrs: Seq[String] = profileData.select(ATTR_ATTRNAME).collect().map(r => r.getString(0))
         val expanded = expandEncodedByAM(renamed, profileAttrs, config)
         val outputSchema = getOutputSchema(expanded, config)
-        val encoded = encode(expanded, outputSchema, config)
+        val encoded = encode(spark, expanded, outputSchema, config)
 
         lattice.output = encoded :: Nil
     }
@@ -54,15 +55,16 @@ class BucketEncodeJob extends AbstractSparkJob[BucketEncodeConfig] {
         retainFields ++ encFields
     }
 
-    private def encode(input: DataFrame, outputSchema: Seq[StructField], config: BucketEncodeConfig): DataFrame = {
+    private def encode(spark: SparkSession, input: DataFrame, outputSchema: Seq[StructField], config: BucketEncodeConfig): DataFrame = {
         val inputPos: Map[String, Int] = input.columns.zipWithIndex.toMap
-        val eAttrs: Map[String, DCEncodedAttr] =
+        val bEAttrs: Broadcast[Map[String, DCEncodedAttr]] = spark.sparkContext.broadcast(
             if (config.getEncAttrs == null) {
                 Map()
             } else {
                 config.getEncAttrs.asScala.map(ea => (ea.getEncAttr, ea)).toMap
-            }
+            })
         input.map(r => {
+            val eAttrs = bEAttrs.value
             val values: Seq[Any] = outputSchema map (f => {
                 val attr = f.name
                 if (inputPos.contains(attr)) {

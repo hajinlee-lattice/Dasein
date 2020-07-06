@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTime;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountProfile;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
@@ -11,7 +10,6 @@ import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -51,10 +48,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.spark.exposed.job.common.UpsertJob;
+import com.latticeengines.spark.exposed.job.cdl.JoinAccountStores;
 import com.latticeengines.spark.exposed.job.stats.BucketEncodeJob;
 import com.latticeengines.spark.exposed.utils.BucketEncodeUtils;
 
@@ -76,35 +73,36 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
     @Override
     public void execute() {
         bootstrap();
-        Table servingTable = getTableSummaryFromKey(customerSpaceStr, ACCOUNT_SERVING_TABLE_NAME);
-        if (servingTable != null) {
-            log.info("Found account serving store in context, going through short-cut mode.");
+        if (shouldDoNothing()) {
+            linkInactiveTable(BucketedAccount);
         } else {
-            Table fullChangeListTbl = getTableSummaryFromKey(customerSpaceStr, FULL_CHANGELIST_TABLE_NAME);
-            Preconditions.checkNotNull(fullChangeListTbl, "Must have full change list table");
+            Table servingTable = getTableSummaryFromKey(customerSpaceStr, ACCOUNT_SERVING_TABLE_NAME);
+            if (servingTable != null) {
+                log.info("Found account serving store in context, going through short-cut mode.");
+            } else {
+                customerAccountTbl = attemptGetTableRole(ConsolidatedAccount, true);
+                customerProfileTbl = attemptGetTableRole(AccountProfile, true);
+                latticeAccountTbl = attemptGetTableRole(LatticeAccount, true);
+                latticeProfileTbl = attemptGetTableRole(LatticeAccountProfile, true);
 
-            customerAccountTbl = attemptGetTableRole(ConsolidatedAccount, true);
-            customerProfileTbl = attemptGetTableRole(AccountProfile, true);
-            latticeAccountTbl = attemptGetTableRole(LatticeAccount, true);
-            latticeProfileTbl = attemptGetTableRole(LatticeAccountProfile, true);
+                HdfsDataUnit customerEncode = encode(customerAccountTbl.toHdfsDataUnit("Data"),
+                        customerProfileTbl.toHdfsDataUnit("Profile"));
+                HdfsDataUnit latticeEncode = encode(latticeAccountTbl.toHdfsDataUnit("Data"),
+                        latticeProfileTbl.toHdfsDataUnit("Profile"));
+                HdfsDataUnit mergeEncode = merge(customerEncode, latticeEncode);
 
-            HdfsDataUnit customerEncode = encode(customerAccountTbl.toHdfsDataUnit("Data"),
-                    customerProfileTbl.toHdfsDataUnit("Profile"));
-            HdfsDataUnit latticeEncode = encode(latticeAccountTbl.toHdfsDataUnit("Data"),
-                    latticeProfileTbl.toHdfsDataUnit("Profile"));
-            HdfsDataUnit mergeEncode = merge(customerEncode, latticeEncode);
-
-            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpaceStr);
-            String servingTableName = tenantId + "_" + NamingUtils.timestamp(Account.name());
-            servingTable = toTable(servingTableName, AccountId.name(), mergeEncode);
-            expandEncAttrs(servingTable);
-            enrichTableSchema(servingTable);
-            enrichCustomerAccountTableSchema(customerAccountTbl);
-            metadataProxy.createTable(customerSpaceStr, servingTableName, servingTable);
-            dataCollectionProxy.upsertTable(customerSpaceStr, servingTableName, BucketedAccount, inactive);
-            exportToS3AndAddToContext(servingTable, ACCOUNT_SERVING_TABLE_NAME);
+                String tenantId = CustomerSpace.shortenCustomerSpace(customerSpaceStr);
+                String servingTableName = tenantId + "_" + NamingUtils.timestamp(Account.name());
+                servingTable = toTable(servingTableName, AccountId.name(), mergeEncode);
+                expandEncAttrs(servingTable);
+                enrichTableSchema(servingTable);
+                enrichCustomerAccountTableSchema(customerAccountTbl);
+                metadataProxy.createTable(customerSpaceStr, servingTableName, servingTable);
+                dataCollectionProxy.upsertTable(customerSpaceStr, servingTableName, BucketedAccount, inactive);
+                exportToS3AndAddToContext(servingTable, ACCOUNT_SERVING_TABLE_NAME);
+            }
+            exportTableRoleToRedshift(servingTable, BucketedAccount);
         }
-        exportTableRoleToRedshift(servingTable, BucketedAccount);
     }
 
     private HdfsDataUnit encode(HdfsDataUnit inputData, HdfsDataUnit profileData) {
@@ -124,12 +122,19 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
     }
 
     private HdfsDataUnit merge(HdfsDataUnit customerEncode, HdfsDataUnit latticeEncode) {
-        UpsertConfig config = new UpsertConfig();
+        JoinAccountStoresConfig config = new JoinAccountStoresConfig();
         config.setInput(Arrays.asList(customerEncode, latticeEncode));
-        config.setJoinKey(AccountId.name());
-        config.setColsFromLhs(Collections.singletonList(CDLCreatedTime.name()));
-        SparkJobResult result = runSparkJob(UpsertJob.class, config);
+        SparkJobResult result = runSparkJob(JoinAccountStores.class, config);
         return result.getTargets().get(0);
+    }
+
+    private boolean shouldDoNothing() {
+        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount);
+        boolean latticeAccountHasChanged = isChanged(LatticeAccount);
+        boolean shouldDoNothing = !(customerAccountHasChanged || latticeAccountHasChanged);
+        log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldDoNothing={}",
+                customerAccountHasChanged, latticeAccountHasChanged, shouldDoNothing);
+        return shouldDoNothing;
     }
 
     private void expandEncAttrs(Table servingTable) {

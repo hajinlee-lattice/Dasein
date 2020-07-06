@@ -1,15 +1,16 @@
 package com.latticeengines.spark.util
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.common.CopyConfig
 import org.apache.commons.collections4.MapUtils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, lit, when}
 
 import scala.collection.JavaConverters._
 
 private[spark] object CopyUtils {
 
-  def copy(config: CopyConfig, inputs: List[DataFrame]): DataFrame = {
+  def copy(config: CopyConfig, inputs: Seq[DataFrame]): DataFrame = {
     val dfs = inputs map {df => processDf(df, config)}
     dfs reduce {(d1, d2) => MergeUtils.concat2(d1, d2)}
   }
@@ -70,6 +71,22 @@ private[spark] object CopyUtils {
       (colsInDf.diff(dropped), false)
     }
 
+  }
+
+  def fillTimestamps(df: DataFrame): DataFrame = {
+    fillTimestamps(df, System.currentTimeMillis)
+  }
+
+  def fillTimestamps(df: DataFrame, time: Long): DataFrame = {
+    addOrFill(addOrFill(df, InterfaceName.CDLCreatedTime.name(), time), InterfaceName.CDLUpdatedTime.name(), time)
+  }
+
+  private def addOrFill(df: DataFrame, tsCol: String, ts: Long): DataFrame = {
+    if (df.columns.contains(tsCol)) {
+      df.withColumn(tsCol, when(col(tsCol).isNull, lit(ts)).otherwise(col(tsCol)))
+    } else {
+      df.withColumn(tsCol, lit(ts))
+    }
   }
 
 }

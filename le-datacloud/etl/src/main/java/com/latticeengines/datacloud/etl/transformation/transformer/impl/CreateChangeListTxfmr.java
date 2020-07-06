@@ -4,8 +4,8 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
-import com.latticeengines.spark.exposed.job.cdl.CreateChangeListJob;
+import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
+import com.latticeengines.spark.exposed.job.common.CreateChangeListJob;
 
 @Component(CreateChangeListTxfmr.TRANSFORMER_NAME)
 public class CreateChangeListTxfmr extends ConfigurableSparkJobTxfmr<ChangeListConfig> {

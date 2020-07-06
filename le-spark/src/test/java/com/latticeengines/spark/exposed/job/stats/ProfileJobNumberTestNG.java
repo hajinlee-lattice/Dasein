@@ -122,7 +122,7 @@ public class ProfileJobNumberTestNG extends SparkJobFunctionalTestNGBase {
                             new Integer[] { 0 });
                     break;
                 default:
-                    Assert.fail("Unknown attribute: " + record);
+                    Assert.fail("Unexpected attribute: " + record);
             }
         });
         return true;
