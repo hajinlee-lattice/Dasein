@@ -10,7 +10,7 @@ CONDA_ARTIFACT_DIR=${WSHOME}/le-dev/conda/artifacts
 
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
-    MINICONDA_VERSION=2020.02
+    MINICONDA_VERSION=latest
 
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
