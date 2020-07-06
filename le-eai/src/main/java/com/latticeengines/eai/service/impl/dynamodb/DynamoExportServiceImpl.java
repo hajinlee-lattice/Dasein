@@ -75,7 +75,7 @@ public class DynamoExportServiceImpl extends ExportService {
         Properties props = constructProperties(exportConfig, context);
         ApplicationId appId;
         if (toAtlasLookupCache) {
-            log.info("Submitting AtlasAccountLookupExportJob");
+            log.info("Updating {} table with account change list", exportConfig.getProperties().get(CONFIG_TABLE_NAME));
             appId = eaiYarnService.submitMRJob(AtlasAccountLookupExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
         } else {
             log.info("Submitting DynamoExportJob");
