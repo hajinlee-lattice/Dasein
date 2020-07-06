@@ -121,4 +121,4 @@ alias deploy-ms='bash $WSHOME/le-dev/scripts/deploy_ms.sh'
 alias deploy-props='bash $WSHOME/le-dev/scripts/deploy_props.sh'
 alias toggle-ms='bash $WSHOME/le-dev/scripts/toggle_ms.sh'
 
-alias aws-login='python $WSHOME/le-dev/scripts/awscli-onelogin.py'
+alias aws-login='python $WSHOME/le-dev/scripts/aws-login.py'
