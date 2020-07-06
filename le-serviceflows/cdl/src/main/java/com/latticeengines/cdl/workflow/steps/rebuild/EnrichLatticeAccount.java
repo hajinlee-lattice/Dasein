@@ -319,6 +319,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         SparkJobResult result = runSparkJob(FilterChangelistJob.class, config);
         changed = result.getTargets().get(0);
         deleted = result.getTargets().get(1);
+        log.info("There are {} accounts have changed LatticeAccountId", changed.getCount());
+        log.info("There are {} accounts deleted", deleted.getCount());
     }
 
     private void applyDelete(HdfsDataUnit deletion, List<String> attrs2Remove) {

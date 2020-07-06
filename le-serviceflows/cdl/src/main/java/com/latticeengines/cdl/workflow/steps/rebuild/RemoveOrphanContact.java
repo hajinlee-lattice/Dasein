@@ -138,13 +138,20 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
     // has account change that might impact orphan contact
     private boolean hasAccountChange() {
         if (isChanged(ConsolidatedAccount)) { // has potential changes
-            Table accountTable = attemptGetTableRole(ConsolidatedAccount, true);
-            GetRowChangesConfig jobConfig = new GetRowChangesConfig();
-            jobConfig.setInput(Collections.singletonList(accountTable.toHdfsDataUnit("Account")));
-            SparkJobResult result = runSparkJob(GetRowChangesJob.class, jobConfig);
-            boolean hasNewAccounts = result.getTargets().get(0).getCount() > 0;
-            boolean hasDeletedAccounts = result.getTargets().get(1).getCount() > 0;
-            return hasNewAccounts || hasDeletedAccounts;
+            Table changeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+            if (changeList == null) {
+                log.info("No account change list to make more accurate decision, " +
+                        "going to rebuild conatct serving store regardlessly.");
+                return true;
+            } else {
+                GetRowChangesConfig jobConfig = new GetRowChangesConfig();
+                jobConfig.setInput(Collections.singletonList(changeList.toHdfsDataUnit("AccountChange")));
+                SparkJobResult result = runSparkJob(GetRowChangesJob.class, jobConfig);
+                long newAcc = result.getTargets().get(0).getCount();
+                long delAcc = result.getTargets().get(1).getCount();
+                log.info("There are {} new accounts and {} deleted accounts", newAcc, delAcc);
+                return (newAcc > 0) || (delAcc > 0);
+            }
         } else {
             return false;
         }
