@@ -108,9 +108,10 @@ for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     fi &&
     IMAGE=latticeengines/${service} &&
     if [[ "${service}" != "oauth2" ]]; then
-        build_docker ${IMAGE} ${service} ${WAR}
+        build_docker ${IMAGE} ${service} ${WAR} &
     fi
 done
 
+wait
 rm -rf tmp
 rm -rf /tmp/latticeengines
