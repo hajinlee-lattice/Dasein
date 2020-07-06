@@ -319,9 +319,7 @@ public class CDLResource {
             } else if (LedpCode.LEDP_40090.equals(e.getCode()) || LedpCode.LEDP_40092.equals(e.getCode())) {
                 String warningMsg = LedpCode.LEDP_40090.equals(e.getCode()) ? removeExceptionCode(LedpCode.LEDP_40090,
                         e.getMessage()) : removeExceptionCode(LedpCode.LEDP_40092, e.getMessage());
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Warning", View.Modal,
-                        Status.Warning, String.format(resetTemplateWarningMsg, warningMsg));
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+                throw new LedpException(LedpCode.LEDP_18247, new String[]{warningMsg});
             } else {
                 log.error("Unknown error code: " + e.getCode());
                 throw e;
@@ -515,9 +513,7 @@ public class CDLResource {
             }
         } catch (LedpException e) {
             if (LedpCode.LEDP_40091.equals(e.getCode())) {
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Action Required", View.Modal, Status.Info,
-                        String.format(validateAndUpdatePriorityWarningMsg, removeExceptionCode(LedpCode.LEDP_40091, e.getMessage())));
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+                throw new LedpException(LedpCode.LEDP_18246, new String[]{removeExceptionCode(LedpCode.LEDP_40091, e.getMessage())});
             } else {
                 log.error("Unknown exception code: " + e.getCode());
                 throw e;

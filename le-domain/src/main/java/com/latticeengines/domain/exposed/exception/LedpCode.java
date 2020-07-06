@@ -373,8 +373,9 @@ public enum LedpCode {
 
     LEDP_18244("Template(s) {0} need to be reset before reset template {1}"), //
     LEDP_18245("Cannot reset template {0}."), //
-    LEDP_18246("You have made changes to the System Priority that may affect the match and merge behavior. New data from these systems could be matched differently then previous data."), //
-    LEDP_18247("Template {0} already has data imported, cannot be reset!"), //
+    LEDP_18246("Updating the priorities of the following systems will update the matching and the merging behavior of" +
+            " data. This will affect the data imported going forward." + System.lineSeparator() + "{0}"), //
+    LEDP_18247("{0}, Please confirm need to reset template."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

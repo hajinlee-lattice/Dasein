@@ -240,7 +240,8 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             if (CollectionUtils.isEmpty(warningSystems)) {
                 changedSystems.forEach(importSystem -> s3ImportSystemEntityMgr.update(importSystem));
             } else {
-                throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems, ",")});
+                throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems,
+                        System.lineSeparator())});
             }
         }
     }
