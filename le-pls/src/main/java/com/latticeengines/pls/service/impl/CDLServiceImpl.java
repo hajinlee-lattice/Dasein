@@ -1163,6 +1163,12 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public boolean validateAndUpdateS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        if (CollectionUtils.isEmpty(systemList)) {
+            return false;
+        }
+        for (int i = 0; i < systemList.size(); i++) {
+            systemList.get(i).setPriority(i + 1);
+        }
         return cdlProxy.validateAndUpdateSystemPriority(customerSpace, systemList);
     }
 
