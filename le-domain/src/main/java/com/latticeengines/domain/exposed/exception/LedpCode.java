@@ -371,11 +371,12 @@ public enum LedpCode {
     LEDP_18242("Team name can't be empty."), //
     LEDP_18243("Could not download result of export job {0}, download path can't be found, please try to export and download it again."), //
 
-    LEDP_18244("Template(s) {0} need to be reset before reset template {1}"), //
+    LEDP_18244("This template cannot be reset {0}. Please contact support for further assistance."), //
     LEDP_18245("Cannot reset template {0}."), //
     LEDP_18246("Updating the priorities of the following systems will update the matching and the merging behavior of" +
             " data. This will affect the data imported going forward." + System.lineSeparator() + "{0}"), //
     LEDP_18247("{0}, Please confirm need to reset template."), //
+    LEDP_18248("Cannot validate and update system priority."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
