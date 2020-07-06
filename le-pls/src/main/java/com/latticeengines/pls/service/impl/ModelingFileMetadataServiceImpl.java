@@ -508,7 +508,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (standardAttrNames.contains(mapping.getMappedField())) {
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
                 String userField = mapping.getUserField();
-                if (StringUtils.equals(preUserField, userField)) {
+                if (!StringUtils.equals(preUserField, userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
                     validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.WARNING, message));
