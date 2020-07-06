@@ -133,7 +133,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         log.info("Serving store table name = {}", servingStoreTableName);
         Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
         CuratedAttributeUtils.enrichTableSchema(servingStoreTable, Category.CURATED_ACCOUNT_ATTRIBUTES,
-                MASTER_STORE_ENTITY, templateSystemMap, systemMap);
+                MASTER_STORE_ENTITY, templateSystemMap, systemMap, null);
         metadataProxy.updateTable(customerSpace.toString(), servingStoreTableName, servingStoreTable);
 
         // rename table to strip invalid characters

@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
@@ -96,6 +97,8 @@ public class CuratedContactAttributes
     private List<String> contactTemplates;
     // template name -> system name
     private Map<String, String> templateSystemMap;
+    // template name -> entity type of this template
+    private Map<String, String> templateTypeMap;
     // system name -> system
     private Map<String, S3ImportSystem> systemMap;
 
@@ -158,8 +161,9 @@ public class CuratedContactAttributes
         jobConfig.masterTableIdx = 0;
         Map<String, DataFeedTask> templateFeedTaskMap = dataFeedProxy
                 .getTemplateToDataFeedTaskMap(customerSpace.toString());
+        templateTypeMap = CuratedAttributeUtils.templateEntityTypeMap(templateFeedTaskMap);
         jobConfig.templateSystemMap = CuratedAttributeUtils.templateSourceMap(templateSystemMap, systemMap);
-        jobConfig.templateTypeMap = CuratedAttributeUtils.templateEntityTypeMap(templateFeedTaskMap);
+        jobConfig.templateTypeMap = templateTypeMap;
         jobConfig.attrsToMerge.put(0, CuratedAttributeUtils.attrsMergeFromMasterStore(MASTER_STORE_ENTITY));
 
         if (StringUtils.isNotBlank(contactLastActivityTempTableName)) {
@@ -169,6 +173,7 @@ public class CuratedContactAttributes
                     contactLastActivityTempTableName);
             inputs.add(contactLastActivityTempTable.toHdfsDataUnit("ContactLastActivityDate"));
             jobConfig.lastActivityDateInputIdx = inputIdx++;
+            currAttrs.remove(LastActivityDate.name());
         }
 
         if (shouldCalculateSystemLastUpdateTime()) {
@@ -200,7 +205,7 @@ public class CuratedContactAttributes
         String resultTableName = tenantId + "_" + NamingUtils.timestamp(TABLE_ROLE.name());
         Table resultTable = toTable(resultTableName, InterfaceName.ContactId.name(), result.getTargets().get(0));
         CuratedAttributeUtils.enrichTableSchema(resultTable, Category.CURATED_CONTACT_ATTRIBUTES, MASTER_STORE_ENTITY,
-                templateSystemMap, systemMap);
+                templateSystemMap, systemMap, templateTypeMap);
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);
         finishing(resultTableName);
         exportToS3AndAddToContext(resultTable, CURATED_CONTACT_SERVING_TABLE_NAME);
