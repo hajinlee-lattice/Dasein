@@ -10,6 +10,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
+import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType.Lead;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public final class CuratedAttributeUtils {
     private static final String LAST_ACTIVITY_DATE_DISPLAY_NAME = "Lattice - Last Activity Date";
     private static final String ENTITY_CREATED_DATE_DISPLAY_NAME = "Lattice - Created Date";
     private static final String ENTITY_MODIFIED_DATE_DISPLAY_NAME = "Lattice - Last Modified Date";
-    private static final String ENTITY_SYS_MODIFIED_DATE_NAME_FMT = "Lattice - Last Modified Date by %s";
+    private static final String ENTITY_SYS_MODIFIED_DATE_NAME_FMT = "Lattice - Last Modified by %s";
     private static final String ENTITY_CREATED_SOURCE_DISPLAY_NAME = "Lattice - Created Source";
     private static final String ENTITY_CREATED_ENTITY_TYPE_DISPLAY_NAME = "Lattice - Created Entity Type";
 
@@ -232,10 +233,12 @@ public final class CuratedAttributeUtils {
      *            template name -> system name map
      * @param systemMap
      *            system name -> system reference map
+     * @param templateTypeMap
+     *            template name -> entity type map
      */
     public static void enrichTableSchema(@NotNull Table servingStoreTable, @NotNull Category category,
             @NotNull String entity, @NotNull Map<String, String> templateSystemMap,
-            @NotNull Map<String, S3ImportSystem> systemMap) {
+            @NotNull Map<String, S3ImportSystem> systemMap, Map<String, String> templateTypeMap) {
         List<Attribute> attrs = servingStoreTable.getAttributes();
         attrs.forEach(attr -> {
             if (NumberOfContacts.name().equals(attr.getName())) {
@@ -264,7 +267,7 @@ public final class CuratedAttributeUtils {
                 attr.setDisplayName(ENTITY_CREATED_ENTITY_TYPE_DISPLAY_NAME);
                 attr.setDescription(String.format(ENTITY_CREATED_ENTITY_TYPE_DESC_FMT, entity.toLowerCase()));
             } else {
-                enrichSystemAttributes(attr, entity, category, templateSystemMap, systemMap);
+                enrichSystemAttributes(attr, entity, category, templateSystemMap, systemMap, templateTypeMap);
             }
         });
     }
@@ -338,7 +341,7 @@ public final class CuratedAttributeUtils {
 
     private static void enrichSystemAttributes(@NotNull Attribute attribute, @NotNull String entity,
             @NotNull Category category, @NotNull Map<String, String> templateSystemMap,
-            @NotNull Map<String, S3ImportSystem> systemMap) {
+            @NotNull Map<String, S3ImportSystem> systemMap, Map<String, String> templateTypeMap) {
         if (StringUtils.isBlank(attribute.getName())) {
             return;
         }
@@ -363,13 +366,27 @@ public final class CuratedAttributeUtils {
                 log.warn("No display name found for system {}", system);
                 return;
             }
-            String displayName = String.format(ENTITY_SYS_MODIFIED_DATE_NAME_FMT, sys.getDisplayName());
+            String sysDisplayName = sys.getDisplayName();
+            String entityType = getEntityType(templateTypeMap, tmpl);
+            if (Lead.name().equalsIgnoreCase(entityType)) {
+                // differentiate lead from contact in display name
+                sysDisplayName = String.format("%s (%s)", sysDisplayName, Lead.name());
+            }
+            String displayName = String.format(ENTITY_SYS_MODIFIED_DATE_NAME_FMT, sysDisplayName);
             String description = String.format(ENTITY_SYS_MODIFIED_DATE_DESC_FMT, entity.toLowerCase(),
-                    sys.getDisplayName());
+                    sysDisplayName);
             log.info("Enriching system attribute {} with system display name {}. system = {}, template = {}",
-                    attribute.getName(), sys.getDisplayName(), system, tmpl);
+                    attribute.getName(), sysDisplayName, system, tmpl);
             enrichDateAttribute(attribute, category, displayName, description);
         });
+    }
+
+    private static String getEntityType(Map<String, String> templateTypeMap, @NotNull String templateName) {
+        if (MapUtils.isEmpty(templateTypeMap)) {
+            return null;
+        }
+
+        return templateTypeMap.get(templateName);
     }
 
     private static void enrichDateAttribute(@NotNull Attribute attribute, @NotNull Category category,
