@@ -45,6 +45,8 @@ import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
+import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
+import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.SSESpecification;
 import com.amazonaws.services.dynamodbv2.model.SSEType;
@@ -210,7 +212,16 @@ public class DynamoServiceImpl implements DynamoService {
 
     @Override
     public boolean hasTable(String tableName) {
-        return client.listTables().getTableNames().contains(tableName);
+        String nextTableName = null;
+        do {
+            ListTablesResult listTables = client.listTables(new ListTablesRequest()
+                    .withExclusiveStartTableName(nextTableName));
+            if (listTables.getTableNames().contains(tableName)) {
+                return true;
+            }
+            nextTableName = listTables.getLastEvaluatedTableName();
+        } while (nextTableName != null);
+        return false;
     }
 
     @Override

@@ -42,18 +42,16 @@ import com.amazonaws.services.s3.model.BucketPolicy;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.CopyPartResult;
 import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingResult;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PartETag;
@@ -65,6 +63,7 @@ import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
+import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -116,38 +115,16 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public void copyLargeObjects(String sourceBucketName, String sourceKey, String destinationBucketName,
                                   String destinationKey) {
-        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(destinationBucketName, destinationKey);
-        InitiateMultipartUploadResult initResult = s3Client.initiateMultipartUpload(initRequest);
-        ObjectMetadata metadataResult = s3Client.getObjectMetadata(sourceBucketName, sourceKey);
-        long objectSize = metadataResult.getContentLength();
+        TransferManager tm = TransferManagerBuilder.standard()
+                .withS3Client(s3Client)
+                .build();
 
-        long bytePosition = 0;
-        int partNum = 1;
-        List<CopyPartResult> copyResponses = new ArrayList<>();
-        while (bytePosition < objectSize) {
-
-            long lastByte = Math.min(bytePosition + partSize - 1, objectSize - 1);
-
-            CopyPartRequest copyRequest = new CopyPartRequest()
-                    .withSourceBucketName(sourceBucketName)
-                    .withSourceKey(sourceKey)
-                    .withDestinationBucketName(destinationBucketName)
-                    .withDestinationKey(destinationKey)
-                    .withUploadId(initResult.getUploadId())
-                    .withFirstByte(bytePosition)
-                    .withLastByte(lastByte)
-                    .withPartNumber(partNum++);
-            copyResponses.add(s3Client.copyPart(copyRequest));
-            bytePosition += partSize;
+        Copy copy = tm.copy(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        try {
+            copy.waitForCompletion();
+        } catch (InterruptedException e) {
+            log.error("Waiting for copy completion interrupted!");
         }
-
-        // Complete the upload request to concatenate all uploaded parts and make the copied object available.
-        CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(
-                destinationBucketName,
-                destinationKey,
-                initResult.getUploadId(),
-                getETags(copyResponses));
-        s3Client.completeMultipartUpload(completeRequest);
     }
 
     // This is a helper function to construct a list of ETags.
@@ -204,8 +181,15 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public void cleanupByObjectList(List<S3ObjectSummary> summaries) {
-        for (S3ObjectSummary summary: summaries) {
-            s3Client.deleteObject(summary.getBucketName(), summary.getKey());
+        if (CollectionUtils.isNotEmpty(summaries)) {
+            Map<String, List<String>> bucketKeyMap = summaries.stream()
+                            .collect(Collectors.groupingBy(S3ObjectSummary::getBucketName,
+                                    Collectors.mapping(S3ObjectSummary::getKey, Collectors.toList())));
+            bucketKeyMap.forEach((bucket, keys) -> {
+                String[] keyArr = keys.toArray(new String[0]);
+                DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keyArr);
+                s3Client.deleteObjects(dor);
+            });
         }
     }
 
@@ -214,25 +198,44 @@ public class S3ServiceImpl implements S3Service {
         prefix = sanitizePathToKey(prefix);
         List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
         log.info("Deleting s3 objects under " + prefix + " from " + bucket + "between " + start + " and " + end);
+        List<String> objectKeysToDelete = new ArrayList<>();
         for (S3ObjectSummary summary : objects) {
             if (summary.getLastModified().before(end) && summary.getLastModified().after(start)) {
-                s3Client.deleteObject(bucket, summary.getKey());
+                objectKeysToDelete.add(summary.getKey());
             }
         }
-        // s3Client.deleteObject(bucket, prefix);
+        if (CollectionUtils.isNotEmpty(objectKeysToDelete)) {
+            String[] keys = objectKeysToDelete.toArray(new String[0]);
+            DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keys);
+            s3Client.deleteObjects(dor);
+        }
     }
 
     @Override
     public void cleanupPrefixByPattern(String bucket, String prefix, String pattern) {
         prefix = sanitizePathToKey(prefix);
-        List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
-        Pattern ptn = Pattern.compile(pattern);
-        for (S3ObjectSummary summary : objects) {
-            String objKey = summary.getKey();
-            if (ptn.matcher(objKey).matches()) {
-                log.info("Deleting s3 object " + objKey + " from " + bucket);
-                s3Client.deleteObject(bucket, objKey);
+        ListObjectsV2Result result;
+        ListObjectsV2Request request = new ListObjectsV2Request() //
+                .withBucketName(bucket) //
+                .withPrefix(prefix);
+        List<String> keysToBeDeleted = new ArrayList<>();
+        do {
+            result = s3Client.listObjectsV2(request);
+            List<S3ObjectSummary> objects = result.getObjectSummaries();
+            Pattern ptn = Pattern.compile(pattern);
+            for (S3ObjectSummary summary : objects) {
+                String objKey = summary.getKey();
+                if (ptn.matcher(objKey).matches()) {
+                    log.info("Deleting s3 object " + objKey + " from " + bucket);
+                    keysToBeDeleted.add(objKey);
+                }
             }
+            request.setContinuationToken(result.getNextContinuationToken());
+        } while (result.isTruncated());
+        if (CollectionUtils.isNotEmpty(keysToBeDeleted)) {
+            String[] keys = keysToBeDeleted.toArray(new String[0]);
+            DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keys);
+            s3Client.deleteObjects(dor);
         }
     }
 
@@ -288,9 +291,9 @@ public class S3ServiceImpl implements S3Service {
 
         List<S3ObjectSummary> objects = result.getObjectSummaries();
         log.info("Deleting " + CollectionUtils.size(objects) + " s3 objects under " + dirPath + " from " + bucket);
-        for (S3ObjectSummary summary : objects) {
-            s3Client.deleteObject(bucket, summary.getKey());
-        }
+        String[] keys = objects.stream().map(S3ObjectSummary::getKey).toArray(String[]::new);
+        DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keys);
+        s3Client.deleteObjects(dor);
     }
 
     private void waitForUploadResult(Upload upload, MutableInt uploadedObjects, int numFiles, List<File> failedUploadFiles) {
@@ -322,12 +325,12 @@ public class S3ServiceImpl implements S3Service {
                 final int numFiles = files.size();
                 List<File> failedUploadFiles = new ArrayList<>();
                 List<Upload> uploads = new ArrayList<>();
-                for (File file : files) {
-                    String filePrefix = finalPrefix + file.getName();
-                    s3Client.deleteObject(bucket, filePrefix);
-                    Upload upload = tm.upload(bucket, filePrefix, file);
-                    uploads.add(upload);
-                }
+                Map<String, File> fileMap =
+                        files.stream().collect(Collectors.toMap(file -> finalPrefix + file.getName(), file -> file));
+                String[] keysToDelete = fileMap.keySet().toArray(new String[0]);
+                DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keysToDelete);
+                s3Client.deleteObjects(dor);
+                fileMap.forEach((key, file) -> uploads.add(tm.upload(bucket, key, file)));
                 log.info("Submitted upload jobs for " + numFiles + " files.");
                 for (Upload upload : uploads) {
                     waitForUploadResult(upload, uploadedObjects, numFiles, failedUploadFiles);
@@ -614,27 +617,35 @@ public class S3ServiceImpl implements S3Service {
     public List<String> getFilesForDir(String s3Bucket, String prefix) {
         final String delimiter = "/";
         List<String> paths = new LinkedList<>();
-        ListObjectsRequest request = new ListObjectsRequest().withBucketName(s3Bucket).withPrefix(prefix);
-        ObjectListing result = s3Client.listObjects(request);
-        for (S3ObjectSummary summary : result.getObjectSummaries()) {
-            if (!summary.getKey().endsWith(delimiter)) {
-                paths.add(summary.getKey());
+        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(s3Bucket).withPrefix(prefix);
+        ListObjectsV2Result result;
+        do {
+            result = s3Client.listObjectsV2(request);
+            for (S3ObjectSummary summary : result.getObjectSummaries()) {
+                if (!summary.getKey().endsWith(delimiter)) {
+                    paths.add(summary.getKey());
+                }
             }
-        }
+            request.setContinuationToken(result.getNextContinuationToken());
+        } while (result.isTruncated());
         return paths;
     }
 
     @Override
     public List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix) {
         final String delimiter = "/";
-        ListObjectsRequest request = new ListObjectsRequest().withBucketName(s3Bucket).withPrefix(prefix);
-        ObjectListing result = s3Client.listObjects(request);
+        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(s3Bucket).withPrefix(prefix);
+        ListObjectsV2Result result;
         List<S3ObjectSummary> s3ObjectSummaries = new LinkedList<>();
-        for (S3ObjectSummary summary : result.getObjectSummaries()) {
-            if (!summary.getKey().endsWith(delimiter)) {
-                s3ObjectSummaries.add(summary);
+        do {
+            result = s3Client.listObjectsV2(request);
+            for (S3ObjectSummary summary : result.getObjectSummaries()) {
+                if (!summary.getKey().endsWith(delimiter)) {
+                    s3ObjectSummaries.add(summary);
+                }
             }
-        }
+            request.setContinuationToken(result.getNextContinuationToken());
+        } while (result.isTruncated());
         return s3ObjectSummaries;
     }
 
@@ -653,7 +664,7 @@ public class S3ServiceImpl implements S3Service {
             this.bucket = bucket;
             objectKeys = listObjects(bucket, prefix).stream() //
                     .map(S3ObjectSummary::getKey)
-                    .filter(key -> filter.accept(key))
+                    .filter(filter::accept)
                     .collect(Collectors.toList());
         }
 

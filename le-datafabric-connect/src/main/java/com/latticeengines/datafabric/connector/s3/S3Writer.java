@@ -1,5 +1,6 @@
 package com.latticeengines.datafabric.connector.s3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,8 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
@@ -49,7 +52,14 @@ class S3Writer {
 
     void initialize() {
         log.info("Initializing prefix " + prefix + " in bucket " + bucket);
-        List<S3ObjectSummary> objects = client.listObjects(bucket, prefix).getObjectSummaries();
+        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucket).withPrefix(prefix);
+        ListObjectsV2Result result;
+        List<S3ObjectSummary> objects = new ArrayList<>();
+        do {
+            result = client.listObjectsV2(request);
+            objects.addAll(result.getObjectSummaries());
+            request.setContinuationToken(result.getNextContinuationToken());
+        } while (result.isTruncated());
         for (S3ObjectSummary summary : objects) {
             String key = summary.getKey();
             try {
@@ -77,7 +87,14 @@ class S3Writer {
 
     long getLastCommittedOffset(TopicPartition tp) {
         Long offset = -1L;
-        List<S3ObjectSummary> objects = client.listObjects(bucket, prefix).getObjectSummaries();
+        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucket).withPrefix(prefix);
+        ListObjectsV2Result result;
+        List<S3ObjectSummary> objects = new ArrayList<>();
+        do {
+            result = client.listObjectsV2(request);
+            objects.addAll(result.getObjectSummaries());
+            request.setContinuationToken(result.getNextContinuationToken());
+        } while (result.isTruncated());
         for (S3ObjectSummary summary : objects) {
             String key = summary.getKey();
             String filename = StringUtils.substringAfterLast(key, "/");

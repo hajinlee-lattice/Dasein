@@ -57,6 +57,7 @@ import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
+import com.latticeengines.common.exposed.util.SleepUtils;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
@@ -264,6 +265,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         String prefix = this.getClass().getSimpleName() + "/TestS3AvroRecordIterator";
         String columnName = "TestColumn";
         uploadAvroIterDataToS3(prefix, columnName, data);
+        SleepUtils.sleep(1000L);
         Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(testBucket, prefix, new S3KeyFilter() {
         });
         List<String> expected = Arrays.stream(data) //
@@ -297,9 +299,9 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         uploadLocalAvroToS3(prefix, dirName, columnName, data);
         List<S3ObjectSummary> s3ObjectSummaries = s3Service.listObjects(testBucket, prefix);
         Assert.assertEquals(data.length, s3ObjectSummaries.size());
-        long sizeOnS3 = s3ObjectSummaries.stream().mapToLong(s3ObjectSummary -> s3ObjectSummary.getSize()).sum();
+        long sizeOnS3 = s3ObjectSummaries.stream().mapToLong(S3ObjectSummary::getSize).sum();
         File dir = new File(dirName);
-        long sizeOnLocal = Arrays.stream(dir.listFiles()).mapToLong(file -> file.length()).sum();
+        long sizeOnLocal = Arrays.stream(dir.listFiles()).mapToLong(File::length).sum();
         Assert.assertEquals(sizeOnS3, sizeOnLocal);
         deleteDir(dir);
         clearS3Prefix(prefix);
@@ -334,9 +336,8 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         List<GenericRecord> records = new ArrayList<>();
         if (data != null) {
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            String content = data;
-            for (int j = 0; j < content.length(); j++) {
-                builder.set(columnName, content.substring(j, j + 1));
+            for (int j = 0; j < data.length(); j++) {
+                builder.set(columnName, data.substring(j, j + 1));
                 records.add(builder.build());
             }
         }
@@ -384,8 +385,9 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     private void deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                deleteDir(new File(dir, children[i]));
+            Assert.assertNotNull(children);
+            for (String child : children) {
+                deleteDir(new File(dir, child));
             }
         }
         dir.delete();
@@ -402,10 +404,10 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         clearS3Prefix(prefix);
         try {
             makeDir(dirName);
-            for (int i = 0; i < data.length; i++) {
+            for (String datum : data) {
                 String fileName = "TestFile_" + UUID.randomUUID().toString().replace("-", "");
                 Schema schema = AvroUtils.constructSchema(fileName, columns);
-                List<GenericRecord> records = generateRecords(schema, columnName, data[i]);
+                List<GenericRecord> records = generateRecords(schema, columnName, datum);
                 File file = new File(dirName, fileName + ".avro");
                 FileOutputStream out = new FileOutputStream(file);
                 writeData(schema, records, out);
