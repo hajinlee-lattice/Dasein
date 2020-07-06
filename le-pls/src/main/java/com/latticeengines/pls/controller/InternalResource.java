@@ -28,7 +28,6 @@ import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -36,23 +35,18 @@ import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.ScoringRequestConfigService;
-import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -90,28 +84,7 @@ public class InternalResource extends InternalResourceBase {
     private EmailService emailService;
 
     @Inject
-    private WorkflowJobService workflowJobService;
-
-    @Inject
-    private ScoringRequestConfigService scoringRequestConfigService;
-
-    @Inject
     private UploadService uploadService;
-
-    @Value("${pls.test.contract}")
-    protected String contractId;
-
-    @Value("${common.pls.url}")
-    private String hostPort;
-
-    @Value("${common.admin.url}")
-    private String adminApi;
-
-    @Value("${pls.test.tenant.reg.json}")
-    private String testTenantRegJson;
-
-    @Value("${pls.test.deployment.reset.by.admin:true}")
-    private boolean resetByAdminApi;
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
@@ -500,7 +473,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 import")
     public boolean sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -543,8 +516,7 @@ public class InternalResource extends InternalResourceBase {
     @PutMapping("/emails/s3template/create/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template created")
-    public boolean sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+    public boolean sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId, @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -565,7 +537,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
     public boolean sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -619,38 +591,6 @@ public class InternalResource extends InternalResourceBase {
             }
         }
         return false;
-    }
-
-    @GetMapping("/jobs/all/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get actions for a tenant")
-    public List<Job> getJobsBasedOnActionIdsAndType( //
-            @PathVariable("tenantId") String customerSpace, //
-            @RequestParam(value = "pid") List<Long> pids, //
-            @RequestParam(value = "type") ActionType actionType, //
-            HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Retrieve Jobs for tenant: %s based on type %s. Pid list = %s", //
-                customerSpace, actionType, //
-                (pids == null ? "{}" : JsonUtils.serialize(pids))));
-        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
-        return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
-    }
-
-    @GetMapping("/external-scoring-config-context/{configUuid}")
-    @ResponseBody
-    @ApiOperation(value = "Get attributes within a predefined group for a tenant")
-    public ScoringRequestConfigContext getScoringRequestConfigContext(HttpServletRequest request,
-            @PathVariable(name = "configUuid") String configUuid) {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Retrieve ScoringRequestConfiguration metadata for ConfigId: %s", configUuid));
-        }
-        ScoringRequestConfigContext srcContext = scoringRequestConfigService
-                .retrieveScoringRequestConfigContext(configUuid);
-        if (srcContext == null) {
-            throw new LedpException(LedpCode.LEDP_18194, new String[] { configUuid });
-        }
-        return srcContext;
     }
 
     @PutMapping("/emails/upload")

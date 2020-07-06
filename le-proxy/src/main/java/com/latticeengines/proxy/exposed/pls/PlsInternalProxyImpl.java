@@ -19,14 +19,11 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 /*
@@ -267,22 +264,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
-    @Override
-    public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
-        try {
-            String url = constructUrl(
-                    "/internal/external-scoring-config-context/" + configUuid);
-            if (log.isDebugEnabled()) {
-                log.debug("Find ScoringRequestConfigContext by configId (" + configUuid + ")" + url);
-            }
-            return get("retrieveScoringRequestConfigContext", url, ScoringRequestConfigContext.class);
-        } catch (RemoteLedpException rle) {
-            throw rle;
-        } catch (Exception e) {
-            throw new RuntimeException("retrieveScoringRequestConfigContext: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
     public void deleteTenant(CustomerSpace customerSpace) {
         try {
             String url = constructUrl(combine("/admin/tenants/", customerSpace.toString()));
@@ -333,16 +314,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
             put("sendOrphanRecordsExportEmail", url, export);
         } catch (Exception e) {
             throw new RuntimeException("sendOrphanRecordsExportEmail: Remote call failure", e);
-        }
-    }
-
-    public boolean createTenant(Tenant tenant) {
-        try {
-            String url = constructUrl("/admin/tenants");
-            log.debug(String.format("Posting to %s", url));
-            return post("createTenant", url, tenant, Boolean.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createTenant: Remote call failure", e);
         }
     }
 

@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.lp.ScoringRequestConfigProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsMarketoCredentialProxy;
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
 public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -46,7 +46,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     private String scoringWebhookResource;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private ScoringRequestConfigProxy scoringRequestConfigProxy;
 
     private static final String CREDENTIAL_NAME = "TEST-DP-MARKETO-SCORING-CONFIG-";
 
@@ -226,7 +226,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         assertNotNull(configSummary.getConfigId());
         assertNotNull(configSummary.getModelUuid());
 
-        ScoringRequestConfigContext srcContext = plsInternalProxy.retrieveScoringRequestConfigContext(configSummary.getConfigId());
+        ScoringRequestConfigContext srcContext = scoringRequestConfigProxy.retrieveScoringRequestConfigContext(configSummary.getConfigId());
         assertNotNull(srcContext);
         assertNotNull(srcContext.getConfigId());
         assertNotNull(srcContext.getSecretKey());
@@ -238,7 +238,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         // Check with Invalid ID
         Exception exception = null;
         try {
-            srcContext = plsInternalProxy.retrieveScoringRequestConfigContext("DummyId");
+            srcContext = scoringRequestConfigProxy.retrieveScoringRequestConfigContext("DummyId");
         } catch (Exception e) {
             exception = e;
         }
@@ -249,12 +249,12 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         // Check with Empty ID
         exception = null;
         try {
-            srcContext = plsInternalProxy.retrieveScoringRequestConfigContext(null);
+            scoringRequestConfigProxy.retrieveScoringRequestConfigContext(null);
         } catch (Exception e) {
             exception = e;
         }
         assertNotNull(exception);
-        assertTrue(exception.getMessage().contains(LedpCode.LEDP_18194.toString()));
+        assertTrue((LedpCode.LEDP_18194.equals(((LedpException) exception).getCode())));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFindMethods")
