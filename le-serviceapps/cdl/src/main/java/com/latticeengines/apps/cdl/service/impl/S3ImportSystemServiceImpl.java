@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -235,20 +236,21 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             }
         }
         if (CollectionUtils.isNotEmpty(changedSystems)) {
-            List<String> warningSystems = validatePriorityChange(customerSpace, changedSystems);
+            Set<String> warningSystems = validatePriorityChange(customerSpace, changedSystems);
             if (CollectionUtils.isEmpty(warningSystems)) {
                 changedSystems.forEach(importSystem -> s3ImportSystemEntityMgr.update(importSystem));
             } else {
-                throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems, ",")});
+                throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems,
+                        System.lineSeparator())});
             }
         }
     }
 
-    private List<String> validatePriorityChange(String customerSpace, List<S3ImportSystem> changedSystems) {
+    private Set<String> validatePriorityChange(String customerSpace, List<S3ImportSystem> changedSystems) {
         Set<String> changedSystemNames =
                 changedSystems.stream().map(S3ImportSystem::getName).collect(Collectors.toSet());
         Map<String, S3ImportSystem> taskSystemMap = dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
-        List<String> warningSystems = new ArrayList<>();
+        Set<String> warningSystems = new HashSet<>();
         if (MapUtils.isNotEmpty(taskSystemMap)) {
             taskSystemMap.forEach((taskName, importSystem) -> {
                 if (changedSystemNames.contains(importSystem.getName())) {

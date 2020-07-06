@@ -88,13 +88,7 @@ public class CDLResource {
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String resetTemplateMsg = "<p>Your import template has been reset.</p>";
-    private static final String resetTemplateErrorMsg = "<p>The template cannot be reset. %s Please contact support for further assistent</p>";
-    private static final String resetTemplateWarningMsg = "<p>%s Please confirm need to reset template.</p>";
     private static final String validateAndUpdatePriorityMsg = "<p>System priorities has been updated.</p>";
-    private static final String validateAndUpdatePriorityErrorMsg = "<p>Update system priorities error!</p>";
-    private static final String validateAndUpdatePriorityWarningMsg = "<p>Updating the priorities of the " +
-            "following systems will update the matching and the merging behavior of data. This will affect the data " +
-            "imported going forward. <br> %s.</p>";
     private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
     private static final String updateS3ImportSystemPriorityMsg = "System priority has been updated.</p>";
 
@@ -310,13 +304,13 @@ public class CDLResource {
         } catch (LedpException e) {
             log.error(String.format("Failed to reset import template: %s", e.getMessage()));
             if (LedpCode.LEDP_40093.equals(e.getCode()) || LedpCode.LEDP_40089.equals(e.getCode())) {
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Modal, Status.Error,
-                        String.format(resetTemplateErrorMsg, e.getMessage()));
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+                String errorMsg = LedpCode.LEDP_40093.equals(e.getCode()) ? removeExceptionCode(LedpCode.LEDP_40093,
+                        e.getMessage()) : removeExceptionCode(LedpCode.LEDP_40089, e.getMessage());
+                throw new LedpException(LedpCode.LEDP_18244, new String[] {errorMsg});
             } else if (LedpCode.LEDP_40090.equals(e.getCode()) || LedpCode.LEDP_40092.equals(e.getCode())) {
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Modal, Status.Warning,
-                        String.format(resetTemplateWarningMsg, e.getMessage()));
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+                String warningMsg = LedpCode.LEDP_40090.equals(e.getCode()) ? removeExceptionCode(LedpCode.LEDP_40090,
+                        e.getMessage()) : removeExceptionCode(LedpCode.LEDP_40092, e.getMessage());
+                throw new LedpException(LedpCode.LEDP_18247, new String[]{warningMsg});
             } else {
                 log.error("Unknown error code: " + e.getCode());
                 throw e;
@@ -504,17 +498,15 @@ public class CDLResource {
                         validateAndUpdatePriorityMsg);
                 return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             } else {
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error,
-                        validateAndUpdatePriorityErrorMsg);
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+                throw new LedpException(LedpCode.LEDP_18248);
             }
         } catch (LedpException e) {
             if (LedpCode.LEDP_40091.equals(e.getCode())) {
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Modal, Status.Info,
-                        String.format(validateAndUpdatePriorityWarningMsg, e.getMessage()));
-                return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+                throw new LedpException(LedpCode.LEDP_18246, new String[]{removeExceptionCode(LedpCode.LEDP_40091, e.getMessage())});
             } else {
-                log.error("Unknown exception code: " + e.getCode());
+                if (!LedpCode.LEDP_18248.equals(e.getCode())) {
+                    log.error("Unknown exception code: " + e.getCode());
+                }
                 throw e;
             }
         }
@@ -816,5 +808,12 @@ public class CDLResource {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
         return cdlService.getAllImportFiles(customerSpace.toString());
+    }
+
+    private String removeExceptionCode(LedpCode code, String errorMessage) {
+        if (StringUtils.isEmpty(errorMessage)) {
+            return errorMessage;
+        }
+        return errorMessage.replace(code.name() + ": ", "");
     }
 }
