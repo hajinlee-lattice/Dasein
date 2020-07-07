@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -111,6 +112,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @Inject
     protected PlsInternalProxy plsInternalProxy;
+
+    @Inject
+    protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     protected OAuthUserEntityMgr userEntityMgr;
 
@@ -210,7 +214,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         selectedAttributes = new ArrayList<>();

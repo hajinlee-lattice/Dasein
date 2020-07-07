@@ -50,49 +50,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
     }
 
     @Override
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-                                                                     String attributeDisplayNameFilter, Category category, //
-                                                                     Boolean onlySelectedAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, onlySelectedAttributes,
-                Boolean.FALSE);
-    }
-
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-                                                                     String attributeDisplayNameFilter, Category category, //
-                                                                     Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, null,
-                onlySelectedAttributes, considerInternalAttributes);
-    }
-
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-                                                                     String attributeDisplayNameFilter, Category category, String subcategory, //
-                                                                     Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, subcategory,
-                onlySelectedAttributes, null, null, considerInternalAttributes);
-    }
-
-    @Override
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-                                                                     String attributeDisplayNameFilter, Category category, String subcategory, //
-                                                                     Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
-        try {
-            String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString()));
-            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
-                    onlySelectedAttributes, offset, max, considerInternalAttributes);
-            if (log.isDebugEnabled()) {
-                log.debug("Get from " + url);
-            }
-            List<?> combinedAttributeObjList = get("getLeadEnrichmentAttributes", url, List.class);
-            List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
-                    LeadEnrichmentAttribute.class);
-
-            return attributeList;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
-        }
-    }
-
-    @Override
     public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
                                                 Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         try {
@@ -177,31 +134,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
                 url += "?" + "considerInternalAttributes" + "=" + considerInternalAttributes;
             }
             return get("getSelectedAttributePremiumCount", url, Integer.class);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
-        }
-    }
-
-    @Override
-    public List<String> getLeadEnrichmentCategories(CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/categories",
-                    customerSpace.toString()));
-            List<?> categoriesObjList = get("getLeadEnrichmentCategories", url, List.class);
-            return JsonUtils.convertList(categoriesObjList, String.class);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
-        }
-    }
-
-    @Override
-    public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category) {
-        try {
-            String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/subcategories",
-                    customerSpace.toString()));
-            url += "?category=" + category;
-            List<?> subCategoriesObjList = get("getLeadEnrichmentSubcategories", url, List.class);
-            return JsonUtils.convertList(subCategoriesObjList, String.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
         }

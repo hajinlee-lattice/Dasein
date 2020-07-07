@@ -40,14 +40,6 @@ public interface PlsInternalProxy {
     void saveLeadEnrichmentAttributes(CustomerSpace customerSpace,
                                       LeadEnrichmentAttributesOperationMap attributes);
 
-    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace,
-                                                              String attributeDisplayNameFilter, Category category,
-                                                              Boolean onlySelectedAttributes);
-
-    List<String> getLeadEnrichmentCategories(CustomerSpace customerSpace);
-
-    List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category);
-
     Integer getSelectedAttributeCount(CustomerSpace customerSpace, Boolean considerInternalAttributes);
 
     Map<String, Integer> getPremiumAttributesLimitation(CustomerSpace customerSpace);
@@ -58,18 +50,7 @@ public interface PlsInternalProxy {
                                          Category category, String subcategory, Boolean onlySelectedAttributes,
                                          Boolean considerInternalAttributes);
 
-    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace,
-                                                              String attributeDisplayNameFilter, Category category, String subcategory,
-                                                              Boolean onlySelectedAttributes, Integer offset,
-                                                              Integer max, Boolean considerInternalAttributes);
-
     List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes();
-
-    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, String attributeDisplayNameFilter, Category category,
-                                                              Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
-
-    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, String attributeDisplayNameFilter, Category category,
-                                                              String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
 
     void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 }

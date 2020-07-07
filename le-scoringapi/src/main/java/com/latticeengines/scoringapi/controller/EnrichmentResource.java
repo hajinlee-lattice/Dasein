@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.exposed.ScoreUtils;
 
@@ -40,13 +41,16 @@ public class EnrichmentResource {
     @Inject
     private PlsInternalProxy plsInternalProxy;
 
+    @Inject
+    private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
+
     // ------------START for LeadEnrichment-------------------//
     @GetMapping("/categories")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getLeadEnrichmentCategories(customerSpace);
+        return latticeInsightsInternalProxy.getLeadEnrichmentCategories(customerSpace);
     }
 
     @GetMapping("/subcategories")
@@ -56,7 +60,7 @@ public class EnrichmentResource {
             @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getLeadEnrichmentSubcategories(customerSpace, category);
+        return latticeInsightsInternalProxy.getLeadEnrichmentSubcategories(customerSpace, category);
     }
 
     @GetMapping()
@@ -89,7 +93,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
-        return plsInternalProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
+        return latticeInsightsInternalProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, offset, max,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }

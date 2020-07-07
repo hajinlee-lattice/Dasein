@@ -40,14 +40,14 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     @Test(groups = "deployment")
     public void cleanupAttributeSelectionBeforeTest() {
-        List<LeadEnrichmentAttribute> existingSelection = plsInternalProxy
+        List<LeadEnrichmentAttribute> existingSelection = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, true, false);
         Assert.assertNotNull(existingSelection);
         Assert.assertEquals(existingSelection.size(), 6);
 
         LeadEnrichmentAttributesOperationMap deselectedAttributeMap = createDeselectionMap(existingSelection);
         plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, deselectedAttributeMap);
-        List<LeadEnrichmentAttribute> freshSelection = plsInternalProxy
+        List<LeadEnrichmentAttribute> freshSelection = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, null, true, false);
         Assert.assertNotNull(freshSelection);
         Assert.assertEquals(freshSelection.size(), 0);

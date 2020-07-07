@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -76,6 +77,9 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @Inject
     private PlsInternalProxy plsInternalProxy;
+
+    @Inject
+    private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -282,7 +286,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();

@@ -89,6 +89,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -103,6 +104,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Inject
     private PlsInternalProxy plsInternalProxy;
+
+    @Inject
+    private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     @Inject
     protected ScoreCorrectnessService scoreCompareService;
@@ -708,7 +712,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();

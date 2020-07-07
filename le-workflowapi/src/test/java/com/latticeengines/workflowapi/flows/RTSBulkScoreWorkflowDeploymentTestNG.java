@@ -129,7 +129,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();
