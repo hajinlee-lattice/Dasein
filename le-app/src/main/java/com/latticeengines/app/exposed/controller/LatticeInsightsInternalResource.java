@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.AttributeService;
@@ -49,7 +48,6 @@ public class LatticeInsightsInternalResource {
     public static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
 
     @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories/" + TENANT_ID_PATH)
-    @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(@PathVariable("tenantId") String tenantId) {
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(tenantId, null, null, null,
@@ -64,7 +62,6 @@ public class LatticeInsightsInternalResource {
     }
 
     @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories" + "/" + TENANT_ID_PATH)
-    @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(@PathVariable("tenantId") String tenantId, //
                                                        @ApiParam(value = "category", required = true) //
@@ -79,15 +76,14 @@ public class LatticeInsightsInternalResource {
     }
 
     @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + TENANT_ID_PATH)
-    @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(@PathVariable("tenantId") String tenantId,
             @ApiParam(value = "Get attributes with display name containing specified text (case insensitive) for attributeDisplayNameFilter")
             @RequestParam(value = "attributeDisplayNameFilter", required = false) String attributeDisplayNameFilter, //
             @ApiParam(value = "Get attributes with specified category")
-            @RequestParam(value = "category") String category, //
+            @RequestParam(value = "category", required = false) String category, //
             @ApiParam(value = "Get attributes with specified subcategory")
-            @RequestParam(value = "subcategory") String subcategory, //
+            @RequestParam(value = "subcategory", required = false) String subcategory, //
             @ApiParam(value = "Should get only selected attribute")
             @RequestParam(value = "onlySelectedAttributes", required = false) Boolean onlySelectedAttributes, //
             @ApiParam(value = "Offset for pagination of matching attributes")
