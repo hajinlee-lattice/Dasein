@@ -186,10 +186,10 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     public void testGoogleAds() {
         defaultGoogleAdsExportFields = exportService.getAllAttributes(CDLExternalSystemName.GoogleAds);
 
-        assertEquals(defaultGoogleAdsExportFields.size(), 41);
+        assertEquals(defaultGoogleAdsExportFields.size(), 43);
         assertEquals(
                 defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                36);
         assertEquals(defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 10);
 
