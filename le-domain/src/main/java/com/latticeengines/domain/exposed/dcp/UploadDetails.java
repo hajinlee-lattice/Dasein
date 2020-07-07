@@ -35,6 +35,9 @@ public class UploadDetails {
     @JsonProperty("uploadDiagnostics")
     public UploadDiagnostics uploadDiagnostics;
 
+    @JsonProperty("ingestionStartTime")
+    private Long ingestionStartTime;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -89,5 +92,13 @@ public class UploadDetails {
 
     public void setUploadDiagnostics(UploadDiagnostics uploadDiagnostics) {
         this.uploadDiagnostics = uploadDiagnostics;
+    }
+
+    public Long getIngestionStartTime() {
+        return ingestionStartTime;
+    }
+
+    public void setIngestionStartTime(Long ingestionStartTime) {
+        this.ingestionStartTime = ingestionStartTime;
     }
 }
