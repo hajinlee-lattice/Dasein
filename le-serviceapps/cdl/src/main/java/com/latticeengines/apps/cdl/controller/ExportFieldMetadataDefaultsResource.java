@@ -18,6 +18,7 @@ import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,8 +45,12 @@ public class ExportFieldMetadataDefaultsResource {
     @ApiOperation(value = "Get default fields by system name")
     @NoCustomerSpace
     public List<ExportFieldMetadataDefaults> getDefaultFields(
-        @RequestParam(value = "systemName", required = true) CDLExternalSystemName systemName) {
-        return exportFieldMetadataDefaultsService.getAllAttributes(systemName);
+            @RequestParam(value = "systemName", required = true) CDLExternalSystemName systemName,
+            @RequestParam(value = "audienceType", required = false) AudienceType audienceType) {
+        if (audienceType == null) {
+            return exportFieldMetadataDefaultsService.getAllAttributes(systemName);
+        }
+        return exportFieldMetadataDefaultsService.getExportEnabledAttributesForAudienceType(systemName, audienceType);
     }
 
     @PutMapping
