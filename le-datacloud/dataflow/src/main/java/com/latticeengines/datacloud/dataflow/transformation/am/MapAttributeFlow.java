@@ -60,7 +60,7 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
         String seedName = config.getSeed();
         log.info("Prepare seed " + seedName);
         Node seed = null;
-        if (config.getStage().equals(REFRESH_STAGE)) {
+        if (config.getStage().contains(REFRESH_STAGE)) {
             List<SourceAttribute> sourceAttributes = getAttributes(config);
             seed = sourceMap.get(seedName);
             if (seed == null) {
@@ -68,7 +68,8 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
             }
             seed = discardExistingAttrs(seed, seedName, sourceAttributes, parameters.getTimestampField());
         } else {
-            seed = prepareSource(sourceMap.get(seedName), sourceAttributeMap.get(seedName), null, null);
+            seed = prepareSource(sourceMap.get(seedName), sourceAttributeMap.get(seedName), null, null,
+                    config.getIsDedupe());
             if (seed == null) {
                 throw new RuntimeException("Failed to prepare seed " + seedName);
             }
@@ -86,15 +87,16 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
 
             List<Node> sources = new ArrayList<>();
 
-             for (MapAttributeConfig.JoinTarget joinTarget : joinConfig.getTargets()) {
-                 String sourceName = joinTarget.getSource();
-                 Node source = sourceMap.get(sourceName);
-                 if (source == null) {
+            for (MapAttributeConfig.JoinTarget joinTarget : joinConfig.getTargets()) {
+                String sourceName = joinTarget.getSource();
+                Node source = sourceMap.get(sourceName);
+                if (source == null) {
                     throw new RuntimeException("Failed to prepare sourcce " + sourceName);
-                 }
-                source = prepareSource(source, sourceAttributeMap.get(sourceName), joinTarget.getKeys(), joinKeyMap);
-                 sources.add(source);
-             }
+                }
+                source = prepareSource(source, sourceAttributeMap.get(sourceName), joinTarget.getKeys(), joinKeyMap,
+                        config.getIsDedupe());
+                sources.add(source);
+            }
 
              log.info("Converging sources");
 
@@ -126,9 +128,10 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
         return node.discard(new FieldList(discardAttrs));
     }
 
-    private Node prepareSource(Node source, List<MapAttributeConfig.MapFunc> mapConfigs, List<String> joinKeys, Map<Node, String> joinKeyMap) {
+    private Node prepareSource(Node source, List<MapAttributeConfig.MapFunc> mapConfigs, List<String> joinKeys,
+            Map<Node, String> joinKeyMap, Boolean isDeduple) {
 
-        if (joinKeys != null) {
+        if (joinKeys != null && Boolean.TRUE.equals(isDeduple)) {
             String[] joinKeyArray = joinKeys.toArray(new String[joinKeys.size()]);
             source = source.groupByAndLimit(new FieldList(joinKeyArray), 1);
         }
@@ -238,6 +241,7 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
         }
         filterString += ")";
 
+        log.info("Filter=" + filterString);
         FieldList seedFields = new FieldList(seedAttrs);
         Node filteredSeed = seed.filter(filterString, seedFields);
 
