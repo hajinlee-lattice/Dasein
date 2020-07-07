@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.AccountLookupToDynamoStepConfiguration;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -13,7 +14,9 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ExportToDynamoStepConfiguration.class, name = ExportToDynamoStepConfiguration.NAME),
         @JsonSubTypes.Type(value = ExportTimelineRawTableToDynamoStepConfiguration.class, name = ExportTimelineRawTableToDynamoStepConfiguration.NAME),
-        @JsonSubTypes.Type(value = AtlasAccountLookupExportStepConfiguration.class, name = AtlasAccountLookupExportStepConfiguration.NAME) })
+        @JsonSubTypes.Type(value = AtlasAccountLookupExportStepConfiguration.class, name = AtlasAccountLookupExportStepConfiguration.NAME),
+        @JsonSubTypes.Type(value = AccountLookupToDynamoStepConfiguration.class, name = AccountLookupToDynamoStepConfiguration.NAME)
+})
 public abstract class BaseExportToDynamoConfiguration extends MicroserviceStepConfiguration {
 
     @NotNull

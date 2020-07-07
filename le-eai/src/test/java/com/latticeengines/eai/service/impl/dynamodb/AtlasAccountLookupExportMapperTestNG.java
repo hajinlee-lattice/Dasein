@@ -2,8 +2,9 @@ package com.latticeengines.eai.service.impl.dynamodb;
 
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL;
-import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_EXPORT_TYPE;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_TABLE_NAME;
 
 import java.io.IOException;
@@ -56,9 +57,9 @@ import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNG
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
-public class AtlasAccountLookupExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
+public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportMapperTestNG.class);
 
     private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("DynamoTestCustomer");
     private static final String DYNAMO_PK_FIELD = InterfaceName.AtlasLookupKey.name();
@@ -71,9 +72,10 @@ public class AtlasAccountLookupExportServiceImplTestNG extends EaiMiniClusterFun
     private static final String FROM_STRING = "FromString";
     private static final String TO_STRING = "ToString";
     private static final String DELETED = "Deleted";
-    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s__%s";
+    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s_%s"; // tenantId__ver__lookupId_lookIdVal
     private static final String LOOKUP_CHANGED = "__Changed__";
     private static final String LOOKUP_DELETED = "__Deleted__";
+    private static final String EXPORT_TYPE = "atlasAccountLookupExportStepConfiguration";
 
     @Inject
     private DynamoService dynamoService;
@@ -127,7 +129,7 @@ public class AtlasAccountLookupExportServiceImplTestNG extends EaiMiniClusterFun
     @AfterClass(groups = "dynamo")
     public void cleanup() throws IOException {
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.INFO);
-        dynamoService.deleteTable(dynamoTableName);
+//        dynamoService.deleteTable(dynamoTableName);
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
         super.clear();
@@ -186,7 +188,8 @@ public class AtlasAccountLookupExportServiceImplTestNG extends EaiMiniClusterFun
         props.put(CONFIG_TABLE_NAME, dynamoTableName);
         props.put(CONFIG_ATLAS_LOOKUP_IDS, ATTR_LOOKUP_ID_1 + "," + ATTR_LOOKUP_ID_2);
         props.put(CONFIG_ENDPOINT, endpoint);
-        props.put(CONFIG_CURRENT_VERSION, currentVersion);
+        props.put(CONFIG_EXPORT_VERSION, currentVersion);
+        props.put(CONFIG_EXPORT_TYPE, EXPORT_TYPE);
         long expTime = Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
         props.put(CONFIG_ATLAS_LOOKUP_TTL, Long.toString(expTime));
 

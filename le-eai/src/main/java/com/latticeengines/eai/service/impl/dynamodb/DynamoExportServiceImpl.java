@@ -6,9 +6,10 @@ import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CO
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_REGION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
-import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_EXPORT_TYPE;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE;
@@ -19,6 +20,7 @@ import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CO
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -39,7 +42,10 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.AccountLookupToDynamoStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.AtlasAccountLookupExportStepConfiguration;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
+import com.latticeengines.eai.dynamodb.runtime.AccountLookupToDynamoJob;
 import com.latticeengines.eai.dynamodb.runtime.AtlasAccountLookupExportJob;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.service.EaiYarnService;
@@ -52,6 +58,9 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 public class DynamoExportServiceImpl extends ExportService {
 
     private static final Logger log = LoggerFactory.getLogger(DynamoExportServiceImpl.class);
+
+    private static final Set<String> ACCOUNT_LOOKUP_JOB_TYPES = ImmutableSet
+            .of(AtlasAccountLookupExportStepConfiguration.NAME, AccountLookupToDynamoStepConfiguration.NAME);
 
     @Inject
     private EaiYarnService eaiYarnService;
@@ -71,13 +80,18 @@ public class DynamoExportServiceImpl extends ExportService {
 
     @Override
     public void exportDataFromHdfs(ExportConfiguration exportConfig, ExportContext context) {
-        boolean toAtlasLookupCache = exportConfig.getProperties().containsKey(CONFIG_ATLAS_LOOKUP_IDS);
         Properties props = constructProperties(exportConfig, context);
         ApplicationId appId;
-        if (toAtlasLookupCache) {
+        switch (exportConfig.getProperties().get(CONFIG_EXPORT_TYPE)) {
+        case AtlasAccountLookupExportStepConfiguration.NAME:
             log.info("Updating {} table with account change list", exportConfig.getProperties().get(CONFIG_TABLE_NAME));
             appId = eaiYarnService.submitMRJob(AtlasAccountLookupExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
-        } else {
+            break;
+        case AccountLookupToDynamoStepConfiguration.NAME:
+            log.info("Republishing lookup entries of tenant {}", exportConfig.getProperties().get(CONFIG_ATLAS_TENANT));
+            appId = eaiYarnService.submitMRJob(AccountLookupToDynamoJob.DYNAMO_EXPORT_JOB_TYPE, props);
+            break;
+        default:
             log.info("Submitting DynamoExportJob");
             appId = eaiYarnService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
         }
@@ -107,8 +121,7 @@ public class DynamoExportServiceImpl extends ExportService {
 
         context.setProperty(ExportProperty.NUM_MAPPERS, exportConfig.getProperties().get(ExportProperty.NUM_MAPPERS));
 
-        boolean toAtlasLookupCache = exportConfig.getProperties().containsKey(CONFIG_ATLAS_LOOKUP_IDS);
-        if (toAtlasLookupCache) {
+        if (ACCOUNT_LOOKUP_JOB_TYPES.contains(exportConfig.getProperties().get(CONFIG_EXPORT_TYPE))) {
             String dynamoTableName = exportConfig.getProperties().get(CONFIG_TABLE_NAME);
             if (StringUtils.isBlank(dynamoTableName)) {
                 dynamoTableName = atlasLookupCacheTableName;
@@ -117,8 +130,9 @@ public class DynamoExportServiceImpl extends ExportService {
             String tenant = CustomerSpace.shortenCustomerSpace(exportConfig.getCustomerSpace().toString());
             context.setProperty(CONFIG_ATLAS_TENANT, tenant);
             context.setProperty(CONFIG_ATLAS_LOOKUP_IDS, exportConfig.getProperties().get(CONFIG_ATLAS_LOOKUP_IDS));
-            context.setProperty(CONFIG_CURRENT_VERSION, exportConfig.getProperties().get(CONFIG_CURRENT_VERSION));
+            context.setProperty(CONFIG_EXPORT_VERSION, exportConfig.getProperties().get(CONFIG_EXPORT_VERSION));
             context.setProperty(CONFIG_ATLAS_LOOKUP_TTL, exportConfig.getProperties().get(CONFIG_ATLAS_LOOKUP_TTL));
+            context.setProperty(CONFIG_EXPORT_TYPE, exportConfig.getProperties().get(CONFIG_EXPORT_TYPE));
         } else {
             context.setProperty(CONFIG_REPOSITORY, exportConfig.getProperties().get(CONFIG_REPOSITORY));
             context.setProperty(CONFIG_RECORD_TYPE, exportConfig.getProperties().get(CONFIG_RECORD_TYPE));
@@ -141,7 +155,6 @@ public class DynamoExportServiceImpl extends ExportService {
     }
 
     private Properties getProperties(ExportContext ctx, Table table) {
-        boolean toAtlasLookupCache = ctx.containsProperty(CONFIG_ATLAS_LOOKUP_IDS);
 
         Properties props = new Properties();
         props.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
@@ -161,11 +174,11 @@ public class DynamoExportServiceImpl extends ExportService {
             props.setProperty("eai.table.schema", JsonUtils.serialize(table));
         }
 
-        if (toAtlasLookupCache) {
+        if (ACCOUNT_LOOKUP_JOB_TYPES.contains(ctx.getProperty(CONFIG_EXPORT_TYPE, String.class))) {
             props.setProperty(CONFIG_TABLE_NAME, ctx.getProperty(CONFIG_TABLE_NAME, String.class));
             props.setProperty(CONFIG_ATLAS_TENANT, ctx.getProperty(CONFIG_ATLAS_TENANT, String.class));
             props.setProperty(CONFIG_ATLAS_LOOKUP_IDS, ctx.getProperty(CONFIG_ATLAS_LOOKUP_IDS, String.class));
-            props.setProperty(CONFIG_CURRENT_VERSION, ctx.getProperty(CONFIG_CURRENT_VERSION, String.class));
+            props.setProperty(CONFIG_EXPORT_VERSION, ctx.getProperty(CONFIG_EXPORT_VERSION, String.class));
             props.setProperty(CONFIG_ATLAS_LOOKUP_TTL, ctx.getProperty(CONFIG_ATLAS_LOOKUP_TTL, String.class));
         } else {
             props.setProperty(CONFIG_RECORD_TYPE, ctx.getProperty(CONFIG_RECORD_TYPE, String.class));
@@ -177,8 +190,7 @@ public class DynamoExportServiceImpl extends ExportService {
         }
 
         props.setProperty(CONFIG_ENDPOINT, ctx.getProperty(CONFIG_ENDPOINT, String.class, ""));
-        props.setProperty(CONFIG_AWS_REGION,
-                ctx.getProperty(CONFIG_AWS_REGION, String.class, "us-east-1"));
+        props.setProperty(CONFIG_AWS_REGION, ctx.getProperty(CONFIG_AWS_REGION, String.class, "us-east-1"));
         props.setProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
                 ctx.getProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, String.class, ""));
         props.setProperty(CONFIG_AWS_SECRET_KEY_ENCRYPTED,
