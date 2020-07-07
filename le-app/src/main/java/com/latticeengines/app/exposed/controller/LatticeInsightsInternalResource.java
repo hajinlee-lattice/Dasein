@@ -48,7 +48,7 @@ public class LatticeInsightsInternalResource {
 
     public static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
 
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories")
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(@PathVariable("tenantId") String tenantId) {
@@ -78,7 +78,7 @@ public class LatticeInsightsInternalResource {
         return new ArrayList<>(subcategories);
     }
 
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH)
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(@PathVariable("tenantId") String tenantId,
