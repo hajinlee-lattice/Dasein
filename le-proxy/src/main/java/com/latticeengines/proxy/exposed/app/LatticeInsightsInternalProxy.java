@@ -12,19 +12,19 @@ public interface LatticeInsightsInternalProxy {
 
     List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category);
 
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                                                      String attributeDisplayNameFilter, Category category, //
                                                                      Boolean onlySelectedAttributes);
 
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                                                      String attributeDisplayNameFilter, Category category, //
                                                                      Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
 
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                                                      String attributeDisplayNameFilter, Category category, String subcategory, //
                                                                      Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
 
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+    List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                                                      String attributeDisplayNameFilter, Category category, String subcategory, //
                                                                      Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes);
 }
