@@ -17,6 +17,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
@@ -29,6 +30,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
     List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
     List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
     List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
+    List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -68,6 +70,13 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
             defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
         }
 
+        defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
+                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.GoogleAds);
+
+        if (defaultGoogleAdsExportFields.size() == 0) {
+            defaultGoogleAdsExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
+        }
+
     }
 
     @AfterClass(groups = "functional")
@@ -104,20 +113,35 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultLinkedInExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.LinkedIn);
 
-        assertEquals(defaultLinkedInExportFields.size(), 43);
-        assertEquals(
-                defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                35);
+        assertEquals(defaultLinkedInExportFields.size(), 55);
         List<ExportFieldMetadataDefaults> exportEnabledFields = defaultLinkedInExportFields.stream()
                 .filter(ExportFieldMetadataDefaults::getExportEnabled).collect((Collectors.toList()));
         assertEquals(defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                5);
+                25);
 
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account).count(),
-                4);
+                14);
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact).count(),
-                1);
+                11);
 
+    }
+
+    @Test(groups = "functional")
+    public void testLinkedInAccounts() {
+        List<ExportFieldMetadataDefaults> defaultLinkedInAccountExportFields = defaultExportFieldMetadataEntityMgr
+                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.LinkedIn,
+                        AudienceType.ACCOUNTS);
+
+        assertEquals(defaultLinkedInAccountExportFields.size(), 14);
+    }
+
+    @Test(groups = "functional")
+    public void testLinkedInContacts() {
+        List<ExportFieldMetadataDefaults> defaultLinkedInContactsExportFields = defaultExportFieldMetadataEntityMgr
+                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.LinkedIn,
+                        AudienceType.CONTACTS);
+
+        assertEquals(defaultLinkedInContactsExportFields.size(), 13);
     }
 
     @Test(groups = "functional")
@@ -148,13 +172,29 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
     }
 
+    @Test(groups = "functional")
+    public void testGoogleAds() {
+        defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
+                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.GoogleAds);
+
+        assertEquals(defaultGoogleAdsExportFields.size(), 41);
+        assertEquals(
+                defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
+                10);
+
+    }
+
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
         String filePath = String.format("service/impl/%s_default_export_fields.json",
                 systemName.toString().toLowerCase());
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
+
+
         List<ExportFieldMetadataDefaults> defaultExportFields = JsonUtils
                 .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
+
         defaultExportFieldMetadataEntityMgr.createAll(defaultExportFields);
         return defaultExportFields;
     }
+
 }
