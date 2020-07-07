@@ -24,7 +24,7 @@ public class FailureHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException {
         try {
-            log.info(String.format("Failed to authenticate: %s", exception));
+            log.error("Failed to authenticate: ", exception);
             String tenantId = SAMLUtils.getTenantFromAlias(request.getPathInfo());
             log.info(String.format("request.getPathInfo() = %s, tenantId = %s", request.getPathInfo(), tenantId));
         } catch (Exception ex) {
