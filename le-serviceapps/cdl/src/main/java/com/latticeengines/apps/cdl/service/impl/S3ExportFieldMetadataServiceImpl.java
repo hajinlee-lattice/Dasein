@@ -22,6 +22,8 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
 
     private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
 
+    private static final String TRAY_CONTACT_ID_COLUMN_NAME = "SFDC Contact ID";
+
     protected S3ExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.AWS_S3);
     }
@@ -38,12 +40,21 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
 
         List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
                 accountAttributesMap, contactAttributesMap);
-        String lookupId = channel.getLookupIdMap().getAccountId();
-        log.info("S3 lookupId " + lookupId);
-        if (lookupId != null && accountAttributesMap.containsKey(lookupId)) {
-            ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
-            lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
-            exportColumnMetadataList.add(lookupIdColumnMetadata);
+
+        String accountId = channel.getLookupIdMap().getAccountId();
+        log.info("S3 accountId " + accountId);
+        if (accountId != null && accountAttributesMap.containsKey(accountId)) {
+            ColumnMetadata accountIdColumnMetadata = accountAttributesMap.get(accountId);
+            accountIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(accountIdColumnMetadata);
+        }
+
+        String contactId = channel.getLookupIdMap().getContactId();
+        log.info("S3 contactId " + contactId);
+        if (contactId != null && contactAttributesMap.containsKey(contactId)) {
+            ColumnMetadata contactIdColumnMetadata = contactAttributesMap.get(contactId);
+            contactIdColumnMetadata.setDisplayName(TRAY_CONTACT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(contactIdColumnMetadata);
         }
 
         if (channelConfig.isIncludeExportAttributes()) {
