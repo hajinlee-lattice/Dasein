@@ -557,10 +557,10 @@ public class InternalResource extends InternalResourceBase {
     private boolean shouldSendEmail(Tenant tenant, TenantEmailNotificationLevel notificationLevel, String jobType) {
         TenantEmailNotificationLevel tenantLevelFlag = tenant.getNotificationLevel();
         Map<String, TenantEmailNotificationLevel> jobLevelFlags = tenant.getJobNotificationLevels();
-        TenantEmailNotificationLevel jobLevelFlag = jobLevelFlags.containsKey(jobType)
+        TenantEmailNotificationLevel flag = jobLevelFlags.containsKey(jobType)
                 ? tenant.getJobNotificationLevels().get(jobType)
-                : TenantEmailNotificationLevel.NONE;
-        return tenantLevelFlag.compareTo(notificationLevel) >= 0 && jobLevelFlag.compareTo(notificationLevel) >= 0;
+                : tenantLevelFlag;
+        return flag.compareTo(notificationLevel) >= 0;//tenantLevelFlag.compareTo(notificationLevel) >= 0 &&
     }
 
     private Tenant manufactureSecurityContextForInternalAccess(String tenantId) {
