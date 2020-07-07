@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -78,6 +79,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private BatonService batonService;
+
     private Table oldLatticeAccountTable = null;
     private Table newLatticeAccountTable = null;
     private Table latticeAccountChangeListTable = null;
@@ -117,20 +121,26 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private boolean shouldDoNothing() {
-        boolean noAccountChange = !isChanged(ConsolidatedAccount);
-        accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
-        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
-        if (accountChangeList != null) {
-            accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
+        // some special tenants do not want to use LDC attributes
+        boolean noLDC = batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId());
+        if (noLDC) {
+            return true;
+        } else {
+            boolean noAccountChange = !isChanged(ConsolidatedAccount);
+            accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
+            Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+            if (accountChangeList != null) {
+                accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
+            }
+            oldLatticeAccountTable = attemptGetTableRole(LatticeAccount, false);
+            if (oldLatticeAccountTable != null) {
+                oldLatticeAccountDU = toDataUnit(oldLatticeAccountTable, "OldLatticeAccount");
+            }
+            fetchAttrs = getFetchAttrs();
+            fetchAll = shouldFetchAll();
+            rebuildDownstream = shouldRebuildLatticeAccount();
+            return noAccountChange && !fetchAll && !rebuildDownstream;
         }
-        oldLatticeAccountTable = attemptGetTableRole(LatticeAccount, false);
-        if (oldLatticeAccountTable != null) {
-            oldLatticeAccountDU = toDataUnit(oldLatticeAccountTable, "OldLatticeAccount");
-        }
-        fetchAttrs = getFetchAttrs();
-        fetchAll = shouldFetchAll();
-        rebuildDownstream = shouldRebuildLatticeAccount();
-        return noAccountChange && !fetchAll && !rebuildDownstream;
     }
 
     private boolean shouldRebuildLatticeAccount() {

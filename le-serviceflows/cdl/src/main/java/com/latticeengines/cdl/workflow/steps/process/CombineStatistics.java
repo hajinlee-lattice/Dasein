@@ -125,9 +125,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         if (MapUtils.isNotEmpty(statsTableMap)) {
             int originalStatsTables = statsTableMap.size();
             resetEntities.forEach(entity -> {
-                if (statsTableMap.containsKey(entity)) {
-                    statsTableMap.remove(entity);
-                }
+                statsTableMap.remove(entity);
             });
             if (statsTableMap.size() != originalStatsTables) {
                 log.info("Removed " + (originalStatsTables - statsTableMap.size())

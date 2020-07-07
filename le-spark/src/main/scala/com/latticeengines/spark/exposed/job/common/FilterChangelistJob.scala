@@ -17,13 +17,14 @@ class FilterChangelistJob extends AbstractSparkJob[FilterChangelistConfig] {
     val changelist: DataFrame = lattice.input.head
 
     val changed = changelist.filter(col(ColumnId) === columnId && (col(Deleted).isNull || col(Deleted) === false))
-    val deleted = changelist.filter(col(ColumnId) === columnId && col(Deleted) === true)
-
     val changedRenamed = changed
       .withColumnRenamed(ToString, columnId)
       .withColumnRenamed(RowId, key)
       .select(selectColumns map col: _*)
       .distinct()
+
+    // detect whole row deletion
+    val deleted = changelist.filter(col(ColumnId).isNull && col(Deleted) === true).select(RowId).distinct()
 
     lattice.output = List(changedRenamed, deleted)
   }
