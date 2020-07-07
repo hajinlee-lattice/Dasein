@@ -29,12 +29,11 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
 
     private static final String INSIGHTS_PATH = "/insights";
 
-    private static final String PLS_INTERNAL_ENRICHMENT = "/internal/latticeinsights/enrichment";
+    private static final String LATTICE_INSIGHTS_INTERNAL_ENRICHMENT = "/internal/latticeinsights/enrichment";
 
     public LatticeInsightsInternalProxyImpl() {
         super(PropertyUtils.getProperty("common.pls.url"), "pls");
     }
-
 
     public LatticeInsightsInternalProxyImpl(String hostPort) {
         super(hostPort, "pls");
@@ -43,7 +42,7 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
     @Override
     public List<String> getLeadEnrichmentCategories(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/categories",
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/categories",
                     customerSpace.toString()));
             List<?> categoriesObjList = get("getLeadEnrichmentCategories", url, List.class);
             return JsonUtils.convertList(categoriesObjList, String.class);
@@ -55,7 +54,7 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
     @Override
     public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category) {
         try {
-            String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/subcategories",
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/subcategories",
                     customerSpace.toString()));
             url += "?category=" + category;
             List<?> subCategoriesObjList = get("getLeadEnrichmentSubcategories", url, List.class);
@@ -92,7 +91,7 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
                                                                      String attributeDisplayNameFilter, Category category, String subcategory, //
                                                                      Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
         try {
-            String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString()));
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString()));
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, offset, max, considerInternalAttributes);
             if (log.isDebugEnabled()) {

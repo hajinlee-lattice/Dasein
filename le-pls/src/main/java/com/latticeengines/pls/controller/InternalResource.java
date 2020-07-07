@@ -1,10 +1,7 @@
 package com.latticeengines.pls.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -88,78 +85,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
-
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get list of categories")
-    public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
-            @PathVariable("tenantId") String tenantId) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, null, null,
-                false, null, null, Boolean.FALSE);
-
-        List<String> categoryStrList = new ArrayList<>();
-        for (Category category : Category.values()) {
-            if (containsAtleastOneAttributeForCategory(allAttributes, category)) {
-                categoryStrList.add(category.toString());
-            }
-        }
-        return categoryStrList;
-    }
-
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories" + "/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get list of subcategories for a given category")
-    public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
-            @PathVariable("tenantId") String tenantId, //
-            @ApiParam(value = "category", required = true) //
-            @RequestParam String category) {
-        Set<String> subcategories = new HashSet<>();
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, category,
-                null, false, null, null, Boolean.FALSE);
-
-        for (LeadEnrichmentAttribute attr : allAttributes) {
-            subcategories.add(attr.getSubcategory());
-        }
-        return new ArrayList<>(subcategories);
-    }
-
-    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + TENANT_ID_PATH)
-    @ResponseBody
-    @ApiOperation(value = "Get lead enrichment")
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request, //
-            @PathVariable("tenantId") String tenantId, //
-            @ApiParam(value = "Get attributes with display name containing specified " //
-                    + "text (case insensitive) for attributeDisplayNameFilter", required = false) //
-            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
-            String attributeDisplayNameFilter, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified category", required = false) //
-            @RequestParam(value = "category", required = false) //
-            String category, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified subcategory", required = false) //
-            @RequestParam(value = "subcategory", required = false) //
-            String subcategory, //
-            @ApiParam(value = "Should get only selected attribute", //
-                    required = false) //
-            @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes, //
-            @ApiParam(value = "Offset for pagination of matching attributes", required = false) //
-            @RequestParam(value = "offset", required = false) //
-            Integer offset, //
-            @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
-            @RequestParam(value = "max", required = false) //
-            Integer max, //
-            @ApiParam(value = "Consider internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") //
-            Boolean considerInternalAttributes) {
-        checkHeader(request);
-        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
-        return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, offset, max, considerInternalAttributes);
-    }
 
     @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count" + "/" + TENANT_ID_PATH)
     @ResponseBody
