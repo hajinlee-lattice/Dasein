@@ -29,6 +29,12 @@ public class JourneyStageServiceImpl implements JourneyStageService {
     }
 
     @Override
+    public JourneyStage findByStageName(String customerSpace, String stageName) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return journeyStageEntityMgr.findByTenantAndStageName(tenant, stageName);
+    }
+
+    @Override
     public List<JourneyStage> findByTenant(String customerSpace) {
         Tenant tenant = MultiTenantContext.getTenant();
         return journeyStageEntityMgr.findByTenant(tenant);
@@ -49,6 +55,11 @@ public class JourneyStageServiceImpl implements JourneyStageService {
         newJourneyStage.setPredicates(journeyStage.getPredicates());
         journeyStageEntityMgr.createOrUpdate(newJourneyStage);
         return newJourneyStage;
+    }
+
+    @Override
+    public boolean createDefaultJourneyStages(String customerSpace) {
+        return false;
     }
 
     @Override

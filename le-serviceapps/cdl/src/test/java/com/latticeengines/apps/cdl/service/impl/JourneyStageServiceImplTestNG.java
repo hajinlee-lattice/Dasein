@@ -27,26 +27,32 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private JourneyStageService journeyStageService;
 
+    private String stageName = "journeyStage1";
+    private int priority = 3;
+    private StreamFieldToFilter filter;
+    private JourneyStagePredicates predicates;
+    private JourneyStage journeyStage;
+    private String updateStageName = "journeyStage2";
+    private Long pid;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
     }
 
     @Test(groups = "functional")
-    public void testCRUD() {
-        String stageName = "journeyStage1";
-        int priority = 3;
-        StreamFieldToFilter filter = new StreamFieldToFilter();
+    public void testCreate() {
+        filter = new StreamFieldToFilter();
         filter.setColumnName(InterfaceName.StageName.name());
         filter.setColumnValue("Close%");
-        filter.setCompareType(StreamFieldToFilter.CompareType.Contains);
-        JourneyStagePredicates predicates = new JourneyStagePredicates();
+        filter.setComparisonType(StreamFieldToFilter.ComparisonType.Contains);
+        predicates = new JourneyStagePredicates();
         predicates.setContactNotNull(false);
         predicates.setNoOfEvents(3);
         predicates.setPeriod(30);
         predicates.setStreamType(AtlasStream.StreamType.WebVisit);
         predicates.setStreamFieldToFilterList(Collections.singletonList(filter));
-        JourneyStage journeyStage = new JourneyStage();
+        journeyStage = new JourneyStage();
         journeyStage.setPredicates(Collections.singletonList(predicates));
         journeyStage.setStageName(stageName);
         journeyStage.setPriority(priority);
@@ -59,6 +65,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(journeyStageList.size(), 1);
         created = journeyStageList.get(0);
         log.info("JourneyStage is {}.", JsonUtils.serialize(created));
+        pid = created.getPid();
         Assert.assertEquals(created.getStageName(), stageName);
         Assert.assertEquals(created.getPriority(), priority);
         List<JourneyStagePredicates> predicateList = created.getPredicates();
@@ -71,6 +78,17 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(createdFilter.size(), 1);
         Assert.assertEquals(createdFilter.get(0).getColumnName(), filter.getColumnName());
         Assert.assertEquals(createdFilter.get(0).getColumnValue(), filter.getColumnValue());
-        Assert.assertEquals(createdFilter.get(0).getCompareType(), filter.getCompareType());
+        Assert.assertEquals(createdFilter.get(0).getComparisonType(), filter.getComparisonType());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
+    public void testUpdate() {
+        JourneyStage stage = journeyStageService.findByPid(mainCustomerSpace, pid);
+        Assert.assertNotNull(stage);
+        Assert.assertEquals(stage.getStageName(), stageName);
+        stage.setStageName(updateStageName);
+        journeyStageService.createOrUpdate(mainCustomerSpace, stage);
+        stage = journeyStageService.findByStageName(mainCustomerSpace, updateStageName);
+        Assert.assertNotNull(stage);
     }
 }

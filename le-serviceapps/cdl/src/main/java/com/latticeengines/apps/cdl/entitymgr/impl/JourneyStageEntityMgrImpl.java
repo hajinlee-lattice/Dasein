@@ -33,6 +33,12 @@ public class JourneyStageEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Journe
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public JourneyStage findByTenantAndStageName(Tenant tenant, String stageName) {
+        return readerRepository.findByTenantAndStageName(tenant, stageName);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<JourneyStage> findByTenant(Tenant tenant) {
         return readerRepository.findByTenant(tenant);
     }

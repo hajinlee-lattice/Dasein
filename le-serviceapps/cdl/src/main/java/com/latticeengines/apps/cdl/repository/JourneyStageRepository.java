@@ -12,5 +12,7 @@ public interface JourneyStageRepository extends BaseJpaRepository<JourneyStage, 
 
     JourneyStage findByPid(@Param("pid") Long pid);
 
+    JourneyStage findByTenantAndStageName(@Param("tenant") Tenant tenant, @Param("stageName") String stageName);
+
     List<JourneyStage> findByTenant(@Param("tenant") Tenant tenant);
 }

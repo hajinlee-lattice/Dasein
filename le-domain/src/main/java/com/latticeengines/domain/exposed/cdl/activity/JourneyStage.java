@@ -13,10 +13,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -24,11 +27,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 @Entity
-@Table(name = "JOURNEY_STAGE")
+@Table(name = "JOURNEY_STAGE", uniqueConstraints = { //
+        @UniqueConstraint(columnNames = { "STAGE_NAME", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 public class JourneyStage  implements HasPid, HasTenant, Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -45,15 +53,15 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @Column(name = "STAGE_NAME")
+    @Column(name = "STAGE_NAME", nullable = false)
     @JsonProperty("stage_name")
     private String stageName;
 
-    @Column(name = "PRIORITY")
+    @Column(name = "PRIORITY", nullable = false)
     @JsonProperty("priority")
     private int priority;
 
-    @Column(name = "PREDICATES", columnDefinition = "'JSON'")
+    @Column(name = "PREDICATES", columnDefinition = "'JSON'", nullable = false)
     @JsonProperty("predicates")
     @Type(type = "json")
     private List<JourneyStagePredicates> predicates;

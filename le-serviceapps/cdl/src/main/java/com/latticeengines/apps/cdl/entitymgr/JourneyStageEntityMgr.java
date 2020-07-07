@@ -10,5 +10,7 @@ public interface JourneyStageEntityMgr extends BaseEntityMgrRepository<JourneySt
 
     JourneyStage findByPid(Long pid);
 
+    JourneyStage findByTenantAndStageName(Tenant tenant, String stageName);
+
     List<JourneyStage> findByTenant(Tenant tenant);
 }

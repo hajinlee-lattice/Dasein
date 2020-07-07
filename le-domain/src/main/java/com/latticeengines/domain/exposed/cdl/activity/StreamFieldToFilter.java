@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,8 +9,8 @@ public class StreamFieldToFilter implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    @JsonProperty("compare_type")
-    private CompareType compareType;
+    @JsonProperty("comparison_type")
+    private ComparisonType comparisonType;
 
     @JsonProperty("column_name")
     private String columnName;
@@ -17,13 +18,8 @@ public class StreamFieldToFilter implements Serializable {
     @JsonProperty("column_value")
     private String columnValue;
 
-    public CompareType getCompareType() {
-        return compareType;
-    }
-
-    public void setCompareType(CompareType compareType) {
-        this.compareType = compareType;
-    }
+    @JsonProperty("column_value_arrs")
+    private List<String> columnValueArrs;
 
     public String getColumnName() {
         return columnName;
@@ -41,7 +37,23 @@ public class StreamFieldToFilter implements Serializable {
         this.columnValue = columnValue;
     }
 
-    public enum CompareType {
-        Equal, Contains
+    public ComparisonType getComparisonType() {
+        return comparisonType;
+    }
+
+    public void setComparisonType(ComparisonType comparisonType) {
+        this.comparisonType = comparisonType;
+    }
+
+    public List<String> getColumnValueArrs() {
+        return columnValueArrs;
+    }
+
+    public void setColumnValueArrs(List<String> columnValueArrs) {
+        this.columnValueArrs = columnValueArrs;
+    }
+
+    public enum ComparisonType {
+        Equal, Contains, In, NotContains
     }
 }

@@ -8,9 +8,13 @@ public interface JourneyStageService {
 
     JourneyStage findByPid(String customerSpace, Long pid);
 
+    JourneyStage findByStageName(String customerSpace, String stageName);
+
     List<JourneyStage> findByTenant(String customerSpace);
 
     JourneyStage createOrUpdate(String customerSpace, JourneyStage journeyStage);
+
+    boolean createDefaultJourneyStages(String customerSpace);
 
     void delete(String customerSpace, JourneyStage journeyStage);
 }

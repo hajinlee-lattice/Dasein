@@ -12,6 +12,7 @@ public class JourneyStagePredicates implements Serializable {
     @JsonProperty("stream_type")
     private AtlasStream.StreamType streamType;
 
+    //the unit here is day and evaluating from current time.
     @JsonProperty("period")
     private int period;
 
