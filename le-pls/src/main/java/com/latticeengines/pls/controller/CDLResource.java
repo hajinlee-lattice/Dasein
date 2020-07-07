@@ -60,6 +60,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.UIMessage;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -292,7 +293,8 @@ public class CDLResource {
     @PostMapping("/s3/template/reset")
     @ApiOperation(value = "Reset template")
     @ResponseBody
-    public Map<String, UIAction> resetTemplate(@RequestParam(value = "forceReset", required = false, defaultValue = "false") Boolean forceReset,
+    public Map<String, UIMessage> resetTemplate(@RequestParam(value = "forceReset", required = false,
+            defaultValue = "false") Boolean forceReset,
                                                @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
@@ -306,11 +308,13 @@ public class CDLResource {
             if (LedpCode.LEDP_40093.equals(e.getCode()) || LedpCode.LEDP_40089.equals(e.getCode())) {
                 String errorMsg = LedpCode.LEDP_40093.equals(e.getCode()) ? removeExceptionCode(LedpCode.LEDP_40093,
                         e.getMessage()) : removeExceptionCode(LedpCode.LEDP_40089, e.getMessage());
-                throw new LedpException(LedpCode.LEDP_18244, new String[] {errorMsg});
+                errorMsg = LedpException.buildMessage(LedpCode.LEDP_18244, new String[]{errorMsg});
+                return ImmutableMap.of(UIMessage.class.getSimpleName(), generateUIMessage(Status.Error, errorMsg));
             } else if (LedpCode.LEDP_40090.equals(e.getCode()) || LedpCode.LEDP_40092.equals(e.getCode())) {
                 String warningMsg = LedpCode.LEDP_40090.equals(e.getCode()) ? removeExceptionCode(LedpCode.LEDP_40090,
                         e.getMessage()) : removeExceptionCode(LedpCode.LEDP_40092, e.getMessage());
-                throw new LedpException(LedpCode.LEDP_18247, new String[]{warningMsg});
+                warningMsg = LedpException.buildMessage(LedpCode.LEDP_18247, new String[]{warningMsg});
+                return ImmutableMap.of(UIMessage.class.getSimpleName(), generateUIMessage(Status.Warning, warningMsg));
             } else {
                 log.error("Unknown error code: " + e.getCode());
                 throw e;
@@ -489,7 +493,7 @@ public class CDLResource {
     @PostMapping("/s3import/system/list/validateandupdate")
     @ResponseBody
     @ApiOperation("Try update import system priority based on sequence with validation")
-    public Map<String, UIAction> validateAndUpdateSystemPriority(@RequestBody List<S3ImportSystem> systemList) {
+    public Map<String, UIMessage> validateAndUpdateSystemPriority(@RequestBody List<S3ImportSystem> systemList) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
         try {
@@ -502,7 +506,9 @@ public class CDLResource {
             }
         } catch (LedpException e) {
             if (LedpCode.LEDP_40091.equals(e.getCode())) {
-                throw new LedpException(LedpCode.LEDP_18246, new String[]{removeExceptionCode(LedpCode.LEDP_40091, e.getMessage())});
+                String warningMsg = LedpException.buildMessage(LedpCode.LEDP_18246,
+                        new String[]{removeExceptionCode(LedpCode.LEDP_40091, e.getMessage())});
+                return ImmutableMap.of(UIMessage.class.getSimpleName(), generateUIMessage(Status.Warning, warningMsg));
             } else {
                 if (!LedpCode.LEDP_18248.equals(e.getCode())) {
                     log.error("Unknown exception code: " + e.getCode());
@@ -815,5 +821,12 @@ public class CDLResource {
             return errorMessage;
         }
         return errorMessage.replace(code.name() + ": ", "");
+    }
+
+    private UIMessage generateUIMessage(Status status, String msg) {
+        UIMessage uiMessage = new UIMessage();
+        uiMessage.setStatus(status);
+        uiMessage.setMessage(msg);
+        return uiMessage;
     }
 }
