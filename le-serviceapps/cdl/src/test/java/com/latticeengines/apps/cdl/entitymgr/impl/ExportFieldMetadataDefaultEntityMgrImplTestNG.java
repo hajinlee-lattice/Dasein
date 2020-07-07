@@ -113,14 +113,14 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultLinkedInExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.LinkedIn);
 
-        assertEquals(defaultLinkedInExportFields.size(), 57);
+        assertEquals(defaultLinkedInExportFields.size(), 55);
         List<ExportFieldMetadataDefaults> exportEnabledFields = defaultLinkedInExportFields.stream()
                 .filter(ExportFieldMetadataDefaults::getExportEnabled).collect((Collectors.toList()));
         assertEquals(defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                27);
+                25);
 
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account).count(),
-                16);
+                14);
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact).count(),
                 11);
 

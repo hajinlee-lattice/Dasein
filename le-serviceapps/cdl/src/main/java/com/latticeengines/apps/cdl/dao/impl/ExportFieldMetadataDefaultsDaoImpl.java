@@ -21,14 +21,7 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
 
     @Override
     public List<ExportFieldMetadataDefaults> getAllDefaultExportFields(CDLExternalSystemName systemName) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "SELECT field FROM %s field LEFT JOIN FETCH field.audienceTypes audience WHERE field.externalSystemName=:systemName",
-                entityClz.getSimpleName());
-        TypedQuery<ExportFieldMetadataDefaults> q = session.createQuery(queryStr, ExportFieldMetadataDefaults.class);
-        q.setParameter("systemName", systemName);
-        return q.getResultList();
+        return this.findAllByFields("externalSystemName", systemName);
     }
 
     @Override
@@ -38,30 +31,13 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
 
     @Override
     public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFields(CDLExternalSystemName systemName) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "SELECT field FROM %s field LEFT JOIN FETCH field.audienceTypes audience WHERE field.externalSystemName=:systemName AND field.exportEnabled=:exportEnabled",
-                entityClz.getSimpleName());
-        TypedQuery<ExportFieldMetadataDefaults> q = session.createQuery(queryStr, ExportFieldMetadataDefaults.class);
-        q.setParameter("systemName", systemName);
-        q.setParameter("exportEnabled", true);
-        return q.getResultList();
+        return this.findAllByFields("externalSystemName", systemName, "exportEnabled", true);
     }
 
     @Override
     public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldsForEntity(CDLExternalSystemName systemName,
             BusinessEntity entity) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "SELECT field FROM %s field LEFT JOIN FETCH field.audienceTypes audience WHERE field.externalSystemName=:systemName AND field.exportEnabled=:exportEnabled AND field.entity=:entity",
-                entityClz.getSimpleName());
-        TypedQuery<ExportFieldMetadataDefaults> q = session.createQuery(queryStr, ExportFieldMetadataDefaults.class);
-        q.setParameter("systemName", systemName);
-        q.setParameter("exportEnabled", true);
-        q.setParameter("entity", entity);
-        return q.getResultList();
+        return this.findAllByFields("externalSystemName", systemName, "exportEnabled", true, "entity", entity);
     }
 
     @Override
@@ -70,7 +46,7 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
         Session session = getSessionFactory().getCurrentSession();
         Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
         String queryStr = String.format(
-                "SELECT field FROM %s field JOIN FETCH field.audienceTypes audience WHERE field.externalSystemName=:systemName AND audience=:audienceType",
+                "SELECT field FROM %s field JOIN field.audienceTypes audience WHERE field.externalSystemName=:systemName AND audience=:audienceType",
                 entityClz.getSimpleName());
         TypedQuery<ExportFieldMetadataDefaults> q = session.createQuery(queryStr, ExportFieldMetadataDefaults.class);
         q.setParameter("systemName", systemName);
