@@ -2,11 +2,13 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import java.util
 
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor.MappingType
 import com.latticeengines.domain.exposed.cdl.activity.{EventFieldExtractor, TimeLine}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, CDLTemplateName, ContactId, ContactName}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, CDLTemplateName, ContactId, ContactName,
+  Detail2, Detail1, PathPattern, PathPatternName}
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig
-import com.latticeengines.domain.exposed.util.TimeLineStoreUtils
+import com.latticeengines.domain.exposed.util.{ActivityStoreUtils, TimeLineStoreUtils}
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
@@ -25,13 +27,13 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val inputIdx = config.rawStreamInputIdx.asScala
     val timelineRelatedStreamTables = config.timelineRelatedStreamTables.asScala.mapValues(_.asScala)
     val timelineMap = config.timeLineMap.asScala
-    val streamTypeWithTableNameMap = config.streamTypeWithTableNameMap.asScala
     val timelineVersionMap = config.timelineVersionMap.asScala
     val partitionKey: String = config.partitionKey
     val sortKey: String = config.sortKey
     val needRebuild: Boolean = config.needRebuild
     val masterStoreInputIdx = config.masterStoreInputIdx.asScala
     val timelineRelatedMasterTables = config.timelineRelatedMasterTables.asScala
+    val metadataMap = config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val suffix: String = config.tableRoleSuffix
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
@@ -88,7 +90,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
             ContactId.name()
           }
           var timelineRawStreamTable: DataFrame = createTimelineRawStreamTable(entityTableMap.toMap, streamTables,
-            streamTypeWithTableNameMap.toMap, timelineObj, contactTable)
+            timelineObj, contactTable, lattice)
           val generatePartitionKey = udf {
                 val version = timelineVersion
                 val id = timelineId
@@ -123,8 +125,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
   }
 
   def createTimelineRawStreamTable(entityTableMap: immutable.Map[String, util.Set[String]], streamTables: immutable
-  .Map[String, DataFrame], streamTypeWithTableNameMap: immutable.Map[String, String], timelineObj: TimeLine,
-                                   contactTable: DataFrame)
+  .Map[String, DataFrame], timelineObj: TimeLine, contactTable: DataFrame, lattice: LatticeContext[TimeLineJobConfig])
   : DataFrame = {
     val timelineEntity = timelineObj.getEntity
     val unMergedTimeLineRawStreamTablesByEntity = entityTableMap.map {
@@ -154,42 +155,48 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
         } else {
           timelineRelatedStreamTables
         }
-        formatRawStreamTables(timelineRelatedTableNames, tableDf, streamTypeWithTableNameMap, timelineObj)
+        formatRawStreamTables(timelineRelatedTableNames, tableDf, timelineObj, lattice)
     }
     unMergedTimeLineRawStreamTablesByEntity.reduceLeft((ldf: DataFrame, rdf: DataFrame) => MergeUtils
       .concat2(ldf, rdf))
   }
 
   def formatRawStreamTables(timelineRelatedTableNames: util.Set[String], streamTables: immutable
-  .Map[String, DataFrame], streamTypeWithTableNameMap: immutable.Map[String, String], timelineObj: TimeLine): DataFrame
+  .Map[String, DataFrame], timelineObj: TimeLine, lattice: LatticeContext[TimeLineJobConfig]): DataFrame
   = {
     val formatedRawStreamTables: Stream[DataFrame] = timelineRelatedTableNames.asScala.map(table =>
-      formatRawStreamTable(table, streamTables, streamTypeWithTableNameMap, timelineObj)).toStream
+      formatRawStreamTable(table, streamTables, timelineObj, lattice))
+      .toStream
     val mergedFormatedRawStreamTable: DataFrame = formatedRawStreamTables.reduceLeft((ldf: DataFrame, rdf: DataFrame) =>
       MergeUtils.concat2(ldf, rdf))
     mergedFormatedRawStreamTable
   }
 
   def formatRawStreamTable(timelineRelatedTableName: String, streamTables: immutable
-  .Map[String, DataFrame], streamTypeWithTableNameMap: immutable.Map[String, String], timelineObj: TimeLine)
+  .Map[String, DataFrame], timelineObj: TimeLine,
+                           lattice: LatticeContext[TimeLineJobConfig])
   : DataFrame = {
+    val streamTypeWithTableNameMap = lattice.config.streamTypeWithTableNameMap.asScala
+    val tableNameToStreamIdMap = lattice.config.tableNameToStreamIdMap.asScala
     val timelineRelatedTable = streamTables(timelineRelatedTableName)
     val allRequiredColumn = TimelineStandardColumn.getColumnNames
     val streamType = streamTypeWithTableNameMap(timelineRelatedTableName)
+    val streamId = tableNameToStreamIdMap(timelineRelatedTableName)
 
     val formatRawStreamTable = allRequiredColumn.asScala.foldLeft(timelineRelatedTable) {
       (df, columnName) =>
         val columnMapping = timelineObj.getEventMappings.get(streamType).get(columnName)
         val formatedRawStreamTable: DataFrame = addAllNullsIfMissing(df, columnName, columnMapping,
-          TimelineStandardColumn.getDataTypeFromColumnName(columnName))
+          TimelineStandardColumn.getDataTypeFromColumnName(columnName), streamType, streamId, lattice)
         formatedRawStreamTable
     }
-    formatRawStreamTable.select(TimelineStandardColumn.getColumnNames.asScala.map(columnName => formatRawStreamTable.col
-    (columnName)):_*)
+    val filterDf = formatRawStreamTable.select(TimelineStandardColumn.getColumnNames.asScala.map(columnName =>
+      formatRawStreamTable.col(columnName)):_*)
+    populateProductPatternNames(filterDf, streamId, streamType, lattice)
   }
 
   def addAllNullsIfMissing(df: DataFrame, requiredCol: String, mapping: EventFieldExtractor,
-                           colType: String): DataFrame = {
+                           colType: String, streamType: String, streamId: String, lattice: LatticeContext[TimeLineJobConfig]): DataFrame = {
     val dfColumnNames = df.columns
     if (mapping != null) {
       val mappingValue = mapping.getMappingValue
@@ -209,6 +216,9 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     }
     val dfColumnNameMaps = dfColumnNames.map(columnName => (columnName.toLowerCase, columnName)).toMap
     if (!dfColumnNameMaps.contains(requiredCol.toLowerCase)) {
+      if (requiredCol.toLowerCase.equals(TimelineStandardColumn.StreamType.getColumnName.toLowerCase)) {
+        return df.withColumn(requiredCol, lit(streamType))
+      }
       return df.withColumn(requiredCol, lit(null).cast(colType))
     }
     //solve contactId in timeline but ContactId in rawStreamTable
@@ -216,6 +226,37 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
       return df.withColumnRenamed(dfColumnNameMaps.getOrElse(requiredCol.toLowerCase, ""), requiredCol)
     }
     df
+  }
+
+  // This is a hack to populate product path names for web visit activity data
+  def populateProductPatternNames(df: DataFrame, streamId: String, streamType: String,
+  lattice: LatticeContext[TimeLineJobConfig]): DataFrame = {
+    if (!StreamType.WebVisit.name().equals(streamType) || streamId == null || streamId.isEmpty) {
+      return df
+    }
+    val metadataMap = lattice.config.dimensionMetadataMap.asScala.mapValues(_.asScala)
+    val metadataInStream = metadataMap(streamId)
+    val attrs = metadataInStream.keys
+    attrs.foldLeft(df) {
+      (rawDf, dimensionName) =>
+        val dimValues = metadataInStream(dimensionName).getDimensionValues.asScala.map(_.asScala.toMap).toList
+        val pathPatternMap = immutable.Map(dimValues.map(p => (ActivityStoreUtils.modifyPattern(p(PathPattern
+          .name()).asInstanceOf[String]).r.pattern, p(PathPatternName.name()).asInstanceOf[String])):_*)
+        val filterFn = udf((detailString1: String, detailString2: String)
+        => {
+          val pathNameString = pathPatternMap.filter(_._1.matcher(detailString1).matches).map(_._2.toString).mkString(",")
+          if (pathNameString == null || pathNameString.isEmpty) {
+            detailString2
+          } else if (detailString2 == null || detailString2.isEmpty) {
+            pathNameString
+          } else {
+            pathNameString + "," + detailString2
+          }
+
+          })
+        rawDf.withColumn(Detail2.name(), when(rawDf.col(Detail1.name()).isNotNull, filterFn(rawDf.col(Detail1.name())
+          , rawDf.col(Detail2.name()))))
+    }
   }
 }
 
