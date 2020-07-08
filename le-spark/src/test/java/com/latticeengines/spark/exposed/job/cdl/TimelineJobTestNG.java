@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
@@ -92,7 +93,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(__StreamDate.name(), String.class), //
             Pair.of(StreamDateId.name(), Integer.class), //
             Pair.of(CDLTemplateName.name(), String.class)
-            );
+    );
 
     private static final List<Pair<String, Class<?>>> OPP_STREAM_IMPORT_FIELDS = Arrays.asList( //
             Pair.of(InternalId.name(), Long.class), //
@@ -126,7 +127,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Map<String, Integer> rawStreamInputIdx = new HashMap<>();
     private Integer contactTableIdx;
-    private Map<String, String> streamTypeWithTableNameMap= new HashMap<>();
+    private Map<String, String> streamTypeWithTableNameMap = new HashMap<>();
     private Map<String, Map<String, Set<String>>> timelineRelatedStreamTables = new HashMap<>();
     private Map<String, TimeLine> timeLineMap = new HashMap<>();
     private TimeLine timeLine1;
@@ -167,7 +168,16 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         List<String> verifyColumns = new ArrayList<>(TimeLineStoreUtils.TimelineStandardColumn.getColumnNames());
         verifyColumns.add(PARTITION_KEY);
         verifyColumns.add(SORT_KEY);
+        Map<String, List<String>> expectedDetail2Map = prepareExpectedDetail2Result();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
+            Object detail1 = record.get(InterfaceName.Detail1.name());
+            if (detail1 != null) {
+                List<String> expectedDetail2 = expectedDetail2Map.get(detail1.toString());
+                String detail2 = record.get(InterfaceName.Detail2.name()).toString();
+                List<String> detail2Arr = Arrays.asList(detail2.split(","));
+                log.info("detail1 is {}, detail2 is {}.", detail1.toString(), detail2);
+                Assert.assertEquals(detail2Arr, expectedDetail2);
+            }
             counter.incrementAndGet();
             log.info(debugStr(record, verifyColumns));
         });
@@ -178,7 +188,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
     private void prepareData() {
         // ContactId, AccountId, ActivityType, ____StreamDate, StreamDateId, __Row_Count__
         // AccountId is set to junk values intentionally to test contact batch store
-        Object[][] importData = new Object[][] { //
+        Object[][] importData = new Object[][]{ //
                 testCTKRow("C1", "sldkfjkls", "Email Sent", 1L, 0), // last activity date for a1, c1
                 testCTKRow("C1", "dfdfdfd", "Email Sent", 1L, 2), //
                 testCTKRow("C1", "dfksjld", "Email Sent", 2L, 3), //
@@ -220,11 +230,11 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         tableNameToStreamIdMap.put(oppTableName, "opp_00q1");
 
         // ContactId, AccountId, ContactName, PhoneNumber
-        Object[][] ctkBatchStore = new Object[][] { //
-                { "C1", "A1", "john doe", "(000)-000-0000" }, //
-                { "C2", "A1", "jane doe", "(000)-000-0000" }, //
-                { "C3", "A2", "tourist", "(000)-000-0000" }, //
-                { "C4", "A3", "hello world", "(000)-000-0000" }, //
+        Object[][] ctkBatchStore = new Object[][]{ //
+                {"C1", "A1", "john doe", "(000)-000-0000"}, //
+                {"C2", "A1", "jane doe", "(000)-000-0000"}, //
+                {"C3", "A2", "tourist", "(000)-000-0000"}, //
+                {"C4", "A3", "hello world", "(000)-000-0000"}, //
         };
         uploadHdfsDataUnit(ctkBatchStore, CTK_TABLE_FIELDS);
         contactTableIdx = 3;
@@ -382,5 +392,16 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         config.tableNameToStreamIdMap = tableNameToStreamIdMap;
         config.dimensionMetadataMap = dimensionMetadataMap;
         return config;
+    }
+
+    private Map<String, List<String>> prepareExpectedDetail2Result() {
+        Map<String, List<String>> detail2ResultMap = new HashMap<>();
+        detail2ResultMap.put("https://dnb.com/contents/audios/1", Collections.singletonList("all content pages"));
+        detail2ResultMap.put("https://dnb.com/contents/videos/1", Arrays.asList("all content pages",
+                "all video content pages"));
+        detail2ResultMap.put("https://dnb.com/contents/videos/2", Arrays.asList("all content pages",
+                "all video content pages"));
+        detail2ResultMap.put("https://dnb.com/contents/audios/5", Collections.singletonList("all content pages"));
+        return detail2ResultMap;
     }
 }
