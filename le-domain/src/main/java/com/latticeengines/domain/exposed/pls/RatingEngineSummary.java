@@ -10,11 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RatingEngineSummary implements HasTeamInfo {
+public class RatingEngineSummary implements HasTeamInfo, HasAuditingFields {
 
     @JsonProperty("id")
     private String id;
@@ -90,18 +91,22 @@ public class RatingEngineSummary implements HasTeamInfo {
         this.displayName = displayName;
     }
 
+    @Override
     public Date getCreated() {
         return this.created;
     }
 
+    @Override
     public void setCreated(Date time) {
         this.created = time;
     }
 
+    @Override
     public Date getUpdated() {
         return this.updated;
     }
 
+    @Override
     public void setUpdated(Date time) {
         this.updated = time;
     }
