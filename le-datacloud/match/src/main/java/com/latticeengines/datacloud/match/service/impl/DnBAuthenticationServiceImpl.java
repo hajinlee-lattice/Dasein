@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.DnBToken;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
@@ -32,6 +31,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
@@ -133,7 +133,6 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         tokenCache.setExpire(reloadTimeInMin, TimeUnit.MINUTES);
     }
 
-
     @Override
     public String requestToken(@NotNull DnBKeyType type, String expiredToken) {
         Preconditions.checkNotNull(type);
@@ -157,8 +156,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             newToken = dnbRequest(type);
         }
         if (newToken == null) {
-            throw new RuntimeException(
-                    "Fail to request a " + type + " token from DnB. Please provide expected token.");
+            throw new RuntimeException("Fail to request a " + type + " token from DnB. Please provide expected token.");
         }
 
         // Acquire the lock to refresh token in redis
@@ -183,7 +181,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
         // trigger watcher cache refresh signal so that all the tomcat apps &
         // yarn containers could reload token from redis to local cache
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat df = DateTimeUtils.getSimpleDateFormatObj("yyyy-MM-dd HH:mm:ss");
         NodeWatcher.updateWatchedData(DnBToken.name(), df.format(new Date()));
 
         return newToken;
@@ -203,10 +201,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     /**
      * Request DnB token externally from Redis/DnB
      *
-     * When to use token cached in Redis (all the conditions should be
-     * satisfied): 1. Cached token is not empty; 2. Cached token was created
-     * within {expireTimeInMin} minutes 3. Cached token is different with
-     * {expiredToken}
+     * When to use token cached in Redis (all the conditions should be satisfied):
+     * 1. Cached token is not empty; 2. Cached token was created within
+     * {expireTimeInMin} minutes 3. Cached token is different with {expiredToken}
      *
      * @param type
      * @param expiredToken
@@ -337,11 +334,11 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             String response = dnbAuthenticateRequest(type);
             String token;
             switch (type) {
-                case DPLUS:
-                    token = parseDplusResponse(response);
-                    break;
-                default:
-                    token = parseDnBResponse(response);
+            case DPLUS:
+                token = parseDplusResponse(response);
+                break;
+            default:
+                token = parseDnBResponse(response);
             }
             log.info("Get new DnB " + type + " token {}", token);
             return token;
