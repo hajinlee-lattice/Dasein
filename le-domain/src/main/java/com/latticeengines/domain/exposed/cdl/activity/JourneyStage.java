@@ -109,4 +109,37 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
     public void setPredicates(List<JourneyStagePredicates> predicates) {
         this.predicates = predicates;
     }
+
+    public static final class Builder {
+
+        private JourneyStage journeyStage;
+
+        public Builder() {
+            journeyStage = new JourneyStage();
+        }
+
+        public Builder withTenant(Tenant tenant) {
+            journeyStage.setTenant(tenant);
+            return this;
+        }
+
+        public Builder withStageName(String stageName) {
+            journeyStage.setStageName(stageName);
+            return this;
+        }
+
+        public Builder withPriority(int priority) {
+            journeyStage.setPriority(priority);
+            return this;
+        }
+
+        public Builder withPredicates(List<JourneyStagePredicates> predicates) {
+            journeyStage.setPredicates(predicates);
+            return this;
+        }
+
+        public JourneyStage build() {
+            return journeyStage;
+        }
+    }
 }

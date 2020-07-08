@@ -54,6 +54,6 @@ public class StreamFieldToFilter implements Serializable {
     }
 
     public enum ComparisonType {
-        Equal, Contains, In, NotContains
+        Equal, Like, In, Unlike
     }
 }

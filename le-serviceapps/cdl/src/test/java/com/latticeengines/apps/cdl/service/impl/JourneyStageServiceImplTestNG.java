@@ -48,7 +48,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         filter = new StreamFieldToFilter();
         filter.setColumnName(InterfaceName.StageName.name());
         filter.setColumnValue("Close%");
-        filter.setComparisonType(StreamFieldToFilter.ComparisonType.Contains);
+        filter.setComparisonType(StreamFieldToFilter.ComparisonType.Like);
         predicates = new JourneyStagePredicates();
         predicates.setContactNotNull(false);
         predicates.setNoOfEvents(3);
