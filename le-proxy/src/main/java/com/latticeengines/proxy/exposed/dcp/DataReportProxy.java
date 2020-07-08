@@ -1,8 +1,10 @@
 package com.latticeengines.proxy.exposed.dcp;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
@@ -94,6 +96,13 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         String baseUrl = "/customerspaces/{customerSpace}/datareport/duplicationreport?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
         post("Update Data Report", url, duplicationReport);
+    }
+
+    public ApplicationId rollupDataReport(String customerSpace, DCPReportRequest request) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/rollup";
+        String url = constructUrl(baseUrl, customerSpace);
+        String appId =  post("rollup data report", url, request, String.class);
+        return ApplicationId.fromString(appId);
     }
 
     private String getUrl(String customerSpace, DataReportRecord.Level level, String ownerId, String baseUrl) {

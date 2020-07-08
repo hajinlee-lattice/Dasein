@@ -10,7 +10,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = DCPSourceImportWorkflowConfiguration.class, name = "DCPSourceImportWorkflowConfiguration")})
+        @JsonSubTypes.Type(value = DCPSourceImportWorkflowConfiguration.class, name = "DCPSourceImportWorkflowConfiguration"),
+        @JsonSubTypes.Type(value=DCPDataReportWorkflowConfiguration.class, name= "DCPDataReportWorkflowConfiguration")
+})
 public class BaseDCPWorkflowConfiguration extends WorkflowConfiguration {
 
     @Override

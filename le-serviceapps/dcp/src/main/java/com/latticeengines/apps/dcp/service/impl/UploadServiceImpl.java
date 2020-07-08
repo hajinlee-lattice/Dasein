@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.dcp.entitymgr.UpdateStatisticsEntityMgr;
 import com.latticeengines.apps.dcp.entitymgr.UploadEntityMgr;
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -183,6 +184,13 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public String getMatchResultTableName(String uploadId) {
         return uploadEntityMgr.findMatchResultTableNameByUploadId(uploadId);
+    }
+
+    @Override
+    public List<Table> getMatchResultTables(String sourceId) {
+        List<Upload> uploads = uploadEntityMgr.findBySourceId(sourceId);
+        uploads.forEach(upload -> HibernateUtils.inflateDetails(upload.getMatchResult()));
+        return uploads.stream().map(Upload::getMatchResult).collect(Collectors.toList());
     }
 
     private UploadStatsContainer findStats(String uploadId, Long statsId) {
