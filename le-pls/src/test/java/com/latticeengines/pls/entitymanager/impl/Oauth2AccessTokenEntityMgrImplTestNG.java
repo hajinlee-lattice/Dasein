@@ -25,25 +25,28 @@ public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBas
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
+    private final String tenantName1 = this.getClass().getSimpleName() + "_TENANT1";
+    private final String tenantName2 = this.getClass().getSimpleName() + "_TENANT2";
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        Tenant tenant1 = tenantService.findByTenantId(tenantName1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
+        Tenant tenant2 = tenantService.findByTenantId(tenantName2);
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+    public void teardown() {
+        Tenant tenant1 = tenantService.findByTenantId(tenantName1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
+        Tenant tenant2 = tenantService.findByTenantId(tenantName2);
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
@@ -53,15 +56,15 @@ public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBas
     public void testCreateToken() {
         String appId1 = "DUMMY_APP1";
         Tenant tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
+        tenant1.setId(tenantName1);
+        tenant1.setName(tenantName1);
         tenantEntityMgr.create(tenant1);
         assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId(), appId1).getAccessToken(), "");
 
         String appId2 = null;
         Tenant tenant2 = new Tenant();
-        tenant2.setId("TENANT2");
-        tenant2.setName("TENANT2");
+        tenant2.setId(tenantName2);
+        tenant2.setName(tenantName2);
         tenantEntityMgr.create(tenant2);
         assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId(), appId2).getAccessToken(), "");
 
