@@ -61,7 +61,7 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
     @JsonProperty("priority")
     private int priority;
 
-    @Column(name = "PREDICATES", columnDefinition = "'JSON'", nullable = false)
+    @Column(name = "PREDICATES", columnDefinition = "'JSON'")
     @JsonProperty("predicates")
     @Type(type = "json")
     private List<JourneyStagePredicates> predicates;

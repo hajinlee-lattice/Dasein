@@ -14,7 +14,7 @@ public interface JourneyStageService {
 
     JourneyStage createOrUpdate(String customerSpace, JourneyStage journeyStage);
 
-    boolean createDefaultJourneyStages(String customerSpace);
+    void createDefaultJourneyStages(String customerSpace);
 
     void delete(String customerSpace, JourneyStage journeyStage);
 }

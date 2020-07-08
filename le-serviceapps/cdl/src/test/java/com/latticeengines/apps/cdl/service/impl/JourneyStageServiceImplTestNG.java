@@ -2,11 +2,13 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.JourneyStageService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStagePredicates;
@@ -83,12 +86,27 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testUpdate() {
-        JourneyStage stage = journeyStageService.findByPid(mainCustomerSpace, pid);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(journeyStageService.findByPid(mainCustomerSpace, pid));
+            Assert.assertNotNull(createdAtom.get());
+            return true;
+        });
+        JourneyStage stage = createdAtom.get();
         Assert.assertNotNull(stage);
         Assert.assertEquals(stage.getStageName(), stageName);
         stage.setStageName(updateStageName);
         journeyStageService.createOrUpdate(mainCustomerSpace, stage);
         stage = journeyStageService.findByStageName(mainCustomerSpace, updateStageName);
         Assert.assertNotNull(stage);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testUpdate")
+    public void testDefault() {
+        journeyStageService.createDefaultJourneyStages(mainCustomerSpace);
+        List<JourneyStage> journeyStageList = journeyStageService.findByTenant(mainCustomerSpace);
+        Assert.assertEquals(journeyStageList.size(), 8);
     }
 }

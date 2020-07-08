@@ -41,4 +41,12 @@ public class JourneyStageResource {
                                     @RequestBody JourneyStage journeyStage) {
         return journeyStageService.createOrUpdate(customerSpace, journeyStage);
     }
+
+    @PostMapping("/createDefault")
+    @ResponseBody
+    @ApiOperation("create default JourneyStage under current tenant.")
+    public Boolean createDefaultJourneyStage(@PathVariable(value = "customerSpace") String customerSpace) {
+        journeyStageService.createDefaultJourneyStages(customerSpace);
+        return true;
+    }
 }
