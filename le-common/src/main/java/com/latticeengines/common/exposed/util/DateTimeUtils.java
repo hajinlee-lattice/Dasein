@@ -168,6 +168,12 @@ public final class DateTimeUtils {
         return Arrays.asList(startDayPeriod.longValue(), endDayPeriod.longValue());
     }
 
+    public static SimpleDateFormat getSimpleDateFormatObj(String pattern) {
+        SimpleDateFormat dateFormat =  new SimpleDateFormat(pattern);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        return dateFormat;
+    }
+
     public static void main(String[] args) {
         CommandLineParser parser = new DefaultParser();
         Options options = new Options();

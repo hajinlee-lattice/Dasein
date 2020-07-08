@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,6 +31,7 @@ import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -203,7 +203,7 @@ public class LatticeInsightsResource {
             Boolean onlySelectedAttributes) {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        DateFormat dateFormat = DateTimeUtils.getSimpleDateFormatObj("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
         String fileName = onlySelectedAttributes != null && onlySelectedAttributes
                 ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
@@ -216,8 +216,8 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public ResponseDocument<String> downloadEnrichmentCSVToken(@ApiParam(value = "Should get only selected attribute") //
-                                            @RequestParam(value = "onlySelectedAttributes", required = false) //
-                                              Boolean onlySelectedAttributes) {
+    @RequestParam(value = "onlySelectedAttributes", required = false) //
+    Boolean onlySelectedAttributes) {
         String token = attributeService.getDownloadAttrsToken(Boolean.TRUE.equals(onlySelectedAttributes));
         return ResponseDocument.successResponse(token);
     }
@@ -233,7 +233,8 @@ public class LatticeInsightsResource {
                 .getResourceAsStream(String.format(SEGMENT_CONTACTS_FILE_LOCAL_PATH, state));
         String inputStream = IOUtils.toString(new InputStreamReader(stream));
         DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
-        builder.setMimeType("application/csv").setFileName("segments-contacts.csv").setFileContent(inputStream).setBatonService(batonService);
+        builder.setMimeType("application/csv").setFileName("segments-contacts.csv").setFileContent(inputStream)
+                .setBatonService(batonService);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }

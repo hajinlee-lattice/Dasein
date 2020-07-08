@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.madison.service.PropDataContext;
@@ -160,24 +161,18 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     .user(sourceDataJdbcUser).clearTextPassword(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
             DbCreds creds = new DbCreds(builder);
 
-            SqoopImporter importer = new SqoopImporter.Builder()
-                    .setTable(dailyProgress.getDestinationTable())
-                    .setTargetDir(targetDir)
-                    .setDbCreds(creds)
-                    .setQueue(assignedQueue)
+            SqoopImporter importer = new SqoopImporter.Builder().setTable(dailyProgress.getDestinationTable())
+                    .setTargetDir(targetDir).setDbCreds(creds).setQueue(assignedQueue)
                     .setCustomer(getJobName() + "-Progress Id-" + dailyProgress.getPid())
-                    .setSplitColumn(splitColumns.split(",")[0])
-                    .setNumMappers(numMappers)
-                    .setSync(false)
-                    .build();
+                    .setSplitColumn(splitColumns.split(",")[0]).setNumMappers(numMappers).setSync(false).build();
 
-            ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
+            ApplicationId appId = ConverterUtils
+                    .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
             }
-
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -294,17 +289,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                         .user(targetJdbcUser).clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
                 DbCreds creds = new DbCreds(builder);
 
-                SqoopImporter importer = new SqoopImporter.Builder()
-                        .setTable(targetTable + "_new")
-                        .setTargetDir(schemaPath)
-                        .setDbCreds(creds)
-                        .setQueue(assignedQueue)
-                        .setCustomer(getJobName() + "-schema")
-                        .setSplitColumn("DomainID")
-                        .setNumMappers(1)
-                        .setSync(false)
-                        .build();
-                ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
+                SqoopImporter importer = new SqoopImporter.Builder().setTable(targetTable + "_new")
+                        .setTargetDir(schemaPath).setDbCreds(creds).setQueue(assignedQueue)
+                        .setCustomer(getJobName() + "-schema").setSplitColumn("DomainID").setNumMappers(1)
+                        .setSync(false).build();
+                ApplicationId appId = ConverterUtils
+                        .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
                 FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
                 if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                     throw new IllegalStateException("The final state of " + appId + " is not "
@@ -421,20 +411,13 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
 
-        SqoopExporter exporter = new SqoopExporter.Builder()
-                .setTable(getTableNew())
-                .setDbCreds(creds)
-                .setSourceDir(getOutputDir(sourceDir))
-                .setQueue(assignedQueue)
-                .setCustomer(getJobName())
-                .setNumMappers(numMappers)
-                .setSync(false)
-                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1")
-                .addExtraOption("--batch")
-                .build();
+        SqoopExporter exporter = new SqoopExporter.Builder().setTable(getTableNew()).setDbCreds(creds)
+                .setSourceDir(getOutputDir(sourceDir)).setQueue(assignedQueue).setCustomer(getJobName())
+                .setNumMappers(numMappers).setSync(false).addHadoopArg("-Dsqoop.export.records.per.statement=1000")
+                .addHadoopArg("-Dexport.statements.per.transaction=1").addExtraOption("--batch").build();
 
-        ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
+        ApplicationId appId = ConverterUtils
+                .toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
             throw new IllegalStateException("The final state of " + appId + " is not "
@@ -486,24 +469,17 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         DbCreds creds = new DbCreds(builder);
         jdbcTemplate.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName
                 + "') AND type in (N'U')) DROP TABLE " + tableName);
-        jdbcTemplate.execute("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
-                        + ";ALTER TABLE " + tableName + " DROP COLUMN ID1");
+        jdbcTemplate.execute("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable + ";ALTER TABLE "
+                + tableName + " DROP COLUMN ID1");
         log.info("Uploading today's data, targetTable=" + tableName);
 
-        SqoopExporter exporter = new SqoopExporter.Builder()
-                .setTable(tableName)
-                .setDbCreds(creds)
-                .setSourceDir(todayIncrementalPath)
-                .setQueue(assignedQueue)
-                .setCustomer(getJobName())
-                .setNumMappers(numMappers)
-                .setSync(false)
-                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1")
-                .addExtraOption("--batch")
-                .build();
+        SqoopExporter exporter = new SqoopExporter.Builder().setTable(tableName).setDbCreds(creds)
+                .setSourceDir(todayIncrementalPath).setQueue(assignedQueue).setCustomer(getJobName())
+                .setNumMappers(numMappers).setSync(false).addHadoopArg("-Dsqoop.export.records.per.statement=1000")
+                .addHadoopArg("-Dexport.statements.per.transaction=1").addExtraOption("--batch").build();
 
-        ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
+        ApplicationId appId = ConverterUtils
+                .toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
             throw new IllegalStateException("The final state of " + appId + " is not "
@@ -572,7 +548,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     }
 
     private String getDateStringFormat(Date fileDate) {
-        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat format = DateTimeUtils.getSimpleDateFormatObj(DATE_FORMAT);
         String formatted = format.format(fileDate);
         return formatted;
     }

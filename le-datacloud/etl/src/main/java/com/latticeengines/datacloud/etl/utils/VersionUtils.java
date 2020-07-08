@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrategy;
 
 public final class VersionUtils {
@@ -64,7 +65,7 @@ public final class VersionUtils {
             Matcher matcher = pattern.matcher(path);
             if (matcher.find()) {
                 String tsStr = matcher.group();
-                DateFormat df = new SimpleDateFormat(tsPattern);
+                DateFormat df = DateTimeUtils.getSimpleDateFormatObj(tsPattern);
                 try {
                     Date ts = df.parse(tsStr);
                     Calendar calendar = baseCalendar != null ? (Calendar) baseCalendar.clone() : Calendar.getInstance();
@@ -84,7 +85,7 @@ public final class VersionUtils {
                         throw new UnsupportedOperationException(
                                 String.format("Unknown file check strategy: %s", checkStrategy.toString()));
                     }
-                    df = new SimpleDateFormat("yyyyMMdd");
+                    df = DateTimeUtils.getSimpleDateFormatObj("yyyyMMdd");
                     Date cutOffTS = df.parse(df.format(calendar.getTime()));
                     if (ts.compareTo(cutOffTS) >= 0) {
                         result.add(path);

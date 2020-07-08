@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
@@ -64,8 +65,7 @@ public class TimeSeriesPurger extends VersionedPurger {
     }
 
     @Override
-    protected List<String> findPurgeVersions(PurgeStrategy strategy, List<String> allVersions,
-            final boolean debug) {
+    protected List<String> findPurgeVersions(PurgeStrategy strategy, List<String> allVersions, final boolean debug) {
         List<String> purgeVersions = new ArrayList<>();
         allVersions.forEach(version -> {
             try {
@@ -83,8 +83,7 @@ public class TimeSeriesPurger extends VersionedPurger {
     }
 
     @Override
-    protected List<String> constructHdfsPaths(PurgeStrategy strategy,
-            List<String> versions) {
+    protected List<String> constructHdfsPaths(PurgeStrategy strategy, List<String> versions) {
         List<String> hdfsPaths = new ArrayList<>();
         versions.forEach(version -> {
             String hdfsPath = new Path(strategy.getHdfsBasePath(), version).toString();
@@ -96,7 +95,7 @@ public class TimeSeriesPurger extends VersionedPurger {
 
     private boolean isValidVersion(String version, String versionFormat) {
         try {
-            new SimpleDateFormat(versionFormat).parse(version);
+            DateTimeUtils.getSimpleDateFormatObj(versionFormat).parse(version);
         } catch (ParseException e) {
             return false;
         }
