@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 
 @Component
@@ -46,9 +45,6 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
     private LoadingCache<CustomerSpace, List<LeadEnrichmentAttribute>> leadEnrichmentAttributeCache;
 
     private volatile List<LeadEnrichmentAttribute> allEnrichmentAttributes;
-
-    @Inject
-    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
@@ -78,7 +74,7 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
         try {
             return leadEnrichmentAttributeCache.get(space);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31112, e, new String[] { e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_31112, e, new String[]{e.getMessage()});
         }
     }
 
@@ -113,7 +109,7 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
 
     private List<LeadEnrichmentAttribute> loadAllEnrichmentAttributesMetadata() {
         log.info("Start loading all enrichment attribute metadata");
-        List<LeadEnrichmentAttribute> list = plsInternalProxy.getAllLeadEnrichmentAttributes();
+        List<LeadEnrichmentAttribute> list = latticeInsightsInternalProxy.getAllLeadEnrichmentAttributes();
         log.info("Completed loading all enrichment attribute metadata");
         return list;
     }

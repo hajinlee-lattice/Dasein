@@ -48,7 +48,6 @@ import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
@@ -74,9 +73,6 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-
-    @Inject
-    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
@@ -282,7 +278,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     private void saveAttributeSelection(CustomerSpace customerSpace) {
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {

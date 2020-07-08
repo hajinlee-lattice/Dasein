@@ -125,7 +125,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         System.out.println("The deselected attributes are: " + selectedAttributeMap.getDeselectedAttributes());
         System.out.println("The selected attributes are: " + selectedAttributeNameList);
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {

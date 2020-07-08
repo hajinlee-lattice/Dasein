@@ -1,7 +1,10 @@
 package com.latticeengines.proxy.app;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 
@@ -92,7 +96,7 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
                                                                      Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString()));
-            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
+            url = argumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, offset, max, considerInternalAttributes);
             if (log.isDebugEnabled()) {
                 log.debug("Get from " + url);
@@ -107,10 +111,10 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
         }
     }
 
-    private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
+    private String argumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
                                                    String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
                                                    Boolean considerInternalAttributes) {
-        url += "?" + "onlySelectedAttributes" + "=" + String.valueOf(Boolean.TRUE.equals(onlySelectedAttributes));
+        url += "?" + "onlySelectedAttributes" + "=" + Boolean.TRUE.equals(onlySelectedAttributes);
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
             url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
         }
@@ -126,12 +130,99 @@ public class LatticeInsightsInternalProxyImpl extends BaseRestApiProxy implement
         if (max != null) {
             url += "&" + "max" + "=" + max;
         }
-
         if (considerInternalAttributes) {
             url += "&" + "considerInternalAttributes" + "=" + considerInternalAttributes;
         }
-
         return url;
     }
 
+    @Override
+    public Integer getSelectedAttributeCount(CustomerSpace customerSpace, Boolean considerInternalAttributes) {
+        try {
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedattributes/count",
+                    customerSpace.toString()));
+            if (considerInternalAttributes) {
+                url += "?" + "considerInternalAttributes" + "=" + considerInternalAttributes;
+            }
+            return get("getSelectedAttributeCount", url, Integer.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
+        }
+    }
+
+    @Override
+    public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace, Boolean considerInternalAttributes) {
+        try {
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedpremiumattributes/count",
+                    customerSpace.toString()));
+            if (considerInternalAttributes) {
+                url += "?" + "considerInternalAttributes" + "=" + considerInternalAttributes;
+            }
+            return get("getSelectedAttributePremiumCount", url, Integer.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
+        }
+    }
+
+    @Override
+    public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
+                                                Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
+        try {
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/count",
+                    customerSpace.toString()));
+            url = argumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
+                    onlySelectedAttributes, null, null, considerInternalAttributes);
+            if (log.isDebugEnabled()) {
+                log.debug("Get from " + url);
+            }
+            return get("getLeadEnrichmentAttributesCount", url, Integer.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
+        }
+    }
+
+    @Override
+    public Map<String, Integer> getPremiumAttributesLimitation(CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/premiumattributeslimitation",
+                    customerSpace.toString()));
+
+            Map<?, ?> limitationMap = get("getPremiumAttributesLimitation", url, Map.class);
+
+            Map<String, Integer> premiumAttributesLimitationMap = new HashMap<>();
+
+            if (!MapUtils.isEmpty(limitationMap)) {
+                premiumAttributesLimitationMap = JsonUtils.convertMap(limitationMap, String.class, Integer.class);
+            }
+
+            return premiumAttributesLimitationMap;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
+        }
+    }
+
+    @Override
+    public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes() {
+        try {
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + "/all" + INSIGHTS_PATH));
+            log.debug("Get from " + url);
+            List<?> combinedAttributeObjList = get("getAllLeadEnrichmentAttributes", url, List.class);
+            List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
+                    LeadEnrichmentAttribute.class);
+            return attributeList;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
+        }
+    }
+
+    @Override
+    public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+                                             LeadEnrichmentAttributesOperationMap attributes) {
+        try {
+            String url = constructUrl(combine(LATTICE_INSIGHTS_INTERNAL_ENRICHMENT + INSIGHTS_PATH, customerSpace.toString()));
+            put("saveLeadEnrichmentAttributes", url, attributes);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
+        }
+    }
 }

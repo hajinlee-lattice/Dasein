@@ -52,7 +52,6 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
 import com.latticeengines.scoringapi.controller.TestRegisterModels;
@@ -109,9 +108,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @Inject
     protected ModelSummaryProxy modelSummaryProxy;
-
-    @Inject
-    protected PlsInternalProxy plsInternalProxy;
 
     @Inject
     protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;
@@ -208,7 +204,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected void saveAttributeSelectionBeforeTest(CustomerSpace customerSpace) {
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
         Assert.assertNotNull(selectedAttributes);
         Assert.assertEquals(selectedAttributes.size(), 6);
     }

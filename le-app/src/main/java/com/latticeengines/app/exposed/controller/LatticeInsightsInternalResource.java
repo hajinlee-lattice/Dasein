@@ -3,6 +3,7 @@ package com.latticeengines.app.exposed.controller;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -13,8 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.AttributeService;
@@ -23,6 +27,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
@@ -96,6 +101,73 @@ public class LatticeInsightsInternalResource {
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, offset, max, considerInternalAttributes);
+    }
+
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedattributes/count/" + TENANT_ID_PATH)
+    @ApiOperation(value = "Get selected attributes count")
+    public Integer getLeadEnrichmentSelectedAttributeCount(
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Consider internal attributes") //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") Boolean considerInternalAttributes) {
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        return attributeService.getSelectedAttributeCount(tenant, considerInternalAttributes);
+    }
+
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count/" + TENANT_ID_PATH)
+    @ResponseBody
+    @ApiOperation(value = "Get selected premium attributes count")
+    public Integer getLeadEnrichmentSelectedAttributePremiumCount(
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Consider internal attributes") //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") Boolean considerInternalAttributes) {
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
+    }
+
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count" + "/" + TENANT_ID_PATH)
+    @ResponseBody
+    @ApiOperation(value = "Get lead enrichment")
+    public int getLeadEnrichmentAttributesCount(
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Get attributes with display name containing specified text (case insensitive) for attributeDisplayNameFilter") //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) String attributeDisplayNameFilter, //
+            @ApiParam(value = "Get attributes with specified category") //
+            @RequestParam(value = "category", required = false) String category, //
+            @ApiParam(value = "Get attributes with specified subcategory") //
+            @RequestParam(value = "subcategory", required = false) String subcategory, //
+            @ApiParam(value = "Should get only selected attribute") //
+            @RequestParam(value = "onlySelectedAttributes", required = false) Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Consider internal attributes") //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") Boolean considerInternalAttributes) {
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
+                : Category.fromName(category));
+        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+                onlySelectedAttributes, considerInternalAttributes);
+    }
+
+    @GetMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation/" + TENANT_ID_PATH)
+    @ApiOperation(value = "Get premium attributes limitation")
+    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(@PathVariable("tenantId") String tenantId) {
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        return attributeService.getPremiumAttributesLimitation(tenant);
+    }
+
+    @GetMapping("/enrichment/all" + LatticeInsightsResource.INSIGHTS_PATH)
+    @ApiOperation(value = "Get all lead enrichment")
+    public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes() {
+        return attributeService.getAllAttributes();
+    }
+
+    @PutMapping("/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + TENANT_ID_PATH)
+    @ApiOperation(value = "Save lead enrichment selection")
+    public void saveLeadEnrichmentAttributes(
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Update lead enrichment selection", required = true) //
+            @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        Map<String, Integer> limitationMap = attributeService.getPremiumAttributesLimitation(tenant);
+        attributeService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
     private boolean containsAtLeastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes, Category category) {

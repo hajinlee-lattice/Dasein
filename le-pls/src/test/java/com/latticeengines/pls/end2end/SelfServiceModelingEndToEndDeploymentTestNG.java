@@ -90,7 +90,6 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -101,9 +100,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Inject
     private WorkflowProxy workflowProxy;
-
-    @Inject
-    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
@@ -708,7 +704,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         System.out.println(selectedAttributeMap.getDeselectedAttributes());
         System.out.println(selectedAttributeMap.getSelectedAttributes());
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
