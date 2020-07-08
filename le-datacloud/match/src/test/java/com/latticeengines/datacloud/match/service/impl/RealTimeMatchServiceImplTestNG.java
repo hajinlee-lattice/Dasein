@@ -94,10 +94,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testSimpleMatchWithDplusConfig() {
         Object[][] data = new Object[][] {
-                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
-                { 2, "google.com", "Google", null, "California", "USA" },
-                { 3, "google.com", "Google", null, null, "UK" },
-                { 4, "bp.com", "British Petroleum", "London", "London", "UK"}
+                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", null, null },
+                { 2, "google.com", "Google", null, "California", "USA", null, null },
+                { 3, "google.com", "Google", null, null, "UK", null, null },
+                { 4, "bp.com", "British Petroleum", "London", "London", "UK", null, null}
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         input.setTargetEntity(BusinessEntity.PrimeAccount.name());
