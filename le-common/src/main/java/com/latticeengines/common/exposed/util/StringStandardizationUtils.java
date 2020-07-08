@@ -100,7 +100,7 @@ public class StringStandardizationUtils {
             if (latticeIdAsString.length() > LATTICE_ID_LENGTH) {
                 log.error(String.format(
                         "LatticeAccountId %s is too long. Required length is less than or equals to "
-                                + "%s, but actual is %s",
+                                + "%d, but actual is %d",
                         latticeId, String.valueOf(LATTICE_ID_LENGTH), latticeId.length()));
                 return null;
             }

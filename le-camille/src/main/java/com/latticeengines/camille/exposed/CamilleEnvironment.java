@@ -69,7 +69,7 @@ public final class CamilleEnvironment {
         if (!connected) {
             stopNoSync();
             throw new RuntimeException(String.format(
-                    "Timed out connecting to Zookeeper (connectionString=%s) after %s %s", config.getConnectionString(),
+                    "Timed out connecting to Zookeeper (connectionString=%d) after %d %s", config.getConnectionString(),
                     CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS.toString().toLowerCase()));
         }
 

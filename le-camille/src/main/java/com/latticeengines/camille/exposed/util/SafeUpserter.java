@@ -62,7 +62,7 @@ public class SafeUpserter {
             }
         }
 
-        throw new RuntimeException(String.format("Could not upsert to path %s after %s attempts", path, numRetries));
+        throw new RuntimeException(String.format("Could not upsert to path %s after %d attempts", path, numRetries));
     }
 
     private <T> void createNewPathWithDoc(Function<T, T> upserter, Path path, ConfigurationController<?> controller)
