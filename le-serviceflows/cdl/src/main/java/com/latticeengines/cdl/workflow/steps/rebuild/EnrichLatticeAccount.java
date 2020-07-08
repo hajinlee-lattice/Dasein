@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -126,26 +127,23 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         if (noLDC) {
             return true;
         } else {
-            boolean noAccountChange = !isChanged(ConsolidatedAccount);
-            accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
-            Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
-            if (accountChangeList != null) {
-                accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
-            }
+            boolean hasAccountChange = isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME);
             oldLatticeAccountTable = attemptGetTableRole(LatticeAccount, false);
             if (oldLatticeAccountTable != null) {
                 oldLatticeAccountDU = toDataUnit(oldLatticeAccountTable, "OldLatticeAccount");
             }
             fetchAttrs = getFetchAttrs();
             fetchAll = shouldFetchAll();
-            rebuildDownstream = shouldRebuildLatticeAccount();
-            return noAccountChange && !fetchAll && !rebuildDownstream;
+            rebuildDownstream = shouldRebuildDownstream();
+            boolean doNothing = !(hasAccountChange || fetchAll|| rebuildDownstream);
+            log.info("hasAccountChange={}, fetchAll={}, rebuildDownstream={}: doNothing={}",
+                    hasAccountChange, fetchAll, rebuildDownstream, doNothing);
+            return doNothing;
         }
     }
 
-    private boolean shouldRebuildLatticeAccount() {
-        // FIXME: add the case where PA enforces to rebuild Account
-        return oldLatticeAccountTable == null;
+    private boolean shouldRebuildDownstream() {
+        return oldLatticeAccountTable == null || Boolean.TRUE.equals(configuration.getRebuild());
     }
 
     private boolean shouldFetchAll() {
@@ -169,6 +167,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         joinKey = InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
         ldcTablePrefix = LatticeAccount.name();
+        accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
     }
 
     private void buildLatticeAccount() {
@@ -207,6 +206,10 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     private void updateLatticeAccount() {
         boolean hasNewFetch;
         boolean hasDelete = false;
+
+        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+        Preconditions.checkNotNull(accountChangeList, "Must have account change list.");
+        accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
 
         HdfsDataUnit enriched = enrich();
         hasNewFetch = (enriched != null);
