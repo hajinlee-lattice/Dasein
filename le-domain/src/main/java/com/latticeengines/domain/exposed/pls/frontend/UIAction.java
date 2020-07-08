@@ -8,20 +8,19 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class UIAction {
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
+public class UIAction extends UIMessage {
 
     @JsonProperty("title")
     private String title;
 
     @JsonProperty("view")
     private View view;
-
-    @JsonProperty("status")
-    private Status status;
-
-    @JsonProperty("message")
-    private String message;
 
     public String getTitle() {
         return this.title;
@@ -37,22 +36,6 @@ public class UIAction {
 
     public void setView(View view) {
         this.view = view;
-    }
-
-    public Status getStatus() {
-        return this.status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     @Override
