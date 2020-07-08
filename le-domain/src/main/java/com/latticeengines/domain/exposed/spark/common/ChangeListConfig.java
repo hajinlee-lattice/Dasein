@@ -20,6 +20,9 @@ public class ChangeListConfig extends SparkJobConfig implements Serializable {
     @JsonProperty("JoinType")
     private String joinType;
 
+    @JsonProperty("CreationMode")
+    private String creationMode = ChangeListConstants.CompleteMode;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -34,20 +37,20 @@ public class ChangeListConfig extends SparkJobConfig implements Serializable {
         this.joinKey = joinKey;
     }
 
-    public String getJoinType() {
-        return joinType;
-    }
-
-    public void setJoinType(String joinType) {
-        this.joinType = joinType;
-    }
-
     public List<String> getExclusionColumns() {
         return exclusionColumns;
     }
 
     public void setExclusionColumns(List<String> exclusionColumns) {
         this.exclusionColumns = exclusionColumns;
+    }
+
+    public String getCreationMode() {
+        return creationMode;
+    }
+
+    public void setCreationMode(String creationMode) {
+        this.creationMode = creationMode;
     }
 
 }

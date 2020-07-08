@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.common.ChangeListConstants;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class CreateChangeListTestNG extends SparkJobFunctionalTestNGBase {
@@ -71,7 +72,7 @@ public class CreateChangeListTestNG extends SparkJobFunctionalTestNGBase {
     private void testCreateChangeListByRightJoin() {
         List<String> input = upload2Data();
         ChangeListConfig config = getConfigForChangeList();
-        config.setJoinType("right");
+        config.setCreationMode(ChangeListConstants.HorizontalMode);
         SparkJobResult result = runSparkJob(CreateChangeListJob.class, config, input,
                 String.format("/tmp/%s/%s/changeListRight", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(dataUnit -> verifyChangeList(dataUnit, "right")));

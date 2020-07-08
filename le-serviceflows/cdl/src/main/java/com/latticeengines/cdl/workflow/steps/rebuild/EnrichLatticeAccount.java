@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TruncateLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.common.ChangeListConstants;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -378,8 +379,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         inputs.add(oldLatticeAccountDU); // fromTable: original table
         ChangeListConfig config = new ChangeListConfig();
         config.setInput(inputs);
+        config.setCreationMode(ChangeListConstants.VerticalMode);
         config.setJoinKey(joinKey);
-        config.setJoinType("right");
         config.setExclusionColumns(Arrays.asList( //
                 InterfaceName.CDLCreatedTime.name(), //
                 InterfaceName.CDLUpdatedTime.name(), //
