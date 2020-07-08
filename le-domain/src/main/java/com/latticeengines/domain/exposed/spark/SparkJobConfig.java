@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JourneyStageJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
@@ -143,6 +144,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = ConcatenateAIRatingsConfig.class, name = ConcatenateAIRatingsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
+        @JsonSubTypes.Type(value = JourneyStageJobConfig.class, name = JourneyStageJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
         @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME),
         @JsonSubTypes.Type(value = MergeLatticeAccountConfig.class, name = MergeLatticeAccountConfig.NAME), //

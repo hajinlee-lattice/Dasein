@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.cdl.activity.KeysWrapper;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -139,5 +141,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         String url = constructUrl("/customerspaces/{customerSpace}/activities/metricsGroups/groupId/{groupId}",
                 shortenCustomerSpace(customerSpace), groupId);
         return get("findGroupByGroupId", url, ActivityMetricsGroup.class);
+    }
+
+    public List<JourneyStage> getJourneyStages(@NotNull String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/journeyStages", shortenCustomerSpace(customerSpace));
+        List<?> list = get("get_all_journey_stages", url, List.class);
+        return JsonUtils.convertList(list, JourneyStage.class);
     }
 }
