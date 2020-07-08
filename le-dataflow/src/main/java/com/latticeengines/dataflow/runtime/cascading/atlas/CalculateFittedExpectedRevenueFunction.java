@@ -66,7 +66,7 @@ public class CalculateFittedExpectedRevenueFunction extends BaseOperation implem
 
         log.info(String.format(
                 "expectedRevenuePercentileFieldName = %s, expectedRevenueFieldName = %s, "
-                        + "expectedRevenueFieldPos = %s, normalizationRatio = %s%s, minAllowedProbability = %s%s",
+                        + "expectedRevenueFieldPos = %d, normalizationRatio = %.4f%s, minAllowedProbability = %.4f%s",
                 expectedRevenuePercentileFieldName, expectedRevenueFieldName, expectedRevenueFieldPos,
                 this.normalizationRatio,
                 normalizationRatio == null //
@@ -94,9 +94,9 @@ public class CalculateFittedExpectedRevenueFunction extends BaseOperation implem
                     .setScale(PREDICTED_REVENUE_PRECISION, RoundingMode.HALF_UP).doubleValue();
         } catch (Exception ex) {
             throw new RuntimeException(String.format(
-                    "Error: adjustedPredictedRevenue = %s, fittedExpectedRevenue = %s, normalizationRatio = %s, normalizedExpectedRevenue = %s, probability = %s, adjustedProbability = %s",
+                    "Error: adjustedPredictedRevenue = %.4f, fittedExpectedRevenue = %.4f, normalizationRatio = %.4f, normalizedExpectedRevenue = %.4f, probability = %.4f, adjustedProbability = %.4f",
                     adjustedPredictedRevenue, fittedExpectedRevenue, normalizationRatio, normalizedExpectedRevenue,
-                    probability, adjustedProbability, ex));
+                    probability, adjustedProbability), ex);
         }
         // copy the original predicted revenue into backupPredictedRevFieldPos
         // for backup and triaging any issue in future
