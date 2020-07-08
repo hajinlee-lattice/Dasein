@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportCon
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -73,6 +74,9 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private ActivityStoreProxy activityStoreProxy;
 
     @Inject
     private BatonService batonService;
@@ -126,6 +130,13 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         config.tableRoleSuffix = SUFFIX;
         // set dimensions
         config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
+        if (config.dimensionMetadataMap == null) {
+            config.dimensionMetadataMap = activityStoreProxy.getDimensionMetadata(customerSpace.toString(), null);
+        }
+        if (MapUtils.isEmpty(config.dimensionMetadataMap)) {
+            log.info("can't find the DimensionMetadata, will skip generate timeline.");
+            return null;
+        }
 
         //no atlasStreamTable, will skip
         // streamId -> table name

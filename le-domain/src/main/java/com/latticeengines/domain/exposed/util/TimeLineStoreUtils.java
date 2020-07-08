@@ -107,14 +107,14 @@ public final class TimeLineStoreUtils {
 
     public enum TimelineStandardColumn {
         RecordId(InterfaceName.Id.name(), "String"),
-        EventDate("EventTimestamp", "Long"),
+        EventDate(InterfaceName.EventTimestamp.name(), "Long"),
         AccountId(InterfaceName.AccountId.name(), "String"),
         ContactId(InterfaceName.ContactId.name(), "String"),
-        EventType("EventType", "String"),
-        StreamType("StreamType", "String"),
+        EventType(InterfaceName.EventType.name(), "String"),
+        StreamType(InterfaceName.StreamType.name(), "String"),
         Detail1(InterfaceName.Detail1.name(), "String"),
         Detail2(InterfaceName.Detail2.name(), "String"),
-        TrackedBySystem("Source", "String"),
+        TrackedBySystem(InterfaceName.Source.name(), "String"),
         ContactName(InterfaceName.ContactName.name(), "String");
 
         private String columnName;
