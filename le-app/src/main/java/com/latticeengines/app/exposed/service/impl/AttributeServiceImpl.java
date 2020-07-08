@@ -2,7 +2,6 @@ package com.latticeengines.app.exposed.service.impl;
 
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -33,6 +32,7 @@ import com.latticeengines.app.exposed.service.FileDownloadService;
 import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -298,7 +298,7 @@ public class AttributeServiceImpl implements AttributeService {
                                  HttpServletResponse response) throws IOException {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        DateFormat dateFormat = DateTimeUtils.getSimpleDateFormatObj("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
         String fileName = downloadConfig.isOnlySelectedAttrs()
                 ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
