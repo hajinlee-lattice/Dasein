@@ -29,7 +29,6 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
     private S3ImportService s3ImportService;
 
     private static String BUCKET = "latticeengines-dev";
-    private static String HOSTURL = "https://localhost:9080";
     private static String KEY1 = "dropfolder/%s/Templates/AccountData/%s";
     private static String KEY2 = "dropfolder/%s/DefaultSystem/Templates/ContactData/%s";
 
@@ -45,11 +44,11 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
         String key1 = String.format(KEY1, prefix, "file1.csv");
         String key2 = String.format(KEY2, prefix, "file2.csv");
         String key3 = String.format(KEY1, prefix, "file1_1.csv");
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key1, HOSTURL, S3ImportMessageType.Atlas);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key1, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key2, HOSTURL, S3ImportMessageType.Atlas);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key2, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, HOSTURL, S3ImportMessageType.Atlas);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
         List<S3ImportMessage> messages = s3ImportMessageService.getMessageGroupByDropBox();
         messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))

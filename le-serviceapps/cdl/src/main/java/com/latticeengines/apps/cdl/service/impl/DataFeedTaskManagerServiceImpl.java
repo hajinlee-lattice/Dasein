@@ -111,9 +111,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
-    @Value("${common.microservice.url}")
-    private String hostUrl;
-
     @Inject
     private DataFeedTaskService dataFeedTaskService;
 
@@ -317,7 +314,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         if (csvImportFileInfo.isPartialFile()) {
             s3ImportService.saveImportMessage(csvImportFileInfo.getS3Bucket(),
-                    csvImportFileInfo.getS3Path(), hostUrl, S3ImportMessageType.Atlas);
+                    csvImportFileInfo.getS3Path(), S3ImportMessageType.Atlas);
             return null;
         } else {
             checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
