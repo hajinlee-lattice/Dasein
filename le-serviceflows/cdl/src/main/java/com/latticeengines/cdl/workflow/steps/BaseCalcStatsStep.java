@@ -51,12 +51,14 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ColumnChanges;
 import com.latticeengines.domain.exposed.spark.common.GetColumnChangesConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
+import com.latticeengines.domain.exposed.spark.stats.FindChangedProfileConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.serviceflows.workflow.stats.StatsProfiler;
 import com.latticeengines.spark.exposed.job.common.GetColumnChangesJob;
 import com.latticeengines.spark.exposed.job.stats.CalcStatsJob;
+import com.latticeengines.spark.exposed.job.stats.FindChangedProfileJob;
 import com.latticeengines.spark.exposed.job.stats.ProfileJob;
 import com.latticeengines.spark.exposed.job.stats.UpdateProfileJob;
 
@@ -180,9 +182,6 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                 attrsToProfile.add(cm.getAttrName());
             }
         });
-        if (StringUtils.isNotBlank(ctxKeyForReProfileAttrs)) {
-            putObjectInContext(ctxKeyForReProfileAttrs, new ArrayList<>(attrsToProfile));
-        }
 
         if (!attrsToProfile.isEmpty()) {
             log.info("Going to re-profile {} attributes", attrsToProfile.size());
@@ -212,6 +211,16 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                 extraProfileUnits.add(updatedProfile);
             }
             profiler.appendResult(profileData, extraProfileUnits, new ArrayList<>(ignoreAttrs));
+
+            FindChangedProfileConfig findChangeConfig = new FindChangedProfileConfig();
+            findChangeConfig.setInput(Arrays.asList(oldProfileData, profileData));
+            SparkJobResult changeSparkResult = runSparkJob(FindChangedProfileJob.class, findChangeConfig);
+            List<?> lst = JsonUtils.deserialize(changeSparkResult.getOutput(), List.class);
+            List<String> attrs = JsonUtils.convertList(lst, String.class);
+            if (StringUtils.isNotBlank(ctxKeyForReProfileAttrs)) {
+                log.info("There are {} attributes having changed profile.", attrs.size());
+                putObjectInContext(ctxKeyForReProfileAttrs, attrs);
+            }
 
             if (profileRole != null) {
                 profileData = saveProfileData(profileRole, profileData, ctxKeyForRetry);
@@ -359,6 +368,15 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         HdfsDataUnit inputData = baseTable.toHdfsDataUnit("BaseTable");
         CalcStatsConfig jobConfig = new CalcStatsConfig();
         jobConfig.setInput(Arrays.asList(inputData, profileData));
+        SparkJobResult statsResult = runSparkJob(CalcStatsJob.class, jobConfig);
+        return statsResult.getTargets().get(0);
+    }
+
+    protected HdfsDataUnit calcStats(Table baseTable, HdfsDataUnit profileData, List<String> includeAttrs) {
+        HdfsDataUnit inputData = baseTable.toHdfsDataUnit("BaseTable");
+        CalcStatsConfig jobConfig = new CalcStatsConfig();
+        jobConfig.setInput(Arrays.asList(inputData, profileData));
+        jobConfig.setIncludeAttrs(includeAttrs);
         SparkJobResult statsResult = runSparkJob(CalcStatsJob.class, jobConfig);
         return statsResult.getTargets().get(0);
     }

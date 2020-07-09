@@ -5,9 +5,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-public class CalcStatsConfig extends SparkJobConfig {
+public class CalcStatsDeltaConfig extends SparkJobConfig {
 
-    public static final String NAME = "calcStats";
+    public static final String NAME = "calcStatsDelta";
 
     // when defined, ignore attributes outside of this list
     @JsonProperty("includeAttrs")

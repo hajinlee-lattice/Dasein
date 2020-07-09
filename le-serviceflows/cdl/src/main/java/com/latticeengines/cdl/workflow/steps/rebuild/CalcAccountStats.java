@@ -8,10 +8,15 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.L
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +32,8 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -36,7 +43,9 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
+import com.latticeengines.domain.exposed.spark.stats.CalcStatsDeltaConfig;
 import com.latticeengines.spark.exposed.job.common.UpsertJob;
+import com.latticeengines.spark.exposed.job.stats.CalcStatsDeltaJob;
 
 @Lazy
 @Component("calcAccountStats")
@@ -64,6 +73,7 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
     private boolean customerAccountChanged;
     private boolean latticeAccountChanged;
     private List<DataUnit> statsTables = new ArrayList<>();
+    private List<DataUnit> statsDiffTables = new ArrayList<>();
     private Table statsTbl;
     private Table statsDiffTbl;
 
@@ -81,9 +91,15 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
                 updateCustomerStats();
                 updateLatticeStats();
                 mergeStats();
+                mergeStatsDiff();
 
                 // for retry
-                exportToS3AndAddToContext(statsTbl, getStatsTableCtxKey());
+                if (statsTbl != null) {
+                    exportToS3AndAddToContext(statsTbl, getStatsTableCtxKey());
+                }
+                if (statsDiffTbl != null) {
+                    exportToS3AndAddToContext(statsDiffTbl, getStatsTableCtxKey());
+                }
             }
             upsertStatsCube();
         }
@@ -135,9 +151,22 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
                         "Must save re-profile attrs list in " + reProfileAttrsKey);
                 Preconditions.checkNotNull(changeListTbl, "Must have change list table " + changeListKey);
                 // partial re-calculate
-                HdfsDataUnit statsResult = calcStats(baseTable, profileTbl.toHdfsDataUnit("Profile"));
+                HdfsDataUnit profileData = profileTbl.toHdfsDataUnit("Profile");
+                log.info("There {} attributes need full stats calculation.", reProfileAttrs.size());
+                HdfsDataUnit statsResult = calcStats(baseTable, profileData, reProfileAttrs);
                 statsResult.setName(baseRole + "Stats");
                 statsTables.add(statsResult);
+
+                List<String> partialAttrs = Arrays.asList(baseTable.getAttributeNames());
+                partialAttrs.removeAll(reProfileAttrs);
+                if (CollectionUtils.isNotEmpty(partialAttrs)) {
+                    log.info("There {} attributes need partial stats calculation.", partialAttrs.size());
+                    CalcStatsDeltaConfig deltaConfig = new CalcStatsDeltaConfig();
+                    deltaConfig.setIncludeAttrs(partialAttrs);
+                    SparkJobResult sparkJobResult = runSparkJob(CalcStatsDeltaJob.class, deltaConfig);
+                    statsDiffTables.add(sparkJobResult.getTargets().get(0));
+                }
+
             }
         } else {
             log.info("No reason to re-calculate {} stats.", baseRole);
@@ -145,19 +174,39 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
     }
 
     private void mergeStats() {
-        HdfsDataUnit statsData;
+        HdfsDataUnit statsData = null;
         if (statsTables.size() > 1) {
             UpsertConfig upsertConfig = new UpsertConfig();
             upsertConfig.setJoinKey(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
             upsertConfig.setInput(statsTables);
             SparkJobResult result = runSparkJob(UpsertJob.class, upsertConfig);
             statsData = result.getTargets().get(0);
-        } else {
+        } else if (statsTables.size() == 1) {
             statsData = (HdfsDataUnit) statsTables.get(0);
         }
-        statsTableName = NamingUtils.timestamp( "AccountStats");
-        statsTbl = toTable(statsTableName, PROFILE_ATTR_ATTRNAME, statsData);
-        metadataProxy.createTable(customerSpaceStr, statsTableName, statsTbl);
+        if (statsData != null) {
+            statsTableName = NamingUtils.timestamp("AccountStats");
+            statsTbl = toTable(statsTableName, PROFILE_ATTR_ATTRNAME, statsData);
+            metadataProxy.createTable(customerSpaceStr, statsTableName, statsTbl);
+        }
+    }
+
+    private void mergeStatsDiff() {
+        HdfsDataUnit statsData = null;
+        if (statsDiffTables.size() > 1) {
+            UpsertConfig upsertConfig = new UpsertConfig();
+            upsertConfig.setJoinKey(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
+            upsertConfig.setInput(statsDiffTables);
+            SparkJobResult result = runSparkJob(UpsertJob.class, upsertConfig);
+            statsData = result.getTargets().get(0);
+        } else if (statsDiffTables.size() == 1) {
+            statsData = (HdfsDataUnit) statsDiffTables.get(0);
+        }
+        if (statsData != null) {
+            String statsDiffTableName = NamingUtils.timestamp("AccountStats");
+            statsDiffTbl = toTable(statsDiffTableName, PROFILE_ATTR_ATTRNAME, statsData);
+            metadataProxy.createTable(customerSpaceStr, statsDiffTableName, statsDiffTbl);
+        }
     }
 
     private boolean shouldDoNothing() {
@@ -182,14 +231,42 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
     }
 
     private void upsertStatsCube() {
-        StatsCube cube = getStatsCube(statsTbl.toHdfsDataUnit("Stats"));
+        Table baseTbl = attemptGetTableRole(ConsolidatedAccount, true);
+        long tblCnt = baseTbl.toHdfsDataUnit("Base").getCount();
+
+        StatsCube replaceCube = null;
+        if (statsTbl != null) {
+            replaceCube = getStatsCube(statsTbl.toHdfsDataUnit("Stats"));
+            log.info("Parsed a replace cube of {} attributes", replaceCube.getStatistics().size());
+        }
+
+        StatsCube updateCube = null;
+        if (statsTbl != null) {
+            updateCube = getStatsCube(statsDiffTbl.toHdfsDataUnit("StatsDiff"));
+            log.info("Parsed a update cube of {} attributes", updateCube.getStatistics().size());
+        }
+
         String lockName = acquireStatsLock(CustomerSpace.shortenCustomerSpace(customerSpaceStr), inactive);
         try {
+            StatsCube cube = new StatsCube();
+            cube.setCount(tblCnt);
             Map<String, StatsCube> cubeMap = getCurrentCubeMap();
             if (cubeMap.containsKey(Account.name())) {
                 StatsCube oldCube = cubeMap.get(Account.name());
                 Map<String, AttributeStats> attrStats = new HashMap<>(oldCube.getStatistics());
-                attrStats.putAll(cube.getStatistics());
+                if (updateCube != null && MapUtils.isNotEmpty(updateCube.getStatistics())) {
+                    for (String attr: updateCube.getStatistics().keySet()) {
+                        AttributeStats updateStat = updateCube.getStatistics().get(attr);
+                        if (attrStats.containsKey(attr)) {
+                            attrStats.put(attr, mergeAttrStat(attrStats.get(attr), updateStat));
+                        } else {
+                            attrStats.put(attr, updateStat);
+                        }
+                    }
+                }
+                if (replaceCube != null && MapUtils.isNotEmpty(replaceCube.getStatistics())) {
+                    attrStats.putAll(replaceCube.getStatistics());
+                }
                 cube.setStatistics(attrStats);
             }
             cubeMap.put(Account.name(), cube);
@@ -197,6 +274,29 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
         } finally {
             LockManager.releaseWriteLock(lockName);
         }
+    }
+
+    private AttributeStats mergeAttrStat(AttributeStats baseStat, AttributeStats statDiff) {
+        if (statDiff.getBuckets() != null && CollectionUtils.isNotEmpty(statDiff.getBuckets().getBucketList())) {
+            Buckets buckets = baseStat.getBuckets();
+            Map<Long, Bucket> bucketMap = buckets.getBucketList().stream()
+                    .collect(Collectors.toMap(Bucket::getId, Function.identity()));
+            statDiff.getBuckets().getBucketList().forEach(bktDiff -> {
+                long bktId = bktDiff.getId();
+                if (bucketMap.containsKey(bktId)) {
+                    Bucket baseBkt = bucketMap.get(bktId);
+                    baseBkt.setCount(baseBkt.getCount() + bktDiff.getCount());
+                } else {
+                    bucketMap.put(bktId, bktDiff);
+                }
+            });
+            List<Bucket> bucketList = bucketMap.values().stream() //
+                    .sorted(Comparator.comparing(Bucket::getId)) //
+                    .collect(Collectors.toList());
+            buckets.setBucketList(bucketList);
+        }
+        baseStat.setNonNullCount(baseStat.getNonNullCount() + statDiff.getNonNullCount());
+        return baseStat;
     }
 
     // directly save active version stats to inactive version

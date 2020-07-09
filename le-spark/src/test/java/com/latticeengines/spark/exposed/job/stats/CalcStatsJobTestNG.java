@@ -31,6 +31,10 @@ public class CalcStatsJobTestNG extends SparkJobFunctionalTestNGBase {
         CalcStatsConfig config = prepareInput();
         SparkJobResult result = runSparkJob(CalcStatsJob.class, config);
         verifyResult(result);
+
+        config.setIncludeAttrs(Arrays.asList(ATTR_BOOLEAN_1, ATTR_BOOLEAN_2));
+        result = runSparkJob(CalcStatsJob.class, config);
+        verifyResult(result);
     }
 
     private CalcStatsConfig prepareInput() {
