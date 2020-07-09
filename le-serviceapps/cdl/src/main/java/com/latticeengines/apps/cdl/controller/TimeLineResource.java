@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.JourneyStageService;
 import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -26,6 +27,9 @@ public class TimeLineResource {
 
     @Inject
     private TimeLineService timeLineService;
+
+    @Inject
+    private JourneyStageService journeyStageService;
 
     @GetMapping("")
     @ResponseBody
@@ -56,6 +60,7 @@ public class TimeLineResource {
     @ApiOperation("create default Account360/Contact360 timeline under current tenant, must be unique.")
     public Boolean createDefaultTimeLine(@PathVariable(value = "customerSpace") String customerSpace) {
         timeLineService.createDefaultTimeLine(customerSpace);
+        journeyStageService.createDefaultJourneyStages(customerSpace);
         return true;
     }
 }
