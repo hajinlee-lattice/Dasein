@@ -46,7 +46,10 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     public JsonNode handleException(UIActionException e) {
         logError(e);
         return JsonUtils.getObjectMapper() //
-                .valueToTree(ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
+                .valueToTree(ImmutableMap.of(
+                        "errorCode", e.getCode(), //
+                        UIAction.class.getSimpleName(), e.getUIAction() //
+                ));
     }
 
     @ExceptionHandler
