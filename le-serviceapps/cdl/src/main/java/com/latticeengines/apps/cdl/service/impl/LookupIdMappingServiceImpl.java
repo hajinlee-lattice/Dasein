@@ -190,16 +190,23 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIdsByAudienceType(
-            CDLExternalSystemType externalSystemType, AudienceType audienceType) {
+            CDLExternalSystemType externalSystemType, String audienceType) {
+        AudienceType audienceTypeEnum;
+        try {
+            audienceTypeEnum = AudienceType.valueOf(audienceType.toUpperCase());
+        } catch (Exception ex) {
+            throw new RuntimeException("Incorrect audience type provided.");
+        }
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
         Map<String, List<CDLExternalSystemMapping>> result;
         try {
             if (externalSystemType == null) {
-                result = externalSystemService.getExternalSystemMap(space.toString(), audienceType.asBusinessEntity());
+                result = externalSystemService.getExternalSystemMap(space.toString(),
+                        audienceTypeEnum.asBusinessEntity());
             } else {
                 result = new HashMap<>();
                 result.put(externalSystemType.name(), externalSystemService.getExternalSystemByType( //
-                        space.toString(), externalSystemType, audienceType.asBusinessEntity()));
+                        space.toString(), externalSystemType, audienceTypeEnum.asBusinessEntity()));
             }
         } catch (Exception ex) {
             result = new HashMap<>();

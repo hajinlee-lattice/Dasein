@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -93,9 +92,9 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(String customerSpace,
-            CDLExternalSystemType externalSystemType, AudienceType audienceType) {
+            CDLExternalSystemType externalSystemType, String audienceType) {
         String url = constructUrl(URL_PREFIX + "/available-lookup-ids/{audienceType}",
-                shortenCustomerSpace(customerSpace), audienceType.getType());
+                shortenCustomerSpace(customerSpace), audienceType);
         List<String> params = new ArrayList<>();
         if (externalSystemType != null) {
             params.add("externalSystemType=" + externalSystemType);

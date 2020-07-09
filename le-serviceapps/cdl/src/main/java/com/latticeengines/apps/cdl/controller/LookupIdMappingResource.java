@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.remote.tray.TraySettings;
 
 import io.swagger.annotations.Api;
@@ -106,7 +105,7 @@ public class LookupIdMappingResource {
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(@PathVariable String customerSpace, //
-            @PathVariable AudienceType audienceType, //
+            @PathVariable String audienceType, //
             @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
             CDLExternalSystemType externalSystemType) {
         return lookupIdMappingService.getAllLookupIdsByAudienceType(externalSystemType, audienceType);
