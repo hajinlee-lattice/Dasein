@@ -512,8 +512,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     String message = String.format("standard field %s is unmapped this time but is mapped previously.",
                             mapping.getMappedField());
                     validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.ERROR, message));
-                }
-                if (!StringUtils.equals(preUserField, userField)) {
+                } else if (!StringUtils.equals(preUserField, userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
                     validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.WARNING, message));
