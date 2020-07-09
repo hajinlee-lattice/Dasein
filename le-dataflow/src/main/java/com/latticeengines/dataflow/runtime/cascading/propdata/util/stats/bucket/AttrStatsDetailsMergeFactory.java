@@ -11,6 +11,7 @@ public final class AttrStatsDetailsMergeFactory {
     protected AttrStatsDetailsMergeFactory() {
         throw new UnsupportedOperationException();
     }
+
     private static Map<MergeType, AttrStatsDetailsMergeTool> utilMap = new ConcurrentHashMap<>();
 
     public static AttrStatsDetailsMergeTool getUtil(MergeType type) {
@@ -24,10 +25,10 @@ public final class AttrStatsDetailsMergeFactory {
                 util = new AttrStatsDetailsDedupMergeUtil();
             }
 
-            utilMap.put(type, util);
+            utilMap.putIfAbsent(type, util);
         }
 
-        return util;
+        return utilMap.get(type);
     }
 
     public enum MergeType {
