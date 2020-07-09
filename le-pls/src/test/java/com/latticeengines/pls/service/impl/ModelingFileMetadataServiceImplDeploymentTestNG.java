@@ -42,7 +42,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void verifyFieldMappingValidations() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
@@ -111,11 +111,11 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 fieldMapping.setUserField(null);
                 accountIdExist = true;
             }
-            if (fieldMapping.getUserField().equals("Lattitude")) {
+            if ("Lattitude".equals(fieldMapping.getUserField())) {
                 fieldMapping.setMappedField(InterfaceName.Longitude.name());
                 longitudeExist = true;
             }
-            if (fieldMapping.getUserField().equals("Longitude")) {
+            if ("Longitude".equals(fieldMapping.getUserField())) {
                 fieldMapping.setMappedField(InterfaceName.Latitude.name());
                 latitudeExist = true;
             }
