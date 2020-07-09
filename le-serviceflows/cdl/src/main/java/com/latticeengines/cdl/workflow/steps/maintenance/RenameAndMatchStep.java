@@ -2,12 +2,12 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STANDARDIZATION;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -51,19 +51,17 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("renameAndMatchStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchStepConfiguration> {
+
     private static final Logger log = LoggerFactory.getLogger(RenameAndMatchStep.class);
 
     static final String BEAN_NAME = "renameAndMatchStep";
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -88,6 +86,8 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
 
     private String renameAndMatchTablePrefix = null;
 
+    private String key;
+
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         intializeConfiguration();
@@ -104,20 +104,8 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         // otherwise throw exception
         Table outputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), outputTableName);
         String path = outputTable.getExtracts().get(0).getPath();
-        log.info("RenameAndMatchStep, output table name {}, path is {}", outputTableName, path);
-        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, path);
-        int cnt = 0;
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
-            String columnForDelete = idEntity.equals(BusinessEntity.Account) ? InterfaceName.AccountId.name()
-                    : InterfaceName.ContactId.name();
-            if (record.get(columnForDelete) != null) {
-                String value = record.get(columnForDelete).toString();
-                if (!StringUtils.isEmpty(value)) {
-                    cnt++;
-                }
-            }
-        }
+        Long cnt = AvroUtils.count(yarnConfiguration, path);
+        log.info("RenameAndMatchStep, output table name {}, path is {}, count is {}", outputTableName, path, cnt);
         if (cnt == 0) {
             throw new RuntimeException("No ID is found after match, can't proceed. Please check the input!");
         }
@@ -156,7 +144,8 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         deleteEntityType = configuration.getDeleteEntityType();
         idSystem = configuration.getIdSystem();
         systemIdColumn = getSystemIdColumn(idEntity, idSystem);
-        log.info("RenameAndMatchStep, systemIdColumn is " + systemIdColumn.toString());
+        key = idEntity.equals(BusinessEntity.Account) ? InterfaceName.AccountId.name() : InterfaceName.ContactId.name();
+        log.info("RenameAndMatchStep, systemIdColumn is {}, key is {}", systemIdColumn.toString(), key);
 
         Table sourceTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTableName());
@@ -174,18 +163,23 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
             request.setEnableSlack(false);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
-            // add the rename step
+            // Add rename step to rename to the system ID column name
             TransformationStepConfig rename = rename();
             steps.add(rename);
-            // add the match step
+            // Add match step for bulk entity match
             TransformationStepConfig match = match(steps.size() - 1);
-            renameAndMatchTablePrefix = "DeleteWith_" + idSystem + "_" + idEntity.name() + "_";
+            steps.add(match);
+            // Add filter step to select target columns and remove rows with empty
+            // AccountId/ContactId
+            TransformationStepConfig filter = filter(steps.size() - 1);
+            renameAndMatchTablePrefix = String.format("Delete_%s_with_%s_%s_", deleteEntityType.name(), idSystem,
+                    idEntity.name());
             log.info("RenameAndMatchStep, renameAndMatchTablePrefix: " + renameAndMatchTablePrefix);
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(configuration.getCustomerSpace());
             targetTable.setNamePrefix(renameAndMatchTablePrefix);
-            match.setTargetTable(targetTable);
-            steps.add(match);
+            filter.setTargetTable(targetTable);
+            steps.add(filter);
 
             request.setSteps(steps);
             return request;
@@ -228,6 +222,24 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         String matchConfig = getMatchConfig();
         log.info("RenameAndMatchStep, matchConfig: " + matchConfig);
         step.setConfiguration(matchConfig);
+
+        return step;
+    }
+
+    private TransformationStepConfig filter(int prevStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(prevStep));
+        step.setTransformer(TRANSFORMER_STANDARDIZATION);
+
+        StandardizationTransformerConfig transformerConfig = new StandardizationTransformerConfig();
+        StandardizationTransformerConfig.StandardizationStrategy[] strategies = new StandardizationTransformerConfig.StandardizationStrategy[] {
+                StandardizationTransformerConfig.StandardizationStrategy.FILTER };
+        transformerConfig.setSequence(strategies);
+        transformerConfig.setFilterFields(new String[] { key, systemIdColumn });
+        String filterExpression = String.format("%s != null", key);
+        log.info("RenameAndMatchStep, filterExpression: " + filterExpression);
+        transformerConfig.setFilterExpression(filterExpression);
+        step.setConfiguration(appendEngineConf(transformerConfig, lightEngineConfig()));
 
         return step;
     }
