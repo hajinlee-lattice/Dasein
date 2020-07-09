@@ -57,6 +57,11 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     }
 
     @Override
+    protected boolean saveToParquet() {
+        return true;
+    }
+
+    @Override
     protected void preMatchProcessing(MatchInput matchInput) {
         String uploadId = configuration.getUploadId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
