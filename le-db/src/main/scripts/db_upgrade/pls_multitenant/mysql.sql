@@ -90,7 +90,8 @@ CREATE PROCEDURE `UpdateSchema`()
 
       CREATE TABLE `JOURNEY_STAGE` (
         `PID` bigint(20) NOT NULL AUTO_INCREMENT,
-        `PREDICATES` json NOT NULL,
+        `DISPLAY_NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        `PREDICATES` json DEFAULT NULL,
         `PRIORITY` int(11) NOT NULL,
         `STAGE_NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
         `FK_TENANT_ID` bigint(20) NOT NULL,
@@ -98,7 +99,7 @@ CREATE PROCEDURE `UpdateSchema`()
         UNIQUE KEY `UKdg4hehgp0xn01bx91t7qwcf1m` (`STAGE_NAME`,`FK_TENANT_ID`),
         KEY `FK_JOURNEYSTAGE_FKTENANTID_TENANT` (`FK_TENANT_ID`),
         CONSTRAINT `FK_JOURNEYSTAGE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE
-      ) ENGINE=InnoDB;
+      ) ENGINE=InnoDB
 
   END //
 -- ##############################################################
