@@ -508,6 +508,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (standardAttrNames.contains(mapping.getMappedField())) {
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
                 String userField = mapping.getUserField();
+                if (StringUtils.isNotBlank(preUserField) && StringUtils.isBlank(userField)) {
+                    String message = String.format("standard field %s is unmapped this time but is mapped previously.",
+                            mapping.getMappedField());
+                    validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.ERROR, message));
+                }
                 if (!StringUtils.equals(preUserField, userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
@@ -875,7 +880,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             String mappedField = mapping.getMappedField();
             if (StringUtils.isBlank(mapping.getUserField()) && StringUtils.isNotBlank(map.get(mappedField))) {
-                throw new LedpException(LedpCode.LEDP_18248, new String[] { mappedField });
+                throw new LedpException(LedpCode.LEDP_18249, new String[] { mappedField });
             }
         }
     }
