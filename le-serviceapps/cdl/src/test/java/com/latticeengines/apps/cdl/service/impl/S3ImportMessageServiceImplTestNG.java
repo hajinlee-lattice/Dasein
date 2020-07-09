@@ -29,6 +29,7 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
     private S3ImportService s3ImportService;
 
     private static String BUCKET = "latticeengines-dev";
+    private static String HOSTURL = "https://localhost:9080";
     private static String KEY1 = "dropfolder/%s/Templates/AccountData/%s";
     private static String KEY2 = "dropfolder/%s/DefaultSystem/Templates/ContactData/%s";
 
@@ -51,6 +52,14 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
         s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
         List<S3ImportMessage> messages = s3ImportMessageService.getMessageGroupByDropBox();
+        messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))
+                .collect(Collectors.toList());
+        Assert.assertEquals(0, messages.size());
+        s3ImportMessageService.updateHostUrl(key1, HOSTURL);
+        s3ImportMessageService.updateHostUrl(key2, HOSTURL);
+        s3ImportMessageService.updateHostUrl(key3, HOSTURL);
+
+        messages = s3ImportMessageService.getMessageGroupByDropBox();
         messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))
                 .collect(Collectors.toList());
         Assert.assertEquals(2, messages.size());
