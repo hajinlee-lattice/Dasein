@@ -8,8 +8,6 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.PhoneNu
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.SystemId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
@@ -39,7 +37,6 @@ import com.latticeengines.datacloud.match.testframework.EntityMatchFunctionalTes
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -921,8 +918,6 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         map.addMatchKey(Email, Email.name());
         map.addMatchKey(Name, ContactName.name());
         map.addMatchKey(PhoneNumber, PhoneNumber.name());
-        map.addMatchKey(MatchKey.Address, Address_Street_1.name());
-        map.addMatchKey(MatchKey.Address2, Address_Street_2.name());
         return map;
     }
 
