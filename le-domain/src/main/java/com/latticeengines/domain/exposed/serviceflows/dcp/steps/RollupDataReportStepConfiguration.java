@@ -6,9 +6,19 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 
 public class RollupDataReportStepConfiguration extends MicroserviceStepConfiguration {
 
+    private String root;
+
     private DataReportRecord.Level level;
 
     private DataReportMode mode;
+
+    public String getRoot() {
+        return root;
+    }
+
+    public void setRoot(String root) {
+        this.root = root;
+    }
 
     public DataReportRecord.Level getLevel() {
         return level;
