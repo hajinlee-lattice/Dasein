@@ -16,7 +16,7 @@ fi
 PYTHON=${PYTHON:=python}
 ZK_HOST="localhost:2181"
 LOCAL_TEST_POD="/Pods/Default/Contracts"
-$PYTHON -c "import zc.zk; zk = zc.zk.ZooKeeper('${ZK_HOST}'); print '${LOCAL_TEST_POD} exists' if zk.exists('${LOCAL_TEST_POD}') else zk.create_recursive('${LOCAL_TEST_POD}', '', zc.zk.OPEN_ACL_UNSAFE)"
+$PYTHON -c "import logging, zc.zk; logging.basicConfig(); zk = zc.zk.ZooKeeper('${ZK_HOST}'); print '${LOCAL_TEST_POD} exists' if zk.exists('${LOCAL_TEST_POD}') else zk.create_recursive('${LOCAL_TEST_POD}', '', zc.zk.OPEN_ACL_UNSAFE)"
 
 function bootstrap_tenant() {
 	TENANT=$1
