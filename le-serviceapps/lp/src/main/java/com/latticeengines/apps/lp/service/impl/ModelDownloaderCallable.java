@@ -3,6 +3,7 @@ package com.latticeengines.apps.lp.service.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +196,12 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             }
         }
         if (originalModelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18127, new String[] { copiedModelId });
+            if (CollectionUtils.isEmpty(modelSummaries)) {
+                throw new LedpException(LedpCode.LEDP_18127, new String[] { copiedModelId });
+            }
+            log.warn("Can not find the original model summary for model Id=" + copiedModelId);
+            modelSummaries.sort(Comparator.comparing(ModelSummary::getPid));
+            originalModelSummary = modelSummaries.get(0);
         }
         List<BucketMetadata> bucketMetadatas = bucketedScoreService
                 .getABCDBucketsByModelGuidAcrossTenant(originalModelSummary.getId());
