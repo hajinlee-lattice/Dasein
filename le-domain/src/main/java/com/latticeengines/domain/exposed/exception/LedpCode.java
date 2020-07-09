@@ -248,7 +248,7 @@ public enum LedpCode {
     LEDP_18124("Model summary with id {0} has been deleted from tenant: {1}"), //
     LEDP_18125("Error retrieving pivot score chart data for model: {0}"), //
     LEDP_18126("Error retrieving bucket metadata for model: {0}"), //
-    LEDP_18127("Cannot copy model with application id: {0}. Error when copying ABCD buckets"), //
+    LEDP_18127("Cannot copy model with model id: {0}. Error when copying ABCD buckets"), //
     LEDP_18128("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     LEDP_18129("Table name should be specified for Vdb table import workflow."), //
