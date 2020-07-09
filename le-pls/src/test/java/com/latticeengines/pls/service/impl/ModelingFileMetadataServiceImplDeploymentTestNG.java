@@ -148,7 +148,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         } catch (Exception e) {
             Assert.assertTrue(e instanceof LedpException);
             LedpException ledp = (LedpException) e;
-            Assert.assertEquals(ledp.getCode(), LedpCode.LEDP_18248);
+            Assert.assertEquals(ledp.getCode(), LedpCode.LEDP_18249);
         }
     }
 }
