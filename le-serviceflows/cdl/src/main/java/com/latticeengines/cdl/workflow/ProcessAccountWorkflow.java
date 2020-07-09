@@ -11,11 +11,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.GenerateAccountLookup;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.CalcAccountStats;
 import com.latticeengines.cdl.workflow.steps.rebuild.EnrichLatticeAccount;
 import com.latticeengines.cdl.workflow.steps.rebuild.UpdateAccountExport;
 import com.latticeengines.cdl.workflow.steps.rebuild.UpdateAccountFeatures;
 import com.latticeengines.cdl.workflow.steps.rebuild.UpdateAccountProfile;
 import com.latticeengines.cdl.workflow.steps.rebuild.UpdateBucketedAccount;
+import com.latticeengines.cdl.workflow.steps.rebuild.UpdateLatticeAccountProfile;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.validations.ValidateAccountBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
@@ -62,6 +64,12 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
     private UpdateAccountProfile updateAccountProfile;
 
     @Inject
+    private UpdateLatticeAccountProfile updateLatticeAccountProfile;
+
+    @Inject
+    private CalcAccountStats calcAccountStats;
+
+    @Inject
     private UpdateBucketedAccount updateBucketedAccount;
 
     @Value("${cdl.use.changelist}")
@@ -80,6 +88,8 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
                     .next(updateAccountExport) //
                     .next(updateAccountFeatures) //
                     .next(updateAccountProfile) //
+                    .next(updateLatticeAccountProfile) //
+                    .next(calcAccountStats) //
                     .next(updateBucketedAccount);
         } else {
             builder = builder //

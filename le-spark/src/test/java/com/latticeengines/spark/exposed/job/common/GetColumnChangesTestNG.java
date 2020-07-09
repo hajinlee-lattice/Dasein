@@ -59,7 +59,7 @@ public class GetColumnChangesTestNG extends SparkJobFunctionalTestNGBase {
     @Override
     protected void verifyOutput(String output) {
         ColumnChanges changes = JsonUtils.deserialize(output, ColumnChanges.class);
-        System.out.println(JsonUtils.pprint(changes));
+        // System.out.println(JsonUtils.pprint(changes));
         Assert.assertEquals(changes.getChanged().size(), 2);
         Assert.assertEquals(changes.getRemoved().size(), 1);
     }

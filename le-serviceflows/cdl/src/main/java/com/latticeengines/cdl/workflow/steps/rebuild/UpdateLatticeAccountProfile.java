@@ -1,10 +1,12 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountProfile;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccountProfile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -23,43 +26,45 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Lazy
-@Component("updateAccountProfile")
+@Component("updateLatticeAccountProfile")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UpdateAccountProfile extends UpdateProfileBase<ProcessAccountStepConfiguration> {
+public class UpdateLatticeAccountProfile extends UpdateProfileBase<ProcessAccountStepConfiguration> {
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
     @Override
     protected TableRoleInCollection getBaseTableRole() {
-        return ConsolidatedAccount;
+        return LatticeAccount;
     }
 
     @Override
     protected List<String> getIncludeAttrs() {
         List<String> includeAttrs = getRetrainAttrNames();
-        includeAttrs.remove(LatticeAccountId.name());
+        Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+        includeAttrs.removeAll(Arrays.asList(customerAccount.getAttributeNames()));
+        includeAttrs.add(AccountId.name());
         return includeAttrs;
     }
 
     @Override
     protected String getBaseChangeListCtxKey() {
-        return ACCOUNT_CHANGELIST_TABLE_NAME;
+        return LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME;
     }
 
     @Override
     protected String getReProfileAttrsCtxKey() {
-        return ACCOUNT_RE_PROFILE_ATTRS;
+        return LATTICE_ACCOUNT_RE_PROFILE_ATTRS;
     }
 
     @Override
     protected TableRoleInCollection getProfileRole() {
-        return AccountProfile;
+        return LatticeAccountProfile;
     }
 
     @Override
     protected String getProfileTableCtxKey() {
-        return ACCOUNT_PROFILE_TABLE_NAME;
+        return LATTICE_ACCOUNT_PROFILE_TABLE_NAME;
     }
 
     @Override
@@ -95,6 +100,12 @@ public class UpdateAccountProfile extends UpdateProfileBase<ProcessAccountStepCo
             retainAttrNames.add(InterfaceName.CDLUpdatedTime.name());
         }
         return retainAttrNames;
+    }
+
+    @Override
+    protected boolean getEnforceRebuild() {
+        return Boolean.TRUE.equals(configuration.getRebuild()) && //
+                Boolean.TRUE.equals(getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class));
     }
 
 }

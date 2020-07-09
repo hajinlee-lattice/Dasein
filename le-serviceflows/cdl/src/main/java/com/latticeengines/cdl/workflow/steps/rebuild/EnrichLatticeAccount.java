@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -79,6 +81,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private BatonService batonService;
+
     private Table oldLatticeAccountTable = null;
     private Table newLatticeAccountTable = null;
     private Table latticeAccountChangeListTable = null;
@@ -118,25 +123,28 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private boolean shouldDoNothing() {
-        boolean noAccountChange = !isChanged(ConsolidatedAccount);
-        accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
-        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
-        if (accountChangeList != null) {
-            accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
+        // some special tenants do not want to use LDC attributes
+        boolean noLDC = batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId());
+        if (noLDC) {
+            return true;
+        } else {
+            boolean hasAccountChange = isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME);
+            oldLatticeAccountTable = attemptGetTableRole(LatticeAccount, false);
+            if (oldLatticeAccountTable != null) {
+                oldLatticeAccountDU = toDataUnit(oldLatticeAccountTable, "OldLatticeAccount");
+            }
+            fetchAttrs = getFetchAttrs();
+            fetchAll = shouldFetchAll();
+            rebuildDownstream = shouldRebuildDownstream();
+            boolean doNothing = !(hasAccountChange || fetchAll|| rebuildDownstream);
+            log.info("hasAccountChange={}, fetchAll={}, rebuildDownstream={}: doNothing={}",
+                    hasAccountChange, fetchAll, rebuildDownstream, doNothing);
+            return doNothing;
         }
-        oldLatticeAccountTable = attemptGetTableRole(LatticeAccount, false);
-        if (oldLatticeAccountTable != null) {
-            oldLatticeAccountDU = toDataUnit(oldLatticeAccountTable, "OldLatticeAccount");
-        }
-        fetchAttrs = getFetchAttrs();
-        fetchAll = shouldFetchAll();
-        rebuildDownstream = shouldRebuildLatticeAccount();
-        return noAccountChange && !fetchAll && !rebuildDownstream;
     }
 
-    private boolean shouldRebuildLatticeAccount() {
-        // FIXME: add the case where PA enforces to rebuild Account
-        return oldLatticeAccountTable == null;
+    private boolean shouldRebuildDownstream() {
+        return oldLatticeAccountTable == null || Boolean.TRUE.equals(configuration.getRebuild());
     }
 
     private boolean shouldFetchAll() {
@@ -160,6 +168,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         joinKey = InterfaceName.AccountId.name();
         log.info("joinKey {}", joinKey);
         ldcTablePrefix = LatticeAccount.name();
+        accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
     }
 
     private void buildLatticeAccount() {
@@ -198,6 +207,10 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     private void updateLatticeAccount() {
         boolean hasNewFetch;
         boolean hasDelete = false;
+
+        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+        Preconditions.checkNotNull(accountChangeList, "Must have account change list.");
+        accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
 
         HdfsDataUnit enriched = enrich();
         hasNewFetch = (enriched != null);
