@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
@@ -153,7 +154,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     @Test(groups = "deployment-app", enabled = false)
     public void getAllLookupIds() {
         Map<String, List<CDLExternalSystemMapping>> allAccountLookupIds = lookupIdMappingProxy
-                .getAllLookupIds(mainCustomerSpace, null, "accounts");
+                .getAllLookupIds(mainCustomerSpace, null, AudienceType.ACCOUNTS);
         Assert.assertNotNull(allAccountLookupIds);
         Assert.assertTrue(allAccountLookupIds.keySet().size() > 0);
 
@@ -170,7 +171,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         });
 
         Map<String, List<CDLExternalSystemMapping>> allContactLookupIds = lookupIdMappingProxy
-                .getAllLookupIds(mainCustomerSpace, null, "contacts");
+                .getAllLookupIds(mainCustomerSpace, null, AudienceType.CONTACTS);
         Assert.assertNotNull(allContactLookupIds);
         Assert.assertTrue(allContactLookupIds.keySet().size() > 0);
 

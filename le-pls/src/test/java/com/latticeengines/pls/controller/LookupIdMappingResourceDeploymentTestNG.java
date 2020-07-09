@@ -158,8 +158,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         @SuppressWarnings({ "rawtypes" })
         Map allLookupIdsRaw = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids/"
-                        + "accounts", Map.class);
+                .getForObject(
+                        getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids" + "?audienceType=ACCOUNTS",
+                        Map.class);
         Assert.assertNotNull(allLookupIdsRaw);
         @SuppressWarnings({ "unchecked" })
         Map<String, List<CDLExternalSystemMapping>> allLookupIds = JsonUtils.convertMapWithListValue(allLookupIdsRaw,
