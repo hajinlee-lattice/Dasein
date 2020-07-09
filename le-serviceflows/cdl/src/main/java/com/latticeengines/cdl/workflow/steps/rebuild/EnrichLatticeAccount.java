@@ -156,7 +156,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         boolean hasDataCloudMinorChange = //
                 Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MINOR_CHANGE, Boolean.class));
         boolean hasAttrs2Add = !findAttrs2Add().isEmpty();
-        boolean missAccountChangeList = isChanged(ConsolidatedAccount) && (accountChangeListDU == null);
+        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+        boolean missAccountChangeList = isChanged(ConsolidatedAccount) && (accountChangeList == null);
         boolean shouldFetchAll = hasDataCloudMajorChange || hasDataCloudMinorChange || hasAttrs2Add || missAccountChangeList;
         log.info("hasDataCloudMajorChange={}, hasDataCloudMinorChange={}, hasAttrs2Add={}, " + //
                         "missAccountChangeList={}: shouldFetchAll={}", //
