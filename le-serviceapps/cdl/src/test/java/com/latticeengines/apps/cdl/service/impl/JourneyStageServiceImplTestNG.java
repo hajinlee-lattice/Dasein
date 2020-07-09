@@ -58,6 +58,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         journeyStage = new JourneyStage();
         journeyStage.setPredicates(Collections.singletonList(predicates));
         journeyStage.setStageName(stageName);
+        journeyStage.setDisplayName(stageName);
         journeyStage.setPriority(priority);
         journeyStage.setTenant(mainTestTenant);
         JourneyStage created = journeyStageService.createOrUpdate(mainCustomerSpace, journeyStage);
@@ -99,7 +100,12 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(stage.getStageName(), stageName);
         stage.setStageName(updateStageName);
         journeyStageService.createOrUpdate(mainCustomerSpace, stage);
-        stage = journeyStageService.findByStageName(mainCustomerSpace, updateStageName);
+        retry.execute(context -> {
+            createdAtom.set(journeyStageService.findByStageName(mainCustomerSpace, updateStageName));
+            Assert.assertNotNull(createdAtom.get());
+            return true;
+        });
+        stage = createdAtom.get();
         Assert.assertNotNull(stage);
     }
 

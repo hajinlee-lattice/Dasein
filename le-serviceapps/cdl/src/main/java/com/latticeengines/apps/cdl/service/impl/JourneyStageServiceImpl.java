@@ -58,6 +58,7 @@ public class JourneyStageServiceImpl implements JourneyStageService {
         newJourneyStage.setTenant(MultiTenantContext.getTenant());
         newJourneyStage.setPriority(journeyStage.getPriority());
         newJourneyStage.setStageName(journeyStage.getStageName());
+        newJourneyStage.setDisplayName(journeyStage.getDisplayName());
         newJourneyStage.setPredicates(journeyStage.getPredicates());
         journeyStageEntityMgr.createOrUpdate(newJourneyStage);
         return newJourneyStage;
@@ -122,14 +123,14 @@ public class JourneyStageServiceImpl implements JourneyStageService {
         predicates.setNoOfEvents(noOfEvents);
         predicates.setStreamFieldToFilterList(filters);
         JourneyStage journeyStage =
-                new JourneyStage.Builder().withTenant(tenant).withStageName(stageName).withPriority(priority).withPredicates(Collections.singletonList(predicates)).build();
+                new JourneyStage.Builder().withTenant(tenant).withStageName(stageName).withDisplayName(stageName).withPriority(priority).withPredicates(Collections.singletonList(predicates)).build();
         journeyStageEntityMgr.createOrUpdate(journeyStage);
     }
 
     private void createDefaultStage(Tenant tenant) {
         JourneyStagePredicates predicates = new JourneyStagePredicates();
         predicates.setStreamType(AtlasStream.StreamType.DefaultStage);
-        JourneyStage journeyStage = new JourneyStage.Builder().withTenant(tenant).withPriority(9).withStageName("Dark").withPredicates(Collections.singletonList(predicates)).build();
+        JourneyStage journeyStage = new JourneyStage.Builder().withTenant(tenant).withPriority(9).withStageName("Dark").withDisplayName("Dark").withPredicates(Collections.singletonList(predicates)).build();
         journeyStageEntityMgr.createOrUpdate(journeyStage);
     }
 }

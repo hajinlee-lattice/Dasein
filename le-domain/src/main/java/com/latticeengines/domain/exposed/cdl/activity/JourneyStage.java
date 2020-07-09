@@ -57,6 +57,10 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
     @JsonProperty("stage_name")
     private String stageName;
 
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    @JsonProperty("display_name")
+    private String displayName;
+
     @Column(name = "PRIORITY", nullable = false)
     @JsonProperty("priority")
     private int priority;
@@ -110,6 +114,14 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
         this.predicates = predicates;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public static final class Builder {
 
         private JourneyStage journeyStage;
@@ -125,6 +137,11 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
 
         public Builder withStageName(String stageName) {
             journeyStage.setStageName(stageName);
+            return this;
+        }
+
+        public Builder withDisplayName(String displayName) {
+            journeyStage.setDisplayName(displayName);
             return this;
         }
 
