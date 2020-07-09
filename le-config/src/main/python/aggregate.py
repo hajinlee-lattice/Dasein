@@ -6,7 +6,7 @@ import os
 PROPERTY_DIR = "/conf/env/"
 PROPERTY_FILE_SUFFIX = "*.properties"
 LINE_SEPERATOR = "\n=============================\n"
-ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster', 'prodcluster_dr')
+ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster', 'prodcluster_dr', 'qa')
 
 WSHOME=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
