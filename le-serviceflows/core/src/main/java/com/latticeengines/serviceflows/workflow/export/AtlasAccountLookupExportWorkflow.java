@@ -1,5 +1,8 @@
 package com.latticeengines.serviceflows.workflow.export;
 
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
+import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -54,9 +58,16 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public void execute() {
         log.info("Using account changelist to populate account lookup.");
+        if (!shouldPublishDynamo()) {
+            log.info("Skip updating account lookup dynamo");
+            return;
+        }
         lookupIds = getLookupIds();
         if (CollectionUtils.isEmpty(lookupIds)) {
             log.info("No lookup IDs in new account batch store");
@@ -105,6 +116,12 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
         return configs.stream().map(AccountLookupExporter::new).collect(Collectors.toList());
     }
 
+    private boolean shouldPublishDynamo() {
+        boolean enableTp = batonService.hasModule(configuration.getCustomerSpace(), TalkingPoint);
+        boolean hasAccount360 = batonService.isEnabled(configuration.getCustomerSpace(), ENABLE_ACCOUNT360);
+        return hasAccount360 || enableTp;
+    }
+
     protected class AccountLookupExporter extends Exporter {
         AccountLookupExporter(DynamoExportConfig config) {
             super(config);
@@ -119,9 +136,10 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
                     CipherUtils.encrypt(awsSecretKey));
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_REGION, awsRegion);
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS, String.join(",", lookupIds));
-            properties.put(HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION, curVersion.toString());
+            properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION, curVersion.toString());
             properties.put(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME, String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL, expTime.toString());
+            properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_TYPE, AtlasAccountLookupExportStepConfiguration.NAME);
             properties.put(ExportProperty.NUM_MAPPERS, String.valueOf(numMappers));
 
             return properties;

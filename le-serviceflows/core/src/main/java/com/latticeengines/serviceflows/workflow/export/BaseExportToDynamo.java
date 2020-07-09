@@ -42,13 +42,13 @@ import com.latticeengines.yarn.exposed.service.JobService;
 public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseExportToDynamo.class);
-    private static final Long ONE_DAY = TimeUnit.DAYS.toSeconds(1);
+    protected static final Long ONE_DAY = TimeUnit.DAYS.toSeconds(1);
 
     @Inject
-    private JobService jobService;
+    protected JobService jobService;
 
     @Inject
-    private EaiProxy eaiProxy;
+    protected EaiProxy eaiProxy;
 
     @Inject
     protected DataUnitProxy dataUnitProxy;

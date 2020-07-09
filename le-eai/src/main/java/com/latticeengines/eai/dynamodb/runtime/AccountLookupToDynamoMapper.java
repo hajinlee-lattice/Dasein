@@ -14,7 +14,6 @@ import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,21 +38,16 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
-public class AtlasAccountLookupExportMapper extends AvroExportMapper implements AvroRowHandler {
+public class AccountLookupToDynamoMapper extends AvroExportMapper implements AvroRowHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountLookupToDynamoMapper.class);
 
     private static final int BUFFER_SIZE = 25;
     private static final String ATTR_PARTITION_KEY = InterfaceName.AtlasLookupKey.name();
-    private static final String ATTR_ACCOUNT_ID = "AccountId";
 
-    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s_%s"; // tenantId__ver__lookupId_lookIdVal
+    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s"; // tenantId__ver__<lookupId_lookIdVal>
 
-    private static final String CHANGELIST_ACCOUNT_ID = "RowId";
-    private static final String CHANGELIST_LOOKUP_NAME = "ColumnId";
-    private static final String CHANGELIST_FROM_STRING = "FromString";
-    private static final String CHANGELIST_TO_STRING = "ToString";
-    private static final String CHANGELIST_DELETED = "Deleted";
+    private static final String AccountId = "AccountId";
     private static final String CHANGED = "__Changed__";
     private static final String DELETED = "__Deleted__";
     private static final String TTLAttr = "EXP";
@@ -61,21 +55,14 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
 
     private String tenant;
     private String tableName;
-    private Integer currentVersion = 0;
+    private Integer targetVersion = 0;
     private final Set<String> lookupIds = new HashSet<>();
     private final List<DynamoAccountLookupRecord> recordBuffer = new ArrayList<>();
     private DynamoItemService dynamoItemService;
     private long expTime;
 
     @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
-        super.setup(context);
-    }
-
-    @Override
-    protected AvroRowHandler initialize(
-            Mapper<AvroKey<GenericData.Record>, NullWritable, NullWritable, NullWritable>.Context context,
-            Schema schema) {
+    protected AvroRowHandler initialize(Context context, Schema schema) throws IOException, InterruptedException {
         tenant = config.get(HdfsToDynamoConfiguration.CONFIG_ATLAS_TENANT);
         tableName = config.get(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME);
         log.info("tenant=" + tenant);
@@ -110,29 +97,15 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
                     .build();
             dynamoItemService = new DynamoItemServiceImpl(new DynamoDB(client));
         }
-        currentVersion = parseTargetVersion(config.get(HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION));
+        targetVersion = Integer.parseInt(config.get(HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION));
         expTime = Long.parseLong(config.get(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL));
 
         return this;
     }
 
-    private Integer parseTargetVersion(String targetVersion) {
-        return StringUtils.isBlank(targetVersion) ? 0 : Integer.parseInt(targetVersion);
-    }
-
     @Override
-    protected void finalize(
-            Mapper<AvroKey<GenericData.Record>, NullWritable, NullWritable, NullWritable>.Context context) {
-        if (!recordBuffer.isEmpty()) {
-            commitBuffer(context.getCounter(RecordExportCounter.EXPORTED_RECORDS),
-                    context.getCounter(RecordExportCounter.ERROR_RECORDS));
-        }
-    }
-
-    @Override
-    public void map(AvroKey<GenericData.Record> key, NullWritable value, Context context) {
-        context.getCounter(RecordExportCounter.SCANNED_RECORDS).increment(1);
-
+    public void map(AvroKey<GenericData.Record> key, NullWritable value, Context context)
+            throws IOException, InterruptedException {
         long totalCount = context.getCounter(RecordExportCounter.SCANNED_RECORDS).getValue();
         if (totalCount % 10000L == 0) {
             log.info("Already scanned " + totalCount + " records.");
@@ -152,82 +125,17 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
         }
     }
 
-    @Override
-    public void startRecord(GenericData.Record record) {
-    }
-
-    @Override
-    public void handleField(GenericData.Record record, Schema.Field field) {
-    }
-
-    @Override
-    public void endRecord(GenericData.Record record) {
-    }
-
     private void loadToBuffer(GenericRecord record) {
-        if (lookupIdModified(record)) {
-            String lookupId = record.get(CHANGELIST_LOOKUP_NAME).toString();
-            if (lookupIdCreated(record)) {
-                String lookupIdVal = record.get(CHANGELIST_TO_STRING).toString();
-                String key = constructLookupKey(tenant, lookupId, lookupIdVal);
-                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
-                        .key(key) //
-                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
-                        .build() //
-                );
-            } else if (lookupIdChanged(record)) {
-                // mark accountId_oldLookupId record deleted, create and mark
-                // accountId_newLookupId changed
-                String oldLookupIdVal = record.get(CHANGELIST_FROM_STRING).toString();
-                String oldKey = constructLookupKey(tenant, lookupId, oldLookupIdVal);
-                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
-                        .key(oldKey) //
-                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
-                        .deleted(true) //
-                        .build() //
-                );
-                String newLookupIdVal = record.get(CHANGELIST_TO_STRING).toString();
-                String newKey = constructLookupKey(tenant, lookupId, newLookupIdVal);
-                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
-                        .key(newKey) //
-                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
-                        .changed(true) //
-                        .build() //
-                );
-            } else if (lookupIdDeleted(record)) {
-                // mark accountId_lookupId record deleted
-                String lookupIdVal = record.get(CHANGELIST_FROM_STRING).toString();
-                String key = constructLookupKey(tenant, lookupId, lookupIdVal);
-                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
-                        .key(key) //
-                        .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
-                        .deleted(true) //
-                        .build() //
-                );
-            }
+        String accountId = record.get(InterfaceName.AccountId.name()).toString();
+        String lookupEntry = record.get(InterfaceName.AtlasLookupKey.name()).toString(); // <lookupId>_<lookupVal>
+        if (StringUtils.isBlank(lookupEntry)) {
+            return;
         }
-    }
-
-    private boolean lookupIdModified(GenericRecord record) {
-        return record.get(CHANGELIST_ACCOUNT_ID) != null && record.get(CHANGELIST_LOOKUP_NAME) != null
-                && lookupIds.contains(record.get(CHANGELIST_LOOKUP_NAME).toString());
-    }
-
-    private boolean lookupIdCreated(GenericRecord record) {
-        return record.get(CHANGELIST_FROM_STRING) == null && record.get(CHANGELIST_TO_STRING) != null;
-    }
-
-    private boolean lookupIdChanged(GenericRecord record) {
-        return record.get(CHANGELIST_FROM_STRING) != null && record.get(CHANGELIST_TO_STRING) != null;
-    }
-
-    private boolean lookupIdDeleted(GenericRecord record) {
-        return record.get(CHANGELIST_DELETED) != null
-                && Boolean.parseBoolean(record.get(CHANGELIST_DELETED).toString());
-    }
-
-    private String constructLookupKey(String tenant, String lookupId, String lookupVal) {
-        return String.format(KEY_FORMAT, tenant, currentVersion, lookupId, lookupVal);
+        String key = String.format(KEY_FORMAT, tenant, targetVersion, lookupEntry);
+        if (StringUtils.isBlank(key)) {
+            return;
+        }
+        recordBuffer.add((new DynamoAccountLookupRecord.Builder()).key(key).accountId(accountId).build());
     }
 
     private void commitBuffer(Counter whiteCounter, Counter blackCounter) {
@@ -251,7 +159,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
             PrimaryKey key = new PrimaryKey(ATTR_PARTITION_KEY, record.key);
             Item item = new Item() //
                     .withPrimaryKey(key) //
-                    .withString(ATTR_ACCOUNT_ID, record.accountId) //
+                    .withString(AccountId, record.accountId) //
                     .withBoolean(CHANGED, record.changed) //
                     .withBoolean(DELETED, record.deleted) //
                     .withLong(TTLAttr, expTime) //
@@ -259,5 +167,25 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
             items.add(item);
         }
         return items;
+    }
+
+    @Override
+    protected void finalize(Context context) throws IOException, InterruptedException {
+        if (!recordBuffer.isEmpty()) {
+            commitBuffer(context.getCounter(RecordExportCounter.EXPORTED_RECORDS),
+                    context.getCounter(RecordExportCounter.ERROR_RECORDS));
+        }
+    }
+
+    @Override
+    public void startRecord(GenericData.Record record) throws IOException {
+    }
+
+    @Override
+    public void handleField(GenericData.Record record, Schema.Field field) throws IOException {
+    }
+
+    @Override
+    public void endRecord(GenericData.Record record) throws IOException {
     }
 }

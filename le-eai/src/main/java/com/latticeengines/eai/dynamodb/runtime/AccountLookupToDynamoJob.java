@@ -20,30 +20,24 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportJob;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 
-public class AtlasAccountLookupExportJob extends AvroExportJob {
+public class AccountLookupToDynamoJob extends AvroExportJob {
 
-    public static final String DYNAMO_EXPORT_JOB_TYPE = "atlasAccountLookupExportJob";
+    public static final String DYNAMO_EXPORT_JOB_TYPE = "accountLookupToDynamoJob";
 
     private int numMappers;
 
-    public AtlasAccountLookupExportJob(Configuration config) {
+    public AccountLookupToDynamoJob(Configuration config) {
         super(config);
     }
 
-    public AtlasAccountLookupExportJob(Configuration config, //
-                                       MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+    public AccountLookupToDynamoJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         super(config, mapReduceCustomizationRegistry);
-    }
-
-    @Override
-    public String getJobType() {
-        return DYNAMO_EXPORT_JOB_TYPE;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends Mapper> getMapperClass() {
-        return AtlasAccountLookupExportMapper.class;
+        return AccountLookupToDynamoMapper.class;
     }
 
     @Override
@@ -51,7 +45,12 @@ public class AtlasAccountLookupExportJob extends AvroExportJob {
         return numMappers;
     }
 
-    private void setNumMappers(int numMappers) {
+    @Override
+    public String getJobType() {
+        return DYNAMO_EXPORT_JOB_TYPE;
+    }
+
+    public void setNumMappers(int numMappers) {
         this.numMappers = numMappers;
     }
 
@@ -63,9 +62,9 @@ public class AtlasAccountLookupExportJob extends AvroExportJob {
         Configuration config = mrJob.getConfiguration();
         config.set(CONFIG_ATLAS_TENANT, (String) properties.get(CONFIG_ATLAS_TENANT));
         config.set(CONFIG_TABLE_NAME, (String) properties.get(CONFIG_TABLE_NAME));
-        config.set(CONFIG_ATLAS_LOOKUP_IDS, (String) properties.get(CONFIG_ATLAS_LOOKUP_IDS));
         config.set(CONFIG_EXPORT_VERSION, (String) properties.get(CONFIG_EXPORT_VERSION));
         config.set(CONFIG_ATLAS_LOOKUP_TTL, (String) properties.get(CONFIG_ATLAS_LOOKUP_TTL));
+        config.set(CONFIG_ATLAS_LOOKUP_IDS, (String) properties.get(CONFIG_ATLAS_LOOKUP_IDS));
 
         config.set(CONFIG_ENDPOINT, (String) properties.get(CONFIG_ENDPOINT));
         config.set(CONFIG_AWS_REGION, (String) properties.get(CONFIG_AWS_REGION));
