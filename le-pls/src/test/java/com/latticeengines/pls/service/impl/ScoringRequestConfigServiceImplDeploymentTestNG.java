@@ -26,10 +26,10 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.security.exposed.service.TenantService;
+
 public class ScoringRequestConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static String CREDENTIAL_NAME = "TEST-MARKETO-SCORING-CONFIG-";
