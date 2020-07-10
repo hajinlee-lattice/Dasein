@@ -26,7 +26,7 @@ public interface LookupIdMappingService {
 
     void deleteConnection(String lookupIdMapId, TraySettings traySettings);
 
-    Map<String, List<CDLExternalSystemMapping>> getAllLookupIdsByAudienceType(CDLExternalSystemType externalSystemType,
+    Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(CDLExternalSystemType externalSystemType,
             AudienceType audienceType);
 
     List<CDLExternalSystemType> getAllCDLExternalSystemType();

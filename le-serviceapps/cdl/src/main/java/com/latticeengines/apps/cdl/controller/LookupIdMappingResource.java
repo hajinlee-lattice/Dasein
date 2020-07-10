@@ -102,14 +102,14 @@ public class LookupIdMappingResource {
         lookupIdMappingService.deleteConnection(lookupIdMapId, traySettings);
     }
 
-    @GetMapping("/available-lookup-ids/{audienceType}")
+    @GetMapping("/available-lookup-ids")
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(@PathVariable String customerSpace, //
-            @PathVariable AudienceType audienceType, //
+            @RequestParam(value = "audienceType", defaultValue = "ACCOUNTS", required = false) AudienceType audienceType, //
             @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
             CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingService.getAllLookupIdsByAudienceType(externalSystemType, audienceType);
+        return lookupIdMappingService.getAllLookupIds(externalSystemType, audienceType);
     }
 
     @GetMapping("/all-external-system-types")
