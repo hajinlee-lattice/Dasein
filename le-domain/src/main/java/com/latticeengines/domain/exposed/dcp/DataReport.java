@@ -47,6 +47,9 @@ public class DataReport {
     @JsonProperty("refreshTimestamp")
     private Long refreshTimestamp;
 
+    @JsonProperty("snapshotTimestamp")
+    private Long snapshotTimestamp;
+
     public BasicStats getBasicStats() {
         return basicStats;
     }
@@ -91,8 +94,21 @@ public class DataReport {
         return refreshTimestamp;
     }
 
+    public Long getSnapshotTimestamp() {
+        return snapshotTimestamp;
+    }
+
+    public void setSnapshotTimestamp(Long snapshotTimestamp) {
+        this.snapshotTimestamp = snapshotTimestamp;
+    }
+
     public void setRefreshTimestamp(Long refreshTimestamp) {
         this.refreshTimestamp = refreshTimestamp;
+    }
+
+    public DataReport combineReport(DataReport dataReport) {
+        this.basicStats.add(dataReport.getBasicStats());
+        this.matchToDUNSReport.
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -165,6 +181,16 @@ public class DataReport {
         public void setUnmatchedCnt(Long unmatchedCnt) {
             this.unmatchedCnt = unmatchedCnt;
         }
+
+        public BasicStats add(BasicStats basicStats) {
+            this.totalSubmitted += basicStats.getTotalSubmitted();
+            this.successCnt += basicStats.getSuccessCnt();
+            this.errorCnt += basicStats.getErrorCnt();
+            this.matchedCnt += basicStats.getMatchedCnt();
+            this.pendingReviewCnt += basicStats.getPendingReviewCnt();
+            this.unmatchedCnt += basicStats.getUnmatchedCnt();
+            return this;
+        }
     }
 
 
@@ -219,6 +245,17 @@ public class DataReport {
                 presenceItem.setRate(getScaledDouble((presenceCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             presenceMap.put(field, presenceItem);
+        }
+
+        @JsonIgnore
+        public InputPresenceReport addPresence(PresenceItem presenceItem) {
+            if (presenceMap == null) {
+                presenceMap = new HashMap<>();
+            }
+            String field = presenceItem.getField();
+            PresenceItem oldItem = presenceMap.get(field);
+
+            return this;
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)
