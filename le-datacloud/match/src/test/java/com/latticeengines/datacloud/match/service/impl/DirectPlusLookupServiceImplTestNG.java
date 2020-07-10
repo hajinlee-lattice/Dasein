@@ -19,6 +19,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -36,6 +37,9 @@ public class DirectPlusLookupServiceImplTestNG extends DataCloudMatchFunctionalT
 
     @Inject
     private DirectPlusRealTimeLookupServiceImpl lookupService;
+
+    @Inject
+    private NameLocationService nameLocationService;
 
     @Inject
     private DnBAuthenticationService dnbAuthenticationService;
@@ -224,5 +228,42 @@ public class DirectPlusLookupServiceImplTestNG extends DataCloudMatchFunctionalT
         return new Object[][] {
                 { "GOOGLE", "USA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZZZZZFZZ"),
                         "GOOGLE LLC", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" }, };
+    }
+
+    @Test(groups = "dnb", dataProvider = "streetInputData", priority = 1, retryAnalyzer = SimpleRetryAnalyzer.class)
+    public void testStreetLookupService(String name, String city, String state, String country, String countryCode,
+                                                String address, String phoneNumber) {
+        MatchKeyTuple input = new MatchKeyTuple();
+        input.setCountry(country);
+        input.setCountryCode(countryCode);
+        input.setName(name);
+        input.setState(state);
+        input.setCity(city);
+        input.setPhoneNumber(phoneNumber);
+        input.setAddress(address);
+        DnBMatchContext context = new DnBMatchContext();
+        context.setInputNameLocation(input);
+        nameLocationService.normalize(context.getInputNameLocation());
+        context.setLookupRequestId(UUID.randomUUID().toString());
+
+        DnBMatchContext res = lookupService.realtimeEntityLookup(context);
+        Assert.assertNotNull(res.getDuration());
+        log.info("InputName={}, DnBReturnCode={}, ConfidenceCode={}, MatchGrade={}, OutOfBusiness={}",
+                res.getInputNameLocation().getName(), res.getDnbCode(), res.getConfidenceCode(),
+                res.getMatchGrade() != null ? res.getMatchGrade().getRawCode() : null, res.isOutOfBusiness());
+
+        Assert.assertNotNull(res.getDuration());
+        log.info("Match duration: {}", res.getDuration());
+        if (res.getMatchGrade() != null) {
+            Assert.assertNotNull(res.getMatchGrade().getRawCode());
+        }
+
+    }
+
+    @DataProvider(name = "streetInputData")
+    public static Object[][] getStreetInputData() {
+        return new Object[][]{
+                { "McDonalds", "New York", "New York", "USA", "US", "1651 Broadway", "2125865530" },
+        };
     }
 }
