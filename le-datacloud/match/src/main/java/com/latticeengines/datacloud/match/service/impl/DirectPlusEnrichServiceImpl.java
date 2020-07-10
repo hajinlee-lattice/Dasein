@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.DPLUS;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.ENRICH;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,6 +53,9 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     @Value("${datacloud.dnb.direct.plus.data.block.chunk.size}")
     private int chunkSize;
 
+    @Value("${datacloud.dnb.direct.plus.enrich.url}")
+    private String enrichUrl;
+
     private volatile RestApiClient apiClient;
     private volatile ExecutorService fetchers;
 
@@ -102,7 +105,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     }
 
     private Map<String, Object> fetch(String duns) {
-        String resp = sendRequest("https://plus.dnb.com/v1/data/duns/" + duns + "?blockIDs=companyinfo_L1_v1");
+        String resp = sendRequest(enrichUrl + "/duns/" + duns + "?blockIDs=companyinfo_L1_v1");
         return DirectPlusUtils.parseDataBlock(resp);
     }
 
@@ -112,7 +115,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     @Cacheable(cacheNames = CacheName.Constants.DnBRealTimeLookup, key = "T(java.lang.String).format(\"%s\", #url)")
     public String sendCacheableRequest(String url) {
-        String token = dnBAuthenticationService.requestToken(DPLUS, null);
+        String token = dnBAuthenticationService.requestToken(ENRICH, null);
         HttpEntity<String> entity = constructEntity(token);
         return client().get(entity, url);
     }

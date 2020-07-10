@@ -57,7 +57,7 @@ public class DirectPlusBulkLookupFetcherImpl extends BaseDnBBulkLookupFetcherImp
 
     @Override
     protected DnBKeyType keyType() {
-        return DnBKeyType.DPLUS;
+        return DnBKeyType.MATCH;
     }
 
     @Override

@@ -47,21 +47,23 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     @Value("${datacloud.dnb.realtime.api.key}")
     private String realtimeKey;
-
-    @Value("${datacloud.dnb.bulk.api.key}")
-    private String batchKey;
-
-    @Value("${datacloud.dnb.dplus.api.key}")
-    private String dplusKey;
-
     @Value("${datacloud.dnb.realtime.password.encrypted}")
     private String realtimePwd;
 
+    @Value("${datacloud.dnb.bulk.api.key}")
+    private String batchKey;
     @Value("${datacloud.dnb.bulk.password.encrypted}")
     private String batchPwd;
 
-    @Value("${datacloud.dnb.dplus.password.encrypted}")
-    private String dplusPwd;
+    @Value("${datacloud.dnb.dplus.match.api.key}")
+    private String dplusMatchKey;
+    @Value("${datacloud.dnb.dplus.match.password.encrypted}")
+    private String dplusMatchPwd;
+
+    @Value("${datacloud.dnb.dplus.enrich.api.key}")
+    private String dplusEnrichKey;
+    @Value("${datacloud.dnb.dplus.enrich.password.encrypted}")
+    private String dplusEnrichPwd;
 
     @Value("${datacloud.dnb.user.header}")
     private String username;
@@ -73,7 +75,10 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private String url;
 
     @Value("${datacloud.dnb.direct.plus.token.url}")
-    private String dplusUrl;
+    private String dplusMatchUrl;
+
+    @Value("${datacloud.dnb.direct.plus.enrich.token.url}")
+    private String dplusEnrichUrl;
 
     @Value("${datacloud.dnb.application.id.header}")
     private String appIdHeader;
@@ -334,7 +339,8 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             String response = dnbAuthenticateRequest(type);
             String token;
             switch (type) {
-            case DPLUS:
+            case MATCH:
+            case ENRICH:
                 token = parseDplusResponse(response);
                 break;
             default:
@@ -356,17 +362,23 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      * @return response: DnB authentication API response
      */
     private String dnbAuthenticateRequest(DnBKeyType type) {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> entity;
         switch (type) {
         case REALTIME:
             return dnbClient.post(getHttpEntity(realtimeKey, realtimePwd), url);
         case BATCH:
             return dnbClient.post(getHttpEntity(batchKey, batchPwd), url);
-        case DPLUS:
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBasicAuth(dplusKey, dplusPwd);
+        case MATCH:
+            headers.setBasicAuth(dplusMatchKey, dplusMatchPwd);
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> entity = new HttpEntity<>("{ \"grant_type\" : \"client_credentials\" }", headers);
-            return dnbClient.post(entity, dplusUrl);
+            entity = new HttpEntity<>("{ \"grant_type\" : \"client_credentials\" }", headers);
+            return dnbClient.post(entity, dplusMatchUrl);
+        case ENRICH:
+            headers.setBasicAuth(dplusEnrichKey, dplusEnrichPwd);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            entity = new HttpEntity<>("{ \"grant_type\" : \"client_credentials\" }", headers);
+            return dnbClient.post(entity, dplusEnrichUrl);
         default:
             throw new UnsupportedOperationException(
                     String.format("DnBKeyType %s is not supported in DnBAuthenticationService.", type.name()));
