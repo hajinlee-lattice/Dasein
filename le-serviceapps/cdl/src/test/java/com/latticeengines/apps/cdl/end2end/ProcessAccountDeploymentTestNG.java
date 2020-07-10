@@ -130,6 +130,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     private void verifyAccountProfile() {
+        if (!useChangeList) {
+            return;
+        }
         Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.AccountProfile);
         Assert.assertNotNull(table);
         table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.LatticeAccountProfile);
