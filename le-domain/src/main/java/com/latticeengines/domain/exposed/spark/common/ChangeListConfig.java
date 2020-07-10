@@ -16,10 +16,6 @@ public class ChangeListConfig extends SparkJobConfig implements Serializable {
     @JsonProperty("ExclusionColumns")
     private List<String> exclusionColumns;
 
-    // left=fromTable, right=toTable, default is outer join
-    @JsonProperty("JoinType")
-    private String joinType;
-
     @JsonProperty("CreationMode")
     private String creationMode = ChangeListConstants.CompleteMode;
 

@@ -233,8 +233,8 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
             ObjectMapper om = JsonUtils.getObjectMapper();
             JsonNode node = om.readTree(accountReportStr);
             JsonNode report = node.get(BusinessEntity.Account.name());
-            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_NEW).asInt(), 2);
-            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 2);
+            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_NEW).asInt(), 0);
+            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 0);
             Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UNMATCH).asInt(), 1);
         } catch (IOException e) {
             throw new RuntimeException("Fail to read parse report: " + accountReportStr);
@@ -248,7 +248,7 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
             JsonNode node = om.readTree(contactReportStr);
             JsonNode report = node.get(BusinessEntity.Contact.name());
             Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_NEW).asInt(), 0);
-            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 3);
+            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 0);
             Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_MATCH).asInt(), 1);
         } catch (IOException e) {
             throw new RuntimeException("Fail to read parse report: " + contactReportStr);
