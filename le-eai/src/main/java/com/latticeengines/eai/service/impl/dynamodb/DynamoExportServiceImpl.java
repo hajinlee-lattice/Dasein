@@ -82,16 +82,20 @@ public class DynamoExportServiceImpl extends ExportService {
     public void exportDataFromHdfs(ExportConfiguration exportConfig, ExportContext context) {
         Properties props = constructProperties(exportConfig, context);
         ApplicationId appId;
-        switch (exportConfig.getProperties().get(CONFIG_EXPORT_TYPE)) {
-        case AtlasAccountLookupExportStepConfiguration.NAME:
-            log.info("Updating {} table with account change list", exportConfig.getProperties().get(CONFIG_TABLE_NAME));
-            appId = eaiYarnService.submitMRJob(AtlasAccountLookupExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
-            break;
-        case AccountLookupToDynamoStepConfiguration.NAME:
-            log.info("Republishing lookup entries of tenant {}", exportConfig.getProperties().get(CONFIG_ATLAS_TENANT));
-            appId = eaiYarnService.submitMRJob(AccountLookupToDynamoJob.DYNAMO_EXPORT_JOB_TYPE, props);
-            break;
-        default:
+        if (exportConfig.getProperties().containsKey(CONFIG_EXPORT_TYPE)) {
+            switch (exportConfig.getProperties().get(CONFIG_EXPORT_TYPE)) {
+                case AtlasAccountLookupExportStepConfiguration.NAME:
+                    log.info("Updating {} table with account change list", exportConfig.getProperties().get(CONFIG_TABLE_NAME));
+                    appId = eaiYarnService.submitMRJob(AtlasAccountLookupExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
+                    break;
+                case AccountLookupToDynamoStepConfiguration.NAME:
+                    log.info("Republishing lookup entries of tenant {}", exportConfig.getProperties().get(CONFIG_ATLAS_TENANT));
+                    appId = eaiYarnService.submitMRJob(AccountLookupToDynamoJob.DYNAMO_EXPORT_JOB_TYPE, props);
+                    break;
+                default:
+                    throw new UnsupportedOperationException(String.format("export type %s is not supported", exportConfig.getProperties().get(CONFIG_EXPORT_TYPE)));
+            }
+        } else {
             log.info("Submitting DynamoExportJob");
             appId = eaiYarnService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
         }
