@@ -45,7 +45,7 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
     val depivotedMap = depivot(inputData)
 
     val withBktCnt = depivotedMap.values.par.map(df => {
-      val withBktId = toBktId(spark, df, filteredProfile).persist(StorageLevel.DISK_ONLY).checkpoint()
+      val withBktId = toBktId(spark, df, filteredProfile)
       val withBktCnt = withBktId.groupBy(AttrName, BktId).count().withColumnRenamed("count", Count)
       val bktCntAgg = new BucketCountAggregation
       withBktCnt.groupBy(AttrName) //
@@ -114,7 +114,7 @@ class CalcStatsJob extends AbstractSparkJob[CalcStatsConfig] {
       .withColumn(AttrName, coalesce(col(SrcAttrName), col(AttrName)))
       .select(AttrName, BktAlgo)
       .orderBy(AttrName)
-      .persist(StorageLevel.MEMORY_ONLY)
+      .persist(StorageLevel.MEMORY_AND_DISK)
   }
 
   private def toBktId(spark: SparkSession, depivoted: DataFrame, profile: DataFrame): DataFrame = {

@@ -134,11 +134,13 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
                     log.info("Need to fully re-calculate {} stats, because there is no change list table.", baseRole);
                     fullReCalc = true;
                 } else {
-                    reProfileAttrs = getListObjectFromContext(reProfileAttrsKey, String.class);
-                    if (reProfileAttrs == null) {
-                        log.info("Need to fully re-calculate {} stats, because there is no list in {}", //
-                                baseRole, reProfileAttrsKey);
-                        fullReCalc = true;
+                    if (isChanged(profileRole)) {
+                        reProfileAttrs = getListObjectFromContext(reProfileAttrsKey, String.class);
+                        if (reProfileAttrs == null) {
+                            log.info("Need to fully re-calculate {} stats, because there is no list in {}", //
+                                    baseRole, reProfileAttrsKey);
+                            fullReCalc = true;
+                        }
                     }
                 }
             }
@@ -147,24 +149,32 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
                 statsResult.setName(baseRole + "Stats");
                 statsTables.add(statsResult);
             } else {
-                Preconditions.checkNotNull(reProfileAttrs, //
-                        "Must save re-profile attrs list in " + reProfileAttrsKey);
-                Preconditions.checkNotNull(changeListTbl, "Must have change list table " + changeListKey);
                 // partial re-calculate
+                Preconditions.checkNotNull(changeListTbl, "Must have change list table " + changeListKey);
                 HdfsDataUnit profileData = profileTbl.toHdfsDataUnit("Profile");
-                log.info("There {} attributes need full stats calculation.", reProfileAttrs.size());
-                HdfsDataUnit statsResult = calcStats(baseTable, profileData, reProfileAttrs);
-                statsResult.setName(baseRole + "Stats");
-                statsTables.add(statsResult);
-
                 List<String> partialAttrs = Arrays.asList(baseTable.getAttributeNames());
-                partialAttrs.removeAll(reProfileAttrs);
+                if (CollectionUtils.isNotEmpty(reProfileAttrs)) {
+                    // handle re-profile attrs
+                    log.info("There {} attributes need full stats calculation.", reProfileAttrs.size());
+                    HdfsDataUnit statsResult = calcStats(baseTable, profileData, reProfileAttrs);
+                    statsResult.setName(baseRole + "Stats");
+                    statsTables.add(statsResult);
+
+                    partialAttrs.removeAll(reProfileAttrs);
+                } else {
+                    log.info("There are no attributes need full stats calculation.");
+                }
                 if (CollectionUtils.isNotEmpty(partialAttrs)) {
                     log.info("There {} attributes need partial stats calculation.", partialAttrs.size());
                     CalcStatsDeltaConfig deltaConfig = new CalcStatsDeltaConfig();
                     deltaConfig.setIncludeAttrs(partialAttrs);
+                    deltaConfig.setInput(Arrays.asList( //
+                            changeListTbl.toHdfsDataUnit("ChangeList"), profileData) //
+                    );
                     SparkJobResult sparkJobResult = runSparkJob(CalcStatsDeltaJob.class, deltaConfig);
                     statsDiffTables.add(sparkJobResult.getTargets().get(0));
+                } else {
+                    log.info("There are no attributes need partial stats calculation.");
                 }
 
             }
@@ -241,7 +251,7 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
         }
 
         StatsCube updateCube = null;
-        if (statsTbl != null) {
+        if (statsDiffTbl != null) {
             updateCube = getStatsCube(statsDiffTbl.toHdfsDataUnit("StatsDiff"));
             log.info("Parsed a update cube of {} attributes", updateCube.getStatistics().size());
         }
