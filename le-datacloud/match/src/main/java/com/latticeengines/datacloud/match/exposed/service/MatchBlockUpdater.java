@@ -14,6 +14,8 @@ public interface MatchBlockUpdater {
     MatchBlockUpdater errorMessage(String errorMessage);
     MatchBlockUpdater matchedRows(int matchedRows);
     MatchBlockUpdater matchResults(Map<EntityMatchResult, Long> matchResultMap);
+
+    MatchBlockUpdater newEntityCounts(Map<String, Long> newEntityCounts);
     MatchBlock commit();
 
 }

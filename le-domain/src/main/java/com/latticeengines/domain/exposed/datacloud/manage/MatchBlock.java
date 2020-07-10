@@ -73,6 +73,10 @@ public class MatchBlock implements HasPid {
     @Column(name = "MatchResults", columnDefinition = "'JSON'")
     @org.hibernate.annotations.Type(type = "json")
     private Map<EntityMatchResult, Long> matchResults;
+    @JsonProperty("NewEntityCounts")
+    @Column(name = "NewEntityCounts", columnDefinition = "'JSON'")
+    @org.hibernate.annotations.Type(type = "json")
+    private Map<String, Long> newEntityCounts;
     @JsonProperty("ApplicationState")
     @Enumerated(EnumType.STRING)
     @Column(name = "ApplicationState", nullable = false, length = 20)
@@ -132,6 +136,14 @@ public class MatchBlock implements HasPid {
 
     public void setMatchResults(Map<EntityMatchResult, Long> matchResults) {
         this.matchResults = matchResults;
+    }
+
+    public Map<String, Long> getNewEntityCounts() {
+        return newEntityCounts;
+    }
+
+    public void setNewEntityCounts(Map<String, Long> newEntityCounts) {
+        this.newEntityCounts = newEntityCounts;
     }
 
     public YarnApplicationState getApplicationState() {
