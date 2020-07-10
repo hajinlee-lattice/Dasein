@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -50,7 +50,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
     private MetadataProxy metadataProxy;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
@@ -104,7 +104,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
             AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
             emailInfo.setUserId(userId);
             try {
-                plsInternalProxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                emailProxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
             } catch (Exception e) {
                 log.error("Can not send process analyze email: " + e.getMessage());
             }

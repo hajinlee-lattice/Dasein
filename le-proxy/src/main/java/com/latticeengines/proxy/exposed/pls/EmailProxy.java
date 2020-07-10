@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
-public interface PlsInternalProxy {
+public interface EmailProxy {
 
     boolean sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo);
 

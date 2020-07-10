@@ -19,21 +19,21 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
  * the plan is to remove all the proxy that uses DeprecatedBaseRestApiProxy in the future,
  * so suppress for now.
  */
-@Component("plsInterProxy")
-public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInternalProxy {
+@Component("emailProxy")
+public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
 
-    private static final Logger log = LoggerFactory.getLogger(PlsInternalProxyImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailProxyImpl.class);
 
     private static final String INSIGHTS_PATH = "/insights";
 
     private static final String PLS_INTERNAL_ENRICHMENT = "/internal/enrichment";
 
-    public PlsInternalProxyImpl() {
+    public EmailProxyImpl() {
         super(PropertyUtils.getProperty("common.pls.url"), "pls");
     }
 
 
-    public PlsInternalProxyImpl(String hostPort) {
+    public EmailProxyImpl(String hostPort) {
         super(hostPort, "pls");
     }
 
