@@ -25,11 +25,17 @@ public class SQSMessageClassifyServiceImpl implements SQSMessageClassifyService 
     @Value("${cdl.s3.import.enabled}")
     private boolean importEnabled;
 
+    @Value("${cdl.s3.import.message.scan.period.seconds}")
+    private int scanPeriod;
+
     @PostConstruct
     public void initialize() {
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(//
-                updateMessageUrlRunnable(), 2, //
-                30, TimeUnit.SECONDS);
+        if (importEnabled) {
+            log.info(String.format("Import enabled for current stack, create scheduled task (scan period %d seconds) " +
+                    "for import message classification.", scanPeriod));
+            Executors.newScheduledThreadPool(1).scheduleAtFixedRate(//
+                    updateMessageUrlRunnable(), 2, scanPeriod, TimeUnit.SECONDS);
+        }
     }
 
     private Runnable updateMessageUrlRunnable() {
