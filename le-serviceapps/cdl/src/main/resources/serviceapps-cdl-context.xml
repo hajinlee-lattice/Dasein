@@ -45,30 +45,4 @@
                       entity-manager-factory-ref="entityManagerFactoryReader"
                       transaction-manager-ref="transactionManagerReader"/>
 
-    <bean name="sqsMessageClassifyJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="durability" value="true" />
-        <property name="jobClass"
-                  value="com.latticeengines.apps.cdl.service.impl.SQSMessageClassifyServiceImpl" />
-        <property name="jobDataAsMap">
-            <map>
-                <entry key="s3ImportService" value-ref="s3ImportService" />
-                <entry key="importEnabled" value="${cdl.s3.import.enabled}" />
-<!--                <entry key="hostUrl" value="${common.microservice.url}" />-->
-            </map>
-        </property>
-    </bean>
-
-    <bean id="sqsMessageClassifyCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="sqsMessageClassifyJob" />
-        <property name="cronExpression" value="${cdl.s3.import.message.classify.cron}" />
-    </bean>
-
-    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="triggers">
-            <list>
-                <ref bean="sqsMessageClassifyCronTrigger" />
-            </list>
-        </property>
-    </bean>
-
 </beans>
