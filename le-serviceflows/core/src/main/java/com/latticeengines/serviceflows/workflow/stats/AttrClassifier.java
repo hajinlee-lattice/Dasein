@@ -126,7 +126,7 @@ public class AttrClassifier {
                 }
             }
         }
-        log.info(String.format("ID attr: %s (unencode)", idAttr));
+        log.debug(String.format("ID attr: %s (unencode)", idAttr));
         this.idAttr = idAttr;
     }
 
@@ -185,8 +185,6 @@ public class AttrClassifier {
     private boolean isIdAttr(ColumnMetadata column) {
         return column.getAttrName().equals(idAttr);
     }
-
-
 
     private boolean isAttrToDiscard(ColumnMetadata column) {
         boolean discard = false;

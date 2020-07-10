@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +23,7 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
 
     protected abstract TableRoleInCollection getBaseTableRole();
     protected abstract List<String> getIncludeAttrs();
+    protected abstract boolean getConsiderAMAttrs();
     protected abstract String getBaseChangeListCtxKey();
     protected abstract String getReProfileAttrsCtxKey();
 
@@ -57,21 +57,23 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
             String profileTableName = dataCollectionProxy.getTableName(customerSpaceStr, profileRole, inactive);
             putStringValueInContext(profileCtxKey, profileTableName);
         } else {
-            Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+            Table baseTable = attemptGetTableRole(baseTableRole, true);
             List<String> includeAttrs = getIncludeAttrs();
             if (shouldRecalculateProfile()) {
                 log.info("Should rebuild {}.", profileRole);
-                profile(customerAccount, profileRole, //
+                log.info("considerAMAttrs={}", getConsiderAMAttrs());
+                profile(baseTable, profileRole, //
                         profileCtxKey, includeAttrs, getDeclaredAttrs(), //
-                        false, true, true);
+                        getConsiderAMAttrs(), true, true);
             } else {
                 log.info("Should partial update {} using change list.", profileRole);
+                log.info("considerAMAttrs={}", getConsiderAMAttrs());
                 Table changeListTbl = getTableSummaryFromKey(customerSpaceStr, baseChangeListKey);
                 Preconditions.checkNotNull(changeListTbl, "Must have base change list table");
                 Table oldProfileTbl = attemptGetTableRole(profileRole, true);
-                profileWithChangeList(customerAccount, changeListTbl, oldProfileTbl, //
+                profileWithChangeList(baseTable, changeListTbl, oldProfileTbl, //
                         profileRole, profileCtxKey, reProfileAttrsKey, includeAttrs, getDeclaredAttrs(), //
-                        false, true, true);
+                        getConsiderAMAttrs(), true, true);
             }
             String profileTableName = dataCollectionProxy.getTableName(customerSpaceStr, profileRole, inactive);
             putStringValueInContext(profileCtxKey, profileTableName);
