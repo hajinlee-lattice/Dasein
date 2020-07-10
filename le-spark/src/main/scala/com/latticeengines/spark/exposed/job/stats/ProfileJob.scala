@@ -42,7 +42,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     } else {
       profileNumAttrs(spark, numAttrs, totalCnt, numAttrs.columns, detectDiscrete,
         config.getMaxDiscrete, config.getBucketNum, config.getMinBucketSize, randomSeed)
-    }.persist(StorageLevel.DISK_ONLY).checkpoint()
+    }.persist(StorageLevel.MEMORY_AND_DISK)
 
     val catAttrs: List[String] =
       if (config.getCatAttrs == null) List() else config.getCatAttrs.asScala.map(_.getAttr).toList
@@ -50,7 +50,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
       profileStrAttrsIndividually(spark, inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)
     } else {
       profileStrAttrs(spark, inputData, totalCnt, catAttrs, config.getMaxCat, config.getMaxCatLength, randomSeed)
-    }.persist(StorageLevel.DISK_ONLY).checkpoint()
+    }.persist(StorageLevel.MEMORY_AND_DISK)
 
     val result = numProfile.union(strProfile)
       .withColumn(DataCloudConstants.PROFILE_ATTR_SRCATTR, lit(null).cast("string"))

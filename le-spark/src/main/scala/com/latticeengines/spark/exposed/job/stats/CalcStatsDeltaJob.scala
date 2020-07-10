@@ -46,7 +46,7 @@ class CalcStatsDeltaJob extends AbstractSparkJob[CalcStatsDeltaConfig] {
     val cells = keepCells(noRemoveCols)
 
     val profile = filterProfile(lattice.input(1))
-    val withBktIds = toBktIds(spark, cells, profile).checkpoint()
+    val withBktIds = toBktIds(spark, cells, profile).persist(StorageLevel.DISK_ONLY)
 
     val fromBkts = cntBkt(withBktIds, FromBktId).withColumn(Count, col(Count) * -1)
     val toBkts = cntBkt(withBktIds, ToBktId)
@@ -55,8 +55,7 @@ class CalcStatsDeltaJob extends AbstractSparkJob[CalcStatsDeltaConfig] {
       .agg(bktCntAgg(col(BktId), col(Count)).as("agg")) //
       .withColumn(NotNullCount, col(s"agg.$BktSum")) //
       .withColumn(Bkts, col(s"agg.$Bkts")) //
-      .drop("agg") //
-      .persist(StorageLevel.MEMORY_AND_DISK)
+      .drop("agg")
 
     val result = bktCnts.join(profile.select(AttrName, BktAlgo), Seq(AttrName), joinType = "left")
       .withColumn(NotNullCount, when(col(NotNullCount).isNull, lit(0L)).otherwise(col(NotNullCount)))
@@ -149,7 +148,7 @@ class CalcStatsDeltaJob extends AbstractSparkJob[CalcStatsDeltaConfig] {
       .withColumn(AttrName, coalesce(col(SrcAttrName), col(AttrName)))
       .select(AttrName, BktAlgo)
       .orderBy(AttrName)
-      .persist(StorageLevel.MEMORY_ONLY)
+      .persist(StorageLevel.MEMORY_AND_DISK)
   }
 
 }
