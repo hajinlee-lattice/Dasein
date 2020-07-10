@@ -123,11 +123,10 @@ public final class EntityMatchDynamoUtils {
         return new PrimaryKey(ATTR_PARTITION_KEY, partitionKey, ATTR_RANGE_KEY, sortKey);
     }
 
-    /*
+    /*-
      * Dynamo key format: - Partition Key:
-     * SEED_<TENANT_PID>_<SERVING_VERSION>_<ENTITY>_<LOOKUP_TYPE>_<
-     * SERIALIZED_KEY_VALUES> - E.g.,
-     * "LOOKUP_123_0_Account_DOMAIN_COUNTRY_google.com_USA"
+     * LOOKUP_<SHORT_TENANT_ID>_<SERVING_VERSION>_<ENTITY>_<LOOKUP_TYPE>_<SERIALIZED_KEY_VALUES>
+     * E.g., "LOOKUP_123_0_Account_DOMAIN_COUNTRY_google.com_USA"
      */
     private static PrimaryKey buildServingKey(@NotNull Tenant tenant, @NotNull EntityLookupEntry entry, int version) {
         String lookupKey = serialize(entry);

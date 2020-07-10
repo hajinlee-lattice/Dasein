@@ -294,7 +294,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
-    protected static final String TIMELINE_RAWTABLE_NAME = "TIMELINE_RAWTABLE_NAME";
+    protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
+    protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
+    protected static final String JOURNEY_STAGE_GENERATED = "JOURNEY_STAGE_GENERATED";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -410,6 +412,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             METRICS_GROUP_TABLE_NAME, //
             MERGED_METRICS_GROUP_TABLE_NAME, //
             PERIOD_STORE_TABLE_NAME, //
+            TIMELINE_MASTER_TABLE_NAME, //
+            TIMELINE_DIFF_TABLE_NAME, //
             LAST_ACTIVITY_DATE_TABLE_NAME);
 
     protected static final Set<String> REMATCH_TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
@@ -429,6 +433,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_REMATCH_STAGING_VERSION, //
             NEW_RECORD_CUT_OFF_TIME, //
             CONSOLIDATE_INPUT_TEMPLATES, //
+            JOURNEY_STAGE_GENERATED,
             PROCESS_ACCOUNT_STATS_MERGE);
 
     @Autowired
