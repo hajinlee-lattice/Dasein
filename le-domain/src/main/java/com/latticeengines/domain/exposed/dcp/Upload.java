@@ -191,10 +191,12 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public enum Status{
         NEW,
-        IMPORT_STARTED,
-        IMPORT_FINISHED,
+        INGESTION_STARTED,
+        INGESTION_FINISHED,
         MATCH_STARTED,
         MATCH_FINISHED,
+        ANALYSIS_STARTED,
+        ANALYSIS_FINISHED,
         FINISHED,
         ERROR
     }

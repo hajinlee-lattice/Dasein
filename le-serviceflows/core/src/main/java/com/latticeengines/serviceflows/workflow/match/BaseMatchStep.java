@@ -75,6 +75,7 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         MatchCommand command = bulkMatchService.match(input, getPredeterminedRootOperationUid());
         log.info("Bulk match finished: {}", JsonUtils.serialize(command));
         postMatchProcessing(input, command);
+        onMatchCompleted();
     }
 
     protected abstract String getInputAvroPath();
@@ -151,5 +152,7 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toSet());
     }
+
+    protected abstract void onMatchCompleted();
 
 }

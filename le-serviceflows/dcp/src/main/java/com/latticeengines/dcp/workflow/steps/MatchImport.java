@@ -74,11 +74,21 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
 
+        log.info("keymap in matchinput : " + JsonUtils.serialize(matchInput.getKeyMap()));
+
         List<String> columnIds = getDCPEnrichAttrs();
         List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         matchInput.setCustomSelection(columnSelection);
+    }
+
+    @Override
+    protected void onMatchCompleted() {
+        String uploadId = configuration.getUploadId();
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
     }
 
     //FIXME: in alpha release, use a hard coded enrich list

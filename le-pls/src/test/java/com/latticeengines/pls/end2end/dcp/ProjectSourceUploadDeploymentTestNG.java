@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.pls.FileProperty;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -91,6 +92,9 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     public void testFlow() {
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+
+        List<FieldDefinition> fields = fieldDefinitionsRecord.getFieldDefinitionsRecordsMap().get("Matching Fields");
+        fields.get(1).setMatchingColumnNames(Collections.singletonList("Street"));
 
         ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID, Project.ProjectType.Type1);
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
