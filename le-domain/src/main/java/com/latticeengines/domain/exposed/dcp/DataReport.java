@@ -108,7 +108,7 @@ public class DataReport {
 
     public DataReport combineReport(DataReport dataReport) {
         this.basicStats.add(dataReport.getBasicStats());
-        this.matchToDUNSReport.
+        return this;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
