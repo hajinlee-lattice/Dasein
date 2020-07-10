@@ -30,12 +30,17 @@ public class NameLocationServiceImpl implements NameLocationService {
         String cleanCity = NameStringStandardizationUtils.getStandardString(nameLocation.getCity());
         String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(nameLocation.getPhoneNumber(), countryCode);
         String cleanZipCode = StringStandardizationUtils.getStandardString(nameLocation.getZipcode());
+        String cleanStreet = StringStandardizationUtils.getStandardString(nameLocation.getStreet());
+        String cleanStreet2 = StringStandardizationUtils.getStandardString(nameLocation.getStreet2());
+
 
         nameLocation.setName(cleanName);
         nameLocation.setState(cleanState);
         nameLocation.setCountry(cleanCountry);
         nameLocation.setCountryCode(countryCode);
         nameLocation.setCity(cleanCity);
+        nameLocation.setStreet(cleanStreet);
+        nameLocation.setStreet2(cleanStreet2);
 
         nameLocation.setZipcode(cleanZipCode);
         nameLocation.setPhoneNumber(cleanPhoneNumber);
