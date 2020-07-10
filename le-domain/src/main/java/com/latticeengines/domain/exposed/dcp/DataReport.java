@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 /**
  * JSON definition for Dashboard Report
@@ -46,6 +47,13 @@ public class DataReport {
 
     @JsonProperty("refreshTimestamp")
     private Long refreshTimestamp;
+
+    @JsonProperty("snapshotTimestamp")
+    private Long snapshotTimestamp;
+
+    @JsonProperty("dunsCount")
+    private Table dunsCount;
+
 
     public BasicStats getBasicStats() {
         return basicStats;
@@ -93,6 +101,22 @@ public class DataReport {
 
     public void setRefreshTimestamp(Long refreshTimestamp) {
         this.refreshTimestamp = refreshTimestamp;
+    }
+
+    public Long getSnapshotTimestamp() {
+        return snapshotTimestamp;
+    }
+
+    public void setSnapshotTimestamp(Long snapshotTimestamp) {
+        this.snapshotTimestamp = snapshotTimestamp;
+    }
+
+    public Table getDunsCount() {
+        return dunsCount;
+    }
+
+    public void setDunsCount(Table dunsCount) {
+        this.dunsCount = dunsCount;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

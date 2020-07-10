@@ -98,6 +98,11 @@ public class DataReportServiceImpl implements DataReportService {
             if (dataReport.getDuplicationReport() != null) {
                 dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
             }
+            if (dataReport.getDunsCount() != null) {
+                dataReportRecord.setDunsCount(dataReport.getDunsCount());
+                dataReportRecord.setDataSnapshotTime(new Date());
+            }
+
             dataReportRecord.setRefreshTime(new Date());
             dataReportEntityMgr.update(dataReportRecord);
         } else {
@@ -108,6 +113,10 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportRecord.setMatchToDUNSReport(dataReport.getMatchToDUNSReport());
             dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
             dataReportRecord.setParentId(getParentPid(customerSpace, level, ownerId));
+            if (dataReport.getDunsCount() != null) {
+                dataReportRecord.setDunsCount(dataReport.getDunsCount());
+                dataReportRecord.setDataSnapshotTime(new Date());
+            }
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
         }
@@ -307,6 +316,12 @@ public class DataReportServiceImpl implements DataReportService {
         dataReport.setGeoDistributionReport(record.getGeoDistributionReport());
         dataReport.setMatchToDUNSReport(record.getMatchToDUNSReport());
         dataReport.setDuplicationReport(record.getDuplicationReport());
+        if (record.getDataSnapshotTime() != null) {
+            dataReport.setSnapshotTimestamp(record.getDataSnapshotTime().getTime());
+        }
+        if (record.getDunsCount() != null) {
+            dataReport.setDunsCount(record.getDunsCount());
+        }
         return dataReport;
     }
 }

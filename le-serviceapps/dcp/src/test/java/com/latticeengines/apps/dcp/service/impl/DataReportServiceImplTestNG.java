@@ -64,6 +64,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNull(dataReportPersist.getGeoDistributionReport());
         Assert.assertNull(dataReportPersist.getMatchToDUNSReport());
         Assert.assertNull(dataReportPersist.getDuplicationReport());
+        Assert.assertNull(dataReportPersist.getDunsCount());
 
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID",
                 dataReport.getGeoDistributionReport());
@@ -80,7 +81,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(dataReportPersist.getBasicStats());
         Assert.assertNotNull(dataReportPersist.getGeoDistributionReport());
         Assert.assertNotNull(dataReportPersist.getMatchToDUNSReport());
-
+        Assert.assertNull(dataReportPersist.getDunsCount());
         Assert.assertNotNull(dataReportPersist.getDuplicationReport());
 
         DataReportRecord uploadReportRecord = dataReportService.getDataReportRecord(mainCustomerSpace,
@@ -125,6 +126,8 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         DataReport newReport = getDataReport();
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", newReport);
         newReport = dataReportService.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID");
+        // only update snapshot time when duns count is not null
+        Assert.assertNull(newReport.getSnapshotTimestamp());
         newReport.setRefreshTimestamp(0L);
         String report2 = JsonUtils.serialize(newReport);
         Assert.assertNotEquals(report1, report2);
@@ -229,6 +232,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         dataReport.setDuplicationReport(duplicationReport);
 
         dataReport.setRefreshTimestamp(Instant.now().toEpochMilli());
+        dataReport.setSnapshotTimestamp(Instant.now().toEpochMilli());
 
         return dataReport;
     }
