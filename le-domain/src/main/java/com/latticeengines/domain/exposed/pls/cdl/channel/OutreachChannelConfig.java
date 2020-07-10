@@ -33,6 +33,9 @@ public class OutreachChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
+    @JsonProperty("folderId")
+    private String folderId;
+
     @JsonProperty("folderName")
     private String folderName;
 
@@ -91,6 +94,14 @@ public class OutreachChannelConfig implements ChannelConfig {
         this.audienceName = audienceName;
     }
 
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
     public String getFolderName() {
         return folderName;
     }
@@ -124,6 +135,7 @@ public class OutreachChannelConfig implements ChannelConfig {
     public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
         playLaunch.setAudienceId(this.getAudienceId());
         playLaunch.setAudienceName(this.getAudienceName());
+        playLaunch.setFolderId(this.getFolderId());
         playLaunch.setFolderName(this.getFolderName());
     }
 
@@ -140,6 +152,7 @@ public class OutreachChannelConfig implements ChannelConfig {
                 .setSuppressAccountsWithoutLookupId(newOutreachChannelConfig.isSuppressAccountsWithoutLookupId());
         outreachChannelConfig.setAudienceId(newOutreachChannelConfig.getAudienceId());
         outreachChannelConfig.setAudienceName(newOutreachChannelConfig.getAudienceName());
+        outreachChannelConfig.setFolderId(newOutreachChannelConfig.getFolderId());
         outreachChannelConfig.setFolderName(newOutreachChannelConfig.getFolderName());
         return this;
 

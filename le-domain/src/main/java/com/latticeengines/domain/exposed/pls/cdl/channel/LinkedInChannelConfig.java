@@ -26,6 +26,9 @@ public class LinkedInChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
+    @JsonProperty("folderId")
+    private String folderId;
+
     @JsonProperty("folderName")
     private String folderName;
 
@@ -91,6 +94,14 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.audienceType = audienceType;
     }
 
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
     public String getFolderName() {
         return folderName;
     }
@@ -130,6 +141,7 @@ public class LinkedInChannelConfig implements ChannelConfig {
         linkedinChannelConfig.setContactLimit(newLinkedInChannelConfig.getContactLimit());
         linkedinChannelConfig.setAudienceId(newLinkedInChannelConfig.getAudienceId());
         linkedinChannelConfig.setAudienceName(newLinkedInChannelConfig.getAudienceName());
+        linkedinChannelConfig.setFolderId(newLinkedInChannelConfig.getFolderId());
         linkedinChannelConfig.setFolderName(newLinkedInChannelConfig.getFolderName());
         linkedinChannelConfig.setAudienceType(newLinkedInChannelConfig.getAudienceType());
         return this;

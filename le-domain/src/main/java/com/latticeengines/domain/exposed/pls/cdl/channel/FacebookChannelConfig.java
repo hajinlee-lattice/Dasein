@@ -30,6 +30,9 @@ public class  FacebookChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
+    @JsonProperty("folderId")
+    private String folderId;
+
     @JsonProperty("folderName")
     private String folderName;
 
@@ -83,6 +86,14 @@ public class  FacebookChannelConfig implements ChannelConfig {
         return audienceType;
     }
 
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
     public String getFolderName() {
         return folderName;
     }
@@ -122,6 +133,7 @@ public class  FacebookChannelConfig implements ChannelConfig {
                 .setSuppressContactsWithoutEmails(newFacebookChannelConfig.isSuppressContactsWithoutEmails());
         facebookChannelConfig.setAudienceId(newFacebookChannelConfig.getAudienceId());
         facebookChannelConfig.setAudienceName(newFacebookChannelConfig.getAudienceName());
+        facebookChannelConfig.setFolderId(newFacebookChannelConfig.getFolderId());
         facebookChannelConfig.setFolderName(newFacebookChannelConfig.getFolderName());
         return this;
     }
