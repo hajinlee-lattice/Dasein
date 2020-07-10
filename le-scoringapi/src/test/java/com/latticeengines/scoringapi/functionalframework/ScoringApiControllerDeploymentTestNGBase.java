@@ -46,12 +46,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
 import com.latticeengines.scoringapi.controller.TestRegisterModels;
@@ -110,7 +110,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected ModelSummaryProxy modelSummaryProxy;
 
     @Inject
-    protected PlsInternalProxy plsInternalProxy;
+    protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     protected OAuthUserEntityMgr userEntityMgr;
 
@@ -204,13 +204,13 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected void saveAttributeSelectionBeforeTest(CustomerSpace customerSpace) {
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
         Assert.assertNotNull(selectedAttributes);
         Assert.assertEquals(selectedAttributes.size(), 6);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         selectedAttributes = new ArrayList<>();

@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RTSScoreStep
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -45,9 +44,6 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
 
     @Autowired
     private BatonService batonService;
-
-    @Autowired
-    private PlsInternalProxy plsInternalProxy;
 
     @Override
     public void execute() {
@@ -90,7 +86,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
 
     private List<String> getSelectedInternalEnrichmentAttributes(CustomerSpace customerSpace,
             boolean enrichmentEnabledForInternalAttributes) {
-        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, Boolean.TRUE,
                         enrichmentEnabledForInternalAttributes);
 

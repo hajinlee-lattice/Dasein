@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.scoringapi.exposed.ScoreUtils;
 
 import io.swagger.annotations.Api;
@@ -38,7 +38,7 @@ public class EnrichmentResource {
     private BatonService batonService;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     // ------------START for LeadEnrichment-------------------//
     @GetMapping("/categories")
@@ -46,7 +46,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getLeadEnrichmentCategories(customerSpace);
+        return latticeInsightsInternalProxy.getLeadEnrichmentCategories(customerSpace);
     }
 
     @GetMapping("/subcategories")
@@ -56,7 +56,7 @@ public class EnrichmentResource {
             @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getLeadEnrichmentSubcategories(customerSpace, category);
+        return latticeInsightsInternalProxy.getLeadEnrichmentSubcategories(customerSpace, category);
     }
 
     @GetMapping()
@@ -89,7 +89,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
-        return plsInternalProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
+        return latticeInsightsInternalProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, offset, max,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
@@ -98,26 +98,18 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get count of attributes with specified query parameters")
     public int getLeadEnrichmentAttributesCount(HttpServletRequest request,
-            @ApiParam(value = "Get attributes with name containing specified " //
-                    + "text for attributeDisplayNameFilter", required = false) //
-            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
-            String attributeDisplayNameFilter, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified category", required = false) //
-            @RequestParam(value = "category", required = false) //
-            String category, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified subcategory", required = false) //
-            @RequestParam(value = "subcategory", required = false) //
-            String subcategory, //
-            @ApiParam(value = "Should get only selected attribute", //
-                    required = false) //
-            @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes) {
+            @ApiParam(value = "Get attributes with name containing specified text for attributeDisplayNameFilter") //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) String attributeDisplayNameFilter, //
+            @ApiParam(value = "Get attributes with specified category") //
+            @RequestParam(value = "category", required = false) String category, //
+            @ApiParam(value = "Get attributes with specified subcategory") //
+            @RequestParam(value = "subcategory", required = false) String subcategory, //
+            @ApiParam(value = "Should get only selected attribute") //
+            @RequestParam(value = "onlySelectedAttributes", required = false) Boolean onlySelectedAttributes) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
-        return plsInternalProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
+        return latticeInsightsInternalProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
@@ -127,7 +119,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getPremiumAttributesLimitation(customerSpace);
+        return latticeInsightsInternalProxy.getPremiumAttributesLimitation(customerSpace);
     }
 
     @GetMapping("/selectedattributes/count")
@@ -135,7 +127,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getSelectedAttributeCount(customerSpace,
+        return latticeInsightsInternalProxy.getSelectedAttributeCount(customerSpace,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 
@@ -144,7 +136,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return plsInternalProxy.getSelectedAttributePremiumCount(customerSpace,
+        return latticeInsightsInternalProxy.getSelectedAttributePremiumCount(customerSpace,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 

@@ -40,14 +40,14 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     @Test(groups = "deployment")
     public void cleanupAttributeSelectionBeforeTest() {
-        List<LeadEnrichmentAttribute> existingSelection = plsInternalProxy
+        List<LeadEnrichmentAttribute> existingSelection = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, true, false);
         Assert.assertNotNull(existingSelection);
         Assert.assertEquals(existingSelection.size(), 6);
 
         LeadEnrichmentAttributesOperationMap deselectedAttributeMap = createDeselectionMap(existingSelection);
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, deselectedAttributeMap);
-        List<LeadEnrichmentAttribute> freshSelection = plsInternalProxy
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, deselectedAttributeMap);
+        List<LeadEnrichmentAttribute> freshSelection = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, null, true, false);
         Assert.assertNotNull(freshSelection);
         Assert.assertEquals(freshSelection.size(), 0);
@@ -144,7 +144,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(deselectCount, 0);
         Assert.assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
 
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
 
         List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
         Assert.assertEquals(enrichmentList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
@@ -165,7 +165,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         attributesOperationMap.getDeselectedAttributes().add(duplicateFieldName);
 
         try {
-            plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
+            latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
             Assert.assertFalse(true, "Expected exception");
         } catch (Exception ex) {
             Assert.assertTrue(ex.getMessage().contains(duplicateFieldName));
@@ -178,7 +178,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         attributesOperationMap.getSelectedAttributes().add(duplicateFieldName);
 
         try {
-            plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
+            latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
             Assert.assertFalse(true, "Expected exception");
         } catch (Exception ex) {
             Assert.assertTrue(ex.getMessage().contains(duplicateFieldName));
@@ -191,7 +191,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         attributesOperationMap.getSelectedAttributes().add(badFieldName);
 
         try {
-            plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
+            latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
             Assert.assertFalse(true, "Expected exception");
         } catch (Exception ex) {
             Assert.assertTrue(ex.getMessage().contains(badFieldName));
@@ -263,7 +263,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
         ObjectMapper om = new ObjectMapper();
         System.out.println("attributesOperationMap = " + om.writeValueAsString(attributesOperationMap));
-        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
+        latticeInsightsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, attributesOperationMap);
 
         List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
         Assert.assertEquals(enrichmentList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);

@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -447,6 +448,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @Autowired
     protected PlsInternalProxy plsInternalProxy;
+
+    @Autowired
+    protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     @Autowired
     protected WorkflowReportService workflowReportService;
