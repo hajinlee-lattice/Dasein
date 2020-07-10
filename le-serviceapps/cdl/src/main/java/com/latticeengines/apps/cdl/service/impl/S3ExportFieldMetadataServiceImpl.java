@@ -47,6 +47,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             ColumnMetadata accountIdColumnMetadata = accountAttributesMap.get(accountId);
             accountIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
             exportColumnMetadataList.add(accountIdColumnMetadata);
+            accountAttributesMap.remove(accountId);
         }
 
         String contactId = channel.getLookupIdMap().getContactId();
@@ -55,6 +56,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             ColumnMetadata contactIdColumnMetadata = contactAttributesMap.get(contactId);
             contactIdColumnMetadata.setDisplayName(TRAY_CONTACT_ID_COLUMN_NAME);
             exportColumnMetadataList.add(contactIdColumnMetadata);
+            contactAttributesMap.remove(contactId);
         }
 
         if (channelConfig.isIncludeExportAttributes()) {
