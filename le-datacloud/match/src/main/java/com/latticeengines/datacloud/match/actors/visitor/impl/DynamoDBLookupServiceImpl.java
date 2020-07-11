@@ -114,7 +114,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
             } else {
                 accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
             }
-            Long startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             AccountLookupEntry lookupEntry = accountLookupService.batchLookup(accountLookupRequest).get(0);
             latticeAccountId = (lookupEntry == null) ? null : lookupEntry.getLatticeAccountId();
             log.info(String.format(
@@ -275,7 +275,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
             }
         }
     }
-    
+
     /************************ Dynamo Lookup Service Status ************************/
     @Override
     public Map<String, Integer> getPendingReqStats() {

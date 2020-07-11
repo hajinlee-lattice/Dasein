@@ -44,35 +44,10 @@ public final class DirectPlusUtils {
         List<String> parts = new ArrayList<>();
         switch (apiType) {
             case REALTIME_ENTITY:
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getName())) {
-                    parts.add(String.format("name=%s", urlEncode(context.getInputNameLocation().getName())));
+                if (StringUtils.isNotBlank(context.getInputDuns())) {
+                    parts.add(String.format("duns=%s", context.getInputDuns()));
                 } else {
-                    throw new LedpException(LedpCode.LEDP_25023);
-                }
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
-                    parts.add(String.format("countryISOAlpha2Code=%s", context.getInputNameLocation().getCountryCode()));
-                } else {
-                    throw new LedpException(LedpCode.LEDP_25023);
-                }
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getCity())) {
-                    parts.add(String.format("addressLocality=%s", urlEncode(context.getInputNameLocation().getCity())));
-                }
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getState())) {
-                    String stateCode = LocationUtils.getStardardStateCode(context.getInputNameLocation().getCountry(),
-                            context.getInputNameLocation().getState());
-                    parts.add(String.format("addressRegion=%s", urlEncode(stateCode)));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getZipcode())) {
-                    parts.add(String.format("postalCode=%s", urlEncode(context.getInputNameLocation().getZipcode())));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
-                    parts.add(String.format("telephoneNumber=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet())) {
-                    parts.add(String.format("streetAddressLine1=%s", urlEncode(context.getInputNameLocation().getStreet())));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet2())) {
-                    parts.add(String.format("streetAddressLine2=%s", urlEncode(context.getInputNameLocation().getStreet2())));
+                    parts.addAll(getLocationParams(context.getInputNameLocation()));
                 }
                 break;
             case REALTIME_EMAIL:
@@ -95,6 +70,40 @@ public final class DirectPlusUtils {
             parts.add("exclusionCriteria=" + exclusions);
         }
         return StringUtils.join(parts, "&");
+    }
+
+    private static List<String> getLocationParams(NameLocation nl) {
+        List<String> parts = new ArrayList<>();
+        if (!StringUtils.isEmpty(nl.getName())) {
+            parts.add(String.format("name=%s", urlEncode(nl.getName())));
+        } else {
+            throw new LedpException(LedpCode.LEDP_25023);
+        }
+        if (!StringUtils.isEmpty(nl.getCountryCode())) {
+            parts.add(String.format("countryISOAlpha2Code=%s", nl.getCountryCode()));
+        } else {
+            throw new LedpException(LedpCode.LEDP_25023);
+        }
+        if (!StringUtils.isEmpty(nl.getCity())) {
+            parts.add(String.format("addressLocality=%s", urlEncode(nl.getCity())));
+        }
+        if (!StringUtils.isEmpty(nl.getState())) {
+            String stateCode = LocationUtils.getStardardStateCode(nl.getCountry(), nl.getState());
+            parts.add(String.format("addressRegion=%s", urlEncode(stateCode)));
+        }
+        if (StringUtils.isNotEmpty(nl.getZipcode())) {
+            parts.add(String.format("postalCode=%s", urlEncode(nl.getZipcode())));
+        }
+        if (StringUtils.isNotEmpty(nl.getPhoneNumber())) {
+            parts.add(String.format("telephoneNumber=%s", urlEncode(nl.getPhoneNumber())));
+        }
+        if (StringUtils.isNotEmpty(nl.getStreet())) {
+            parts.add(String.format("streetAddressLine1=%s", urlEncode(nl.getStreet())));
+        }
+        if (StringUtils.isNotEmpty(nl.getStreet2())) {
+            parts.add(String.format("streetAddressLine2=%s", urlEncode(nl.getStreet2())));
+        }
+        return parts;
     }
 
     public static Map<String, Object> parseDataBlock(String response, List<PrimeColumn> metadata) {

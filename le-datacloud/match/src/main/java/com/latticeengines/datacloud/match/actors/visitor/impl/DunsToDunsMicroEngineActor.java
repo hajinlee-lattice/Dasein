@@ -19,10 +19,10 @@ import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
-@Component("locationBasedMicroEngineActor")
+@Component("dunsToDunsMicroEngineActor")
 @Scope("prototype")
-public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
-    private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
+public class DunsToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
+    private static final Logger log = LoggerFactory.getLogger(DunsToDunsMicroEngineActor.class);
 
     @PostConstruct
     public void postConstruct() {
@@ -38,9 +38,8 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
 
-        // If already tried to get DUNS from LocationToCachedDunsActor or
-        // LocationToDunsActor
-        if (triedDunsFromLocation(traveler)) {
+        // If already tried to get DUNS from this actor
+        if (triedDunsFromDuns(traveler)) {
             return false;
         }
 
@@ -49,22 +48,21 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
             return false;
         }
 
-        return StringUtils.isNotBlank(matchKeyTuple.getName());
+        return StringUtils.isNotBlank(matchKeyTuple.getDuns());
     }
 
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
-        traveler.setUseDunsMatchDuns(false);
+        traveler.setUseDunsMatchDuns(true);
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.LOCATION_DUNS, traveler.getMatchKeyTuple()));
     }
 
-    private boolean triedDunsFromLocation(MatchTraveler traveler) {
+    private boolean triedDunsFromDuns(MatchTraveler traveler) {
         Map<String, String> dunsOriginMap = traveler.getDunsOriginMap();
         if (MapUtils.isEmpty(dunsOriginMap)) {
             return false;
         }
-        return dunsOriginMap.containsKey(this.getClass().getName())
-                || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName());
+        return dunsOriginMap.containsKey(this.getClass().getName());
     }
 
     @Override

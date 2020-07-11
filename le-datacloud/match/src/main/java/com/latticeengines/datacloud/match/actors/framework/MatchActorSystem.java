@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngi
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsToDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityAssociateActor;
@@ -178,6 +179,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 DunsDomainBasedMicroEngineActor.class, //
                 DomainBasedMicroEngineActor.class, //
                 DunsBasedMicroEngineActor.class, //
+                DunsToDunsMicroEngineActor.class, //
                 LocationToDunsMicroEngineActor.class, //
                 LocationToCachedDunsMicroEngineActor.class, //
                 DunsValidateMicroEngineActor.class, //
