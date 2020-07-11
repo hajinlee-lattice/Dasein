@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.SQSMessageClassifyService;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 
 @Component("sqsMessageClassifyService")
 public class SQSMessageClassifyServiceImpl implements SQSMessageClassifyService {
@@ -33,7 +33,7 @@ public class SQSMessageClassifyServiceImpl implements SQSMessageClassifyService 
         if (importEnabled) {
             log.info(String.format("Import enabled for current stack, create scheduled task (scan period %d seconds) " +
                     "for import message classification.", scanPeriod));
-            Executors.newScheduledThreadPool(1).scheduleAtFixedRate(//
+            ThreadPoolUtils.getScheduledThreadPool("sqs-message-classification", 1).scheduleAtFixedRate(//
                     updateMessageUrlRunnable(), 2, scanPeriod, TimeUnit.SECONDS);
         }
     }
