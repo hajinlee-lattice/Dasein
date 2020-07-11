@@ -181,7 +181,7 @@ public class DirectPlusLookupServiceImplTestNG extends DataCloudMatchFunctionalT
     @Test(groups = "dnb", priority = 4, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testInvalidToken() {
         // Set token to be invalid
-        dnbAuthenticationService.refreshToken(DnBKeyType.DPLUS, "abc");
+        dnbAuthenticationService.refreshToken(DnBKeyType.MATCH, "abc");
         // Wait for local cache to be refreshed
         SleepUtils.sleep(5000L);
         // Expected the service to refresh token and make a successful call via

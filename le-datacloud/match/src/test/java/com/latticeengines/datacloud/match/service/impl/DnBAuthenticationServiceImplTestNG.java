@@ -79,7 +79,7 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
 
     @DataProvider(name = "keyTypes")
     public Object[][] provideKeyTypes() {
-        return new Object[][] { { DnBKeyType.REALTIME }, { DnBKeyType.DPLUS } };
+        return new Object[][] { { DnBKeyType.REALTIME }, { DnBKeyType.MATCH } };
     }
 
 }

@@ -1,6 +1,10 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Address;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Zipcode;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.NonHeadQuarters;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
 
@@ -29,6 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -147,6 +152,47 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         //System.out.println(JsonUtils.pprint(output4));
         Assert.assertTrue(output4.isMatched());
         Assert.assertEquals(output4.getOutput().get(0), "210042669");
+    }
+
+    @Test(groups = "functional")
+    public void testStreetAddress() {
+        // Schema: ID, CompanyName, State, Country, ZipCode, Address
+        Object[][] data = new Object[][] {
+                { 123, "AMAZON.COM, INC.", "WASHINGTON", "USA", "98109-5210", "410 Terry Ave N" } //
+        };
+        // ColumnSelection is RTS
+        MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+        input.setUseDirectPlus(true);
+        DplusMatchRule baseRule = new DplusMatchRule(6, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+        input.setDplusMatchConfig(new DplusMatchConfig(baseRule));
+        input.setTargetEntity(BusinessEntity.PrimeAccount.name());
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
+                .put(Name, Collections.singletonList("CompanyName"))
+                .put(State, Collections.singletonList("State"))
+                .put(Country, Collections.singletonList("Country"))
+                .put(Zipcode, Collections.singletonList("ZipCode"))
+                .put(Address, Collections.singletonList("Address"))
+                .build());
+        input.setFields(Arrays.asList("ID", "CompanyName", "State", "Country", "ZipCode", "Address"));
+        input.setSkipKeyResolution(true);
+        List<Column> columns = Stream.of(
+                "PrimaryBusinessName",
+                "TradeStyleName",
+                "TelephoneNumber",
+                "IndustryCodeUSSicV4Code"
+        ).map(c -> new Column(c, c)).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertTrue(output.getResult().get(0).isMatched());
+        String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(2).toString();
+        Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
+        Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
     }
 
     @Test(groups = "functional")
@@ -307,7 +353,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 new String[] { "ID", "Domain", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(Name, Collections.singletonList("Name"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         ColumnSelection columnSelection = new ColumnSelection();
@@ -389,7 +435,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "Email", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Email"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(Name, Collections.singletonList("Name"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
@@ -417,7 +463,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 new String[] { "ID", "Domain", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(Name, Collections.singletonList("Name"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
