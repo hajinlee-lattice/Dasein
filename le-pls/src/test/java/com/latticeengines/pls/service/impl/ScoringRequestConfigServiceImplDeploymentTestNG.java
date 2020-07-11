@@ -252,9 +252,14 @@ public class ScoringRequestConfigServiceImplDeploymentTestNG extends PlsDeployme
         assertEquals(srcContext.getModelUuid(), configSummary.getModelUuid());
         assertEquals(srcContext.getTenantId(), TENANT1);
         assertTrue(srcContext.getExternalProfileId().contains(marketoCredentialId.toString()));
-
-        srcContext = scoringRequestConfigService.retrieveScoringRequestConfigContext("DummyId");
-        assertNull(srcContext);
+        Exception exception = null;
+        try {
+            scoringRequestConfigService.retrieveScoringRequestConfigContext("DummyId");
+        } catch (Exception e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertTrue((LedpCode.LEDP_18194.equals(((LedpException) exception).getCode())));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFindMethods")
