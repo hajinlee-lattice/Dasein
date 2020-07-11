@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
+import com.latticeengines.proxy.exposed.dcp.AppendConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
 import io.swagger.annotations.Api;
@@ -26,6 +28,9 @@ public class DataBlockResource {
 
     @Inject
     private PrimeMetadataProxy primeMetadataProxy;
+
+    @Inject
+    private AppendConfigProxy appendConfigProxy;
 
     @GetMapping("/metadata")
     @ResponseBody
@@ -46,7 +51,7 @@ public class DataBlockResource {
     @ApiOperation(value = "Get block drt entitlement")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
     public DataBlockEntitlementContainer getEntitlement() {
-        return primeMetadataProxy.getBlockDrtMatrix();
+        return appendConfigProxy.getEntitlement(MultiTenantContext.getShortTenantId());
     }
 
 }

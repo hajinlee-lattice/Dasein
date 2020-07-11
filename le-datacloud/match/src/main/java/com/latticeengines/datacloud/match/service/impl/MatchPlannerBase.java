@@ -37,8 +37,8 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
+import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -84,6 +84,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
+
+    @Inject
+    private PrimeMetadataService primeMetadataService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -399,12 +402,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 throw new UnsupportedOperationException("Column metadatas should already be set for Entity Match");
             }
             if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
-                // FIXME: should move to metadata driven
-                List<PrimeColumn> columns = DirectPlusUtils.getDataBlockMetadata();
                 Set<String> requestedCols = new HashSet<>(columnSelection.getColumnIds());
-                List<ColumnMetadata> cms = columns.stream().map(PrimeColumn::toColumnMetadata) //
-                        .filter(cm -> requestedCols.contains(cm.getAttrName())) //
-                        .collect(Collectors.toList());
+                List<PrimeColumn> columns = primeMetadataService.getPrimeColumns(requestedCols);
+                List<ColumnMetadata> cms = columns.stream() //
+                        .map(PrimeColumn::toColumnMetadata).collect(Collectors.toList());
                 output.setMetadata(cms);
             } else {
                 output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());

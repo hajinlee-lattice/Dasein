@@ -1,6 +1,5 @@
 package com.latticeengines.dcp.workflow.steps;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,28 +78,11 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
 
-        List<String> columnIds = getDCPEnrichAttrs();
+        List<String> columnIds = configuration.getAppendConfig().getElementIds();
         List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         matchInput.setCustomSelection(columnSelection);
-    }
-
-    //FIXME: in alpha release, use a hard coded enrich list
-    private List<String> getDCPEnrichAttrs() {
-        return Arrays.asList(
-                "DunsNumber",
-                "PrimaryBusinessName",
-                "TradeStyleName",
-                "PrimaryAddressStreetLine1",
-                "PrimaryAddressStreetLine2",
-                "PrimaryAddressLocalityName",
-                "PrimaryAddressRegionName",
-                "PrimaryAddressPostalCode",
-                "PrimaryAddressCountyName",
-                "TelephoneNumber",
-                "IndustryCodeUSSicV4Code"
-        );
     }
 
 }

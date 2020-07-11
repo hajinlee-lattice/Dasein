@@ -1,6 +1,14 @@
 package com.latticeengines.dcp.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.NameMatchScore;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.OperatingStatusText;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +33,7 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
@@ -46,6 +55,7 @@ import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.SplitImportMatchResultJob;
 
@@ -73,6 +83,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     @Inject
     private DataReportProxy dataReportProxy;
 
+    @Inject
+    private PrimeMetadataProxy primeMetadataProxy;
+
     @Value("${datacloud.manage.url}")
     private String url;
 
@@ -81,6 +94,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     @Value("${datacloud.manage.password.encrypted}")
     private String password;
+
+    private Map<String, String> dataBlockDispNames = new HashMap<>();
 
     @Override
     protected Class<SplitImportMatchResultJob> getJobClz() {
@@ -96,7 +111,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setInput(Collections.singletonList(input));
         jobConfig.setTotalCount(input.getCount());
 
-        jobConfig.setMatchedDunsAttr("DunsNumber");
+        jobConfig.setMatchedDunsAttr(MatchedDuns);
         jobConfig.setCountryAttr(InterfaceName.Country.name());
         jobConfig.setManageDbUrl(url);
         jobConfig.setUser(user);
@@ -105,9 +120,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         String saltHint = CipherUtils.generateKey();
         jobConfig.setSaltHint(saltHint);
         jobConfig.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
-        jobConfig.setConfidenceCodeAttr("ConfidenceCode");
+        jobConfig.setConfidenceCodeAttr(ConfidenceCode);
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
+        dataBlockDispNames = dataBlockFieldDisplayNames();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
         List<ColumnMetadata> rejectedCms = cms.stream().filter(cm -> {
             boolean isCustomer = (cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL);
@@ -209,10 +225,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
-        Map<String, String> dataBlockDisNames = dataBlockFieldDisplayNames();
         Map<String, String> dispNames = cms.stream().collect(Collectors.toMap(ColumnMetadata::getAttrName, cm -> {
-            if (dataBlockDisNames.containsKey(cm.getAttrName())) {
-                return dataBlockDisNames.get(cm.getAttrName());
+            if (dataBlockDispNames.containsKey(cm.getAttrName())) {
+                return dataBlockDispNames.get(cm.getAttrName());
             } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
                 return candidateFieldDispNames.get(cm.getAttrName());
             } else {
@@ -232,7 +247,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                     throw new RuntimeException("Do not know how to resolve display name conflict.");
                 }
                 List<String> customerCols = cols.stream() //
-                        .filter(c -> !dataBlockDisNames.containsKey(c) && !candidateFieldDispNames.containsKey(c)) //
+                        .filter(c -> !dataBlockDispNames.containsKey(c) && !candidateFieldDispNames.containsKey(c)) //
                         .collect(Collectors.toList());
                 if (customerCols.size() == 1) {
                     String customerCol = customerCols.get(0);
@@ -257,35 +272,45 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     private boolean isFromDataBlock(ColumnMetadata cm) {
-        return dataBlockFieldDisplayNames().containsKey(cm.getAttrName());
+        return dataBlockDispNames.containsKey(cm.getAttrName());
     }
 
     // to be changed to metadata driven
-    public Map<String, String> candidateFieldDisplayNames() {
+    private Map<String, String> candidateFieldDisplayNames() {
         Map<String, String> dispNames = new HashMap<>();
-        dispNames.put("MatchedDuns", "Matched D-U-N-S Number");
-        dispNames.put("ConfidenceCode", "Confidence Code");
-        dispNames.put("MatchGrade", "Match Grade");
-        dispNames.put("MatchDataProfile", "Match Data Profile");
-        dispNames.put("NameMatchScore", "Name Match Score");
-        dispNames.put("OperatingStatusText", "Operating Status Text");
+        dispNames.put(MatchedDuns, "Matched D-U-N-S Number");
+        dispNames.put(ConfidenceCode, "Confidence Code");
+        dispNames.put(MatchGrade, "Match Grade");
+        dispNames.put(MatchDataProfile, "Match Data Profile");
+        dispNames.put(NameMatchScore, "Name Match Score");
+        dispNames.put(OperatingStatusText, "Operating Status Text");
         return dispNames;
     }
 
     // to be changed to metadata driven
-    public Map<String, String> dataBlockFieldDisplayNames() {
+    private Map<String, String> dataBlockFieldDisplayNames() {
+        List<PrimeColumn> primeColumns = new ArrayList<>();
+        List<String> elementIds = configuration.getAppendConfig().getElementIds();
+        log.info("Start retrieving metadata for {} data block elements from match api", elementIds.size());
+        List<String> chunk = new ArrayList<>();
+        for (String elementId: elementIds) {
+            chunk.add(elementId);
+            if (chunk.size() >= 200) {
+                List<PrimeColumn> primeChunk = primeMetadataProxy.getPrimeColumns(chunk);
+                primeColumns.addAll(primeChunk);
+                chunk.clear();
+            }
+        }
+        if (!chunk.isEmpty()) {
+            List<PrimeColumn> primeChunk = primeMetadataProxy.getPrimeColumns(chunk);
+            primeColumns.addAll(primeChunk);
+            chunk.clear();
+        }
+        log.info("Retrieved {} prime columns from match api", primeColumns.size());
         Map<String, String> dispNames = new HashMap<>();
-        dispNames.put("DunsNumber", "D-U-N-S Number");
-        dispNames.put("PrimaryBusinessName", "Primary Business Name");
-        dispNames.put("TradeStyleName", "Trade Style Name");
-        dispNames.put("PrimaryAddressStreetLine1", "Primary Address Street Line 1");
-        dispNames.put("PrimaryAddressStreetLine2", "Primary Address Street Line 2");
-        dispNames.put("PrimaryAddressLocalityName", "Primary Address Locality Name");
-        dispNames.put("PrimaryAddressRegionName", "Primary Address Region Name");
-        dispNames.put("PrimaryAddressPostalCode", "Primary Address Postal Code");
-        dispNames.put("PrimaryAddressCountyName", "Primary Address County Name");
-        dispNames.put("TelephoneNumber", "Telephone Number");
-        dispNames.put("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code");
+        for (PrimeColumn primeColumn: primeColumns) {
+            dispNames.put(primeColumn.getPrimeColumnId(), primeColumn.getDisplayName());
+        }
         return dispNames;
     }
 
