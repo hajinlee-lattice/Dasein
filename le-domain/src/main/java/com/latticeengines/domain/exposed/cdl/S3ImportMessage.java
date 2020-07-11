@@ -62,7 +62,7 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     private String feedType;
 
     @JsonProperty("host_url")
-    @Column(name = "HOST_URL", nullable = false)
+    @Column(name = "HOST_URL")
     private String hostUrl;
 
     @JsonProperty("message_type")
