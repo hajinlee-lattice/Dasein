@@ -14,6 +14,10 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
 
     boolean existsByLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
+    @Query("select d.pid,dc.name from DataReportRecord as d join d.dunsCount as dc WHERE d.level = ?1 AND d.ownerId =" +
+            " ?2")
+    Object[] findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
+
     @Query("SELECT d.pid from DataReportRecord d WHERE d.level = ?1 AND d.ownerId = ?2")
     Long findPidByLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 

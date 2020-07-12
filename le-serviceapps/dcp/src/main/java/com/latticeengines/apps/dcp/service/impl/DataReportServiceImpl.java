@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,12 +14,19 @@ import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import avro.shaded.com.google.common.base.Preconditions;
 
@@ -36,6 +44,8 @@ public class DataReportServiceImpl implements DataReportService {
     @Inject
     private UploadService uploadService;
 
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
@@ -98,10 +108,6 @@ public class DataReportServiceImpl implements DataReportService {
             if (dataReport.getDuplicationReport() != null) {
                 dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
             }
-            if (dataReport.getDunsCount() != null) {
-                dataReportRecord.setDunsCount(dataReport.getDunsCount());
-                dataReportRecord.setDataSnapshotTime(new Date());
-            }
 
             dataReportRecord.setRefreshTime(new Date());
             dataReportEntityMgr.update(dataReportRecord);
@@ -113,10 +119,6 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportRecord.setMatchToDUNSReport(dataReport.getMatchToDUNSReport());
             dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
             dataReportRecord.setParentId(getParentPid(customerSpace, level, ownerId));
-            if (dataReport.getDunsCount() != null) {
-                dataReportRecord.setDunsCount(dataReport.getDunsCount());
-                dataReportRecord.setDataSnapshotTime(new Date());
-            }
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
         }
@@ -129,6 +131,52 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getDuplicationReport());
             parentId = dataReportEntityMgr.findParentId(parentId);
         }
+    }
+
+    @Override
+    public void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
+                           String tableName) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        Object[] objects = dataReportEntityMgr.findPidAndDunsCountTableName(level, ownerId);
+        if (objects == null) {
+            log.info("data report is not registered");
+            return ;
+        }
+        Long pid = objects[0] != null ? (Long) objects[0] : null;
+        String oldTableName = objects[1] != null ? (String) objects[1] : null;
+        Preconditions.checkNotNull(pid, String.format("data record should exist for %s and %s.", level, ownerId));
+        Table table = metadataProxy.getTable(customerSpace, tableName);
+        Preconditions.checkNotNull(table, String.format("table shouldn't be null for %s", tableName));
+        DunsCountCache cache = new DunsCountCache();
+        cache.setDunsCount(table);
+        cache.setSnapshotTimestamp(new Date());
+        dataReportEntityMgr.uploadDataReportRecord(pid, cache);
+        if (StringUtils.isNotBlank(oldTableName)) {
+            log.info("There was an old duns count table {}, going to be marked as temporary.", oldTableName);
+            RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
+            metadataProxy.updateDataTablePolicy(customerSpace, oldTableName,
+                    retentionPolicy);
+        } else {
+            log.info("There weren't duns count table previously");
+        }
+    }
+
+    @Override
+    public DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        DataReportRecord record = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+        if (record == null) {
+            return new DunsCountCache();
+        }
+        HibernateUtils.inflateDetails(record.getDunsCount());
+        DunsCountCache cache = new DunsCountCache();
+        cache.setSnapshotTimestamp(record.getDataSnapshotTime());
+        cache.setDunsCount(record.getDunsCount());
+        return cache;
     }
 
     @Override
@@ -316,12 +364,6 @@ public class DataReportServiceImpl implements DataReportService {
         dataReport.setGeoDistributionReport(record.getGeoDistributionReport());
         dataReport.setMatchToDUNSReport(record.getMatchToDUNSReport());
         dataReport.setDuplicationReport(record.getDuplicationReport());
-        if (record.getDataSnapshotTime() != null) {
-            dataReport.setSnapshotTimestamp(record.getDataSnapshotTime().getTime());
-        }
-        if (record.getDunsCount() != null) {
-            dataReport.setDunsCount(record.getDunsCount());
-        }
         return dataReport;
     }
 }

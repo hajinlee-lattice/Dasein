@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 
 public interface DataReportService {
 
@@ -20,6 +21,11 @@ public interface DataReportService {
     DataReportRecord getDataReportRecord(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport dataReport);
+
+    void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
+                      String tableName);
+
+    DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.BasicStats basicStats);
 

@@ -37,7 +37,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
     val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
     val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
-    val dupReport = generateDupReport(acceptedDF, matchedDunsAttr)
+    val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
     val report : DataReport = new DataReport
     report.setGeoDistributionReport(geoReport)
@@ -45,7 +45,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     report.setMatchToDUNSReport(matchToDUNSReport)
 
     lattice.outputStr = JsonUtils.serialize(report)
-    lattice.output = acceptedCsv :: rejectedCsv :: Nil
+    lattice.output = acceptedCsv :: rejectedCsv :: dunsCount :: Nil
   }
 
   private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]):
@@ -78,7 +78,8 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     geoReport
   }
 
-  private def generateDupReport(acceptedDF: DataFrame, matchedDunsAttr: String): DataReport.DuplicationReport = {
+  private def generateDupReport(acceptedDF: DataFrame, matchedDunsAttr: String): (DataReport.DuplicationReport,
+    DataFrame) = {
     val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
       .persist(StorageLevel.DISK_ONLY).checkpoint()
     val uniqueDF: DataFrame = dunsCntDF.filter(col("cnt") === 1)
@@ -90,7 +91,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     dupReport.setDistinctRecords(distinctCount)
     dupReport.setUniqueRecords(uniqueCnt)
     dupReport.setDuplicateRecords(duplicatedCnt)
-    dupReport
+    (dupReport, dunsCntDF)
   }
 
   private def generateMatchToDunsReport(input: DataFrame, cc: String, totalCnt: Long): DataReport.MatchToDUNSReport = {

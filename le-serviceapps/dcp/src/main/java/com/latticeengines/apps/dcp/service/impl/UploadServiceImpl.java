@@ -92,8 +92,7 @@ public class UploadServiceImpl implements UploadService {
         boolean hasOldTable = false;
         String oldTableName = getMatchResultTableName(uploadId);
         if (StringUtils.isNotBlank(oldTableName)) {
-            Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
-            hasOldTable = oldTable != null;
+            hasOldTable = true;
         }
         upload.setMatchResult(table);
         uploadEntityMgr.update(upload);
