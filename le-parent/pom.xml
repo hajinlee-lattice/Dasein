@@ -60,7 +60,6 @@
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.8.5</hadoop.version>
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
-        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <!--<spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> &lt;!&ndash; need ledp3 classifier &ndash;&gt;-->
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
