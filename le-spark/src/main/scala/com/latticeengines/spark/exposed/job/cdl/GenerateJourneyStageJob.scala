@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.query.AggregateLookup
 import com.latticeengines.domain.exposed.spark.cdl.JourneyStageJobConfig
 import com.latticeengines.domain.exposed.spark.common.GroupingUtilConfig
@@ -20,8 +21,9 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
   }
 
   def getQualifiedAccounts(df: DataFrame, stage: JourneyStage): DataFrame = {
-    stage.getPredicates.asScala.map(sp => GroupingUtil.getGroupedDf(df, GroupingUtilConfig.from(stage, sp)) //
-      .where(df.col(AggregateLookup.Aggregator.COUNT.name).geq(lit(sp.getNoOfEvents)))) //
-      .reduce(_ union _) //
+    stage.getPredicates.asScala.map(sp => {
+      val gdf = GroupingUtil.getGroupedDf(df, GroupingUtilConfig.from(stage, sp))
+      gdf.where(gdf.col(AggregateLookup.Aggregator.COUNT.name).geq(lit(sp.getNoOfEvents))).select(InterfaceName.AccountId.name)
+    }).reduce(_ union _)
   }
 }
