@@ -59,7 +59,10 @@ public class FilterChangelistJobTestNG extends SparkJobFunctionalTestNGBase {
                 { "02slxn2gwjjm1qxs", "CompanyName", "String", true, "Facebook", null, null, null, null, null, null, null,
                         null, null, null, null }, //
                 { "1048abefwwss3jho", "Country", "String", null, "USA", "France", null, null, null, null, null, null, null,
-                        null, null, null } };
+                        null, null, null }, //
+                { "02slxn2gwjjm1qxs", null, null, true, null, null, null, null, null, null, null, null,
+                        null, null, null, null }, //
+        };
 
         input.add(uploadHdfsDataUnit(changeListData, changeList));
     }
@@ -84,7 +87,7 @@ public class FilterChangelistJobTestNG extends SparkJobFunctionalTestNGBase {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            System.out.println("accountId: " + accountId);
+            // System.out.println("accountId: " + accountId);
             switch (accountId) {
             case "168882gwjopqxyz":
                 Assert.assertEquals(record.get("CompanyName").toString(), "Alphabet");
@@ -105,14 +108,7 @@ public class FilterChangelistJobTestNG extends SparkJobFunctionalTestNGBase {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
             String rowId = record.get("RowId").toString();
-            switch (rowId) {
-            case "02slxn2gwjjm1qxs":
-                Assert.assertEquals(record.get("Deleted"), true);
-                Assert.assertEquals(record.get("FromString").toString(), "Facebook");
-                break;
-            default:
-                Assert.fail("Should not see a record with rowId : " + rowId);
-            }
+            Assert.assertEquals(rowId, "02slxn2gwjjm1qxs");
             count.addAndGet(1);
         });
         Assert.assertEquals(count.get(), 1L);
