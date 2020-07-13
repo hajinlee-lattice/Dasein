@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.entitymgr;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
@@ -18,7 +19,9 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
     Map<String, DataReport.BasicStats> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel,
                                                                              String parentOwnerId);
 
-    Object[] findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
+    List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
+
+    int countBrothersByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
     boolean existsDataReport(DataReportRecord.Level level, String ownerId);
 

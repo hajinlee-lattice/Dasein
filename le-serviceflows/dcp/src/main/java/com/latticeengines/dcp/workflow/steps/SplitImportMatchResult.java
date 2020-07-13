@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -185,9 +186,19 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
         dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 uploadId, dunsCountTableName);
-        DataReportRecord.Level level = DataReportRecord.Level.Source;
-        while(level != null) {
-            // update parent if it's the only child;
+        DataReportRecord.Level level = DataReportRecord.Level.Upload;
+        String ownerId = uploadId;
+        while(level != DataReportRecord.Level.Tenant) {
+            // update parent node if it's the only child
+            DunsCountCopy copy = dataReportProxy.getDunsCountCopy(configuration.getCustomerSpace().toString(), level,
+                    ownerId);
+            if (copy.isOnlyChild()) {
+                dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), level.getParentLevel()
+                        , copy.getParentOwnerId(), dunsCountTableName);
+                ownerId = copy.getParentOwnerId();
+            } else {
+                break;
+            }
             level = level.getParentLevel();
         }
     }

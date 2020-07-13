@@ -31,6 +31,7 @@ import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -327,9 +328,21 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
         Assert.assertNotNull(matchToDUNSReport);
 
-        DunsCountCache dunsCountCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload
+        DunsCountCache uploadCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload
                 , uploadId);
-        Assert.assertNotNull(dunsCountCache);
-        System.out.println(JsonUtils.pprint(dunsCountCache));
+        Assert.assertNotNull(uploadCache);
+        System.out.println(JsonUtils.pprint(uploadCache));
+
+        DunsCountCache sourceCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Source,
+                source.getSourceId());
+        Assert.assertNotNull(sourceCache);
+
+        DunsCountCache projectCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Project,
+                projectDetails.getProjectId());
+        Assert.assertNotNull(projectCache);
+
+        DunsCountCache tenantCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Tenant,
+                CustomerSpace.parse(mainCustomerSpace).toString());
+        Assert.assertNotNull(tenantCache);
     }
 }

@@ -69,7 +69,7 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Object[] findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId) {
+    public List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findPidAndDunsCountTableName(level, ownerId);
     }
 
@@ -107,6 +107,12 @@ public class DataReportEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean existsDataReport(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().existsByLevelAndOwnerId(level, ownerId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int countBrothersByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().countBrothersByParentLevelAndOwnerId(level, ownerId);
     }
 
     @Override

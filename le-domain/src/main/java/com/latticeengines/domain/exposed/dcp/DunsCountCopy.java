@@ -17,8 +17,8 @@ public class DunsCountCopy {
     @JsonProperty("isOnlyChild")
     private boolean isOnlyChild;
 
-    @JsonProperty("parentalOwnerId")
-    private String parentalOwnerId;
+    @JsonProperty("parentOwnerId")
+    private String parentOwnerId;
 
     public boolean isOnlyChild() {
         return isOnlyChild;
@@ -28,11 +28,11 @@ public class DunsCountCopy {
         isOnlyChild = onlyChild;
     }
 
-    public String getParentalOwnerId() {
-        return parentalOwnerId;
+    public String getParentOwnerId() {
+        return parentOwnerId;
     }
 
-    public void setParentalOwnerId(String parentalOwnerId) {
-        this.parentalOwnerId = parentalOwnerId;
+    public void setParentOwnerId(String parentOwnerId) {
+        this.parentOwnerId = parentOwnerId;
     }
 }

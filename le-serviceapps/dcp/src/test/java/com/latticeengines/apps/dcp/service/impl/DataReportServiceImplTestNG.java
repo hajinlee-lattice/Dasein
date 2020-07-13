@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 
@@ -56,12 +57,19 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         DataReport.InputPresenceReport inputPresenceReport = dataReport.getInputPresenceReport();
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", inputPresenceReport);
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", basicStats);
+        // verify empty duns count cache
         DunsCountCache cache = dataReportService.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload,
-                "uploadId");
+                "uploadUID");
         Assert.assertNotNull(cache);
         Assert.assertNull(cache.getDunsCount());
         Assert.assertNull(cache.getSnapshotTimestamp());
 
+        // verify upload node has no brothers
+        DunsCountCopy copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
+                "uploadUID");
+        Assert.assertNotNull(copy);
+        Assert.assertTrue(copy.isOnlyChild());
+        Assert.assertNotNull(copy.getParentOwnerId());
 
         DataReport dataReportPersist = dataReportService.getDataReport(mainCustomerSpace,
                 DataReportRecord.Level.Upload,  "uploadUID");
@@ -154,6 +162,13 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
                 dataReportService.getDataReportBasicStats(mainCustomerSpace, DataReportRecord.Level.Project);
         Assert.assertNotNull(projectBasicStats);
         Assert.assertEquals(projectBasicStats.size(), 1);
+
+        // verify upload node is not only brothers
+        DunsCountCopy copy2 = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
+                "uploadUID");
+        Assert.assertNotNull(copy2);
+        Assert.assertFalse(copy2.isOnlyChild());
+        Assert.assertNotNull(copy2.getParentOwnerId());
     }
 
     private DataReport getDataReport() {
