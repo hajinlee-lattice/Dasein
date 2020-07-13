@@ -33,6 +33,8 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
+    public static final String WORKFLOW_NAME = "modelAndEmailWorkflow";
+
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
@@ -346,7 +348,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public MatchAndModelWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("modelAndEmailWorkflow", configuration.getCustomerSpace(),
+            configuration.setContainerConfiguration(WORKFLOW_NAME, configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             export.setUsingDisplayName(Boolean.FALSE);
             pivotScoreAndEvent.setSaveBucketMetadata(Boolean.TRUE);

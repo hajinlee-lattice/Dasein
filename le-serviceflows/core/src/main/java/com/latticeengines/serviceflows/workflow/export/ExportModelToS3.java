@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.export;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,25 +33,41 @@ public class ExportModelToS3 extends BaseImportExportS3<ImportExportS3StepConfig
 
         ModelSummary modelSummary = getModelSummary();
         addModelingArtifactsDirs(requests, modelSummary);
-        addModelingSourceDirs(requests, modelSummary);
-        addScoringTrainingFile(requests);
+        List<String> registeredTables = addModelingSourceDirs(requests, modelSummary);
+        String scoreTable = addScoringTrainingFile(requests);
+        if (StringUtils.isNotBlank(scoreTable)) {
+            registeredTables.add(scoreTable);
+        }
+        registerTables(registeredTables);
     }
 
-    private void addScoringTrainingFile(List<ImportExportRequest> requests) {
-        String tableName = getStringValueFromContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME);
-        if (StringUtils.isNotBlank(tableName)) {
-            addTableDirs(tableName, requests);
+    private void registerTables(List<String> registeredTables) {
+        for (String tableName : registeredTables) {
+            registerTable(tableName);
         }
     }
 
-    private void addModelingSourceDirs(List<ImportExportRequest> requests, ModelSummary modelSummary) {
+    private String addScoringTrainingFile(List<ImportExportRequest> requests) {
+        String tableName = getStringValueFromContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME);
+        if (StringUtils.isNotBlank(tableName)) {
+            addTableDirs(tableName, requests);
+            return tableName;
+        }
+        return null;
+    }
 
+    private List<String> addModelingSourceDirs(List<ImportExportRequest> requests, ModelSummary modelSummary) {
+
+        List<String> registeredTables = new ArrayList<>();
         addSourceFiles(requests, modelSummary);
 
         String trainingTable = modelSummary.getTrainingTableName();
         String eventTable = modelSummary.getEventTableName();
         addTableDirs(trainingTable, requests);
         addTableDirs(eventTable, requests);
+        registeredTables.add(trainingTable);
+        registeredTables.add(eventTable);
+        return registeredTables;
 
     }
 

@@ -59,13 +59,6 @@ public class MatchCdlMergeStep extends RunDataFlow<MatchCdlMergeConfiguration> {
         enableEmbeddedWorkflow(getParentNamespace(), noAccountIdWorkflow.name(),
                 MatchCdlAccountWorkflowConfiguration.class);
 
-        if (tableWithAccountId != null) {
-            metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), tableWithAccountId.getName());
-        }
-        if (tableWithoutAccountId != null) {
-            metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), tableWithoutAccountId.getName());
-        }
-
         removeObjectFromContext(CUSTOM_EVENT_MATCH_ACCOUNT_ID);
         removeObjectFromContext(CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID);
 
