@@ -11,6 +11,9 @@ public class CatalogFileValidationConfiguration extends InputFileValidationConfi
     @JsonProperty("total_rows")
     private long totalRows;
 
+    @JsonProperty("catalog_records_limit")
+    private Long catalogRecordsLimit;
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -25,5 +28,13 @@ public class CatalogFileValidationConfiguration extends InputFileValidationConfi
 
     public void setTotalRows(long totalRows) {
         this.totalRows = totalRows;
+    }
+
+    public Long getCatalogRecordsLimit() {
+        return catalogRecordsLimit;
+    }
+
+    public void setCatalogRecordsLimit(Long catalogRecordsLimit) {
+        this.catalogRecordsLimit = catalogRecordsLimit;
     }
 }

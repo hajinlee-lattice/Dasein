@@ -12,11 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -45,6 +49,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(CDLDataFeedImportWorkflowSubmitter.class);
 
+    public static final long CATALOG_RECORDS_LIMIT = 10L;
+
     @Inject
     private TenantService tenantService;
 
@@ -56,6 +62,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private BatonService batonService;
+
+    private static ObjectMapper om = new ObjectMapper();
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
@@ -162,6 +170,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .prepareImportConfig(prepareImportConfig)
                 .importFromS3(entity) //
                 .validateUsingSpark(entity) //
+                .catalogRecordsLimit(getCatalogRecordsLimit(dataFeedTask)) //
                 .inputProperties(ImmutableMap.<String, String>builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, csvImportFileInfo.getReportFileName()) //
@@ -173,5 +182,21 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_INFO, emailInfoStr)
                         .build())
                 .build();
+    }
+
+    private Long getCatalogRecordsLimit(DataFeedTask dataFeedTask) {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String content = c.get(PathBuilder.buildCatalogQuotaLimitPath(CamilleEnvironment.getPodId())).getData();
+            Map<String, Long> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
+                    Long.class);
+            if (StringUtils.isEmpty(dataFeedTask.getUniqueId())) {
+                return CATALOG_RECORDS_LIMIT;
+            }
+            return jsonMap.getOrDefault(dataFeedTask.getUniqueId(), CATALOG_RECORDS_LIMIT);
+        } catch (Exception e) {
+            log.error("Get json node from zk failed.");
+            return null;
+        }
     }
 }

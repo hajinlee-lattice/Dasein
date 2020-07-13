@@ -71,4 +71,6 @@ public final class PathConstants {
 
     public static final String PLS = "PLS";
     public static final String CDL = "CDL";
+
+    public static final String CATALOG_QUOTA_LIMIT_FILE = "catalogQuotaLimit.json";
 }
