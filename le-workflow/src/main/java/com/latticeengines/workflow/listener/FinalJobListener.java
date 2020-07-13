@@ -16,8 +16,12 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -170,6 +174,10 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         Set<String> workflowNames = new HashSet<>();
         workflowNames.add(ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME);
         workflowNames.add(DCPSourceImportWorkflowConfiguration.WORKFLOW_NAME);
+        workflowNames.add(CrossSellImportMatchAndModelWorkflowConfiguration.WORKFLOW_NAME);
+        workflowNames.add(CustomEventModelingWorkflowConfiguration.WORKFLOW_NAME);
+        workflowNames.add(MatchAndModelWorkflowConfiguration.WORKFLOW_NAME);
+        workflowNames.add(PMMLModelWorkflowConfiguration.WORKFLOW_NAME);
         return workflowNames;
     }
 
