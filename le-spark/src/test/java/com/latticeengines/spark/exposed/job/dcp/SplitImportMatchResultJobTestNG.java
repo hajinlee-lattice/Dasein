@@ -103,7 +103,6 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         verifyAndReadTarget(unit).forEachRemaining(record -> {
             System.out.println(record);
         });
-        System.out.println("111111    "+ unit.getCount());
         return true;
     }
 
