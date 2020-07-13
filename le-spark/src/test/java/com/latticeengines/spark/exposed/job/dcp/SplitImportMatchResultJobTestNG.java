@@ -96,7 +96,15 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(this::verifySingleTarget, this::verifySingleTarget);
+        return Arrays.asList(this::verifySingleTarget, this::verifySingleTarget, this::verifyThirdTarget);
+    }
+
+    public Boolean verifyThirdTarget(HdfsDataUnit unit) {
+        verifyAndReadTarget(unit).forEachRemaining(record -> {
+            System.out.println(record);
+        });
+        System.out.println("111111    "+ unit.getCount());
+        return true;
     }
 
     private String uploadData() {

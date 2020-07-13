@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 
@@ -55,6 +56,12 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         DataReport.InputPresenceReport inputPresenceReport = dataReport.getInputPresenceReport();
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", inputPresenceReport);
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", basicStats);
+        DunsCountCache cache = dataReportService.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload,
+                "uploadId");
+        Assert.assertNotNull(cache);
+        Assert.assertNull(cache.getDunsCount());
+        Assert.assertNull(cache.getSnapshotTimestamp());
+
 
         DataReport dataReportPersist = dataReportService.getDataReport(mainCustomerSpace,
                 DataReportRecord.Level.Upload,  "uploadUID");

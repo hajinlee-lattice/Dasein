@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -325,5 +326,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
         Assert.assertNotNull(matchToDUNSReport);
+
+        DunsCountCache dunsCountCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload
+                , uploadId);
+        Assert.assertNotNull(dunsCountCache);
+        System.out.println(JsonUtils.pprint(dunsCountCache));
     }
 }

@@ -118,7 +118,9 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[SplitImportMatchResultConfig]): List[HdfsDataUnit] = {
-    CSVUtils.dfToCSV(spark, compress=false, latticeCtx.targets, latticeCtx.output)
+    val units: List[HdfsDataUnit] = CSVUtils.dfToCSV(spark, compress=false, latticeCtx.targets.take(2), latticeCtx
+      .output.take(2))
+    units ::: super.finalizeJob(spark, latticeCtx.targets.drop(2), latticeCtx.output.drop(2))
   }
 
 }
