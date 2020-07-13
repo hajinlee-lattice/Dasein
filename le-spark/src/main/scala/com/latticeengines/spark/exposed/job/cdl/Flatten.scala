@@ -28,11 +28,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
   
   var cols: Seq[String] = Seq.empty[String]
   var useConfiguredCols: Boolean = false
-  var sfdcContactIdOrEmpty : String = 
-    if (sfdcContactId == null)
-        ""
-      else
-        sfdcContactId
+  var sfdcContactIdEmpty: Boolean = sfdcContactId == null
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
@@ -56,7 +52,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
       			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
       			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
       			  PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
-      			  PlaymakerConstants.SfdcContactID -> getInputValue(input, sfdcContactIdOrEmpty), //
+      			  PlaymakerConstants.SfdcContactID -> if sfdcContactIdEmpty "" else getInputValue(input, sfdcContactId), //
       			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
       			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
       			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
