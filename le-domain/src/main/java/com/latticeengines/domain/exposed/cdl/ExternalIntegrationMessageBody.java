@@ -20,6 +20,8 @@ public class ExternalIntegrationMessageBody {
 
     private String solutionInstanceId;
 
+    private String folderId;
+
     private String folderName;
 
     private String audienceType;
@@ -84,6 +86,14 @@ public class ExternalIntegrationMessageBody {
 
     public void setSolutionInstanceId(String solutionInstanceId) {
         this.solutionInstanceId = solutionInstanceId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    public String getFolderId() {
+        return folderId;
     }
 
     public void setFolderName(String folderName) {

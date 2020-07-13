@@ -30,6 +30,9 @@ public class GoogleChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
+    @JsonProperty("folderId")
+    private String folderId;
+
     @JsonProperty("folderName")
     private String folderName;
 
@@ -83,6 +86,14 @@ public class GoogleChannelConfig implements ChannelConfig {
         return audienceType;
     }
 
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
     public String getFolderName() {
         return folderName;
     }
@@ -121,6 +132,7 @@ public class GoogleChannelConfig implements ChannelConfig {
         googleChannelConfig.setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
         googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
         googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
+        googleChannelConfig.setFolderId(newGoogleChannelConfig.getFolderId());
         googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
         return this;
     }

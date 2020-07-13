@@ -73,6 +73,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             exportFileGeneratorConf.setChannelConfig(playLaunch.getChannelConfig());
             exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
             exportFilesToS3Conf.setPlayDisplayName(playLaunch.getPlay().getDisplayName());
+            exportPublishToSNSConf.setExternalFolderId(playLaunch.getFolderId());
             exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
             exportPublishToSNSConf.setExternalAudienceId(playLaunch.getAudienceId());
             exportPublishToSNSConf.setExternalAudienceName(playLaunch.getAudienceName());
