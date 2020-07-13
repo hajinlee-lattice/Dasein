@@ -24,7 +24,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
 import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -47,6 +49,9 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Inject
     private TestPlayCreationHelper playCreationHelper;
@@ -122,28 +127,14 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         PlayLaunchChannel channel = playProxy
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
         // Mimicking an automatic Launch creation
-
         Long workflowPid = playProxy.createLaunchByChannelAndKickoffWorkflow(playCreationHelper.getCustomerSpace(),
                 play.getName(), channel.getId(), true);
 
-        Thread.sleep(15000); // Making sure update passes thru to the read cluster
+        Thread.sleep(10000); // Making sure update passes thru to the read cluster
 
-        PlayLaunch testPlayLaunch = playProxy
-                .getPlay(playCreationHelper.getCustomerSpace(), play.getName(), false, true).getLaunchHistory()
-                .getMostRecentLaunch();
-        Assert.assertNotNull(testPlayLaunch);
-        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Launching);
-        Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
-        Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
-        Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
-        Assert.assertNotNull(testPlayLaunch.getAccountsErrored());
-        Assert.assertNotNull(testPlayLaunch.getAccountsSuppressed());
-        Assert.assertEquals(testPlayLaunch.getCreatedBy(), serviceUser);
-        Assert.assertEquals(testPlayLaunch.getUpdatedBy(), serviceUser);
-        totalRatedAccounts = testPlayLaunch.getAccountsSelected();
-
-        playProxy.deletePlayLaunch(playCreationHelper.getCustomerSpace(), playCreationHelper.getPlayName(),
-                testPlayLaunch.getLaunchId(), true);
+        WorkflowJob job = workflowProxy.getWorkflowJobByWorkflowJobPid(mainTestTenant.getId(), workflowPid);
+        Assert.assertNotNull(job);
+        Assert.assertEquals(job.getType(), "campaignDeltaCalculationWorkflow");
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testAutomaticLaunchByChannel" })

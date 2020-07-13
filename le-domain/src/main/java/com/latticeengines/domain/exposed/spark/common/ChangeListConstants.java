@@ -22,6 +22,10 @@ public final class ChangeListConstants {
     public static final String From = "From";
     public static final String To = "To";
 
+    public static final String CompleteMode = "Complete";
+    public static final String VerticalMode = "Vertical";
+    public static final String HorizontalMode = "Horizontal";
+
     public static final String FromString = From + "String";
     public static final String ToString = To + "String";
     public static final String FromBoolean = From + "Boolean";

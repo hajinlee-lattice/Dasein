@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.datacloud.collection.service.CollectedArchiveService;
 import com.latticeengines.datacloud.core.source.CollectedSource;
@@ -75,7 +76,7 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
     }
 
     private String constructWhereClauseByDates(String timestampColumn, Date startDate, Date endDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        SimpleDateFormat dateFormat = DateTimeUtils.getSimpleDateFormatObj("yyyy-MM-dd HH:mm:ss.SSS");
         return String.format("\"%s >= '%s' AND %s <= '%s'\"", timestampColumn, dateFormat.format(startDate),
                 timestampColumn, dateFormat.format(endDate));
     }

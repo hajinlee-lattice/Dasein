@@ -18,8 +18,8 @@ public class S3ImportMessageServiceImpl implements S3ImportMessageService {
     private S3ImportMessageEntityMgr s3ImportMessageEntityMgr;
 
     @Override
-    public S3ImportMessage createOrUpdateMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
-        return s3ImportMessageEntityMgr.createOrUpdateS3ImportMessage(bucket, key, hostUrl, messageType);
+    public S3ImportMessage createOrUpdateMessage(String bucket, String key, S3ImportMessageType messageType) {
+        return s3ImportMessageEntityMgr.createOrUpdateS3ImportMessage(bucket, key, messageType);
     }
 
     @Override
@@ -30,5 +30,15 @@ public class S3ImportMessageServiceImpl implements S3ImportMessageService {
     @Override
     public void deleteMessage(S3ImportMessage message) {
         s3ImportMessageEntityMgr.delete(message);
+    }
+
+    @Override
+    public List<S3ImportMessage> getMessageWithoutHostUrlByType(S3ImportMessageType messageType) {
+        return s3ImportMessageEntityMgr.getMessageWithoutHostUrlByType(messageType);
+    }
+
+    @Override
+    public void updateHostUrl(String key, String hostUrl) {
+        s3ImportMessageEntityMgr.updateHostUrl(key, hostUrl);
     }
 }

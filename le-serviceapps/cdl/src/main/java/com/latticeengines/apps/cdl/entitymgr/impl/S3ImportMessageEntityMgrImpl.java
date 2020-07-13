@@ -63,13 +63,8 @@ public class S3ImportMessageEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
-        S3ImportMessage message;
-        if (isReaderConnection()) {
-            message = readerRepository.findByKey(key);
-        } else {
-            message = writerRepository.findByKey(key);
-        }
+    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key, S3ImportMessageType messageType) {
+        S3ImportMessage message = getReadOrWriteRepository().findByKey(key);
         if (message != null) {
             s3ImportMessageDao.update(message);
             return message;
@@ -82,7 +77,6 @@ public class S3ImportMessageEntityMgrImpl
             if (S3ImportMessageType.Atlas.equals(messageType)) {
                 message.setFeedType(S3ImportMessageUtils.getFeedTypeFromKey(key));
             }
-            message.setHostUrl(hostUrl);
             message.setDropBox(dropBox);
             message.setMessageType(messageType);
             s3ImportMessageDao.create(message);
@@ -93,10 +87,18 @@ public class S3ImportMessageEntityMgrImpl
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<S3ImportMessage> getS3ImportMessageGroupByDropBox() {
-        if (isReaderConnection()) {
-            return readerRepository.getS3ImportMessageGroupByDropBox();
-        } else {
-            return writerRepository.getS3ImportMessageGroupByDropBox();
-        }
+        return getReadOrWriteRepository().getS3ImportMessageGroupByDropBox();
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateHostUrl(String key, String hostUrl) {
+        writerRepository.updateHostUrl(key, hostUrl);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<S3ImportMessage> getMessageWithoutHostUrlByType(S3ImportMessageType messageType) {
+        return getReadOrWriteRepository().findByMessageTypeAndHostUrlIsNull(messageType);
     }
 }

@@ -148,7 +148,7 @@ public final class BucketTestUtils {
         };
     }
 
-    protected static Object[] relayAttr(String attrName, String srcAttr) {
+    static Object[] relayAttr(String attrName, String srcAttr) {
         Object[] data = new Object[7];
         data[0] = attrName;
         data[1] = srcAttr;
@@ -157,6 +157,60 @@ public final class BucketTestUtils {
         } else if (ATTR_NULL_INT.equals(attrName)) {
             data[6] = JsonUtils.serialize(nullDiscreteBucket());
         }
+        return data;
+    }
+
+    static Object[] booleanAttr(String attrName) {
+        Object[] data = new Object[7];
+        data[0] = attrName;
+        data[1] = attrName;
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        data[6] = JsonUtils.serialize(new BooleanBucket());
+        return data;
+    }
+
+    static Object[] categoricalAttr(String attrName, List<String> cats) {
+        Object[] data = new Object[7];
+        data[0] = attrName;
+        data[1] = attrName;
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        CategoricalBucket bucket = new CategoricalBucket();
+        bucket.setCategories(cats);
+        data[6] = JsonUtils.serialize(bucket);
+        return data;
+    }
+
+    static Object[] intervalAttr(String attrName, List<Number> bnds) {
+        Object[] data = new Object[7];
+        data[0] = attrName;
+        data[1] = attrName;
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        IntervalBucket bucket = new IntervalBucket();
+        bucket.setBoundaries(bnds);
+        data[6] = JsonUtils.serialize(bucket);
+        return data;
+    }
+
+    static Object[] discreteAttr(String attrName, List<Number> values) {
+        Object[] data = new Object[7];
+        data[0] = attrName;
+        data[1] = attrName;
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        DiscreteBucket bucket = new DiscreteBucket();
+        bucket.setValues(values);
+        data[6] = JsonUtils.serialize(bucket);
         return data;
     }
 

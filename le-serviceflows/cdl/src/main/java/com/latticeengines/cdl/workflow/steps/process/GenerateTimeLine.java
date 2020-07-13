@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
-import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.time.Instant;
@@ -21,20 +20,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -45,10 +43,10 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -66,15 +64,14 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();
     private static final String SUFFIX = "_TABLE_ROLE";
     static final String BEAN_NAME = "generateTimeline";
+    private static final TypeReference<Map<String, Map<String, DimensionMetadata>>> METADATA_MAP_TYPE = new TypeReference<Map<String, Map<String, DimensionMetadata>>>() {
+    };
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject
-    private BatonService batonService;
-
-    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
-    private boolean skipPublishDynamo;
+    private ActivityStoreProxy activityStoreProxy;
 
     private DataCollection.Version inactive;
     private DataCollection.Version active;
@@ -83,8 +80,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     //timelineId -> version
     private Map<String, String> timelineVersionMap;
 
-    //timelineId -> tableRoleTableName
-    private Map<String, String> timelineMaterStoreNameMap;
+    // timelineId -> table name of timeline master store in active version
+    private Map<String, String> activeTimelineMasterTableNames;
 
     private DataCollectionStatus dcStatus;
 
@@ -97,6 +94,11 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     protected TimeLineJobConfig configureJob(TimeLineSparkStepConfiguration stepConfiguration) {
         if (isShortCutMode()) {
             log.info("Already computed this step, skip processing (short-cut mode)");
+            Map<String, String> masterTableNames = getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class,
+                    String.class);
+            log.info("Linking timeline master tables = {} to inactive version = {}", masterTableNames, inactive);
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), masterTableNames,
+                    TableRoleInCollection.TimelineProfile, inactive);
             return null;
         }
         List<TimeLine> timeLineList = stepConfiguration.getTimeLineList();
@@ -108,7 +110,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         active = inactive.complement();
         dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
-        timelineMaterStoreNameMap = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
+        activeTimelineMasterTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
                 TableRoleInCollection.TimelineProfile, active, null);
         checkRebuild();
         bumpVersion();
@@ -120,6 +122,15 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         config.sortKey = SORT_KEY_NAME;
         config.needRebuild = needRebuild;
         config.tableRoleSuffix = SUFFIX;
+        // set dimensions
+        config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
+        if (config.dimensionMetadataMap == null) {
+            config.dimensionMetadataMap = activityStoreProxy.getDimensionMetadata(customerSpace.toString(), null);
+        }
+        if (MapUtils.isEmpty(config.dimensionMetadataMap)) {
+            log.info("can't find the DimensionMetadata, will skip generate timeline.");
+            return null;
+        }
 
         //no atlasStreamTable, will skip
         // streamId -> table name
@@ -138,9 +149,13 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         //timelineId -> (BusinessEntity, streamTableName list)
         config.timelineRelatedStreamTables =
                 getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
-        if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables) && MapUtils.isNotEmpty(timelineMaterStoreNameMap)) {
+        if (MapUtils.isNotEmpty(config.timelineRelatedStreamTables)
+                && MapUtils.isNotEmpty(activeTimelineMasterTableNames)) {
             config.timelineRelatedMasterTables =
-                    timelineMaterStoreNameMap.entrySet().stream().filter(entry -> config.timelineRelatedStreamTables.keySet().contains(entry.getKey())).map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                    activeTimelineMasterTableNames.entrySet().stream()
+                            .filter(entry -> config.timelineRelatedStreamTables.keySet().contains(entry.getKey()))
+                            .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
+                            .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
             config.timelineRelatedMasterTables = new HashMap<>();
         }
@@ -158,6 +173,11 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                         .filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && configuration.getActivityStreamMap().get(entry.getKey()).getStreamType() != null))
                         .map(entry -> Pair.of(entry.getValue(),
                                 configuration.getActivityStreamMap().get(entry.getKey()).getStreamType().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        //TableName -> StreamId
+        config.tableNameToStreamIdMap =
+                sourceTables.entrySet().stream().filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && configuration.getActivityStreamMap().get(entry.getKey()).getStreamId() != null))
+                .map(entry -> Pair.of(entry.getValue(),
+                        configuration.getActivityStreamMap().get(entry.getKey()).getStreamId())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         config.timelineVersionMap = timelineVersionMap;
         return config;
     }
@@ -169,7 +189,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         Map<String, Integer> timelineOutputIdx = JsonUtils.convertMap(rawMap, String.class, Integer.class);
         Preconditions.checkArgument(MapUtils.isNotEmpty(timelineOutputIdx),
                 "timeline output index map should not be empty here");
-        // timeline -> timeline rawstream table name
+        // timeline -> timeline diff table
         Map<String, String> tableNames = new HashMap<>();
         Map<String, Table> tables = new HashMap<>();
         Map<String, String> mergedMaterStoreNames = new HashMap<>();
@@ -190,38 +210,23 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 tables.put(timelineId, table);
             }
         });
+        Map<String, String> timelineMasterStore;
         if (!needRebuild) {
-            timelineMaterStoreNameMap = timelineMaterStoreNameMap.entrySet().stream().map(entry -> {
-                if (mergedMaterStoreNames.keySet().contains(entry.getKey())) {
-                    return Pair.of(entry.getKey(), mergedMaterStoreNames.get(entry.getKey()));
-                } else {
-                    return Pair.of(entry.getKey(), entry.getValue());
-                }
-            }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            timelineMasterStore = activeTimelineMasterTableNames.entrySet() //
+                    .stream() //
+                    .map(entry -> Pair.of(entry.getKey(),
+                            mergedMaterStoreNames.getOrDefault(entry.getKey(), entry.getValue())))
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
-            timelineMaterStoreNameMap = mergedMaterStoreNames;
+            timelineMasterStore = mergedMaterStoreNames;
         }
-        log.info("merged timelineMasterStore names = {}.", mergedMaterStoreNames);
-        log.info("timeline rawStream table names = {}", tableNames);
-        exportToS3AndAddToContext(tables, TIMELINE_RAWTABLE_NAME);
-        tableNames.values().forEach(name -> {
-            exportToDynamo(name);
-            addToListInContext(TEMPORARY_CDL_TABLES, name, String.class);
-        });
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineMaterStoreNameMap,
-                TableRoleInCollection.TimelineProfile, inactive);
-    }
+        log.info("timeline master table names = {}.", timelineMasterStore);
+        log.info("timeline diff table names = {}", tableNames);
+        exportToS3AndAddToContext(tables, TIMELINE_DIFF_TABLE_NAME);
+        putObjectInContext(TIMELINE_MASTER_TABLE_NAME, timelineMasterStore);
 
-    private void exportToDynamo(String tableName) {
-        if (shouldPublishDynamo()) {
-            String inputPath = metadataProxy.getAvroDir(configuration.getCustomer(), tableName);
-            DynamoExportConfig config = new DynamoExportConfig();
-            config.setTableName(tableName);
-            config.setInputPath(PathUtils.toAvroGlob(inputPath));
-            config.setPartitionKey(PARTITION_KEY_NAME);
-            config.setSortKey(SORT_KEY_NAME);
-            addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
-        }
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineMasterStore,
+                TableRoleInCollection.TimelineProfile, inactive);
     }
 
     private Table getContactTable() {
@@ -401,14 +406,12 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     }
 
     private boolean isShortCutMode() {
-        Map<String, String> timelineRawTableNames = getMapObjectFromContext(TIMELINE_RAWTABLE_NAME,
+        Map<String, String> timelineRawTableNames = getMapObjectFromContext(TIMELINE_DIFF_TABLE_NAME,
                 String.class, String.class);
-        log.info("timeline raw table names = {}", timelineRawTableNames);
-        return allTablesExist(timelineRawTableNames);
-    }
-
-    private boolean shouldPublishDynamo() {
-        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
-        return !skipPublishDynamo && hasAccount360;
+        Map<String, String> timelineMasterTableNames = getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class,
+                String.class);
+        log.info("timeline diff table names = {}, master table names = {}", timelineRawTableNames,
+                timelineMasterTableNames);
+        return allTablesExist(timelineRawTableNames) && allTablesExist(timelineMasterTableNames);
     }
 }

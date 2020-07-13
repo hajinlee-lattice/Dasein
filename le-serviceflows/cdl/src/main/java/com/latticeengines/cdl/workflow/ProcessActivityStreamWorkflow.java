@@ -12,7 +12,9 @@ import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper
 import com.latticeengines.cdl.workflow.steps.merge.MigrateActivityPartitionKey;
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
+import com.latticeengines.cdl.workflow.steps.process.FinishActivityStreamProcessing;
 import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
+import com.latticeengines.cdl.workflow.steps.process.GenerateJourneyStage;
 import com.latticeengines.cdl.workflow.steps.process.GenerateLastActivityDate;
 import com.latticeengines.cdl.workflow.steps.process.GenerateTimeLine;
 import com.latticeengines.cdl.workflow.steps.process.MergeActivityMetricsToEntityStep;
@@ -71,6 +73,12 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     @Inject
     private GenerateTimeLine generateTimeLine;
 
+    @Inject
+    private GenerateJourneyStage generateJourneyStage;
+
+    @Inject
+    private FinishActivityStreamProcessing finishActivityStreamProcessing;
+
     @Override
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -86,7 +94,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
                 .next(mergeActivityMetricsToEntityStep) //
                 .next(profileAccountActivityMetricsWrapper) //
                 .next(profileContactActivityMetricsWrapper) //
-                .next(generateTimeLine)
+                .next(generateTimeLine) //
+                .next(generateJourneyStage) //
+                .next(finishActivityStreamProcessing) //
                 .build();
     }
 }

@@ -9,6 +9,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -73,7 +74,7 @@ public class ExportFieldMetadataDefaults implements HasPid {
     @JsonProperty("audienceType")
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "EXPORT_FIELD_METADATA_DEFAULTS_AUDIENCE_TYPE", joinColumns = @JoinColumn(name = "EXPORT_FIELD_METADATA_DEFAULTS_PID"))
-    @ElementCollection(targetClass = AudienceType.class)
+    @ElementCollection(targetClass = AudienceType.class, fetch = FetchType.EAGER)
     @Column(name = "AUDIENCE_TYPE", nullable = false)
     private List<AudienceType> audienceTypes;
 

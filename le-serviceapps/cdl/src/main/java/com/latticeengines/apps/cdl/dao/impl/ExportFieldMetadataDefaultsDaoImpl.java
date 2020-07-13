@@ -21,7 +21,7 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
 
     @Override
     public List<ExportFieldMetadataDefaults> getAllDefaultExportFields(CDLExternalSystemName systemName) {
-        return this.findAllByField("externalSystemName", systemName);
+        return this.findAllByFields("externalSystemName", systemName);
     }
 
     @Override
@@ -39,16 +39,17 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
             BusinessEntity entity) {
         return this.findAllByFields("externalSystemName", systemName, "exportEnabled", true, "entity", entity);
     }
-    
+
     @Override
     public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldsForAudienceType(CDLExternalSystemName systemName,
             AudienceType audienceType) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
         String queryStr = String.format(
-                "SELECT field FROM %s field JOIN field.audienceTypes audience WHERE audience = :audienceType",
+                "SELECT field FROM %s field JOIN field.audienceTypes audience WHERE field.externalSystemName=:systemName AND audience=:audienceType",
                 entityClz.getSimpleName());
         TypedQuery<ExportFieldMetadataDefaults> q = session.createQuery(queryStr, ExportFieldMetadataDefaults.class);
+        q.setParameter("systemName", systemName);
         q.setParameter("audienceType", audienceType);
         return q.getResultList();
     }
@@ -61,12 +62,11 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
     @Override
     public void deleteBySystemName(CDLExternalSystemName systemName) {
         Session session = getSessionFactory().getCurrentSession();
-        Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
-        String queryStr = String.format("delete from  %s field where field.externalSystemName=:systemName",
-                entityClz.getSimpleName());
-        Query<?> query = session.createQuery(queryStr);
-        query.setParameter("systemName", systemName);
-        query.executeUpdate();
+
+        List<ExportFieldMetadataDefaults> metadataList = getAllDefaultExportFields(systemName);
+        for (ExportFieldMetadataDefaults metadata : metadataList) {
+            session.delete(metadata);
+        }
     }
 
     @Override

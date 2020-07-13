@@ -13,6 +13,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -21,6 +22,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -71,8 +73,10 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         if (upload == null || upload.getUploadConfig() == null || StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath())) {
             throw new RuntimeException("Cannot start DCP import job due to lack of import info!");
         }
+
         String sourceKey = upload.getUploadConfig().getDropFilePath();
         String csvFileName = sourceKey.substring(sourceKey.lastIndexOf("/") + 1);
+
         // Build upload dir
         Source source = sourceProxy.getSource(customerSpace.toString(), configuration.getSourceId());
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
@@ -101,6 +105,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
 
         String uploadImportResult = UploadS3PathBuilderUtils.getUploadImportResultDir(projectDetails.getProjectId(),
                 source.getSourceId(), uploadTS);
+
         s3Service.createFolder(dropBoxSummary.getBucket(),
                 UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadImportResult));
 
@@ -111,6 +116,20 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
 
         // Copy file from drop folder to raw input folder.
         copyFromDropfolder(upload, dropBoxSummary);
+
+        if (Boolean.TRUE.equals(upload.getUploadConfig().getSourceOnHdfs())) {
+            try {
+                FileStatus hdfsFile = HdfsUtils.getFileStatus(yarnConfiguration, sourceKey);
+                upload.getUploadConfig().setDropFileTime(hdfsFile.getModificationTime());
+            } catch (IOException e) {
+                log.warn("Can not get time stamp of file " + sourceKey + " error="
+                        + e.getMessage());
+            }
+        } else {
+            ObjectMetadata sourceFile = s3Service.getObjectMetadata(dropBoxSummary.getBucket(), sourceKey);
+            upload.getUploadConfig().setDropFileTime(sourceFile.getLastModified().getTime());
+        }
+
         uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
         checkCSVFile(upload, dropBoxSummary);
     }

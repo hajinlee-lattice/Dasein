@@ -232,7 +232,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         featureImportanceProxy.upsertModelFeatureImportances(mainTestTenant.getId(), modelSummary.getId());
         featureImportances = featureImportanceProxy.getFeatureImportanceByModelGuid(mainTestTenant.getId(),
                 modelSummary.getId());
-        Assert.assertEquals(featureImportances.size(), 52);
+        Assert.assertEquals(featureImportances.size(), 50);
     }
 
     private void verifyBucketMetadataGenerated(PredictionType predictionType) {

@@ -19,7 +19,7 @@ public class ServiceflowsCoreEmrEnvServiceImpl implements EMREnvService {
     @Value("${dataplatform.python.conda.env}")
     private String condaEnv;
 
-    @Value("${dataplatform.python.conda2.env}")
+    @Value("${dataplatform.python2.conda.env}")
     private String condaEnvP2;
 
     @Value("${dataplatform.default.python.version}")

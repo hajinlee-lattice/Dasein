@@ -55,9 +55,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -483,47 +480,6 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
             exp = e;
         }
         Assert.assertNotNull(exp);
-    }
-
-    @Test(groups = "deployment")
-    public void verifyFieldMappingValidations() {
-        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + TRANSACTION_SOURCE_FILE_MISSING));
-
-        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_TRANSACTION);
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_TRANSACTION, SOURCE, feedType);
-        boolean dateExist = false;
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            }
-            if (fieldMapping.getUserField().equals("Date")) {
-                dateExist = true;
-                // 5/26/2016 12:00:00 AM
-                Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
-                Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
-                // set wrong date format and time zone
-                fieldMapping.setDateFormatString("MM-DD-YYYY");
-                fieldMapping.setTimezone(TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
-            }
-        }
-        Assert.assertTrue(dateExist);
-        FieldValidationResult fieldValidationResult = modelingFileMetadataService
-                .validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION, SOURCE, feedType);
-        List<FieldValidation> validations = fieldValidationResult.getFieldValidations();
-        Assert.assertNotNull(validations);
-        List<FieldValidation> errorValidations = validations.stream()
-                .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
-                .collect(Collectors.toList());
-        Assert.assertNotNull(errorValidations);
-        List<FieldValidation> warningValidations = validations.stream()
-                .filter(validation -> ValidationStatus.WARNING.equals(validation.getStatus()))
-                .collect(Collectors.toList());
-        Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")

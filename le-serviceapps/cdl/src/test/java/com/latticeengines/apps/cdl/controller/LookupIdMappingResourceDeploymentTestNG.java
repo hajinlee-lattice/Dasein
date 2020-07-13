@@ -153,16 +153,33 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     // TODO - anoop - enable it
     @Test(groups = "deployment-app", enabled = false)
     public void getAllLookupIds() {
-        Map<String, List<CDLExternalSystemMapping>> allLookupIds = lookupIdMappingProxy
+        Map<String, List<CDLExternalSystemMapping>> allAccountLookupIds = lookupIdMappingProxy
                 .getAllLookupIds(mainCustomerSpace, null, AudienceType.ACCOUNTS);
-        Assert.assertNotNull(allLookupIds);
-        Assert.assertTrue(allLookupIds.keySet().size() > 0);
+        Assert.assertNotNull(allAccountLookupIds);
+        Assert.assertTrue(allAccountLookupIds.keySet().size() > 0);
 
-        allLookupIds.keySet().forEach(k -> {
+        allAccountLookupIds.keySet().forEach(k -> {
             CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
             Assert.assertNotNull(externalSystemType);
-            Assert.assertTrue(allLookupIds.get(k).size() > 0);
-            allLookupIds.get(k).forEach(c -> {
+            Assert.assertTrue(allAccountLookupIds.get(k).size() > 0);
+            allAccountLookupIds.get(k).forEach(c -> {
+                Assert.assertNotNull(c);
+                Assert.assertNotNull(c.getDisplayName());
+                Assert.assertNotNull(c.getFieldName());
+                Assert.assertNotNull(c.getFieldType());
+            });
+        });
+
+        Map<String, List<CDLExternalSystemMapping>> allContactLookupIds = lookupIdMappingProxy
+                .getAllLookupIds(mainCustomerSpace, null, AudienceType.CONTACTS);
+        Assert.assertNotNull(allContactLookupIds);
+        Assert.assertTrue(allContactLookupIds.keySet().size() > 0);
+
+        allContactLookupIds.keySet().forEach(k -> {
+            CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
+            Assert.assertNotNull(externalSystemType);
+            Assert.assertTrue(allContactLookupIds.get(k).size() > 0);
+            allContactLookupIds.get(k).forEach(c -> {
                 Assert.assertNotNull(c);
                 Assert.assertNotNull(c.getDisplayName());
                 Assert.assertNotNull(c.getFieldName());

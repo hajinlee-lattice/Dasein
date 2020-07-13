@@ -18,7 +18,6 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -26,9 +25,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
-import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
@@ -53,13 +51,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     protected String modelingServiceHdfsBaseDir;
 
     @Inject
-    protected SoftwareLibraryService softwareLibraryService;
-
-    @Inject
     protected WorkflowJobService workflowJobService;
-
-    @Inject
-    protected VersionManager versionManager;
 
     @Value("${workflowapi.test.sfdc.user.name}")
     private String salesforceUserName;
@@ -74,7 +66,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     private String stackName;
 
     @Inject
-    protected PlsInternalProxy plsInternalProxy;
+    protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     @Inject
     protected SourceFileProxy sourceFileProxy;

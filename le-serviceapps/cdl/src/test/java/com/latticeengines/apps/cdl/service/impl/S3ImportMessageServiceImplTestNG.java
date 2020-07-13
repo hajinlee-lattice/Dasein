@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,16 +46,32 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
         String key1 = String.format(KEY1, prefix, "file1.csv");
         String key2 = String.format(KEY2, prefix, "file2.csv");
         String key3 = String.format(KEY1, prefix, "file1_1.csv");
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key1, HOSTURL, S3ImportMessageType.Atlas);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key1, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key2, HOSTURL, S3ImportMessageType.Atlas);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key2, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, HOSTURL, S3ImportMessageType.Atlas);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
         List<S3ImportMessage> messages = s3ImportMessageService.getMessageGroupByDropBox();
         messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))
                 .collect(Collectors.toList());
-        Assert.assertEquals(2, messages.size());
+        Assert.assertEquals(messages.size(), 0);
+
+        List<S3ImportMessage> pendingMessages =
+                s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.Atlas);
+        Assert.assertEquals(CollectionUtils.size(pendingMessages), 3);
+
+        pendingMessages = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.DCP);
+        Assert.assertEquals(CollectionUtils.size(pendingMessages), 0);
+
+        s3ImportMessageService.updateHostUrl(key1, HOSTURL);
+        s3ImportMessageService.updateHostUrl(key2, HOSTURL);
+        s3ImportMessageService.updateHostUrl(key3, HOSTURL);
+
+        messages = s3ImportMessageService.getMessageGroupByDropBox();
+        messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))
+                .collect(Collectors.toList());
+        Assert.assertEquals(messages.size(), 2);
         S3ImportMessage s3ImportMessage = messages.get(0);
         if (s3ImportMessage.getKey().equals(key1)) {
             Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);

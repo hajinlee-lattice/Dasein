@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -118,6 +119,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     Map<BusinessEntity, Boolean> hardDeleteEntities;
     @Inject
     private MatchProxy matchProxy;
+
+    @Value("${cdl.pa.use.directplus}")
+    private boolean useDirectPlus;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -461,6 +465,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
+        matchInput.setUseDirectPlus(useDirectPlus);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         return matchInput;
     }

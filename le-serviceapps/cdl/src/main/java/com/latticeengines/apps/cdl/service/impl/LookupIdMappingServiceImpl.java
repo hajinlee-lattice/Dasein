@@ -189,13 +189,14 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     }
 
     @Override
-    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIdsByAudienceType(
+    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(
             CDLExternalSystemType externalSystemType, AudienceType audienceType) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
         Map<String, List<CDLExternalSystemMapping>> result;
         try {
             if (externalSystemType == null) {
-                result = externalSystemService.getExternalSystemMap(space.toString(), audienceType.asBusinessEntity());
+                result = externalSystemService.getExternalSystemMap(space.toString(),
+                        audienceType.asBusinessEntity());
             } else {
                 result = new HashMap<>();
                 result.put(externalSystemType.name(), externalSystemService.getExternalSystemByType( //

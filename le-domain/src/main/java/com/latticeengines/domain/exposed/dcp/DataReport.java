@@ -296,7 +296,7 @@ public class DataReport {
         }
 
         @JsonIgnore
-        public void addGeoDistribution(String countryCode, String countryName, Long recordCnt, Long totalCnt) {
+        public void addGeoDistribution(String countryCode, Long recordCnt, Long totalCnt) {
             Preconditions.checkArgument(StringUtils.isNotEmpty(countryCode));
             Preconditions.checkNotNull(recordCnt);
             Preconditions.checkNotNull(totalCnt);
@@ -306,7 +306,6 @@ public class DataReport {
             }
             GeographicalItem geographicalItem = new GeographicalItem();
             geographicalItem.setGeoCode(countryCode);
-            geographicalItem.setGeoName(countryName);
             geographicalItem.setCount(recordCnt);
             if (totalCnt == 0L) {
                 geographicalItem.setRate(getScaledDouble(0.0));
@@ -324,9 +323,6 @@ public class DataReport {
             @JsonProperty("geoCode")
             private String geoCode;
 
-            @JsonProperty("geoName")
-            private String geoName;
-
             @JsonProperty("count")
             private Long count;
 
@@ -339,14 +335,6 @@ public class DataReport {
 
             public void setGeoCode(String geoCode) {
                 this.geoCode = geoCode;
-            }
-
-            public String getGeoName() {
-                return geoName;
-            }
-
-            public void setGeoName(String geoName) {
-                this.geoName = geoName;
             }
 
             public Long getCount() {

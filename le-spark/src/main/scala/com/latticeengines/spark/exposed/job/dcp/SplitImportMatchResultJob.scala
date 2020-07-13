@@ -65,16 +65,14 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
       // fake one country code column
       val countryCodeAttr: String = "CountryCodeAttr"
       val countryDF = CountryCodeUtils.convert(input, countryAttr, countryCodeAttr, url, user, password, key, salt)
-        .groupBy(col(countryAttr), col(countryCodeAttr))
+        .groupBy(col(countryCodeAttr))
         .agg(count("*").alias("cnt"))
         .persist(StorageLevel.DISK_ONLY)
       countryDF.collect().foreach(row => {
-        val countryVal: String = row.getAs(countryAttr)
-        val country: String = if (StringUtils.isEmpty(countryVal)) "undefined" else countryVal
         val countryCodeVal: String = row.getAs(countryCodeAttr)
-        val countryCode: String = if (StringUtils.isEmpty(countryCodeVal)) "undefined" else countryCodeVal
+        val countryCode: String = if (StringUtils.isEmpty(countryCodeVal)) "indeterminate" else countryCodeVal
         val count: Long = row.getAs("cnt")
-        geoReport.addGeoDistribution(countryCode, country, count, totalCnt)
+        geoReport.addGeoDistribution(countryCode, count, totalCnt)
       })
     }
     geoReport

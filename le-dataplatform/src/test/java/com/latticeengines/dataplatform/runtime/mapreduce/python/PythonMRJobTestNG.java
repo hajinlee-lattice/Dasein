@@ -48,8 +48,8 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${dataplatform.debug:false}")
     private String debug;
 
-    @Value("${dataplatform.hdfs.stack:}")
-    private String stackName;
+    @Value("${dataplatform.python.conda.env}")
+    private String condaEnv;
 
     @Inject
     private ManifestService manifestService;
@@ -197,6 +197,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         properties.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
         properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
         properties.put(PythonMRProperty.DEBUG.name(), debug);
+        properties.put(PythonContainerProperty.CONDA_ENV.name(), condaEnv);
         properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
         properties.put(PythonContainerProperty.RUNTIME_CONFIG.name(), "runtimeconfig.properties");
 

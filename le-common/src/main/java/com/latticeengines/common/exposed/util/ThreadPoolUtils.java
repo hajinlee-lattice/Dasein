@@ -13,6 +13,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -55,6 +56,13 @@ public final class ThreadPoolUtils {
     public static ExecutorService getSingleThreadPool(String name) {
         ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
         ExecutorService executorService = Executors.newSingleThreadExecutor(threadFac);
+        Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
+        return executorService;
+    }
+
+    public static ScheduledExecutorService getScheduledThreadPool(String name, int size) {
+        ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(size, threadFac);
         Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
         return executorService;
     }

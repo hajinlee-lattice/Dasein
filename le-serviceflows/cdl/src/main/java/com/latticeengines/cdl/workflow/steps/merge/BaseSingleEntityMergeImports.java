@@ -261,11 +261,12 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
                 masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
             }
+            // not wipe out customer attrs
             // in replace mode, delete the records in document db
-            if (Boolean.TRUE.equals(configuration.getNeedReplace()) && !metadataProxy.isTenantInMigration(customerSpace.toString())) {
-                cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(),
-                        configuration.getMainEntity());
-            }
+            // if (Boolean.TRUE.equals(configuration.getNeedReplace()) && !metadataProxy.isTenantInMigration(customerSpace.toString())) {
+            //     cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(),
+            //            configuration.getMainEntity());
+            // }
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
             log.info("There has been no master table for this data collection. Creating a new one. entity is: {}",

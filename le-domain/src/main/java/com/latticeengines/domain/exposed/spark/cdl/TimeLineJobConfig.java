@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
@@ -46,6 +47,14 @@ public class TimeLineJobConfig extends SparkJobConfig implements Serializable {
     //streamTableName -> streamType
     @JsonProperty
     public Map<String, String> streamTypeWithTableNameMap;
+
+    // streamId -> dimensionName -> metadata
+    @JsonProperty
+    public Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap = new HashMap<>();
+
+    //tableName -> streamId
+    @JsonProperty
+    public Map<String, String> tableNameToStreamIdMap = new HashMap<>();
 
     //timelineId -> timelineVersion
     @JsonProperty

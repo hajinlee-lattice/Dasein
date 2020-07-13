@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -159,8 +158,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         @SuppressWarnings({ "rawtypes" })
         Map allLookupIdsRaw = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids/"
-                        + AudienceType.ACCOUNTS.getType(), Map.class);
+                .getForObject(
+                        getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids" + "?audienceType=ACCOUNTS",
+                        Map.class);
         Assert.assertNotNull(allLookupIdsRaw);
         @SuppressWarnings({ "unchecked" })
         Map<String, List<CDLExternalSystemMapping>> allLookupIds = JsonUtils.convertMapWithListValue(allLookupIdsRaw,

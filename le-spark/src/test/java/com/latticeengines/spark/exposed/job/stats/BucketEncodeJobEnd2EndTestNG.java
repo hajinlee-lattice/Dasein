@@ -28,7 +28,7 @@ public class BucketEncodeJobEnd2EndTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     // need a big avro as the Account input
-    @Test(groups = "functional")
+    @Test(groups = "manual")
     public void test() {
         BucketEncodeConfig config = new BucketEncodeConfig();
         SparkJobResult result = runSparkJob(BucketEncodeJob.class, config);

@@ -151,7 +151,8 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         setupSeedLookupTable();
     }
 
-    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    // TODO: need to get data populated into dynamo
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, enabled = false)
     public void testCDLLookupByAccountId() {
         Object[][] data = new Object[][] { { 123, ACCOUNT_ID } };
         MatchInput input = prepareMatchInput(data);
@@ -159,7 +160,8 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         verifyAttributeInMatchOutput(output, true);
     }
 
-    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, dataProvider = "entityMatchAttrLookup")
+    // TODO: need to get data populated into dynamo
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, dataProvider = "entityMatchAttrLookup", enabled = false)
     private void testEntityMatchAttrLookup(String accountId, String customerAccountId, MatchKey lookupIdMatchKey,
             boolean shouldMatch) {
         Object[] data = new Object[] { accountId, customerAccountId };

@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.dao.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -39,13 +40,20 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
     @SuppressWarnings("unchecked")
     public List<String> findPlayDisplayNamesUsingGivenAttributes(List<String> attributes) {
         Session session = getSessionFactory().getCurrentSession();
+
         String queryStr = String.format("select distinct tp.play.displayName from %s tp where ( ",
                 getEntityClass().getSimpleName())
-                + attributes.stream().map(attr -> "content like '%{!" + attr + "}%'")
+                + IntStream.range(0, attributes.size()).mapToObj(index -> String.format("content like :attr%d", index))
                         .collect(Collectors.joining(" or "))
                 + ") and tp.play.tenant = :tenant and tp.play.deleted = :deleted";
 
         Query<String> query = session.createQuery(queryStr);
+
+        int index = 0;
+        for (String attr : attributes) {
+            query.setParameter(String.format("attr%d", index++), "'%{!" + attr + "}%'");
+        }
+
         query.setParameter("tenant", MultiTenantContext.getTenant());
         query.setParameter("deleted", Boolean.FALSE);
         return query.list();

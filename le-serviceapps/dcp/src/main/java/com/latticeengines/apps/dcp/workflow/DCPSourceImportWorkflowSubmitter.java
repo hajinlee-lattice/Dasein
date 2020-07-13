@@ -114,9 +114,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                     matchRuleConfiguration.getBaseRule().getAcceptCriterion().getMatchGradePatterns());
         }
         if(matchRuleConfiguration.getBaseRule().getExclusionCriterionList() != null) {
-            matchRuleConfiguration.getBaseRule().getExclusionCriterionList().stream().forEach(exclusionCriterion -> {
-                baseRule.exclude(exclusionCriterion);
-            });
+            matchRuleConfiguration.getBaseRule().getExclusionCriterionList().forEach(baseRule::exclude);
         }
         if(matchRuleConfiguration.getBaseRule().getReviewCriterion() != null) {
             baseRule.review(matchRuleConfiguration.getBaseRule().getReviewCriterion().getLowestConfidenceCode(),
@@ -126,7 +124,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
 
         DplusMatchConfig dplusMatchConfig =  new DplusMatchConfig(baseRule);
 
-        matchRuleConfiguration.getSpecialRules().stream().forEach(matchRule -> {
+        matchRuleConfiguration.getSpecialRules().forEach(matchRule -> {
             DplusMatchRule rule = new DplusMatchRule();
             if(matchRule.getAcceptCriterion() != null) {
                 rule.accept(matchRule.getAcceptCriterion().getLowestConfidenceCode(),
@@ -134,9 +132,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                         matchRule.getAcceptCriterion().getMatchGradePatterns());
             }
             if(matchRule.getExclusionCriterionList() != null){
-                matchRule.getExclusionCriterionList().stream().forEach(exclusionCriterion -> {
-                    rule.exclude(exclusionCriterion);
-                });
+                matchRule.getExclusionCriterionList().forEach(rule::exclude);
             }
             if(matchRule.getReviewCriterion() != null){
                 rule.review(matchRule.getReviewCriterion().getLowestConfidenceCode(),

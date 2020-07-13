@@ -159,11 +159,11 @@ public class LookupIdMappingResource {
         lookupIdMappingProxy.deleteConnection(MultiTenantContext.getTenant().getId(), traySettings, lookupIdMapId);
     }
 
-    @GetMapping("/available-lookup-ids/{audienceType}")
+    @GetMapping("/available-lookup-ids")
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(HttpServletRequest request, //
-            @PathVariable AudienceType audienceType,
+            @RequestParam(value = "audienceType", defaultValue = "ACCOUNTS", required = false) AudienceType audienceType,
             @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
             CDLExternalSystemType externalSystemType) {
         return lookupIdMappingProxy.getAllLookupIds(MultiTenantContext.getTenant().getId(), externalSystemType,
