@@ -219,10 +219,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "AUDIENCE_NAME")
     private String audienceName;
 
-    @JsonProperty("folderId")
-    @Column(name = "FOLDER_ID")
-    private String folderId;
-
     @JsonProperty("folderName")
     @Column(name = "FOLDER_NAME")
     private String folderName;
@@ -720,14 +716,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.audienceName = audienceName;
     }
 
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-
     public String getFolderName() {
         return folderName;
     }
@@ -913,9 +901,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         }
         if (playLaunch.getAudienceSize() != null) {
             this.setAudienceSize(playLaunch.getAudienceSize());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getFolderId())) {
-            this.setFolderId(playLaunch.getFolderId());
         }
         if (StringUtils.isNotBlank(playLaunch.getFolderName())) {
             this.setFolderName(playLaunch.getFolderName());
