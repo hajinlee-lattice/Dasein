@@ -75,7 +75,7 @@ public class ProcessAnalyzeImportCorrectnessTest extends CDLQATestNGBase {
 
         // wait all file import actions are done
         log.info("Waiting all file import actions are done...");
-        testJobService.waitForProcessAnalyzeReady(DEFAULT_WAIT_PA_READY_IN_MINUTES);
+        testJobService.waitForProcessAnalyzeReady(DEFAULT_WAIT_PA_READY_IN_MINUTES); // rename method
 
         // run PA
         log.info("Starting PA for file import...");

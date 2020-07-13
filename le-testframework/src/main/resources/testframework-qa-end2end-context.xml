@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <import resource="classpath:camille-runtime-context.xml" />
+    <import resource="classpath:security-no-controller-context.xml" />
+    <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:redshiftdb-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml"/>
+
+    <context:component-scan base-package="com.latticeengines.testframework">
+        <context:exclude-filter type="assignable" expression="com.latticeengines.testframework.exposed.proxy.pls.PlsRestApiProxyBase"/>
+    </context:component-scan>
+
+    <bean class="com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy">
+        <constructor-arg value="${qa.end2end.test.url}"/>
+    </bean>
+
+    <bean class="com.latticeengines.testframework.exposed.proxy.pls.PlsCDLS3ImportProxy">
+        <constructor-arg value="${qa.end2end.test.url}"/>
+    </bean>
+
+    <bean class="com.latticeengines.testframework.exposed.proxy.pls.PlsCDLS3TemplateProxy">
+        <constructor-arg value="${qa.end2end.test.url}"/>
+    </bean>
+
+    <bean class="com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy">
+        <constructor-arg value="${qa.end2end.test.url}"/>
+    </bean>
+
+    <bean class="com.latticeengines.testframework.exposed.proxy.pls.PlsJobProxy">
+        <constructor-arg value="${qa.end2end.test.url}"/>
+    </bean>
+
+    <bean id="deploymentTestBed" class="com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed">
+        <constructor-arg name="plsApiHostPort" value="${qa.end2end.test.url}"/>
+        <constructor-arg name="adminApiHostPort" value="${qa.end2end.test.admin.url}"/>
+        <constructor-arg name="environment" value="${common.test.env}"/>
+    </bean>
+
+    <bean name="awsCredentials" class="com.amazonaws.auth.BasicAWSCredentials">
+        <constructor-arg index="0" value="${aws.default.access.key}"/>
+        <constructor-arg index="1" value="${aws.default.secret.key.encrypted}"/>
+    </bean>
+
+    <bean name="s3Client" class="com.amazonaws.services.s3.AmazonS3Client">
+        <constructor-arg index="0" ref="awsCredentials" />
+    </bean>
+
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
+</beans>

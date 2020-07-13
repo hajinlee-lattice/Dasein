@@ -96,19 +96,6 @@ public class TestFileImportServiceImpl implements TestFileImportService {
     }
 
     @Override
-    public void upsertDefaultTemplateByAutoMapping(String filePath, EntityType entity, boolean importData) {
-        String defaultFeedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, entity);
-        String defaultTemplateName = getTemplateNameByFeedType(defaultFeedType);
-        S3ImportTemplateDisplay defaultTemplate = getTemplate(defaultFeedType, defaultTemplateName);
-        if (defaultTemplate == null) {
-            throw new RuntimeException(String.format("Not able to find default template %s, with feedType %s",
-                    defaultTemplateName, defaultFeedType));
-        }
-        upsertTemplateByAutoMapping(filePath, defaultTemplateName, defaultFeedType, entity, importData,
-                defaultTemplate);
-    }
-
-    @Override
     public void upsertTemplateByAutoMapping(String filePath, String templateName, String feedType, EntityType entity,
             boolean importData, S3ImportTemplateDisplay template) {
         log.info("Uploading file {}", filePath);
@@ -123,5 +110,18 @@ public class TestFileImportServiceImpl implements TestFileImportService {
 
         log.info("Creating or updating template {} with feedType {}", templateName, feedType);
         createS3Template(sourceFile.getName(), SourceType.FILE, importData, template);
+    }
+
+    @Override
+    public void upsertDefaultTemplateByAutoMapping(String filePath, EntityType entity, boolean importData) {
+        String defaultFeedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, entity);
+        String defaultTemplateName = getTemplateNameByFeedType(defaultFeedType);
+        S3ImportTemplateDisplay defaultTemplate = getTemplate(defaultFeedType, defaultTemplateName);
+        if (defaultTemplate == null) {
+            throw new RuntimeException(String.format("Not able to find default template %s, with feedType %s",
+                    defaultTemplateName, defaultFeedType));
+        }
+        upsertTemplateByAutoMapping(filePath, defaultTemplateName, defaultFeedType, entity, importData,
+                defaultTemplate);
     }
 }

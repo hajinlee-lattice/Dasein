@@ -9,6 +9,10 @@ public abstract class PlsRestApiProxyBase extends ProtectedRestApiProxy {
         super(PropertyUtils.getProperty("common.test.pls.url"), rootpath, urlVariables);
     }
 
+    public PlsRestApiProxyBase(String hostport, String rootpath, Object... urlVariables) {
+        super(hostport, rootpath, urlVariables);
+    }
+
     @Override
     protected String loginInternal(String username, String password) {
         throw new UnsupportedOperationException("We do not support login on this proxy yet.");

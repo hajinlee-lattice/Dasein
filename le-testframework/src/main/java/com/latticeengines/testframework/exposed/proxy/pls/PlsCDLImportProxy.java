@@ -8,9 +8,14 @@ import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 
 @Service("plsCDLImportProxy")
 public class PlsCDLImportProxy extends PlsRestApiProxyBase {
+    private static final String ROOT_PATH = "pls/jobs";
 
     public PlsCDLImportProxy() {
-        super("pls/cdl/import");
+        super(ROOT_PATH);
+    }
+
+    public PlsCDLImportProxy(String hostport) {
+        super(hostport, ROOT_PATH);
     }
 
     @SuppressWarnings("unchecked")
