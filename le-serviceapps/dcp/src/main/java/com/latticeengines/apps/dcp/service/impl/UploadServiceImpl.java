@@ -1,7 +1,5 @@
 package com.latticeengines.apps.dcp.service.impl;
 
-import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,15 +21,12 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
-import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
-import com.latticeengines.domain.exposed.dcp.UploadJobStep;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -189,31 +184,6 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public String getMatchResultTableName(String uploadId) {
         return uploadEntityMgr.findMatchResultTableNameByUploadId(uploadId);
-    }
-
-    @Override
-    public UploadJobDetails getJobDetailsByUploadId(String customerSpace, String uploadId) {
-        UploadJobDetails uploadJobDetails = new UploadJobDetails();
-        uploadJobDetails.setUploadId(uploadId);
-        UploadDetails uploadDetails = getUploadByUploadId(customerSpace, uploadId, false);
-        uploadJobDetails.setUploadDiagnostics(uploadDetails.getUploadDiagnostics());
-        uploadJobDetails.setStatistics(uploadDetails.getStatistics());
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(uploadDetails.getUploadDiagnostics().getApplicationId(), customerSpace);
-        List<UploadJobStep> uploadJobSteps = new ArrayList<>();
-        job.getSteps().stream().forEach(jobStep -> {
-            UploadJobStep uploadJobStep = new UploadJobStep();
-            uploadJobStep.setStepName(jobStep.getName());
-            uploadJobStep.setStepDescription(jobStep.getDescription());
-            uploadJobStep.setStartTimestamp(jobStep.getStartTimestamp().getTime());
-            uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
-            uploadJobSteps.add(uploadJobStep);
-        });
-        uploadJobDetails.setCurrentStep(uploadJobSteps.get(uploadJobSteps.size()-1));
-        NumberFormat numberFormat = NumberFormat.getInstance();
-        numberFormat.setMaximumFractionDigits(2);
-        String progressPercentage = numberFormat.format((float) uploadJobSteps.size() / (float) 6 * 100);
-        uploadJobDetails.setProgressPercentage(progressPercentage);
-        return uploadJobDetails;
     }
 
     private UploadStatsContainer findStats(String uploadId, Long statsId) {

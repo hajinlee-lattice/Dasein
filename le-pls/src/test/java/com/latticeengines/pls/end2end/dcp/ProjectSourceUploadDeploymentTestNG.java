@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
@@ -144,6 +145,11 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
         String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
+
+        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
+        Assert.assertNotNull(uploadJobDetails);
+        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 6);
+        Assert.assertEquals(uploadJobDetails.getCurrentStep().getStepName(), "Analysis");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")

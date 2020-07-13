@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl.dcp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,13 +43,14 @@ import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
+import com.latticeengines.domain.exposed.dcp.UploadJobStep;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service
 public class UploadServiceImpl implements UploadService, FileDownloader<UploadFileDownloadConfig> {
@@ -71,7 +73,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     private EmailService emailService;
 
     @Inject
-    private WorkflowProxy workflowProxy;
+    private WorkflowJobService workflowJobService;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -205,7 +207,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     public UploadDetails startImport(DCPImportRequest importRequest) {
         ApplicationId appId = submitImportRequest(importRequest);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
+        Job job = workflowJobService.findByApplicationId(appId.toString());
         String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
         UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(customerSpace, uploadId, Boolean.TRUE);
 
@@ -220,6 +222,27 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public UploadJobDetails getJobDetailsByUploadId(String uploadId) {
-        return uploadProxy.getJobDetailsByUploadId(MultiTenantContext.getShortTenantId(), uploadId);
+        UploadJobDetails uploadJobDetails = new UploadJobDetails();
+        uploadJobDetails.setUploadId(uploadId);
+        UploadDetails uploadDetails = getByUploadId(uploadId, false);
+        uploadJobDetails.setUploadDiagnostics(uploadDetails.getUploadDiagnostics());
+        uploadJobDetails.setStatistics(uploadDetails.getStatistics());
+        Job job = workflowJobService.findByApplicationId(uploadDetails.getUploadDiagnostics().getApplicationId());
+        List<UploadJobStep> uploadJobSteps = new ArrayList<>();
+        job.getSteps().stream().forEach(jobStep -> {
+            UploadJobStep uploadJobStep = new UploadJobStep();
+            uploadJobStep.setStepName(jobStep.getName());
+            uploadJobStep.setStepDescription(jobStep.getDescription());
+            uploadJobStep.setStartTimestamp(jobStep.getStartTimestamp().getTime());
+            uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
+            uploadJobSteps.add(uploadJobStep);
+        });
+        uploadJobDetails.setUploadJobSteps(uploadJobSteps);
+        uploadJobDetails.setCurrentStep(uploadJobSteps.get(uploadJobSteps.size()-1));
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        numberFormat.setMaximumFractionDigits(2);
+        String progressPercentage = numberFormat.format((float) uploadJobSteps.size() / (float) 6 * 100);
+        uploadJobDetails.setProgressPercentage(progressPercentage);
+        return uploadJobDetails;
     }
 }
