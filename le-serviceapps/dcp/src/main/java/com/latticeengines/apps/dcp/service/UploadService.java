@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 
@@ -35,4 +36,5 @@ public interface UploadService {
 
     String getMatchResultTableName(String uploadId);
 
+    UploadJobDetails getJobDetailsByUploadId(String customerSpace, String uploadId);
 }

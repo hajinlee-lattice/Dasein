@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -94,6 +95,24 @@ public class SourceImportListener extends LEJobListener {
                             ExceptionUtils.getStackTrace(exception));
                 }
                 uploadDiagnostics.setLastErrorMessage(JsonUtils.serialize(details));
+                UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(tenantId, uploadId, false);
+                switch (uploadDetails.getStatus()) {
+                    case NEW:
+                    case INGESTION_STARTED:
+                    case INGESTION_FINISHED:
+                        uploadDiagnostics.setLastErrorStep("Ingestion");
+                        break;
+                    case MATCH_STARTED:
+                    case MATCH_FINISHED:
+                        uploadDiagnostics.setLastErrorStep("Match");
+                        break;
+                    case ANALYSIS_STARTED:
+                    case ANALYSIS_FINISHED:
+                        uploadDiagnostics.setLastErrorStep("Analysis");
+                        break;
+                    default:
+                        break;
+                }
             }
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR, uploadDiagnostics);
         }

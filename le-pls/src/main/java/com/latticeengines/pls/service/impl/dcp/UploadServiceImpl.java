@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -215,5 +216,10 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     @Override
     public ApplicationId submitImportRequest(DCPImportRequest importRequest) {
         return uploadProxy.startImport(MultiTenantContext.getShortTenantId(), importRequest);
+    }
+
+    @Override
+    public UploadJobDetails getJobDetailsByUploadId(String uploadId) {
+        return uploadProxy.getJobDetailsByUploadId(MultiTenantContext.getShortTenantId(), uploadId);
     }
 }

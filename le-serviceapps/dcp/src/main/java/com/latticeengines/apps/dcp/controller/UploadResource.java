@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 
@@ -137,5 +138,14 @@ public class UploadResource {
         ApplicationId appId = importSubmitter.submit(CustomerSpace.parse(customerSpace), request,
                 new WorkflowPidWrapper(-1L));
         return appId.toString();
+    }
+
+    @GetMapping("/uploadId/{uploadId}/jobDetails")
+    @ResponseBody
+    @ApiOperation(value = "Get upload job details by uploadId")
+    public UploadJobDetails getJobDetailsByUploadId(@PathVariable String customerSpace, @PathVariable String uploadId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        log.info(String.format("Get job details for customer %s, with uploadId %s", customerSpace, uploadId));
+        return uploadService.getJobDetailsByUploadId(customerSpace, uploadId);
     }
 }

@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -98,5 +99,11 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         String appIdStr = post("Start DCP import", url, request, String.class);
         return ApplicationId.fromString(appIdStr);
+    }
+
+    public UploadJobDetails getJobDetailsByUploadId(String customerSpace, String uploadId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}/jobDetails";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+        return get("Get Upload Job Details by UploadId", url, UploadJobDetails.class);
     }
 }
