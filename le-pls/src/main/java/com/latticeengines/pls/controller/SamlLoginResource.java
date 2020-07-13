@@ -75,7 +75,7 @@ public class SamlLoginResource {
     @Value("${pls.saml.local.redirection.allowed:false}")
     private boolean isLocalRedirectionAllowed;
 
-    @PostMapping(value = "/login/" + InternalResource.TENANT_ID_PATH,
+    @PostMapping(value = "/login/" + EmailResource.TENANT_ID_PATH,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     @ApiOperation(value = "Login via SAML Authentication")
@@ -176,7 +176,7 @@ public class SamlLoginResource {
         return result;
     }
 
-    @PostMapping(value = "/logout/" + InternalResource.TENANT_ID_PATH,
+    @PostMapping(value = "/logout/" + EmailResource.TENANT_ID_PATH,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     @ApiOperation(value = "Logout the user at GA and SAML IDP")

@@ -234,7 +234,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     private void sendS3ImportEmail(String result, S3ImportEmailInfo emailInfo) {
         try {
             String tenantId = configuration.getCustomerSpace().toString();
-            plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            emailProxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }

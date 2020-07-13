@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -29,7 +29,7 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -58,7 +58,7 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
             log.info(String.format("userId: %s; modelName: %s; status:%s ", emailInfo.getUserId(),
                     emailInfo.getModelId(), jobExecution.getStatus().name()));
             try {
-                plsInternalProxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                emailProxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
             } catch (Exception e) {
                 log.error("Can not send create model email: " + e.getMessage());
             }

@@ -241,6 +241,12 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
     }
 
     private void upsertStatsCube() {
+        boolean alreadyUpdated = Boolean.TRUE.equals(getObjectFromContext(ACCOUNT_STATS_UPDATED, Boolean.class));
+        if (alreadyUpdated) {
+            log.info("Stats already updated according to ctx ACCOUNT_STATS_UPDATED.");
+            return;
+        }
+
         Table baseTbl = attemptGetTableRole(ConsolidatedAccount, true);
         long tblCnt = baseTbl.toHdfsDataUnit("Base").getCount();
 
@@ -258,29 +264,31 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
 
         String lockName = acquireStatsLock(CustomerSpace.shortenCustomerSpace(customerSpaceStr), inactive);
         try {
-            StatsCube cube = new StatsCube();
-            cube.setCount(tblCnt);
             Map<String, StatsCube> cubeMap = getCurrentCubeMap();
+            Map<String, AttributeStats> attrStats = new HashMap<>();
             if (cubeMap.containsKey(Account.name())) {
                 StatsCube oldCube = cubeMap.get(Account.name());
-                Map<String, AttributeStats> attrStats = new HashMap<>(oldCube.getStatistics());
-                if (updateCube != null && MapUtils.isNotEmpty(updateCube.getStatistics())) {
-                    for (String attr: updateCube.getStatistics().keySet()) {
-                        AttributeStats updateStat = updateCube.getStatistics().get(attr);
-                        if (attrStats.containsKey(attr)) {
-                            attrStats.put(attr, mergeAttrStat(attrStats.get(attr), updateStat));
-                        } else {
-                            attrStats.put(attr, updateStat);
-                        }
+                attrStats.putAll(oldCube.getStatistics());
+            }
+            if (updateCube != null && MapUtils.isNotEmpty(updateCube.getStatistics())) {
+                for (String attr: updateCube.getStatistics().keySet()) {
+                    AttributeStats updateStat = updateCube.getStatistics().get(attr);
+                    if (attrStats.containsKey(attr)) {
+                        attrStats.put(attr, mergeAttrStat(attrStats.get(attr), updateStat));
+                    } else {
+                        attrStats.put(attr, updateStat);
                     }
                 }
-                if (replaceCube != null && MapUtils.isNotEmpty(replaceCube.getStatistics())) {
-                    attrStats.putAll(replaceCube.getStatistics());
-                }
-                cube.setStatistics(attrStats);
             }
+            if (replaceCube != null && MapUtils.isNotEmpty(replaceCube.getStatistics())) {
+                attrStats.putAll(replaceCube.getStatistics());
+            }
+            StatsCube cube = new StatsCube();
+            cube.setCount(tblCnt);
+            cube.setStatistics(attrStats);
             cubeMap.put(Account.name(), cube);
             saveStatsContainer(cubeMap);
+            putObjectInContext(ACCOUNT_STATS_UPDATED, Boolean.TRUE);
         } finally {
             LockManager.releaseWriteLock(lockName);
         }
@@ -321,10 +329,11 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
 
     private void saveStatsContainer(Map<String, StatsCube> cubeMap) {
         StatisticsContainer statsContainer = new StatisticsContainer();
-        statsContainer.setName(NamingUtils.timestamp("Stats"));
+        String statsName = NamingUtils.timestamp("Stats");
+        statsContainer.setName(statsName);
         statsContainer.setStatsCubes(cubeMap);
         statsContainer.setVersion(inactive);
-        log.info("Saving stats with " + cubeMap.size() + " cubes.");
+        log.info("Saving stats " + statsName + " with " + cubeMap.size() + " cubes.");
         dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 
