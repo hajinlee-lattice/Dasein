@@ -274,6 +274,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
     protected static final String ACCOUNT_STATS_DIFF_TABLE_NAME = "ACCOUNT_STATS_DIFF_TABLE_NAME";
+    protected static final String ACCOUNT_STATS_UPDATED = "ACCOUNT_STATS_UPDATED";
     protected static final String FULL_ACCOUNT_STATS_TABLE_NAME = "FULL_ACCOUNT_STATS_TABLE_NAME";
     protected static final String ACCOUNT_LOOKUP_TABLE_NAME = "ACCOUNT_LOOKUP_TABLE_NAME";
     protected static final String CONTACT_SERVING_TABLE_NAME = "CONTACT_SERVING_TABLE_NAME";
@@ -426,6 +427,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PA_TIMESTAMP, //
             ACCOUNT_RE_PROFILE_ATTRS, //
             LATTICE_ACCOUNT_RE_PROFILE_ATTRS, //
+            ACCOUNT_STATS_UPDATED, //
             REBUILD_LATTICE_ACCOUNT, //
             ENTITY_MATCH_COMPLETED, //
             NEW_ENTITY_MATCH_ENVS, //
