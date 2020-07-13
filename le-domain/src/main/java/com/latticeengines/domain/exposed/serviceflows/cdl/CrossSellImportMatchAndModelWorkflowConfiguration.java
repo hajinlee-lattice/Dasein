@@ -37,6 +37,8 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
+    public static final String WORKFLOW_NAME = "crossSellImportMatchAndModelWorkflow";
+
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
@@ -421,7 +423,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.fetchOnly(Boolean.TRUE);
             matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
 
-            configuration.setContainerConfiguration("crossSellImportMatchAndModelWorkflow",
+            configuration.setContainerConfiguration(WORKFLOW_NAME,
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(cdlEventTableTupleFilter);
             configuration.add(cdlEventTable);

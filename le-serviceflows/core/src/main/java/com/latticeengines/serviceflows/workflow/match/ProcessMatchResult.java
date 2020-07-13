@@ -112,10 +112,6 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         putObjectInContext(MATCH_RESULT_TABLE, eventTable);
         putStringValueInContext(MATCH_RESULT_TABLE_NAME, eventTable.getName());
 
-        Table upstreamTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
-        if (upstreamTable != null) {
-            metadataProxy.deleteTable(customer, upstreamTable.getName());
-        }
         removeObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE);
         setMatchRate(result);
 

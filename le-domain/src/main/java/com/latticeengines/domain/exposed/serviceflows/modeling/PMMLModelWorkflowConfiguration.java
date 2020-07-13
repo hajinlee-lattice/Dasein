@@ -9,6 +9,8 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepCo
 
 public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfiguration {
 
+    public static final String WORKFLOW_NAME = "pmmlModelWorkflow";
+
     public static class Builder {
         private PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
@@ -103,8 +105,8 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
         }
 
         public PMMLModelWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("pmmlModelWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration(WORKFLOW_NAME, configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(pmml);
             configuration.add(model);
             configuration.add(exportModelToS3);

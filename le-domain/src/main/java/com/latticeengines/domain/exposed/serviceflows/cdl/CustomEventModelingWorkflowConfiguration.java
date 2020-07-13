@@ -42,6 +42,8 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
+    public static final String WORKFLOW_NAME = "customEventModelingWorkflow";
+
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
@@ -499,7 +501,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             exportBucketTool.setUsingDisplayName(false);
             generateAIRating.saveBucketMetadata();
 
-            configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
+            configuration.setContainerConfiguration(WORKFLOW_NAME, configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(importData);
             configuration.add(registerReport);
