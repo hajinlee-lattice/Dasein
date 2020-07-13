@@ -252,6 +252,8 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     // Manipulate Contact Table
     var finalRecommendations: DataFrame = null
     var finalOutput: String = null
+    
+    val sfdcContactId: String = playLaunchContext.getSfdcContactID
 
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
@@ -263,7 +265,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
       val selectedAccountList =  contactTable.join(derivedAccounts, joinKey :: Nil, "inner").select(joinKey).distinct()
       val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
-      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, joinKey)
+      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, sfdcContactId, joinKey)
 
       // join
       val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
@@ -415,9 +417,9 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     userConfiguredDataFrame
   }
 
-  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], joinKey: String): DataFrame = {
+  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //

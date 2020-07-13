@@ -140,6 +140,7 @@ public class FrontEndQueryCreator {
             boolean useSpark) {
         ProcessedFieldMappingMetadata result = new ProcessedFieldMappingMetadata();
         String destinationAccountId = playLaunchContext.getPlayLaunch().getDestinationAccountId();
+        String destinationContactId = playLaunchContext.getPlayLaunch().getDestinationContactId();
         Map<BusinessEntity, List<String>> tempAccLookupFields;
         if (StringUtils.isBlank(destinationAccountId)) {
             tempAccLookupFields = accountLookupFields;
@@ -162,6 +163,10 @@ public class FrontEndQueryCreator {
         Map<BusinessEntity, List<String>> temContactLookupFields = new HashMap<>();
         List<String> contactAttrs = contactLookupFields.get(BusinessEntity.Contact).stream()
                 .collect(Collectors.toList());
+        final String fDestinationContactId = destinationContactId.trim();
+        if (StringUtils.isNotBlank(destinationContactId) && !contactAttrs.contains(fDestinationContactId)) {
+            contactAttrs.add(fDestinationContactId);
+        }
         temContactLookupFields.put(BusinessEntity.Contact, contactAttrs);
         CustomerSpace cs = playLaunchContext.getCustomerSpace();
         if (cs != null) {
