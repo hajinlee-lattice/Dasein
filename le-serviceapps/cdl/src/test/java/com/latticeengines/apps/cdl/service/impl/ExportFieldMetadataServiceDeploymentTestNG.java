@@ -306,12 +306,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 11);
+        assertEquals(columnMetadata.size(), 10);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
         log.info(JsonUtils.serialize(nonStandardFields));
-        assertEquals(nonStandardFields.size(), 2);
+        assertEquals(nonStandardFields.size(), 8);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testFacebookLaunch")

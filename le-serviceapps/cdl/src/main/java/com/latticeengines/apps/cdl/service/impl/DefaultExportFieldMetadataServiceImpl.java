@@ -25,7 +25,7 @@ public class DefaultExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         CDLExternalSystemName externalSystemName = channel.getLookupIdMap().getExternalSystemName();
 
-        if (externalSystemName.equals(CDLExternalSystemName.LinkedIn)) {
+        if (externalSystemName.equals(CDLExternalSystemName.LinkedIn) || externalSystemName.equals(CDLExternalSystemName.Facebook)) {
             AudienceType audienceType = channel.getChannelConfig().getAudienceType();
 
             return enrichDefaultFieldsMetadata(customerSpace, externalSystemName, audienceType);
