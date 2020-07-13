@@ -259,6 +259,13 @@ public class MatchResource {
         );
     }
 
+    @PostMapping("/cdllookup/clearcache")
+    @ResponseBody
+    @ApiOperation(value = "clear account lookup data unit cache")
+    public boolean clearAccountLookupDUCache() {
+        return cdlLookupService.clearAccountLookupDUCache();
+    }
+
     @PostMapping("/entity/publish")
     @ResponseBody
     @ApiOperation(value = "Publish entity seed/lookup entries "

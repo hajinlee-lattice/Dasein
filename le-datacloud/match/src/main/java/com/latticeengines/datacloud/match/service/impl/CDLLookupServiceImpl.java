@@ -17,15 +17,21 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.dynamo.DynamoItemService;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.GenericTableEntityMgrImpl;
@@ -37,12 +43,14 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 import reactor.core.publisher.Flux;
 
@@ -50,6 +58,11 @@ import reactor.core.publisher.Flux;
 public class CDLLookupServiceImpl implements CDLLookupService {
 
     private static final Logger log = LoggerFactory.getLogger(CDLLookupServiceImpl.class);
+
+    private static final String ACCOUNT_LOOKUP_DATA_UNIT_NAME = "AccountLookup";
+    private static final String ACCOUNT_LOOKUP_KEY_FORMAT = "AccountLookup__%s__%s__%s_%s"; // tenantId__ver__lookupId_lookIdVal
+    private static final String ACCOUNT_LOOKUP_TABLE_FORMAT = "AccountLookup_%s"; // + signature
+    private static final String LOOKUP_DELETED = "__Deleted__";
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
@@ -63,6 +76,15 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     @Inject
     private FabricDataService dataService;
 
+    @Inject
+    protected DataUnitProxy dataUnitProxy;
+
+    @Inject
+    protected DynamoItemService dynamoItemService;
+
+    @Value("${eai.export.dynamo.accountlookup.signature}")
+    private String accountLookupSignature;
+
     private final Map<String, GenericTableEntityMgr> dynamoDataStoreMap = new ConcurrentHashMap<>();
 
     private LoadingCache<String, DynamoDataUnit> roleBasedDynamoDataCache = Caffeine.newBuilder() //
@@ -74,6 +96,11 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             .maximumSize(500) //
             .expireAfterWrite(1, TimeUnit.MINUTES) //
             .build(this::getCustomDynamoDataUnits);
+
+    private LoadingCache<String, DynamoDataUnit> accountLookupDUCache = Caffeine.newBuilder() //
+            .maximumSize(500) //
+            .expireAfterWrite(1, TimeUnit.MINUTES) //
+            .build(this::getAccountLookupDataUnit);
 
     @Override
     public List<ColumnMetadata> parseMetadata(MatchInput input) {
@@ -140,8 +167,13 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     @Override
     public DynamoDataUnit parseAccountLookupDataUnit(MatchInput input) {
         String customerSpace = input.getTenant().getId();
+        DynamoDataUnit unit = accountLookupDUCache.get(customerSpace);
         DataCollection.Version version = input.getDataCollectionVersion();
-        return roleBasedDynamoDataCache.get(getCacheKey(customerSpace, TableRoleInCollection.AccountLookup, version));
+        if (unit == null) {
+            unit = roleBasedDynamoDataCache.get(getCacheKey(CustomerSpace.shortenCustomerSpace(customerSpace),
+                    TableRoleInCollection.AccountLookup, version));
+        }
+        return unit;
     }
 
     @Override
@@ -152,12 +184,76 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     }
 
     @Override
-    public String lookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey,
-            String lookupIdValue) {
+    public String lookupInternalAccountId(@NotNull String customerSpace, DataCollection.Version version, String lookupIdKey, String lookupIdValue) {
+        DynamoDataUnit lookupDataUnit = accountLookupDUCache.get(customerSpace);
+        if (lookupDataUnit == null) {
+            return legacyLookupInternalAccountId(customerSpace, version, lookupIdKey, lookupIdValue);
+        }
+        return getInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
+    }
+
+    @Override
+    public boolean clearAccountLookupDUCache() {
+        accountLookupDUCache.invalidateAll();
+        return true;
+    }
+
+    private String getInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
+        if (lookupDataUnit != null) {
+            String signature = extractAccountLookupSignature(lookupDataUnit);
+            String tenantId = lookupDataUnit.getTenant();
+            Integer version = lookupDataUnit.getVersion();
+            String tableName = String.format(ACCOUNT_LOOKUP_TABLE_FORMAT, signature);
+            List<PrimaryKey> searchKeys = new ArrayList<>();
+            if (StringUtils.isNotBlank(lookupIdKey)) {
+                searchKeys.add(constructAccountLookupKey(tenantId, version, lookupIdKey, lookupIdValue));
+            }
+            if (!InterfaceName.AccountId.name().equalsIgnoreCase(lookupIdKey)) {
+                searchKeys.add(
+                        constructAccountLookupKey(tenantId, version, InterfaceName.AccountId.name(), lookupIdValue));
+            }
+            List<Item> records = dynamoItemService.batchGet(tableName, searchKeys);
+            List<String> accountIds = records.stream()
+                    .filter(record -> BooleanUtils.isNotTrue(record.getBoolean(LOOKUP_DELETED)))
+                    .map(record -> record.getString(InterfaceName.AccountId.name())).collect(Collectors.toList());
+            if (accountIds.size() >= 1) {
+                return accountIds.get(0);
+            }
+        }
+        return null;
+    }
+
+    private String legacyLookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey,
+                                          String lookupIdValue) {
         DynamoDataUnit lookupDataUnit = //
                 roleBasedDynamoDataCache.get(getCacheKey(CustomerSpace.shortenCustomerSpace(customerSpace),
                         TableRoleInCollection.AccountLookup, version));
-        return lookupInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
+        return legacyGetInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
+    }
+
+    private String legacyGetInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
+        if (lookupDataUnit != null) {
+            String signature = lookupDataUnit.getSignature();
+            GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(signature);
+            String tenantId = parseTenantId(lookupDataUnit);
+            String tableName = parseTableName(lookupDataUnit);
+            List<Pair<String, String>> keyPairs = new ArrayList<>();
+            if (StringUtils.isNotBlank(lookupIdKey)) {
+                keyPairs.add(Pair.of(lookupIdKey + "_" + lookupIdValue.toLowerCase(), "0"));
+            }
+            keyPairs.add(Pair.of(InterfaceName.AccountId.name() + "_" + lookupIdValue.toLowerCase(), "0"));
+            List<Map<String, Object>> rows = tableEntityMgr.getByKeyPairs(tenantId, tableName, keyPairs);
+            String accountId = null;
+
+            for (Map<String, Object> row : rows) {
+                if (row != null && StringUtils.isBlank(accountId)) {
+                    accountId = row.getOrDefault(InterfaceName.AccountId.name(), "").toString();
+                }
+            }
+            return accountId;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -235,7 +331,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             String lookupIdKey, String lookupIdValue) {
         if (!InterfaceName.AccountId.name().equals(lookupIdKey)) {
             if (lookupDataUnit != null) {
-                String accountId = lookupInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
+                String accountId = ACCOUNT_LOOKUP_DATA_UNIT_NAME.equals(lookupDataUnit.getName()) ?
+                        lookupInternalAccountId(lookupDataUnit.getTenant(), null, lookupIdKey, lookupIdValue) :
+                        legacyGetInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
                 if (accountId == null) {
                     throw new RuntimeException(String.format("Failed to find account by lookupId %s=%s", //
                             lookupIdKey, lookupIdValue));
@@ -274,30 +372,14 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return data;
     }
 
-    @VisibleForTesting
-    String lookupInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
-        if (lookupDataUnit != null) {
-            String signature = lookupDataUnit.getSignature();
-            GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(signature);
-            String tenantId = parseTenantId(lookupDataUnit);
-            String tableName = parseTableName(lookupDataUnit);
-            List<Pair<String, String>> keyPairs = new ArrayList<>();
-            if (StringUtils.isNotBlank(lookupIdKey)) {
-                keyPairs.add(Pair.of(lookupIdKey + "_" + lookupIdValue.toLowerCase(), "0"));
-            }
-            keyPairs.add(Pair.of(InterfaceName.AccountId.name() + "_" + lookupIdValue.toLowerCase(), "0"));
-            List<Map<String, Object>> rows = tableEntityMgr.getByKeyPairs(tenantId, tableName, keyPairs);
-            String accountId = null;
+    private PrimaryKey constructAccountLookupKey(String tenantId, Integer version, String lookupIdKey,
+            String lookupIdValue) {
+        return new PrimaryKey(InterfaceName.AtlasLookupKey.name(),
+                String.format(ACCOUNT_LOOKUP_KEY_FORMAT, tenantId, version, lookupIdKey, lookupIdValue));
+    }
 
-            for (Map<String, Object> row : rows) {
-                if (row != null && StringUtils.isBlank(accountId)) {
-                    accountId = row.getOrDefault(InterfaceName.AccountId.name(), "").toString();
-                }
-            }
-            return accountId;
-        } else {
-            return null;
-        }
+    private String extractAccountLookupSignature(DynamoDataUnit du) {
+        return StringUtils.isBlank(du.getSignature()) ? accountLookupSignature : du.getSignature();
     }
 
     private String getCacheKey(String tenant, TableRoleInCollection role, DataCollection.Version version) {
@@ -323,6 +405,11 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             servingTables.add(servingTable);
         }
         return dataCollectionProxy.getDynamoDataUnits(tenant, version, servingTables);
+    }
+
+    private DynamoDataUnit getAccountLookupDataUnit(String cacheKey) { // <tenant_id>
+        return (DynamoDataUnit) dataUnitProxy.getByNameAndType(CustomerSpace.shortenCustomerSpace(cacheKey),
+                ACCOUNT_LOOKUP_DATA_UNIT_NAME, DataUnit.StorageType.Dynamo);
     }
 
     private String parseTenantId(DynamoDataUnit dynamoDataUnit) {
