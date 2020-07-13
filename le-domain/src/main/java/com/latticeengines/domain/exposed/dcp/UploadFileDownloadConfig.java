@@ -19,9 +19,6 @@ public class UploadFileDownloadConfig extends FileDownloadConfig {
     private String uploadId;
 
     @JsonProperty
-    private Boolean includeAll;
-
-    @JsonProperty
     private Boolean includeRaw;
 
     @JsonProperty
@@ -43,14 +40,6 @@ public class UploadFileDownloadConfig extends FileDownloadConfig {
 
     public Boolean getIncludeRaw() {
         return includeRaw;
-    }
-
-    public void setIncludeAll(Boolean includeAll) {
-        this.includeAll = includeAll;
-    }
-
-    public Boolean getIncludeAll() {
-        return includeAll;
     }
 
     public void setIncludeRaw(Boolean includeRaw) {

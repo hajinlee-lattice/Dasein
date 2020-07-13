@@ -232,9 +232,6 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         if (fileType == null) {
             return false;
         }
-        if (config.getIncludeAll()) {
-            return true;
-        }
         switch (fileType) {
             case RAW:
                 return config.getIncludeRaw();
@@ -273,13 +270,12 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     public String generateToken(String uploadId, List<UploadFileDownloadConfig.FileType> files) {
         UploadFileDownloadConfig config = new UploadFileDownloadConfig();
         config.setUploadId(uploadId);
-        config.setIncludeAll(files == null || files.isEmpty());
-        if (!config.getIncludeAll()) {
-            config.setIncludeRaw(false);
-            config.setIncludeMatched(false);
-            config.setIncludeUnmatched(false);
-            config.setIncludeErrors(false);
-
+        boolean includeAll = (files == null || files.isEmpty());
+        config.setIncludeRaw(includeAll);
+        config.setIncludeMatched(includeAll);
+        config.setIncludeUnmatched(includeAll);
+        config.setIncludeErrors(includeAll);
+        if (!includeAll) {
             for (UploadFileDownloadConfig.FileType type : files) {
                 switch (type) {
                     case RAW:
