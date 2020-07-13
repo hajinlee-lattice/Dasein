@@ -7,7 +7,6 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -190,12 +189,12 @@ public class SpendAnalyticMetricsDecoratorFacImpl implements SpendAnalyticMetric
                         new S3KeyFilter() {
                         });
                 return ProductUtils.loadProducts(streamIter,
-                        Arrays.asList(ProductType.Analytic.name()), null);
+                        Collections.singletonList(ProductType.Analytic.name()), null);
             });
 
             Map<String, List<Product>> productMap = ProductUtils.getProductMap(productList);
-            timer.setTimerMessage(String.format("Loaded product map from table %s for tenant %s",
-                    productTable.getName(), customerSpace));
+            timer.setTimerMessage(String.format("Loaded product map of %d analytic products from table %s for tenant %s",
+                    productList.size(), productTable.getName(), customerSpace));
             return productMap;
         }
 
