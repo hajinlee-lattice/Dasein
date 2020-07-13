@@ -57,7 +57,7 @@ import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowReportService;
@@ -454,7 +454,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Autowired
-    protected PlsInternalProxy plsInternalProxy;
+    protected EmailProxy emailProxy;
 
     @Autowired
     protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;

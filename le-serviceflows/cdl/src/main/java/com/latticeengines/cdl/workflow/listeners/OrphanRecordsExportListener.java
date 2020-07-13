@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -27,7 +27,7 @@ public class OrphanRecordsExportListener extends LEJobListener {
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -57,10 +57,10 @@ public class OrphanRecordsExportListener extends LEJobListener {
                 request.setCreatedBy(createdBy);
 
                 if (jobStatus == BatchStatus.COMPLETED) {
-                    plsInternalProxy.sendOrphanRecordsExportEmail(
+                    emailProxy.sendOrphanRecordsExportEmail(
                             DataCollectionArtifact.Status.READY.name(), tenantId, request);
                 } else if (jobStatus.isRunning()) {
-                    plsInternalProxy.sendOrphanRecordsExportEmail(
+                    emailProxy.sendOrphanRecordsExportEmail(
                             DataCollectionArtifact.Status.GENERATING.name(), tenantId, request);
                 }
             } catch (Exception e) {

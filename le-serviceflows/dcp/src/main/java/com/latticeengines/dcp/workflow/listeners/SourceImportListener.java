@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflo
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -36,7 +36,7 @@ public class SourceImportListener extends LEJobListener {
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Inject
     private ProjectProxy projectProxy;
@@ -105,6 +105,6 @@ public class SourceImportListener extends LEJobListener {
         uploadEmailInfo.setRecipientList(project.getRecipientList());
         uploadEmailInfo.setJobStatus(jobStatus.name());
         log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
-        plsInternalProxy.sendUploadEmail(uploadEmailInfo);
+        emailProxy.sendUploadEmail(uploadEmailInfo);
     }
 }

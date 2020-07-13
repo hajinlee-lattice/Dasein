@@ -34,19 +34,18 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "internal", description = "REST resource for internal operations")
+@Api(value = "emails", description = "REST resource for email operations")
 @RestController
-@RequestMapping("/internal")
-public class InternalResource extends InternalResourceBase {
+@RequestMapping("/internal/emails")
+public class EmailResource {
 
-    private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailResource.class);
 
     public static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
 
@@ -68,11 +67,11 @@ public class InternalResource extends InternalResourceBase {
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
 
-    @PutMapping("/emails/createmodel/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/createmodel/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after model creation")
     public void sendPlsCreateModelEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
+                                        @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
         List<User> users = userService.getUsers(tenantId);
         String modelName = emailInfo.getModelId();
         if (modelName != null && !modelName.isEmpty()) {
@@ -80,41 +79,41 @@ public class InternalResource extends InternalResourceBase {
                 if (user.getEmail().equals(emailInfo.getUserId())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     switch (result.toUpperCase()) {
-                    case "COMPLETED":
-                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                    true);
-                        } else {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                    false);
-                        }
-                        break;
-                    case "FAILED":
-                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
-                        } else {
-                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
-                        }
-                        break;
-                    default:
-                        log.warn(String.format(
-                                "Non-completed nor failed model created. Model status: %s, "
-                                        + "Tenant ID: %s, Details: %s",
-                                result, tenantId, JsonUtils.serialize(emailInfo)));
-                        break;
+                        case "COMPLETED":
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                        true);
+                            } else {
+                                emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                        false);
+                            }
+                            break;
+                        case "FAILED":
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                            } else {
+                                emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                            }
+                            break;
+                        default:
+                            log.warn(String.format(
+                                    "Non-completed nor failed model created. Model status: %s, "
+                                            + "Tenant ID: %s, Details: %s",
+                                    result, tenantId, JsonUtils.serialize(emailInfo)));
+                            break;
                     }
                 }
             }
         }
     }
 
-    @PutMapping("/emails/score/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/score/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after scoring")
     public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
+                                  @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String modelId = emailInfo.getModelId();
         if (modelId != null && !modelId.isEmpty()) {
@@ -147,12 +146,12 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @PutMapping("/emails/enrichment/internal/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/enrichment/internal/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after enrichment of internal attributes")
     public void sendPlsInternalEnrichmentEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
-            HttpServletRequest request) {
+                                               @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
+                                               HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String modelId = emailInfo.getModelId();
         if (modelId != null && !modelId.isEmpty()) {
@@ -175,11 +174,11 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @PutMapping("/emails/processanalyze/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/processanalyze/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after processanalyze")
     public boolean sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
+                                              @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -204,11 +203,11 @@ public class InternalResource extends InternalResourceBase {
         return isSendEmail;
     }
 
-    @PutMapping("/emails/orphanexport/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/orphanexport/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after orphan records export")
     public void sendOrphanRecordsExportEmail(@PathVariable String result, @PathVariable String tenantId,
-            @RequestBody OrphanRecordsExportRequest exportRequest, HttpServletRequest request) {
+                                             @RequestBody OrphanRecordsExportRequest exportRequest, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = exportRequest.getExportId();
         String exportType = exportRequest.getOrphanRecordsType().getDisplayName();
@@ -221,26 +220,26 @@ public class InternalResource extends InternalResourceBase {
                             exportID);
                     log.info(String.format("URL=%s, result=%s", url, result));
                     switch (result) {
-                    case "READY":
-                        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
-                                exportID, exportType);
-                        break;
-                    case "GENERATING":
-                        emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
-                        break;
-                    default:
-                        log.warn("Unknown result {}", result);
+                        case "READY":
+                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
+                                    exportID, exportType);
+                            break;
+                        case "GENERATING":
+                            emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
+                            break;
+                        default:
+                            log.warn("Unknown result {}", result);
                     }
                 }
             }
         }
     }
 
-    @PutMapping("/emails/segmentexport/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/segmentexport/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendSegmentExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody MetadataSegmentExport export) {
+                                       @RequestBody MetadataSegmentExport export) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
         AtlasExportType exportType = export.getType();
@@ -248,7 +247,7 @@ public class InternalResource extends InternalResourceBase {
     }
 
     private void sendEmail(AtlasExportType exportType, String exportID, List<User> users, String result,
-            String tenantId, String createBy) {
+                           String tenantId, String createBy) {
         String exportTypeStr = exportType.getDisplayName();
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
@@ -256,39 +255,39 @@ public class InternalResource extends InternalResourceBase {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
-                    case "COMPLETED":
-                        emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr, tenantName);
-                        break;
-                    case "FAILED":
-                        emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
-                        break;
-                    case "STARTED":
-                        emailService.sendPlsExportSegmentRunningEmail(user, exportID);
-                        break;
-                    default:
-                        log.warn("Unknown result {}", result);
+                        case "COMPLETED":
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr, tenantName);
+                            break;
+                        case "FAILED":
+                            emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
+                            break;
+                        case "STARTED":
+                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
+                            break;
+                        default:
+                            log.warn("Unknown result {}", result);
                     }
                 }
             }
         }
     }
 
-    @PutMapping("/emails/atlasexport/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/atlasexport/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendAtlasExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody AtlasExport export) {
+                                     @RequestBody AtlasExport export) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getUuid();
         AtlasExportType exportType = export.getExportType();
         sendEmail(exportType, exportID, users, result, tenantId, export.getCreatedBy());
     }
 
-    @PutMapping("/emails/s3import/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/s3import/result/{result}/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 import")
     public boolean sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo) {
+                                     @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -299,36 +298,36 @@ public class InternalResource extends InternalResourceBase {
             if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser()))
                     || (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
                 switch (result.toUpperCase()) {
-                case "FAILED":
-                    if (shouldSendEmail(tenant, TenantEmailNotificationLevel.ERROR, "S3Import")) {
-                        emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
-                        isSendEmail = true;
-                    }
-                    break;
-                case "SUCCESS":
-                    if (shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3Import")) {
-                        emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
-                        isSendEmail = true;
-                    }
-                    break;
-                case "IN_PROGRESS":
-                    if ((shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3Import")
-                            && StringUtils.isEmpty(emailInfo.getErrorMsg()))
-                            || (shouldSendEmail(tenant, TenantEmailNotificationLevel.WARNING, "S3Import")
-                                    && StringUtils.isNotEmpty(emailInfo.getErrorMsg()))) {
-                        emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
-                        isSendEmail = true;
-                    }
-                    break;
-                default:
-                    break;
+                    case "FAILED":
+                        if (shouldSendEmail(tenant, TenantEmailNotificationLevel.ERROR, "S3Import")) {
+                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                            isSendEmail = true;
+                        }
+                        break;
+                    case "SUCCESS":
+                        if (shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3Import")) {
+                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                            isSendEmail = true;
+                        }
+                        break;
+                    case "IN_PROGRESS":
+                        if ((shouldSendEmail(tenant, TenantEmailNotificationLevel.INFO, "S3Import")
+                                && StringUtils.isEmpty(emailInfo.getErrorMsg()))
+                                || (shouldSendEmail(tenant, TenantEmailNotificationLevel.WARNING, "S3Import")
+                                && StringUtils.isNotEmpty(emailInfo.getErrorMsg()))) {
+                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                            isSendEmail = true;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
         return isSendEmail;
     }
 
-    @PutMapping("/emails/s3template/create/" + TENANT_ID_PATH)
+    @PutMapping("/s3template/create/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template created")
     public boolean sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId, @RequestBody S3ImportEmailInfo emailInfo) {
@@ -348,11 +347,11 @@ public class InternalResource extends InternalResourceBase {
         return isSendEmail;
     }
 
-    @PutMapping("/emails/s3template/update/" + TENANT_ID_PATH)
+    @PutMapping("/s3template/update/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
     public boolean sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
-            @RequestBody S3ImportEmailInfo emailInfo) {
+                                             @RequestBody S3ImportEmailInfo emailInfo) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
@@ -377,7 +376,7 @@ public class InternalResource extends InternalResourceBase {
         return flag.compareTo(notificationLevel) >= 0;
     }
 
-    @PutMapping("/emails/upload")
+    @PutMapping("/upload")
     @ResponseBody
     @ApiOperation(value = "Send out email after upload state change")
     public void sendUploadEmail(@RequestBody UploadEmailInfo uploadEmailInfo) {
