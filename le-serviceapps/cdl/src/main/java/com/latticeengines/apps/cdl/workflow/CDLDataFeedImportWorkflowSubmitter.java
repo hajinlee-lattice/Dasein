@@ -187,6 +187,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     private Long getCatalogRecordsLimit(DataFeedTask dataFeedTask) {
         try {
             Camille c = CamilleEnvironment.getCamille();
+            if (!c.exists(PathBuilder.buildCatalogQuotaLimitPath(CamilleEnvironment.getPodId()))) {
+                return CATALOG_RECORDS_LIMIT;
+            }
             String content = c.get(PathBuilder.buildCatalogQuotaLimitPath(CamilleEnvironment.getPodId())).getData();
             Map<String, Long> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
                     Long.class);
@@ -196,7 +199,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
             return jsonMap.getOrDefault(dataFeedTask.getUniqueId(), CATALOG_RECORDS_LIMIT);
         } catch (Exception e) {
             log.error("Get json node from zk failed.");
-            return null;
+            return CATALOG_RECORDS_LIMIT;
         }
     }
 }
