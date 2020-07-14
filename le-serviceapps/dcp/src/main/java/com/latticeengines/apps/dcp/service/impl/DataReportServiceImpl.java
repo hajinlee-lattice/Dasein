@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.metadata.service.MetadataService;
 
 import avro.shaded.com.google.common.base.Preconditions;
 
@@ -48,7 +48,7 @@ public class DataReportServiceImpl implements DataReportService {
     private UploadService uploadService;
 
     @Inject
-    private MetadataProxy metadataProxy;
+    private MetadataService metadataService;
 
     @Override
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
@@ -151,7 +151,7 @@ public class DataReportServiceImpl implements DataReportService {
         Long pid = objects[0] != null ? (Long) objects[0] : null;
         String oldTableName = objects[1] != null ? (String) objects[1] : null;
         Preconditions.checkNotNull(pid, String.format("data record should exist for %s and %s.", level, ownerId));
-        Table table = metadataProxy.getTable(customerSpace, tableName);
+        Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
         Preconditions.checkNotNull(table, String.format("table shouldn't be null for %s", tableName));
         DunsCountCache cache = new DunsCountCache();
         cache.setDunsCount(table);
@@ -160,7 +160,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (StringUtils.isNotBlank(oldTableName)) {
             log.info("There was an old duns count table {}, going to be marked as temporary.", oldTableName);
             RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
-            metadataProxy.updateDataTablePolicy(customerSpace, oldTableName,
+            metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName,
                     retentionPolicy);
         } else {
             log.info("There weren't duns count table previously");
