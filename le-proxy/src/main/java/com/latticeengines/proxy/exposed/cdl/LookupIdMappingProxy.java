@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -89,6 +90,11 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
                 shortenCustomerSpace(customerSpace),
                 lookupIdMapId);
         put("connection", url, settings, TraySettings.class);
+    }
+
+    public String publishAccountLookup(@NotNull String customerSpace, String targetSignature) {
+        String url = constructUrl(URL_PREFIX + "/publishAccountLookup", shortenCustomerSpace(customerSpace));
+        return post("publishAccountLookup", url, targetSignature, String.class);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
