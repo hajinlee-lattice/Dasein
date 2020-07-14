@@ -199,6 +199,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             catalogConfig.setEntity(entity);
             catalogConfig.setPathList(pathList);
             catalogConfig.setTotalRows(totalRows);
+            catalogConfig.setCatalogRecordsLimit(configuration.getCatalogRecordsLimit());
             return catalogConfig;
         default:
             return null;
