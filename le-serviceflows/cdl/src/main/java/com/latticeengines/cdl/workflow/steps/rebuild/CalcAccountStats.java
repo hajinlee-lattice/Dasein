@@ -152,7 +152,7 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
                 // partial re-calculate
                 Preconditions.checkNotNull(changeListTbl, "Must have change list table " + changeListKey);
                 HdfsDataUnit profileData = profileTbl.toHdfsDataUnit("Profile");
-                List<String> partialAttrs = Arrays.asList(baseTable.getAttributeNames());
+                List<String> partialAttrs = new ArrayList<>(Arrays.asList(baseTable.getAttributeNames()));
                 if (CollectionUtils.isNotEmpty(reProfileAttrs)) {
                     // handle re-profile attrs
                     log.info("There {} attributes need full stats calculation.", reProfileAttrs.size());

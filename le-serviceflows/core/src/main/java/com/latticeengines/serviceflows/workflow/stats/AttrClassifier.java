@@ -151,9 +151,9 @@ public class AttrClassifier {
         // Parse flat attrs in the profiled source
         for (ColumnMetadata cm : cms) {
             boolean readyForNext;
-            readyForNext = isIdAttr(cm);
+            readyForNext = isAttrToDiscard(cm);
             if (!readyForNext) {
-                readyForNext = isAttrToDiscard(cm);
+                readyForNext = isIdAttr(cm);
             }
             if (!readyForNext) {
                 readyForNext = isDeclaredAttr(cm);
@@ -188,7 +188,10 @@ public class AttrClassifier {
 
     private boolean isAttrToDiscard(ColumnMetadata column) {
         boolean discard = false;
-        if (CollectionUtils.isNotEmpty(includeAttrs) && !includeAttrs.contains(column.getAttrName())) {
+        if (includeAttrs != null
+                // do not use CollectionUtils.isNotEmpty(includeAttrs)
+                // because we could set includeAttrs to empty collection
+                && !includeAttrs.contains(column.getAttrName())) {
             discard = true;
         } else if (amAttrConfig.containsKey(column.getAttrName()) &&
                 Boolean.FALSE.equals(amAttrConfig.get(column.getAttrName()).isProfile())) {

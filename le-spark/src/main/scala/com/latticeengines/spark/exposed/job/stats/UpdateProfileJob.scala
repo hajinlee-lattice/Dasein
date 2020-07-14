@@ -25,11 +25,6 @@ class UpdateProfileJob extends AbstractSparkJob[UpdateProfileConfig] {
     val attrNameIdx = lattice.input(1).columns.indexOf(AttrName)
     val profile = lattice.input(1).filter(row => bCastIncAttrs.value.contains(row.getString(attrNameIdx))).cache()
 
-    val colIdIdx = lattice.input.head.columns.indexOf(ColumnId)
-    val changelist = lattice.input.head //
-      .filter(row => bCastIncAttrs.value.contains(row.getString(colIdIdx)) //
-        && ChangeListUtils.getToValue(row) != null)
-
     val valMap: Map[String, Seq[Any]] = profile.select(AttrName, BktAlgo).collect().map(row => {
       val attrName = row.getString(0)
       val bktAlgoStr = row.getString(1)
@@ -48,6 +43,11 @@ class UpdateProfileJob extends AbstractSparkJob[UpdateProfileConfig] {
     val bCastValMap = spark.sparkContext.broadcast(valMap)
 
     val aggr = new UpdateProfileAggregation(bCastValMap, config.getMaxCat, config.getMaxCatLength, config.getMaxDiscrete)
+    val colIdIdx = lattice.input.head.columns.indexOf(ColumnId)
+    val changelist = lattice.input.head //
+      .filter(row => bCastIncAttrs.value.contains(row.getString(colIdIdx)) //
+        && bCastValMap.value.contains(row.getString(colIdIdx)) //
+        && ChangeListUtils.getToValue(row) != null)
     val newBktAlgo = changelist.groupBy(ColumnId, DataType).agg(aggr( //
       col(DataType), //
       col(ToString), col(ToInteger), col(ToLong), col(ToFloat), col(ToDouble), //
