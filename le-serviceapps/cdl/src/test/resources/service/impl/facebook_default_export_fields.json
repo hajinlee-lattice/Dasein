@@ -479,9 +479,9 @@
     "javaClass": "String",
     "externalSystemName": "Facebook",
     "standardField": true,
-    "exportEnabled": false,
+    "exportEnabled": true,
     "historyEnabled": true,
-    "audienceType": []
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "ContactName",
