@@ -79,8 +79,6 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
 
-        log.info("keymap in matchinput : " + JsonUtils.serialize(matchInput.getKeyMap()));
-
         List<String> columnIds = getDCPEnrichAttrs();
         List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();

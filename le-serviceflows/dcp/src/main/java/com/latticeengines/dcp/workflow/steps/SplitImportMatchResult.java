@@ -89,7 +89,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     @Override
     protected SplitImportMatchResultConfig configureJob(ImportSourceStepConfiguration stepConfiguration) {
-        String uploadId = configuration.getUploadId();
         String matchResultName = getStringValueFromContext(MATCH_RESULT_TABLE_NAME);
         Table matchResult = metadataProxy.getTable(configuration.getCustomerSpace().toString(), matchResultName);
         HdfsDataUnit input = matchResult.toHdfsDataUnit("input");
