@@ -160,11 +160,11 @@ INSERT INTO `DecisionGraph`
 VALUES
 (
     'Match multiple candidates from PRIME',
-    '0:1|1:0',
+    '0:1',
     'PrimeAccount',
     'WestWind',
     0,
-    'DunsBased,LocationToDuns'
+    'DunsToDuns,LocationToDuns'
 );
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`

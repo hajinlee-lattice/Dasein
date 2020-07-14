@@ -35,6 +35,10 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     @JsonProperty("inputEmail")
     private String inputEmail;
 
+    // send to Direct+
+    @JsonProperty("inputDuns")
+    private String inputDuns;
+
     @JsonProperty("duns")
     private String duns;
 
@@ -47,6 +51,7 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     @JsonProperty("finalGuDuns")
     private String finalGuDuns;
 
+    // for duns guide book
     @JsonProperty("origDuns")
     private String origDuns;
 
@@ -240,6 +245,14 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     public void setInputEmail(String inputEmail) {
         this.inputEmail = inputEmail;
+    }
+
+    public String getInputDuns() {
+        return inputDuns;
+    }
+
+    public void setInputDuns(String inputDuns) {
+        this.inputDuns = inputDuns;
     }
 
     @MetricField(name = "DUNS")

@@ -256,8 +256,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
-        context.setInputNameLocation(matchKeyTuple);
-        nameLocationService.setDefaultCountry(context.getInputNameLocation());
+        boolean isDunsToDuns = Boolean.TRUE.equals(request.getMatchTravelerContext().getUseDunsMatchDuns());
+        if (isDunsToDuns && StringUtils.isNotBlank(matchKeyTuple.getDuns())) {
+            // duns to duns mode
+            context.setInputDuns(matchKeyTuple.getDuns());
+        } else {
+            context.setInputNameLocation(matchKeyTuple);
+            nameLocationService.setDefaultCountry(context.getInputNameLocation());
+        }
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         boolean readyToReturn = false;
         // Check timeout
@@ -266,7 +272,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             readyToReturn = true;
         }
         // Check country code
-        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+        if (!readyToReturn && !isDunsToDuns && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
             context.setDnbCode(DnBReturnCode.UNMATCH);
             readyToReturn = true;
         }
@@ -296,8 +302,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
-        context.setInputNameLocation(matchKeyTuple);
-        nameLocationService.setDefaultCountry(context.getInputNameLocation());
+        boolean isDunsToDuns = Boolean.TRUE.equals(request.getMatchTravelerContext().getUseDunsMatchDuns());
+        if (isDunsToDuns && StringUtils.isNotBlank(matchKeyTuple.getDuns())) {
+            // duns to duns mode
+            context.setInputDuns(matchKeyTuple.getDuns());
+        } else {
+            context.setInputNameLocation(matchKeyTuple);
+            nameLocationService.setDefaultCountry(context.getInputNameLocation());
+        }
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
         boolean readyToReturn = false;
         // Check timeout
@@ -306,7 +318,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             readyToReturn = true;
         }
         // Check country code
-        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+        if (!readyToReturn && !isDunsToDuns && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
             context.setDnbCode(DnBReturnCode.UNMATCH);
             readyToReturn = true;
         }
