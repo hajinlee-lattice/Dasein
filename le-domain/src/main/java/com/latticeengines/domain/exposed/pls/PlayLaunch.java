@@ -211,6 +211,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ACC_ID")
     private String destinationAccountId;
 
+    @JsonProperty("destinationContactId")
+    @Column(name = "DESTINATION_CONTACT_ID")
+    private String destinationContactId;
+
     @JsonProperty("audienceId")
     @Column(name = "AUDIENCE_ID")
     private String audienceId;
@@ -687,6 +691,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setDestinationAccountId(String destinationAccountId) {
         this.destinationAccountId = destinationAccountId;
+    }
+
+    public String getDestinationContactId() {
+        return destinationContactId;
+    }
+
+    public void setDestinationContactId(String destinationContactId) {
+        this.destinationContactId = destinationContactId;
     }
 
     @Override
