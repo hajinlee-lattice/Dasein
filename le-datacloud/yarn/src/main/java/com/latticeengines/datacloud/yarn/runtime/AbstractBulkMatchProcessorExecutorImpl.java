@@ -39,13 +39,16 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
@@ -61,6 +64,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component("bulkMatchProcessorExecutor")
@@ -111,6 +115,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     @Inject
     @Lazy
     private MatchMetricService matchMetricService;
+
+    @Lazy
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
 
     @Value("${datacloud.match.bulk.snappy.compress}")
     private boolean useSnappy;
@@ -177,6 +185,47 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         MatchOutput blockOutput = MatchUtils.mergeOutputs(processorContext.getBlockOutput(), groupOutput);
         processorContext.setBlockOutput(blockOutput);
         log.info("Merge group output into block output.");
+    }
+
+    private boolean hasNullEntityId(MatchOutput output) {
+        if (output == null || output.getStatistics() == null
+                || MapUtils.isEmpty(output.getStatistics().getNullEntityIdCount())) {
+            return false;
+        }
+        return output.getStatistics().getNullEntityIdCount().values().stream().anyMatch(cnt -> cnt > 0);
+    }
+
+    private void failWithNullIds(@NotNull ProcessorContext processorContext,
+            @NotNull Map<String, Long> nullEntityIdCount, Tenant tenant) {
+        // has null ID in allocate ID mode
+        String msg = String.format("Found null entity ID in allocate mode. nullEntityIdCount = %s", nullEntityIdCount);
+        log.error(msg);
+        nullEntityIdCount.forEach((entity, cnt) -> {
+            if (cnt > 0) {
+                entityMatchMetricService.recordNullEntityIdCount(tenant, entity, cnt);
+            }
+        });
+
+        MatchOutput blockOutput = processorContext.getBlockOutput();
+        if (blockOutput != null && blockOutput.getStatistics() != null
+                && blockOutput.getStatistics().getNullEntityIdCount() != null) {
+            try {
+                // update new entity id count, otherwise retry won't record these and will think
+                // they are existing entity
+                matchCommandService.updateBlock(processorContext.getBlockOperationUid()) //
+                        .newEntityCounts(getNewEntityCounts(processorContext)) //
+                        .commit();
+            } catch (Exception updateErr) {
+                log.warn("Failed to update new entity id count in match block", updateErr);
+            }
+        }
+
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            log.error("Interrupted while waiting for alert sent");
+        }
+        throw new IllegalStateException(msg);
     }
 
     private void logError(ProcessorContext processorContext, MatchOutput groupOutput) throws IOException {
@@ -505,6 +554,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     private void finalizeBlock(ProcessorContext processorContext) throws IOException {
+        checkNullEntityId(processorContext);
         Long count = uploadOutput(processorContext);
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
@@ -540,8 +590,11 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
 
         try {
-            matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue())
-                    .matchResults(matchResultMap).commit();
+            matchCommandService.updateBlock(processorContext.getBlockOperationUid()) //
+                    .matchedRows(count.intValue()) //
+                    .matchResults(matchResultMap) //
+                    .newEntityCounts(getNewEntityCounts(processorContext)) //
+                    .commit();
         } catch (Exception e) {
             log.warn("Failed to update block matched rows.", e);
         }
@@ -556,6 +609,21 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             dnbCacheService.dumpQueue();
         } catch (Exception e) {
             log.error("Failed to dump remaining DnBCaches to Dynamo.", e);
+        }
+    }
+
+    /*-
+     * check whether current match block contains null entity id, and fail current match block if yes
+     */
+    private void checkNullEntityId(@NotNull ProcessorContext context) {
+        String blockUid = context.getBlockOperationUid();
+        MatchOutput blockOutput = context.getBlockOutput();
+        boolean allocateIdEntityMatch = EntityMatchUtils.isAllocateIdModeEntityMatch(context.getGroupMatchInput());
+        if (allocateIdEntityMatch && hasNullEntityId(blockOutput)) {
+            log.error("Found null entity id in current match block {}. block output = {}", blockUid,
+                    JsonUtils.serialize(blockOutput));
+            failWithNullIds(context, blockOutput.getStatistics().getNullEntityIdCount(),
+                    context.getGroupMatchInput().getTenant());
         }
     }
 
@@ -616,6 +684,16 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         } catch (Exception e) {
             log.error("Failed to save match output json.", e);
         }
+    }
+
+    private Map<String, Long> getNewEntityCounts(ProcessorContext ctx) {
+        if (ctx == null || ctx.getBlockOutput() == null || ctx.getBlockOutput().getStatistics() == null) {
+            return null;
+        }
+
+        Map<String, Long> newEntityCount = ctx.getBlockOutput().getStatistics().getNewEntityCount();
+        log.info("New entity id count map of block = {}", newEntityCount);
+        return newEntityCount;
     }
 
 }

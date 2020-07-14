@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.firehose.FirehoseService;
@@ -31,10 +30,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
-import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -52,7 +51,6 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -75,10 +73,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Inject
     private DirectPlusCandidateService directPlusCandidateService;
-
-    @Lazy
-    @Inject
-    private EntityMatchMetricService entityMatchMetricService;
 
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
@@ -459,6 +453,13 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
+            if (matchContext.getOutput().getStatistics().getNullEntityIdCount() != null) {
+                log.warn("Found null entity id count map in existing context {}, merging with current map {}",
+                        matchContext.getOutput().getStatistics().getNullEntityIdCount(), nullEntityIdCount);
+                MatchUtils.mergeEntityCnt(nullEntityIdCount,
+                        matchContext.getOutput().getStatistics().getNullEntityIdCount());
+            }
+
             matchContext.getOutput().getStatistics().setNullEntityIdCount(nullEntityIdCount);
 
             log.debug("NewEntityCnt: {}", newEntityCnt);
@@ -469,32 +470,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             log.debug("NullEntityIdCount: {}", nullEntityIdCount);
         }
 
-        if (isAllocateMode && isEntityMatch && nullEntityIdCount.values().stream().anyMatch(cnt -> cnt > 0)) {
-            failWithNullIds(nullEntityIdCount, matchContext.getInput().getTenant());
-        }
-
         if (columnMatchCount.length <= 10000) {
             matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
         }
 
         return matchContext;
-    }
-
-    private void failWithNullIds(@NotNull Map<String, Long> nullEntityIdCount, Tenant tenant) {
-        // has null ID in allocate ID mode
-        String msg = String.format("Found null entity ID in allocate mode. nullEntityIdCount = %s", nullEntityIdCount);
-        log.error(msg);
-        nullEntityIdCount.forEach((entity, cnt) -> {
-            if (cnt > 0) {
-                entityMatchMetricService.recordNullEntityIdCount(tenant, entity, cnt);
-            }
-        });
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-            log.error("Interrupted while waiting for alert sent");
-        }
-        throw new IllegalStateException(msg);
     }
 
     // return whether there are null entity ids in this record
