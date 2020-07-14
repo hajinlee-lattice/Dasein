@@ -149,13 +149,22 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultFacebookExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Facebook);
 
-        assertEquals(defaultFacebookExportFields.size(), 41);
+        assertEquals(defaultFacebookExportFields.size(), 47);
         assertEquals(
                 defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                40);
         assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                11);
+                10);
 
+    }
+    
+    @Test(groups = "functional")
+    public void testFacebookContacts() {
+        List<ExportFieldMetadataDefaults> defaultFacebookContactsExportFields = defaultExportFieldMetadataEntityMgr
+                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.Facebook,
+                        AudienceType.CONTACTS);
+
+        assertEquals(defaultFacebookContactsExportFields.size(), 10);
     }
 
     @Test(groups = "functional")

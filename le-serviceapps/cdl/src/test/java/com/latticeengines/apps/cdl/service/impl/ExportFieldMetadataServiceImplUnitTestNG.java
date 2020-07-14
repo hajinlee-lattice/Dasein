@@ -173,12 +173,12 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     public void testFacebook() {
         defaultFacebookExportFields = exportService.getAllAttributes(CDLExternalSystemName.Facebook);
 
-        assertEquals(defaultFacebookExportFields.size(), 41);
+        assertEquals(defaultFacebookExportFields.size(), 47);
         assertEquals(
                 defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                40);
         assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                11);
+                10);
 
     }
 
