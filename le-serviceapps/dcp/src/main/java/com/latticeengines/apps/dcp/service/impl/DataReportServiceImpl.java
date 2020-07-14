@@ -16,7 +16,6 @@ import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
-import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -55,7 +54,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+        DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId, false);
         return convertRecordToDataReport(dataReportRecord);
     }
 
@@ -82,7 +81,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        return dataReportEntityMgr.findDataReportRecord(level, ownerId);
+        return dataReportEntityMgr.findDataReportRecord(level, ownerId, false);
     }
 
     @Override
@@ -95,7 +94,7 @@ public class DataReportServiceImpl implements DataReportService {
         }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
-            DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+            DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId, false);
             if (dataReport.getBasicStats() != null) {
                 dataReportRecord.setBasicStats(dataReport.getBasicStats());
             }
@@ -172,11 +171,10 @@ public class DataReportServiceImpl implements DataReportService {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        DataReportRecord record = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+        DataReportRecord record = dataReportEntityMgr.findDataReportRecord(level, ownerId, true);
         if (record == null) {
             return new DunsCountCache();
         }
-        HibernateUtils.inflateDetails(record.getDunsCount());
         DunsCountCache cache = new DunsCountCache();
         cache.setSnapshotTimestamp(record.getDataSnapshotTime());
         cache.setDunsCount(record.getDunsCount());

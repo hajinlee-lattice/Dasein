@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 
 public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportRecord, Long> {
 
-    DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId);
+    DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId, boolean inflate);
 
     DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId);
 

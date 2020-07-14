@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrIm
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("dataReportEntityMgr")
 public class DataReportEntityMgrImpl
@@ -63,8 +64,12 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId) {
-        return getReadOrWriteRepository().findByLevelAndOwnerId(level, ownerId);
+    public DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId, boolean inflate) {
+        DataReportRecord record = getReadOrWriteRepository().findByLevelAndOwnerId(level, ownerId);
+        if (inflate) {
+            TableEntityMgr.inflateTable(record.getDunsCount());
+        }
+        return record;
     }
 
     @Override
