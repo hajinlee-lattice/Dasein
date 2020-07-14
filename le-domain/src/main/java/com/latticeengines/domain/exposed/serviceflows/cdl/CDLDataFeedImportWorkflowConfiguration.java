@@ -109,6 +109,11 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder catalogRecordsLimit(Long catalogRecordsLimit) {
+            inputFileValidatorConfiguration.setCatalogRecordsLimit(catalogRecordsLimit);
+            return this;
+        }
+
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             return this;
