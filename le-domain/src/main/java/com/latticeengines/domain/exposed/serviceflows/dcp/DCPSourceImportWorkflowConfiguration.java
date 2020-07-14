@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.dcp;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusAppendConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.DCPExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
@@ -78,6 +79,11 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
 
         public Builder matchConfig(DplusMatchConfig matchConfig) {
             importSource.setMatchConfig(matchConfig);
+            return this;
+        }
+
+        public Builder appendConfig(DplusAppendConfig appendConfig) {
+            importSource.setAppendConfig(appendConfig);
             return this;
         }
 
