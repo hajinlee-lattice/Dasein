@@ -30,9 +30,6 @@ public class MarketoChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
-    @JsonProperty("folderId")
-    private String folderId;
-
     @JsonProperty("folderName")
     private String folderName;
 
@@ -82,14 +79,6 @@ public class MarketoChannelConfig implements ChannelConfig {
         this.audienceName = audienceName;
     }
 
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-
     public String getFolderName() {
         return folderName;
     }
@@ -112,7 +101,6 @@ public class MarketoChannelConfig implements ChannelConfig {
     public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
         playLaunch.setAudienceId(this.getAudienceId());
         playLaunch.setAudienceName(this.getAudienceName());
-        playLaunch.setFolderId(this.getFolderId());
         playLaunch.setFolderName(this.getFolderName());
     }
 
@@ -141,7 +129,6 @@ public class MarketoChannelConfig implements ChannelConfig {
                 .setSuppressAccountsWithoutContacts(newMarketoChannelConfig.isSuppressAccountsWithoutContacts());
         marketoChannelConfig.setAudienceId(newMarketoChannelConfig.getAudienceId());
         marketoChannelConfig.setAudienceName(newMarketoChannelConfig.getAudienceName());
-        marketoChannelConfig.setFolderId(newMarketoChannelConfig.getFolderId());
         marketoChannelConfig.setFolderName(newMarketoChannelConfig.getFolderName());
         return this;
     }
