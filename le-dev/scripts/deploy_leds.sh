@@ -41,6 +41,9 @@ function upload_artifact() {
     fi
 }
 
+source "${WSHOME}/le-dev/scripts/check_aws_creds_expiration.sh"
+check_aws_creds_expiration
+
 ARTIFACT_DIR=${WSHOME}/le-dev/artifacts/leds
 if [[ -d "${ARTIFACT_DIR}" ]]; then
     rm -rf ${ARTIFACT_DIR}/*

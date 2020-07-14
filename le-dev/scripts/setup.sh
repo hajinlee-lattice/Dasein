@@ -24,15 +24,18 @@ printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among develop
 echo "You are using this python: ${PYTHON}"
 echo "You are using this java: ${JAVA_HOME}"
 
+source "${WSHOME}/le-dev/scripts/check_aws_creds_expiration.sh"
+check_aws_creds_expiration
+
 # Expand aliases
 echo "Expanding aliases."
 shopt -s expand_aliases
 echo "Sourcing aliases file"
-source "$WSHOME/le-dev/aliases"
+source "${WSHOME}/le-dev/aliases"
 
 # Top-level compile
 echo "Changing dir into workspace"
-cd "$WSHOME"
+cd "${WSHOME}" || exit
 
 OLD_JAVA_HOME="${JAVA_HOME}"
 if [[ -n "${J11_HOME}" ]]; then
@@ -49,21 +52,19 @@ processErrors
 
 echo "" > /tmp/errors.txt
 
-hdfs dfs -rm -r -f /app/${LE_STACK}/$(leversion) || true
-hdfs dfs -mkdir -p /app/${LE_STACK} || true
-pushd "${WSHOME}/le-dataplatform"
+hdfs dfs -rm -r -f "/app/${LE_STACK}/$(leversion)" || true
+hdfs dfs -mkdir -p "/app/${LE_STACK}" || true
+pushd "${WSHOME}/le-dataplatform" || exit
 mvn -Ppkg-shaded -DskipTests package &&
 echo "Deploying artifacts to hdfs ..."
-hdfs dfs -copyFromLocal target/dist /app/${LE_STACK}/$(leversion)
-popd
+hdfs dfs -copyFromLocal target/dist "/app/${LE_STACK}/$(leversion)"
+popd || exit
 
 echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
 
-bash "${WSHOME}/le-dev/scripts/deploy_leds.sh"
-
-if [[ -n `"${ANACONDA_HOME}/bin/conda" env list | grep p2` ]]; then
+if [[ -n $("${ANACONDA_HOME}/bin/conda" env list | grep p2) ]]; then
     source "${ANACONDA_HOME}/bin/activate" p2
 else
     source "${ANACONDA_HOME}/bin/activate" lattice
@@ -75,6 +76,8 @@ else
     ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py"
 fi
 source "${ANACONDA_HOME}/bin/deactivate"
+
+bash "${WSHOME}/le-dev/scripts/deploy_leds.sh"
 
 echo "Clean up old test tenants"
 export JAVA_HOME="${OLD_JAVA_HOME}"
