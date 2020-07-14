@@ -2,7 +2,7 @@ package com.latticeengines.pls.service.impl.dcp;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.NumberFormat;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -239,9 +239,8 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         });
         uploadJobDetails.setUploadJobSteps(uploadJobSteps);
         uploadJobDetails.setCurrentStep(uploadJobSteps.get(uploadJobSteps.size()-1));
-        NumberFormat numberFormat = NumberFormat.getInstance();
-        numberFormat.setMaximumFractionDigits(2);
-        String progressPercentage = numberFormat.format((float) uploadJobSteps.size() / (float) 6 * 100);
+        Double progressPercentage = (double) uploadJobSteps.size() / (double) 6;
+        progressPercentage = BigDecimal.valueOf(progressPercentage).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         uploadJobDetails.setProgressPercentage(progressPercentage);
         return uploadJobDetails;
     }

@@ -88,14 +88,6 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         matchInput.setCustomSelection(columnSelection);
     }
 
-    @Override
-    protected void onMatchCompleted() {
-        String uploadId = configuration.getUploadId();
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
-
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
-    }
-
     //FIXME: in alpha release, use a hard coded enrich list
     private List<String> getDCPEnrichAttrs() {
         return Arrays.asList(

@@ -86,14 +86,14 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         uploadConfig.setDropFilePath("DummyPath");
         uploadService.updateUploadConfig(mainCustomerSpace, upload1.getUploadId(), uploadConfig);
         UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();
-        uploadService.updateUploadStatus(mainCustomerSpace, upload2.getUploadId(), Upload.Status.INGESTION_STARTED, uploadDiagnostics);
+        uploadService.updateUploadStatus(mainCustomerSpace, upload2.getUploadId(), Upload.Status.IMPORT_STARTED, uploadDiagnostics);
         uploads = uploadService.getUploads(mainCustomerSpace, sourceId1, Boolean.TRUE);
         Assert.assertEquals(uploads.size(), 2);
         uploads.forEach(upload -> {
             if (upload.getUploadId().equals(upload1.getUploadId())) {
                 Assert.assertNotNull(upload.getUploadConfig());
             } else {
-                Assert.assertEquals(upload.getStatus(), Upload.Status.INGESTION_STARTED);
+                Assert.assertEquals(upload.getStatus(), Upload.Status.IMPORT_STARTED);
             }
         });
         return Arrays.asList(upload1, upload2);

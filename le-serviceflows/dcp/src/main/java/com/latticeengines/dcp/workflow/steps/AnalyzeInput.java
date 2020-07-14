@@ -98,6 +98,6 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
                 configuration.getUploadId(), inputPresenceReport);
 
         String uploadId = configuration.getUploadId();
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.INGESTION_FINISHED, null);
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_FINISHED, null);
     }
 }

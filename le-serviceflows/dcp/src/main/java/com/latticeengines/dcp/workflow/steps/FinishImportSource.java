@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
-import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
@@ -41,7 +40,6 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         customerSpaceStr = customerSpace.toString();
         saveMatchResultTable();
         updateStats();
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.ANALYSIS_FINISHED, null);
     }
 
     private void saveMatchResultTable() {

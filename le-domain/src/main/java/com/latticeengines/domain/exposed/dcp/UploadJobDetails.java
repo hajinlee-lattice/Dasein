@@ -22,7 +22,7 @@ public class UploadJobDetails {
     private List<UploadJobStep> uploadJobSteps;
 
     @JsonProperty("progressPercentage")
-    private String progressPercentage;
+    private Double progressPercentage;
 
     @JsonProperty("uploadStats")
     public UploadStats statistics;
@@ -54,11 +54,11 @@ public class UploadJobDetails {
         this.uploadJobSteps = uploadJobSteps;
     }
 
-    public String getProgressPercentage() {
+    public Double getProgressPercentage() {
         return progressPercentage;
     }
 
-    public void setProgressPercentage(String progressPercentage) {
+    public void setProgressPercentage(Double progressPercentage) {
         this.progressPercentage = progressPercentage;
     }
 

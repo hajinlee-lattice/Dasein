@@ -78,7 +78,6 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         MatchCommand command = bulkMatchService.match(input, getPredeterminedRootOperationUid());
         log.info("Bulk match finished: {}", JsonUtils.serialize(command));
         postMatchProcessing(input, command);
-        onMatchCompleted();
     }
 
     protected abstract String getInputAvroPath();
@@ -188,7 +187,5 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         metadataProxy.createTable(customerSpace.toString(), resultTable.getName(), resultTable);
         metadataProxy.deleteTable(customerSpace.toString(), avroResultTable.getName());
     }
-
-    protected abstract void onMatchCompleted();
 
 }

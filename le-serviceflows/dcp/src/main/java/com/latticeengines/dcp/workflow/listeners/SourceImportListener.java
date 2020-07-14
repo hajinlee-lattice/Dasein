@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Upload;
-import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -95,19 +95,18 @@ public class SourceImportListener extends LEJobListener {
                             ExceptionUtils.getStackTrace(exception));
                 }
                 uploadDiagnostics.setLastErrorMessage(JsonUtils.serialize(details));
-                UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(tenantId, uploadId, false);
-                switch (uploadDetails.getStatus()) {
-                    case NEW:
-                    case INGESTION_STARTED:
-                    case INGESTION_FINISHED:
+                String lastStepName = getLastStepName(jobExecution);
+                switch (lastStepName) {
+                    case "startImportSource":
+                    case "importSource":
+                    case "getStartTime":
                         uploadDiagnostics.setLastErrorStep("Ingestion");
                         break;
-                    case MATCH_STARTED:
-                    case MATCH_FINISHED:
+                    case "matchImport":
                         uploadDiagnostics.setLastErrorStep("Match");
                         break;
-                    case ANALYSIS_STARTED:
-                    case ANALYSIS_FINISHED:
+                    case "splitImportMatchResult":
+                    case "finishImportSource":
                         uploadDiagnostics.setLastErrorStep("Analysis");
                         break;
                     default:
@@ -125,5 +124,19 @@ public class SourceImportListener extends LEJobListener {
         uploadEmailInfo.setJobStatus(jobStatus.name());
         log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
         plsInternalProxy.sendUploadEmail(uploadEmailInfo);
+    }
+
+    private String getLastStepName(JobExecution jobExecution) {
+        StepExecution lastStepExecution = null;
+        for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
+            if(lastStepExecution == null){
+                lastStepExecution = stepExecution;
+            } else {
+                if(stepExecution.getStartTime().after(lastStepExecution.getStartTime())){
+                    lastStepExecution = stepExecution;
+                }
+            }
+        }
+        return lastStepExecution.getStepName();
     }
 }
