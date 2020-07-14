@@ -22,14 +22,9 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelingFileUploadProxy.class);
-    private static final String ROOT_PATH = "pls/models/uploadfile";
 
     public ModelingFileUploadProxy() {
-        super(ROOT_PATH);
-    }
-
-    public ModelingFileUploadProxy(String hostport) {
-        super(hostport, ROOT_PATH);
+        super("pls/models/uploadfile");
     }
 
     public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,

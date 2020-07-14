@@ -16,26 +16,26 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.testframework.exposed.service.TestFileImportService;
 import com.latticeengines.testframework.exposed.service.TestJobService;
 
-public class ProcessAnalyzeImportCorrectnessTest extends CDLQATestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeImportCorrectnessTest.class);
+public class ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG extends CDLQATestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG.class);
     private static final Integer DEFAULT_WAIT_PA_READY_IN_MINUTES = 60;
 
-    @Value("${pa.importcorrectness.cleanuptenant}")
+    @Value("${pa.import.correctness.cleanup.tenant}")
     private boolean needCleanupTenant;
 
-    @Value("${pa.importcorrectness.account}")
+    @Value("${pa.import.correctness.account}")
     private String accountFilePath;
 
-    @Value("${pa.importcorrectness.contact}")
+    @Value("${pa.import.correctness.contact}")
     private String contactFilePath;
 
-    @Value("${pa.importcorrectness.transaction}")
+    @Value("${pa.import.correctness.transaction}")
     private String transactionFilePath;
 
-    @Value("${pa.importcorrectness.bundle}")
+    @Value("${pa.import.correctness.bundle}")
     private String productBundleFilePath;
 
-    @Value("${pa.importcorrectness.hierarchy}")
+    @Value("${pa.import.correctness.hierarchy}")
     private String productHierarchyFilePath;
 
     @Inject
@@ -75,7 +75,7 @@ public class ProcessAnalyzeImportCorrectnessTest extends CDLQATestNGBase {
 
         // wait all file import actions are done
         log.info("Waiting all file import actions are done...");
-        testJobService.waitForProcessAnalyzeReady(DEFAULT_WAIT_PA_READY_IN_MINUTES); // rename method
+        testJobService.waitForProcessAnalyzeAllActionsDone(DEFAULT_WAIT_PA_READY_IN_MINUTES); // rename method
 
         // run PA
         log.info("Starting PA for file import...");

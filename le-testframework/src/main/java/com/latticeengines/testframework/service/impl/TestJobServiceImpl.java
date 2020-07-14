@@ -29,11 +29,11 @@ public class TestJobServiceImpl implements TestJobService {
     private PlsJobProxy plsJobProxy;
 
     @Override
-    public void waitForProcessAnalyzeReady(int maxWaitInMinutes) throws TimeoutException {
-        TestControlUtils.defaultWait(this::isProcessAnalyzeReady, true, maxWaitInMinutes);
+    public void waitForProcessAnalyzeAllActionsDone(int maxWaitInMinutes) throws TimeoutException {
+        TestControlUtils.defaultWait(this::isProcessAnalyzeAllActionsDone, true, maxWaitInMinutes);
     }
 
-    public boolean isProcessAnalyzeReady() {
+    public boolean isProcessAnalyzeAllActionsDone() {
         deploymentTestBed.attachProtectedProxy(plsJobProxy);
         List<Job> jobs = plsJobProxy.getAllJobs();
         int size = jobs.size();

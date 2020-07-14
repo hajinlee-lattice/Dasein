@@ -65,7 +65,7 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
     @Value("${qa.maintenant}")
     protected String mainTenant;
 
-    @BeforeClass
+    @BeforeClass(groups = { "qaend2end" })
     public void init() {
         checkBasicInfo();
         setupTestEnvironment(mainTenant);
@@ -78,13 +78,14 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
         Preconditions.checkState(StringUtils.isNotEmpty(mainTenant), "Main tenant is required");
     }
 
-    @AfterClass
+    @AfterClass(groups = { "qaend2end" })
     public void tearDown() {
         logout();
     }
 
     // @Override
     protected void setupTestEnvironment(String existingTenant) {
+        System.out.println("Existing tenant: " + existingTenant);
         testBed.useExistingQATenantAsMain(existingTenant);
         mainTestTenant = testBed.getMainTestTenant();
         mainCustomerSpace = mainTestTenant.getId();

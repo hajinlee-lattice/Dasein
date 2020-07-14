@@ -9,14 +9,9 @@ import com.latticeengines.domain.exposed.workflow.Job;
 
 @Component("plsJobProxy")
 public class PlsJobProxy extends PlsRestApiProxyBase {
-    private static final String ROOT_PATH = "pls/jobs";
 
     public PlsJobProxy() {
-        super(ROOT_PATH);
-    }
-
-    public PlsJobProxy(String hostport) {
-        super(hostport, ROOT_PATH);
+        super("pls/jobs");
     }
 
     public List<Job> getAllJobs() {

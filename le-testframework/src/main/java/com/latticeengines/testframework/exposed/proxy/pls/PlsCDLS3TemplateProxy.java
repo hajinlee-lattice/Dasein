@@ -8,14 +8,9 @@ import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 
 @Component("plsCDLS3TemplateProxy")
 public class PlsCDLS3TemplateProxy extends PlsRestApiProxyBase {
-    private static final String ROOT_PATH = "pls/cdl/s3/template";
 
     public PlsCDLS3TemplateProxy() {
-        super(ROOT_PATH);
-    }
-
-    public PlsCDLS3TemplateProxy(String hostport) {
-        super(hostport, ROOT_PATH);
+        super("pls/cdl/s3/template");
     }
 
     public void createS3Template(String templateFileName, String source, boolean importData,
