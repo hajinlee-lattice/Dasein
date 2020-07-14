@@ -623,6 +623,7 @@ public class CDLResource {
                         }
                         break;
                     case Contacts:
+                    case Leads:
                     case ProductPurchases:
                         if (contactSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
                             fieldPreview.setFieldCategory(FieldCategory.LatticeField);
