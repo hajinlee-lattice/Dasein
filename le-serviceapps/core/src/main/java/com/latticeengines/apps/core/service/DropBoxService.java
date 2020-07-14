@@ -40,7 +40,14 @@ public interface DropBoxService {
 
     boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath);
 
-    List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter);
+    /**
+     *
+     * @param customerSpace: TenantId
+     * @param relativePath: Should be relative path under dropbox, not absolute path in bucket.
+     * @param filter: File extension filter.
+     * @return List of {@link FileProperty}.
+     */
+    List<FileProperty> getFileListForPath(String customerSpace, String relativePath, String filter);
 
     String getExportPath(String customerSpace, AtlasExportType exportType, String datePrefix, String optionalId);
 

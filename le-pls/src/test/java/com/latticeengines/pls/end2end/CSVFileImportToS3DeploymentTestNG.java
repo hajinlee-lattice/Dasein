@@ -18,6 +18,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
@@ -54,8 +55,11 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
         for (S3ImportTemplateDisplay display : templates) {
             importFile(display.getEntity().name(), display.getPath());
         }
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
         for (S3ImportTemplateDisplay display : templates) {
-            List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace, display.getPath(), "csv");
+            List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace,
+                    display.getPath().substring(display.getPath().indexOf(dropBoxSummary.getDropBox() + dropBoxSummary.getDropBox().length())),
+                    "csv");
             log.info("under the path: " + display.getPath() + " , the fileLists is " + JsonUtils.serialize(fileLists));
             switch (display.getEntity().name()) {
                 case ENTITY_ACCOUNT:
