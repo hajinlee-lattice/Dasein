@@ -54,7 +54,7 @@ public class DunsToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<Dn
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
         traveler.setUseDunsMatchDuns(true);
-        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.LOCATION_DUNS, traveler.getMatchKeyTuple()));
+        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.DUNS_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedDunsFromDuns(MatchTraveler traveler) {
