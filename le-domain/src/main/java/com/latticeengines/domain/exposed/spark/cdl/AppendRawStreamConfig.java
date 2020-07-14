@@ -9,6 +9,9 @@ public class AppendRawStreamConfig extends SparkJobConfig {
     public static final String NAME = "appendRawActivityStream";
 
     @JsonProperty
+    public String streamName;
+
+    @JsonProperty
     public Long currentEpochMilli;
 
     // null if no imports

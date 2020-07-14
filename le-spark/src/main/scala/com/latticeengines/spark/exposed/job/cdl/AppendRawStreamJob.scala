@@ -4,10 +4,12 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __StreamDate, StreamDateId}
+import com.latticeengines.domain.exposed.cdl.activity.EmptyStreamException
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, StreamDateId, __StreamDate}
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -59,6 +61,12 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       }
       df = DeriveAttrsUtils.applyReducer(df, reducer)
     }
+
+    val cnt = df.count
+    if (cnt == 0) {
+      throw new EmptyStreamException(StringUtils.defaultIfEmpty(config.streamName, ""), config.retentionDays, config.currentEpochMilli)
+    }
+
     lattice.output = df :: Nil
   }
 
