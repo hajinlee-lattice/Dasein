@@ -30,9 +30,6 @@ public class GoogleChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
-    @JsonProperty("folderName")
-    private String folderName;
-
     public Long getContactLimit() {
         return contactLimit;
     }
@@ -83,14 +80,6 @@ public class GoogleChannelConfig implements ChannelConfig {
         return audienceType;
     }
 
-    public String getFolderName() {
-        return folderName;
-    }
-
-    public void setFolderName(String folderName) {
-        this.folderName = folderName;
-    }
-
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
@@ -121,7 +110,6 @@ public class GoogleChannelConfig implements ChannelConfig {
         googleChannelConfig.setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
         googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
         googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
-        googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
         return this;
     }
 

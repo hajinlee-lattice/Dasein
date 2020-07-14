@@ -23,6 +23,7 @@ public class ChannelConfigUnitTestNG {
     private static final String testAudienceName2 = "Audience2";
     private static final String testFolderName1 = "Folder1";
     private static final String testFolderName2 = "Folder2";
+    private static final String testFolderId1 = "FolderId1";
 
     @Test(groups = "functional")
     public void testSalesforceChannelConfig() {
@@ -50,12 +51,14 @@ public class ChannelConfigUnitTestNG {
         config.setAudienceName(testAudienceName1);
         config.setAudienceId(testAudienceId1);
         ((MarketoChannelConfig) config).setFolderName(testFolderName1);
+        ((MarketoChannelConfig) config).setFolderId(testFolderId1);
 
         PlayLaunch launch = new PlayLaunch();
         config.populateLaunchFromChannelConfig(launch);
         Assert.assertEquals(launch.getAudienceId(), testAudienceId1);
         Assert.assertEquals(launch.getAudienceName(), testAudienceName1);
         Assert.assertEquals(launch.getFolderName(), testFolderName1);
+        Assert.assertEquals(launch.getFolderId(), testFolderId1);
 
         MarketoChannelConfig copy = new MarketoChannelConfig();
         copy = (MarketoChannelConfig) copy.copyConfig(config);
@@ -83,7 +86,6 @@ public class ChannelConfigUnitTestNG {
         config.setAudienceName(testAudienceName1);
         config.setAudienceId(testAudienceId1);
         ((LinkedInChannelConfig) config).setAudienceType(AudienceType.CONTACTS);
-        ((LinkedInChannelConfig) config).setFolderName(testFolderName1);
         Assert.assertTrue(config.isSuppressAccountsWithoutContacts());
         Assert.assertTrue(config.isSuppressContactsWithoutEmails());
 
@@ -133,13 +135,11 @@ public class ChannelConfigUnitTestNG {
         ChannelConfig config = new OutreachChannelConfig();
         config.setAudienceName(testAudienceName1);
         config.setAudienceId(testAudienceId1);
-        ((OutreachChannelConfig) config).setFolderName(testFolderName1);
 
         PlayLaunch launch = new PlayLaunch();
         config.populateLaunchFromChannelConfig(launch);
         Assert.assertEquals(launch.getAudienceId(), testAudienceId1);
         Assert.assertEquals(launch.getAudienceName(), testAudienceName1);
-        Assert.assertEquals(launch.getFolderName(), testFolderName1);
 
         OutreachChannelConfig copy = new OutreachChannelConfig();
         copy = (OutreachChannelConfig) copy.copyConfig(config);
@@ -158,7 +158,6 @@ public class ChannelConfigUnitTestNG {
         ChannelConfig config = new GoogleChannelConfig();
         config.setAudienceName(testAudienceName1);
         config.setAudienceId(testAudienceId1);
-        ((GoogleChannelConfig) config).setFolderName(testFolderName1);
 
         PlayLaunch launch = new PlayLaunch();
         config.populateLaunchFromChannelConfig(launch);
@@ -182,7 +181,6 @@ public class ChannelConfigUnitTestNG {
         ChannelConfig config = new FacebookChannelConfig();
         config.setAudienceName(testAudienceName1);
         config.setAudienceId(testAudienceId1);
-        ((FacebookChannelConfig) config).setFolderName(testFolderName1);
 
         PlayLaunch launch = new PlayLaunch();
         config.populateLaunchFromChannelConfig(launch);
