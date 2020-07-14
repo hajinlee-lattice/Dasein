@@ -112,18 +112,18 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 .put(Country, Collections.singletonList("Country"))
                 .build());
         input.setTargetEntity(BusinessEntity.PrimeAccount.name());
-
         List<Column> columns = Stream.of(
-                "DunsNumber",
-                "PrimaryBusinessName",
-                "TradeStyleName",
-                "TelephoneNumber",
-                "IndustryCodeUSSicV4Code"
+                "duns_number",
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         input.setCustomSelection(columnSelection);
         input.setPredefinedSelection(null);
+        input.setUseDirectPlus(true);
 
         DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}[^Z]{2}.*"))
                 .exclude(OutOfBusiness) //
@@ -182,10 +182,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         input.setFields(Arrays.asList("ID", "CompanyName", "State", "Country", "ZipCode", "Address"));
         input.setSkipKeyResolution(true);
         List<Column> columns = Stream.of(
-                "PrimaryBusinessName",
-                "TradeStyleName",
-                "TelephoneNumber",
-                "IndustryCodeUSSicV4Code"
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);

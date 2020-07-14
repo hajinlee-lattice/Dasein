@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -15,6 +16,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
@@ -28,6 +30,13 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     public PrimeMetadataProxyImpl(PrimeMetadataProxyImpl _self) {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/prime-metadata");
         this._self = _self;
+    }
+
+    @Override
+    public List<PrimeColumn> getPrimeColumns(List<String> elementIds) {
+        String url = constructUrl("/columns?elementIds={elementIds}", //
+                StringUtils.join(elementIds, ","));
+        return getList("get prime columns", url, PrimeColumn.class);
     }
 
     @Override

@@ -63,9 +63,6 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     @Value("${datacloud.match.default.decision.graph.prime}")
     private String primeMatchDG;
 
-    @Value("${datacloud.match.latest.data.cloud.major.version}")
-    private String latestMajorVersion;
-
     @BeforeClass(groups = {"functional", "manual"})
     public void setup() throws Exception {
         switchHdfsPod(podId);
@@ -168,18 +165,18 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     }
 
     private ColumnSelection getColumnSelection() {
-        List<Column> columns = Stream.of(
-                DataCloudConstants.ATTR_LDC_DUNS,
-                DataCloudConstants.ATTR_LDC_NAME,
-                "TRADESTYLE_NAME",
-                "LDC_Street",
-                "STREET_ADDRESS_2",
-                DataCloudConstants.ATTR_CITY,
-                DataCloudConstants.ATTR_STATE,
-                DataCloudConstants.ATTR_ZIPCODE,
-                DataCloudConstants.ATTR_COUNTRY,
-                "TELEPHONE_NUMBER",
-                "LE_SIC_CODE"
+        List<Column> columns = Stream.of( //
+                "duns_number", //
+                "primaryname", //
+                "tradestylenames_name", //
+                "primaryaddr_street_line1", //
+                "primaryaddr_street_line2", //
+                "primaryaddr_addrlocality_name", //
+                "primaryaddr_addrregion_name", //
+                "primaryaddr_postalcode", //
+                "primaryaddr_country_name", //
+                "telephone_telephonenumber", //
+                "primaryindcode_ussicv4" //
         ).map(Column::new).collect(Collectors.toList());
         ColumnSelection cs = new ColumnSelection();
         cs.setColumns(columns);

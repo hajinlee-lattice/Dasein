@@ -50,11 +50,13 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
+import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -91,6 +93,9 @@ public class ProcessorContext {
 
     @Inject
     private MatchProxy matchProxy;
+
+    @Inject
+    private PrimeMetadataService primeMetadataService;
 
     @Resource(name = "bulkMatchPlanner")
     private MatchPlanner matchPlanner;
@@ -648,9 +653,17 @@ public class ProcessorContext {
                 log.info("Generating output schema using custom/union selection with "
                         + columnSelection.getColumns().size() + " columns");
                 if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
-                    //FIXME: to be moved to metadata driven
+                    List<PrimeColumn> primeColumns = //
+                            primeMetadataService.getPrimeColumns(columnSelection.getColumnIds());
                     List<Pair<String, Class<?>>> pairs = new ArrayList<>();
-                    columnSelection.getColumnIds().forEach(cid -> pairs.add(Pair.of(cid, String.class)));
+                    primeColumns.forEach(pc -> {
+                        try {
+                            pairs.add(Pair.of(pc.getAttrName(), //
+                                    Class.forName("java.lang." + pc.getJavaClass())));
+                        } catch (ClassNotFoundException e) {
+                            throw new RuntimeException("Cannt parse java class " + pc.getJavaClass(), e);
+                        }
+                    });
                     outputSchema = AvroUtils.constructSchema("PrimeAccount", pairs);
                 } else {
                     metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
