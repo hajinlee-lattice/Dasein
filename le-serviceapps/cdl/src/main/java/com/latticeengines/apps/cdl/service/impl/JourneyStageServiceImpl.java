@@ -15,9 +15,10 @@ import com.latticeengines.apps.cdl.service.JourneyStageService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
-import com.latticeengines.domain.exposed.cdl.activity.JourneyStagePredicates;
+import com.latticeengines.domain.exposed.cdl.activity.JourneyStagePredicate;
 import com.latticeengines.domain.exposed.cdl.activity.StreamFieldToFilter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("JourneyStageService")
@@ -27,7 +28,6 @@ public class JourneyStageServiceImpl implements JourneyStageService {
 
     @Inject
     private JourneyStageEntityMgr journeyStageEntityMgr;
-
 
     @Override
     public JourneyStage findByPid(String customerSpace, Long pid) {
@@ -83,54 +83,56 @@ public class JourneyStageServiceImpl implements JourneyStageService {
     private void createDefaultJourneyStages() {
         Tenant tenant = MultiTenantContext.getTenant();
         createDefaultStage(tenant);
-        createJourneyStage(tenant, "Aware", 8, AtlasStream.StreamType.DnbIntentData, 1, 28, Collections.emptyList());
-        createJourneyStage(tenant, "Engaged", 7, AtlasStream.StreamType.WebVisit, 1, 14, Collections.emptyList());
+        createJourneyStage(tenant, "Aware", 6, AtlasStream.StreamType.DnbIntentData, 1, 28, Collections.emptyList());
+        createJourneyStage(tenant, "Engaged", 5, AtlasStream.StreamType.WebVisit, 1, 14, Collections.emptyList());
 
         StreamFieldToFilter filter = new StreamFieldToFilter();
-        filter.setComparisonType(StreamFieldToFilter.ComparisonType.In);
-        filter.setColumnName(InterfaceName.EventType.name());
-        filter.setColumnValueArrs(Collections.singletonList("WebVisit"));
-        createJourneyStage(tenant, "Known Engaged", 6, AtlasStream.StreamType.MarketingActivity, 1, 14,
+        filter.setComparisonType(ComparisonType.EQUAL);
+        filter.setColumnName(InterfaceName.EventType);
+        filter.setColumnValue("WebVisit");
+        createJourneyStage(tenant, "Known Engaged", 4, AtlasStream.StreamType.MarketingActivity, 1, 14,
                 Collections.singletonList(filter));
 
         filter = new StreamFieldToFilter();
-        filter.setComparisonType(StreamFieldToFilter.ComparisonType.Unlike);
-        filter.setColumnName(InterfaceName.Detail1.name());
+        filter.setComparisonType(ComparisonType.NOT_CONTAINS);
+        filter.setColumnName(InterfaceName.Detail1);
         filter.setColumnValue("Closed%");
-        createJourneyStage(tenant, "Opportunity", 4, AtlasStream.StreamType.Opportunity, 1, 90,
+        createJourneyStage(tenant, "Opportunity", 3, AtlasStream.StreamType.Opportunity, 1, 90,
                 Collections.singletonList(filter));
 
         filter = new StreamFieldToFilter();
-        filter.setComparisonType(StreamFieldToFilter.ComparisonType.Like);
-        filter.setColumnName(InterfaceName.Detail1.name());
+        filter.setComparisonType(ComparisonType.CONTAINS);
+        filter.setColumnName(InterfaceName.Detail1);
         filter.setColumnValue("Closed%");
         createJourneyStage(tenant, "Closed", 2, AtlasStream.StreamType.Opportunity, 1, 90,
                 Collections.singletonList(filter));
 
         StreamFieldToFilter filter2 = new StreamFieldToFilter();
-        filter2.setComparisonType(StreamFieldToFilter.ComparisonType.Like);
-        filter2.setColumnName(InterfaceName.Detail1.name());
+        filter2.setComparisonType(ComparisonType.CONTAINS);
+        filter2.setColumnName(InterfaceName.Detail1);
         filter2.setColumnValue("%Won");
-        createJourneyStage(tenant, "Closed-Won", 1, AtlasStream.StreamType.Opportunity, 1, 90, Arrays.asList(filter,
-                filter2));
+        createJourneyStage(tenant, "Closed-Won", 1, AtlasStream.StreamType.Opportunity, 1, 90,
+                Arrays.asList(filter, filter2));
     }
 
     private void createJourneyStage(Tenant tenant, String stageName, int priority, AtlasStream.StreamType streamType,
-                                           int noOfEvents, int period, List<StreamFieldToFilter> filters) {
-        JourneyStagePredicates predicates = new JourneyStagePredicates();
+            int noOfEvents, int periodDays, List<StreamFieldToFilter> filters) {
+        JourneyStagePredicate predicates = new JourneyStagePredicate();
         predicates.setStreamType(streamType);
-        predicates.setPeriod(period);
+        predicates.setPeriodDays(periodDays);
         predicates.setNoOfEvents(noOfEvents);
-        predicates.setStreamFieldToFilterList(filters);
-        JourneyStage journeyStage =
-                new JourneyStage.Builder().withTenant(tenant).withStageName(stageName).withDisplayName(stageName).withPriority(priority).withPredicates(Collections.singletonList(predicates)).build();
+        predicates.setStreamFieldsToFilter(filters);
+        JourneyStage journeyStage = new JourneyStage.Builder().withTenant(tenant).withStageName(stageName)
+                .withDisplayName(stageName).withPriority(priority).withPredicates(Collections.singletonList(predicates))
+                .build();
         journeyStageEntityMgr.createOrUpdate(journeyStage);
     }
 
     private void createDefaultStage(Tenant tenant) {
-        JourneyStagePredicates predicates = new JourneyStagePredicates();
+        JourneyStagePredicate predicates = new JourneyStagePredicate();
         predicates.setStreamType(AtlasStream.StreamType.DefaultStage);
-        JourneyStage journeyStage = new JourneyStage.Builder().withTenant(tenant).withPriority(9).withStageName("Dark").withDisplayName("Dark").withPredicates(Collections.singletonList(predicates)).build();
+        JourneyStage journeyStage = new JourneyStage.Builder().withTenant(tenant).withPriority(7).withStageName("Dark")
+                .withDisplayName("Dark").withPredicates(Collections.singletonList(predicates)).build();
         journeyStageEntityMgr.createOrUpdate(journeyStage);
     }
 }

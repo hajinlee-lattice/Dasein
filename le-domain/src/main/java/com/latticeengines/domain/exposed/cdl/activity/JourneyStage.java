@@ -68,7 +68,7 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
     @Column(name = "PREDICATES", columnDefinition = "'JSON'")
     @JsonProperty("predicates")
     @Type(type = "json")
-    private List<JourneyStagePredicates> predicates;
+    private List<JourneyStagePredicate> predicates;
 
     @Override
     public Long getPid() {
@@ -106,11 +106,11 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
         this.priority = priority;
     }
 
-    public List<JourneyStagePredicates> getPredicates() {
+    public List<JourneyStagePredicate> getPredicates() {
         return predicates;
     }
 
-    public void setPredicates(List<JourneyStagePredicates> predicates) {
+    public void setPredicates(List<JourneyStagePredicate> predicates) {
         this.predicates = predicates;
     }
 
@@ -150,7 +150,7 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
             return this;
         }
 
-        public Builder withPredicates(List<JourneyStagePredicates> predicates) {
+        public Builder withPredicates(List<JourneyStagePredicate> predicates) {
             journeyStage.setPredicates(predicates);
             return this;
         }
