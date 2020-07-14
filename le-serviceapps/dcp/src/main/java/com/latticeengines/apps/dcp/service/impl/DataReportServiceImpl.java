@@ -193,10 +193,10 @@ public class DataReportServiceImpl implements DataReportService {
         if (!DataReportRecord.Level.Tenant.equals(level)) {
             Preconditions.checkNotNull(parentOwnerId, "parent owner id should not be empty");
         }
-        int brothers = dataReportEntityMgr.countBrothersByParentLevelAndOwnerId(level.getParentLevel(), parentOwnerId);
-        log.info("the brothers are " + brothers);
+        int siblings = dataReportEntityMgr.countSiblingsByParentLevelAndOwnerId(level.getParentLevel(), parentOwnerId);
+        log.info("the siblings are " + siblings);
         DunsCountCopy copy = new DunsCountCopy();
-        copy.setOnlyChild(brothers == 1);
+        copy.setOnlyChild(siblings == 1);
         copy.setParentOwnerId(parentOwnerId);
         return copy;
     }

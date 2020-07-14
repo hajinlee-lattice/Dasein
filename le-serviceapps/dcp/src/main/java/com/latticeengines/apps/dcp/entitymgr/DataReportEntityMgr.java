@@ -21,7 +21,7 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
 
-    int countBrothersByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
+    int countSiblingsByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
     boolean existsDataReport(DataReportRecord.Level level, String ownerId);
 

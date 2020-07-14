@@ -37,7 +37,7 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
     }
 
     public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {
-        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount?level={level}";
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscountcopy?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
         return get("Get duns count copy", url, DunsCountCopy.class);
     }

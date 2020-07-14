@@ -83,9 +83,9 @@ public class DataReportResource {
         return dataReportService.getDunsCount(customerSpace, level, ownerId);
     }
 
-    @GetMapping("/dunsCountCache")
+    @GetMapping("/dunscountcopy")
     @ResponseBody
-    @ApiOperation(value = "")
+    @ApiOperation(value = "Get duns count copy")
     public DunsCountCopy getDunsCountCopy(@PathVariable String customerSpace,
                                           @RequestParam DataReportRecord.Level level,
                                           @RequestParam(required = false) String ownerId) {

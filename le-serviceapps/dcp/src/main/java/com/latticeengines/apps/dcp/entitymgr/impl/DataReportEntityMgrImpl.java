@@ -111,8 +111,8 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int countBrothersByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId) {
-        return getReadOrWriteRepository().countBrothersByParentLevelAndOwnerId(level, ownerId);
+    public int countSiblingsByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().countSiblingsByParentLevelAndOwnerId(level, ownerId);
     }
 
     @Override

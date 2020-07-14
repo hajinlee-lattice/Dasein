@@ -16,10 +16,10 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
 
     @Query("select count(*) from DataReportRecord d join DataReportRecord d2 on d.parentId = d2.pid " +
             "where d2.level = ?1 AND d2.ownerId = ?2")
-    int countBrothersByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
+    int countSiblingsByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
-    @Query("select d.pid,dc.name from DataReportRecord as d join d.dunsCount as dc WHERE d.level = ?1 AND d.ownerId =" +
-            " ?2")
+    @Query("select d.pid,dc.name from DataReportRecord as d left join d.dunsCount as dc WHERE d.level = ?1 AND " +
+            "d.ownerId = ?2")
     List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
 
     @Query("SELECT d.pid from DataReportRecord d WHERE d.level = ?1 AND d.ownerId = ?2")

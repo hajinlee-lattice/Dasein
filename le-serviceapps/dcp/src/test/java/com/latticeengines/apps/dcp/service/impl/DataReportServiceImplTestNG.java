@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
@@ -33,6 +35,9 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     @Inject
     private DataReportService dataReportService;
+
+    @Inject
+    private DataReportEntityMgr dataReportEntityMgr;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -70,6 +75,13 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(copy);
         Assert.assertTrue(copy.isOnlyChild());
         Assert.assertNotNull(copy.getParentOwnerId());
+
+        // test find Pid and corresponding duns count table name
+        List<Object[]> result = dataReportEntityMgr.findPidAndDunsCountTableName(DataReportRecord.Level.Upload,
+                "uploadUID");
+        Object[] objs = result.get(0);
+        Assert.assertNotNull(objs[0]);
+        Assert.assertNull(objs[1]);
 
         DataReport dataReportPersist = dataReportService.getDataReport(mainCustomerSpace,
                 DataReportRecord.Level.Upload,  "uploadUID");

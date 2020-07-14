@@ -331,18 +331,26 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         DunsCountCache uploadCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload
                 , uploadId);
         Assert.assertNotNull(uploadCache);
+        Assert.assertNotNull(uploadCache.getSnapshotTimestamp());
+        Assert.assertNotNull(uploadCache.getDunsCount());
         System.out.println(JsonUtils.pprint(uploadCache));
 
         DunsCountCache sourceCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Source,
                 source.getSourceId());
         Assert.assertNotNull(sourceCache);
+        Assert.assertNotNull(sourceCache.getSnapshotTimestamp());
+        Assert.assertNotNull(sourceCache.getDunsCount());
 
         DunsCountCache projectCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Project,
                 projectDetails.getProjectId());
         Assert.assertNotNull(projectCache);
+        Assert.assertNotNull(projectCache.getSnapshotTimestamp());
+        Assert.assertNotNull(projectCache.getDunsCount());
 
         DunsCountCache tenantCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Tenant,
                 CustomerSpace.parse(mainCustomerSpace).toString());
         Assert.assertNotNull(tenantCache);
+        Assert.assertNotNull(tenantCache.getSnapshotTimestamp());
+        Assert.assertNotNull(tenantCache.getDunsCount());
     }
 }
