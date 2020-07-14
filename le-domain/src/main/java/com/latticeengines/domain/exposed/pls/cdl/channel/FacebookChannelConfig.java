@@ -30,9 +30,6 @@ public class  FacebookChannelConfig implements ChannelConfig {
     @JsonProperty("audienceName")
     private String audienceName;
 
-    @JsonProperty("folderName")
-    private String folderName;
-
     public Long getContactLimit() {
         return contactLimit;
     }
@@ -83,14 +80,6 @@ public class  FacebookChannelConfig implements ChannelConfig {
         return audienceType;
     }
 
-    public String getFolderName() {
-        return folderName;
-    }
-
-    public void setFolderName(String folderName) {
-        this.folderName = folderName;
-    }
-
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
@@ -122,7 +111,6 @@ public class  FacebookChannelConfig implements ChannelConfig {
                 .setSuppressContactsWithoutEmails(newFacebookChannelConfig.isSuppressContactsWithoutEmails());
         facebookChannelConfig.setAudienceId(newFacebookChannelConfig.getAudienceId());
         facebookChannelConfig.setAudienceName(newFacebookChannelConfig.getAudienceName());
-        facebookChannelConfig.setFolderName(newFacebookChannelConfig.getFolderName());
         return this;
     }
 
