@@ -211,6 +211,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ACC_ID")
     private String destinationAccountId;
 
+    @JsonProperty("destinationContactId")
+    @Column(name = "DESTINATION_CONTACT_ID")
+    private String destinationContactId;
+
     @JsonProperty("audienceId")
     @Column(name = "AUDIENCE_ID")
     private String audienceId;
@@ -218,6 +222,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("audienceName")
     @Column(name = "AUDIENCE_NAME")
     private String audienceName;
+
+    @JsonProperty("folderId")
+    @Column(name = "FOLDER_ID")
+    private String folderId;
 
     @JsonProperty("folderName")
     @Column(name = "FOLDER_NAME")
@@ -685,6 +693,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.destinationAccountId = destinationAccountId;
     }
 
+    public String getDestinationContactId() {
+        return destinationContactId;
+    }
+
+    public void setDestinationContactId(String destinationContactId) {
+        this.destinationContactId = destinationContactId;
+    }
+
     @Override
     public Boolean getDeleted() {
         return deleted;
@@ -714,6 +730,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
+    }
+
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
     }
 
     public String getFolderName() {
@@ -901,6 +925,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         }
         if (playLaunch.getAudienceSize() != null) {
             this.setAudienceSize(playLaunch.getAudienceSize());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getFolderId())) {
+            this.setFolderId(playLaunch.getFolderId());
         }
         if (StringUtils.isNotBlank(playLaunch.getFolderName())) {
             this.setFolderName(playLaunch.getFolderName());

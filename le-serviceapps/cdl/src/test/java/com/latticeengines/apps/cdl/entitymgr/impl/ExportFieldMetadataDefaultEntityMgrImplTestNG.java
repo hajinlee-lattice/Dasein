@@ -149,13 +149,22 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultFacebookExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Facebook);
 
-        assertEquals(defaultFacebookExportFields.size(), 41);
+        assertEquals(defaultFacebookExportFields.size(), 47);
         assertEquals(
                 defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                40);
         assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                11);
+                10);
 
+    }
+    
+    @Test(groups = "functional")
+    public void testFacebookContacts() {
+        List<ExportFieldMetadataDefaults> defaultFacebookContactsExportFields = defaultExportFieldMetadataEntityMgr
+                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.Facebook,
+                        AudienceType.CONTACTS);
+
+        assertEquals(defaultFacebookContactsExportFields.size(), 10);
     }
 
     @Test(groups = "functional")
@@ -177,11 +186,20 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.GoogleAds);
 
-        assertEquals(defaultGoogleAdsExportFields.size(), 41);
+        assertEquals(defaultGoogleAdsExportFields.size(), 43);
         assertEquals(
                 defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 10);
 
+    }
+
+    @Test(groups = "functional")
+    public void testGoogleAdsContacts() {
+        List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
+                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.GoogleAds,
+                        AudienceType.CONTACTS);
+
+        assertEquals(defaultGoogleAdsExportFields.size(), 10);
     }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {

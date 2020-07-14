@@ -44,35 +44,10 @@ public final class DirectPlusUtils {
         List<String> parts = new ArrayList<>();
         switch (apiType) {
             case REALTIME_ENTITY:
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getName())) {
-                    parts.add(String.format("name=%s", urlEncode(context.getInputNameLocation().getName())));
+                if (StringUtils.isNotBlank(context.getInputDuns())) {
+                    parts.add(String.format("duns=%s", context.getInputDuns()));
                 } else {
-                    throw new LedpException(LedpCode.LEDP_25023);
-                }
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
-                    parts.add(String.format("countryISOAlpha2Code=%s", context.getInputNameLocation().getCountryCode()));
-                } else {
-                    throw new LedpException(LedpCode.LEDP_25023);
-                }
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getCity())) {
-                    parts.add(String.format("addressLocality=%s", urlEncode(context.getInputNameLocation().getCity())));
-                }
-                if (!StringUtils.isEmpty(context.getInputNameLocation().getState())) {
-                    String stateCode = LocationUtils.getStardardStateCode(context.getInputNameLocation().getCountry(),
-                            context.getInputNameLocation().getState());
-                    parts.add(String.format("addressRegion=%s", urlEncode(stateCode)));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getZipcode())) {
-                    parts.add(String.format("postalCode=%s", urlEncode(context.getInputNameLocation().getZipcode())));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
-                    parts.add(String.format("telephoneNumber=%s", urlEncode(context.getInputNameLocation().getPhoneNumber())));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet())) {
-                    parts.add(String.format("streetAddressLine1=%s", urlEncode(context.getInputNameLocation().getStreet())));
-                }
-                if (StringUtils.isNotEmpty(context.getInputNameLocation().getStreet2())) {
-                    parts.add(String.format("streetAddressLine2=%s", urlEncode(context.getInputNameLocation().getStreet2())));
+                    parts.addAll(getLocationParams(context.getInputNameLocation()));
                 }
                 break;
             case REALTIME_EMAIL:
@@ -97,13 +72,46 @@ public final class DirectPlusUtils {
         return StringUtils.join(parts, "&");
     }
 
-    public static Map<String, Object> parseDataBlock(String response) {
+    private static List<String> getLocationParams(NameLocation nl) {
+        List<String> parts = new ArrayList<>();
+        if (!StringUtils.isEmpty(nl.getName())) {
+            parts.add(String.format("name=%s", urlEncode(nl.getName())));
+        } else {
+            throw new LedpException(LedpCode.LEDP_25023);
+        }
+        if (!StringUtils.isEmpty(nl.getCountryCode())) {
+            parts.add(String.format("countryISOAlpha2Code=%s", nl.getCountryCode()));
+        } else {
+            throw new LedpException(LedpCode.LEDP_25023);
+        }
+        if (!StringUtils.isEmpty(nl.getCity())) {
+            parts.add(String.format("addressLocality=%s", urlEncode(nl.getCity())));
+        }
+        if (!StringUtils.isEmpty(nl.getState())) {
+            String stateCode = LocationUtils.getStardardStateCode(nl.getCountry(), nl.getState());
+            parts.add(String.format("addressRegion=%s", urlEncode(stateCode)));
+        }
+        if (StringUtils.isNotEmpty(nl.getZipcode())) {
+            parts.add(String.format("postalCode=%s", urlEncode(nl.getZipcode())));
+        }
+        if (StringUtils.isNotEmpty(nl.getPhoneNumber())) {
+            parts.add(String.format("telephoneNumber=%s", urlEncode(nl.getPhoneNumber())));
+        }
+        if (StringUtils.isNotEmpty(nl.getStreet())) {
+            parts.add(String.format("streetAddressLine1=%s", urlEncode(nl.getStreet())));
+        }
+        if (StringUtils.isNotEmpty(nl.getStreet2())) {
+            parts.add(String.format("streetAddressLine2=%s", urlEncode(nl.getStreet2())));
+        }
+        return parts;
+    }
+
+    public static Map<String, Object> parseDataBlock(String response, List<PrimeColumn> metadata) {
         Map<String, Object> result = new HashMap<>();
-        List<PrimeColumn> mds = getDataBlockMetadata();
         JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
         // cache of jsonPath -> jsonNode
         ConcurrentMap<String, JsonNode> nodeCache = new ConcurrentHashMap<>();
-        mds.forEach(md -> {
+        metadata.forEach(md -> {
             String jsonPath = md.getJsonPath();
             JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
             String value = (String) toValue(jsonNode);
@@ -161,24 +169,6 @@ public final class DirectPlusUtils {
             }
         }
     }
-
-    // to be changed to metadata driven
-    public static List<PrimeColumn> getDataBlockMetadata() {
-        return Arrays.asList(
-                new PrimeColumn("DunsNumber", "D-U-N-S Number", "organization.duns"),
-                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryName"),
-                new PrimeColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames.name"),
-                new PrimeColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1"),
-                new PrimeColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2"),
-                new PrimeColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name"),
-                new PrimeColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name"),
-                new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
-                new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name"),
-                new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
-                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4")
-        );
-    }
-
 
     public static void parseJsonResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);

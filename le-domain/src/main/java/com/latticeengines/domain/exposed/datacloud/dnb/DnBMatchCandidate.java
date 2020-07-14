@@ -17,6 +17,15 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 )
 public class DnBMatchCandidate {
 
+    public static class Attr {
+        public static final String MatchedDuns = "MatchedDuns";
+        public static final String ConfidenceCode = "ConfidenceCode";
+        public static final String MatchGrade = "MatchGrade";
+        public static final String MatchDataProfile = "MatchDataProfile";
+        public static final String NameMatchScore = "NameMatchScore";
+        public static final String OperatingStatusText = "OperatingStatusText";
+    }
+
     @JsonProperty("DUNS")
     private String duns;
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -115,6 +116,13 @@ public class DropBoxResource {
     @ApiOperation(value = "Get all files under path")
     public List<FileProperty> getAllSubFolders(@PathVariable String customerSpace, @RequestParam String s3Path,
             @RequestParam(required = false, defaultValue = "") String filter) {
+        if (StringUtils.isBlank(s3Path)) {
+            throw new IllegalArgumentException("Path cannot be empty!");
+        }
+
+        if (!s3Path.contains(dropBoxService.getDropBoxPrefix())) {
+            throw new IllegalArgumentException("Must provide path under tenant's root directory!");
+        }
         return dropBoxService.getFileListForPath(customerSpace, s3Path, filter);
     }
 }

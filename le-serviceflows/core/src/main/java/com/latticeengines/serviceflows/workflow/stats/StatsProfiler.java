@@ -89,10 +89,11 @@ public class StatsProfiler {
         Map<String, ProfileArgument> amAttrsConfig;
         if (Boolean.TRUE.equals(jobConfig.getConsiderAMAttrs())) {
             amAttrsConfig = findAMAttrsConfig(dataCloudVersion);
+            log.info("Found {} AM attributes config", amAttrsConfig.size());
         } else {
             amAttrsConfig = new HashMap<>();
         }
-        log.info("Classifying attributes...");
+        log.info("Classifying {} attributes...", cms.size());
         try {
             classifier = new AttrClassifier(jobConfig, //
                     jobConfig.getIncludeAttrs(), amAttrsConfig, declaredAttrsConfig, encodeBits, maxAttrs);

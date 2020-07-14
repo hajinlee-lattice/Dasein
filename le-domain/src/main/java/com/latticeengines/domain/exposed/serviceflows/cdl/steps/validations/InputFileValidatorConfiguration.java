@@ -17,6 +17,9 @@ public class InputFileValidatorConfiguration extends BaseReportStepConfiguration
     @JsonProperty("data_feed_task_id")
     private String dataFeedTaskId;
 
+    @JsonProperty("catalog_records_limit")
+    private Long catalogRecordsLimit;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -47,5 +50,13 @@ public class InputFileValidatorConfiguration extends BaseReportStepConfiguration
 
     public void setDataFeedTaskId(String dataFeedTaskId) {
         this.dataFeedTaskId = dataFeedTaskId;
+    }
+
+    public Long getCatalogRecordsLimit() {
+        return catalogRecordsLimit;
+    }
+
+    public void setCatalogRecordsLimit(Long catalogRecordsLimit) {
+        this.catalogRecordsLimit = catalogRecordsLimit;
     }
 }

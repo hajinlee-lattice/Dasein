@@ -31,4 +31,6 @@ public interface MatchCommandService {
 
     List<MatchBlock> getBlocks(String rootOperationUid);
 
+    MatchBlock getBlock(String blockOperationUid);
+
 }

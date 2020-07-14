@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -400,7 +401,7 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return cdlService.getS3ImportTemplate(customerSpace.toString(), sortBy,
-                null);
+                ImmutableSet.of(EntityType.CustomIntent));
     }
 
     @GetMapping("/s3import/fileList")
@@ -622,6 +623,7 @@ public class CDLResource {
                         }
                         break;
                     case Contacts:
+                    case Leads:
                     case ProductPurchases:
                         if (contactSystemIdMap.containsKey(fieldPreview.getNameInTemplate())) {
                             fieldPreview.setFieldCategory(FieldCategory.LatticeField);

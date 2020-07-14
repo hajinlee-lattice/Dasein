@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -23,7 +23,7 @@ public class SendEmailAfterScoringCompletionListener extends LEJobListener {
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -42,7 +42,7 @@ public class SendEmailAfterScoringCompletionListener extends LEJobListener {
             emailInfo.setModelId(modelId);
             log.info(String.format("userId: %s; modelId: %s", emailInfo.getUserId(), emailInfo.getModelId()));
             try {
-                plsInternalProxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                emailProxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
             } catch (Exception e) {
                 log.error("Can not send scoring email: " + e.getMessage());
             }

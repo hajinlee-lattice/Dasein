@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 
 public class StreamFieldToFilter implements Serializable {
 
@@ -13,19 +15,19 @@ public class StreamFieldToFilter implements Serializable {
     private ComparisonType comparisonType;
 
     @JsonProperty("column_name")
-    private String columnName;
+    private InterfaceName columnName;
 
     @JsonProperty("column_value")
     private String columnValue;
 
-    @JsonProperty("column_value_arrs")
-    private List<String> columnValueArrs;
+    @JsonProperty("column_values")
+    private List<String> columnValues;
 
-    public String getColumnName() {
+    public InterfaceName getColumnName() {
         return columnName;
     }
 
-    public void setColumnName(String columnName) {
+    public void setColumnName(InterfaceName columnName) {
         this.columnName = columnName;
     }
 
@@ -45,15 +47,9 @@ public class StreamFieldToFilter implements Serializable {
         this.comparisonType = comparisonType;
     }
 
-    public List<String> getColumnValueArrs() {
-        return columnValueArrs;
-    }
+    public List<String> getColumnValues() { return columnValues; }
 
-    public void setColumnValueArrs(List<String> columnValueArrs) {
-        this.columnValueArrs = columnValueArrs;
-    }
-
-    public enum ComparisonType {
-        Equal, Like, In, Unlike
+    public void setColumnValues(List<String> columnValues) {
+        this.columnValues = columnValues;
     }
 }

@@ -11,7 +11,7 @@ import com.latticeengines.common.exposed.util.KryoUtils;
 
 public class PrimeAccount {
 
-    private static final String DunsNumber = "DunsNumber";
+    public static final String DunsNumber = "duns_number";
 
     private Map<String, Object> result;
 

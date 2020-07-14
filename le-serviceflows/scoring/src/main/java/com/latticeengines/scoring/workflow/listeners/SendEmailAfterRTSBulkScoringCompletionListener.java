@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -26,7 +26,7 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -59,7 +59,7 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
                     List<String> internalEnrichmentAttributes = JsonUtils.convertList(internalEnrichmentAttributesObj,
                             String.class);
                     emailInfo.setExtraInfoList(internalEnrichmentAttributes);
-                    plsInternalProxy.sendPlsEnrichInternalAttributeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                    emailProxy.sendPlsEnrichInternalAttributeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
                 }
             } catch (Exception e) {
                 log.error("Can not send RTS bulk scoring email: " + e.getMessage());

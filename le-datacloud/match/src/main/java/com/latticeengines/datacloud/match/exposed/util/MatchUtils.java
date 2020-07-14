@@ -51,10 +51,10 @@ public final class MatchUtils {
         mergedStats.setMatchedByMatchKeyCount(stats.getMatchedByMatchKeyCount() + newStats.getMatchedByMatchKeyCount());
         mergedStats.setMatchedByAccountIdCount(stats.getMatchedByAccountIdCount()
                 + newStats.getMatchedByAccountIdCount());
-        mergeNewEntityCnt(mergedStats.getNullEntityIdCount(), stats.getNullEntityIdCount());
-        mergeNewEntityCnt(mergedStats.getNullEntityIdCount(), newStats.getNullEntityIdCount());
-        mergeNewEntityCnt(mergedStats.getNewEntityCount(), stats.getNewEntityCount());
-        mergeNewEntityCnt(mergedStats.getNewEntityCount(), newStats.getNewEntityCount());
+        mergeEntityCnt(mergedStats.getNullEntityIdCount(), stats.getNullEntityIdCount());
+        mergeEntityCnt(mergedStats.getNullEntityIdCount(), newStats.getNullEntityIdCount());
+        mergeEntityCnt(mergedStats.getNewEntityCount(), stats.getNewEntityCount());
+        mergeEntityCnt(mergedStats.getNewEntityCount(), newStats.getNewEntityCount());
 
         log.debug("Merged Match Statistics");
         log.debug("   Merged Stats Rows Matched: " + mergedStats.getRowsMatched());
@@ -66,15 +66,14 @@ public final class MatchUtils {
     }
 
     /*-
-     * merge newEntityCnt (entity->count map) into accumulated one
+     * merge entity count map (entity->count) into accumulated one
      */
-    private static void mergeNewEntityCnt(@NotNull Map<String, Long> accNewEntityCnt,
-            @NotNull Map<String, Long> newEntityCnt) {
-        for (String entity : accNewEntityCnt.keySet()) {
-            accNewEntityCnt.put(entity, accNewEntityCnt.get(entity) + newEntityCnt.getOrDefault(entity, 0L));
+    public static void mergeEntityCnt(@NotNull Map<String, Long> accEntityCnt, @NotNull Map<String, Long> entityCnt) {
+        for (String entity : accEntityCnt.keySet()) {
+            accEntityCnt.put(entity, accEntityCnt.get(entity) + entityCnt.getOrDefault(entity, 0L));
         }
-        for (String entity : newEntityCnt.keySet()) {
-            accNewEntityCnt.putIfAbsent(entity, newEntityCnt.get(entity));
+        for (String entity : entityCnt.keySet()) {
+            accEntityCnt.putIfAbsent(entity, entityCnt.get(entity));
         }
     }
 

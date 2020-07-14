@@ -231,7 +231,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testErrorResponseExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);

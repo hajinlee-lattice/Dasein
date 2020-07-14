@@ -13,11 +13,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.apps.dcp.service.AppendConfigService;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusAppendConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
@@ -43,6 +45,9 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private MatchRuleService matchRuleService;
+
+    @Inject
+    private AppendConfigService appendConfigService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DCPImportRequest importRequest,
@@ -97,7 +102,12 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
                         .build()) //
                 .matchConfig(getMatchConfig(customerSpace.toString(), sourceId)) //
+                .appendConfig(getAppendConfig(customerSpace.toString(), sourceId)) //
                 .build();
+    }
+
+    private DplusAppendConfig getAppendConfig(String customerSpace, String sourceId) {
+        return appendConfigService.getAppendConfig(customerSpace, sourceId);
     }
 
     private DplusMatchConfig getMatchConfig(String customerSpace, String sourceId) {

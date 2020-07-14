@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -17,19 +15,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
 public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
-
-    private static final String REMOTE_API = "Went to remote DnB API.";
 
     @PostConstruct
     public void postConstruct() {
@@ -56,11 +49,12 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
             return false;
         }
 
-        return matchKeyTuple.getName() != null;
+        return StringUtils.isNotBlank(matchKeyTuple.getName());
     }
 
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.setUseDunsMatchDuns(false);
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.LOCATION_DUNS, traveler.getMatchKeyTuple()));
     }
 
@@ -69,63 +63,12 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
         if (MapUtils.isEmpty(dunsOriginMap)) {
             return false;
         }
-        if (dunsOriginMap.containsKey(this.getClass().getName())
-                || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName())) {
-            return true;
-        }
-        return false;
+        return dunsOriginMap.containsKey(this.getClass().getName())
+                || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName());
     }
 
     @Override
     protected void process(Response response) {
-        MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
-        if (response.getResult() == null) {
-            traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", getClass().getSimpleName(),
-                    "Result in response is empty"));
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                            Collections.singletonList(null))));
-            return;
-        }
-        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-        DnBMatchContext res = (DnBMatchContext) response.getResult();
-        traveler.debug(REMOTE_API);
-        String logMessage = String.format(
-                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, " +
-                        "City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
-                res.getDuns(), getClass().getSimpleName(),
-                (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
-                (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
-                res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
-                res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
-                res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
-                res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusinessString());
-        if (Boolean.TRUE.equals(res.getPatched())) {
-            logMessage += " This cache entry has been manually patched.";
-        }
-        traveler.debug(logMessage);
-        traveler.setDunsOriginMapIfAbsent(new HashMap<>());
-        traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
-        traveler.getDnBMatchContexts().add(res);
-        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                        Collections.singletonList(res.getDuns()))));
-        if (res.getDnbCode() != DnBReturnCode.OK) {
-            if (StringUtils.isNotEmpty(res.getDuns())) {
-                res.setDuns(null);
-            }
-            traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", //
-                    getClass().getSimpleName(), //
-                    (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
-        } else {
-            matchKeyTuple.setDuns(res.getDuns());
-            if (BusinessEntity.PrimeAccount.name().equals(traveler.getEntity())) {
-                traveler.setCandidates(res.getCandidates());
-                // still relying on LDC to get enrich data
-//                traveler.setResult(res.getDuns());
-//                traveler.setMatched(StringUtils.isNotBlank(res.getDuns()));
-            }
-        }
-        response.setResult(null);
+        DnBResultProcessor.process(response, getClass());
     }
 }

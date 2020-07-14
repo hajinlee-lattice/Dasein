@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Address;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.City;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.DUNS;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Zipcode;
@@ -111,19 +112,20 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 .put(State, Collections.singletonList("State"))
                 .put(Country, Collections.singletonList("Country"))
                 .build());
+        input.setUseDirectPlus(true);
         input.setTargetEntity(BusinessEntity.PrimeAccount.name());
-
         List<Column> columns = Stream.of(
-                "DunsNumber",
-                "PrimaryBusinessName",
-                "TradeStyleName",
-                "TelephoneNumber",
-                "IndustryCodeUSSicV4Code"
+                "duns_number",
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         input.setCustomSelection(columnSelection);
         input.setPredefinedSelection(null);
+        input.setUseDirectPlus(true);
 
         DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}[^Z]{2}.*"))
                 .exclude(OutOfBusiness) //
@@ -167,7 +169,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { 123, "AMAZON.COM, INC.", "WASHINGTON", "USA", "98109-5210", "410 Terry Ave N" } //
         };
         // ColumnSelection is RTS
-        MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data, //
+                new String[]{ "ID", "CompanyName", "State", "Country", "ZipCode", "Address" });
         input.setUseDirectPlus(true);
         DplusMatchRule baseRule = new DplusMatchRule(6, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
         input.setDplusMatchConfig(new DplusMatchConfig(baseRule));
@@ -179,13 +182,13 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 .put(Zipcode, Collections.singletonList("ZipCode"))
                 .put(Address, Collections.singletonList("Address"))
                 .build());
-        input.setFields(Arrays.asList("ID", "CompanyName", "State", "Country", "ZipCode", "Address"));
         input.setSkipKeyResolution(true);
         List<Column> columns = Stream.of(
-                "PrimaryBusinessName",
-                "TradeStyleName",
-                "TelephoneNumber",
-                "IndustryCodeUSSicV4Code"
+                "duns_number",
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
@@ -257,17 +260,42 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     // Test against retired V1.0 matcher -- DerivedColumnsCache
     // Disable the test as SQL Server is shutdown
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testDuns() {
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "12345" },
-                { 123, "chevron.com", 12345 }
+                { "884114609", "Dun & BradStreet", "US" },
+                { "884114609", "No such company", "US" },
+                { "884114609", null, null },
+                { "1234", "Dun & BradStreet", "US" },
+                { null, "Dun & BradStreet", "US" },
         };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "ID", "Domain", "DUNS" });
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "DUNS", "Name", "Country" });
+        input.setUseDirectPlus(true);
+        input.setTargetEntity(BusinessEntity.PrimeAccount.name());
+        DplusMatchRule baseRule = new DplusMatchRule(6, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+        input.setDplusMatchConfig(new DplusMatchConfig(baseRule));
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
+                .put(DUNS, Collections.singletonList("DUNS"))
+                .put(Name, Collections.singletonList("Name"))
+                .put(Country, Collections.singletonList("Country"))
+                .build());
+        input.setSkipKeyResolution(true);
+        List<Column> columns = Stream.of("DunsNumber").map(c -> new Column(c, c)).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertEquals(output.getStatistics().getRowsMatched().intValue(), data.length);
+        // MatchGrade is AAAAAAAAAAA, if it was matched by DUNS
+        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
+        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
+        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
     }
 
     @Test(groups = "functional")

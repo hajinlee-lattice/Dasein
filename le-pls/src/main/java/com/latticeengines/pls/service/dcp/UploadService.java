@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 
 public interface UploadService {
@@ -16,7 +17,7 @@ public interface UploadService {
 
     UploadDetails getByUploadId(String uploadId, Boolean includeConfig);
 
-    String generateToken(String uploadId);
+    String generateToken(String uploadId, List<UploadFileDownloadConfig.FileType> files);
 
     void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 

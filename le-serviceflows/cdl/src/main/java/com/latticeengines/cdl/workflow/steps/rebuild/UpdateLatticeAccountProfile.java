@@ -73,6 +73,11 @@ public class UpdateLatticeAccountProfile extends UpdateProfileBase<ProcessAccoun
     }
 
     @Override
+    protected boolean getConsiderAMAttrs() {
+        return true;
+    }
+
+    @Override
     public void execute() {
         bootstrap();
         autoDetectCategorical = true;

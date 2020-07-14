@@ -5,19 +5,19 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class JourneyStagePredicates implements Serializable {
+public class JourneyStagePredicate implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
     @JsonProperty("stream_type")
     private AtlasStream.StreamType streamType;
 
-    //the unit here is day and evaluating from current time.
-    @JsonProperty("period")
-    private int period;
+    // the unit here is day and evaluating from current time.
+    @JsonProperty("period_days")
+    private int periodDays;
 
-    @JsonProperty("stream_field_to_filter_list")
-    private List<StreamFieldToFilter> streamFieldToFilterList;
+    @JsonProperty("stream_fields_to_filter")
+    private List<StreamFieldToFilter> streamFieldsToFilter;
 
     @JsonProperty("no_of_events")
     private int noOfEvents;
@@ -25,28 +25,20 @@ public class JourneyStagePredicates implements Serializable {
     @JsonProperty("contact_not_null")
     private boolean contactNotNull;
 
-    public AtlasStream.StreamType getStreamType() {
-        return streamType;
-    }
+    public AtlasStream.StreamType getStreamType() { return streamType; }
 
     public void setStreamType(AtlasStream.StreamType streamType) {
         this.streamType = streamType;
     }
 
-    public int getPeriod() {
-        return period;
-    }
+    public int getPeriodDays() { return periodDays; }
 
-    public void setPeriod(int period) {
-        this.period = period;
-    }
+    public void setPeriodDays(int periodDays) { this.periodDays = periodDays; }
 
-    public List<StreamFieldToFilter> getStreamFieldToFilterList() {
-        return streamFieldToFilterList;
-    }
+    public List<StreamFieldToFilter> getStreamFieldsToFilter() { return streamFieldsToFilter; }
 
-    public void setStreamFieldToFilterList(List<StreamFieldToFilter> streamFieldToFilterList) {
-        this.streamFieldToFilterList = streamFieldToFilterList;
+    public void setStreamFieldsToFilter(List<StreamFieldToFilter> streamFieldsToFilter) {
+        this.streamFieldsToFilter = streamFieldsToFilter;
     }
 
     public int getNoOfEvents() {

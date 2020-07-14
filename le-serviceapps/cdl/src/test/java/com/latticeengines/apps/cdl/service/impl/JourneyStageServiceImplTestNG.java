@@ -19,9 +19,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
-import com.latticeengines.domain.exposed.cdl.activity.JourneyStagePredicates;
+import com.latticeengines.domain.exposed.cdl.activity.JourneyStagePredicate;
 import com.latticeengines.domain.exposed.cdl.activity.StreamFieldToFilter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 
 public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -33,7 +34,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     private String stageName = "journeyStage1";
     private int priority = 3;
     private StreamFieldToFilter filter;
-    private JourneyStagePredicates predicates;
+    private JourneyStagePredicate predicates;
     private JourneyStage journeyStage;
     private String updateStageName = "journeyStage2";
     private Long pid;
@@ -46,15 +47,15 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCreate() {
         filter = new StreamFieldToFilter();
-        filter.setColumnName(InterfaceName.StageName.name());
+        filter.setColumnName(InterfaceName.StageName);
         filter.setColumnValue("Close%");
-        filter.setComparisonType(StreamFieldToFilter.ComparisonType.Like);
-        predicates = new JourneyStagePredicates();
+        filter.setComparisonType(ComparisonType.CONTAINS);
+        predicates = new JourneyStagePredicate();
         predicates.setContactNotNull(false);
         predicates.setNoOfEvents(3);
-        predicates.setPeriod(30);
+        predicates.setPeriodDays(30);
         predicates.setStreamType(AtlasStream.StreamType.WebVisit);
-        predicates.setStreamFieldToFilterList(Collections.singletonList(filter));
+        predicates.setStreamFieldsToFilter(Collections.singletonList(filter));
         journeyStage = new JourneyStage();
         journeyStage.setPredicates(Collections.singletonList(predicates));
         journeyStage.setStageName(stageName);
@@ -72,13 +73,13 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         pid = created.getPid();
         Assert.assertEquals(created.getStageName(), stageName);
         Assert.assertEquals(created.getPriority(), priority);
-        List<JourneyStagePredicates> predicateList = created.getPredicates();
+        List<JourneyStagePredicate> predicateList = created.getPredicates();
         Assert.assertEquals(predicateList.size(), 1);
-        JourneyStagePredicates createdPre = predicateList.get(0);
+        JourneyStagePredicate createdPre = predicateList.get(0);
         Assert.assertEquals(createdPre.getNoOfEvents(), predicates.getNoOfEvents());
-        Assert.assertEquals(createdPre.getPeriod(), predicates.getPeriod());
+        Assert.assertEquals(createdPre.getPeriodDays(), predicates.getPeriodDays());
         Assert.assertEquals(createdPre.getStreamType(), predicates.getStreamType());
-        List<StreamFieldToFilter> createdFilter = createdPre.getStreamFieldToFilterList();
+        List<StreamFieldToFilter> createdFilter = createdPre.getStreamFieldsToFilter();
         Assert.assertEquals(createdFilter.size(), 1);
         Assert.assertEquals(createdFilter.get(0).getColumnName(), filter.getColumnName());
         Assert.assertEquals(createdFilter.get(0).getColumnValue(), filter.getColumnValue());

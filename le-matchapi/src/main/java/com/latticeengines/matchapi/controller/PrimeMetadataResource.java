@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +14,8 @@ import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
-import io.micrometer.core.annotation.Timed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -29,7 +30,6 @@ public class PrimeMetadataResource {
     @GetMapping("/elements")
     @ResponseBody
     @ApiOperation(value = "Get all block-level-element tree")
-    @Timed
     public List<DataBlock> getBlockElements() {
         return primeMetadataService.getDataBlocks();
     }
@@ -37,7 +37,6 @@ public class PrimeMetadataResource {
     @GetMapping("/blocks")
     @ResponseBody
     @ApiOperation(value = "Get all block metadata")
-    @Timed
     public DataBlockMetadataContainer getBlockMetadata() {
         return primeMetadataService.getDataBlockMetadata();
     }
@@ -45,9 +44,13 @@ public class PrimeMetadataResource {
     @GetMapping("/drt-matrix")
     @ResponseBody
     @ApiOperation(value = "Get block - drt matrix")
-    @Timed
     public DataBlockEntitlementContainer getBlockDrtMatrix() {
         return primeMetadataService.getBaseEntitlement();
+    }
+
+    @GetMapping("/columns")
+    public List<PrimeColumn> getPrimeColumns(@RequestParam("elementIds") List<String> elementIds) {
+        return primeMetadataService.getPrimeColumns(elementIds);
     }
 
 }

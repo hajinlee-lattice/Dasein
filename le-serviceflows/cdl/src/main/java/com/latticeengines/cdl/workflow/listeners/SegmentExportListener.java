@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.serviceflows.cdl.SegmentExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -29,7 +29,7 @@ public class SegmentExportListener extends LEJobListener {
     private SegmentProxy segmentProxy;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -56,7 +56,7 @@ public class SegmentExportListener extends LEJobListener {
                 if (metadataSegmentExport.getStatus() == Status.FAILED) {
                     jobStatus = BatchStatus.FAILED.name();
                 }
-                plsInternalProxy.sendMetadataSegmentExportEmail(jobStatus, tenantId, metadataSegmentExport);
+                emailProxy.sendMetadataSegmentExportEmail(jobStatus, tenantId, metadataSegmentExport);
             } catch (Exception e) {
                 log.error("Can not send email: " + e.getMessage());
             }

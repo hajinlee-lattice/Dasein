@@ -40,8 +40,6 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
 
     private static final Logger log = LoggerFactory.getLogger(InputFileValidator.class);
 
-    public static final long CATALOG_RECORDS_LIMIT = 10L;
-
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
 
@@ -116,7 +114,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                             .put("deduped_rows", 0L)
                             .putPOJO("product_summary", entityValidationSummary).put("total_failed_rows",
                     totalFailed);
-        } else if (BusinessEntity.Catalog.equals(entity) && eaiImportJobDetail.getTotalRows() > CATALOG_RECORDS_LIMIT) {
+        } else if (BusinessEntity.Catalog.equals(entity) && eaiImportJobDetail.getTotalRows() > configuration.getCatalogRecordsLimit()) {
             getJson().put(entity.toString(), totalRows)
                     .put("total_rows", totalRows)
                     .put("ignored_rows", 0L)
@@ -147,9 +145,9 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
-        if (totalRows > CATALOG_RECORDS_LIMIT && BusinessEntity.Catalog.equals(entity)) {
-            String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than 10 rows.",
-                    String.valueOf(totalRows));
+        if (totalRows > configuration.getCatalogRecordsLimit() && BusinessEntity.Catalog.equals(entity)) {
+            String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than %s rows.",
+                    String.valueOf(totalRows), String.valueOf(configuration.getCatalogRecordsLimit()));
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
@@ -201,6 +199,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             catalogConfig.setEntity(entity);
             catalogConfig.setPathList(pathList);
             catalogConfig.setTotalRows(totalRows);
+            catalogConfig.setCatalogRecordsLimit(configuration.getCatalogRecordsLimit());
             return catalogConfig;
         default:
             return null;

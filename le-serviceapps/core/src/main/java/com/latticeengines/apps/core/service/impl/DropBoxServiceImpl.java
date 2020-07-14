@@ -29,6 +29,7 @@ import com.amazonaws.auth.policy.conditions.StringCondition;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.util.S3ImportMessageUtils;
@@ -429,6 +430,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter) {
+        Preconditions.checkState(StringUtils.isNotBlank(s3Path), "s3Path should not be empty!");
         final String delimiter = "/";
         String bucket = getDropBoxBucket();
         String prefix = PathUtils.formatKey(bucket, s3Path);

@@ -100,6 +100,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     // directory to store all newly allocated entity list of this match
     private String matchNewEntityDir;
     private String matchCandidateDir;
+    private Map<String, Long> newEntityCountsFromFailedBlocks = new HashMap<>();
 
     @Override
     public void execute() {
@@ -267,12 +268,16 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 log.info("   MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
             }
 
+            Map<String, Long> outputNewEntityCnts = new HashMap<>(
+                    MapUtils.emptyIfNull(matchOutput.getStatistics().getNewEntityCount()));
+            MatchUtils.mergeEntityCnt(outputNewEntityCnts, newEntityCountsFromFailedBlocks);
+
             log.info("Aggregated statistics will be stored in " + MatchUtils.toAvroGlobs(avroDir));
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
                     .dnbCommands() //
                     .rowsMatched(count.intValue()) //
-                    .newEntityCounts(matchOutput.getStatistics().getNewEntityCount()) //
+                    .newEntityCounts(outputNewEntityCnts) //
                     .matchResults(entityMatchResultMap) //
                     .status(MatchStatus.FINISHED) //
                     .progress(1f) //
@@ -415,6 +420,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         String errorMsg = "Application [" + appId + "] ended abnormally with the final status " + status;
 
         String blockUid = blockUuidMap.get(appId.toString());
+        updateNewEntityCounts(blockUid);
         if (doRetry(blockUid)) {
             log.info(errorMsg + ". Retry the block.");
             for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
@@ -438,6 +444,22 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
                     : MatchStatus.ABORTED;
             failTheWorkflowByFailedBlock(terminalStatus, report);
+        }
+    }
+
+    private void updateNewEntityCounts(String blockUid) {
+        try {
+            MatchBlock block = matchCommandService.getBlock(blockUid);
+            if (block != null && block.getNewEntityCounts() != null) {
+                MatchUtils.mergeEntityCnt(newEntityCountsFromFailedBlocks, block.getNewEntityCounts());
+                log.info("Copy new entity counts from failed block {}", block.getNewEntityCounts());
+            } else if (block == null) {
+                log.warn("Cannot find block object for match block {}", blockUid);
+            } else {
+                log.info("No new entity allocated for failed block {}", blockUid);
+            }
+        } catch (Exception e) {
+            log.error("Failed to update new entity counts", e);
         }
     }
 
