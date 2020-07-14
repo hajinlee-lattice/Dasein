@@ -3,7 +3,9 @@ package com.latticeengines.pls.service.impl.dcp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -41,12 +43,14 @@ import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service
@@ -71,6 +75,9 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private SourceFileProxy sourceFileProxy;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -102,15 +109,12 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public void downloadByConfig(UploadFileDownloadConfig downloadConfig, HttpServletRequest request,
-                               HttpServletResponse response) throws IOException {
-        response.setHeader("Content-Encoding", "gzip");
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "upload.zip" + "\"");
+                                 HttpServletResponse response) throws IOException {
         String tenantId = MultiTenantContext.getShortTenantId();
         String uploadId = downloadConfig.getUploadId();
         UploadDetails upload = uploadProxy.getUploadByUploadId(tenantId, uploadId, Boolean.TRUE);
 
-        Preconditions.checkNotNull(upload, "object should't be null");
+        Preconditions.checkNotNull(upload, "object shouldn't be null");
         UploadConfig config = upload.getUploadConfig();
         List<String> pathsToDownload = config.getDownloadPaths()
                 .stream()
@@ -119,6 +123,21 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
         Preconditions.checkState(CollectionUtils.isNotEmpty(pathsToDownload),
                 String.format("empty settings in upload config for %s", uploadId));
+
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        String fileId = config.getDropFilePath();
+        if (fileId == null) {
+            fileId = config.getUploadRawFilePath();
+        }
+        fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
+        String displayName;
+        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, fileId);
+        displayName = (sourceFile == null) ? fileId : sourceFile.getDisplayName();
+        String displayPrefix = displayName.substring(0, displayName.lastIndexOf('.')); // strip file extension
+
+        response.setHeader("Content-Encoding", "gzip");
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + displayPrefix + "_Results.zip\"");
 
         // the download part will download files in path in UploadConfig: uploadRawFilePath,
         // uploadImportedFilePath, uploadMatchResultPrefix, uploadImportedErrorFilePath.
@@ -157,33 +176,129 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
             }
         }
 
+        Map<String, UploadFileDownloadConfig.FileType> fileToType = new HashMap<>();
+        for (String path : paths) {
+            fileToType.put(path, determineFileType(fileId, path, config));
+        }
+
+        paths = paths.stream().filter(path -> includeInDownload(downloadConfig, fileToType.get(path))).collect(Collectors.toList());
+
         Preconditions.checkState(CollectionUtils.isNotEmpty(paths),
-                String.format("no file in folder for %s", uploadId));
+                String.format("no files to download for %s", uploadId));
 
         log.info("download files: " + paths);
         ZipOutputStream zipOut = new ZipOutputStream(new GzipCompressorOutputStream(response.getOutputStream()));
+        List<String> names = new ArrayList<>();
         for (String filePath : paths) {
             Path path = new Path(filePath);
             FileSystem system = path.getFileSystem(yarnConfiguration);
             InputStream in = system.open(path);
-            ZipEntry zipEntry = new ZipEntry(filePath.substring(filePath.lastIndexOf("/") + 1));
+            String fileName = generateFileName(displayPrefix, filePath, fileToType.get(filePath));
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            names.add(fileName);
             zipOut.putNextEntry(zipEntry);
             try {
                 IOUtils.copyLarge(in, zipOut);
-            } catch (Exception e ) {
+            } catch (Exception e) {
                 log.info("unexpected error when copying file: {}", e.getMessage());
             }
             in.close();
             zipOut.closeEntry();
         }
+        log.info(names.toString());
         zipOut.finish();
         zipOut.close();
     }
 
+    private UploadFileDownloadConfig.FileType determineFileType(String fileId, String filePath, UploadConfig config) {
+        if (filePath.endsWith(config.getUploadRawFilePath())) {
+            return UploadFileDownloadConfig.FileType.RAW;
+        }
+        if (filePath.endsWith(config.getUploadImportedErrorFilePath())) {
+            return UploadFileDownloadConfig.FileType.IMPORT_ERRORS;
+        }
+        if (filePath.endsWith(config.getUploadMatchResultAccepted())) {
+            return UploadFileDownloadConfig.FileType.MATCHED;
+        }
+        if (filePath.endsWith(config.getUploadMatchResultRejected())) {
+            return UploadFileDownloadConfig.FileType.UNMATCHED;
+        }
+
+        // unknown/unexpected file
+        return null;
+    }
+
+    private boolean includeInDownload(UploadFileDownloadConfig config, UploadFileDownloadConfig.FileType fileType) {
+        if (fileType == null) {
+            return false;
+        }
+        switch (fileType) {
+            case RAW:
+                return config.getIncludeRaw();
+            case MATCHED:
+                return config.getIncludeMatched();
+            case UNMATCHED:
+                return config.getIncludeUnmatched();
+            case IMPORT_ERRORS:
+                return config.getIncludeErrors();
+
+            default:
+                return false;
+        }
+    }
+
+    private String generateFileName(String displayPrefix, String filePath, UploadFileDownloadConfig.FileType fileType) {
+        if (fileType != null) {
+            switch (fileType) {
+                case RAW:
+                    return displayPrefix + filePath.substring(filePath.lastIndexOf('.'));
+                case MATCHED:
+                    return displayPrefix + "_Matched.csv";
+                case UNMATCHED:
+                    return displayPrefix + "_Unmatched.csv";
+                case IMPORT_ERRORS:
+                    return displayPrefix + "_Error.csv";
+
+                default:
+                    break;
+            }
+        }
+        return filePath.substring(filePath.lastIndexOf("/") + 1);
+    }
+
     @Override
-    public String generateToken(String uploadId) {
+    public String generateToken(String uploadId, List<UploadFileDownloadConfig.FileType> files) {
         UploadFileDownloadConfig config = new UploadFileDownloadConfig();
         config.setUploadId(uploadId);
+        boolean includeAll = (files == null || files.isEmpty());
+        config.setIncludeRaw(includeAll);
+        config.setIncludeMatched(includeAll);
+        config.setIncludeUnmatched(includeAll);
+        config.setIncludeErrors(includeAll);
+        if (!includeAll) {
+            for (UploadFileDownloadConfig.FileType type : files) {
+                switch (type) {
+                    case RAW:
+                        config.setIncludeRaw(true);
+                        break;
+
+                    case MATCHED:
+                        config.setIncludeMatched(true);
+                        break;
+
+                    case UNMATCHED:
+                        config.setIncludeUnmatched(true);
+                        break;
+
+                    case IMPORT_ERRORS:
+                        config.setIncludeErrors(true);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
         return fileDownloadService.generateDownloadToken(config);
     }
 
