@@ -261,7 +261,11 @@ public class MetadataResolver {
         result.cdlExternalSystem.setOtherIdList(otherIds);
         result.cdlExternalSystem.setIdMapping(idMappings);
         if (fieldMappingDocument.getIgnoredFields() != null) {
-            attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getSourceAttrName()));
+            if (cdlResolve) {
+                attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getSourceAttrName()));
+            } else {
+                attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getDisplayName()));
+            }
         }
         Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
         if (lastModified == null) {

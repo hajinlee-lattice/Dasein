@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.auth.TeamEntities;
-import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -82,16 +81,24 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
             if (!TeamUtils.isGlobalTeam(teamId)) {
                 teamMap.putIfAbsent(teamId, new TeamInfo(Long.MIN_VALUE, new ArrayList<>()));
                 teamMap.get(teamId).getHasTeamInfos().add(hasTeamInfo);
-                if (hasTeamInfo instanceof HasAuditingFields) {
-                    HasAuditingFields hasAuditingFields = (HasAuditingFields) hasTeamInfo;
-                    long updated = hasAuditingFields.getUpdated().getTime();
-                    if (teamMap.get(teamId).getLastUsed() < updated) {
-                        teamMap.get(teamId).setLastUsed(updated);
-                    }
+                long updated = getLastUsed(hasTeamInfo);
+                if (teamMap.get(teamId).getLastUsed() < updated) {
+                    teamMap.get(teamId).setLastUsed(updated);
                 }
             }
         }
         return teamMap;
+    }
+
+    private long getLastUsed(HasTeamInfo hasTeamInfo) {
+        if (hasTeamInfo instanceof MetadataSegment) {
+            return ((MetadataSegment)hasTeamInfo).getUpdated().getTime();
+        } else if (hasTeamInfo instanceof Play) {
+            return ((Play)hasTeamInfo).getUpdated().getTime();
+        } else if (hasTeamInfo instanceof RatingEngineSummary) {
+            return ((RatingEngineSummary)hasTeamInfo).getUpdated().getTime();
+        }
+        return Long.MIN_VALUE;
     }
 
     private TeamInfo getTeamInfo(String teamId, Map<String, TeamInfo> teamInfoMap, List<TeamInfo> teamInfos) {

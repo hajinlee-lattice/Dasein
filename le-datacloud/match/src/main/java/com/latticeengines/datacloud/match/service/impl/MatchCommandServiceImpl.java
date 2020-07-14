@@ -112,6 +112,11 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     @Override
+    public MatchBlock getBlock(String blockOperationUid) {
+        return matchBlockEntityMgr.findByBlockUid(blockOperationUid);
+    }
+
+    @Override
     public MatchCommandUpdaterImpl update(String rootOperationUid) {
         MatchCommand matchCommand = matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);
         if (matchCommand == null) {
@@ -382,6 +387,14 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         public MatchBlockUpdater matchResults(Map<EntityMatchResult, Long> matchResultMap) {
             if (MapUtils.isNotEmpty(matchResultMap)) {
                 matchBlock.setMatchResults(matchResultMap);
+            }
+            return this;
+        }
+
+        @Override
+        public MatchBlockUpdater newEntityCounts(Map<String, Long> newEntityCounts) {
+            if (MapUtils.isNotEmpty(newEntityCounts)) {
+                matchBlock.setNewEntityCounts(newEntityCounts);
             }
             return this;
         }

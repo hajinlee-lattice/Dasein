@@ -52,11 +52,12 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowReportService;
@@ -268,8 +269,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_EXPORT_TABLE_NAME = "ACCOUNT_EXPORT_TABLE_NAME";
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String LATTICE_ACCOUNT_PROFILE_TABLE_NAME = "LATTICE_ACCOUNT_PROFILE_TABLE_NAME";
+    protected static final String ACCOUNT_RE_PROFILE_ATTRS = "ACCOUNT_RE_PROFILE_ATTRS";
+    protected static final String LATTICE_ACCOUNT_RE_PROFILE_ATTRS = "LATTICE_ACCOUNT_RE_PROFILE_ATTRS";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
+    protected static final String ACCOUNT_STATS_DIFF_TABLE_NAME = "ACCOUNT_STATS_DIFF_TABLE_NAME";
+    protected static final String ACCOUNT_STATS_UPDATED = "ACCOUNT_STATS_UPDATED";
     protected static final String FULL_ACCOUNT_STATS_TABLE_NAME = "FULL_ACCOUNT_STATS_TABLE_NAME";
     protected static final String ACCOUNT_LOOKUP_TABLE_NAME = "ACCOUNT_LOOKUP_TABLE_NAME";
     protected static final String CONTACT_SERVING_TABLE_NAME = "CONTACT_SERVING_TABLE_NAME";
@@ -290,7 +295,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
-    protected static final String TIMELINE_RAWTABLE_NAME = "TIMELINE_RAWTABLE_NAME";
+    protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
+    protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
+    protected static final String JOURNEY_STAGE_GENERATED = "JOURNEY_STAGE_GENERATED";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -373,6 +380,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_PROFILE_TABLE_NAME, //
             ACCOUNT_SERVING_TABLE_NAME, //
             ACCOUNT_STATS_TABLE_NAME, //
+            ACCOUNT_STATS_DIFF_TABLE_NAME, //
             FULL_ACCOUNT_STATS_TABLE_NAME, //
             ACCOUNT_LOOKUP_TABLE_NAME, //
             REMATCHED_ACCOUNT_TABLE_NAME, //
@@ -405,6 +413,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             METRICS_GROUP_TABLE_NAME, //
             MERGED_METRICS_GROUP_TABLE_NAME, //
             PERIOD_STORE_TABLE_NAME, //
+            TIMELINE_MASTER_TABLE_NAME, //
+            TIMELINE_DIFF_TABLE_NAME, //
             LAST_ACTIVITY_DATE_TABLE_NAME);
 
     protected static final Set<String> REMATCH_TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
@@ -415,6 +425,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     // above
     protected static final Set<String> EXTRA_KEYS_FOR_PA_RETRY = Sets.newHashSet( //
             PA_TIMESTAMP, //
+            ACCOUNT_RE_PROFILE_ATTRS, //
+            LATTICE_ACCOUNT_RE_PROFILE_ATTRS, //
+            ACCOUNT_STATS_UPDATED, //
             REBUILD_LATTICE_ACCOUNT, //
             ENTITY_MATCH_COMPLETED, //
             NEW_ENTITY_MATCH_ENVS, //
@@ -422,6 +435,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_REMATCH_STAGING_VERSION, //
             NEW_RECORD_CUT_OFF_TIME, //
             CONSOLIDATE_INPUT_TEMPLATES, //
+            JOURNEY_STAGE_GENERATED,
             PROCESS_ACCOUNT_STATS_MERGE);
 
     @Autowired
@@ -440,7 +454,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Autowired
-    protected PlsInternalProxy plsInternalProxy;
+    protected EmailProxy emailProxy;
+
+    @Autowired
+    protected LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     @Autowired
     protected WorkflowReportService workflowReportService;

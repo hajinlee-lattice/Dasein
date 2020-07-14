@@ -88,11 +88,11 @@ public class DataReportServiceImpl implements DataReportService {
         Long ct4 = new RandomDataGenerator().nextLong(1L, matchCnt / 4);
         Long ct5 = matchCnt - ct1 - ct2 - ct3 - ct4;
 
-        geoDistributionReport.addGeoDistribution("US", "United States of America", ct1, matchCnt);
-        geoDistributionReport.addGeoDistribution("AU", "Australia", ct2, matchCnt);
-        geoDistributionReport.addGeoDistribution("DE", "Germany", ct3, matchCnt);
-        geoDistributionReport.addGeoDistribution("GR", "Greece", ct4, matchCnt);
-        geoDistributionReport.addGeoDistribution("MX", "Mexico", ct5, matchCnt);
+        geoDistributionReport.addGeoDistribution("US", ct1, matchCnt);
+        geoDistributionReport.addGeoDistribution("AU", ct2, matchCnt);
+        geoDistributionReport.addGeoDistribution("DE", ct3, matchCnt);
+        geoDistributionReport.addGeoDistribution("GR", ct4, matchCnt);
+        geoDistributionReport.addGeoDistribution("MX", ct5, matchCnt);
 
         DataReport.MatchToDUNSReport matchToDUNSReport = new DataReport.MatchToDUNSReport();
         Long dMatch = new RandomDataGenerator().nextLong(300L, matchCnt);

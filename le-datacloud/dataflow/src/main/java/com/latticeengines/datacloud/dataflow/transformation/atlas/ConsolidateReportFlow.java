@@ -46,26 +46,21 @@ public class ConsolidateReportFlow
         List<Node> reports = new ArrayList<>();
         switch (parameters.getEntity()) {
         case Account:
-            Node totalReport = reportTotal(source);
-            Node newReport = reportNew(source, parameters);
-            Node updateReport = reportUpdate(totalReport, newReport);
             Node unMatchReport = reportUnmatch(source);
-            reports.addAll(Arrays.asList(newReport, updateReport, unMatchReport));
+            reports.addAll(Arrays.asList(unMatchReport));
             break;
         case Contact:
-            totalReport = reportTotal(source);
-            newReport = reportNew(source, parameters);
-            updateReport = reportUpdate(totalReport, newReport);
-            reports.addAll(Arrays.asList(newReport, updateReport));
+            Node newReport = reportFixedNew(source);
+            reports.addAll(Arrays.asList(newReport));
             if (parameters.getBaseTables().size() > 1) {
                 Node matchReport = reportMatchAccount(source, addSource(parameters.getBaseTables().get(1)));
                 reports.add(matchReport);
             }
             break;
         case Product:
-            totalReport = reportTotal(source);
+            Node totalReport = reportTotal(source);
             newReport = reportNew(source, parameters);
-            updateReport = reportUpdate(totalReport, newReport);
+            Node updateReport = reportUpdate(totalReport, newReport);
             reports.addAll(Arrays.asList(newReport, updateReport));
             break;
         case Transaction:
@@ -94,6 +89,14 @@ public class ConsolidateReportFlow
     private Node reportTotal(Node node) {
         node = node.count("__TOTAL_COUNT__").rename(new FieldList("__TOTAL_COUNT__"), new FieldList(REPORT_CONTENT))
                 .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_TOTAL, String.class).renamePipe("TotalReport");
+        return node;
+    }
+
+    private Node reportFixedNew(Node node) {
+        node = node.count("__NEW_COUNT__").addColumnWithFixedValue("__NEW_COUNT2__", 0L, Long.class)
+                .rename(new FieldList("__NEW_COUNT2__"), new FieldList(REPORT_CONTENT))
+                .discard(new FieldList("__NEW_COUNT__"))
+                .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_NEW, String.class).renamePipe("NewReport");
         return node;
     }
 

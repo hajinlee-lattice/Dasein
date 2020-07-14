@@ -25,11 +25,12 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.security.exposed.service.TenantService;
-public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
+
+public class ScoringRequestConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static String CREDENTIAL_NAME = "TEST-MARKETO-SCORING-CONFIG-";
 
@@ -82,7 +83,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         setupSecurityContext(tenant);
     }
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTenant(TENANT1);
         CREDENTIAL_NAME += System.currentTimeMillis();
@@ -101,7 +102,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void createMarketoCredential_assertCredentialCreated() {
         MarketoCredential marketoCredential = new MarketoCredential();
         marketoCredential.setName(CREDENTIAL_NAME);
@@ -134,7 +135,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
                 UuidUtils.packUuid(TENANT1, Long.toString(marketoCredential.getPid())));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "createMarketoCredential_assertCredentialCreated")
+    @Test(groups = "deployment", dependsOnMethods = "createMarketoCredential_assertCredentialCreated")
     public void testCreateScoringRequestConfig_assertCreation() {
         MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials().get(0);
         assertNotNull(marketoCredential);
@@ -169,7 +170,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(scoringReqConfFromDB.getMarketoScoringMatchFields().size(), scoringMappings.size());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
     public void testCreateScoringRequestConfigDuplicate_assertCreationFails() {
         MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials().get(0);
         assertNotNull(marketoCredential);
@@ -210,7 +211,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(reqConfigSummaryLst.size(), 1);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
     public void testFindMethods() {
         List<ScoringRequestConfigSummary> requestConfigLst =
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
@@ -233,7 +234,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(scoreReqConf2.getMarketoScoringMatchFields().size(), scoreReqConf1.getMarketoScoringMatchFields().size());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
     public void testRetrieveMethods_assertScoringRequestConfigContext() {
         List<ScoringRequestConfigSummary> requestConfigLst =
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
@@ -251,12 +252,17 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(srcContext.getModelUuid(), configSummary.getModelUuid());
         assertEquals(srcContext.getTenantId(), TENANT1);
         assertTrue(srcContext.getExternalProfileId().contains(marketoCredentialId.toString()));
-
-        srcContext = scoringRequestConfigService.retrieveScoringRequestConfigContext("DummyId");
-        assertNull(srcContext);
+        Exception exception = null;
+        try {
+            scoringRequestConfigService.retrieveScoringRequestConfigContext("DummyId");
+        } catch (Exception e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertTrue((LedpCode.LEDP_18194.equals(((LedpException) exception).getCode())));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindMethods")
+    @Test(groups = "deployment", dependsOnMethods = "testFindMethods")
     public void testUpdateScoringRequestConfig_assertFieldAdditions() {
         List<ScoringRequestConfigSummary> requestConfigLst =
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
@@ -283,7 +289,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(scoreReqConf2.getMarketoScoringMatchFields().size(), updatedMatchFields.size());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldAdditions")
+    @Test(groups = "deployment", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldAdditions")
     public void testUpdateScoringRequestConfig_assertFieldRemoval() {
         List<ScoringRequestConfigSummary> requestConfigLst =
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
@@ -302,7 +308,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(scoreReqConf2.getMarketoScoringMatchFields().size(), updatedMatchFields.size());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldRemoval")
+    @Test(groups = "deployment", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldRemoval")
     public void testUpdateScoringRequestConfig_assertFieldsAddAndUpdate() {
         List<ScoringRequestConfigSummary> requestConfigLst =
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
@@ -328,7 +334,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         scoreReqConf2.getMarketoScoringMatchFields().forEach(matchField -> assertTrue(matchField.getMarketoFieldName().endsWith("-Updated")));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldsAddAndUpdate")
+    @Test(groups = "deployment", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldsAddAndUpdate")
     public void testDeleteMarketoCredential_assertDeleteScoringRequests() {
         marketoCredentialService.deleteMarketoCredentialById(marketoCredentialId.toString());
         addDelay();

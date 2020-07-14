@@ -1,5 +1,12 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.NameMatchScore;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.OperatingStatusText;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,26 +26,6 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
         List<Object> data = new ArrayList<>();
         String duns = candidate.getDuns();
         data.add(duns);
-//        if (candidate.getNameLocation() != null) {
-//            NameLocation nl = candidate.getNameLocation();
-//            data.add(nl.getName());
-//            data.add(nl.getStreet());
-//            data.add(nl.getStreet2());
-//            data.add(nl.getCity());
-//            data.add(nl.getState());
-//            data.add(nl.getZipcode());
-//            data.add(nl.getCountryCode());
-//            data.add(nl.getPhoneNumber());
-//        } else {
-//            data.add(null); // name
-//            data.add(null); // street
-//            data.add(null); // street 2
-//            data.add(null); // city
-//            data.add(null); // state
-//            data.add(null); // zip code
-//            data.add(null); // country code
-//            data.add(null); // phone
-//        }
         if (candidate.getMatchInsight() != null) {
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             data.add(matchInsight.getConfidenceCode());
@@ -67,25 +54,25 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<String> candidateOutputFields() {
         // hard coded for now, need to in sync with SplitImportMatchResult
-        return Arrays.asList(
-                "MatchedDuns",
-                "ConfidenceCode",
-                "MatchGrade",
-                "MatchDataProfile",
-                "NameMatchScore",
-                "OperatingStatusText"
+        return Arrays.asList( //
+                MatchedDuns, //
+                ConfidenceCode, //
+                MatchGrade, //
+                MatchDataProfile, //
+                NameMatchScore, //
+                OperatingStatusText //
         );
     }
 
     @Override
     public List<Pair<String, Class<?>>> candidateSchema() {
         return Arrays.asList( //
-                Pair.of("MatchedDuns", String.class), //
-                Pair.of("ConfidenceCode", Integer.class), //
-                Pair.of("MatchGrade", String.class), //
-                Pair.of("MatchDataProfile", String.class), //
-                Pair.of("NameMatchScore", String.class), //
-                Pair.of("OperatingStatusText", String.class) //
+                Pair.of(MatchedDuns, String.class), //
+                Pair.of(ConfidenceCode, Integer.class), //
+                Pair.of(MatchGrade, String.class), //
+                Pair.of(MatchDataProfile, String.class), //
+                Pair.of(NameMatchScore, String.class), //
+                Pair.of(OperatingStatusText, String.class) //
         );
     }
 

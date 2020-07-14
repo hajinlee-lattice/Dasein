@@ -65,7 +65,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
@@ -95,7 +95,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private ApplicationContext applicationContext;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private LatticeInsightsInternalProxy latticeInsightsInternalProxy;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -269,7 +269,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private void getLeadEnrichmentAttributes(CustomerSpace customerSpace, Map<String, Schema.Type> attributeMap,
             Map<String, String> attributeDisplayNameMap, Map<String, Boolean> internalAttributeFlagMap,
             boolean enrichmentEnabledForInternalAttributes) {
-        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = plsInternalProxy
+        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = latticeInsightsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, Boolean.TRUE,
                         enrichmentEnabledForInternalAttributes);
         leadEnrichmentAttributeList.sort((e1, e2) -> {

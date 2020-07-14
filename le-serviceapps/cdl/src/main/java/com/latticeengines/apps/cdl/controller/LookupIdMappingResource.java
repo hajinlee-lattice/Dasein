@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
+import com.latticeengines.apps.cdl.workflow.PublishAccountLookupWorkflowSubmitter;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -35,6 +40,9 @@ public class LookupIdMappingResource {
 
     @Inject
     private LookupIdMappingService lookupIdMappingService;
+
+    @Inject
+    private PublishAccountLookupWorkflowSubmitter publishAccountLookupWorkflowSubmitter;
 
     @GetMapping
     @ResponseBody
@@ -94,14 +102,14 @@ public class LookupIdMappingResource {
         lookupIdMappingService.deleteConnection(lookupIdMapId, traySettings);
     }
 
-    @GetMapping("/available-lookup-ids/{audienceType}")
+    @GetMapping("/available-lookup-ids")
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(@PathVariable String customerSpace, //
-            @PathVariable AudienceType audienceType, //
+            @RequestParam(value = "audienceType", defaultValue = "ACCOUNTS", required = false) AudienceType audienceType, //
             @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
             CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingService.getAllLookupIdsByAudienceType(externalSystemType, audienceType);
+        return lookupIdMappingService.getAllLookupIds(externalSystemType, audienceType);
     }
 
     @GetMapping("/all-external-system-types")
@@ -118,5 +126,17 @@ public class LookupIdMappingResource {
             @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = true) //
             CDLExternalSystemType externalSystemType) {
         return lookupIdMappingService.getLookupIdMapByOrgId(orgId, externalSystemType);
+    }
+
+    @PostMapping("/publishAccountLookup")
+    @ApiOperation(value = "publish/re-publish account lookup table to dynamo")
+    public ResponseDocument<String> publishAccountLookup(@PathVariable(value = "customerSpace") String tenantId, @RequestBody(required = false) String targetSignature) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        try {
+            ApplicationId applicationId = publishAccountLookupWorkflowSubmitter.submit(customerSpace, targetSignature, new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(applicationId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
     }
 }

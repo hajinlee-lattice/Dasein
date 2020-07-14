@@ -1,11 +1,11 @@
 package com.latticeengines.eai.dynamodb.runtime;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -32,6 +32,7 @@ import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.dynamo.impl.DynamoItemServiceImpl;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.DynamoAccountLookupRecord;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordExportCounter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -46,7 +47,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
     private static final String ATTR_PARTITION_KEY = InterfaceName.AtlasLookupKey.name();
     private static final String ATTR_ACCOUNT_ID = "AccountId";
 
-    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s__%s"; // tenantId__ver__lookupId__lookIdVal
+    private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s_%s"; // tenantId__ver__lookupId_lookIdVal
 
     private static final String CHANGELIST_ACCOUNT_ID = "RowId";
     private static final String CHANGELIST_LOOKUP_NAME = "ColumnId";
@@ -61,8 +62,8 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
     private String tenant;
     private String tableName;
     private Integer currentVersion = 0;
-    private final List<String> lookupIds = new ArrayList<>();
-    private final List<DynamoLookupRecord> recordBuffer = new ArrayList<>();
+    private final Set<String> lookupIds = new HashSet<>();
+    private final List<DynamoAccountLookupRecord> recordBuffer = new ArrayList<>();
     private DynamoItemService dynamoItemService;
     private long expTime;
 
@@ -84,9 +85,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
         if (StringUtils.isNotBlank(lookupIdsStr)) {
             lookupIds.addAll(Arrays.asList(lookupIdsStr.split(",")));
         }
-        if (!lookupIds.contains(InterfaceName.AccountId.name())) {
-            lookupIds.add(InterfaceName.AccountId.name());
-        }
+        lookupIds.add(InterfaceName.AccountId.name());
         log.info("lookupIds=[" + StringUtils.join(lookupIds, ",") + "]");
 
         String endpoint = config.get(HdfsToDynamoConfiguration.CONFIG_ENDPOINT);
@@ -111,14 +110,10 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
                     .build();
             dynamoItemService = new DynamoItemServiceImpl(new DynamoDB(client));
         }
-        currentVersion = parseTargetVersion(config.get(HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION));
+        currentVersion = parseTargetVersion(config.get(HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION));
         expTime = Long.parseLong(config.get(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL));
 
         return this;
-    }
-
-    private long getExpirationTime() {
-        return Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
     }
 
     private Integer parseTargetVersion(String targetVersion) {
@@ -175,7 +170,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
             if (lookupIdCreated(record)) {
                 String lookupIdVal = record.get(CHANGELIST_TO_STRING).toString();
                 String key = constructLookupKey(tenant, lookupId, lookupIdVal);
-                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
                         .key(key) //
                         .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
                         .build() //
@@ -185,7 +180,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
                 // accountId_newLookupId changed
                 String oldLookupIdVal = record.get(CHANGELIST_FROM_STRING).toString();
                 String oldKey = constructLookupKey(tenant, lookupId, oldLookupIdVal);
-                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
                         .key(oldKey) //
                         .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
                         .deleted(true) //
@@ -193,7 +188,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
                 );
                 String newLookupIdVal = record.get(CHANGELIST_TO_STRING).toString();
                 String newKey = constructLookupKey(tenant, lookupId, newLookupIdVal);
-                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
                         .key(newKey) //
                         .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
                         .changed(true) //
@@ -203,7 +198,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
                 // mark accountId_lookupId record deleted
                 String lookupIdVal = record.get(CHANGELIST_FROM_STRING).toString();
                 String key = constructLookupKey(tenant, lookupId, lookupIdVal);
-                recordBuffer.add((new DynamoLookupRecord.Builder()) //
+                recordBuffer.add((new DynamoAccountLookupRecord.Builder()) //
                         .key(key) //
                         .accountId(record.get(CHANGELIST_ACCOUNT_ID).toString()) //
                         .deleted(true) //
@@ -250,9 +245,9 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
         }
     }
 
-    private List<Item> convertRecordBufferToItems(List<DynamoLookupRecord> records) {
+    private List<Item> convertRecordBufferToItems(List<DynamoAccountLookupRecord> records) {
         List<Item> items = new ArrayList<>();
-        for (DynamoLookupRecord record : records) {
+        for (DynamoAccountLookupRecord record : records) {
             PrimaryKey key = new PrimaryKey(ATTR_PARTITION_KEY, record.key);
             Item item = new Item() //
                     .withPrimaryKey(key) //
@@ -264,45 +259,5 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
             items.add(item);
         }
         return items;
-    }
-
-    private static class DynamoLookupRecord {
-        public String key;
-        public String accountId;
-        public boolean changed;
-        public boolean deleted;
-
-        public static final class Builder {
-
-            private DynamoLookupRecord lookupRecord;
-
-            Builder() {
-                lookupRecord = new DynamoLookupRecord();
-            }
-
-            public Builder key(String key) {
-                lookupRecord.key = key;
-                return this;
-            }
-
-            public Builder accountId(String accountId) {
-                lookupRecord.accountId = accountId;
-                return this;
-            }
-
-            public Builder changed(boolean changed) {
-                lookupRecord.changed = changed;
-                return this;
-            }
-
-            public Builder deleted(boolean deleted) {
-                lookupRecord.deleted = deleted;
-                return this;
-            }
-
-            public DynamoLookupRecord build() {
-                return lookupRecord;
-            }
-        }
     }
 }

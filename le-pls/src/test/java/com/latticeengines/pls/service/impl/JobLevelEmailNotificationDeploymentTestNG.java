@@ -16,13 +16,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class JobLevelEmailNotificationDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Inject
     private TenantService tenantService;
@@ -51,85 +51,95 @@ public class JobLevelEmailNotificationDeploymentTestNG extends PlsDeploymentTest
     public void tearDown() {
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testSendCDLProcessAnalyzeEmail() {
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.ERROR, "CDLProcessAnalyze");
-        Assert.assertTrue(plsInternalProxy.sendCDLProcessAnalyzeEmail("FAILED", tenantId, additionalEmailInfo));
-        Assert.assertFalse(plsInternalProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
+        Assert.assertTrue(emailProxy.sendCDLProcessAnalyzeEmail("FAILED", tenantId, additionalEmailInfo));
+        Assert.assertFalse(emailProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
 
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.INFO, "CDLProcessAnalyze");
-        Assert.assertFalse(plsInternalProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
+        Assert.assertTrue(emailProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.ERROR, "CDLProcessAnalyze");
-        Assert.assertFalse(plsInternalProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
+        Assert.assertFalse(emailProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.INFO, "CDLProcessAnalyze");
-        Assert.assertTrue(plsInternalProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
+        Assert.assertTrue(emailProxy.sendCDLProcessAnalyzeEmail("COMPLETED", tenantId, additionalEmailInfo));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testSendS3ImportEmail() {
         tenant.setNotificationType(TenantEmailNotificationType.SINGLE_USER);
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.ERROR, "S3Import");
         sendS3ImportEmails();
-        Assert.assertTrue(plsInternalProxy.sendS3ImportEmail("FAILED", tenantId, emailInfo));
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
-
-        setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.INFO, "S3Import");
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("FAILED", tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.ERROR, "S3Import");
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
 
-        setLevels(TenantEmailNotificationLevel.WARNING, TenantEmailNotificationLevel.ERROR, "S3Import");
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
-
-        setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.WARNING, "S3Import");
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
-
-        setLevels(TenantEmailNotificationLevel.WARNING, TenantEmailNotificationLevel.WARNING, "S3Import");
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
-        Assert.assertFalse(plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
-
-        emailInfo.setErrorMsg("test error msg");
-        Assert.assertTrue(plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+        setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.INFO, "S3Import");
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.INFO, "S3Import");
-        Assert.assertTrue(plsInternalProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
-        Assert.assertTrue(plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
+        setLevels(TenantEmailNotificationLevel.WARNING, TenantEmailNotificationLevel.ERROR, "S3Import");
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
+        setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.WARNING, "S3Import");
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
+        setLevels(TenantEmailNotificationLevel.WARNING, TenantEmailNotificationLevel.WARNING, "S3Import");
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
+
+        emailInfo.setErrorMsg("test error msg");
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
+        setLevels(TenantEmailNotificationLevel.WARNING, TenantEmailNotificationLevel.ERROR, "S3Import");
+        Assert.assertFalse(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
+        setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.WARNING, "S3Import");
+        Assert.assertTrue(emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo));
+
     }
 
     @Test(groups = "deployment", enabled = true)
     public void testSendS3TemplateCreateEmail() {
         tenant.setNotificationType(TenantEmailNotificationType.SINGLE_USER);
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.ERROR, "S3TemplateCreate");
-        Assert.assertFalse(plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.INFO, "S3TemplateCreate");
-        Assert.assertFalse(plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.ERROR, "S3TemplateCreate");
-        Assert.assertFalse(plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.INFO, "S3TemplateCreate");
-        Assert.assertTrue(plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3TemplateCreateEmail(tenantId, emailInfo));
     }
 
     @Test(groups = "deployment", enabled = true)
     public void testSendS3TemplateUpdateEmail() {
         tenant.setNotificationType(TenantEmailNotificationType.SINGLE_USER);
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.ERROR, "S3TemplateUpdate");
-        Assert.assertFalse(plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.ERROR, TenantEmailNotificationLevel.INFO, "S3TemplateUpdate");
-        Assert.assertFalse(plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.ERROR, "S3TemplateUpdate");
-        Assert.assertFalse(plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
+        Assert.assertFalse(emailProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
 
         setLevels(TenantEmailNotificationLevel.INFO, TenantEmailNotificationLevel.INFO, "S3TemplateUpdate");
-        Assert.assertTrue(plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
+        Assert.assertTrue(emailProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo));
     }
 
     private void setLevels(TenantEmailNotificationLevel tenantLevel, TenantEmailNotificationLevel jobLevel,
@@ -154,9 +164,9 @@ public class JobLevelEmailNotificationDeploymentTestNG extends PlsDeploymentTest
     }
 
     private void sendS3ImportEmails() {
-        plsInternalProxy.sendS3ImportEmail("FAILED", tenantId, emailInfo);
-        plsInternalProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo);
-        plsInternalProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo);
+        emailProxy.sendS3ImportEmail("FAILED", tenantId, emailInfo);
+        emailProxy.sendS3ImportEmail("SUCCESS", tenantId, emailInfo);
+        emailProxy.sendS3ImportEmail("IN_PROGRESS", tenantId, emailInfo);
     }
 
     private void initEmailInfo() {

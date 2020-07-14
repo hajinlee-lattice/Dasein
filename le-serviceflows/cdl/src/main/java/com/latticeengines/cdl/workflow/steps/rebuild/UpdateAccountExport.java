@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -135,8 +136,8 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     }
 
     private boolean shouldDoNothing() {
-        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount);
-        boolean latticeAccountHasChanged = isChanged(LatticeAccount);
+        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME);
+        boolean latticeAccountHasChanged = isChanged(LatticeAccount, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
         boolean shouldDoNothing = !(customerAccountHasChanged || latticeAccountHasChanged);
         log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldDoNothing={}",
                 customerAccountHasChanged, latticeAccountHasChanged, shouldDoNothing);
@@ -157,7 +158,10 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         JoinAccountStoresConfig config = new JoinAccountStoresConfig();
         config.setRetainAttrs(retainAttrs);
         config.setInput(Arrays.asList(customerInput, latticeInput));
+        config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+        setPartitionMultiplier(4);
         SparkJobResult result = runSparkJob(JoinAccountStores.class, config);
+        setPartitionMultiplier(1);
         return result.getTargets().get(0);
     }
 

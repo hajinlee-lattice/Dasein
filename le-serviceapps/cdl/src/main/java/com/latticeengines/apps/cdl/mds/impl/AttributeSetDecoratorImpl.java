@@ -65,11 +65,18 @@ public class AttributeSetDecoratorImpl implements AttributeSetDecoratorFac {
                     MultiTenantContext.setTenant(tenant);
                     if (MapUtils.isNotEmpty(attributeSet.getAttributesMap())) {
                         Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
-                        Category category = CategoryUtils.getEntityCategory(entity);
                         Set<String> attributes = new HashSet<>();
-                        addCategoryAttributes(attributes, attributesMap, category);
                         if (BusinessEntity.Account.equals(entity)) {
-                            addCategoryAttributes(attributes, attributesMap, Category.FIRMOGRAPHICS);
+                            for (Category category : Category.values()) {
+                                if (!category.isHiddenFromUi()) {
+                                    if (BusinessEntity.Account.equals(CategoryUtils.getEntity(category).get(0))) {
+                                        addCategoryAttributes(attributes, attributesMap, category);
+                                    }
+                                }
+                            }
+                        } else {
+                            Category category = CategoryUtils.getEntityCategory(entity);
+                            addCategoryAttributes(attributes, attributesMap, category);
                         }
                         return attributes.stream().map(attribute -> toColumnMetadata(attribute)).collect(Collectors.toList());
                     } else {
@@ -104,4 +111,5 @@ public class AttributeSetDecoratorImpl implements AttributeSetDecoratorFac {
         cm.enableGroup(ColumnSelection.Predefined.Enrichment);
         return cm;
     }
+
 }

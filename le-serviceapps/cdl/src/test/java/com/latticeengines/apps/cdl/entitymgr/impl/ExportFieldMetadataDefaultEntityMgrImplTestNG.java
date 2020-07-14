@@ -186,11 +186,20 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.GoogleAds);
 
-        assertEquals(defaultGoogleAdsExportFields.size(), 41);
+        assertEquals(defaultGoogleAdsExportFields.size(), 43);
         assertEquals(
                 defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 10);
 
+    }
+
+    @Test(groups = "functional")
+    public void testGoogleAdsContacts() {
+        List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
+                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.GoogleAds,
+                        AudienceType.CONTACTS);
+
+        assertEquals(defaultGoogleAdsExportFields.size(), 10);
     }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {

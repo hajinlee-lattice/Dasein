@@ -1,6 +1,11 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Address;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.City;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Zipcode;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.NonHeadQuarters;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
 
@@ -29,6 +34,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -66,8 +72,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RealTimeMatchServiceImplTestNG.class);
-    private Camille camille;
-    private String podId;
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
     private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "IceCreamSandwich";
@@ -94,24 +98,32 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testSimpleMatchWithDplusConfig() {
         Object[][] data = new Object[][] {
-                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
-                { 2, "google.com", "Google", null, "California", "USA" },
-                { 3, "google.com", "Google", null, null, "UK" },
-                { 4, "bp.com", "British Petroleum", "London", "London", "UK"}
+                { 1, "Chevron Corporation", "San Ramon", "California", "USA" },
+                { 2, "Google", null, "California", "USA" },
+                { 3, "Google", null, null, "UK" },
+                { 4, "British Petroleum", "London", "London", "UK"}
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+        input.setFields(Arrays.asList("ID", "CompanyName", "City", "State", "Country"));
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
+                .put(Name, Collections.singletonList("CompanyName"))
+                .put(City, Collections.singletonList("City"))
+                .put(State, Collections.singletonList("State"))
+                .put(Country, Collections.singletonList("Country"))
+                .build());
         input.setTargetEntity(BusinessEntity.PrimeAccount.name());
-
         List<Column> columns = Stream.of(
-                "PrimaryBusinessName",
-                "TradeStyleName",
-                "TelephoneNumber",
-                "IndustryCodeUSSicV4Code"
+                "duns_number",
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         input.setCustomSelection(columnSelection);
         input.setPredefinedSelection(null);
+        input.setUseDirectPlus(true);
 
         DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}[^Z]{2}.*"))
                 .exclude(OutOfBusiness) //
@@ -127,10 +139,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), data.length);
-        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
 
         OutputRecord output1 = output.getResult().get(0); // Chevron - 7 - AZZZZZZZZFZ
-        //System.out.println(JsonUtils.pprint(output1));
+        // System.out.println(JsonUtils.pprint(output1));
         Assert.assertTrue(output1.isMatched());
         Assert.assertEquals(output1.getOutput().get(0), "001382555");
 
@@ -147,6 +158,47 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         //System.out.println(JsonUtils.pprint(output4));
         Assert.assertTrue(output4.isMatched());
         Assert.assertEquals(output4.getOutput().get(0), "210042669");
+    }
+
+    @Test(groups = "functional")
+    public void testStreetAddress() {
+        // Schema: ID, CompanyName, State, Country, ZipCode, Address
+        Object[][] data = new Object[][] {
+                { 123, "AMAZON.COM, INC.", "WASHINGTON", "USA", "98109-5210", "410 Terry Ave N" } //
+        };
+        // ColumnSelection is RTS
+        MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+        input.setUseDirectPlus(true);
+        DplusMatchRule baseRule = new DplusMatchRule(6, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+        input.setDplusMatchConfig(new DplusMatchConfig(baseRule));
+        input.setTargetEntity(BusinessEntity.PrimeAccount.name());
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
+                .put(Name, Collections.singletonList("CompanyName"))
+                .put(State, Collections.singletonList("State"))
+                .put(Country, Collections.singletonList("Country"))
+                .put(Zipcode, Collections.singletonList("ZipCode"))
+                .put(Address, Collections.singletonList("Address"))
+                .build());
+        input.setFields(Arrays.asList("ID", "CompanyName", "State", "Country", "ZipCode", "Address"));
+        input.setSkipKeyResolution(true);
+        List<Column> columns = Stream.of(
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
+        ).map(c -> new Column(c, c)).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertTrue(output.getResult().get(0).isMatched());
+        String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(2).toString();
+        Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
+        Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
     }
 
     @Test(groups = "functional")
@@ -253,7 +305,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
 
-        Integer pos = output.getOutputFields().indexOf("LatticeAccountId");
+        int pos = output.getOutputFields().indexOf("LatticeAccountId");
         Assert.assertEquals(output.getResult().get(0).getOutput().get(pos), "0530001159335");
         log.info(JsonUtils.serialize(output));
     }
@@ -266,8 +318,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
 
-        Integer pos = output.getOutputFields().indexOf("IsPublicDomain");
-        Assert.assertTrue(Boolean.TRUE.equals(output.getResult().get(0).getOutput().get(pos)));
+        int pos = output.getOutputFields().indexOf("IsPublicDomain");
+        Assert.assertEquals(output.getResult().get(0).getOutput().get(pos), Boolean.TRUE);
         log.info(JsonUtils.serialize(output));
     }
 
@@ -307,7 +359,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 new String[] { "ID", "Domain", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(Name, Collections.singletonList("Name"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         ColumnSelection columnSelection = new ColumnSelection();
@@ -320,8 +372,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         input.setPredefinedSelection(null);
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         try {
-            camille = CamilleEnvironment.getCamille();
-            podId = CamilleEnvironment.getPodId();
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
             camille.upsert(
                     PathBuilder.buildServicePath(podId, PROPDATA_SERVICE, leStack).append(RELAX_PUBLIC_DOMAIN_CHECK),
                     new Document("true"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -389,7 +441,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "Email", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Email"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(Name, Collections.singletonList("Name"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
@@ -417,7 +469,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 new String[] { "ID", "Domain", "Name", "Duns" });
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("Name"));
+        keyMap.put(Name, Collections.singletonList("Name"));
         keyMap.put(MatchKey.DUNS, Collections.singletonList("Duns"));
         input.setKeyMap(keyMap);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
@@ -520,6 +572,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             log.info("TestCase: " + entry.getKey());
             Assert.assertNotNull(output);
             Assert.assertEquals(output.getResult().size(), 1);
+            Assert.assertEquals(output.getResult().get(0).isMatched(), (int) entry.getValue()[2] > 0);
             Assert.assertEquals(output.getStatistics().getRowsMatched(), entry.getValue()[2]);
             Set<String> logs = new HashSet<>();
             for (String log : output.getResult().get(0).getMatchLogs()) {
@@ -610,8 +663,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                         }));
         map.put("Key_Duns_Data_DunsUnmatch", //
                 testDunsExpectedResuls(new String[] { "DUNS" }, //
-                        new Object[] { "123" }, 0,
-                        new String[] { "Did not get any luck at DunsBasedMicroEngineActor with ( DUNS=000000123 )", //
+                        new Object[] { "987654321" }, 0,
+                        new String[] { "Did not get any luck at DunsBasedMicroEngineActor with ( DUNS=987654321 )", //
                                 "Rejected by LocationToCachedDunsMicroEngineActor", //
                                 "Rejected by LocationToDunsMicroEngineActor", //
                                 "Skipping DunsBasedMicroEngineActor because this is the second visit with the same context." },
@@ -667,17 +720,17 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                         new String[] { "Arrived LocationToCachedDunsMicroEngineActor.", //
                                 "Arrived LocationToDunsMicroEngineActor.",//
                         }));
-        map.put("Key_DunsLoc_Data_DunsLoc_DunsUnatchLocCacheHitAccept", //
+        map.put("Key_DunsLoc_Data_DunsLoc_DunsUnmatchLocCacheHitAccept", //
                 testDunsExpectedResuls(new String[] { "DUNS", "Name", "State" }, //
-                        new Object[] { "123", "Google", "CA" }, 1,
-                        new String[] { "Did not get any luck at DunsBasedMicroEngineActor with ( DUNS=000000123 )", //
+                        new Object[] { "987654321", "Google", "CA" }, 1,
+                        new String[] { "Did not get any luck at DunsBasedMicroEngineActor with ( DUNS=987654321 )", //
                                 "Retrieved a DUNS from white cache using Id=_CITY_NULL_COUNTRYCODE_US_NAME_GOOGLE_PHONE_NULL_STATE_CALIFORNIA_ZIPCODE_NULL. Did not go to remote DnB API.", //
                                 "Rejected by LocationToDunsMicroEngineActor", //
                         }, new String[] {}));
-        map.put("Key_DunsLoc_Data_DunsLoc_DunsUnatchLocCacheHitDiscard", //
+        map.put("Key_DunsLoc_Data_DunsLoc_DunsUnmatchLocCacheHitDiscard", //
                 testDunsExpectedResuls(new String[] { "DUNS", "Name", "State" }, //
-                        new Object[] { "123", "Google123456", "CA" }, 0, new String[] { //
-                                "Did not get any luck at DunsBasedMicroEngineActor with ( DUNS=000000123 )", //
+                        new Object[] { "987654321", "Google123456", "CA" }, 0, new String[] { //
+                                "Did not get any luck at DunsBasedMicroEngineActor with ( DUNS=987654321 )", //
                                 "Retrieved a DUNS from white cache using Id=_CITY_NULL_COUNTRYCODE_US_NAME_GOOGLE123456_PHONE_NULL_STATE_CALIFORNIA_ZIPCODE_NULL. Did not go to remote DnB API.", //
                                 "Encountered an issue with DUNS lookup at LocationToCachedDunsMicroEngineActor: Match result does not meet acceptance criteria, discarded.", //
                                 "Rejected by LocationToDunsMicroEngineActor", //

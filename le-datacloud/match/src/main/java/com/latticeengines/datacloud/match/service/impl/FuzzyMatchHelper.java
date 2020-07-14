@@ -20,9 +20,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
@@ -35,8 +37,10 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
+import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -77,6 +81,9 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Inject
     private DirectPlusEnrichService directPlusEnrichService;
+
+    @Inject
+    private PrimeMetadataService primeMetadataService;
 
     @Inject
     private EntityMatchInternalService entityMatchInternalService;
@@ -295,10 +302,26 @@ public class FuzzyMatchHelper implements DbHelper {
             }
         }
 
+        List<String> elementIds = context.getColumnSelection().getColumnIds();
+        if (!elementIds.contains(PrimeAccount.DunsNumber)) {
+            elementIds.add(PrimeAccount.DunsNumber);
+        }
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        List<PrimeColumn> reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
+        Set<String> blockIds = retry.execute(ctx -> primeMetadataService.getBlocksContainingElements(elementIds));
+
         List<PrimeAccount> accounts;
         try (PerformanceTimer timer = //
                      new PerformanceTimer("Fetch " + ids.size() + " accounts from Direct+.")) {
-            accounts = directPlusEnrichService.fetch(ids);
+            List<DirectPlusEnrichRequest> requests = new ArrayList<>();
+            for (String duns: ids) {
+                DirectPlusEnrichRequest request = new DirectPlusEnrichRequest();
+                request.setDunsNumber(duns);
+                request.setReqColumns(reqColumns);
+                request.setBlockIds(blockIds);
+                requests.add(request);
+            }
+            accounts = directPlusEnrichService.fetch(requests);
         }
 
         Map<String, PrimeAccount> dunsAccountMap = accounts.stream() //

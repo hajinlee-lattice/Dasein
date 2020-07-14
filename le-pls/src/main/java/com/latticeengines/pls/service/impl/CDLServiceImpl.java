@@ -576,6 +576,13 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter) {
+        if (StringUtils.isBlank(s3Path)) {
+            throw new IllegalArgumentException("Cannot list files for empty path!");
+        }
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        if (!s3Path.contains(dropBoxSummary.getDropBox())) {
+            throw new IllegalArgumentException("Must provide path under tenant's root directory!");
+        }
         return dropBoxProxy.getFileListForPath(customerSpace, s3Path, filter);
     }
 

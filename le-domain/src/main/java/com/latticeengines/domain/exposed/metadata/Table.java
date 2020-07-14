@@ -679,7 +679,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, HasAuditi
             if (tokens == null) {
                 return null;
             }
-            StringBuilder extractParentDir = new StringBuilder("");
+            StringBuilder extractParentDir = new StringBuilder();
             if (tokens[tokens.length - 1].endsWith(".avro")) {
                 for (int i = 0; i < tokens.length - 1; i++) {
                     extractParentDir.append("/").append(tokens[i]);

@@ -1,11 +1,15 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,8 +17,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.datacloud.match.repository.reader.DataBlockDomainEntitlementRepository;
 import com.latticeengines.datacloud.match.repository.reader.DataBlockElementRepository;
@@ -23,6 +29,7 @@ import com.latticeengines.datacloud.match.repository.reader.PrimeColumnRepositor
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockDomainEntitlement;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockElement;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevelMetadata;
@@ -162,6 +169,106 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
             domains.sort(Comparator.comparing(domain -> domain.getDomain().ordinal()));
             return new DataBlockEntitlementContainer(domains);
         }
+    }
+
+    @Override
+    public List<PrimeColumn> getPrimeColumns(Collection<String> elementIds) {
+        return primeColumnRepository.findAllByPrimeColumnIdIn(elementIds);
+    }
+
+    /**
+     * Find minimum and lowest level blocks containing all elements requested
+     */
+    @Override
+    public Set<String> getBlocksContainingElements(Collection<String> elementIds) {
+        List<DataBlockElement> blockElements = //
+                dataBlockElementRepository.findAllByPrimeColumn_PrimeColumnIdIn(elementIds);
+        Set<String> blockIds = consolidateBlocks(blockElements);
+        Set<String> toReturn = blockIds.stream().filter(block -> !block.startsWith("baseinfo"))
+                .collect(Collectors.toSet());
+        if (toReturn.isEmpty()) {
+            return Collections.singleton("companyinfo_L1_v1");
+        } else {
+            return toReturn;
+        }
+    }
+
+    static Set<String> consolidateBlocks(Collection<DataBlockElement> blockElements) {
+        // elementId -> list(dbe)
+        Map<String, List<DataBlockElement>> elementIdToBlockElementMap = new HashMap<>();
+        // blockId -> list(dbe) : result
+        Map<String, List<DataBlockElement>> blockIdToBlockElementMap = new HashMap<>();
+
+        for (DataBlockElement blockElement: blockElements) {
+            String elmentId =  blockElement.getPrimeColumn().getPrimeColumnId();
+            List<DataBlockElement> blockElementsForElement = //
+                    elementIdToBlockElementMap.getOrDefault(elmentId, new ArrayList<>());
+            blockElementsForElement.add(blockElement);
+            elementIdToBlockElementMap.put(elmentId, blockElementsForElement);
+        }
+
+        String maxCoverageBlockId;
+        do {
+            // elements can only be found in one block
+            Set<String> singleChoiceBlocks;
+            do {
+                singleChoiceBlocks = new HashSet<>();
+                for (String elementId: elementIdToBlockElementMap.keySet()) {
+                    if (elementIdToBlockElementMap.get(elementId).size() == 1) {
+                        String blockId = elementIdToBlockElementMap.get(elementId).get(0).getBlock();
+                        singleChoiceBlocks.add(blockId);
+                    }
+                }
+                for (String blockId: singleChoiceBlocks) {
+                    takeBlock(blockId, elementIdToBlockElementMap, blockIdToBlockElementMap);
+                }
+            } while (!singleChoiceBlocks.isEmpty());
+            Map<String, Integer> blockCoverageMap = new HashMap<>();
+            for (String elementId: elementIdToBlockElementMap.keySet()) {
+                for (DataBlockElement dbe: elementIdToBlockElementMap.get(elementId)) {
+                    String blockId = dbe.getBlock();
+                    int cnt = blockCoverageMap.getOrDefault(blockId, 0);
+                    blockCoverageMap.put(blockId, cnt + 1);
+                }
+            }
+            maxCoverageBlockId = blockCoverageMap.entrySet().stream() //
+                    .min(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("");
+            if (StringUtils.isNotBlank(maxCoverageBlockId)) {
+                takeBlock(maxCoverageBlockId, elementIdToBlockElementMap, blockIdToBlockElementMap);
+            }
+        } while (StringUtils.isNotBlank(maxCoverageBlockId));
+        return blockIdToBlockElementMap.values().stream().map(dataBlockElements -> {
+            DataBlockElement maxLevel = dataBlockElements.stream() //
+                    .max(Comparator.comparing(DataBlockElement::getLevel)).orElse(null);
+            Preconditions.checkNotNull(maxLevel);
+            return maxLevel.getFqBlockId();
+        }).collect(Collectors.toSet());
+    }
+
+    private static void takeBlock(String blockId, Map<String, //
+            List<DataBlockElement>> elementIdToBlockElementMap, //
+            Map<String, List<DataBlockElement>> blockIdToBlockElementMap) {
+        List<DataBlockElement> elements = blockIdToBlockElementMap.getOrDefault(blockId, new ArrayList<>());
+        Set<String> elementIdsToRemove = new HashSet<>();
+        for (String elementId: elementIdToBlockElementMap.keySet()) {
+            List<DataBlockElement> remainingDbeList = new ArrayList<>();
+            boolean belongToBlock = false;
+            for (DataBlockElement dbe: elementIdToBlockElementMap.get(elementId)) {
+                if (blockId.equals(dbe.getBlock())) {
+                    elements.add(dbe);
+                    belongToBlock = true;
+                } else {
+                    remainingDbeList.add(dbe);
+                }
+            }
+            if (belongToBlock || remainingDbeList.isEmpty()) {
+                elementIdsToRemove.add(elementId);
+            } else {
+                elementIdToBlockElementMap.put(elementId, remainingDbeList);
+            }
+        }
+        elementIdsToRemove.forEach(elementIdToBlockElementMap::remove);
+        blockIdToBlockElementMap.put(blockId, elements);
     }
 
 }

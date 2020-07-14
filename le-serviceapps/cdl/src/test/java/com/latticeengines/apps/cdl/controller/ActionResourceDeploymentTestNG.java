@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 
 public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -32,9 +31,6 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
     private ActionProxy actionProxy;
-
-    @Inject
-    private PlsInternalProxy plsInternalProxy;
 
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 

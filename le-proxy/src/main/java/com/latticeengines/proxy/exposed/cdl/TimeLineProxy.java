@@ -2,8 +2,11 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -15,6 +18,12 @@ public class TimeLineProxy extends MicroserviceRestApiProxy implements ProxyInte
 
     public TimeLineProxy() {
         super("cdl");
+    }
+
+    public List<TimeLine> findAll(String customerSpace) {
+        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        List<?> list = get("findByEntity", url, List.class);
+        return JsonUtils.convertList(list, TimeLine.class);
     }
 
     public TimeLine findByEntity(String customerSpace, BusinessEntity entity) {

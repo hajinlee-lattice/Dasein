@@ -51,7 +51,7 @@ public class DirectPlusBulkLookupStatusCheckerImpl extends BaseDnBBulkLookupStat
 
     @Override
     protected DnBKeyType keyType() {
-        return DnBKeyType.DPLUS;
+        return DnBKeyType.MATCH;
     }
 
     @Override

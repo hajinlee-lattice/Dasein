@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.common
 
+import com.latticeengines.domain.exposed.spark.common.ChangeListConstants.{CompleteMode, VerticalMode, HorizontalMode}
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{ChangeListUtils, MergeUtils}
@@ -18,14 +19,13 @@ class CreateChangeListJob extends AbstractSparkJob[ChangeListConfig] {
     val fromTable: DataFrame = if (lattice.input.size == 2) lattice.input(1) else null
     val joinKey = config.getJoinKey
     val exclusionCols = config.getExclusionColumns.asScala.toSet
+    val creationMode = config.getCreationMode
     val params = new Params
     params.fromTableColPos = if (fromTable != null) fromTable.columns.zipWithIndex.toMap else null
     params.toTableColPos = toTable.columns.zipWithIndex.toMap
     params.fromTableColType = if (fromTable != null) fromTable.dtypes.toMap else null
     params.toTableColType = toTable.dtypes.toMap
-    if (config.getJoinType != null) {
-      params.joinType = config.getJoinType
-    }
+    params.creationMode = creationMode
 
     val result =
       if (fromTable == null) {
@@ -63,15 +63,17 @@ class CreateChangeListJob extends AbstractSparkJob[ChangeListConfig] {
 
     val bDeleteColPos = spark.sparkContext.broadcast(params.fromTableColPos)
     val bDeleteColType = spark.sparkContext.broadcast(params.fromTableColType)
-    val deletedColList =  fromTable.flatMap(row => {
-      val rows: Seq[Option[Row]] = deletedColNames.par.map(colName => {
-        ChangeListUtils.buildDeletedRowColumnList(row, colName, joinKey, bDeleteColPos.value, bDeleteColType.value)
-      }).seq
-      rows.flatten
-    })(RowEncoder(ChangeListUtils.changeListSchema))
-      .union(spark.createDataFrame(
-        spark.sparkContext.parallelize(ChangeListUtils.buildDeletedColumnList(deletedColNames.toList)),
-        ChangeListUtils.changeListSchema))
+    val deletedColList =  
+      if (params.creationMode == VerticalMode) spark.createDataFrame(spark.sparkContext.emptyRDD[Row], ChangeListUtils.changeListSchema) 
+      else fromTable.flatMap(row => {
+        val rows: Seq[Option[Row]] = deletedColNames.par.map(colName => {
+          ChangeListUtils.buildDeletedRowColumnList(row, colName, joinKey, bDeleteColPos.value, bDeleteColType.value)
+        }).seq
+        rows.flatten
+      })(RowEncoder(ChangeListUtils.changeListSchema))
+        .union(spark.createDataFrame(
+          spark.sparkContext.parallelize(ChangeListUtils.buildDeletedColumnList(deletedColNames.toList)),
+          ChangeListUtils.changeListSchema))
 
     val bNewColPos = spark.sparkContext.broadcast(params.toTableColPos)
     val bNewColType = spark.sparkContext.broadcast(params.toTableColType)
@@ -104,15 +106,19 @@ class CreateChangeListJob extends AbstractSparkJob[ChangeListConfig] {
 
       var rows: MSeq[Option[Row]] = MSeq()
       if (isDeletedRow) {
-        rows = rows :+ ChangeListUtils.buildDeletedRowList(row, joinKey, fromColPos)
+        if (params.creationMode != HorizontalMode) {
+          rows = rows :+ ChangeListUtils.buildDeletedRowList(row, joinKey, fromColPos)
+        }
       } else if (isNewRow) {
         rows = rows :+ ChangeListUtils.buildNewRowList(row, joinKey, fromColPos)
       }
       if (isDeletedRow) {
-        val newRows = commonColNames map (colName => {
-          ChangeListUtils.buildDeletedRowColumnList(row, colName, joinKey, fromColPos, fromTableColType)
-        })
-        rows = rows ++ newRows
+        if (params.creationMode != HorizontalMode) {
+          val newRows = commonColNames map (colName => {
+            ChangeListUtils.buildDeletedRowColumnList(row, colName, joinKey, fromColPos, fromTableColType)
+          })
+          rows = rows ++ newRows
+        }
       } else if (isNewRow) {
         val newRows = commonColNames map (colName => {
           ChangeListUtils.buildNewRowColumnList(row, colName, joinKey, fromColPos, toColPos, toTableColType)
@@ -136,6 +142,7 @@ class Params extends Serializable {
   var toTableColPos: Map[String, Int] = _
   var fromTableColType: Map[String, String] = _
   var toTableColType: Map[String, String] = _
+  var creationMode: String = CompleteMode
   var joinType: String = "outer"
 }
 

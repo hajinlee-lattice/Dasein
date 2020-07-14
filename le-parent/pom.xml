@@ -60,7 +60,6 @@
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.8.5</hadoop.version>
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
-        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <!--<spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> &lt;!&ndash; need ledp3 classifier &ndash;&gt;-->
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
@@ -71,7 +70,7 @@
         <parquet.version>1.10.1</parquet.version>
         <aws.version>1.11.759</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
-        <spark.version>2.4.4</spark.version>
+        <spark.version>2.4.5</spark.version>
         <scala.version>2.11.12</scala.version>
         <jackson.fasterxml.version>2.10.1</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->

@@ -1,6 +1,7 @@
 package com.latticeengines.serviceflows.workflow.match;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,6 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +20,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -27,13 +28,20 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
+import com.latticeengines.spark.exposed.job.common.CopyJob;
 
-public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends BaseWorkflowStep<S> {
+public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends BaseSparkStep<S> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseMatchStep.class);
 
@@ -54,13 +62,8 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
     @Inject
     private BulkMatchService bulkMatchService;
 
-    @Inject
-    protected Configuration yarnConfiguration;
-
     @Value("${camille.zk.pod.id}")
     protected String podId;
-
-    private CustomerSpace customerSpace;
 
     @Override
     public void execute() {
@@ -81,11 +84,22 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
     protected abstract String getResultTableName();
     protected abstract void preMatchProcessing(MatchInput matchInput);
 
+    protected boolean saveToParquet() {
+        return false;
+    }
+
     protected void postMatchProcessing(MatchInput input, MatchCommand command) {
         String customer = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
-        String resultTableName = getResultTableName();
-        bulkMatchService.registerResultTable(customer, command, resultTableName);
-        putStringValueInContext(MATCH_RESULT_TABLE_NAME, resultTableName);
+        String finalResultTable = getResultTableName();
+        String avroResultTableName = finalResultTable;
+        if (saveToParquet()) {
+            avroResultTableName = NamingUtils.timestamp("AvroMatchResult"); // temporary table name
+        }
+        bulkMatchService.registerResultTable(customer, command, avroResultTableName);
+        if (saveToParquet()) {
+            saveResultAsParquetTable(avroResultTableName, finalResultTable);
+        }
+        putStringValueInContext(MATCH_RESULT_TABLE_NAME, finalResultTable);
 
         String newEntitiesTableName = getNewEntitiesTableName();
         if (StringUtils.isNotBlank(newEntitiesTableName) && input.isOutputNewEntities()) {
@@ -150,6 +164,28 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         String avroGlob = PathUtils.toAvroGlob(avroDir);
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toSet());
+    }
+
+    private void saveResultAsParquetTable(String avroResultTableName, String targetTableName) {
+        Table avroResultTable = metadataProxy.getTable(customerSpace.toString(), avroResultTableName);
+        HdfsDataUnit avroResult = avroResultTable.toHdfsDataUnit("AvroResult");
+        CopyConfig copyConfig = new CopyConfig();
+        copyConfig.setInput(Collections.singletonList(avroResult));
+        copyConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+        SparkJobResult sparkJobResult = runSparkJob(CopyJob.class, copyConfig);
+        Table resultTable = toTable(targetTableName, sparkJobResult.getTargets().get(0));
+        Map<String, Attribute> avroAttrs = new HashMap<>();
+        avroResultTable.getAttributes().forEach(attr -> {
+            avroAttrs.put(attr.getName(), attr);
+        });
+        List<Attribute> attrs = new ArrayList<>();
+        resultTable.getAttributes().forEach(attr0 -> {
+            Attribute attr = avroAttrs.getOrDefault(attr0.getName(), attr0);
+            attrs.add(attr);
+        });
+        resultTable.setAttributes(attrs);
+        metadataProxy.createTable(customerSpace.toString(), resultTable.getName(), resultTable);
+        metadataProxy.deleteTable(customerSpace.toString(), avroResultTable.getName());
     }
 
 }

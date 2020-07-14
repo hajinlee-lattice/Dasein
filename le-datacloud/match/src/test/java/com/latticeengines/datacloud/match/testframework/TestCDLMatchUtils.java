@@ -30,11 +30,11 @@ public final class TestCDLMatchUtils {
     }
 
     private static String[][] dynamoDataUnits = { //
-            { "Account_2018-06-22_23-04-26_UTC", "LocalTest", "20190917", "Account_2018-06-22_23-04-26_UTC",
+            { "Account_2018-06-22_23-04-26_UTC", "LocalTest", "20200501", "Account_2018-06-22_23-04-26_UTC",
                     "LETest1533755623454", "AccountId" }, //
-            { "LETest1533755623454_Rating_2018_08_08_22_06_57_UTC", "LocalTest", "20190917",
+            { "LETest1533755623454_Rating_2018_08_08_22_06_57_UTC", "LocalTest", "20200501",
                     "LETest1533755623454_Rating_2018_08_08_22_06_57_UTC", "LETest1533755623454", "AccountId" }, //
-            { "LETest1533755623454_PurchaseHistory_2018_08_08_21_21_59_UTC", "LocalTest", "20190917",
+            { "LETest1533755623454_PurchaseHistory_2018_08_08_21_21_59_UTC", "LocalTest", "20200501",
                     "LETest1533755623454_PurchaseHistory_2018_08_08_21_21_59_UTC", "LETest1533755623454", "AccountId" }, //
     };
 

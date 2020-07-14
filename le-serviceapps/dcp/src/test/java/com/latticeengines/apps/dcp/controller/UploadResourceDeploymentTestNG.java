@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -62,6 +64,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private String sourceId;
     private String projectId;
+    private String uploadId;
 
     @BeforeClass(groups = {"deployment"})
     public void setup() {
@@ -93,8 +96,8 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         String uploadTS = "2020-03-20";
         String errorPath = uploadDirKey + uploadTS + "/error/file1.csv";
-        String importedFilePath = uploadDirKey + uploadTS + "/processed/file2.csv";
-        String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
+        String resultsPath = uploadDirKey + uploadTS + "/results/";
+        String rawPath = uploadDirKey + uploadTS + "/raw/file2.csv";
         config.setUploadImportedErrorFilePath(errorPath);
         UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), uploadRequest);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
@@ -106,7 +109,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         // update config
         config.setUploadRawFilePath(rawPath);
-        config.setUploadImportedFilePath(importedFilePath);
+        config.setUploadMatchResultPrefix(resultsPath);
         config.setUploadTSPrefix(uploadTS);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
         List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null, Boolean.TRUE);
@@ -114,7 +117,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails retrievedUpload = uploads.get(0);
         UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
-        Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), importedFilePath);
+        Assert.assertEquals(retrievedConfig.getUploadMatchResultPrefix(), resultsPath);
         Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
         Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
@@ -139,11 +142,12 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
 
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
-    public void testDownload() throws Exception {
+    public void testDownloadAll() throws Exception {
         List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED, Boolean.TRUE);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails upload = uploads.get(0);
+        uploadId = upload.getUploadId();
         Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
 
         StringInputStream sis = new StringInputStream("file1");
@@ -152,38 +156,122 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String bucket = dropBox.getBucket();
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadImportedErrorFilePath(), sis, true);
 
-        StringInputStream sis2 = new StringInputStream("file2");
-        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadImportedFilePath(), sis2, true);
+        StringInputStream sis2 = new StringInputStream("accepted");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultAccepted(), sis2, true);
 
-        StringInputStream sis3 = new StringInputStream("file3");
+        StringInputStream sis3 = new StringInputStream("file2");
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
+
+        StringInputStream sis4 = new StringInputStream("rejected");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultRejected(), sis4, true);
 
         // drop file to another upload
         List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW, Boolean.TRUE);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
         UploadDetails upload2 = uploads2.get(0);
-        StringInputStream sis4 = new StringInputStream("file4");
-        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis4, true);
+        StringInputStream sis5 = new StringInputStream("file3");
+        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis5, true);
 
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
-                upload.getUploadId().toString());
+                upload.getUploadId());
         String token = template.getForObject(tokenUrl, String.class);
         SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
+
+        // test the result file can be extracted to 3 files
+        ZipFile zipFile = downloadZipAndVerifyName(template, downloadUrl, "file2_Results.zip");
+        List<FileHeader> fileHeaders = zipFile.getFileHeaders();
+        Assert.assertNotNull(fileHeaders);
+        Assert.assertEquals(fileHeaders.size(), 4);
+        String tmp = System.getProperty("java.io.tmpdir");
+        if (tmp.endsWith("/")) {
+            tmp = tmp.substring(0, tmp.length() - 1);
+        }
+        String destPath = tmp + NamingUtils.uuid("/download");
+        zipFile.extractAll(destPath);
+        File destDir = new File(destPath);
+        Assert.assertTrue(destDir.isDirectory());
+        String[] files = destDir.list();
+        Assert.assertEquals(ArrayUtils.getLength(files), 4);
+
+        // Check the correct file names for each
+        List<String> fileNames = Arrays.asList(destDir.list());
+        Assert.assertTrue(fileNames.contains("file2.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Error.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Matched.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Unmatched.csv"));
+        FileUtils.forceDelete(destDir);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testDownloadAll")
+    public void testDownloadSelect() throws Exception {
+        RestTemplate template = testBed.getRestTemplate();
+        String tokenUrlBase = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort, uploadId);
+
+        for (int i = 1; i <= 15; ++i) {
+            boolean includeRaw = (i % 2 == 1);
+            boolean includeMatched = ((i / 2) % 2 == 1);
+            boolean includeUnmatched = ((i / 4) % 2 == 1);
+            boolean includeErrors = ((i / 8) % 2 == 1);
+
+            Boolean[] includes = {includeRaw, includeMatched, includeUnmatched, includeErrors};
+            int numFiles = (int) Arrays.stream(includes).filter(x -> x).count();
+
+            String downloadParams = "";
+            if (includeRaw) {
+                downloadParams = downloadParams + ",RAW";
+            }
+            if (includeMatched) {
+                downloadParams = downloadParams + ",MATCHED";
+            }
+            if (includeUnmatched) {
+                downloadParams = downloadParams + ",UNMATCHED";
+            }
+            if (includeErrors) {
+                downloadParams = downloadParams + ",IMPORT_ERRORS";
+            }
+            downloadParams = downloadParams.substring(1);
+
+            String tokenUrlFull = tokenUrlBase + "?files=" + downloadParams;
+            String token = template.getForObject(tokenUrlFull, String.class);
+            SleepUtils.sleep(300);
+            String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
+
+            ZipFile zipFile = downloadZipFile(template, downloadUrl);
+            List<FileHeader> fileHeaders = zipFile.getFileHeaders();
+            Assert.assertEquals(fileHeaders.size(), numFiles);
+            List<String> fileNames = fileHeaders.stream().map(FileHeader::getFileName).collect(Collectors.toList());
+
+            // check each file's existence/omission
+            Assert.assertEquals(includeRaw, fileNames.contains("file2.csv"));
+            Assert.assertEquals(includeMatched, fileNames.contains("file2_Matched.csv"));
+            Assert.assertEquals(includeUnmatched, fileNames.contains("file2_Unmatched.csv"));
+            Assert.assertEquals(includeErrors, fileNames.contains("file2_Error.csv"));
+        }
+    }
+
+    public static ZipFile downloadZipFile(RestTemplate client, String downloadUrl) throws Exception {
+        return downloadZipAndVerifyName(client, downloadUrl, null);
+    }
+
+    public static ZipFile downloadZipAndVerifyName(RestTemplate client, String downloadUrl, String fileName) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.ALL));
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = template.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
-        String fileName = response.getHeaders().getFirst("Content-Disposition");
-        Assert.assertTrue(StringUtils.isNotBlank(fileName) && fileName.contains(".zip"));
+        ResponseEntity<byte[]> response = client.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
         byte[] contents = response.getBody();
         Assert.assertNotNull(contents);
         Assert.assertTrue(contents.length > 0);
 
-        // write the byte to zip, then unzip the zip
+        if (fileName != null) {
+            String contentHeader = response.getHeaders().getFirst("Content-Disposition");
+            Assert.assertTrue(StringUtils.isNotEmpty(contentHeader) && contentHeader.contains("filename=\"" + fileName + "\""));
+        }
+
+        // write the byte to zip
         File zip = File.createTempFile(NamingUtils.uuid("zip"), ".zip");
         zip.deleteOnExit();
         OutputStream outputStream = new FileOutputStream(zip);
@@ -191,22 +279,6 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         outputStream.flush();
         outputStream.close();
 
-        // test the zip file can be extracted to 3 files
-        ZipFile zipFile = new ZipFile(zip);
-        List<FileHeader> fileHeaders = zipFile.getFileHeaders();
-        Assert.assertNotNull(fileHeaders);
-        Assert.assertEquals(fileHeaders.size(), 3);
-        String tmp = System.getProperty("java.io.tmpdir");
-        if (tmp.endsWith("/")) {
-            tmp = tmp.substring(0, tmp.length() -1);
-        }
-        String destPath = tmp + NamingUtils.uuid("/download");
-        zipFile.extractAll(destPath);
-        File destDir = new File(destPath);
-        Assert.assertTrue(destDir.isDirectory());
-        String[] files = destDir.list();
-        Assert.assertEquals(ArrayUtils.getLength(files), 3);
-        FileUtils.forceDelete(destDir);
+        return new ZipFile(zip);
     }
-
 }

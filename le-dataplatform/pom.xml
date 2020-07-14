@@ -170,11 +170,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.sqoop</groupId>
-            <artifactId>sqoop</artifactId>
-            <version>${sqoop.version}</version>
-        </dependency>
-        <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
             <scope>test</scope>

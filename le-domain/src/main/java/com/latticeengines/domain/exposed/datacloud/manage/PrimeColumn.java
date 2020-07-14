@@ -20,9 +20,22 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 @Access(AccessType.FIELD)
 @Table(name = TABLE_NAME, uniqueConstraints = {
         @UniqueConstraint(name = "UQ_PRIME_COLUMN_ID", columnNames = { PRIME_COLUMN_ID }), //
@@ -35,25 +48,32 @@ public class PrimeColumn implements MetadataColumn {
     public static final String JSON_PATH = "JsonPath";
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    @JsonProperty("primeColumnId")
     @Column(name = PRIME_COLUMN_ID, nullable = false, length = 64)
     private String primeColumnId;
 
+    @JsonProperty("jsonPath")
     @Column(name = JSON_PATH, nullable = false, length = 256)
     private String jsonPath;
 
+    @JsonProperty("displayName")
     @Column(name = "DisplayName", nullable = false, length = 256)
     private String displayName;
 
+    @JsonProperty("description")
     @Column(name = "Description", length = 1024)
     private String description;
 
+    @JsonProperty("javaClass")
     @Column(name = "JavaClass", nullable = false, length = 16)
     private String javaClass;
 
+    @JsonIgnore
     @LazyCollection(LazyCollectionOption.TRUE)
     @OneToMany(mappedBy = "primeColumn")
     private List<DataBlockElement> dataBlocks;

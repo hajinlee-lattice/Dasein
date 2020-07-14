@@ -141,8 +141,8 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     }
 
     private boolean shouldDoNothing() {
-        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount);
-        boolean latticeAccountHasChanged = isChanged(LatticeAccount);
+        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME);
+        boolean latticeAccountHasChanged = isChanged(LatticeAccount, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
         boolean shouldDoNothing = !(customerAccountHasChanged || latticeAccountHasChanged);
         log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldDoNothing={}",
                 customerAccountHasChanged, latticeAccountHasChanged, shouldDoNothing);

@@ -81,7 +81,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.Prepa
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("dataFeedTaskManagerService")
@@ -111,9 +111,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
-    @Value("${common.microservice.url}")
-    private String hostUrl;
-
     @Inject
     private DataFeedTaskService dataFeedTaskService;
 
@@ -130,7 +127,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private S3Service s3Service;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Inject
     private DataFeedService dataFeedService;
@@ -317,7 +314,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         if (csvImportFileInfo.isPartialFile()) {
             s3ImportService.saveImportMessage(csvImportFileInfo.getS3Bucket(),
-                    csvImportFileInfo.getS3Path(), hostUrl, S3ImportMessageType.Atlas);
+                    csvImportFileInfo.getS3Path(), S3ImportMessageType.Atlas);
             return null;
         } else {
             checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
@@ -500,7 +497,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private void sendS3ImportEmail(String customerSpace, String result, S3ImportEmailInfo emailInfo) {
         try {
             String tenantId = CustomerSpace.parse(customerSpace).toString();
-            plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            emailProxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
@@ -525,9 +522,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 emailInfo.setUser(user);
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
                 if (isCreate) {
-                    plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
+                    emailProxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
                 } else {
-                    plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
+                    emailProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
                 }
             }
         } catch (Exception e) {

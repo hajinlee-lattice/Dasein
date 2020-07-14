@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
-import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -68,7 +68,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
     private Configuration yarnConfiguration;
 
     @Inject
-    private PlsInternalProxy plsInternalProxy;
+    private EmailProxy emailProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -223,7 +223,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     emailInfo.setErrorMsg(message);
                 }
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
-                plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
+                emailProxy.sendS3ImportEmail(result, tenantId, emailInfo);
             }
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());

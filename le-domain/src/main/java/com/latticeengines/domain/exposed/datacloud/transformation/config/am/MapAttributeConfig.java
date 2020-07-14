@@ -23,6 +23,9 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
     @JsonProperty("JoinConfigs")
     private List<JoinConfig> joinConfigs;
 
+    @JsonProperty("IsDedupe")
+    private Boolean isDedupe = Boolean.TRUE;
+    
     public String getDataCloudVersion() {
         return dataCloudVersion;
     }
@@ -53,6 +56,14 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
     public void setSeedId(String seedId) {
         this.seedId = seedId;
+    }
+
+    public Boolean getIsDedupe() {
+        return isDedupe;
+    }
+
+    public void setIsDedupe(Boolean isDedupe) {
+        this.isDedupe = isDedupe;
     }
 
     public List<JoinConfig> getJoinConfigs() {

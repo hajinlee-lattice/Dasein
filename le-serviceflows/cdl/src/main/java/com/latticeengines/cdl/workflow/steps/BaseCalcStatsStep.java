@@ -7,21 +7,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.AvroRecordIterator;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -32,8 +36,12 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -43,11 +51,14 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ColumnChanges;
 import com.latticeengines.domain.exposed.spark.common.GetColumnChangesConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
+import com.latticeengines.domain.exposed.spark.stats.FindChangedProfileConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
+import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.serviceflows.workflow.stats.StatsProfiler;
 import com.latticeengines.spark.exposed.job.common.GetColumnChangesJob;
 import com.latticeengines.spark.exposed.job.stats.CalcStatsJob;
+import com.latticeengines.spark.exposed.job.stats.FindChangedProfileJob;
 import com.latticeengines.spark.exposed.job.stats.ProfileJob;
 import com.latticeengines.spark.exposed.job.stats.UpdateProfileJob;
 
@@ -141,7 +152,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
     }
 
     protected HdfsDataUnit profileWithChangeList(Table baseTable, Table changeListTbl, Table oldProfileTbl,
-            TableRoleInCollection profileRole, String ctxKeyForRetry, List<String> includeAttrs,
+            TableRoleInCollection profileRole, String ctxKeyForRetry, String ctxKeyForReProfileAttrs, List<String> includeAttrs,
             List<ProfileParameters.Attribute> declaredAttrs, boolean considerAMAttrs, boolean autoDetectCategorical,
             boolean autoDetectDiscrete) {
         ProfileJobConfig profileConfig = new ProfileJobConfig();
@@ -164,6 +175,13 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         attrsToProfile.addAll(numAttrsBasedNewData);
         ColumnChanges changes = getColumnChanges(changeListData, attrsToProfile);
         attrsToProfile.retainAll(changes.getChanged().keySet());
+        // need to include all date attributes
+        baseTable.getColumnMetadata().forEach(cm -> {
+            if (LogicalDataType.Date.equals(cm.getLogicalDataType()) && //
+                    !evaluationDateStr.equals(cm.getLastDataRefresh())) {
+                attrsToProfile.add(cm.getAttrName());
+            }
+        });
 
         if (!attrsToProfile.isEmpty()) {
             log.info("Going to re-profile {} attributes", attrsToProfile.size());
@@ -193,6 +211,16 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                 extraProfileUnits.add(updatedProfile);
             }
             profiler.appendResult(profileData, extraProfileUnits, new ArrayList<>(ignoreAttrs));
+
+            FindChangedProfileConfig findChangeConfig = new FindChangedProfileConfig();
+            findChangeConfig.setInput(Arrays.asList(oldProfileData, profileData));
+            SparkJobResult changeSparkResult = runSparkJob(FindChangedProfileJob.class, findChangeConfig);
+            List<?> lst = JsonUtils.deserialize(changeSparkResult.getOutput(), List.class);
+            List<String> attrs = JsonUtils.convertList(lst, String.class);
+            if (StringUtils.isNotBlank(ctxKeyForReProfileAttrs)) {
+                log.info("There are {} attributes having changed profile.", attrs.size());
+                putObjectInContext(ctxKeyForReProfileAttrs, attrs);
+            }
 
             if (profileRole != null) {
                 profileData = saveProfileData(profileRole, profileData, ctxKeyForRetry);
@@ -344,6 +372,15 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         return statsResult.getTargets().get(0);
     }
 
+    protected HdfsDataUnit calcStats(Table baseTable, HdfsDataUnit profileData, List<String> includeAttrs) {
+        HdfsDataUnit inputData = baseTable.toHdfsDataUnit("BaseTable");
+        CalcStatsConfig jobConfig = new CalcStatsConfig();
+        jobConfig.setInput(Arrays.asList(inputData, profileData));
+        jobConfig.setIncludeAttrs(includeAttrs);
+        SparkJobResult statsResult = runSparkJob(CalcStatsJob.class, jobConfig);
+        return statsResult.getTargets().get(0);
+    }
+
     // attrs with declared profile strategy
     protected List<ProfileParameters.Attribute> getDeclaredAttrs() {
         List<ProfileParameters.Attribute> pAttrs = new ArrayList<>();
@@ -383,9 +420,51 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         return baseTable;
     }
 
+    protected Map<String, StatsCube> getCurrentCubeMap() {
+        Map<String, StatsCube> cubeMap = new HashMap<>();
+        StatisticsContainer latestStatsContainer = dataCollectionProxy.getStats(customerSpaceStr, inactive);
+        DataCollection.Version latestStatsVersion = null;
+        if (latestStatsContainer == null) {
+            latestStatsContainer = dataCollectionProxy.getStats(customerSpaceStr, active);
+            if (latestStatsContainer != null) {
+                latestStatsVersion = active;
+            }
+        } else {
+            latestStatsVersion = inactive;
+        }
+        if (latestStatsContainer != null && MapUtils.isNotEmpty(latestStatsContainer.getStatsCubes())) {
+            cubeMap.putAll(latestStatsContainer.getStatsCubes());
+        }
+        String msg = "Found {} cubes in the stats in {}";
+        if (MapUtils.isNotEmpty(cubeMap)) {
+            msg += " : " + StringUtils.join(cubeMap.keySet(), ", ");
+        }
+        log.info(msg, MapUtils.size(cubeMap), latestStatsVersion);
+        return cubeMap;
+    }
+
+    protected StatsCube getStatsCube(HdfsDataUnit statsData) {
+        String avroGlob = PathUtils.toAvroGlob(statsData.getPath());
+        log.info("Checking for stats file at {}", avroGlob);
+        try (AvroUtils.AvroFilesIterator records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob)) {
+            return StatsCubeUtils.parseAvro(records);
+        }
+    }
+
+    public static String acquireStatsLock(String tenantId, DataCollection.Version version) {
+        String lockName = "AtlastStatsLock_" + tenantId + "_" + version;
+        try {
+            LockManager.registerCrossDivisionLock(lockName);
+            LockManager.acquireWriteLock(lockName, 1, TimeUnit.HOURS);
+            log.info("Won the distributed lock {}", lockName);
+        } catch (Exception e) {
+            log.warn("Error while acquiring zk lock {}", lockName, e);
+        }
+        return lockName;
+    }
+
     @Override
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
         updateEntityValueMapInContext(getServingEntity(), key, value, clz);
     }
-
 }

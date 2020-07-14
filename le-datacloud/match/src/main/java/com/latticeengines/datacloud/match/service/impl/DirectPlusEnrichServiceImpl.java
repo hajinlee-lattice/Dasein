@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.DPLUS;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.ENRICH;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
+import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
@@ -45,6 +47,9 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     private DnBAuthenticationService dnBAuthenticationService;
 
     @Inject
+    private PrimeMetadataService primeMetadataService;
+
+    @Inject
     private ApplicationContext appCtx;
 
     @Inject
@@ -53,15 +58,18 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     @Value("${datacloud.dnb.direct.plus.data.block.chunk.size}")
     private int chunkSize;
 
+    @Value("${datacloud.dnb.direct.plus.enrich.url}")
+    private String enrichUrl;
+
     private volatile RestApiClient apiClient;
     private volatile ExecutorService fetchers;
 
     @Override
-    public List<PrimeAccount> fetch(Collection<String> dunsNumbers) {
-        List<String> chunk = new ArrayList<>();
+    public List<PrimeAccount> fetch(Collection<DirectPlusEnrichRequest> requests) {
+        List<DirectPlusEnrichRequest> chunk = new ArrayList<>();
         List<PrimeAccount> results = new ArrayList<>();
-        for (String dunsNumber: dunsNumbers) {
-            chunk.add(dunsNumber);
+        for (DirectPlusEnrichRequest request: requests) {
+            chunk.add(request);
             if (chunk.size() >= chunkSize) {
                 List<PrimeAccount> chunkResult = fetchChunk(chunk);
                 results.addAll(chunkResult);
@@ -76,7 +84,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         return results;
     }
 
-    private List<PrimeAccount> fetchChunk(List<String> dunsNumbers) {
+    private List<PrimeAccount> fetchChunk(List<DirectPlusEnrichRequest> requests) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -84,14 +92,14 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                 SleepUtils.sleep(5000); // sleep 5 seconds to avoid blast D+ rate limit
             }
             try (PerformanceTimer timer = new PerformanceTimer("Fetch data block for " + //
-                    dunsNumbers.size() + " DUNS numbers.")) {
+                    requests.size() + " DUNS numbers.")) {
                 List<Callable<PrimeAccount>> callables = new ArrayList<>();
-                dunsNumbers.forEach(dunsNumber -> //
+                requests.forEach(request -> //
                         callables.add(() -> {
                             try {
-                                return new PrimeAccount(fetch(dunsNumber));
+                                return new PrimeAccount(fetch(request));
                             } catch (Exception e) {
-                                log.error("Failed to fetch data block for DUNS {}", dunsNumber, e);
+                                log.error("Failed to fetch data block for DUNS {}", request.getDunsNumber(), e);
                                 return null;
                             }
                         }));
@@ -101,9 +109,11 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         });
     }
 
-    private Map<String, Object> fetch(String duns) {
-        String resp = sendRequest("https://plus.dnb.com/v1/data/duns/" + duns + "?blockIDs=companyinfo_L1_v1");
-        return DirectPlusUtils.parseDataBlock(resp);
+    private Map<String, Object> fetch(DirectPlusEnrichRequest request) {
+        String url = enrichUrl + "/duns/" + request.getDunsNumber() + "?blockIDs=";
+        url += StringUtils.join(request.getBlockIds(), ",");
+        String resp = sendRequest(url);
+        return DirectPlusUtils.parseDataBlock(resp, request.getReqColumns());
     }
 
     private String sendRequest(String url) {
@@ -112,7 +122,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     @Cacheable(cacheNames = CacheName.Constants.DnBRealTimeLookup, key = "T(java.lang.String).format(\"%s\", #url)")
     public String sendCacheableRequest(String url) {
-        String token = dnBAuthenticationService.requestToken(DPLUS, null);
+        String token = dnBAuthenticationService.requestToken(ENRICH, null);
         HttpEntity<String> entity = constructEntity(token);
         return client().get(entity, url);
     }

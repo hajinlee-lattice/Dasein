@@ -93,7 +93,7 @@ public class ProjectResource {
     @ApiOperation("Get project by projectId")
     @PreAuthorize("hasRole('View_DCP_Projects')")
     ProjectDetails getProjectByProjectId(@PathVariable String projectId,
-                                         @RequestParam(required = false, defaultValue = "false") Boolean includeSources) {
+                                         @RequestParam(required = false, defaultValue = "true") Boolean includeSources) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);

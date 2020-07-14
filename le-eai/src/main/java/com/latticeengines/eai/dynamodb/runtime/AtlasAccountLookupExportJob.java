@@ -6,7 +6,7 @@ import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CO
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_REGION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
-import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_CURRENT_VERSION;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
 import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_TABLE_NAME;
 
@@ -64,7 +64,7 @@ public class AtlasAccountLookupExportJob extends AvroExportJob {
         config.set(CONFIG_ATLAS_TENANT, (String) properties.get(CONFIG_ATLAS_TENANT));
         config.set(CONFIG_TABLE_NAME, (String) properties.get(CONFIG_TABLE_NAME));
         config.set(CONFIG_ATLAS_LOOKUP_IDS, (String) properties.get(CONFIG_ATLAS_LOOKUP_IDS));
-        config.set(CONFIG_CURRENT_VERSION, (String) properties.get(CONFIG_CURRENT_VERSION));
+        config.set(CONFIG_EXPORT_VERSION, (String) properties.get(CONFIG_EXPORT_VERSION));
         config.set(CONFIG_ATLAS_LOOKUP_TTL, (String) properties.get(CONFIG_ATLAS_LOOKUP_TTL));
 
         config.set(CONFIG_ENDPOINT, (String) properties.get(CONFIG_ENDPOINT));

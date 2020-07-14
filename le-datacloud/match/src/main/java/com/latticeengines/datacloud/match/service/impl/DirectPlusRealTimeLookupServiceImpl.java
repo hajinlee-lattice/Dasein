@@ -58,18 +58,19 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
             long startTime = System.currentTimeMillis();
-            executeLookup(context, DnBKeyType.DPLUS, DnBAPIType.REALTIME_ENTITY);
+            executeLookup(context, DnBKeyType.MATCH, DnBAPIType.REALTIME_ENTITY);
             context.setDuration(System.currentTimeMillis() - startTime);
             if (context.getDnbCode() != DnBReturnCode.UNAUTHORIZED) {
-                log.info(String.format("Direct+ transaction matching request %s%s: Status=%s, Duration=%d",
+                log.info("Direct+ transaction matching request {}{}: Status={}, Duration={}, Candidate={}",
                         context.getLookupRequestId(),
                         context.getRootOperationUid() == null ? ""
                                 : " (RootOperationID=" + context.getRootOperationUid() + ")",
-                        context.getDnbCode(), context.getDuration()));
+                        context.getDnbCode(), context.getDuration(),
+                        (CollectionUtils.isNotEmpty(context.getCandidates())) ? context.getCandidates().get(0) : null);
                 break;
             }
             log.info("Attempting to refresh DnB token which was found invalid: " + context.getToken());
-            dnBAuthenticationService.requestToken(DnBKeyType.DPLUS, context.getToken());
+            dnBAuthenticationService.requestToken(DnBKeyType.MATCH, context.getToken());
             if (i == retries - 1) {
                 log.error("Fail to call dnb realtime email API due to invalid token and failed to refresh");
             }

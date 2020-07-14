@@ -97,13 +97,12 @@ public final class DirectPlusUtils {
         return StringUtils.join(parts, "&");
     }
 
-    public static Map<String, Object> parseDataBlock(String response) {
+    public static Map<String, Object> parseDataBlock(String response, List<PrimeColumn> metadata) {
         Map<String, Object> result = new HashMap<>();
-        List<PrimeColumn> mds = getDataBlockMetadata();
         JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
         // cache of jsonPath -> jsonNode
         ConcurrentMap<String, JsonNode> nodeCache = new ConcurrentHashMap<>();
-        mds.forEach(md -> {
+        metadata.forEach(md -> {
             String jsonPath = md.getJsonPath();
             JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
             String value = (String) toValue(jsonNode);
@@ -161,24 +160,6 @@ public final class DirectPlusUtils {
             }
         }
     }
-
-    // to be changed to metadata driven
-    public static List<PrimeColumn> getDataBlockMetadata() {
-        return Arrays.asList(
-                new PrimeColumn("DunsNumber", "D-U-N-S Number", "organization.duns"),
-                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryName"),
-                new PrimeColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames.name"),
-                new PrimeColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1"),
-                new PrimeColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2"),
-                new PrimeColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name"),
-                new PrimeColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name"),
-                new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
-                new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name"),
-                new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
-                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4")
-        );
-    }
-
 
     public static void parseJsonResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);

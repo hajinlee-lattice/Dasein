@@ -769,12 +769,12 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (inputSteps != null) {
                 for (Integer inputStep : inputSteps) {
                     if (inputStep < 0) {
-                        error = String.format("Input Step %s uses invalid step %s", currentStep, inputStep);
+                        error = String.format("Input Step %d uses invalid step %d", currentStep, inputStep);
                         log.error(error);
                         RequestContext.logError(error);
                         return null;
                     } else if (inputStep >= currentStep) {
-                        error = String.format("Step %s uses future step %s result", currentStep, inputStep);
+                        error = String.format("Step %d uses future step %d result", currentStep, inputStep);
                         log.error(error);
                         RequestContext.logError(error);
                         return null;
@@ -785,7 +785,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             List<String> baseSourceNames = step.getBaseSources();
             if (!step.getNoInput() && ((baseSourceNames == null) || (baseSourceNames.size() == 0))
                     && ((inputSteps == null) || (inputSteps.size() == 0))) {
-                error = String.format("Step %s does not have any input source specified", currentStep);
+                error = String.format("Step %d does not have any input source specified", currentStep);
                 log.error(error);
                 RequestContext.logError(error);
                 return null;
@@ -847,7 +847,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                     }
                 }
                 if (!transformer.validateConfig(config, sourceNames)) {
-                    error = String.format("Invalid configuration for step %s", currentStep);
+                    error = String.format("Invalid configuration for step %d", currentStep);
                     log.error(error);
                     RequestContext.logError(error);
                     return null;

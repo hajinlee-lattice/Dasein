@@ -73,24 +73,26 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
     @Override
     public void execute() {
         bootstrap();
-        if (shouldDoNothing()) {
-            linkInactiveTable(BucketedAccount);
+        Table servingTable = getTableSummaryFromKey(customerSpaceStr, ACCOUNT_SERVING_TABLE_NAME);
+        if (servingTable != null) {
+            log.info("Found account serving store in context, going through short-cut mode.");
         } else {
-            Table servingTable = getTableSummaryFromKey(customerSpaceStr, ACCOUNT_SERVING_TABLE_NAME);
-            if (servingTable != null) {
-                log.info("Found account serving store in context, going through short-cut mode.");
-            } else {
-                customerAccountTbl = attemptGetTableRole(ConsolidatedAccount, true);
-                customerProfileTbl = attemptGetTableRole(AccountProfile, true);
-                latticeAccountTbl = attemptGetTableRole(LatticeAccount, true);
-                latticeProfileTbl = attemptGetTableRole(LatticeAccountProfile, true);
-
+            customerAccountTbl = attemptGetTableRole(ConsolidatedAccount, true);
+            customerProfileTbl = attemptGetTableRole(AccountProfile, true);
+            latticeAccountTbl = attemptGetTableRole(LatticeAccount, false);
+            latticeProfileTbl = attemptGetTableRole(LatticeAccountProfile, false);
+            if (shouldRunEncode()) {
                 HdfsDataUnit customerEncode = encode(customerAccountTbl.toHdfsDataUnit("Data"),
                         customerProfileTbl.toHdfsDataUnit("Profile"));
-                HdfsDataUnit latticeEncode = encode(latticeAccountTbl.toHdfsDataUnit("Data"),
-                        latticeProfileTbl.toHdfsDataUnit("Profile"));
-                HdfsDataUnit mergeEncode = merge(customerEncode, latticeEncode);
-
+                HdfsDataUnit mergeEncode;
+                if (latticeAccountTbl == null) {
+                    log.info("This tenant does not have LatticeAccount data.");
+                    mergeEncode = customerEncode;
+                } else {
+                    HdfsDataUnit latticeEncode = encode(latticeAccountTbl.toHdfsDataUnit("Data"),
+                            latticeProfileTbl.toHdfsDataUnit("Profile"));
+                    mergeEncode = merge(customerEncode, latticeEncode);
+                }
                 String tenantId = CustomerSpace.shortenCustomerSpace(customerSpaceStr);
                 String servingTableName = tenantId + "_" + NamingUtils.timestamp(Account.name());
                 servingTable = toTable(servingTableName, AccountId.name(), mergeEncode);
@@ -100,7 +102,14 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
                 metadataProxy.createTable(customerSpaceStr, servingTableName, servingTable);
                 dataCollectionProxy.upsertTable(customerSpaceStr, servingTableName, BucketedAccount, inactive);
                 exportToS3AndAddToContext(servingTable, ACCOUNT_SERVING_TABLE_NAME);
+            } else {
+                linkInactiveTable(BucketedAccount);
+                String tableName = dataCollectionProxy.getTableName(customerSpaceStr, BucketedAccount, inactive);
+                putStringValueInContext(ACCOUNT_SERVING_TABLE_NAME, tableName);
             }
+        }
+        // regardless short-cut or not, need to publish to redshift
+        if (isChanged(BucketedAccount)) {
             exportTableRoleToRedshift(servingTable, BucketedAccount);
         }
     }
@@ -128,20 +137,31 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
         return result.getTargets().get(0);
     }
 
-    private boolean shouldDoNothing() {
-        boolean customerAccountHasChanged = isChanged(ConsolidatedAccount);
-        boolean latticeAccountHasChanged = isChanged(LatticeAccount);
-        boolean shouldDoNothing = !(customerAccountHasChanged || latticeAccountHasChanged);
-        log.info("customerAccountChanged={}, latticeAccountChanged={}, shouldDoNothing={}",
-                customerAccountHasChanged, latticeAccountHasChanged, shouldDoNothing);
-        return shouldDoNothing;
+    private boolean shouldRunEncode() {
+        boolean shouldRunEncode = false;
+        if (Boolean.TRUE.equals(configuration.getRebuild())) {
+            log.info("Should run encode, because enforced to rebuild");
+            shouldRunEncode = true;
+        } else if (Boolean.TRUE.equals(getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class))) {
+            log.info("Should run encode, because upstream marked REBUILD_LATTICE_ACCOUNT to true");
+            shouldRunEncode = true;
+        } else if (isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME)) {
+            log.info("Should run encode, because customer account has changes");
+            shouldRunEncode = true;
+        } else if (latticeAccountTbl != null && isChanged(LatticeAccount, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME)) {
+            log.info("Should run encode, because lattice account has changes");
+            shouldRunEncode = true;
+        }
+        return shouldRunEncode;
     }
 
     private void expandEncAttrs(Table servingTable) {
         String profileAvroGlob = PathUtils.toAvroGlob(customerProfileTbl.toHdfsDataUnit("1").getPath());
         List<GenericRecord> records = new ArrayList<>(AvroUtils.getDataFromGlob(yarnConfiguration, profileAvroGlob));
-        profileAvroGlob = PathUtils.toAvroGlob(latticeProfileTbl.toHdfsDataUnit("1").getPath());
-        records.addAll(AvroUtils.getDataFromGlob(yarnConfiguration, profileAvroGlob));
+        if (latticeProfileTbl != null) {
+            profileAvroGlob = PathUtils.toAvroGlob(latticeProfileTbl.toHdfsDataUnit("1").getPath());
+            records.addAll(AvroUtils.getDataFromGlob(yarnConfiguration, profileAvroGlob));
+        }
 
         List<DCEncodedAttr> encAttrs = BucketEncodeUtils.encodedAttrs(records);
         Map<String, List<DCBucketedAttr>> bktAttrsMap = new HashMap<>();

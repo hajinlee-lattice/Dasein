@@ -153,6 +153,35 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         }
     }
 
+    protected boolean isChanged(TableRoleInCollection tableRole, String changeListCtxKey) {
+        boolean changed;
+        String inactiveName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
+        if (StringUtils.isNotBlank(inactiveName)) {
+            String activeName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, active);
+            changed = !inactiveName.equals(activeName);
+        } else {
+            // consider no change if no inactive version, no matter whether active version exists
+            changed = false;
+        }
+        if (changed && StringUtils.isNotBlank(changeListCtxKey)) {
+            String tableName = getStringValueFromContext(changeListCtxKey);
+            if (StringUtils.isNotBlank(tableName)) {
+                Table changeListTbl = metadataProxy.getTableSummary(customerSpaceStr, changeListCtxKey);
+                if (changeListTbl != null) {
+                    long cnt = changeListTbl.toHdfsDataUnit("ChangeList").getCount();
+                    if (cnt <= 0) {
+                        log.info("There are 0 entries in change list {}, so no real changes.", changeListCtxKey);
+                        changed = false;
+                    } else {
+                        log.info("There are {} entries in the change list {}, so it is really changed.", //
+                                cnt, changeListCtxKey);
+                    }
+                }
+            }
+        }
+        return changed;
+    }
+
     protected void linkInactiveTable(TableRoleInCollection tableRole) {
         cloneTableService.linkInactiveTable(tableRole);
     }

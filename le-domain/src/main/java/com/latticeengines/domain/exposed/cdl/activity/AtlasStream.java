@@ -399,6 +399,6 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     }
 
     public enum StreamType {
-        WebVisit, Opportunity, MarketingActivity, DnbIntentData
+        WebVisit, Opportunity, MarketingActivity, DnbIntentData, DefaultStage
     }
 }

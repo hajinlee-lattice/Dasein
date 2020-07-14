@@ -48,7 +48,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     private Model model;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         throttleConfigurationEntityMgr.deleteAll();
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -101,7 +101,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setDataFormat("avro");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
@@ -129,7 +129,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         validateAppStatus(appId);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "createSamples" })
+    @Test(groups = "functional", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -146,7 +146,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "profile" })
+    @Test(groups = "functional", dependsOnMethods = { "profile" }, enabled = false)
     public void submit() {
         // reset throttle
         restTemplate.postForObject("http://localhost:8080/rest/resetThrottle", null, ThrottleSubmission.class);
@@ -159,7 +159,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         validateAppStatus(platformTestBase.getApplicationId(appId));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "submit" })
+    @Test(groups = "functional", dependsOnMethods = { "submit" }, enabled = false)
     public void throttle() {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(true);

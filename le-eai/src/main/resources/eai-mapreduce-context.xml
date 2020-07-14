@@ -37,4 +37,11 @@
         <constructor-arg ref="mapReduceCustomizationRegistry" />
     </bean>
 
+    <hdp:job id="accountLookupToDynamoJob" mapper="com.latticeengines.eai.dynamodb.runtime.AccountLookupToDynamoMapper" />
+
+    <bean id="accountLookupToDynamoCustomization" class="com.latticeengines.eai.dynamodb.runtime.AccountLookupToDynamoJob">
+        <constructor-arg ref="hadoopConfiguration" />
+        <constructor-arg ref="mapReduceCustomizationRegistry" />
+    </bean>
+
 </beans>

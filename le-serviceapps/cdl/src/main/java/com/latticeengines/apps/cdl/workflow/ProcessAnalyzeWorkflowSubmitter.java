@@ -279,6 +279,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             List<Long> canceledActionPids = getCanceledActionIds(customerSpace, actions);
             updateActions(canceledActionPids, pidWrapper.getPid());
 
+            filterOutActionIdsWithFailedJob(customerSpace, completedActions, actionIds);
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
                     completedActions, actionIds, needDeletedEntity, initialStatus,
@@ -528,6 +529,35 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActions));
 
         return completedActions;
+    }
+
+    private void filterOutActionIdsWithFailedJob(String customerSpace, List<Action> completedActions,
+                                                       List<Long> actionIds) {
+        if (CollectionUtils.isEmpty(completedActions)) {
+            return;
+        }
+
+        List<String> jobPidStrs = completedActions.stream()
+                .filter(action -> action.getTrackingPid() != null)
+                .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
+        log.info(String.format("filterOutActionsWithFailedJob, job pids are %s", jobPidStrs));
+        if (!CollectionUtils.isEmpty(jobPidStrs)) {
+            List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobPids(jobPidStrs, customerSpace);
+
+            List<Long> failedJobPids = CollectionUtils.isEmpty(jobs)
+                    ? Collections.emptyList()
+                    : jobs.stream().filter(job -> job.getJobStatus() == JobStatus.FAILED)
+                    .map(Job::getPid).collect(Collectors.toList());
+            log.info(String.format("filterOutActionsWithFailedJob, failed job pids are %s", failedJobPids));
+
+            // Filter out actions and action ids with failed job associated
+            completedActions.forEach(action -> {
+                if(failedJobPids.contains(action.getTrackingPid())) {
+                    actionIds.remove(action.getPid());
+                    log.info(String.format("filterOutActionsWithFailedJob, remove action id %d", action.getPid()));
+                }
+            });
+        }
     }
 
     @VisibleForTesting

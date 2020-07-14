@@ -1,23 +1,35 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.apps.cdl.service.S3ImportMessageService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.util.S3ImportMessageUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
@@ -42,6 +54,9 @@ public class S3ImportServiceImpl implements S3ImportService {
     private static final String SOURCE = "File";
     private static final String TEMPLATES = "Templates";
     private static final String DROPFOLDER = "dropfolder";
+    private static final String STACK_INFO_URL = "/pls/health/stackinfo";
+
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @Inject
     private S3ImportMessageService s3ImportMessageService;
@@ -50,15 +65,33 @@ public class S3ImportServiceImpl implements S3ImportService {
     private DropBoxService dropBoxService;
 
     @Inject
+    private BatonService batonService;
+
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
     @Inject
     private SourceProxy sourceProxy;
 
+    @Value("${cdl.app.public.url}")
+    private String appPublicUrl;
+
+    @Value("${dcp.app.public.url}")
+    private String dcpPublicUrl;
+
+    @Value("${common.le.stack}")
+    private String currentStack;
+
+    @Value("${common.microservice.url}")
+    private String hostUrl;
+
+    @Value("${common.stack.is.dcp}")
+    private boolean isDCPStack;
+
     @Override
-    public boolean saveImportMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
+    public boolean saveImportMessage(String bucket, String key, S3ImportMessageType messageType) {
         if (isValidKey(key, messageType)) {
-            S3ImportMessage message = s3ImportMessageService.createOrUpdateMessage(bucket, key, hostUrl, messageType);
+            S3ImportMessage message = s3ImportMessageService.createOrUpdateMessage(bucket, key, messageType);
             return message != null;
         } else {
             log.warn(String.format("Not a valid import message for key: %s, skip save import message", key));
@@ -130,6 +163,59 @@ public class S3ImportServiceImpl implements S3ImportService {
             }
         }
         return true;
+    }
+
+    @Override
+    public void updateMessageUrl() {
+        S3ImportMessageType messageType = isDCPStack ? S3ImportMessageType.DCP : S3ImportMessageType.Atlas;
+        List<S3ImportMessage> messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(messageType);
+        if (CollectionUtils.isNotEmpty(messageList)) {
+            log.info("Current stack: " + currentStack + " hostUrl: " + hostUrl + " isDCPStack: " + isDCPStack);
+            for (S3ImportMessage message : messageList) {
+                Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
+                if (tenant == null) {
+                    log.error("Cannot find DropBox Owner: " + message.getDropBox().getDropBox());
+                } else {
+                    if (shouldSet(CustomerSpace.shortenCustomerSpace(tenant.getId()), messageType)) {
+                        log.info("Set message " + message.getKey() + " with hostUrl: " + hostUrl);
+                        s3ImportMessageService.updateHostUrl(message.getKey(), hostUrl);
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean shouldSet(String tenantId, S3ImportMessageType messageType) {
+        String url = S3ImportMessageType.Atlas.equals(messageType) ? appPublicUrl + STACK_INFO_URL : dcpPublicUrl + STACK_INFO_URL;
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        boolean currentActive = true;
+        boolean inactiveImport = false;
+        try {
+            inactiveImport = batonService.isEnabled(customerSpace, LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE);
+        } catch (Exception e) {
+            log.warn("Cannot get AUTO_IMPORT_ON_INACTIVE flag for " + tenantId + "default running on active stack");
+        }
+        try {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                    Collections.singleton(HttpServerErrorException.class), null);
+            AtomicReference<Map<String, String>> stackInfo = new AtomicReference<>();
+            retry.execute(retryContext -> {
+                stackInfo.set(restTemplate.getForObject(url, Map.class));
+                return true;
+            });
+            if (MapUtils.isNotEmpty(stackInfo.get()) && stackInfo.get().containsKey("CurrentStack")) {
+                String activeStack = stackInfo.get().get("CurrentStack");
+                currentActive = currentStack.equalsIgnoreCase(activeStack);
+                log.info("Message type: " + messageType + " Current stack: " + currentStack + " Active stack: " + activeStack +
+                        " INACTIVE IMPORT=" + inactiveImport);
+            }
+            return currentActive ^ inactiveImport;
+        } catch (Exception e) {
+            // active stack is down, running on inactive
+            log.warn("Cannot get active stack!", e);
+            return inactiveImport;
+        }
     }
 
     private void submitDCPImport(Set<String> dropBoxSet, S3ImportMessage message) {

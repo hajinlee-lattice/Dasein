@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.validations.InputFileValidator;
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -51,7 +50,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         CSVFormat format = copyErrorFileToLocalIfExist(errorFile);
         long totalRows = catalogFileValidationServiceConfiguration.getTotalRows();
         boolean skipCheck = false;
-        if (totalRows > InputFileValidator.CATALOG_RECORDS_LIMIT) {
+        if (totalRows > catalogFileValidationServiceConfiguration.getCatalogRecordsLimit()) {
             skipCheck = true;
         }
         InterfaceName pathPattern = InterfaceName.PathPattern;
