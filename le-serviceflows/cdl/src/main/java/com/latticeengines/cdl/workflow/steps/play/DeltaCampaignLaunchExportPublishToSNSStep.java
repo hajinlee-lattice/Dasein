@@ -101,7 +101,6 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         if (lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null) {
             messageBody.setSolutionInstanceId(lookupIdMap.getExternalAuthentication().getSolutionInstanceId());
         }
-        messageBody.setFolderId(config.getExternalFolderId());
         messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());

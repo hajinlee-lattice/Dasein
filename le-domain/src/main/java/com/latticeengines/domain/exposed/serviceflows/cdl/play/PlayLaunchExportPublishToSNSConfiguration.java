@@ -16,8 +16,6 @@ public class PlayLaunchExportPublishToSNSConfiguration extends BaseStepConfigura
 
     private String externalAudienceName;
 
-    private String externalFolderId;
-
     private String externalFolderName;
 
     private AudienceType audienceType;
@@ -54,14 +52,6 @@ public class PlayLaunchExportPublishToSNSConfiguration extends BaseStepConfigura
 
     public void setExternalAudienceName(String externalAudienceName) {
         this.externalAudienceName = externalAudienceName;
-    }
-
-    public String getExternalFolderId() {
-        return externalFolderId;
-    }
-
-    public void setExternalFolderId(String externalFolderId) {
-        this.externalFolderId = externalFolderId;
     }
 
     public String getExternalFolderName() {
