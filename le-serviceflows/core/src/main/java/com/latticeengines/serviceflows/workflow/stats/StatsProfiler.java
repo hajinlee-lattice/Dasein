@@ -126,8 +126,8 @@ public class StatsProfiler {
                     previousRecords.add(record);
                 }
             }
-            previousRecords = classifier.interceptEncodedPreviousRecord(previousRecords);
         }
+        previousRecords = classifier.interceptEncodedPreviousRecord(previousRecords);
         Object[][] data = classifier.parseResult();
         List<Pair<String, Class<?>>> columns = ProfileUtils.getProfileSchema();
         String outputDir = PathUtils.toParquetOrAvroDir(dataUnit.getPath());
