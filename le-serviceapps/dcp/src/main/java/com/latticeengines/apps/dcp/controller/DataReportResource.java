@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +17,8 @@ import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,6 +60,37 @@ public class DataReportResource {
                                  @RequestBody DataReport dataReport) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataReportService.updateDataReport(customerSpace, level, ownerId, dataReport);
+    }
+
+    @PutMapping("/dunscount/{tableName}")
+    @ResponseBody
+    @ApiOperation(value = "Register duns count")
+    public void registerDunsCount(@PathVariable String customerSpace,
+                                  @PathVariable String tableName,
+                                  @RequestParam DataReportRecord.Level level,
+                                  @RequestParam(required = false) String ownerId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataReportService.registerDunsCount(customerSpace, level, ownerId, tableName);
+    }
+
+    @GetMapping("/dunscount")
+    @ResponseBody
+    @ApiOperation(value = "Get duns count cache")
+    public DunsCountCache getDunsCountCache(@PathVariable String customerSpace,
+                                            @RequestParam DataReportRecord.Level level,
+                                            @RequestParam(required = false) String ownerId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataReportService.getDunsCount(customerSpace, level, ownerId);
+    }
+
+    @GetMapping("/dunscountcopy")
+    @ResponseBody
+    @ApiOperation(value = "Get duns count copy")
+    public DunsCountCopy getDunsCountCopy(@PathVariable String customerSpace,
+                                          @RequestParam DataReportRecord.Level level,
+                                          @RequestParam(required = false) String ownerId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataReportService.getDunsCountCopy(customerSpace, level, ownerId);
     }
 
     @PostMapping("/basicstats")

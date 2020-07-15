@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +39,15 @@ public final class TimeLineStoreUtils {
         log.info("contruct timeline {} in tenant {}.", timelineName, customerSpace);
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
         return String.format("%s_%s", tenantId, timelineName);
+    }
+
+    public static long toEventTimestampNDaysAgo(Instant now, int numDays) {
+        // use start of day as evaluation point for now
+        return now.atOffset(ZoneOffset.UTC) //
+                .truncatedTo(ChronoUnit.DAYS) //
+                .minus(numDays, ChronoUnit.DAYS) //
+                .toInstant() //
+                .toEpochMilli();
     }
 
     /**

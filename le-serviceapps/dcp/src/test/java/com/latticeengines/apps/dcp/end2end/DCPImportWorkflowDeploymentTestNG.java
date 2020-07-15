@@ -31,10 +31,12 @@ import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -325,5 +327,30 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         DataReport.MatchToDUNSReport matchToDUNSReport = report.getMatchToDUNSReport();
         Assert.assertNotNull(matchToDUNSReport);
+
+        DunsCountCache uploadCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload
+                , uploadId);
+        Assert.assertNotNull(uploadCache);
+        Assert.assertNotNull(uploadCache.getSnapshotTimestamp());
+        Assert.assertNotNull(uploadCache.getDunsCount());
+        System.out.println(JsonUtils.pprint(uploadCache));
+
+        DunsCountCache sourceCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Source,
+                source.getSourceId());
+        Assert.assertNotNull(sourceCache);
+        Assert.assertNotNull(sourceCache.getSnapshotTimestamp());
+        Assert.assertNotNull(sourceCache.getDunsCount());
+
+        DunsCountCache projectCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Project,
+                projectDetails.getProjectId());
+        Assert.assertNotNull(projectCache);
+        Assert.assertNotNull(projectCache.getSnapshotTimestamp());
+        Assert.assertNotNull(projectCache.getDunsCount());
+
+        DunsCountCache tenantCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Tenant,
+                CustomerSpace.parse(mainCustomerSpace).toString());
+        Assert.assertNotNull(tenantCache);
+        Assert.assertNotNull(tenantCache.getSnapshotTimestamp());
+        Assert.assertNotNull(tenantCache.getDunsCount());
     }
 }

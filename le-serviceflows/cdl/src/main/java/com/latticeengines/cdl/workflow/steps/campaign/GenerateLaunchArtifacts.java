@@ -135,7 +135,10 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         boolean contactsDataExists = doesContactDataExist(attrRepo);
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
-        String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
+        String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId()
+                : launch.getDestinationAccountId();
+        String contactLookupId = launch == null ? channel.getLookupIdMap().getContactId()
+                : launch.getDestinationContactId();
 
         List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
                 channel.getId());
@@ -145,13 +148,15 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
 
         Set<Lookup> accountLookups = buildLookupsByEntity(BusinessEntity.Account, fieldMappingMetadata, channel);
-        if (StringUtils.isNotBlank(lookupId)) {
-            accountLookups.add(new AttributeLookup(BusinessEntity.Account, lookupId));
+        if (StringUtils.isNotBlank(accountLookupId)) {
+            accountLookups.add(new AttributeLookup(BusinessEntity.Account, accountLookupId));
         }
         accountLookups = addRatingLookups(play.getRatingEngine(), accountLookups);
 
         Set<Lookup> contactLookups = buildLookupsByEntity(BusinessEntity.Contact, fieldMappingMetadata, channel);
-
+        if (StringUtils.isNotBlank(contactLookupId)) {
+            contactLookups.add(new AttributeLookup(BusinessEntity.Contact, contactLookupId));
+        }
         log.info("Account Lookups: " + accountLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
         log.info("Contact Lookups: " + contactLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
 

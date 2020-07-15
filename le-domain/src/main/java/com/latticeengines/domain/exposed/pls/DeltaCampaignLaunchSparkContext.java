@@ -90,6 +90,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("SfdcAccountID")
     private String sfdcAccountID;
 
+    @JsonProperty("SfdcContactID")
+    private String sfdcContactID;
+
     @JsonProperty("AccountColsRecIncluded")
     private List<String> accountColsRecIncluded;
 
@@ -296,6 +299,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         this.sfdcAccountID = sfdcAccountID;
     }
 
+    public String getSfdcContactID() {
+        return this.sfdcContactID;
+    }
+
+    public void setSfdcContactID(String sfdcContactID) {
+        this.sfdcContactID = sfdcContactID;
+    }
+
     public List<String> getAccountColsRecIncluded() {
         return this.accountColsRecIncluded;
     }
@@ -447,6 +458,13 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
             this.sfdcAccountID = destinationAccountId;
         } else {
             this.sfdcAccountID = null;
+        }
+
+        if (StringUtils.isNotBlank(playLaunch.getDestinationContactId())) {
+            String destinationContactId = playLaunch.getDestinationContactId().trim();
+            this.sfdcContactID = destinationContactId;
+        } else {
+            this.sfdcContactID = null;
         }
     }
 

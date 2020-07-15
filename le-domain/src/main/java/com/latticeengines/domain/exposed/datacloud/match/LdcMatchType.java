@@ -14,5 +14,6 @@ public enum LdcMatchType {
     DUNS_VALIDATE,
     LOCATION_CACHED_DUNS,
     LOCATION_DUNS,
+    DUNS_DUNS,
     NO_MATCH
 }

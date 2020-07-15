@@ -210,7 +210,7 @@ public class DecisionGraph implements HasPid, Serializable {
 
         startingNodes = new ArrayList<>();
         for (String idxStr : getStartingVertices().split(",")) {
-            String nodeName = nodeNameList.get(Integer.valueOf(idxStr));
+            String nodeName = nodeNameList.get(Integer.parseInt(idxStr));
             startingNodes.add(nodeMap.get(nodeName));
         }
     }

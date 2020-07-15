@@ -52,6 +52,11 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Real time or bulk match.
     private Boolean isBatchMode = false;
 
+    // Use DUNS to match DUNS
+    // if the given DUNS is bad, even other inputs are correct, still cannot match
+    // therefore try to use a special attempt for DUNS -> DUNS
+    private Boolean useDunsMatchDuns = false;
+
     private OperationalMode operationalMode;
 
     // Actor name (class name) -> duns
@@ -248,6 +253,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         if (this.dunsOriginMap == null) {
             this.dunsOriginMap = dunsOriginMap;
         }
+    }
+
+    public Boolean getUseDunsMatchDuns() {
+        return useDunsMatchDuns;
+    }
+
+    public void setUseDunsMatchDuns(Boolean useDunsMatchDuns) {
+        this.useDunsMatchDuns = useDunsMatchDuns;
     }
 
     public List<Object> getInputDataRecord() {

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -13,6 +15,31 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
 
     protected DataReportProxy() {
         super("dcp");
+    }
+
+    public void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
+                                  String tableName) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount/{tableName}?level={level}";
+        String url;
+        if (StringUtils.isNotEmpty(ownerId)) {
+            baseUrl += "&ownerId={ownerId}";
+            url = constructUrl(baseUrl, customerSpace, tableName, level, ownerId);
+        } else {
+            url = constructUrl(baseUrl, customerSpace, tableName, level);
+        }
+        put("Register duns count", url);
+    }
+
+    public DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount?level={level}";
+        String url = getUrl(customerSpace, level, ownerId, baseUrl);
+        return get("Get duns count", url, DunsCountCache.class);
+    }
+
+    public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscountcopy?level={level}";
+        String url = getUrl(customerSpace, level, ownerId, baseUrl);
+        return get("Get duns count copy", url, DunsCountCopy.class);
     }
 
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {

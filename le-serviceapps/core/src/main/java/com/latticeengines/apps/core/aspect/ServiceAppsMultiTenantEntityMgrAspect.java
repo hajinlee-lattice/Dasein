@@ -46,6 +46,12 @@ public class ServiceAppsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrA
                 Arrays.asList(entityManager, entityManagerReader));
     }
 
+    @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.count*(..))")
+    public void count(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
+    }
+
     @Before("execution(* com.latticeengines.apps.dcp.entitymgr.impl.*.update*(..))")
     public void dcpUpdate(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));

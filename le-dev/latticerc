@@ -4,6 +4,25 @@ export LE_ENVIRONMENT=dev
 export LE_SECRET_KEY="I03TMIIUftFUUI7bV0zFBw=="
 export LE_SALT_HINT="bi0mpJJNxiYpEka5C6JO4g=="
 
+if [[ -f "${HOME}/.aws/credentials" ]]; then
+  expiration=$(cat ${HOME}/.aws/credentials | grep "expiration" | cut -d ' ' -f 3- | cut -d '+' -f 1)
+  echo "Your aws creds is expiring at ${expiration} UTC"
+  if [[ "$(uname)" == "Darwin" ]]; then
+    exp_ts=$(TZ="UTC" date -jf "%Y-%m-%d %H:%M:%S" "${expiration}" +%s)
+  else
+    exp_ts=$(date -u -d "${expiration}" +%s)
+  fi
+  current_ts=$(date +%s)
+  remaining_min=$(( (exp_ts - current_ts) / 60 ))
+  if (( remaining_min > 30 )); then
+    echo "The current aws creds is still valid for ${remaining_min} minutes, ok to continue using it."
+  else
+    echo "WARNING: The current aws creds is only valid for ${remaining_min} minutes, please consider re-login aws cli"
+  fi
+else
+  echo "Cannot find ~/.aws/credentials. Must setup aws cli!"
+fi
+
 if [ -f $WSHOME/le-dev/aliases ]; then
     . $WSHOME/le-dev/aliases
 fi
