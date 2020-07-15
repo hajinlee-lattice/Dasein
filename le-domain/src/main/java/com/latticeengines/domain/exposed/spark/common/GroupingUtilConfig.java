@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.spark.common;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +21,7 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.ValueLookup;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 
 public class GroupingUtilConfig {
     private String groupKey;
@@ -59,7 +58,7 @@ public class GroupingUtilConfig {
         this.aggregateLookup = aggregateLookup;
     }
 
-    public static GroupingUtilConfig from(JourneyStage stage, JourneyStagePredicate predicate) {
+    public static GroupingUtilConfig from(JourneyStage stage, JourneyStagePredicate predicate, Instant now) {
         GroupingUtilConfig config = new GroupingUtilConfig();
         config.setGroupKey(InterfaceName.AccountId.name());
 
@@ -81,8 +80,7 @@ public class GroupingUtilConfig {
         ConcreteRestriction timeStampFilter = new ConcreteRestriction(false, //
                 new ColumnLookup(InterfaceName.EventTimestamp.name()), //
                 ComparisonType.GREATER_THAN, //
-                new ValueLookup(Instant.now().atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS)
-                        .minusDays(predicate.getPeriodDays()).toEpochSecond()));
+                new ValueLookup(TimeLineStoreUtils.toEventTimestampNDaysAgo(now, predicate.getPeriodDays())));
         filterRestrictions.add(timeStampFilter);
 
         // Contact not null
