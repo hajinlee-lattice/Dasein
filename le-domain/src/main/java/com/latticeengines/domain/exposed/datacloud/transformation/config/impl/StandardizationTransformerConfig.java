@@ -119,6 +119,9 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("DunsFields")
     private String[] dunsFields; // for strategy DUNS: standardize DUNS
 
+    @JsonProperty("DunsValidateFields")
+    private String[] dunsValidateFields; // for strategy VALIDATE_DUNS: validate DUNS related fields
+
     @JsonProperty("IDFields")
     private String[] idFields; // for strategy ADD_ID: add id field
 
@@ -338,8 +341,7 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         return consolidateIndustryStrategy;
     }
 
-    public void setConsolidateIndustryStrategy(
-            ConsolidateIndustryStrategy consolidateIndustryStrategy) {
+    public void setConsolidateIndustryStrategy(ConsolidateIndustryStrategy consolidateIndustryStrategy) {
         this.consolidateIndustryStrategy = consolidateIndustryStrategy;
     }
 
@@ -387,8 +389,7 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         return consolidateRangeStrategies;
     }
 
-    public void setConsolidateRangeStrategies(
-            ConsolidateRangeStrategy[] consolidateRangeStrategies) {
+    public void setConsolidateRangeStrategies(ConsolidateRangeStrategy[] consolidateRangeStrategies) {
         this.consolidateRangeStrategies = consolidateRangeStrategies;
     }
 
@@ -511,6 +512,7 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         CHECKSUM, //
         UPDATE, //
         SAMPLE, //
+        VALIDATE_DUNS, //
     }
 
     public enum FieldType {
@@ -529,4 +531,11 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         ROWID, UUID
     }
 
+    public String[] getDunsValidateFields() {
+        return dunsValidateFields;
+    }
+
+    public void setDunsValidateFields(String[] dunsValidateFields) {
+        this.dunsValidateFields = dunsValidateFields;
+    }
 }

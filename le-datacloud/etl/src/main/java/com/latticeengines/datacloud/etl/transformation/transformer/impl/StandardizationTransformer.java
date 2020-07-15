@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -268,9 +269,10 @@ public class StandardizationTransformer
                     RequestContext.logError(error);
                     return false;
                 }
-                switch(config.getConsolidateIndustryStrategy()) {
+                switch (config.getConsolidateIndustryStrategy()) {
                 case MAP_INDUSTRY:
-                    if (StringUtils.isEmpty(config.getIndustryField()) || StringUtils.isEmpty(config.getIndustryMapFileName())) {
+                    if (StringUtils.isEmpty(config.getIndustryField())
+                            || StringUtils.isEmpty(config.getIndustryMapFileName())) {
                         error = String.format(
                                 "For ConsolidateIndustryStrategy %s, IndustryField and IndustryMapFileName are required.",
                                 config.getConsolidateIndustryStrategy().name());
@@ -280,7 +282,8 @@ public class StandardizationTransformer
                     }
                     break;
                 case PARSE_NAICS:
-                    if (StringUtils.isEmpty(config.getNaicsField()) || StringUtils.isEmpty(config.getNaicsMapFileName())) {
+                    if (StringUtils.isEmpty(config.getNaicsField())
+                            || StringUtils.isEmpty(config.getNaicsMapFileName())) {
                         error = String.format(
                                 "For ConsolidateIndustryStrategy %s, NaicsField and NaicsMapFileName are required.",
                                 config.getConsolidateIndustryStrategy().name());
@@ -503,6 +506,14 @@ public class StandardizationTransformer
                     return false;
                 }
                 break;
+            case VALIDATE_DUNS:
+                if (ArrayUtils.isEmpty(config.getDunsFields())) {
+                    error = String.format("Invalid configuration for strategy %s", strategy.name());
+                    log.error(error);
+                    RequestContext.logError(error);
+                    return false;
+                }
+                break;
             default:
                 error = String.format("Standardization strategy %s is not supported", strategy.name());
                 log.error(error);
@@ -575,6 +586,6 @@ public class StandardizationTransformer
         parameters.setUpdateInputFields(config.getUpdateInputFields());
         parameters.setSampleFraction(config.getSampleFraction());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
+        parameters.setDunsValidateFields(config.getDunsValidateFields());
     }
-
 }
