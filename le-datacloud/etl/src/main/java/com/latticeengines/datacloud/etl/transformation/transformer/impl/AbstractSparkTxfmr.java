@@ -52,6 +52,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
+import com.latticeengines.spark.exposed.utils.SparkJobClzUtils;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -176,7 +177,15 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
                 }
                 sessionHolder.set(createLivySession(step, progress, sparkProps, scalingConfig));
                 span.log(Collections.singletonMap("livySession", JsonUtils.serialize(sessionHolder.get())));
-                return sparkJobService.runJob(sessionHolder.get(), getSparkJobClz(), sparkJobConfig);
+                try {
+                    return sparkJobService.runJob(sessionHolder.get(), getSparkJobClz(), sparkJobConfig);
+                } catch (Exception e) {
+                    if (!SparkJobClzUtils.isExceptionRetryable(e)) {
+                        log.error("Spark job failed with not retryable error, failing", e);
+                        ctx.setExhaustedOnly();
+                    }
+                    throw e;
+                }
             });
             span.log(Collections.singletonMap("sparkOutput", JsonUtils.serialize(sparkJobResult)));
 
