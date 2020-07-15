@@ -121,6 +121,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
             return true;
         });
         List<JourneyStage> journeyStageList = createdAtom.get();
+        log.info("journeyStages : {}.", JsonUtils.serialize(journeyStageList));
         Assert.assertEquals(journeyStageList.size(), 8);
     }
 }
