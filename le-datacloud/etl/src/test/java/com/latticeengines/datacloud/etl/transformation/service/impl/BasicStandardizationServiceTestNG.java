@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,7 +36,8 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
 
     private GeneralSource source = new GeneralSource("Output");
     private GeneralSource baseSource = new GeneralSource("Input");
-    private GeneralSource intermediateSource = new GeneralSource("Intermediate");
+    private GeneralSource intermediateSource1 = new GeneralSource("Intermediate1");
+    private GeneralSource intermediateSource2 = new GeneralSource("Intermediate2");
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
@@ -64,7 +66,7 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
         baseSources.add(baseSource.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
-        step1.setTargetSource(intermediateSource.getSourceName());
+        step1.setTargetSource(intermediateSource1.getSourceName());
         String confParamStr1 = getFirstStepConfig();
         step1.setConfiguration(confParamStr1);
 
@@ -74,14 +76,22 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
         step2.setInputSteps(inputSteps);
 
         step2.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
-        step2.setTargetSource(source.getSourceName());
+        step2.setTargetSource(intermediateSource2.getSourceName());
         String confParamStr2 = getSecondStepConfig();
         step2.setConfiguration(confParamStr2);
+
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        step3.setInputSteps(Collections.singletonList(1));
+        step3.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
+        step3.setTargetSource(source.getSourceName());
+        String confParamStr3 = getThirdStepConfig();
+        step3.setConfiguration(confParamStr3);
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(step1);
         steps.add(step2);
+        steps.add(step3);
 
         // -----------
         configuration.setSteps(steps);
@@ -129,12 +139,21 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
         return JsonUtils.serialize(conf);
     }
 
+    private String getThirdStepConfig() {
+        StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
+        String[] dunFilterFields = { "DUNS" };
+        conf.setDunsValidateFields(dunFilterFields);
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.VALIDATE_DUNS };
+        conf.setSequence(sequence);
+        return JsonUtils.serialize(conf);
+    }
+
     // ID, Name, Country, State, ZipCode, DUNS, CHIEF_EXECUTIVE_OFFICER_NAME
     private Object[][] input = new Object[][] { //
-            { 1, "Name1", "United States", "CA", "  94404  ", "0123456789", null }, //
-            { 2, "Name2", "England", "Scotland &.", " null ", "123456789", "CEO2" }, //
-            { 3, "Name3", null, "Scotland &.", "", "6789", "CEO3" }, //
-            { 4, "Name4", "USA", null, "none", null, "" }, //
+            { 1, "Name1", "United States", "CA", "  94404  ", "0123456789", null, null }, //
+            { 2, "Name2", "England", "Scotland &.", " null ", "123456789", "CEO2", "987654321" }, //
+            { 3, "Name3", null, "Scotland &.", "", "6789", "CEO3", "12345" }, //
+            { 4, "Name4", "USA", null, "none", null, "", "456789" }, //
     };
 
     private void prepareInput() {
@@ -146,6 +165,7 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
         columns.add(Pair.of("ZipCode", String.class));
         columns.add(Pair.of("DUNS", String.class));
         columns.add(Pair.of("CHIEF_EXECUTIVE_OFFICER_NAME", String.class));
+        columns.add(Pair.of("DOMESTIC_ULTIMATE_DUNS_NUMBER",String.class));
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, input);
 
         try {
@@ -163,10 +183,10 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
     }
 
     private Object[][] expected = { //
-            { 1, "Name1", "USA", "CALIFORNIA", "94404", null, "Name1", null }, //
-            { 2, "Name2", "UNITED KINGDOM", "SCOTLAND", null, "123456789", "Name2", "CEO2Fixed" }, //
-            { 3, "Name3", null, null, null, "000006789", "Name3", "CEO3" }, //
-            { 4, "Name4", "USA", null, null, null, "Name4", "" } //
+            { 1, "Name1", "USA", "CALIFORNIA", "94404", null, "Name1", null, null }, //
+            { 2, "Name2", "UNITED KINGDOM", "SCOTLAND", null, "123456789", "Name2", "CEO2Fixed", "987654321" }, //
+            { 3, "Name3", null, null, null, "000006789", "Name3", "CEO3", "12345" }, //
+            { 4, "Name4", "USA", null, null, null, "Name4", "", "456789" } //
     };
 
     @Override
@@ -200,7 +220,7 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
     }
 
     private void confirmSchema() {
-        Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(intermediateSource, targetVersion);
+        Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(intermediateSource1, targetVersion);
         Assert.assertEquals(schema.getProp("PropertyToRetain"), "TestPropertyToRetain");
     }
 }

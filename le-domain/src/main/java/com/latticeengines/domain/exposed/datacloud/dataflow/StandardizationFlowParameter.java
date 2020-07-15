@@ -109,6 +109,9 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("DunsFields")
     private String[] dunsFields;
 
+    @JsonProperty("DunsValidateFields")
+    private String[] dunsValidateFields;
+
     @JsonProperty("IDFields")
     private String[] idFields;
 
@@ -336,8 +339,7 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         return consolidateIndustryStrategy;
     }
 
-    public void setConsolidateIndustryStrategy(
-            ConsolidateIndustryStrategy consolidateIndustryStrategy) {
+    public void setConsolidateIndustryStrategy(ConsolidateIndustryStrategy consolidateIndustryStrategy) {
         this.consolidateIndustryStrategy = consolidateIndustryStrategy;
     }
 
@@ -385,8 +387,7 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         return consolidateRangeStrategies;
     }
 
-    public void setConsolidateRangeStrategies(
-            ConsolidateRangeStrategy[] consolidateRangeStrategies) {
+    public void setConsolidateRangeStrategies(ConsolidateRangeStrategy[] consolidateRangeStrategies) {
         this.consolidateRangeStrategies = consolidateRangeStrategies;
     }
 
@@ -486,4 +487,7 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         this.sampleFraction = sampleFraction;
     }
 
+    public String[] getDunsValidateFields() { return dunsValidateFields; }
+
+    public void setDunsValidateFields(String[] dunsValidateFields) { this.dunsValidateFields = dunsValidateFields; }
 }
