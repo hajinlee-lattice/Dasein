@@ -2,8 +2,6 @@ package com.latticeengines.apps.cdl.qaend2end;
 
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +11,6 @@ import org.testng.annotations.Test;
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.testframework.CDLQATestNGBase;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.testframework.exposed.service.TestFileImportService;
-import com.latticeengines.testframework.exposed.service.TestJobService;
 
 public class ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG extends CDLQATestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG.class);
@@ -37,12 +33,6 @@ public class ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG extends CDLQATestNGB
 
     @Value("${pa.import.correctness.hierarchy}")
     private String productHierarchyFilePath;
-
-    @Inject
-    private TestFileImportService testFileImportService;
-
-    @Inject
-    private TestJobService testJobService;
 
     @Override
     protected void checkBasicInfo() {
@@ -75,10 +65,10 @@ public class ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG extends CDLQATestNGB
 
         // wait all file import actions are done
         log.info("Waiting all file import actions are done...");
-        testJobService.waitForProcessAnalyzeAllActionsDone(DEFAULT_WAIT_PA_READY_IN_MINUTES); // rename method
+        testJobService.waitForProcessAnalyzeAllActionsDone(DEFAULT_WAIT_PA_READY_IN_MINUTES);
 
         // run PA
         log.info("Starting PA for file import...");
-        processAnalyzeRunNow();
+        testJobService.processAnalyzeRunNow(mainTestTenant);
     }
 }

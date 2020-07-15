@@ -22,7 +22,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -34,7 +33,6 @@ import com.latticeengines.apps.cdl.service.impl.CheckpointAutoService;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -56,7 +54,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
@@ -64,6 +61,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.testframework.exposed.service.TestJobService;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -100,6 +98,9 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Inject
     protected CheckpointAutoService checkpointAutoService;
+
+    @Inject
+    protected TestJobService testJobService;
 
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;
@@ -142,7 +143,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected void setupTestEnvironmentByFile(String jsonFileName) {
-        if(!StringUtils.isEmpty(jsonFileName)) {
+        if (!StringUtils.isEmpty(jsonFileName)) {
             testBed.bootstrapForProduct(LatticeProduct.CG, jsonFileName);
             mainTestTenant = testBed.getMainTestTenant();
             mainCustomerSpace = mainTestTenant.getId();
@@ -189,76 +190,12 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         return ruleBasedModel;
     }
 
-    protected String waitForTrueApplicationId(String applicationId) {
-        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        if (StringUtils.isBlank(applicationId)) {
-            throw new IllegalArgumentException("Must provide a valid fake application id");
-        }
-        if (!ApplicationIdUtils.isFakeApplicationId(applicationId)) {
-            return applicationId;
-        }
-        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate( //
-                100, 1000, 2, 3000, //
-                false, Collections.emptyMap());
-        try {
-            return retry.execute(ctx -> {
-                if (ctx.getLastThrowable() != null) {
-                    log.error("Failed to retrieve Job using application id " + applicationId, ctx.getLastThrowable());
-                }
-                Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId, customerSpace);
-                String newId = job.getApplicationId();
-                if (!ApplicationIdUtils.isFakeApplicationId(newId)) {
-                    return newId;
-                } else {
-                    throw new IllegalStateException("Still showing fake id " + newId);
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve the true application id from fake id [" + applicationId + "]");
-        }
-    }
-
     protected JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
-        String trueAppId = waitForTrueApplicationId(applicationId);
-        if (!trueAppId.equals(applicationId)) {
-            log.info("Convert fake app id " + applicationId + " to true app id " + trueAppId);
-        }
-        int retryOnException = 4;
-        Job job;
-        while (true) {
-            try {
-                job = workflowProxy.getWorkflowJobFromApplicationId(trueAppId,
-                        CustomerSpace.parse(mainTestTenant.getId()).toString());
-            } catch (Exception e) {
-                log.error(String.format("Workflow job exception: %s", e.getMessage()), e);
-
-                job = null;
-                if (--retryOnException == 0)
-                    throw new RuntimeException(e);
-            }
-
-            if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
-                if (job.getJobStatus() == JobStatus.FAILED || job.getJobStatus() == JobStatus.PENDING_RETRY) {
-                    log.error(applicationId + " Failed with ErrorCode " + job.getErrorCode() + ". \n"
-                            + job.getErrorMsg());
-                }
-                return job.getJobStatus();
-            }
-            try {
-                Thread.sleep(30000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        return testJobService.waitForWorkflowStatus(mainTestTenant, applicationId, running);
     }
 
     protected Job getWorkflowJobFromApplicationId(String applicationId) {
-        String trueAppId = waitForTrueApplicationId(applicationId);
-        if (!trueAppId.equals(applicationId)) {
-            log.info("Convert fake app id " + applicationId + " to true app id " + trueAppId);
-        }
-        return workflowProxy.getWorkflowJobFromApplicationId(trueAppId,
-                CustomerSpace.parse(mainTestTenant.getId()).toString());
+        return testJobService.getWorkflowJobFromApplicationId(mainTestTenant, applicationId);
     }
 
     public void setMainTestTenant(Tenant mainTestTenant) {
