@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.spark.common;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,11 +15,13 @@ import com.latticeengines.domain.exposed.cdl.activity.JourneyStagePredicate;
 import com.latticeengines.domain.exposed.cdl.activity.StreamFieldToFilter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 
 public class GroupingConfgUnitTestNG {
 
     @Test(groups = "unit")
     public void testJourneyStageSparkFilterClauses() {
+        Instant now = Instant.now();
         JourneyStage stage = new JourneyStage();
         List<JourneyStagePredicate> predicates;
         JourneyStagePredicate predicate;
@@ -44,13 +47,15 @@ public class GroupingConfgUnitTestNG {
         predicates.add(predicate);
         stage.setPredicates(predicates);
 
-        config = GroupingUtilConfig.from(stage, predicate);
+        config = GroupingUtilConfig.from(stage, predicate, now);
         Assert.assertNotNull(config);
         Assert.assertEquals(config.getGroupKey(), InterfaceName.AccountId.name());
         Assert.assertNotNull(config.getAggregateLookup());
         Assert.assertEquals(config.getAggregationColumn(), InterfaceName.AccountId.name());
         Assert.assertEquals(config.getSparkSqlWhereClause(),
-                "StreamType = 'MarketingActivity' and EventTimestamp > '1593302400' and Detail1 in ('WebVisit','Email Bounce')");
+                String.format(
+                        "StreamType = 'MarketingActivity' and EventTimestamp > '%d' and Detail1 in ('WebVisit','Email Bounce')",
+                        TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 14)));
 
         // Test 2: Opportunity-> Opportunity 1 90 Days Detail1 NOT CONTAINS "Closed%"
         stage.setStageName("Opportunity");
@@ -75,13 +80,15 @@ public class GroupingConfgUnitTestNG {
         predicates.add(predicate);
         stage.setPredicates(predicates);
 
-        config = GroupingUtilConfig.from(stage, predicate);
+        config = GroupingUtilConfig.from(stage, predicate, now);
         Assert.assertNotNull(config);
         Assert.assertEquals(config.getGroupKey(), InterfaceName.AccountId.name());
         Assert.assertNotNull(config.getAggregateLookup());
         Assert.assertEquals(config.getAggregationColumn(), InterfaceName.AccountId.name());
         Assert.assertEquals(config.getSparkSqlWhereClause(),
-                "StreamType = 'Opportunity' and EventTimestamp > '1586736000' and Detail1 like 'closed%' and Detail1 like '%won'");
+                String.format(
+                        "StreamType = 'Opportunity' and EventTimestamp > '%d' and Detail1 like 'closed%%' and Detail1 like '%%won'",
+                        TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 90)));
 
     }
 }
