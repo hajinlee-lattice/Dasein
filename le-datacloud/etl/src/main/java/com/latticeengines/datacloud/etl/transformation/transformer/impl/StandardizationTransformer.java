@@ -507,7 +507,7 @@ public class StandardizationTransformer
                 }
                 break;
             case VALIDATE_DUNS:
-                if (ArrayUtils.isEmpty(config.getDunsFields())) {
+                if (ArrayUtils.isEmpty(config.getDunsValidateFields())) {
                     error = String.format("Invalid configuration for strategy %s", strategy.name());
                     log.error(error);
                     RequestContext.logError(error);
