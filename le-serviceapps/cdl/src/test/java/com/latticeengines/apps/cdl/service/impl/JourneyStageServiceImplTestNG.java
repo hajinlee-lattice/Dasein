@@ -117,7 +117,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         AtomicReference<List<JourneyStage>> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom.set(journeyStageService.findByTenant(mainCustomerSpace));
-            Assert.assertNotNull(createdAtom.get());
+            Assert.assertEquals(createdAtom.get().size(), 7);
             return true;
         });
         List<JourneyStage> journeyStageList = createdAtom.get();
