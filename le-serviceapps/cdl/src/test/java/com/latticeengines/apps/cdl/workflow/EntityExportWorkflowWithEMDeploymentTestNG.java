@@ -48,7 +48,6 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
         // make sure no account and contact id
         Assert.assertFalse(headerMap.containsKey("Atlas Account ID"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertFalse(headerMap.containsKey("Atlas Contact ID"), "Header map: " + JsonUtils.serialize(headerMap));
-        Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey(InterfaceName.LatticeExportTime.name()), "Header map: " + JsonUtils.serialize(headerMap));

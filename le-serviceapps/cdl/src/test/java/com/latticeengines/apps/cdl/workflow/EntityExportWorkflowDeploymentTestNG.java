@@ -213,11 +213,10 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     protected void configExportAttrs() {
         AttrConfig enable1 = enableExport(BusinessEntity.Account, "user_Test_Date"); // date attr
         AttrConfig enable2 = enableExport(BusinessEntity.Account, "TechIndicator_OracleCommerce"); // bit encode
-        AttrConfig enable3 = enableExport(BusinessEntity.Account, "CHIEF_EXECUTIVE_OFFICER_NAME"); // non-segmentable
-        AttrConfig enable4 = enableExport(BusinessEntity.PurchaseHistory,
+        AttrConfig enable3 = enableExport(BusinessEntity.PurchaseHistory,
                 "AM_g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J__W_1__SW"); // activity metric
         AttrConfigRequest request2 = new AttrConfigRequest();
-        request2.setAttrConfigs(Arrays.asList(enable1, enable2, enable3, enable4));
+        request2.setAttrConfigs(Arrays.asList(enable1, enable2, enable3));
         attrConfigService.saveRequest(request2, AttrConfigUpdateMode.Usage);
     }
 
@@ -270,7 +269,6 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         // make sure header map contains account and contact id
         Assert.assertTrue(headerMap.containsKey("Id"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("ContactId"), "Header map: " + JsonUtils.serialize(headerMap));
-        Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey(InterfaceName.LatticeExportTime.name()), "Header map: " + JsonUtils.serialize(headerMap));
