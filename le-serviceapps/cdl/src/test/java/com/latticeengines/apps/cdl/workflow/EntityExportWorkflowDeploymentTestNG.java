@@ -215,6 +215,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         AttrConfig enable2 = enableExport(BusinessEntity.Account, "TechIndicator_OracleCommerce"); // bit encode
         AttrConfig enable3 = enableExport(BusinessEntity.PurchaseHistory,
                 "AM_g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J__W_1__SW"); // activity metric
+        // TODO: need to make a non-segmentable attribute enabled
         AttrConfigRequest request2 = new AttrConfigRequest();
         request2.setAttrConfigs(Arrays.asList(enable1, enable2, enable3));
         attrConfigService.saveRequest(request2, AttrConfigUpdateMode.Usage);
