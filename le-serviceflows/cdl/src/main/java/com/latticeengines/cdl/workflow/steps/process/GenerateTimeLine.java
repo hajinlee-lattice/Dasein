@@ -179,6 +179,10 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 .map(entry -> Pair.of(entry.getValue(),
                         configuration.getActivityStreamMap().get(entry.getKey()).getStreamId())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         config.timelineVersionMap = timelineVersionMap;
+        config.dimensionMetadataMap =
+                config.dimensionMetadataMap.entrySet().stream().filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && AtlasStream.StreamType.WebVisit.equals(configuration.getActivityStreamMap().get(entry.getKey()).getStreamType())))
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey,
+                        Pair::getValue));
         return config;
     }
 
