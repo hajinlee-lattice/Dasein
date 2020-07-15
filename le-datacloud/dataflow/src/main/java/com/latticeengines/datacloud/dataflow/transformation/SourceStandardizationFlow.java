@@ -13,7 +13,10 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -25,6 +28,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateIndustr
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DunsValidateFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StateStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StringStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
@@ -43,6 +47,8 @@ import cascading.tuple.Fields;
 @Component(SourceStandardizationFlow.DATAFLOW_BEAN_NAME)
 public class SourceStandardizationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, StandardizationFlowParameter> {
+
+    private static final Logger log = LoggerFactory.getLogger(SourceStandardizationFlow.class);
 
     private static final String IS_VALID_DOMAIN = "IsValidDomain";
     private static final String DOMAIN = "Domain";
@@ -135,6 +141,9 @@ public class SourceStandardizationFlow
             case SAMPLE:
                 source = sample(source, parameters.getSampleFraction());
                 break;
+            case VALIDATE_DUNS:
+                source = validateDuns(source, parameters.getDunsValidateFields());
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Standardization strategy %s is not supported", strategy.name()));
@@ -162,15 +171,14 @@ public class SourceStandardizationFlow
 
     private Node checksum(Node source, String[] excludeFields, String checksumField) {
         Set<String> toExclude = excludeFields == null ? new HashSet<>() : new HashSet<>(Arrays.asList(excludeFields));
-        source = source
-                .apply(new AddMD5Hash(new Fields(checksumField), toExclude), new FieldList(source.getFieldNames()),
-                        new FieldMetadata(checksumField, String.class));
+        source = source.apply(new AddMD5Hash(new Fields(checksumField), toExclude),
+                new FieldList(source.getFieldNames()), new FieldMetadata(checksumField, String.class));
         return source;
     }
 
     private Node copy(Node source, String[][] copyFields) {
         List<FieldMetadata> fms = source.getSchema();
-        for (String[] couple : copyFields) {    // couple[0]: fromField; couple[1]: toField
+        for (String[] couple : copyFields) { // couple[0]: fromField; couple[1]: toField
             FieldMetadata newFM = null;
             for (FieldMetadata fm : fms) {
                 if (fm.getFieldName().equals(couple[0])) {
@@ -236,8 +244,9 @@ public class SourceStandardizationFlow
 
     private Node consolidateRange(Node source, String[] addConsolidatedRangeFields,
             ConsolidateRangeStrategy[] strategies, String[] rangeInputFields, String[] rangeMapFileNames) {
-        if (addConsolidatedRangeFields != null && strategies != null && rangeInputFields != null && rangeMapFileNames != null
-                && addConsolidatedRangeFields.length == strategies.length && strategies.length == rangeInputFields.length
+        if (addConsolidatedRangeFields != null && strategies != null && rangeInputFields != null
+                && rangeMapFileNames != null && addConsolidatedRangeFields.length == strategies.length
+                && strategies.length == rangeInputFields.length
                 && rangeInputFields.length == rangeMapFileNames.length) {
             for (int i = 0; i < addConsolidatedRangeFields.length; i++) {
                 String addConsolidatedRangeField = addConsolidatedRangeFields[i];
@@ -452,6 +461,16 @@ public class SourceStandardizationFlow
         return source;
     }
 
+    private Node validateDuns(Node source, String[] dunsValidateFields) {
+        if (!ArrayUtils.isEmpty(dunsValidateFields)) {
+            for (String dunsField : dunsValidateFields) {
+                source = source.apply(new DunsValidateFunction(dunsField), new FieldList(dunsField),
+                        new FieldMetadata(dunsField, String.class));
+            }
+        }
+        return source;
+    }
+
     private Node standardizeDomain(Node source, String[] domainFields) {
         if (domainFields != null && domainFields.length > 0) {
             for (String domainField : domainFields) {
@@ -473,47 +492,47 @@ public class SourceStandardizationFlow
     }
 
     private Node convertType(Node source, String[] convertTypeFields, TypeConvertStrategy[] strategies) {
-        if (convertTypeFields != null && convertTypeFields.length > 0 && strategies != null
-                && strategies.length > 0 && convertTypeFields.length == strategies.length) {
+        if (convertTypeFields != null && convertTypeFields.length > 0 && strategies != null && strategies.length > 0
+                && convertTypeFields.length == strategies.length) {
             for (int i = 0; i < convertTypeFields.length; i++) {
                 String convertTypeField = convertTypeFields[i];
                 TypeConvertStrategy strategy = strategies[i];
                 TypeConvertFunction function = new TypeConvertFunction(convertTypeField, strategy, false);
                 switch (strategy) {
-                    case ANY_TO_STRING:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, String.class));
-                        break;
-                    case STRING_TO_INT:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Integer.class));
-                        break;
-                    case STRING_TO_LONG:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Long.class));
-                        break;
-                    case STRING_TO_BOOLEAN:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Boolean.class));
-                        break;
-                    case ANY_TO_INT:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Integer.class));
-                        break;
-                    case ANY_TO_DOUBLE:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Double.class));
-                        break;
-                    case ANY_TO_LONG:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Long.class));
-                        break;
-                    case ANY_TO_BOOLEAN:
-                        source = source.apply(function, new FieldList(convertTypeField),
-                                new FieldMetadata(convertTypeField, Boolean.class));
-                        break;
-                    default:
-                        break;
+                case ANY_TO_STRING:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, String.class));
+                    break;
+                case STRING_TO_INT:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Integer.class));
+                    break;
+                case STRING_TO_LONG:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Long.class));
+                    break;
+                case STRING_TO_BOOLEAN:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Boolean.class));
+                    break;
+                case ANY_TO_INT:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Integer.class));
+                    break;
+                case ANY_TO_DOUBLE:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Double.class));
+                    break;
+                case ANY_TO_LONG:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Long.class));
+                    break;
+                case ANY_TO_BOOLEAN:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Boolean.class));
+                    break;
+                default:
+                    break;
                 }
             }
         }
