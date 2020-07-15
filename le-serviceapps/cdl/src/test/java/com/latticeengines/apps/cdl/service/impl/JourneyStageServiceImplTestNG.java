@@ -38,10 +38,13 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     private JourneyStage journeyStage;
     private String updateStageName = "journeyStage2";
     private Long pid;
+    private RetryTemplate retry;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
+        retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
     }
 
     @Test(groups = "functional")
@@ -88,8 +91,6 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testUpdate() {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                Collections.singleton(AssertionError.class), null);
         AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom.set(journeyStageService.findByPid(mainCustomerSpace, pid));
@@ -113,7 +114,13 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "testUpdate")
     public void testDefault() {
         journeyStageService.createDefaultJourneyStages(mainCustomerSpace);
-        List<JourneyStage> journeyStageList = journeyStageService.findByTenant(mainCustomerSpace);
+        AtomicReference<List<JourneyStage>> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(journeyStageService.findByTenant(mainCustomerSpace));
+            Assert.assertEquals(createdAtom.get().size(), 8);
+            return true;
+        });
+        List<JourneyStage> journeyStageList = createdAtom.get();
         Assert.assertEquals(journeyStageList.size(), 8);
     }
 }
