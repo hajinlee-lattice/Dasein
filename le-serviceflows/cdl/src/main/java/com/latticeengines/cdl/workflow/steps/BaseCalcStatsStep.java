@@ -182,12 +182,15 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                 attrsToProfile.add(cm.getAttrName());
             }
         });
+        if (CollectionUtils.isNotEmpty(declaredAttrs)) {
+            declaredAttrs.forEach(da -> attrsToProfile.remove(da.getAttr()));
+        }
 
         if (!attrsToProfile.isEmpty()) {
             log.info("Going to re-profile {} attributes", attrsToProfile.size());
 
             // compute partial update
-            List<String> attrsToUpdate = findAttrsToUpdateProfile(changes, baseData, attrsToProfile);
+            List<String> attrsToUpdate = findAttrsToUpdateProfile(changes, baseData, attrsToProfile, declaredAttrs);
             HdfsDataUnit updatedProfile = null;
             if (!attrsToUpdate.isEmpty()) {
                 log.info("Going to try partial update {} attributes's profile", attrsToUpdate.size());
@@ -271,7 +274,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
     }
 
     private List<String> findAttrsToUpdateProfile(ColumnChanges changes, HdfsDataUnit baseTable,
-            Set<String> attrsToProfile) {
+            Set<String> attrsToProfile, List<ProfileParameters.Attribute> declareAttrs) {
         List<String> attrsToUpdate = new ArrayList<>();
         long totalCnt = baseTable.getCount();
         if (totalCnt > 10000) {
@@ -286,6 +289,9 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                     attrsToUpdate.add(attr);
                 }
             }
+        }
+        if (CollectionUtils.isNotEmpty(declareAttrs)) {
+            declareAttrs.forEach(da -> attrsToUpdate.remove(da.getAttr()));
         }
         return attrsToUpdate;
     }

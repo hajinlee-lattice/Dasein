@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor.MappingType
 import com.latticeengines.domain.exposed.cdl.activity.{EventFieldExtractor, TimeLine}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, CDLTemplateName, ContactId, ContactName,
-  Detail2, Detail1, PathPattern, PathPatternName}
+  Detail2, Detail1, PathPatternId, PathPattern, PathPatternName}
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig
 import com.latticeengines.domain.exposed.util.{ActivityStoreUtils, TimeLineStoreUtils}
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
@@ -228,7 +228,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     df
   }
 
-  // This is a hack to populate product path names for web visit activity data
+  // This is a method to populate product path names for web visit activity data
   def populateProductPatternNames(df: DataFrame, streamId: String, streamType: String,
   lattice: LatticeContext[TimeLineJobConfig]): DataFrame = {
     if (!StreamType.WebVisit.name().equals(streamType) || streamId == null || streamId.isEmpty) {
@@ -236,27 +236,28 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     }
     val metadataMap = lattice.config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val metadataInStream = metadataMap(streamId)
-    val attrs = metadataInStream.keys
-    attrs.foldLeft(df) {
-      (rawDf, dimensionName) =>
-        val dimValues = metadataInStream(dimensionName).getDimensionValues.asScala.map(_.asScala.toMap).toList
-        val pathPatternMap = immutable.Map(dimValues.map(p => (ActivityStoreUtils.modifyPattern(p(PathPattern
-          .name()).asInstanceOf[String]).r.pattern, p(PathPatternName.name()).asInstanceOf[String])):_*)
-        val filterFn = udf((detailString1: String, detailString2: String)
-        => {
-          val pathNameString = pathPatternMap.filter(_._1.matcher(detailString1).matches).map(_._2.toString).mkString(",")
-          if (pathNameString == null || pathNameString.isEmpty) {
-            detailString2
-          } else if (detailString2 == null || detailString2.isEmpty) {
-            pathNameString
-          } else {
-            pathNameString + "," + detailString2
-          }
-
-          })
-        rawDf.withColumn(Detail2.name(), when(rawDf.col(Detail1.name()).isNotNull, filterFn(rawDf.col(Detail1.name())
-          , rawDf.col(Detail2.name()))))
+    if (metadataInStream.isEmpty || !metadataInStream.contains(PathPatternId.name()) || metadataInStream.get
+    (PathPatternId.name()).isEmpty) {
+      return df
     }
+
+    val dimValues = metadataInStream(PathPatternId.name()).getDimensionValues.asScala.map(_.asScala.toMap).toList
+    val pathPatternMap = immutable.Map(dimValues.map(p => (ActivityStoreUtils.modifyPattern(p(PathPattern
+      .name()).asInstanceOf[String]).r.pattern, p(PathPatternName.name()).asInstanceOf[String])):_*)
+    val filterFn = udf((detailString1: String, detailString2: String)
+    => {
+      val pathNameString = pathPatternMap.filter(_._1.matcher(detailString1).matches).map(_._2.toString).mkString(",")
+      if (pathNameString == null || pathNameString.isEmpty) {
+        detailString2
+      } else if (detailString2 == null || detailString2.isEmpty) {
+        pathNameString
+      } else {
+        pathNameString + "," + detailString2
+      }
+
+    })
+    df.withColumn(Detail2.name(), when(df.col(Detail1.name()).isNotNull, filterFn(df.col(Detail1.name())
+      , df.col(Detail2.name()))))
   }
 }
 
