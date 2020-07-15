@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 public class PlsCDLImportProxy extends PlsRestApiProxyBase {
 
     public PlsCDLImportProxy() {
-        super("pls/jobs");
+        super("pls/cdl/import");
     }
 
     @SuppressWarnings("unchecked")
