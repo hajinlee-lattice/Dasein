@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.
 import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.READY;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
@@ -14,14 +15,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -273,9 +277,20 @@ public class GenerateProfileReport extends BaseSparkStep<ProfileReportStepConfig
         // get all attributes from LDC
         List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns("");
 
+        // remove those in account serving store (already profiled in PA)
+        String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(), BucketedAccount);
+        Set<String> accCols = new HashSet<>();
+        if (StringUtils.isNotBlank(accountTableName)) {
+            accCols = metadataProxy.getTableColumns(customerSpace.toString(), accountTableName).stream() //
+                    .map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+        }
+
         List<Column> colsToFetch = new ArrayList<>();
         boolean useInternalAttrs = useInternalAttrs();
         for (ColumnMetadata cm : dcCols) {
+            if (accCols.contains(cm.getAttrName())) {
+                continue;
+            }
             if (useInternalAttrs || canBeUsedInModelOrSegment(cm) || isNotInternalAttr(cm)) {
                 colsToFetch.add(new Column(cm.getAttrName()));
             }

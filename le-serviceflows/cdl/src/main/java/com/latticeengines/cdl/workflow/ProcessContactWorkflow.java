@@ -12,6 +12,7 @@ import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteContactWrappe
 import com.latticeengines.cdl.workflow.steps.merge.MergeContactWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.CalcContactStats;
 import com.latticeengines.cdl.workflow.steps.rebuild.RemoveOrphanContact;
+import com.latticeengines.cdl.workflow.steps.rebuild.UpdateContactProfile;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.validations.ValidateContactBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessContactWorkflowConfiguration;
@@ -37,6 +38,9 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkf
     private RemoveOrphanContact removeOrphanContact;
 
     @Inject
+    private UpdateContactProfile updateContactProfile;
+
+    @Inject
     private CalcContactStats calcContactStats;
 
     @Inject
@@ -60,6 +64,7 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkf
         if (useChangeList) {
             builder = builder //
                     .next(removeOrphanContact) //
+                    .next(updateContactProfile) //
                     .next(calcContactStats);
         } else {
             builder = builder //
