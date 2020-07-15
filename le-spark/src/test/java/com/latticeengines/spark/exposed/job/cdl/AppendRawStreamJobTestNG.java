@@ -4,9 +4,9 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.InternalId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -108,6 +109,7 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
 
         AppendRawStreamConfig config = new AppendRawStreamConfig();
         config.currentEpochMilli = now;
+        config.streamName = AtlasStream.StreamType.WebVisit.name();
         config.retentionDays = RETENTION_DAYS;
         config.matchedRawStreamInputIdx = 0;
         config.masterInputIdx = 1;

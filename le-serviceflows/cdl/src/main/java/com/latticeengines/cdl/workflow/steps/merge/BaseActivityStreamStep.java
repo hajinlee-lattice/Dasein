@@ -125,6 +125,9 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
         String streamId = stream.getStreamId();
         String rawStreamTablePrefix = String.format(prefixFormat, streamId);
         AppendRawStreamConfig config = new AppendRawStreamConfig();
+        // TODO use type for now since most tenant have only one system maybe format the
+        // name for better multi-stream experience later
+        config.streamName = stream.getStreamType() == null ? stream.getName() : stream.getStreamType().name();
         config.dateAttr = stream.getDateAttribute();
         config.retentionDays = stream.getRetentionDays();
         config.currentEpochMilli = paTimestamp;

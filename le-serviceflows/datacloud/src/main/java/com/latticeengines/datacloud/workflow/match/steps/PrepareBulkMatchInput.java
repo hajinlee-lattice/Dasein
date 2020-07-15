@@ -37,6 +37,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
@@ -80,6 +81,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     @Value("${datacloud.match.txn.concurrent.blocks.max}")
     private Integer maxTxnConcurrentBlocks;
+
+    @Value("${datacloud.match.stream.idonly.concurrent.blocks.max}")
+    private Integer maxIdOnlyStreamConcurrentBlocks;
 
     @Value("${datacloud.match.fuzzy.block.size.min}")
     private Integer minFuzzyBlockSize;
@@ -179,6 +183,14 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 // Prime Match - DCP
                 put(BusinessEntity.PrimeAccount.name(),
                         Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxAccountConcurrentBlocks)); //
+
+                // Activity streams that only have ID
+                // TODO use stream type as key for now, consolidate later if number of entity
+                // keep growing
+                put(AtlasStream.StreamType.Opportunity.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxIdOnlyStreamConcurrentBlocks)); //
+                put(AtlasStream.StreamType.MarketingActivity.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxIdOnlyStreamConcurrentBlocks)); //
             }
         };
 

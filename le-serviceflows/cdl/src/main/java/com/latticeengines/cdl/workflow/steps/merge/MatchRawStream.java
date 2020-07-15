@@ -231,6 +231,10 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         if (isRematchMode) {
             setRematchVersions(baseMatchInput);
         }
+        if (stream.getStreamType() != null) {
+            // set stream type to source entity to get higher concurrency
+            baseMatchInput.setSourceEntity(stream.getStreamType().name());
+        }
 
         String uid = UUID.randomUUID().toString();
         matchRootOperationUids.put(stream.getStreamId(), uid);
