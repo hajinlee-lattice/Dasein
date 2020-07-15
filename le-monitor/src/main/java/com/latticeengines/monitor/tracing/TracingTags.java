@@ -32,8 +32,4 @@ public final class TracingTags {
     public static class Attribute {
         public static final String ATTR_CONFIG_UPDATE_MODE = "attr.config.update_mode";
     }
-
-    public static class Admin {
-        public static final String TENANT_NAME = "admin.tenant.name";
-    }
 }

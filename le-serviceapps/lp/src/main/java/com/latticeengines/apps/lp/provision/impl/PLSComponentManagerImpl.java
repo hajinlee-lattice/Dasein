@@ -436,7 +436,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.buildSpan("PLSComponent Bootstrap - " + tenantId) //
                 .addReference(References.FOLLOWS_FROM, parentContext) //
-                .withTag(TracingTags.Admin.TENANT_NAME, tenantId) //
+                .withTag(TracingTags.TENANT_ID, tenantId) //
                 .withStartTimestamp(startTimeStamp) //
                 .start();
         return tracer.activateSpan(span);

@@ -761,7 +761,7 @@ public class TenantServiceImpl implements TenantService {
     private Scope startAdminSpan(String tenantName, long startTimeStamp) {
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.buildSpan("Bootstrap Tenant - " + tenantName)
-                .withTag(TracingTags.Admin.TENANT_NAME, tenantName)
+                .withTag(TracingTags.TENANT_ID, tenantName)
                 .withStartTimestamp(startTimeStamp)
                 .start();
         return tracer.activateSpan(span);
