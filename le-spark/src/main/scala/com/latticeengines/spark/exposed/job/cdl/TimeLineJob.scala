@@ -228,7 +228,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     df
   }
 
-  // This is a hack to populate product path names for web visit activity data
+  // This is a method to populate product path names for web visit activity data
   def populateProductPatternNames(df: DataFrame, streamId: String, streamType: String,
   lattice: LatticeContext[TimeLineJobConfig]): DataFrame = {
     if (!StreamType.WebVisit.name().equals(streamType) || streamId == null || streamId.isEmpty) {

@@ -102,7 +102,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
             log.info("Skip intent setup. {}={}", SKIP_INTENT, System.getenv(SKIP_INTENT));
         }
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
-//        setupTimeline();
+        setupTimeline();
         if (isLocalEnvironment()) {
             // run PA with fake current time
             processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
