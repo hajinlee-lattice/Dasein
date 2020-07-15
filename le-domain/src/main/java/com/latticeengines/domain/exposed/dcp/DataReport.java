@@ -47,9 +47,6 @@ public class DataReport {
     @JsonProperty("refreshTimestamp")
     private Long refreshTimestamp;
 
-    @JsonProperty("snapshotTimestamp")
-    private Long snapshotTimestamp;
-
     public BasicStats getBasicStats() {
         return basicStats;
     }
@@ -94,20 +91,24 @@ public class DataReport {
         return refreshTimestamp;
     }
 
-    public Long getSnapshotTimestamp() {
-        return snapshotTimestamp;
-    }
-
-    public void setSnapshotTimestamp(Long snapshotTimestamp) {
-        this.snapshotTimestamp = snapshotTimestamp;
-    }
-
     public void setRefreshTimestamp(Long refreshTimestamp) {
         this.refreshTimestamp = refreshTimestamp;
     }
 
     public DataReport combineReport(DataReport dataReport) {
-        this.basicStats.add(dataReport.getBasicStats());
+        if (this.basicStats == null) {
+            this.basicStats = new BasicStats();
+            this.basicStats.setSuccessCnt(0L);
+        }
+        Preconditions.checkNotNull(dataReport.getBasicStats(), "basic stats shouldn't be null");
+        Preconditions.checkNotNull(dataReport.getBasicStats().getSuccessCnt(), "count shouldn't be null");
+        Long totalCnt1 = this.basicStats.getSuccessCnt();
+        Long totalCnt2 = dataReport.getBasicStats().getSuccessCnt();
+        this.basicStats.combineBasicStats(dataReport.getBasicStats());
+        this.inputPresenceReport.combineInputPresenceReport(dataReport.getInputPresenceReport(), totalCnt1, totalCnt2);
+        this.matchToDUNSReport.combineMatchToDUNSReport(dataReport.getMatchToDUNSReport(), totalCnt1, totalCnt2);
+        this.geoDistributionReport.combineGeoDistributionReport(dataReport.getGeoDistributionReport(), totalCnt1,
+                totalCnt2);
         return this;
     }
 
@@ -182,14 +183,16 @@ public class DataReport {
             this.unmatchedCnt = unmatchedCnt;
         }
 
-        public BasicStats add(BasicStats basicStats) {
-            this.totalSubmitted += basicStats.getTotalSubmitted();
-            this.successCnt += basicStats.getSuccessCnt();
-            this.errorCnt += basicStats.getErrorCnt();
-            this.matchedCnt += basicStats.getMatchedCnt();
-            this.pendingReviewCnt += basicStats.getPendingReviewCnt();
-            this.unmatchedCnt += basicStats.getUnmatchedCnt();
-            return this;
+        public void combineBasicStats(BasicStats basicStats) {
+            if (basicStats == null) {
+                return ;
+            }
+            this.totalSubmitted += basicStats.getTotalSubmitted() == null ? 0L : basicStats.getTotalSubmitted();
+            this.successCnt += basicStats.getSuccessCnt() == null ? 0L : basicStats.getSuccessCnt();
+            this.errorCnt += basicStats.getErrorCnt() == null ? 0L : basicStats.getErrorCnt();
+            this.matchedCnt += basicStats.getMatchedCnt() == null ? 0L : basicStats.getMatchedCnt();
+            this.pendingReviewCnt += basicStats.getPendingReviewCnt() == null ? 0L : basicStats.getPendingReviewCnt();
+            this.unmatchedCnt += basicStats.getUnmatchedCnt() == null ? 0L : basicStats.getUnmatchedCnt();
         }
     }
 
@@ -247,15 +250,38 @@ public class DataReport {
             presenceMap.put(field, presenceItem);
         }
 
+        /** totalCount1 represents the successful count in this report,
+         * totalCount2 represents the successful count in passing report
+         * pass these parameters as the rate is 0 will lose these data
+        */
         @JsonIgnore
-        public InputPresenceReport addPresence(PresenceItem presenceItem) {
+        public void combineInputPresenceReport(InputPresenceReport inputPresenceReport, Long totalCount1,
+                                                         Long totalCount2) {
             if (presenceMap == null) {
                 presenceMap = new HashMap<>();
             }
-            String field = presenceItem.getField();
-            PresenceItem oldItem = presenceMap.get(field);
-
-            return this;
+            if (inputPresenceReport == null) {
+                return ;
+            }
+            List<PresenceItem> items = inputPresenceReport.getPresenceList();
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.forEach(presenceItem -> {
+                    String field = presenceItem.getField();
+                    PresenceItem oldItem = presenceMap.get(field);
+                    if (oldItem == null) {
+                        presenceMap.put(field, presenceItem);
+                    } else {
+                        Long presenceCount = oldItem.getCount() + presenceItem.getCount();
+                        oldItem.setCount(presenceCount);
+                        Long totalCount = totalCount1 + totalCount2;
+                        if (totalCount == 0L) {
+                            oldItem.setRate(getScaledDouble(0.0));
+                        } else {
+                            oldItem.setRate(getScaledDouble((presenceCount.doubleValue() / totalCount.doubleValue()) * 100));
+                        }
+                    }
+                });
+            }
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -350,6 +376,37 @@ public class DataReport {
                 geographicalItem.setRate(getScaledDouble((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             geographicalDistributionMap.put(countryCode, geographicalItem);
+        }
+
+        @JsonIgnore
+        public void combineGeoDistributionReport(GeoDistributionReport geoDistributionReport,
+                                                                  Long totalCount1,
+                                                                  Long totalCount2) {
+            if (geographicalDistributionMap == null) {
+                geographicalDistributionMap = new HashMap<>();
+            }
+            if (geoDistributionReport == null) {
+                return ;
+            }
+            List<GeographicalItem> items = geoDistributionReport.getGeographicalDistributionList();
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.forEach(geographicalItem -> {
+                    String geoCode = geographicalItem.getGeoCode();
+                    GeographicalItem oldItem = geographicalDistributionMap.get(geoCode);
+                    if (oldItem == null) {
+                        geographicalDistributionMap.put(geoCode, geographicalItem);
+                    } else {
+                        Long presenceCount = oldItem.getCount() + geographicalItem.getCount();
+                        oldItem.setCount(presenceCount);
+                        Long totalCount = totalCount1 + totalCount2;
+                        if (totalCount == 0L) {
+                            oldItem.setRate(getScaledDouble(0.0));
+                        } else {
+                            oldItem.setRate(getScaledDouble((presenceCount.doubleValue() / totalCount.doubleValue()) * 100));
+                        }
+                    }
+                });
+            }
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -482,6 +539,36 @@ public class DataReport {
                     (confidenceCode < 8 ? ConfidenceItem.Classification.Medium : ConfidenceItem.Classification.High);
             confidenceItem.setClassification(classification);
             confidenceRateMap.put(confidenceCode, confidenceItem);
+        }
+
+        @JsonIgnore
+        public void combineMatchToDUNSReport(MatchToDUNSReport matchToDUNSReport, Long totalCnt1,
+                                                          Long totalCnt2) {
+            if (confidenceRateMap == null) {
+                confidenceRateMap = new HashMap<>();
+            }
+            if (matchToDUNSReport == null) {
+                return ;
+            }
+            List<ConfidenceItem> items = matchToDUNSReport.getConfidenceRateList();
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.forEach(confidenceItem -> {
+                    Integer confidenceCode = confidenceItem.getConfidenceCode();
+                    ConfidenceItem oldItem = confidenceRateMap.get(confidenceCode);
+                    if (oldItem == null) {
+                        confidenceRateMap.put(confidenceCode, confidenceItem);
+                    } else {
+                        Long confidenceCount = oldItem.getCount() + confidenceItem.getCount();
+                        oldItem.setCount(confidenceCount);
+                        Long totalCount = totalCnt1 + totalCnt2;
+                        if (totalCount == 0L) {
+                            oldItem.setRate(getScaledDouble(0.0));
+                        } else {
+                            oldItem.setRate(getScaledDouble((confidenceCount.doubleValue() / totalCount.doubleValue()) * 100));
+                        }
+                    }
+                });
+            }
         }
 
         @JsonProperty("matchedRate")
