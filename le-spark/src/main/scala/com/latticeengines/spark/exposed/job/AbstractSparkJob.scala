@@ -137,9 +137,16 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {
     val targets: List[HdfsDataUnit] = latticeCtx.targets
     val output: List[DataFrame] = latticeCtx.output
+
+    val results = finalizeJob(spark, targets, output)
+    latticeCtx.orphanViews map spark.catalog.dropTempView
+    results
+  }
+
+  def finalizeJob(spark: SparkSession, targets: List[HdfsDataUnit], output: List[DataFrame]): List[HdfsDataUnit] = {
     if (targets.length != output.length) {
       throw new IllegalArgumentException(s"${targets.length} targets are declared " //
-              + s"but ${output.length} outputs are generated!")
+        + s"but ${output.length} outputs are generated!")
     }
     val results = targets.zip(output).par.map { t =>
       val tgt = t._1
@@ -166,7 +173,6 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       }
       tgt
     }.toList
-    latticeCtx.orphanViews map spark.catalog.dropTempView
     results
   }
 

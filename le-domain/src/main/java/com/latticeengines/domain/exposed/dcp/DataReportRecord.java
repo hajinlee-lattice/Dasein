@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -75,6 +76,10 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "DATA_SNAPSHOT_TIME")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dataSnapshotTime;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_DUNS_COUNT")
+    private com.latticeengines.domain.exposed.metadata.Table dunsCount;
 
     @Column(name = "REFRESH_TIME")
     @Temporal(TemporalType.TIMESTAMP)
@@ -170,6 +175,14 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
 
     public void setDataSnapshotTime(Date dataSnapshotTime) {
         this.dataSnapshotTime = dataSnapshotTime;
+    }
+
+    public com.latticeengines.domain.exposed.metadata.Table getDunsCount() {
+        return dunsCount;
+    }
+
+    public void setDunsCount(com.latticeengines.domain.exposed.metadata.Table dunsCount) {
+        this.dunsCount = dunsCount;
     }
 
     public Date getRefreshTime() {

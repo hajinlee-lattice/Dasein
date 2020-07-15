@@ -31,11 +31,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -187,9 +189,36 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             throw new RuntimeException(e);
         }
 
+        updateDunsCount(result.getTargets().get(2), uploadId);
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
 
         updateUploadStatistics(result);
+    }
+
+    private void updateDunsCount(HdfsDataUnit unit, String uploadId) {
+        // register duns count cache
+        String dunsCountTableName = NamingUtils.timestamp("dunsCount");
+        Table dunsCount = toTable(dunsCountTableName, null, unit);
+        metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
+        dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
+                uploadId, dunsCountTableName);
+        // set table name to variable, then set table policy forever at finish step
+        putStringValueInContext(DUNS_COUNT_TABLE_NAME, dunsCountTableName);
+        DataReportRecord.Level level = DataReportRecord.Level.Upload;
+        String ownerId = uploadId;
+        while(level != DataReportRecord.Level.Tenant) {
+            // update parent node if it's the only child
+            DunsCountCopy copy = dataReportProxy.getDunsCountCopy(configuration.getCustomerSpace().toString(), level,
+                    ownerId);
+            if (copy.isOnlyChild()) {
+                dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), level.getParentLevel()
+                        , copy.getParentOwnerId(), dunsCountTableName);
+                ownerId = copy.getParentOwnerId();
+            } else {
+                break;
+            }
+            level = level.getParentLevel();
+        }
     }
 
     private void updateUploadStatistics(SparkJobResult result) {

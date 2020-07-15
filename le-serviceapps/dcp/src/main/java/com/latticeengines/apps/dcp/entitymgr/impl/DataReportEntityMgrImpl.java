@@ -22,6 +22,8 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("dataReportEntityMgr")
 public class DataReportEntityMgrImpl
@@ -62,8 +64,18 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId) {
-        return getReadOrWriteRepository().findByLevelAndOwnerId(level, ownerId);
+    public DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId, boolean inflate) {
+        DataReportRecord record = getReadOrWriteRepository().findByLevelAndOwnerId(level, ownerId);
+        if (inflate) {
+            TableEntityMgr.inflateTable(record.getDunsCount());
+        }
+        return record;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findPidAndDunsCountTableName(level, ownerId);
     }
 
     @Override
@@ -104,6 +116,12 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int countSiblingsByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().countSiblingsByParentLevelAndOwnerId(level, ownerId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Long findDataReportPid(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findPidByLevelAndOwnerId(level, ownerId);
     }
@@ -118,6 +136,13 @@ public class DataReportEntityMgrImpl
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateDataReportRecord(Long pid, DataReport.BasicStats basicStats) {
         dataReportWriterRepository.updateDataReport(pid, new Date(), basicStats);
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void uploadDataReportRecord(Long pid, DunsCountCache dunsCount) {
+        dataReportWriterRepository.updateDataReport(pid, new Date(), dunsCount.getSnapshotTimestamp(),
+                dunsCount.getDunsCount());
     }
 
     @Override

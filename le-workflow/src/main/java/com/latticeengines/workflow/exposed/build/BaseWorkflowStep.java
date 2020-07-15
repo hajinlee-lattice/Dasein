@@ -138,6 +138,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     // DCP
     protected static final String UPLOAD_STATS = "UPLOAD_STATS";
+    protected static final String DUNS_COUNT_TABLE_NAME = "DUNS_COUNT_TABLE_NAME";
 
     // CDL
     public static final String CONSOLIDATE_INPUT_TEMPLATES = "CONSOLIDATE_INPUT_TEMPLATES";

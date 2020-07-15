@@ -1,10 +1,13 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,8 +20,15 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.metadata.service.MetadataService;
 
 import avro.shaded.com.google.common.base.Preconditions;
 
@@ -36,13 +46,15 @@ public class DataReportServiceImpl implements DataReportService {
     @Inject
     private UploadService uploadService;
 
+    @Inject
+    private MetadataService metadataService;
 
     @Override
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+        DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId, false);
         return convertRecordToDataReport(dataReportRecord);
     }
 
@@ -69,7 +81,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        return dataReportEntityMgr.findDataReportRecord(level, ownerId);
+        return dataReportEntityMgr.findDataReportRecord(level, ownerId, false);
     }
 
     @Override
@@ -82,7 +94,7 @@ public class DataReportServiceImpl implements DataReportService {
         }
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
-            DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+            DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId, false);
             if (dataReport.getBasicStats() != null) {
                 dataReportRecord.setBasicStats(dataReport.getBasicStats());
             }
@@ -98,6 +110,7 @@ public class DataReportServiceImpl implements DataReportService {
             if (dataReport.getDuplicationReport() != null) {
                 dataReportRecord.setDuplicationReport(dataReport.getDuplicationReport());
             }
+
             dataReportRecord.setRefreshTime(new Date());
             dataReportEntityMgr.update(dataReportRecord);
         } else {
@@ -120,6 +133,70 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getDuplicationReport());
             parentId = dataReportEntityMgr.findParentId(parentId);
         }
+    }
+
+    @Override
+    public void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
+                           String tableName) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        List<Object[]> result = dataReportEntityMgr.findPidAndDunsCountTableName(level, ownerId);
+        if (CollectionUtils.isEmpty(result)) {
+            log.info("data report is not registered");
+            return ;
+        }
+        Object[] objects = result.get(0);
+        Long pid = objects[0] != null ? (Long) objects[0] : null;
+        String oldTableName = objects[1] != null ? (String) objects[1] : null;
+        Preconditions.checkNotNull(pid, String.format("data record should exist for %s and %s.", level, ownerId));
+        Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
+        Preconditions.checkNotNull(table, String.format("table shouldn't be null for %s", tableName));
+        DunsCountCache cache = new DunsCountCache();
+        cache.setDunsCount(table);
+        cache.setSnapshotTimestamp(new Date());
+        dataReportEntityMgr.uploadDataReportRecord(pid, cache);
+        if (StringUtils.isNotBlank(oldTableName)) {
+            log.info("There was an old duns count table {}, going to be marked as temporary.", oldTableName);
+            RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
+            metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName,
+                    retentionPolicy);
+        } else {
+            log.info("There weren't duns count table previously");
+        }
+    }
+
+    @Override
+    public DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        DataReportRecord record = dataReportEntityMgr.findDataReportRecord(level, ownerId, true);
+        if (record == null) {
+            return new DunsCountCache();
+        }
+        DunsCountCache cache = new DunsCountCache();
+        cache.setSnapshotTimestamp(record.getDataSnapshotTime());
+        cache.setDunsCount(record.getDunsCount());
+
+        return cache;
+    }
+
+    @Override
+    public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            ownerId = customerSpace;
+        }
+        String parentOwnerId = getParentOwnerId(customerSpace, level, ownerId);
+        if (!DataReportRecord.Level.Tenant.equals(level)) {
+            Preconditions.checkNotNull(parentOwnerId, "parent owner id should not be empty");
+        }
+        int siblings = dataReportEntityMgr.countSiblingsByParentLevelAndOwnerId(level.getParentLevel(), parentOwnerId);
+        log.info("the siblings are " + siblings);
+        DunsCountCopy copy = new DunsCountCopy();
+        copy.setOnlyChild(siblings == 1);
+        copy.setParentOwnerId(parentOwnerId);
+        return copy;
     }
 
     @Override

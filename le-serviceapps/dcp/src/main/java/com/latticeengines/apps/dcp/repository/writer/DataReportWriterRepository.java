@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.dcp.repository.DataReportRepository;
 import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface DataReportWriterRepository extends DataReportRepository {
 
@@ -15,6 +16,12 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DataReportRecord d SET d.basicStats = ?3, d.refreshTime = ?2 WHERE d.pid = ?1")
     void updateDataReport(Long pid, Date refreshTime, DataReport.BasicStats basicStats);
+
+    @Transactional(transactionManager = "jpaTransactionManager")
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE DataReportRecord d SET d.dunsCount = ?4, d.refreshTime = ?2, d.dataSnapshotTime=?3 WHERE d.pid = " +
+            "?1")
+    void updateDataReport(Long pid, Date refreshTime, Date snapshotTime, Table dunsCount);
 
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
