@@ -186,6 +186,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
         dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 uploadId, dunsCountTableName);
+        // set table name to variable, then set table policy forever at finish step
+        putStringValueInContext(DUNS_COUNT_TABLE_NAME, dunsCountTableName);
         DataReportRecord.Level level = DataReportRecord.Level.Upload;
         String ownerId = uploadId;
         while(level != DataReportRecord.Level.Tenant) {

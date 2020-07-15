@@ -39,6 +39,7 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         customerSpace = configuration.getCustomerSpace();
         customerSpaceStr = customerSpace.toString();
         saveMatchResultTable();
+        saveDunsCountTable();
         updateStats();
     }
 
@@ -48,6 +49,13 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         exportToS3(matchResultTable);
         registerTable(matchResultName);
         uploadProxy.registerMatchResult(customerSpaceStr, uploadId, matchResultName);
+    }
+
+    private void saveDunsCountTable() {
+        String dunsCountTableName = getStringValueFromContext(DUNS_COUNT_TABLE_NAME);
+        Table dunsCountTable = metadataProxy.getTable(customerSpaceStr, dunsCountTableName);
+        exportToS3(dunsCountTable);
+        registerTable(dunsCountTableName);
     }
 
     private void updateStats() {
