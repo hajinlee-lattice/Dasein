@@ -1,8 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedActivityStream;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,12 +60,13 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
     private static final String RAWSTREAM_TABLE_PREFIX_FORMAT = "RawStream_%s";
     private static final String REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT = "Re_RawStream_%s";
+    private static final String CDL_EVAL_DATE_FORMAT = "yyyy-MM-dd";
 
     // streamId -> matched raw stream import table (in rematch, this means new
     // import + batch store)
     private Map<String, String> matchedStreamImportTables;
 
-    private long paTimestamp;
+    private Long evalTimeEpoch;
 
     private Map<String, String> updatedRawStreamTables;
 
@@ -70,8 +77,15 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        paTimestamp = getLongValueFromContext(PA_TIMESTAMP);
-        log.info("Timestamp used as current time to build raw stream = {}", paTimestamp);
+        String evalDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+        try {
+            evalTimeEpoch = new SimpleDateFormat("yyyy-MM-dd").parse(evalDate).getTime();
+        } catch (ParseException e) {
+            throw new IllegalStateException(String.format("Unable to parse eval date %s", evalDate));
+        }
+        evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+        evaluationDateId = DateTimeUtils.dateToDayPeriod(evaluationDate);
+        log.info("Timestamp used as current time to build raw stream = {}", evalTimeEpoch);
         log.info("IsRematch={}, isReplace={}", configuration.isRematchMode(), configuration.isReplaceMode());
 
         matchedStreamImportTables = getMatchedStreamImportTables();
@@ -85,7 +99,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         }
         // in replace mode, delete the records in document db
         if (Boolean.TRUE.equals(configuration.isReplaceMode())) {
-            cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(), configuration.getMainEntity());
+            cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(),
+                    configuration.getMainEntity());
         }
     }
 
@@ -114,19 +129,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName(BEAN_NAME);
 
-        List<TransformationStepConfig> steps = new ArrayList<>();
-
         verifyImportLimit();
-
-        configuration.getActivityStreamMap().forEach((streamId, stream) -> {
-            String matchedImportTable = matchedStreamImportTables.get(streamId);
-            // ignore active table in rematch
-            String activeTable = configuration.isRematchMode() ? null : getRawStreamActiveTable(streamId, stream);
-            String targetTablePrefixFormat = configuration.isRematchMode() ? REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT
-                    : RAWSTREAM_TABLE_PREFIX_FORMAT;
-            appendRawStream(steps, stream, paTimestamp, matchedImportTable, activeTable, targetTablePrefixFormat) //
-                    .ifPresent(pair -> rawStreamTablePrefixes.put(streamId, pair.getLeft()));
-        });
+        List<TransformationStepConfig> steps = getBuildRawStreamSteps();
 
         if (CollectionUtils.isEmpty(steps)) {
             log.info("No existing/new activity stream found, skip build raw stream step");
@@ -137,11 +141,64 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         return request;
     }
 
+    private List<TransformationStepConfig> getBuildRawStreamSteps() {
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, Integer> refreshDateMap = getRefreshDateMap(status);
+        List<String> streamsNeedReLink = new ArrayList<>();
+
+        configuration.getActivityStreamMap().forEach((streamId, stream) -> {
+            String matchedImportTable = matchedStreamImportTables.get(streamId);
+            // ignore active table in rematch
+            String activeTable = configuration.isRematchMode() ? null : getRawStreamActiveTable(streamId, stream);
+            String targetTablePrefixFormat = configuration.isRematchMode() ? REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT
+                    : RAWSTREAM_TABLE_PREFIX_FORMAT;
+            if (StringUtils.isNotBlank(matchedImportTable)
+                    || needRefresh(refreshDateMap, streamId)
+                    || deletePerformed()
+            ) {
+                // has import, over 30 days not refreshed, or performed soft delete
+                appendRawStream(steps, stream, evalTimeEpoch, matchedImportTable, activeTable, targetTablePrefixFormat)
+                        .ifPresent(pair -> {
+                            rawStreamTablePrefixes.put(streamId, pair.getLeft());
+                            refreshDateMap.put(stream.getStreamId(),
+                                    DateTimeUtils.fromEpochMilliToDateId(evalTimeEpoch));
+                        });
+            } else if (StringUtils.isNotBlank(activeTable)){ // TODO - streams with no import and batch should not relink
+                streamsNeedReLink.add(streamId);
+            }
+        });
+        status.setActivityStreamLastRefresh(refreshDateMap);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
+        Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(
+                customerSpace.toString(), ConsolidatedActivityStream, active, streamsNeedReLink);
+        if (MapUtils.isNotEmpty(signatureTableNames)) {
+            log.info("Linking existing raw stream tables to inactive version {}: {}", inactive, signatureTableNames.keySet());
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames,
+                    ConsolidatedActivityStream, inactive);
+        }
+        putObjectInContext(ACTIVITY_STREAMS_RELINK, new HashSet<>(streamsNeedReLink));
+        return steps;
+    }
+
+    private boolean needRefresh(Map<String, Integer> refreshDateMap, String streamId) {
+        int threshold = DateTimeUtils.subtractDays(evaluationDateId, 30);
+        boolean needRefresh = refreshDateMap.get(streamId) != null && refreshDateMap.get(streamId) < threshold;
+        if (needRefresh) {
+            log.info("Stream {} has no new import but hasn't been refreshed for over 30 days since {}.", streamId,
+                    DateTimeUtils.dayPeriodToDate(threshold));
+        }
+        return needRefresh;
+    }
+
+    private Map<String, Integer> getRefreshDateMap(DataCollectionStatus status) {
+        Map<String, Integer> map = status.getActivityStreamLastRefresh();
+        return map == null ? new HashMap<>() : map;
+    }
+
     private void verifyImportLimit() {
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         tenantOverride = getTenantOverride();
-        evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
-        evaluationDateId = DateTimeUtils.dateToDayPeriod(evaluationDate);
         ActivityBookkeeping bookkeeping = getAndCleanupBookkeeping(status);
         matchedStreamImportTables.keySet().forEach(streamId -> {
             log.info("Verifying quota for stream {}", streamId);
@@ -181,7 +238,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         Long importedCount = getImportCount();
 
         log.info("Verifying imported rows count for stream {} doesn't exceed limit...", streamId);
-        log.info("Uploaded {} records in total ({} - {})", existingCount, DateTimeUtils.dayPeriodToDate(lastMonthLower), evaluationDate);
+        log.info("Uploaded {} records in total ({} - {})", existingCount, DateTimeUtils.dayPeriodToDate(lastMonthLower),
+                evaluationDate);
         log.info("Imported {} new records", importedCount);
 
         long totalLimit = defaultQuota;
@@ -201,7 +259,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     }
 
     private Long getImportCount() {
-        List<Table> importTables = getTableSummaries(customerSpace.toString(), new ArrayList<>(matchedStreamImportTables.values()));
+        List<Table> importTables = getTableSummaries(customerSpace.toString(),
+                new ArrayList<>(matchedStreamImportTables.values()));
         return importTables.stream().mapToLong(table -> table.getExtracts().get(0).getProcessedRecords()).sum();
     }
 
@@ -221,7 +280,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         }
         ActivityBookkeeping bookkeeping = status.getActivityBookkeeping();
         Integer lowerBound = DateTimeUtils.subtractDays(evaluationDateId, 30);
-        log.info("Evaluation date is {}, Removing records before {}", evaluationDate, DateTimeUtils.dayPeriodToDate(lowerBound));
+        log.info("Evaluation date is {}, Removing records before {}", evaluationDate,
+                DateTimeUtils.dayPeriodToDate(lowerBound));
         matchedStreamImportTables.keySet().forEach(streamId -> {
             bookkeeping.streamRecord.putIfAbsent(streamId, new HashMap<>());
             Map<Integer, Long> records = bookkeeping.streamRecord.get(streamId);
@@ -259,5 +319,9 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
             }
             return activeTable;
         }
+    }
+
+    private boolean deletePerformed() {
+        return softDeleteEntities.containsKey(entity) || hardDeleteEntities.containsKey(entity);
     }
 }
