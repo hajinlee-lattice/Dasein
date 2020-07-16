@@ -174,8 +174,8 @@ public class SparkSQLTemplates extends SQLTemplates {
         for (int var5 = 0; var5 < var4; ++var5) {
             char ch = var3[var5];
             if (ch == '\'') {
-                // need to replace ' to \\' in spark sql
-                builder.append("\\\\'");
+                // need to replace ' to \' in spark sql
+                builder.append("\\'");
             } else {
                 builder.append(ch);
             }
