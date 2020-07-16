@@ -12,6 +12,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.apps.cdl.service.impl.CheckpointAutoService;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -38,6 +39,9 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends CDLDeploymentTestNG
 
     @Inject
     protected CheckpointService checkpointService;
+
+    @Inject
+    protected CheckpointAutoService checkpointAutoService;
 
     protected YarnFunctionalTestNGBase platformTestBase;
 
