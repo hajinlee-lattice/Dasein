@@ -19,8 +19,10 @@ public interface CDLLookupService {
     Map<String, Object> lookup(DynamoDataUnit lookupDataUnit, List<DynamoDataUnit> dynamoDataUnits, String lookupIdKey,
             String lookupIdValue);
 
-    String lookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey,
-            String lookupIdValue);
+    // using new account lookup method
+    String lookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey, String lookupIdValue);
+
+    boolean clearAccountLookupDUCache();
 
     List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace, DataCollection.Version version,
             String lookupIdKey, String lookupIdValue, String contactId);

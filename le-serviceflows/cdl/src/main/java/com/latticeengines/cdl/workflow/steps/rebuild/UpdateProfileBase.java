@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
 
 import java.util.ArrayList;
@@ -23,18 +25,21 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
 
     protected abstract TableRoleInCollection getBaseTableRole();
     protected abstract List<String> getIncludeAttrs();
-    protected abstract boolean getConsiderAMAttrs();
     protected abstract String getBaseChangeListCtxKey();
     protected abstract String getReProfileAttrsCtxKey();
 
     private TableRoleInCollection baseTableRole;
     private TableRoleInCollection profileRole;
     private String baseChangeListKey;
+    protected boolean ignoreDateAttrs;
+    protected boolean considerAMAttrs;
 
     @Override
     protected List<ProfileParameters.Attribute> getDeclaredAttrs() {
         List<ProfileParameters.Attribute> pAttrs = new ArrayList<>();
+        pAttrs.add(ProfileParameters.Attribute.nonBktAttr(EntityId.name()));
         pAttrs.add(ProfileParameters.Attribute.nonBktAttr(AccountId.name()));
+        pAttrs.add(ProfileParameters.Attribute.nonBktAttr(CustomerAccountId.name()));
         pAttrs.add(ProfileParameters.Attribute.nonBktAttr(LatticeAccountId.name()));
         pAttrs.add(ProfileParameters.Attribute.nonBktAttr(InterfaceName.CDLCreatedTime.name()));
         pAttrs.add(ProfileParameters.Attribute.nonBktAttr(InterfaceName.CDLUpdatedTime.name()));
@@ -45,7 +50,6 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
         baseTableRole = getBaseTableRole();
         profileRole = getProfileRole();
         baseChangeListKey = getBaseChangeListCtxKey();
-        String reProfileAttrsKey = getReProfileAttrsCtxKey();
         String profileCtxKey = getProfileTableCtxKey();
 
         Table tblInCtx = getTableSummaryFromKey(customerSpace.toString(), profileCtxKey);
@@ -61,19 +65,18 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
             List<String> includeAttrs = getIncludeAttrs();
             if (shouldRecalculateProfile()) {
                 log.info("Should rebuild {}.", profileRole);
-                log.info("considerAMAttrs={}", getConsiderAMAttrs());
-                profile(baseTable, profileRole, //
-                        profileCtxKey, includeAttrs, getDeclaredAttrs(), //
-                        getConsiderAMAttrs(), true, true);
+                log.info("considerAMAttrs={}", considerAMAttrs);
+                profile(baseTable, profileRole, profileCtxKey, includeAttrs, getDeclaredAttrs(), //
+                        considerAMAttrs, true, true);
             } else {
                 log.info("Should partial update {} using change list.", profileRole);
-                log.info("considerAMAttrs={}", getConsiderAMAttrs());
+                log.info("considerAMAttrs={}", considerAMAttrs);
                 Table changeListTbl = getTableSummaryFromKey(customerSpaceStr, baseChangeListKey);
                 Preconditions.checkNotNull(changeListTbl, "Must have base change list table");
                 Table oldProfileTbl = attemptGetTableRole(profileRole, true);
                 profileWithChangeList(baseTable, changeListTbl, oldProfileTbl, //
-                        profileRole, profileCtxKey, reProfileAttrsKey, includeAttrs, getDeclaredAttrs(), //
-                        getConsiderAMAttrs(), true, true);
+                        profileRole, profileCtxKey, getReProfileAttrsCtxKey(), includeAttrs, getDeclaredAttrs(), //
+                        considerAMAttrs, ignoreDateAttrs,true, true);
             }
             String profileTableName = dataCollectionProxy.getTableName(customerSpaceStr, profileRole, inactive);
             putStringValueInContext(profileCtxKey, profileTableName);
@@ -83,7 +86,7 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
     private boolean shouldDoNothing() {
         boolean hasBaseTableChange = isChanged(baseTableRole, baseChangeListKey);
         boolean enforceRebuild = getEnforceRebuild();
-        boolean shouldRelinkProfile =  !enforceRebuild && !hasBaseTableChange;
+        boolean shouldRelinkProfile = !enforceRebuild && !hasBaseTableChange;
         log.info("hasBaseTableChange={}, enforceRebuild={}, shouldRelinkProfile={}",
                 hasBaseTableChange, enforceRebuild, shouldRelinkProfile);
         return shouldRelinkProfile;
@@ -96,12 +99,18 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
     private boolean shouldRecalculateProfile() {
         boolean shouldRecalculate = false;
         if (attemptGetTableRole(profileRole, false) == null) {
-            log.info("Should recalculate {}, because there was no {}} in active version.", profileRole, profileRole);
+            log.info("Should recalculate {}, because there was no {} in active version.", profileRole, profileRole);
             shouldRecalculate = true;
         } else if (Boolean.TRUE.equals(configuration.getRebuild())) {
-            log.info("Should recalculate {}, becaue enforced to rebuild {}.", //
+            log.info("Should recalculate {}, because enforced to rebuild {}.", //
                     profileRole, configuration.getMainEntity());
             shouldRecalculate = true;
+        } else {
+            Table changeListTbl = getTableSummaryFromKey(customerSpaceStr, baseChangeListKey);
+            if (changeListTbl == null) {
+                log.info("Should recalculate {}, because no change list table.", profileRole);
+                shouldRecalculate = true;
+            }
         }
         return shouldRecalculate;
     }

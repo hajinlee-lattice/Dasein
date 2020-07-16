@@ -278,9 +278,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_STATS_UPDATED = "ACCOUNT_STATS_UPDATED";
     protected static final String FULL_ACCOUNT_STATS_TABLE_NAME = "FULL_ACCOUNT_STATS_TABLE_NAME";
     protected static final String ACCOUNT_LOOKUP_TABLE_NAME = "ACCOUNT_LOOKUP_TABLE_NAME";
+    protected static final String CONTACT_CHANGELIST_TABLE_NAME = "CONTACT_CHANGELIST_TABLE_NAME";
     protected static final String CONTACT_SERVING_TABLE_NAME = "CONTACT_SERVING_TABLE_NAME";
     protected static final String CONTACT_PROFILE_TABLE_NAME = "CONTACT_PROFILE_TABLE_NAME";
     protected static final String CONTACT_STATS_TABLE_NAME = "CONTACT_STATS_TABLE_NAME";
+    protected static final String CONTACT_STATS_DIFF_TABLE_NAME = "CONTACT_STATS_DIFF_TABLE_NAME";
+    protected static final String CONTACT_RE_PROFILE_ATTRS = "CONTACT_RE_PROFILE_ATTRS";
+    protected static final String CONTACT_STATS_UPDATED = "CONTACT_STATS_UPDATED";
     protected static final String DAILY_TRXN_TABLE_NAME = "DAILY_TRXN_TABLE_NAME";
     protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
     protected static final String PERIOD_TRXN_TABLE_NAME = "PERIOD_TRXN_TABLE_NAME";
@@ -386,9 +390,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_LOOKUP_TABLE_NAME, //
             REMATCHED_ACCOUNT_TABLE_NAME, //
             ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
+            CONTACT_CHANGELIST_TABLE_NAME, //
             CONTACT_SERVING_TABLE_NAME, //
             CONTACT_PROFILE_TABLE_NAME, //
             CONTACT_STATS_TABLE_NAME, //
+            CONTACT_STATS_DIFF_TABLE_NAME, //
             DAILY_TRXN_TABLE_NAME, //
             AGG_DAILY_TRXN_TABLE_NAME, //
             AGG_PERIOD_TRXN_TABLE_NAME, //
@@ -428,7 +434,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PA_TIMESTAMP, //
             ACCOUNT_RE_PROFILE_ATTRS, //
             LATTICE_ACCOUNT_RE_PROFILE_ATTRS, //
+            CONTACT_RE_PROFILE_ATTRS, //
             ACCOUNT_STATS_UPDATED, //
+            CONTACT_STATS_UPDATED, //
             REBUILD_LATTICE_ACCOUNT, //
             ENTITY_MATCH_COMPLETED, //
             NEW_ENTITY_MATCH_ENVS, //

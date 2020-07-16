@@ -143,7 +143,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
 
         deleteEntityType = configuration.getDeleteEntityType();
         idSystem = configuration.getIdSystem();
-        systemIdColumn = getSystemIdColumn(idEntity, idSystem);
+        systemIdColumn = getSystemIdColumn(idEntity, idSystem, true);
         key = idEntity.equals(BusinessEntity.Account) ? InterfaceName.AccountId.name() : InterfaceName.ContactId.name();
         log.info("RenameAndMatchStep, systemIdColumn is {}, key is {}", systemIdColumn.toString(), key);
 
@@ -270,17 +270,23 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         log.info("RenameAndMatchStep, RootOperationUid {}, columnNames {} ", matchInput.getRootOperationUid(),
                 columnNames);
 
-        List<String> accountSystemIds = Collections.singletonList(getSystemIdColumn(BusinessEntity.Account, idSystem));
-        List<String> contactSystemIds = Collections.singletonList(getSystemIdColumn(BusinessEntity.Contact, idSystem));
-        log.info("RenameAndMatchStep, accountSystemIds {}, contactSystemIds {} ", accountSystemIds, contactSystemIds);
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
         if (idEntity.equals(BusinessEntity.Account)) {
+            List<String> accountSystemIds = Collections
+                    .singletonList(getSystemIdColumn(BusinessEntity.Account, idSystem, true));
+            log.info("RenameAndMatchStep, accountSystemIds {}", accountSystemIds);
             MatchInput.EntityKeyMap accountKeyMap = new MatchInput.EntityKeyMap();
             matchInput.setTargetEntity(BusinessEntity.Account.name());
             accountKeyMap.setKeyMap(MatchUtils.getAccountMatchKeysAccount(columnNames, accountSystemIds, false));
             entityKeyMaps.put(BusinessEntity.Account.name(), accountKeyMap);
             matchInput.setEntityKeyMaps(entityKeyMaps);
         } else {
+            List<String> contactSystemIds = Collections
+                    .singletonList(getSystemIdColumn(BusinessEntity.Contact, idSystem, true));
+            List<String> accountSystemIds = Collections
+                    .singletonList(getSystemIdColumn(BusinessEntity.Account, idSystem, false));
+            log.info("RenameAndMatchStep, accountSystemIds {}, contactSystemIds {} ", accountSystemIds,
+                    contactSystemIds);
             matchInput.setTargetEntity(BusinessEntity.Contact.name());
             MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
                     .fromKeyMap(MatchUtils.getAccountMatchKeysForContact(columnNames, accountSystemIds, false, false));
@@ -296,7 +302,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         return JsonUtils.serialize(config);
     }
 
-    private String getSystemIdColumn(BusinessEntity idEntity, String idSystem) {
+    private String getSystemIdColumn(BusinessEntity idEntity, String idSystem, boolean mustHave) {
         S3ImportSystem system = cdlProxy.getS3ImportSystem(configuration.getCustomerSpace().toString(), idSystem);
         if (system == null) {
             throw new RuntimeException("RenameAndMatchStep, System " + idSystem + " doesn't exist...");
@@ -304,7 +310,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
         String systemIdColumn = idEntity.equals(BusinessEntity.Account) ? system.getAccountSystemId()
                 : system.getContactSystemId();
 
-        if (StringUtils.isBlank(systemIdColumn)) {
+        if (StringUtils.isBlank(systemIdColumn) && mustHave) {
             throw new RuntimeException("RenameAndMatchStep, system " + idSystem + " is not mapped...");
         }
 

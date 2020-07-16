@@ -5,8 +5,10 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PRO
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -114,34 +116,60 @@ public class StatsProfiler {
         }
     }
 
-    public void appendResult(HdfsDataUnit dataUnit, Collection<HdfsDataUnit> extraProfileUnits, Collection<String> removeAttrs) {
+    public void appendResult(HdfsDataUnit profileData, HdfsDataUnit updateProfileData, HdfsDataUnit oldProfileData, //
+                             Collection<String> removeAttrs) {
         List<GenericRecord> previousRecords = new ArrayList<>();
-        for (HdfsDataUnit extraProfile: extraProfileUnits) {
-            String avroGlob = PathUtils.toAvroGlob(extraProfile.getPath());
-            AvroRecordIterator itr = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
+        Set<String> updatedAttrs = new HashSet<>();
+        if (updateProfileData != null) {
+            AvroRecordIterator itr = iterateProfileData(updateProfileData);
             while(itr.hasNext()) {
                 GenericRecord record = itr.next();
                 String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
                 if (!removeAttrs.contains(attrName)) {
                     previousRecords.add(record);
+                    updatedAttrs.add(attrName);
+                    log.debug("Add {} from update profile", attrName);
+                }
+            }
+        }
+        if (oldProfileData != null) {
+            AvroRecordIterator itr = iterateProfileData(oldProfileData);
+            while(itr.hasNext()) {
+                GenericRecord record = itr.next();
+                String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
+                if (!removeAttrs.contains(attrName) && !updatedAttrs.contains(attrName)) {
+                    previousRecords.add(record);
+                    log.debug("Add {} from old profile", attrName);
                 }
             }
         }
         previousRecords = classifier.interceptEncodedPreviousRecord(previousRecords);
         Object[][] data = classifier.parseResult();
         List<Pair<String, Class<?>>> columns = ProfileUtils.getProfileSchema();
-        String outputDir = PathUtils.toParquetOrAvroDir(dataUnit.getPath());
+        String outputDir = PathUtils.toParquetOrAvroDir(profileData.getPath());
         try {
             AvroUtils.createAvroFileByData(yarnConfiguration, columns, data, outputDir, "Profile.avro");
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        Set<String> savedAttrs = new HashSet<>();
+        AvroRecordIterator itr = iterateProfileData(profileData);
+        while(itr.hasNext()) {
+            GenericRecord record = itr.next();
+            String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
+            savedAttrs.add(attrName);
         }
         if (CollectionUtils.isNotEmpty(previousRecords)) {
             try {
                 List<Object[]> alignedRecords = new ArrayList<>();
                 for (GenericRecord record: previousRecords) {
                     Object[] row = ProfileUtils.convertAvroRecord(record);
-                    alignedRecords.add(row);
+                    String attrName = row[0].toString();
+                    if (!savedAttrs.contains(attrName)) {
+                        alignedRecords.add(row);
+                    } else {
+                        log.warn("Found duplicated profile attribute {}", attrName);
+                    }
                 }
                 AvroUtils.createAvroFileByData(yarnConfiguration, columns, alignedRecords.toArray(new Object[0][]), //
                         outputDir, "PreviousProfile.avro");
@@ -149,6 +177,11 @@ public class StatsProfiler {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private AvroRecordIterator iterateProfileData(HdfsDataUnit profileData) {
+        String avroGlob = PathUtils.toAvroGlob(profileData.getPath());
+        return AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
     }
 
     private Map<String, ProfileParameters.Attribute> parseDeclaredAttrs(ProfileJobConfig jobConfig) {
