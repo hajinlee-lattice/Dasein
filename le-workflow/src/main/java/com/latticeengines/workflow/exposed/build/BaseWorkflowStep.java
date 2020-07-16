@@ -188,6 +188,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
     protected static final String ENTITY_CHANGELIST_TABLES = "ENTITY_CHANGELIST_TABLES";
+    protected static final String NEED_PUBLISH_ACCOUNT_LOOKUP = "NEED_PUBLISH_ACCOUNT_LOOKUP";
     protected static final String ENTITY_REPORT_CHANGELIST_TABLES = "ENTITY_REPORT_CHANGELIST_TABLES";
     protected static final String PROCESSED_DIFF_TABLES = "PROCESSED_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
