@@ -258,6 +258,10 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     })
     df.withColumn(Detail2.name(), when(df.col(Detail1.name()).isNotNull, filterFn(df.col(Detail1.name())
       , df.col(Detail2.name()))))
+    logSpark("----- BEGIN SCRIPT OUTPUT -----")
+    df.printSchema
+    logSpark("----- END SCRIPT OUTPUT -----")
+    df
   }
 }
 
