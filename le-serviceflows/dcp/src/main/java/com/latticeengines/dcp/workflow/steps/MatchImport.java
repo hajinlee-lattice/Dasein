@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -83,6 +84,13 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         matchInput.setCustomSelection(columnSelection);
+    }
+
+    @Override
+    protected void matchCompleted(MatchInput input, MatchCommand command){
+        String uploadId = configuration.getUploadId();
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, "66");
     }
 
 }
