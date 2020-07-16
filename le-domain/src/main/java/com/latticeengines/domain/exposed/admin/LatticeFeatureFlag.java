@@ -45,6 +45,7 @@ public enum LatticeFeatureFlag {
     MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
+    ENABLE_LIVERAMP_INTEGRATION("EnableLiveRampIntegration", "Enable LiveRamp integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
     ENABLE_ACCOUNT360("EnableAccount360", "Enable Account360 features"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //

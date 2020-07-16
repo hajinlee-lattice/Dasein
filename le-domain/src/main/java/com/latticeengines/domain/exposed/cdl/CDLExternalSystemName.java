@@ -12,6 +12,12 @@ public enum CDLExternalSystemName {
     GoogleAds("GoogleAds"), //
     AWS_S3("AWS S3"), //
     Outreach("Outreach"), //
+    Adobe_Audience_Mgr("Adobe Audience Manager"), //
+    MediaMath("MediaMath"), //
+    TradeDesk("TradeDesk"), //
+    Verizon_Media("Verizon Media"), //
+    Google_Display_N_Video_360("Google Display & Video 360"), //
+    AppNexus("AppNexus"), //
     Others("Others");
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();

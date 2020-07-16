@@ -200,6 +200,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
         channelConfig.setIncludeExportAttributes(false);
+        channelConfig.setAudienceType(AudienceType.CONTACTS);
         createPlayLaunchChannel(channelConfig, lookupIdMap);
 
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
@@ -207,16 +208,38 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 32);
+        assertEquals(columnMetadata.size(), 37);
 
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         log.info("" + nonStandardFieldsCount);
-        assertEquals(nonStandardFieldsCount, 20);
+        assertEquals(nonStandardFieldsCount, 30);
+    }
+    
+    @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
+    public void testS3AccountsWithOutExportAttributes() {
+        registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_2");
+
+        S3ChannelConfig channelConfig = new S3ChannelConfig();
+        channelConfig.setAudienceType(AudienceType.ACCOUNTS);
+        channelConfig.setIncludeExportAttributes(false);
+        createPlayLaunchChannel(channelConfig, lookupIdMap);
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 21);
+
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        log.info(JsonUtils.serialize(attrNames));
+        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
+        assertEquals(nonStandardFields, 18);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
     public void testS3WithExportAttributes() {
-        registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_2");
+        registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_3");
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
         channelConfig.setIncludeExportAttributes(true);
@@ -227,11 +250,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 132);
+        assertEquals(columnMetadata.size(), 142);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
-        assertEquals(nonStandardFields.size(), 20);
+        assertEquals(nonStandardFields.size(), 30);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
