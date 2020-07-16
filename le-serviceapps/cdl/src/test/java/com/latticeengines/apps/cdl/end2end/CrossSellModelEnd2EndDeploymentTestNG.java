@@ -163,7 +163,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
         ModelSummary modelSummary = verifyModelSummary(testIteration1.getModelSummaryId(), predictionType);
-        verifyFeatureImportancesGenerated(modelSummary);
+        verifyFeatureImportancesGenerated(modelSummary, predictionType);
     }
 
     private ModelSummary verifyModelSummary(String modelSummaryId, PredictionType predictionType) {
@@ -225,14 +225,18 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertTrue(bucketMetadataHistory.isEmpty());
     }
 
-    private void verifyFeatureImportancesGenerated(ModelSummary modelSummary) {
+    private void verifyFeatureImportancesGenerated(ModelSummary modelSummary, PredictionType predictionType) {
         List<ModelFeatureImportance> featureImportances = featureImportanceProxy
                 .getFeatureImportanceByModelGuid(mainTestTenant.getId(), modelSummary.getId());
-        Assert.assertEquals(featureImportances.size(), 50);
+        // current in Atlas, we use the default value of:
+        //    - 50 features in RF model for propensity model,
+        //    - 55 features for expected value (EV) model
+        int numOfFeatures = predictionType == PredictionType.PROPENSITY ? 50 : 55;
+        Assert.assertEquals(featureImportances.size(), numOfFeatures);
         featureImportanceProxy.upsertModelFeatureImportances(mainTestTenant.getId(), modelSummary.getId());
         featureImportances = featureImportanceProxy.getFeatureImportanceByModelGuid(mainTestTenant.getId(),
                 modelSummary.getId());
-        Assert.assertEquals(featureImportances.size(), 50);
+        Assert.assertEquals(featureImportances.size(), numOfFeatures);
     }
 
     private void verifyBucketMetadataGenerated(PredictionType predictionType) {
