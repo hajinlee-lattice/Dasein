@@ -221,6 +221,9 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToDynamo(batchStoreTableName, TableRoleInCollection.ConsolidatedContact.getPartitionKey(),
                 TableRoleInCollection.ConsolidatedContact.getRangeKey());
+        if (StringUtils.isNotBlank(changeListTableName)) {
+            exportToS3AndAddToContext(changeListTableName, CONTACT_CHANGELIST_TABLE_NAME);
+        }
     }
 
     private void addNewContactExtractStepsForActivityStream(@NotNull List<TransformationStepConfig> extracts,

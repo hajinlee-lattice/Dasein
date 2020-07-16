@@ -265,7 +265,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
             }
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
-
         }
         TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
         exportToDynamo(batchStoreTableName, role.getPartitionKey(), role.getRangeKey());

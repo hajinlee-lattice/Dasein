@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -25,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.AvroRecordIterator;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -32,10 +35,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -44,19 +51,24 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ColumnChanges;
 import com.latticeengines.domain.exposed.spark.common.GetColumnChangesConfig;
+import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
+import com.latticeengines.domain.exposed.spark.stats.CalcStatsDeltaConfig;
 import com.latticeengines.domain.exposed.spark.stats.FindChangedProfileConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.serviceflows.workflow.stats.StatsProfiler;
 import com.latticeengines.spark.exposed.job.common.GetColumnChangesJob;
+import com.latticeengines.spark.exposed.job.common.UpsertJob;
+import com.latticeengines.spark.exposed.job.stats.CalcStatsDeltaJob;
 import com.latticeengines.spark.exposed.job.stats.CalcStatsJob;
 import com.latticeengines.spark.exposed.job.stats.FindChangedProfileJob;
 import com.latticeengines.spark.exposed.job.stats.ProfileJob;
@@ -69,9 +81,16 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
     protected String statsTableName;
     protected boolean autoDetectCategorical; // auto detect categorical string
     protected boolean autoDetectDiscrete; // auto detect discrete number
+
+
     @Inject
     private ApplicationContext appCtx;
     private Table baseTable;
+
+    protected Table statsTbl;
+    protected Table statsDiffTbl;
+    protected List<DataUnit> statsTables = new ArrayList<>();
+    protected List<DataUnit> statsDiffTables = new ArrayList<>();
 
     // check if the entity is to be removed (reset)
     protected BusinessEntity getServingEntity() {
@@ -95,6 +114,10 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         return null;
     }
 
+    protected String getStatsUpdatedFlagCtxKey() {
+        return null;
+    }
+
     // not using change list
     protected void executeFullCalculation() {
         if (shouldCalcStats()) {
@@ -103,6 +126,108 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                 calcFullStats(profileData);
             }
             addStatsTableToCtx();
+        }
+    }
+
+    protected void updateStats(boolean baseChanged, boolean enforceRebuild, TableRoleInCollection baseRole, //
+                               TableRoleInCollection profileRole, String reProfileAttrsKey, String changeListKey) {
+        if (baseChanged || enforceRebuild) {
+            Table baseTable = attemptGetTableRole(baseRole, true);
+            Table profileTbl = attemptGetTableRole(profileRole, true);
+            Table changeListTbl = null;
+            List<String> reProfileAttrs = null;
+            boolean fullReCalc = false;
+            if (enforceRebuild) {
+                log.info("Need to fully re-calculate {} stats, due to enforced rebuild", baseRole);
+                fullReCalc = true;
+            } else {
+                changeListTbl = getTableSummaryFromKey(customerSpaceStr, changeListKey);
+                if (changeListTbl == null) {
+                    log.info("Need to fully re-calculate {} stats, because there is no change list table.", baseRole);
+                    fullReCalc = true;
+                } else {
+                    if (isChanged(profileRole)) {
+                        reProfileAttrs = getListObjectFromContext(reProfileAttrsKey, String.class);
+                        if (reProfileAttrs == null) {
+                            log.info("Need to fully re-calculate {} stats, because there is no list in {}", //
+                                    baseRole, reProfileAttrsKey);
+                            fullReCalc = true;
+                        }
+                    }
+                }
+            }
+            if (fullReCalc) {
+                HdfsDataUnit statsResult = calcStats(baseTable, profileTbl.toHdfsDataUnit("Profile"));
+                statsResult.setName(baseRole + "Stats");
+                statsTables.add(statsResult);
+            } else {
+                // partial re-calculate
+                Preconditions.checkNotNull(changeListTbl, "Must have change list table " + changeListKey);
+                HdfsDataUnit profileData = profileTbl.toHdfsDataUnit("Profile");
+                List<String> partialAttrs = new ArrayList<>(Arrays.asList(baseTable.getAttributeNames()));
+                if (CollectionUtils.isNotEmpty(reProfileAttrs)) {
+                    // handle re-profile attrs
+                    log.info("There {} attributes need full stats calculation.", reProfileAttrs.size());
+                    HdfsDataUnit statsResult = calcStats(baseTable, profileData, reProfileAttrs);
+                    statsResult.setName(baseRole + "Stats");
+                    statsTables.add(statsResult);
+
+                    partialAttrs.removeAll(reProfileAttrs);
+                } else {
+                    log.info("There are no attributes need full stats calculation.");
+                }
+                if (CollectionUtils.isNotEmpty(partialAttrs)) {
+                    log.info("There {} attributes need partial stats calculation.", partialAttrs.size());
+                    CalcStatsDeltaConfig deltaConfig = new CalcStatsDeltaConfig();
+                    deltaConfig.setIncludeAttrs(partialAttrs);
+                    deltaConfig.setInput(Arrays.asList( //
+                            changeListTbl.toHdfsDataUnit("ChangeList"), profileData) //
+                    );
+                    SparkJobResult sparkJobResult = runSparkJob(CalcStatsDeltaJob.class, deltaConfig);
+                    statsDiffTables.add(sparkJobResult.getTargets().get(0));
+                } else {
+                    log.info("There are no attributes need partial stats calculation.");
+                }
+
+            }
+        } else {
+            log.info("No reason to re-calculate {} stats.", baseRole);
+        }
+    }
+
+    protected void mergeStats() {
+        HdfsDataUnit statsData = null;
+        if (statsTables.size() > 1) {
+            UpsertConfig upsertConfig = new UpsertConfig();
+            upsertConfig.setJoinKey(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
+            upsertConfig.setInput(statsTables);
+            SparkJobResult result = runSparkJob(UpsertJob.class, upsertConfig);
+            statsData = result.getTargets().get(0);
+        } else if (statsTables.size() == 1) {
+            statsData = (HdfsDataUnit) statsTables.get(0);
+        }
+        if (statsData != null) {
+            statsTableName = NamingUtils.timestamp("AccountStats");
+            statsTbl = toTable(statsTableName, PROFILE_ATTR_ATTRNAME, statsData);
+            metadataProxy.createTable(customerSpaceStr, statsTableName, statsTbl);
+        }
+    }
+
+    protected void mergeStatsDiff() {
+        HdfsDataUnit statsData = null;
+        if (statsDiffTables.size() > 1) {
+            UpsertConfig upsertConfig = new UpsertConfig();
+            upsertConfig.setJoinKey(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
+            upsertConfig.setInput(statsDiffTables);
+            SparkJobResult result = runSparkJob(UpsertJob.class, upsertConfig);
+            statsData = result.getTargets().get(0);
+        } else if (statsDiffTables.size() == 1) {
+            statsData = (HdfsDataUnit) statsDiffTables.get(0);
+        }
+        if (statsData != null) {
+            String statsDiffTableName = NamingUtils.timestamp("AccountStats");
+            statsDiffTbl = toTable(statsDiffTableName, PROFILE_ATTR_ATTRNAME, statsData);
+            metadataProxy.createTable(customerSpaceStr, statsDiffTableName, statsDiffTbl);
         }
     }
 
@@ -153,8 +278,8 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
 
     protected HdfsDataUnit profileWithChangeList(Table baseTable, Table changeListTbl, Table oldProfileTbl,
             TableRoleInCollection profileRole, String ctxKeyForRetry, String ctxKeyForReProfileAttrs, List<String> includeAttrs,
-            List<ProfileParameters.Attribute> declaredAttrs, boolean considerAMAttrs, boolean autoDetectCategorical,
-            boolean autoDetectDiscrete) {
+            List<ProfileParameters.Attribute> declaredAttrs, boolean considerAMAttrs, boolean ignoreDateAttrs,
+                                                 boolean autoDetectCategorical, boolean autoDetectDiscrete) {
         ProfileJobConfig profileConfig = new ProfileJobConfig();
         initializeProfiler(baseTable, profileConfig, includeAttrs, //
                 declaredAttrs, considerAMAttrs, autoDetectCategorical, autoDetectDiscrete);
@@ -175,13 +300,15 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         attrsToProfile.addAll(numAttrsBasedNewData);
         ColumnChanges changes = getColumnChanges(changeListData, attrsToProfile);
         attrsToProfile.retainAll(changes.getChanged().keySet());
-        // need to include all date attributes
-        baseTable.getColumnMetadata().forEach(cm -> {
-            if (LogicalDataType.Date.equals(cm.getLogicalDataType()) && //
-                    !evaluationDateStr.equals(cm.getLastDataRefresh())) {
-                attrsToProfile.add(cm.getAttrName());
-            }
-        });
+        if (!ignoreDateAttrs) {
+            // need to include all date attributes
+            baseTable.getColumnMetadata().forEach(cm -> {
+                if (LogicalDataType.Date.equals(cm.getLogicalDataType()) && //
+                        !evaluationDateStr.equals(cm.getLastDataRefresh())) {
+                    attrsToProfile.add(cm.getAttrName());
+                }
+            });
+        }
         if (CollectionUtils.isNotEmpty(declaredAttrs)) {
             declaredAttrs.forEach(da -> attrsToProfile.remove(da.getAttr()));
         }
@@ -213,7 +340,9 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
             if (updatedProfile != null) {
                 extraProfileUnits.add(updatedProfile);
             }
-            profiler.appendResult(profileData, extraProfileUnits, new ArrayList<>(ignoreAttrs));
+            profiler.appendResult(profileData, updatedProfile, oldProfileData, new ArrayList<>(ignoreAttrs));
+
+            verifyNoDuplicatedProfile(profileData);
 
             FindChangedProfileConfig findChangeConfig = new FindChangedProfileConfig();
             findChangeConfig.setInput(Arrays.asList(oldProfileData, profileData));
@@ -234,6 +363,26 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
             log.info("No attributes need re-profile.");
             linkInactiveTable(profileRole);
             return attemptGetTableRole(profileRole, true).toHdfsDataUnit("Profile");
+        }
+    }
+
+    private void verifyNoDuplicatedProfile(HdfsDataUnit profileData) {
+        String avroGlob = PathUtils.toAvroGlob(profileData.getPath());
+        AvroRecordIterator itr = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
+        Set<String> seenAttrs = new HashSet<>();
+        List<String> duplicatedAttrs = new ArrayList<>();
+        while(itr.hasNext()) {
+            GenericRecord record = itr.next();
+            String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
+            if (!seenAttrs.contains(attrName)) {
+                seenAttrs.add(attrName);
+            } else {
+                duplicatedAttrs.add(attrName);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(duplicatedAttrs)) {
+            throw new IllegalArgumentException("Duplicated attributs in profile: " //
+                    + StringUtils.join(duplicatedAttrs, ","));
         }
     }
 
@@ -424,6 +573,107 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
             baseTable = attemptGetTableRole(servingRole, true);
         }
         return baseTable;
+    }
+
+    protected long getBaseTableCount() {
+        Table baseTbl = attemptGetTableRole(getBaseTableRole(), true);
+        return baseTbl.toHdfsDataUnit("Base").getCount();
+    }
+
+    protected void upsertStatsCube() {
+        boolean alreadyUpdated = Boolean.TRUE.equals(getObjectFromContext(getStatsUpdatedFlagCtxKey(), Boolean.class));
+        if (alreadyUpdated) {
+            log.info("Stats already updated according to ctx ACCOUNT_STATS_UPDATED.");
+            return;
+        }
+
+        long tblCnt = getBaseTableCount();
+        StatsCube replaceCube = null;
+        if (statsTbl != null) {
+            replaceCube = getStatsCube(statsTbl.toHdfsDataUnit("Stats"));
+            log.info("Parsed a replace cube of {} attributes", replaceCube.getStatistics().size());
+        }
+
+        StatsCube updateCube = null;
+        if (statsDiffTbl != null) {
+            updateCube = getStatsCube(statsDiffTbl.toHdfsDataUnit("StatsDiff"));
+            log.info("Parsed a update cube of {} attributes", updateCube.getStatistics().size());
+        }
+
+        String lockName = acquireStatsLock(CustomerSpace.shortenCustomerSpace(customerSpaceStr), inactive);
+        try {
+            String cubeName = configuration.getMainEntity().name();
+            Map<String, StatsCube> cubeMap = getCurrentCubeMap();
+            Map<String, AttributeStats> attrStats = new HashMap<>();
+            if (cubeMap.containsKey(cubeName)) {
+                StatsCube oldCube = cubeMap.get(cubeName);
+                attrStats.putAll(oldCube.getStatistics());
+            }
+            if (updateCube != null && MapUtils.isNotEmpty(updateCube.getStatistics())) {
+                for (String attr: updateCube.getStatistics().keySet()) {
+                    AttributeStats updateStat = updateCube.getStatistics().get(attr);
+                    if (attrStats.containsKey(attr)) {
+                        attrStats.put(attr, mergeAttrStat(attrStats.get(attr), updateStat));
+                    } else {
+                        attrStats.put(attr, updateStat);
+                    }
+                }
+            }
+            if (replaceCube != null && MapUtils.isNotEmpty(replaceCube.getStatistics())) {
+                attrStats.putAll(replaceCube.getStatistics());
+            }
+            StatsCube cube = new StatsCube();
+            cube.setCount(tblCnt);
+            cube.setStatistics(attrStats);
+            cubeMap.put(cubeName, cube);
+            saveStatsContainer(cubeMap);
+            putObjectInContext(getStatsUpdatedFlagCtxKey(), Boolean.TRUE);
+        } finally {
+            LockManager.releaseWriteLock(lockName);
+        }
+    }
+
+    private AttributeStats mergeAttrStat(AttributeStats baseStat, AttributeStats statDiff) {
+        if (statDiff.getBuckets() != null && CollectionUtils.isNotEmpty(statDiff.getBuckets().getBucketList())) {
+            Buckets buckets = baseStat.getBuckets();
+            Map<Long, Bucket> bucketMap = buckets.getBucketList().stream()
+                    .collect(Collectors.toMap(Bucket::getId, Function.identity()));
+            statDiff.getBuckets().getBucketList().forEach(bktDiff -> {
+                long bktId = bktDiff.getId();
+                if (bucketMap.containsKey(bktId)) {
+                    Bucket baseBkt = bucketMap.get(bktId);
+                    baseBkt.setCount(baseBkt.getCount() + bktDiff.getCount());
+                } else {
+                    bucketMap.put(bktId, bktDiff);
+                }
+            });
+            List<Bucket> bucketList = bucketMap.values().stream() //
+                    .sorted(Comparator.comparing(Bucket::getId)) //
+                    .collect(Collectors.toList());
+            buckets.setBucketList(bucketList);
+        }
+        baseStat.setNonNullCount(baseStat.getNonNullCount() + statDiff.getNonNullCount());
+        return baseStat;
+    }
+
+    // directly save active version stats to inactive version
+    protected void linkStatsContainer() {
+        Map<String, StatsCube> cubeMap = getCurrentCubeMap();
+        if (MapUtils.isNotEmpty(cubeMap)) {
+            saveStatsContainer(cubeMap);
+        } else {
+            log.info("Skip saving an empty stats.");
+        }
+    }
+
+    private void saveStatsContainer(Map<String, StatsCube> cubeMap) {
+        StatisticsContainer statsContainer = new StatisticsContainer();
+        String statsName = NamingUtils.timestamp("Stats");
+        statsContainer.setName(statsName);
+        statsContainer.setStatsCubes(cubeMap);
+        statsContainer.setVersion(inactive);
+        log.info("Saving stats " + statsName + " with " + cubeMap.size() + " cubes.");
+        dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 
     protected Map<String, StatsCube> getCurrentCubeMap() {

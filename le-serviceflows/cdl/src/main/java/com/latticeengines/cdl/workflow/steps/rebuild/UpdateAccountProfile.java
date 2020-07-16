@@ -68,11 +68,6 @@ public class UpdateAccountProfile extends UpdateProfileBase<ProcessAccountStepCo
     }
 
     @Override
-    protected boolean getConsiderAMAttrs() {
-        return false;
-    }
-
-    @Override
     public void execute() {
         bootstrap();
         autoDetectCategorical = true;
