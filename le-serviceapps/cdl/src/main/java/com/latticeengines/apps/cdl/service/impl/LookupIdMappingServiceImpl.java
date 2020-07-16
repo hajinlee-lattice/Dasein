@@ -73,8 +73,8 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
         if ((externalSystemType == null || externalSystemType == CDLExternalSystemType.FILE_SYSTEM)
                 && !toReturn.containsKey(CDLExternalSystemType.FILE_SYSTEM.name())) {
-            // Every tenant should have an AWS S3 connection, set one up if its missing for
-            // this tenant
+            // Every tenant should have an AWS S3 connection, set one up if its
+            // missing for this tenant
             log.info("No FileSystem connection found, creating it now");
             LookupIdMap awsS3 = new LookupIdMap();
             awsS3.setDescription("Lattice S3 dropfolder connection");
@@ -161,7 +161,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public void deleteConnection(String lookupIdMapId, TraySettings traySettings) {
-        try{
+        try {
 
             LookupIdMap map = getLookupIdMap(lookupIdMapId);
             ExternalSystemAuthentication trayAuth = map.getExternalAuthentication();
@@ -182,21 +182,19 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 updateLookupIdMap(lookupIdMapId, map);
             }
             deleteLookupIdMap(lookupIdMapId);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("Errors while deleting connection: ", ex.getMessage());
         }
     }
 
     @Override
-    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(
-            CDLExternalSystemType externalSystemType, AudienceType audienceType) {
+    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(CDLExternalSystemType externalSystemType,
+            AudienceType audienceType) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
         Map<String, List<CDLExternalSystemMapping>> result;
         try {
             if (externalSystemType == null) {
-                result = externalSystemService.getExternalSystemMap(space.toString(),
-                        audienceType.asBusinessEntity());
+                result = externalSystemService.getExternalSystemMap(space.toString(), audienceType.asBusinessEntity());
             } else {
                 result = new HashMap<>();
                 result.put(externalSystemType.name(), externalSystemService.getExternalSystemByType( //
@@ -215,6 +213,9 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             }
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.ERP) {
                 result.put(CDLExternalSystemType.ERP.name(), new ArrayList<>());
+            }
+            if (externalSystemType == null || externalSystemType == CDLExternalSystemType.DSP) {
+                result.put(CDLExternalSystemType.DSP.name(), new ArrayList<>());
             }
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.OTHER) {
                 result.put(CDLExternalSystemType.OTHER.name(), new ArrayList<>());
@@ -241,10 +242,8 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             if (dropbox != null && StringUtils.isNotBlank(dropbox.getDropBox()))
                 switch (lookupIdMap.getExternalSystemType()) {
                 case MAP:
-                    lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
-                            pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
-                    break;
                 case ADS:
+                case DSP:
                     lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
                             pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
                     break;
@@ -265,7 +264,6 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     }
 
     private String getProtocolPrefix() {
-
         return pathBuilder.getProtocol() + pathBuilder.getProtocolSeparator() + pathBuilder.getPathSeparator();
     }
 }
