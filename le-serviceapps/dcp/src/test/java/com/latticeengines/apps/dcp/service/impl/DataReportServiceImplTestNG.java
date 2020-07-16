@@ -183,7 +183,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(copy2.getParentOwnerId());
     }
 
-    private DataReport getDataReport() {
+    public static DataReport getDataReport() {
         DataReport dataReport = new DataReport();
 
         DataReport.BasicStats basicStats = new DataReport.BasicStats();
@@ -198,6 +198,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         basicStats.setErrorCnt(errorCnt);
         basicStats.setMatchedCnt(matchCnt);
         basicStats.setUnmatchedCnt(unmatchedCnt);
+        basicStats.setPendingReviewCnt(0L);
 
         DataReport.InputPresenceReport inputPresenceReport = new DataReport.InputPresenceReport();
         Long p1 = new RandomDataGenerator().nextLong(0L, successCnt);
@@ -254,6 +255,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Long unique = new RandomDataGenerator().nextLong(100L, matchCnt);
         duplicationReport.setUniqueRecords(unique);
         duplicationReport.setDuplicateRecords(matchCnt - unique);
+        duplicationReport.setDistinctRecords(10L);
 
         dataReport.setBasicStats(basicStats);
         dataReport.setInputPresenceReport(inputPresenceReport);

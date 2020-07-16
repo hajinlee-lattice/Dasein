@@ -27,18 +27,21 @@ public class DCPDataReportWorkflowSubmitter extends WorkflowSubmitter {
                                 WorkflowPidWrapper pidWrapper) {
 
         DCPDataReportWorkflowConfiguration configuration =
-                generateConfiguration(customerSpace, reportRequest.getLevel(), reportRequest.getMode());
+                generateConfiguration(customerSpace, reportRequest.getRoot(), reportRequest.getLevel(),
+                        reportRequest.getMode());
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return applicationId;
     }
 
     private DCPDataReportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
+                                                                     String root,
                                                                      DataReportRecord.Level level,
                                                                      DataReportMode mode) {
         return new DCPDataReportWorkflowConfiguration.Builder()
                 .customer(customerSpace)
                 .internalResourceHostPort(internalResourceHostPort)
                 .microServiceHostPort(microserviceHostPort)
+                .root(root)
                 .level(level)
                 .mode(mode)
                 .builder();

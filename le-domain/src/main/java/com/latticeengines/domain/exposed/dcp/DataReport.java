@@ -96,10 +96,8 @@ public class DataReport {
     }
 
     public DataReport combineReport(DataReport dataReport) {
-        if (this.basicStats == null) {
-            this.basicStats = new BasicStats();
-            this.basicStats.setSuccessCnt(0L);
-        }
+        Preconditions.checkNotNull(this.basicStats, "basic stats shouldn't be null");
+        Preconditions.checkNotNull(this.basicStats.getSuccessCnt(), "successful count shouldn't be null");
         Preconditions.checkNotNull(dataReport.getBasicStats(), "basic stats shouldn't be null");
         Preconditions.checkNotNull(dataReport.getBasicStats().getSuccessCnt(), "count shouldn't be null");
         Long totalCnt1 = this.basicStats.getSuccessCnt();
@@ -378,6 +376,10 @@ public class DataReport {
             geographicalDistributionMap.put(countryCode, geographicalItem);
         }
 
+        /** totalCount1 represents the successful count in this report,
+         * totalCount2 represents the successful count in passing report
+         * pass these parameters as the rate is 0 will lose these data
+         */
         @JsonIgnore
         public void combineGeoDistributionReport(GeoDistributionReport geoDistributionReport,
                                                                   Long totalCount1,
@@ -541,6 +543,10 @@ public class DataReport {
             confidenceRateMap.put(confidenceCode, confidenceItem);
         }
 
+        /** totalCnt1 represents the successful count in this report,
+         * totalCnt2 represents the successful count in passing report
+         * pass these parameters as the rate is 0 will lose these data
+         */
         @JsonIgnore
         public void combineMatchToDUNSReport(MatchToDUNSReport matchToDUNSReport, Long totalCnt1,
                                                           Long totalCnt2) {
@@ -550,6 +556,21 @@ public class DataReport {
             if (matchToDUNSReport == null) {
                 return ;
             }
+            if (this.matched == null) {
+                this.matched = 0L;
+            }
+            this.matched += matchToDUNSReport.getMatched() == null ? 0L : matchToDUNSReport.getMatched();
+
+            if (this.unmatched == null) {
+                this.unmatched = 0L;
+            }
+            this.unmatched += matchToDUNSReport.getUnmatched() == null ? 0L : matchToDUNSReport.getUnmatched();
+
+            if (this.noMatchCnt == null) {
+                this.noMatchCnt = 0L;
+            }
+            this.noMatchCnt += matchToDUNSReport.getNoMatchCnt() == null ? 0L : matchToDUNSReport.getNoMatchCnt();
+
             List<ConfidenceItem> items = matchToDUNSReport.getConfidenceRateList();
             if (CollectionUtils.isNotEmpty(items)) {
                 items.forEach(confidenceItem -> {

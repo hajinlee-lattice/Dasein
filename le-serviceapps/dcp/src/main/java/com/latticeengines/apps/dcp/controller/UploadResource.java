@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -138,12 +137,5 @@ public class UploadResource {
         ApplicationId appId = importSubmitter.submit(CustomerSpace.parse(customerSpace), request,
                 new WorkflowPidWrapper(-1L));
         return appId.toString();
-    }
-
-    @GetMapping("/sourceId/{sourceId}/matchresult")
-    @ResponseBody
-    @ApiOperation(value = "Get match result table")
-    public List<Table> getMatchResultsBySourceId(@PathVariable String customerSpace, @PathVariable String sourceId) {
-        return uploadService.getMatchResultTables(sourceId);
     }
 }

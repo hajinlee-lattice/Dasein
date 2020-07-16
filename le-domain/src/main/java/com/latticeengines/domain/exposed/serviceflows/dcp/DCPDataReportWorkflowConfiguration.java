@@ -34,6 +34,11 @@ public class DCPDataReportWorkflowConfiguration extends BaseDCPWorkflowConfigura
             return this;
         }
 
+        public Builder root(String root) {
+            generateReport.setRoot(root);
+            return this;
+        }
+
         public Builder level(DataReportRecord.Level level) {
             generateReport.setLevel(level);
             return this;

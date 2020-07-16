@@ -173,7 +173,7 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         this.statistics = statistics;
     }
 
-    public Table getMatchResult() {
+    private Table getMatchResult() {
         return matchResult;
     }
 

@@ -4,11 +4,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -36,6 +40,8 @@ import com.latticeengines.spark.exposed.job.dcp.RollupDataReportJob;
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfiguration, RollupDataReportConfig> {
+
+    private static final Logger log = LoggerFactory.getLogger(RollupDataReport.class);
 
     @Inject
     private UploadProxy uploadProxy;
@@ -87,19 +93,20 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
         do {
             Map<String, DataReport> parentMap = levelMap.get(parentLevel);
             Map<String, DataReport> childMap = levelMap.get(childLevel);
-            Set<String> keys = parentMap.keySet();
-            for (String key : keys) {
-                Set<String> childIds = parentIdToChildren.get(key);
+            Set<String> parentOwnerIds = parentMap.keySet();
+            for (String parentOwnerId : parentOwnerIds) {
+                Set<String> childIds = parentIdToChildren.get(parentOwnerId);
                 Map<String, DataReport> childOwnerIdToReport = new HashMap<>();
                 for (String childId : childIds) {
                     DataReport childReport = childMap.get(childId);
                     childOwnerIdToReport.put(childId, childReport);
                 }
-                DataReport parentReport = parentMap.get(key);
-                DataReport updatedParentReport = constructParentReport(key, parentLevel, parentReport, childLevel,
-                        childOwnerIdToReport, mode);
-                if (!DataReportMode.UPDATE.equals(mode)) {
-                    parentMap.put(key, updatedParentReport);
+                DataReport parentReport = parentMap.get(parentOwnerId);
+                Pair<Boolean, DataReport> result = constructParentReport(parentOwnerId, parentLevel, parentReport,
+                        childLevel, childOwnerIdToReport, mode);
+                // write report back if needed
+                if (result != null && Boolean.TRUE.equals(result.getLeft())) {
+                    parentMap.put(parentOwnerId, result.getRight());
                 }
             }
             childLevel = parentLevel;
@@ -107,10 +114,10 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
         } while(childLevel != level);
     }
 
-    private DataReport constructParentReport(String parentOwnerId, DataReportRecord.Level parentLevel,
-                                       DataReport parentReport, DataReportRecord.Level childLevel,
-                                       Map<String, DataReport> childOwnerIdToReport, DataReportMode mode) {
-        DataReport updatedParentReport = new DataReport();
+    private Pair<Boolean, DataReport> constructParentReport(String parentOwnerId, DataReportRecord.Level parentLevel,
+                                                            DataReport parentReport, DataReportRecord.Level childLevel,
+                                                            Map<String, DataReport> childOwnerIdToReport, DataReportMode mode) {
+        DataReport updatedParentReport = initializeReport();
         switch (mode) {
             case UPDATE:
                 DunsCountCache parentCache = dataReportProxy.getDunsCount(customerSpace.toString(), parentLevel,
@@ -123,30 +130,48 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 if (!needUpdate) {
                     Set<String> childOwnerIds = childOwnerIdToReport.keySet();
                     for (String childOwnerId : childOwnerIds) {
-                        DunsCountCache childCache = dataReportProxy.getDunsCount(customerSpace.toString(), childLevel
-                                , childOwnerId);
+                        DunsCountCache childCache = dataReportProxy.getDunsCount(customerSpace.toString(),
+                                childLevel, childOwnerId);
                         if (childCache.getSnapshotTimestamp() != null && parentTime.before(childCache.getSnapshotTimestamp())) {
                             needUpdate = true;
                         }
                     }
                 }
                 if (needUpdate) {
-                    childOwnerIdToReport.forEach((key, value) -> updatedParentReport.combineReport(value));
+                    childOwnerIdToReport.forEach((childOwnerId, childReport) -> updatedParentReport.combineReport(childReport));
                     dataReportProxy.updateDataReport(customerSpace.toString(), parentLevel, parentOwnerId, updatedParentReport);
+                    return Pair.of(Boolean.TRUE, updatedParentReport);
                 } else {
-                    return parentReport;
+                    return Pair.of(Boolean.FALSE, parentReport);
                 }
-                break;
             case RECOMPUTE_TREE:
-                childOwnerIdToReport.forEach((key, value) -> updatedParentReport.combineReport(value));
+                childOwnerIdToReport.forEach((childOwnerId, childReport) -> updatedParentReport.combineReport(childReport));
                 dataReportProxy.updateDataReport(customerSpace.toString(), parentLevel, parentOwnerId, updatedParentReport);
-                break;
+                return Pair.of(Boolean.TRUE, updatedParentReport);
             case RECOMPUTE_ROOT:
-                childOwnerIdToReport.forEach((key, value) -> updatedParentReport.combineReport(value));
-                break;
+                childOwnerIdToReport.forEach((childOwnerId, childReport) -> updatedParentReport.combineReport(childReport));
+                return Pair.of(Boolean.TRUE, updatedParentReport);
+                default:
+                    return null;
         }
 
-        return updatedParentReport;
+    }
+
+    private DataReport initializeReport() {
+        DataReport report = new DataReport();
+        report.setInputPresenceReport(new DataReport.InputPresenceReport());
+        DataReport.BasicStats stats = new DataReport.BasicStats();
+        stats.setSuccessCnt(0L);
+        stats.setErrorCnt(0L);
+        stats.setPendingReviewCnt(0L);
+        stats.setMatchedCnt(0L);
+        stats.setTotalSubmitted(0L);
+        stats.setUnmatchedCnt(0L);
+        report.setBasicStats(stats);
+        report.setDuplicationReport(new DataReport.DuplicationReport());
+        report.setGeoDistributionReport(new DataReport.GeoDistributionReport());
+        report.setMatchToDUNSReport(new DataReport.MatchToDUNSReport());
+        return report;
     }
 
     private void prepareDataReport(DataReportRecord.Level level, String root,
@@ -159,10 +184,13 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             case Tenant:
                 List<ProjectSummary> projects = projectProxy.getAllDCPProject(customerSpace.toString(), true);
                 parentIdToChildren.put(root,
-                        projects.stream().map(ProjectSummary::getProjectId).collect(Collectors.toSet()));
+                        projects.stream()
+                                .map(ProjectSummary::getProjectId)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()));
                 DataReport tenantReport = dataReportProxy.getDataReport(customerSpace.toString(),
                     DataReportRecord.Level.Tenant, root);
-                tenantIdToReport.put(customerSpace.toString(), tenantReport);
+                tenantIdToReport.put(root, tenantReport);
                 projects.forEach(projectSummary -> {
                     String projectId = projectSummary.getProjectId();
                     DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
@@ -170,7 +198,10 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                     projectIdToReport.put(projectId, projectReport);
                     List<Source> sources = projectSummary.getSources();
                     parentIdToChildren.put(projectId,
-                            sources.stream().map(Source::getSourceId).collect(Collectors.toSet()));
+                            sources.stream()
+                                    .filter(Objects::nonNull)
+                                    .map(Source::getSourceId)
+                                    .collect(Collectors.toSet()));
                     sources.forEach(source -> {
                         String sourceId = source.getSourceId();
                         DataReport sourceReport = dataReportProxy.getDataReport(customerSpace.toString(),
@@ -179,13 +210,18 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                         List<UploadDetails> uploads = uploadProxy.getUploads(customerSpace.toString(), sourceId,
                                 Upload.Status.FINISHED, false);
                         parentIdToChildren.put(sourceId,
-                                uploads.stream().map(UploadDetails::getUploadId).collect(Collectors.toSet()));
+                                uploads.stream()
+                                        .filter(Objects::nonNull)
+                                        .map(UploadDetails::getUploadId)
+                                        .collect(Collectors.toSet()));
                         uploads.forEach(upload -> {
                             DataReport report = dataReportProxy.getDataReport(customerSpace.toString(),
                                     DataReportRecord.Level.Upload,
                                     upload.getUploadId());
                             if (report != null) {
                                 uploadIdToReport.put(upload.getUploadId(), report);
+                            } else {
+                                log.info("no report found for {}", upload.getUploadId());
                             }
                         });
                     });
@@ -196,7 +232,10 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                         root, Boolean.TRUE);
                 List<Source> sources = project.getSources();
                 parentIdToChildren.put(project.getProjectId(),
-                        sources.stream().map(Source::getSourceId).collect(Collectors.toSet()));
+                        sources.stream()
+                                .map(Source::getSourceId)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()));
                 DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
                         DataReportRecord.Level.Project, root);
                 projectIdToReport.put(root, projectReport);
@@ -208,12 +247,19 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                     List<UploadDetails> uploads = uploadProxy.getUploads(customerSpace.toString(), sourceId,
                             Upload.Status.FINISHED, false);
                     parentIdToChildren.put(sourceId,
-                            uploads.stream().map(UploadDetails::getUploadId).collect(Collectors.toSet()));
+                            uploads.stream()
+                                    .map(UploadDetails::getUploadId)
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toSet()));
                     uploads.forEach(upload -> {
                         DataReport report = dataReportProxy.getDataReport(customerSpace.toString(),
                                 DataReportRecord.Level.Upload,
                                 upload.getUploadId());
-                        uploadIdToReport.put(upload.getUploadId(), report);
+                        if (report != null) {
+                            uploadIdToReport.put(upload.getUploadId(), report);
+                        } else {
+                            log.info("no report found for " + upload.getUploadId());
+                        }
                     });
                 });
                 break;
@@ -224,12 +270,19 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 List<UploadDetails> uploads = uploadProxy.getUploads(customerSpace.toString(), root,
                         Upload.Status.FINISHED, false);
                 parentIdToChildren.put(root,
-                        uploads.stream().map(UploadDetails::getUploadId).collect(Collectors.toSet()));
+                        uploads.stream()
+                                .map(UploadDetails::getUploadId)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()));
                 uploads.forEach(upload -> {
                     DataReport report = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Upload,
                             upload.getUploadId());
-                    uploadIdToReport.put(upload.getUploadId(), report);
+                    if (report != null) {
+                        uploadIdToReport.put(upload.getUploadId(), report);
+                    } else {
+                        log.info("no report found for " + upload.getUploadId());
+                    }
                 });
                 break;
             default:

@@ -236,8 +236,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
         Assert.assertNotNull(matchResult);
         Assert.assertEquals(matchResult.getExtracts().size(), 1);
-        List<Table> uploads = uploadProxy.getMatchResultsBySourceId(mainCustomerSpace, source.getSourceId());
-        Assert.assertNotNull(uploads);
 
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
