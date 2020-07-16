@@ -48,14 +48,8 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             enrichS3ContactsFields(customerSpace, channel, channelConfig,
                     exportColumnMetadataList,
                     contactAttributesMap);
-            enrichS3AccountsFields(customerSpace, channel, channelConfig,
-                    exportColumnMetadataList,
-                    accountAttributesMap);
-        } else if (channelAudienceType.equals(AudienceType.ACCOUNTS)) {
-            enrichS3AccountsFields(customerSpace, channel, channelConfig,
-                    exportColumnMetadataList,
-                    accountAttributesMap);
         }
+        enrichS3AccountsFields(customerSpace, channel, channelConfig, exportColumnMetadataList, accountAttributesMap);
 
         return exportColumnMetadataList;
     }
