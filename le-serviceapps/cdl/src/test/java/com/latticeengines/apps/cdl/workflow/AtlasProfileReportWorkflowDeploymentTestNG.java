@@ -51,7 +51,7 @@ public class AtlasProfileReportWorkflowDeploymentTestNG extends CDLWorkflowFrame
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
-        checkpointService.resumeCheckpoint( //
+        checkpointAutoService.resumeCheckpoint( //
                 ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT, //
                 CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
     }
