@@ -243,7 +243,9 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
                 uploadFile(s3Client, bucket, objectKey);
             }
             Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
-            List<FileProperty> result = dropBoxProxy.getFileListForPath(customerSpace, prefix, null);
+            DropBoxSummary summary = dropBoxProxy.getDropBox(customerSpace);
+            List<FileProperty> result = dropBoxProxy.getFileListForPath(customerSpace,
+                    prefix.substring(prefix.indexOf(summary.getDropBox()) + summary.getDropBox().length()), null);
             Assert.assertTrue(result.size() > 0);
             return true;
         });

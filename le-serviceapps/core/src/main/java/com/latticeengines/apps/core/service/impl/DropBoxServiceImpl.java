@@ -29,7 +29,6 @@ import com.amazonaws.auth.policy.conditions.StringCondition;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.util.S3ImportMessageUtils;
@@ -429,11 +428,12 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     @Override
-    public List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter) {
-        Preconditions.checkState(StringUtils.isNotBlank(s3Path), "s3Path should not be empty!");
+    public List<FileProperty> getFileListForPath(String customerSpace, String relativePath, String filter) {
         final String delimiter = "/";
         String bucket = getDropBoxBucket();
-        String prefix = PathUtils.formatKey(bucket, s3Path);
+        String dropbox = getDropBoxPrefix();
+        relativePath = trimSlash(relativePath);
+        String prefix = StringUtils.isBlank(relativePath) ? dropbox : dropbox + SLASH + relativePath;
         List<S3ObjectSummary> s3ObjectSummaries = s3Service.getFilesWithInfoForDir(bucket, prefix);
         List<FileProperty> fileList = new LinkedList<>();
         for (S3ObjectSummary summary : s3ObjectSummaries) {
@@ -470,6 +470,19 @@ public class DropBoxServiceImpl implements DropBoxService {
             fileList.add(fileProperty);
         }
         return fileList;
+    }
+
+    private static String trimSlash(String part) {
+        if (StringUtils.isBlank(part)) {
+            return part;
+        }
+        while (part.startsWith(SLASH)) {
+            part = part.substring(1);
+        }
+        while (part.endsWith(SLASH)) {
+            part = part.substring(0, part.length() - 1);
+        }
+        return part;
     }
 
     @Override

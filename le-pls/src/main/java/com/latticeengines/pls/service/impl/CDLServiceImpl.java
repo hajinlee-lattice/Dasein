@@ -583,7 +583,10 @@ public class CDLServiceImpl implements CDLService {
         if (!s3Path.contains(dropBoxSummary.getDropBox())) {
             throw new IllegalArgumentException("Must provide path under tenant's root directory!");
         }
-        return dropBoxProxy.getFileListForPath(customerSpace, s3Path, filter);
+        // first occurrence of the dropbox
+        String relativePath =
+                s3Path.substring(s3Path.indexOf(dropBoxSummary.getDropBox()) + dropBoxSummary.getDropBox().length());
+        return dropBoxProxy.getFileListForPath(customerSpace, relativePath, filter);
     }
 
     @Override
