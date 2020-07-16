@@ -331,7 +331,7 @@
    },
    {
       "attrName":"PostalCode",
-      "displayName":"Contact ZipCode",
+      "displayName":"Contact Zip Code",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Marketo",
