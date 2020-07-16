@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -134,5 +135,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         String token = testUploadProxy.getToken(uploadDetails.getUploadId());
         Assert.assertNotNull(token);
+
+        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
+        Assert.assertNotNull(uploadJobDetails);
+        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 6);
+        Assert.assertEquals(uploadJobDetails.getCurrentStep().getStepName(), "Analysis");
     }
 }

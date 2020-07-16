@@ -8,6 +8,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 
 @Component("testUploadProxy")
 public class TestUploadProxy extends PlsRestApiProxyBase {
@@ -41,5 +42,11 @@ public class TestUploadProxy extends PlsRestApiProxyBase {
         String urlPattern = "/uploadId/{uploadId}/token";
         String url = constructUrl(urlPattern, uploadId);
         return get("Generate a token for downloading zip file of the upload results", url, String.class);
+    }
+
+    public UploadJobDetails getJobDetailsByUploadId(String uploadId) {
+        String urlPattern = "/uploadId/{uploadId}/jobDetails";
+        String url = constructUrl(urlPattern, uploadId);
+        return get("get upload job details by uploadId", url, UploadJobDetails.class);
     }
 }

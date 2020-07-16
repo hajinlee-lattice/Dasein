@@ -16,6 +16,9 @@ public class UploadDiagnostics {
     @JsonProperty("lastErrorMessage")
     private String lastErrorMessage;
 
+    @JsonProperty("lastErrorStep")
+    private String lastErrorStep;
+
     public String getApplicationId() {
         return applicationId;
     }
@@ -30,5 +33,13 @@ public class UploadDiagnostics {
 
     public void setLastErrorMessage(String lastErrorMessage) {
         this.lastErrorMessage = lastErrorMessage;
+    }
+
+    public String getLastErrorStep() {
+        return lastErrorStep;
+    }
+
+    public void setLastErrorStep(String lastErrorStep) {
+        this.lastErrorStep = lastErrorStep;
     }
 }

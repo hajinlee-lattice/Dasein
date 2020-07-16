@@ -165,7 +165,7 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toSet());
     }
-
+  
     private void saveResultAsParquetTable(String avroResultTableName, String targetTableName) {
         Table avroResultTable = metadataProxy.getTable(customerSpace.toString(), avroResultTableName);
         HdfsDataUnit avroResult = avroResultTable.toHdfsDataUnit("AvroResult");

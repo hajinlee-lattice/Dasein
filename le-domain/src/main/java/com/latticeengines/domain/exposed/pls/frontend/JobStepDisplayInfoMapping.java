@@ -372,6 +372,14 @@ public final class JobStepDisplayInfoMapping {
             "score_data", //
             "score_data" };
 
+    private static final String[] DCP_SOURCE_IMPORT_STEPS = {
+            "Ingestion", //
+            "Ingestion", //
+            "Ingestion", //
+            "Match_Append", //
+            "Analysis", //
+            "Analysis" };
+
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();
     private static final Map<String, String[]> DISPLAY_DESCRIPTION = new HashMap<>();
     static {
@@ -393,6 +401,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("cdlOperationWorkflow", CDL_OPERATION_STEPS);
         DISPLAY_NAME.put("importAndRTSBulkScoreWorkflow", IMPORT_AND_RTS_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("scoreWorkflow", SCORE_STEPS);
+        DISPLAY_NAME.put("dcpSourceImportWorkflow", DCP_SOURCE_IMPORT_STEPS);
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
@@ -412,6 +421,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("cdlOperationWorkflow", CDL_OPERATION_STEPS);
         DISPLAY_DESCRIPTION.put("importAndRTSBulkScoreWorkflow", IMPORT_AND_RTS_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("scoreWorkflow", SCORE_STEPS);
+        DISPLAY_DESCRIPTION.put("dcpSourceImportWorkflow", DCP_SOURCE_IMPORT_STEPS);
     }
 
     public static String getMappedName(String workflowType, int stepIndex) {

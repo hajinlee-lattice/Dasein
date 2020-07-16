@@ -191,7 +191,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
         updateDunsCount(result.getTargets().get(2), uploadId);
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
-
         updateUploadStatistics(result);
     }
 
