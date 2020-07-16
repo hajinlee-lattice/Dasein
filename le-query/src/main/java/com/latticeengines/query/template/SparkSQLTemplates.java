@@ -166,4 +166,21 @@ public class SparkSQLTemplates extends SQLTemplates {
         }
     }
 
+    @Override
+    public String escapeLiteral(String str) {
+        StringBuilder builder = new StringBuilder();
+        char[] var3 = str.toCharArray();
+        int var4 = var3.length;
+        for (int var5 = 0; var5 < var4; ++var5) {
+            char ch = var3[var5];
+            if (ch == '\'') {
+                // need to replace ' to \' in spark sql
+                builder.append("\\'");
+            } else {
+                builder.append(ch);
+            }
+        }
+        return builder.toString();
+    }
+
 }
