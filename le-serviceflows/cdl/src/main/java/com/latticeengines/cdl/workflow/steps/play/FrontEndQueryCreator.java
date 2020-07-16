@@ -163,9 +163,12 @@ public class FrontEndQueryCreator {
         Map<BusinessEntity, List<String>> temContactLookupFields = new HashMap<>();
         List<String> contactAttrs = contactLookupFields.get(BusinessEntity.Contact).stream()
                 .collect(Collectors.toList());
-        final String fDestinationContactId = destinationContactId.trim();
-        if (StringUtils.isNotBlank(destinationContactId) && !contactAttrs.contains(fDestinationContactId)) {
-            contactAttrs.add(fDestinationContactId);
+
+        if (StringUtils.isNotBlank(destinationContactId)) {
+            final String fDestinationContactId = destinationContactId.trim();
+            if (!contactAttrs.contains(fDestinationContactId)) {
+                contactAttrs.add(fDestinationContactId);
+            }
         }
         temContactLookupFields.put(BusinessEntity.Contact, contactAttrs);
         CustomerSpace cs = playLaunchContext.getCustomerSpace();
