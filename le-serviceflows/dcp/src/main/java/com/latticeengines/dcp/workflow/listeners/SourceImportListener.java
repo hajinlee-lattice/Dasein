@@ -76,7 +76,7 @@ public class SourceImportListener extends LEJobListener {
         uploadDiagnostics.setApplicationId(job.getApplicationId());
         if (BatchStatus.COMPLETED.equals(jobStatus)) {
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED, uploadDiagnostics);
-            uploadProxy.updateProgressPercentage(tenantId, uploadId, "100");
+            uploadProxy.updateProgressPercentage(tenantId, uploadId, "1.00");
         } else {
             if (jobStatus.isUnsuccessful()) {
                 log.info("SourceImport workflow job {} failed with status {}", jobExecution.getId(), jobStatus);
@@ -103,16 +103,16 @@ public class SourceImportListener extends LEJobListener {
                     case "importSource":
                     case "getStartTime":
                         uploadDiagnostics.setLastErrorStep("Ingestion");
-                        processPercentage = "33";
+                        processPercentage = "0.33";
                         break;
                     case "matchImport":
                         uploadDiagnostics.setLastErrorStep("Match");
-                        processPercentage = "66";
+                        processPercentage = "0.66";
                         break;
                     case "splitImportMatchResult":
                     case "finishImportSource":
                         uploadDiagnostics.setLastErrorStep("Analysis");
-                        processPercentage = "100";
+                        processPercentage = "1.00";
                         break;
                     default:
                         break;

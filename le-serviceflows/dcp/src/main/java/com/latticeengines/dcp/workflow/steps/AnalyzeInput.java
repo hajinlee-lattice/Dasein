@@ -99,6 +99,6 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
 
         String uploadId = configuration.getUploadId();
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_FINISHED, null);
-        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, "33");
+        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, "0.33");
     }
 }

@@ -41,7 +41,7 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         saveMatchResultTable();
         saveDunsCountTable();
         updateStats();
-        uploadProxy.updateProgressPercentage(customerSpaceStr, uploadId, "100");
+        uploadProxy.updateProgressPercentage(customerSpaceStr, uploadId, "1.00");
     }
 
     private void saveMatchResultTable() {

@@ -143,6 +143,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         uploadDetail = uploadDetails.get(0);
         UploadDetails retrievedDetail = testUploadProxy.getUpload(uploadDetail.getUploadId());
         Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
+        Assert.assertEquals(retrievedDetail.getProgressPercentage(), 1.00);
         String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
 

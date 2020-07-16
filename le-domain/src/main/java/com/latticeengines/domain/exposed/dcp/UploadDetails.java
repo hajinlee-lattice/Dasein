@@ -38,6 +38,9 @@ public class UploadDetails {
     @JsonProperty("ingestionStartTime")
     private Long ingestionStartTime;
 
+    @JsonProperty("progressPercentage")
+    private Double progressPercentage;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -100,5 +103,13 @@ public class UploadDetails {
 
     public void setIngestionStartTime(Long ingestionStartTime) {
         this.ingestionStartTime = ingestionStartTime;
+    }
+
+    public Double getProgressPercentage() {
+        return progressPercentage;
+    }
+
+    public void setProgressPercentage(Double progressPercentage) {
+        this.progressPercentage = progressPercentage;
     }
 }

@@ -90,7 +90,7 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     protected void matchCompleted(MatchInput input, MatchCommand command){
         String uploadId = configuration.getUploadId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, "66");
+        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, "0.66");
     }
 
 }
