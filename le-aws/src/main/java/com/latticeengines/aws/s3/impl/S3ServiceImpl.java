@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.iterable.S3Objects;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Rule;
@@ -86,6 +87,9 @@ public class S3ServiceImpl implements S3Service {
     private static final long SIZE_LIMIT = 5L * 1024L * 1024L * 1024L;
 
     private static final long MB = 1024L * 1024L;
+
+    private static final int DEFAULT_ITEM_COUNTS = 3000;
+    private static final int MAX_ITEM_COUNTS = 30000;
 
     @Inject
     private AmazonS3 s3Client;
@@ -230,23 +234,35 @@ public class S3ServiceImpl implements S3Service {
                     keysToBeDeleted.add(objKey);
                 }
             }
+            if (CollectionUtils.isNotEmpty(keysToBeDeleted)) {
+                String[] keys = keysToBeDeleted.toArray(new String[0]);
+                DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keys);
+                s3Client.deleteObjects(dor);
+                keysToBeDeleted.clear();
+            }
             request.setContinuationToken(result.getNextContinuationToken());
         } while (result.isTruncated());
-        if (CollectionUtils.isNotEmpty(keysToBeDeleted)) {
-            String[] keys = keysToBeDeleted.toArray(new String[0]);
-            DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket).withKeys(keys);
-            s3Client.deleteObjects(dor);
-        }
     }
 
     @Override
     public List<S3ObjectSummary> listObjects(String bucket, String prefix) {
+        return listObjects(bucket, prefix, DEFAULT_ITEM_COUNTS);
+    }
+
+    @Override
+    public List<S3ObjectSummary> listObjects(String bucket, String prefix, int maxCount) {
+        Preconditions.checkState(maxCount > 0);
+        Preconditions.checkState(maxCount <= MAX_ITEM_COUNTS, "Max s3 objects supported in memory is " + MAX_ITEM_COUNTS);
         prefix = sanitizePathToKey(prefix);
-        ListObjectsV2Request request = new ListObjectsV2Request() //
-                .withBucketName(bucket) //
-                .withPrefix(prefix) //
-                .withMaxKeys(Integer.MAX_VALUE);
-        return s3Client.listObjectsV2(request).getObjectSummaries();
+        List<S3ObjectSummary> objectSummaries = new ArrayList<>();
+        for (S3ObjectSummary summary : S3Objects.withPrefix(s3Client, bucket, prefix)) {
+            objectSummaries.add(summary);
+            if (objectSummaries.size() > maxCount) {
+                throw new IllegalStateException(String.format("S3 object counts exceed memory count limit (%d), consider " +
+                        "expand count or use S3 object iterator!", maxCount));
+            }
+        }
+        return objectSummaries;
     }
 
     private List<String> getCommonPrefixes(String bucket, String prefix) {
@@ -255,13 +271,16 @@ public class S3ServiceImpl implements S3Service {
         ListObjectsV2Request request = new ListObjectsV2Request() //
                 .withBucketName(bucket) //
                 .withPrefix(prefix) //
-                .withDelimiter("/")
-                .withMaxKeys(Integer.MAX_VALUE);
+                .withDelimiter("/");
         ListObjectsV2Result result;
         List<String> commonPrefixes = new ArrayList<>();
         do {
             result = s3Client.listObjectsV2(request);
             commonPrefixes.addAll(result.getCommonPrefixes());
+            if (commonPrefixes.size() > MAX_ITEM_COUNTS) {
+                throw new IllegalStateException(String.format("S3 object counts exceed memory count limit (%d), " +
+                        "please use S3 object iterator!", MAX_ITEM_COUNTS));
+            }
             String token = result.getNextContinuationToken();
             request.setContinuationToken(token);
         } while (result.isTruncated());
@@ -615,38 +634,53 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public List<String> getFilesForDir(String s3Bucket, String prefix) {
+        return getFilesForDir(s3Bucket, prefix, DEFAULT_ITEM_COUNTS);
+    }
+
+    @Override
+    public List<String> getFilesForDir(String s3Bucket, String prefix, int maxCount) {
+        Preconditions.checkState(maxCount > 0);
+        Preconditions.checkState(maxCount <= MAX_ITEM_COUNTS, "Max s3 objects supported in memory is " + MAX_ITEM_COUNTS);
         final String delimiter = "/";
         List<String> paths = new LinkedList<>();
-        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(s3Bucket).withPrefix(prefix);
-        ListObjectsV2Result result;
-        do {
-            result = s3Client.listObjectsV2(request);
-            for (S3ObjectSummary summary : result.getObjectSummaries()) {
-                if (!summary.getKey().endsWith(delimiter)) {
-                    paths.add(summary.getKey());
+        for (S3ObjectSummary summary : S3Objects.withPrefix(s3Client, s3Bucket, prefix)) {
+            if (!summary.getKey().endsWith(delimiter)) {
+                paths.add(summary.getKey());
+                if (paths.size() > maxCount) {
+                    throw new IllegalStateException(String.format("S3 object counts exceed memory count limit (%d), consider " +
+                            "expand count or use S3 object iterator!", maxCount));
                 }
             }
-            request.setContinuationToken(result.getNextContinuationToken());
-        } while (result.isTruncated());
+        }
         return paths;
     }
 
     @Override
     public List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix) {
+        return getFilesWithInfoForDir(s3Bucket, prefix, DEFAULT_ITEM_COUNTS);
+    }
+
+    @Override
+    public List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix, int maxCount) {
+        Preconditions.checkState(maxCount > 0);
+        Preconditions.checkState(maxCount <= MAX_ITEM_COUNTS, "Max s3 objects supported in memory is " + MAX_ITEM_COUNTS);
         final String delimiter = "/";
-        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(s3Bucket).withPrefix(prefix);
-        ListObjectsV2Result result;
         List<S3ObjectSummary> s3ObjectSummaries = new LinkedList<>();
-        do {
-            result = s3Client.listObjectsV2(request);
-            for (S3ObjectSummary summary : result.getObjectSummaries()) {
-                if (!summary.getKey().endsWith(delimiter)) {
-                    s3ObjectSummaries.add(summary);
+        for (S3ObjectSummary summary : S3Objects.withPrefix(s3Client, s3Bucket, prefix)) {
+            if (!summary.getKey().endsWith(delimiter)) {
+                s3ObjectSummaries.add(summary);
+                if (s3ObjectSummaries.size() > maxCount) {
+                    throw new IllegalStateException(String.format("S3 object counts exceed memory count limit (%d), consider " +
+                            "expand count or use S3 object iterator!", maxCount));
                 }
             }
-            request.setContinuationToken(result.getNextContinuationToken());
-        } while (result.isTruncated());
+        }
         return s3ObjectSummaries;
+    }
+
+    @Override
+    public S3Objects getIterableObjects(String s3Bucket, String prefix) {
+        return S3Objects.withPrefix(s3Client, s3Bucket, prefix);
     }
 
     /**

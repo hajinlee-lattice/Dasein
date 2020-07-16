@@ -53,6 +53,13 @@ public interface CDLService {
 
     List<S3ImportTemplateDisplay> getS3ImportTemplate(String string, String sortBy, Set<EntityType> excludeTypes);
 
+    /**
+     *
+     * @param customerSpace: TenantId
+     * @param s3Path: Full path: eg: {bucket}/dropfolder/{dropbox}/Templates/DefaultSystem_AccountData/
+     * @param filter: file extension
+     * @return List of {@link FileProperty}
+     */
     List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter);
 
     void createS3ImportSystem(String customerSpace, String systemDisplayName, S3ImportSystem.SystemType systemType,

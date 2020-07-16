@@ -195,7 +195,7 @@ public class DropBoxServiceImplTestNG extends ServiceAppsFunctionalTestNGBase {
                 uploadFile(s3Client, bucket, prefix);
             }
             Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
-            List<FileProperty> result = dropboxService.getFileListForPath(mainCustomerSpace, prefix, null);
+            List<FileProperty> result = dropboxService.getFileListForPath(mainCustomerSpace, "/le.html", null);
             log.info(JsonUtils.serialize(result));
             Assert.assertTrue(result.size() > 0);
             return true;

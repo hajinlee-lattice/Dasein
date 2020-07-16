@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.amazonaws.services.s3.iterable.S3Objects;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -52,6 +53,8 @@ public interface S3Service {
 
     List<S3ObjectSummary> listObjects(String bucket, String prefix);
 
+    List<S3ObjectSummary> listObjects(String bucket, String prefix, int maxCount);
+
     List<String> listSubFolders(String bucket, String parentDir);
 
     MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
@@ -96,7 +99,13 @@ public interface S3Service {
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
 
+    List<String> getFilesForDir(String s3Bucket, String prefix, int maxCount);
+
     List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix);
+
+    List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix, int maxCount);
+
+    S3Objects getIterableObjects(String s3Bucket, String prefix);
 
     /**
      * Generate a read only URL to access the specified key under the input bucket. The URL will expires at
