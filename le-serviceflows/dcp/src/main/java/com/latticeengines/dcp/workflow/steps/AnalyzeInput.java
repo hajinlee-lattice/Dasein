@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStep
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
+import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.InputPresenceJob;
@@ -53,6 +55,9 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
 
     @Inject
     private DataReportProxy dataReportProxy;
+
+    @Inject
+    private UploadProxy uploadProxy;
 
     @Override
     protected Class<? extends AbstractSparkJob<InputPresenceConfig>> getJobClz() {
@@ -91,5 +96,8 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
 
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 configuration.getUploadId(), inputPresenceReport);
+
+        String uploadId = configuration.getUploadId();
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_FINISHED, null);
     }
 }

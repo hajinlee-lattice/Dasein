@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 
 public interface UploadService {
 
@@ -23,4 +24,6 @@ public interface UploadService {
     UploadDetails startImport(DCPImportRequest importRequest);
 
     ApplicationId submitImportRequest(DCPImportRequest importRequest);
+
+    UploadJobDetails getJobDetailsByUploadId(String uploadId);
 }

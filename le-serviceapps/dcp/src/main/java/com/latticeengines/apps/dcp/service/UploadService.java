@@ -34,5 +34,4 @@ public interface UploadService {
     UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 
     String getMatchResultTableName(String uploadId);
-
 }

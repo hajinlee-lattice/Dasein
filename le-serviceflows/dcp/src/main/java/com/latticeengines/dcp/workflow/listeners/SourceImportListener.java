@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -94,6 +95,23 @@ public class SourceImportListener extends LEJobListener {
                             ExceptionUtils.getStackTrace(exception));
                 }
                 uploadDiagnostics.setLastErrorMessage(JsonUtils.serialize(details));
+                String lastStepName = getLastStepName(jobExecution);
+                switch (lastStepName) {
+                    case "startImportSource":
+                    case "importSource":
+                    case "getStartTime":
+                        uploadDiagnostics.setLastErrorStep("Ingestion");
+                        break;
+                    case "matchImport":
+                        uploadDiagnostics.setLastErrorStep("Match");
+                        break;
+                    case "splitImportMatchResult":
+                    case "finishImportSource":
+                        uploadDiagnostics.setLastErrorStep("Analysis");
+                        break;
+                    default:
+                        break;
+                }
             }
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR, uploadDiagnostics);
         }
@@ -106,5 +124,19 @@ public class SourceImportListener extends LEJobListener {
         uploadEmailInfo.setJobStatus(jobStatus.name());
         log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
         emailProxy.sendUploadEmail(uploadEmailInfo);
+    }
+
+    private String getLastStepName(JobExecution jobExecution) {
+        StepExecution lastStepExecution = null;
+        for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
+            if(lastStepExecution == null){
+                lastStepExecution = stepExecution;
+            } else {
+                if(stepExecution.getStartTime().after(lastStepExecution.getStartTime())){
+                    lastStepExecution = stepExecution;
+                }
+            }
+        }
+        return lastStepExecution.getStepName();
     }
 }

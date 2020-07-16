@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.pls.service.dcp.UploadService;
 
 import io.swagger.annotations.Api;
@@ -66,5 +67,16 @@ public class UploadResource {
     public UploadDetails startImport(@RequestBody DCPImportRequest importRequest) {
         importRequest.setUserId(MultiTenantContext.getEmailAddress());
         return uploadService.startImport(importRequest);
+    }
+
+    @GetMapping("/uploadId/{uploadId}/jobDetails")
+    @ResponseBody
+    @ApiOperation(value = "Get upload job details by uploadId")
+    public UploadJobDetails getJobDetailsByUploadId(@PathVariable String uploadId) {
+        if (uploadId == null) {
+            return null;
+        } else {
+            return uploadService.getJobDetailsByUploadId(uploadId);
+        }
     }
 }
