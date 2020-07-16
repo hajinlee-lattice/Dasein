@@ -158,6 +158,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_GOOGLE_INTEGRATION, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LIVERAMP_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DELTA_CALCULATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ACCOUNT360, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_MODELING, cg).setDefaultValue(false);
