@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <bean id="vboDataSource" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory"
+          depends-on="beanEnvironment">
+        <property name="jndiName" value="java:comp/env/jdbc/vboDB"/>
+        <property name="driverClass" value="${admin.vbo.datasource.driver}" />
+        <property name="jdbcUrl" value="${admin.vbo.datasource.url}"/>
+        <property name="user" value="${admin.vbo.datasource.user}" />
+        <property name="password" value="${admin.vbo.datasource.password.encrypted}" />
+        <property name="writerConnection" value="true"/>
+        <property name="poolSizePropKeyPrefix" value="admin.vbo.datasource.poolsize"/>
+        <property name="enableDebugSlowSql" value="false" />
+    </bean>
+
+    <!-- Entity manager factory -->
+    <bean id="vboEntityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="vboDataSource" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.vbo" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <!-- property name="prepareConnection" value="false"/-->
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">${admin.vbo.datasource.dialect}</prop>
+                <prop key="hibernate.show_sql">${admin.vbo.datasource.show_sql:false}</prop>
+                <prop key="hibernate.use_sql_comments">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.type">trace</prop>
+
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+                <prop key="hibernate.id.new_generator_mappings">true</prop>
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+                <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="vboJpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="vboEntityManagerFactory"/>
+    </bean>
+
+    <bean id="vboDataSourceReader" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory"
+          depends-on="beanEnvironment">
+        <property name="jndiName" value="java:comp/env/jdbc/vboDB"/>
+        <property name="driverClass" value="${admin.vbo.datasource.reader.driver}" />
+        <property name="jdbcUrl" value="${admin.vbo.datasource.reader.url}"/>
+        <property name="user" value="${admin.vbo.datasource.user}" />
+        <property name="password" value="${admin.vbo.datasource.password.encrypted}" />
+        <property name="poolSizePropKeyPrefix" value="admin.vbo.datasource.reader.poolsize"/>
+        <property name="enableDebugSlowSql" value="false" />
+    </bean>
+
+    <!-- Entity manager factory -->
+    <bean id="vboEntityManagerFactoryReader"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="vboDataSourceReader" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.vbo" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <!-- property name="prepareConnection" value="false"/-->
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">${admin.vbo.datasource.dialect}</prop>
+                <prop key="hibernate.show_sql">${admin.vbo.datasource.show_sql:false}</prop>
+                <prop key="hibernate.use_sql_comments">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.type">trace</prop>
+
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+                <prop key="hibernate.id.new_generator_mappings">true</prop>
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+                <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="vboJpaTransactionManagerReader" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="vboEntityManagerFactoryReader"/>
+    </bean>
+
+    <jpa:auditing/>
+
+</beans>
