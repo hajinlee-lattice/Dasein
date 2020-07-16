@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -73,6 +72,11 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             log.info("No lookup IDs in new account batch store");
             return;
         }
+        if (needPublishAccountLookup(configuration.getCustomerSpace().getTenantId())) {
+            putObjectInContext(NEED_PUBLISH_ACCOUNT_LOOKUP, Boolean.TRUE);
+            log.info("No account lookup data unit found. Account lookup will be published after PA success.");
+            return;
+        }
         curVersion = getCurrentVersion();
         expTime = Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
         List<DynamoExportConfig> configs = getExportConfigs();
@@ -81,11 +85,18 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             return;
         }
         log.info("Going to populate changelist to account lookup: " + configs);
-        log.info("Using dynamo table {}", String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
+        log.info("Using dynamo table {}",
+                String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
         List<AccountLookupExporter> exporters = getLookupExporters(configs);
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
         ThreadPoolUtils.runInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
+    }
+
+    private boolean needPublishAccountLookup(String tenantId) {
+        DynamoDataUnit unit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(tenantId, ACCOUNT_LOOKUP_DATA_UNIT_NAME,
+                DataUnit.StorageType.Dynamo);
+        return unit == null;
     }
 
     private List<String> getLookupIds() {
@@ -137,31 +148,14 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_REGION, awsRegion);
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS, String.join(",", lookupIds));
             properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION, curVersion.toString());
-            properties.put(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME, String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
+            properties.put(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME,
+                    String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL, expTime.toString());
-            properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_TYPE, AtlasAccountLookupExportStepConfiguration.NAME);
+            properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_TYPE,
+                    AtlasAccountLookupExportStepConfiguration.NAME);
             properties.put(ExportProperty.NUM_MAPPERS, String.valueOf(numMappers));
 
             return properties;
-        }
-
-        @Override
-        void registerDataUnit() {
-            String customerSpace = configuration.getCustomerSpace().toString();
-            DynamoDataUnit unit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
-                    ACCOUNT_LOOKUP_DATA_UNIT_NAME, DataUnit.StorageType.Dynamo);
-            if (unit == null) {
-                dataUnitProxy.create(customerSpace, initUnit(customerSpace));
-            }
-        }
-
-        private DynamoDataUnit initUnit(String customerSpace) {
-            DynamoDataUnit unit = new DynamoDataUnit();
-            unit.setTenant(customerSpace);
-            unit.setName(ACCOUNT_LOOKUP_DATA_UNIT_NAME);
-            unit.setVersion(0);
-            unit.setPartitionKey(InterfaceName.AtlasLookupKey.name());
-            return unit;
         }
     }
 }

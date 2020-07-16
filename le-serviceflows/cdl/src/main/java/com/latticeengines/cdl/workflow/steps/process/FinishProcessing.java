@@ -8,9 +8,11 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -66,6 +69,12 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     @Inject
     private MatchProxy matchProxy;
+
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
+
+    @Value("${eai.export.dynamo.accountlookup.signature}")
+    private String accountLookupSignature;
 
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
@@ -116,6 +125,12 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         SegmentCountUtils.invokeMetadataApi(servingStoreProxy, customerSpace.toString());
         SegmentCountUtils.updateEntityCountsAsync(segmentProxy, customerSpace.toString());
         updateActiveRuleModelCounts();
+
+        // publish account lookup and create dynamo data unit
+        if (BooleanUtils.isTrue(getObjectFromContext(NEED_PUBLISH_ACCOUNT_LOOKUP, Boolean.class))) {
+            String appId = lookupIdMappingProxy.publishAccountLookup(customerSpace.getTenantId(), accountLookupSignature);
+            log.info("Kicked off account lookup publication workflow: {}", appId);
+        }
     }
 
     private void updateActiveRuleModelCounts() {
