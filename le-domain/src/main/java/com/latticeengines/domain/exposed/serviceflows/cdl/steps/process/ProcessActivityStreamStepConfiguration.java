@@ -37,6 +37,9 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
     @JsonProperty("entity_match_ga_only")
     private boolean entityMatchGAOnly;
 
+    @JsonProperty("timeline_signature")
+    private String timelineSignature;
+
     public Map<String, AtlasStream> getActivityStreamMap() {
         return activityStreamMap;
     }
@@ -108,5 +111,13 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
     @Override
     public BusinessEntity getMainEntity() {
         return BusinessEntity.ActivityStream;
+    }
+
+    public String getTimelineSignature() {
+        return timelineSignature;
+    }
+
+    public void setTimelineSignature(String timelineSignature) {
+        this.timelineSignature = timelineSignature;
     }
 }
