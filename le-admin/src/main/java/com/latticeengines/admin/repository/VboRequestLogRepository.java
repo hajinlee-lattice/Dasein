@@ -1,5 +1,7 @@
 package com.latticeengines.admin.repository;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
 
@@ -7,5 +9,5 @@ public interface VboRequestLogRepository extends BaseJpaRepository<VboRequestLog
 
     VboRequestLog findByTraceId(String traceId);
 
-    VboRequestLog findByTenantId(String tenantId);
+    List<VboRequestLog> findByTenantId(String tenantId);
 }

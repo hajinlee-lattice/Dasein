@@ -1,5 +1,7 @@
 package com.latticeengines.admin.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -41,7 +43,7 @@ public class VboRequestLogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<VboRe
 
     @Override
     @Transactional(transactionManager = "vboJpaTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public VboRequestLog findByTenantId(String tenantId) {
+    public List<VboRequestLog> findByTenantId(String tenantId) {
         return readerRepository.findByTenantId(tenantId);
     }
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -46,6 +47,21 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
         Assert.assertNotNull(requestLog);
         Assert.assertNotNull(requestLog.getVboRequest());
+    }
+
+    @Test(groups = "functional")
+    public void testCreateWithNullId() {
+        VboRequest vboRequest = generateVBORequest();
+        VboResponse vboResponse = new VboResponse();
+        String tenantId = NamingUtils.uuid("TenantId");
+        vboResponse.setStatus("failed");
+        vboResponse.setMessage("Test");
+        vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
+        vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
+        List<VboRequestLog> nullLog = vboRequestLogService.getVboRequestLogByTenantId(tenantId);
+        Assert.assertNotNull(nullLog);
+        Assert.assertEquals(nullLog.size(), 2);
+        nullLog.forEach(log -> vboRequestLogEntityMgr.delete(log));
     }
 
     private VboRequest generateVBORequest() {

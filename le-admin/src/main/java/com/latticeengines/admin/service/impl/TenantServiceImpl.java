@@ -37,6 +37,7 @@ import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.ServiceConfigService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.service.VboRequestLogService;
 import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
@@ -117,6 +118,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Inject
     private ServiceService serviceService;
+
+    @Inject
+    private VboRequestLogService vboRequestLogService;
 
     @Inject
     private ComponentOrchestrator orchestrator;
@@ -644,16 +648,20 @@ public class TenantServiceImpl implements TenantService {
             String existingName = existingTenant.getName();
             log.error("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
-            return generateVBOResponse("failed",
+            VboResponse response = generateVBOResponse("failed",
                     "A tenant has already existed for this subscriber number");
+            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            return response;
         }
 
         String subName = vboRequest.getSubscriber().getName();
         String tenantName = constructTenantNameFromSubscriber(subName);
         if (StringUtils.isBlank(tenantName)) {
             log.error("system can't construct tenant name from subscriber name {}.", subName);
-            return generateVBOResponse("failed",
+            VboResponse response = generateVBOResponse("failed",
                     "system can't construct tenant name from subscriber name.");
+            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            return response;
         }
         Tracer tracer = GlobalTracer.get();
         Span adminSpan = null;
@@ -752,10 +760,16 @@ public class TenantServiceImpl implements TenantService {
             String message = result ? "tenant created successfully via Vbo request" :
                     "tenant created failed via Vbo request";
             log.info("create tenant {} from vbo request", tenantName);
-            return generateVBOResponse(status, message, adminSpan.context().toTraceId());
+            VboResponse response = generateVBOResponse(status, message, adminSpan.context().toTraceId());
+            vboRequestLogService.createVboRequestLog(response.getAckReferenceId(), tenantName, vboRequest, response);
+            return response;
         } finally {
             TracingUtils.finish(adminSpan);
         }
+    }
+
+    private void saveVboRequestLog(String traceId, String tenantName, VboRequest vboRequest, VboResponse vboResponse) {
+
     }
 
     private Scope startAdminSpan(String tenantName, long startTimeStamp) {

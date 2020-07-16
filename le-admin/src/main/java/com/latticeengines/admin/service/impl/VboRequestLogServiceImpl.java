@@ -1,11 +1,11 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.admin.entitymgr.VboRequestLogEntityMgr;
 import com.latticeengines.admin.service.VboRequestLogService;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
@@ -20,7 +20,6 @@ public class VboRequestLogServiceImpl implements VboRequestLogService {
 
     @Override
     public void createVboRequestLog(String traceId, String tenantId, VboRequest vboRequest, VboResponse vboResponse) {
-        Preconditions.checkState(StringUtils.isNotBlank(traceId));
         VboRequestLog vboRequestLog = new VboRequestLog();
         vboRequestLog.setTraceId(traceId);
         vboRequestLog.setTenantId(tenantId);
@@ -35,7 +34,7 @@ public class VboRequestLogServiceImpl implements VboRequestLogService {
     }
 
     @Override
-    public VboRequestLog getVboRequestLogByTenantId(String tenantId) {
+    public List<VboRequestLog> getVboRequestLogByTenantId(String tenantId) {
         return vboRequestLogEntityMgr.findByTenantId(tenantId);
     }
 }

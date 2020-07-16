@@ -1,5 +1,7 @@
 package com.latticeengines.admin.entitymgr;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
 
@@ -7,7 +9,7 @@ public interface VboRequestLogEntityMgr extends BaseEntityMgrRepository<VboReque
 
     VboRequestLog findByTraceId(String traceId);
 
-    VboRequestLog findByTenantId(String tenantId);
+    List<VboRequestLog> findByTenantId(String tenantId);
 
     void save(VboRequestLog vboRequestLog);
 }

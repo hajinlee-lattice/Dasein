@@ -1,5 +1,7 @@
 package com.latticeengines.admin.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
@@ -10,5 +12,5 @@ public interface VboRequestLogService {
 
     VboRequestLog getVboRequestLogByTraceId(String traceId);
 
-    VboRequestLog getVboRequestLogByTenantId(String tenantId);
+    List<VboRequestLog> getVboRequestLogByTenantId(String tenantId);
 }

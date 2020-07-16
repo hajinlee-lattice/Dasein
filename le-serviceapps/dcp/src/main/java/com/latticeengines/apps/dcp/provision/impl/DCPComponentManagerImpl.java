@@ -66,7 +66,7 @@ public class DCPComponentManagerImpl implements DCPComponentManager {
 
     private Scope startProvisionSpan(SpanContext parentContext, String tenantId, long startTimeStamp) {
         Tracer tracer = GlobalTracer.get();
-        Span span = tracer.buildSpan("DCPComponent Bootstrap - " + tenantId) //
+        Span span = tracer.buildSpan("DCPComponent Bootstrap") //
                 .addReference(References.FOLLOWS_FROM, parentContext) //
                 .withTag(TracingTags.TENANT_ID, tenantId) //
                 .withStartTimestamp(startTimeStamp) //
