@@ -102,9 +102,9 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultS3ExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.AWS_S3);
 
-        assertEquals(defaultS3ExportFields.size(), 41);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 34);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 32);
+        assertEquals(defaultS3ExportFields.size(), 50);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 40);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 42);
 
     }
 

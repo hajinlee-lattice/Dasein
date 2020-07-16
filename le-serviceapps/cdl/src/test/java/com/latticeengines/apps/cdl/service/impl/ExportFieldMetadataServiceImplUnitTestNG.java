@@ -135,9 +135,9 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     public void testS3() {
         defaultS3ExportFields = exportService.getAllAttributes(CDLExternalSystemName.AWS_S3);
 
-        assertEquals(defaultS3ExportFields.size(), 41);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 34);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 32);
+        assertEquals(defaultS3ExportFields.size(), 50);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 40);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 42);
 
         List<ExportFieldMetadataDefaults> enabledS3ExportFields = exportService
                 .getExportEnabledAttributes(CDLExternalSystemName.AWS_S3);
@@ -145,9 +145,9 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 .getExportEnabledAttributesForEntity(CDLExternalSystemName.AWS_S3, BusinessEntity.Account);
         List<ExportFieldMetadataDefaults> enabledContactS3ExportFields = exportService
                 .getExportEnabledAttributesForEntity(CDLExternalSystemName.AWS_S3, BusinessEntity.Contact);
-        assertEquals(enabledS3ExportFields.size(), 32);
-        assertEquals(enabledAccountS3ExportFields.size(), 20);
-        assertEquals(enabledContactS3ExportFields.size(), 12);
+        assertEquals(enabledS3ExportFields.size(), 42);
+        assertEquals(enabledAccountS3ExportFields.size(), 21);
+        assertEquals(enabledContactS3ExportFields.size(), 21);
     }
 
     @Test(groups = "functional")
