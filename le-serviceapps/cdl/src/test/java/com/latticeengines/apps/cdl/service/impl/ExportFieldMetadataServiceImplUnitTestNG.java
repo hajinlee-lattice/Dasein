@@ -178,7 +178,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
                 40);
         assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                10);
+                11);
 
     }
 
