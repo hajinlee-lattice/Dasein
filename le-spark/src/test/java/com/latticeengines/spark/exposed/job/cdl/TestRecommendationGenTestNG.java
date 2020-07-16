@@ -372,7 +372,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 PlaymakerConstants.State, PlaymakerConstants.ZipCode, PlaymakerConstants.Country,
                 PlaymakerConstants.SfdcContactID, PlaymakerConstants.City, PlaymakerConstants.ContactID,
                 PlaymakerConstants.Name, PlaymakerConstants.FirstName, PlaymakerConstants.LastName,
-                PlaymakerConstants.Title, PlaymakerConstants.DoNotCall, PlaymakerConstants.DoNotMail);
+                PlaymakerConstants.Title, PlaymakerConstants.DoNotCall, PlaymakerConstants.DoNotMail,
+                PlaymakerConstants.CreatedDate, PlaymakerConstants.LastModifiedDate);
     }
 
     private PlayLaunchSparkContext generateMarketoPlayLaunchSparkContext() {
