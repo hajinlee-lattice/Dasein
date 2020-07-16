@@ -29,6 +29,11 @@ public class VboRequestLogServiceImpl implements VboRequestLogService {
     }
 
     @Override
+    public void updateVboResponse(String traceId, VboResponse vboResponse) {
+        vboRequestLogEntityMgr.updateVboResponse(traceId, vboResponse);
+    }
+
+    @Override
     public VboRequestLog getVboRequestLogByTraceId(String traceId) {
         return vboRequestLogEntityMgr.findByTraceId(traceId);
     }

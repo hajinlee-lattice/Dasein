@@ -669,6 +669,9 @@ public class TenantServiceImpl implements TenantService {
         try (Scope scope = startAdminSpan(tenantName, start)) {
             adminSpan = tracer.activeSpan();
             Map<String, String> tracingCtx = TracingUtils.getActiveTracingContext();
+            String traceId = adminSpan.context().toTraceId();
+            vboRequestLogService.createVboRequestLog(traceId, tenantName, vboRequest, null);
+
             List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
 
             // TenantInfo
@@ -760,8 +763,8 @@ public class TenantServiceImpl implements TenantService {
             String message = result ? "tenant created successfully via Vbo request" :
                     "tenant created failed via Vbo request";
             log.info("create tenant {} from vbo request", tenantName);
-            VboResponse response = generateVBOResponse(status, message, adminSpan.context().toTraceId());
-            vboRequestLogService.createVboRequestLog(response.getAckReferenceId(), tenantName, vboRequest, response);
+            VboResponse response = generateVBOResponse(status, message, traceId);
+            vboRequestLogService.updateVboResponse(traceId, response);
             return response;
         } finally {
             TracingUtils.finish(adminSpan);

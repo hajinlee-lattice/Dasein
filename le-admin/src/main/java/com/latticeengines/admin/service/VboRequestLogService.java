@@ -10,6 +10,8 @@ public interface VboRequestLogService {
 
     void createVboRequestLog(String traceId, String tenantId, VboRequest vboRequest, VboResponse vboResponse);
 
+    void updateVboResponse(String traceId, VboResponse vboResponse);
+
     VboRequestLog getVboRequestLogByTraceId(String traceId);
 
     List<VboRequestLog> getVboRequestLogByTenantId(String tenantId);

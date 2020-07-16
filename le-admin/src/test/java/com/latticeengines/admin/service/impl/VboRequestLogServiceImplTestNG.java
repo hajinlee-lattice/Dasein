@@ -14,6 +14,7 @@ import com.latticeengines.admin.entitymgr.VboRequestLogEntityMgr;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.VboRequestLogService;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
@@ -42,11 +43,18 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         vboResponse.setStatus("success");
         vboResponse.setMessage("Test");
         vboResponse.setAckReferenceId(traceId);
-        vboRequestLogService.createVboRequestLog(traceId, "TenantId", vboRequest, vboResponse);
-
+        vboRequestLogService.createVboRequestLog(traceId, "TenantId", vboRequest, null);
+        SleepUtils.sleep(500);
         requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
         Assert.assertNotNull(requestLog);
         Assert.assertNotNull(requestLog.getVboRequest());
+        Assert.assertNull(requestLog.getVboResponse());
+        vboRequestLogService.updateVboResponse(traceId, vboResponse);
+        SleepUtils.sleep(500);
+        requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
+        Assert.assertNotNull(requestLog);
+        Assert.assertNotNull(requestLog.getVboRequest());
+        Assert.assertNotNull(requestLog.getVboResponse());
     }
 
     @Test(groups = "functional")
