@@ -19,7 +19,8 @@ public class OutOfOrderProcessContactDeploymentTestNG extends CDLEnd2EndDeployme
 
     private static final String UNDER_SCORE = "_";
 
-    @Test(groups = "deployment")
+    // FIXME re-enable after EnrichLatticeAccount is refactored
+    @Test(groups = "deployment", enabled = false)
     public void runTest() throws Exception {
         importData();
         processAnalyze();
