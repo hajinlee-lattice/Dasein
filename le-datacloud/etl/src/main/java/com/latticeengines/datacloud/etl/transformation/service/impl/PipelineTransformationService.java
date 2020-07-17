@@ -863,6 +863,7 @@ public class PipelineTransformationService extends AbstractTransformationService
         configuration.setKeepTemp(inputRequest.getKeepTemp());
         configuration.setSteps(steps);
         configuration.setEnableSlack(request.isEnableSlack());
+        configuration.setEnableMsTeams(request.isEnableMsTeams());
         configuration.setAMJob(request.isAMJob());
         configuration.setContainerMemMB(inputRequest.getContainerMemMB());
 

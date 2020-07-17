@@ -50,6 +50,11 @@ public class PipelineTransformationRequest {
     // job progress
     @JsonProperty("EnableSlack")
     private boolean enableSlack;
+    
+    // Whether to send notification in PropData MsTeams channel to track pipeline
+    // job progress
+    @JsonProperty("EnableMsTeams")
+    private boolean enableMsTeams;
 
     // Memory setting for pipeline workflow container (NOT dataflow job)
     @JsonProperty("ContainerMemMB")
@@ -111,6 +116,14 @@ public class PipelineTransformationRequest {
 
     public void setEnableSlack(boolean enableSlack) {
         this.enableSlack = enableSlack;
+    }
+
+    public boolean isEnableMsTeams() {
+        return enableMsTeams;
+    }
+
+    public void setEnableMsTeams(boolean enableMsTeams) {
+        this.enableMsTeams = enableMsTeams;
     }
 
     public Integer getContainerMemMB() {
