@@ -7,8 +7,15 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 
 public class RollupDataReportStepConfiguration extends MicroserviceStepConfiguration {
 
-    @JsonProperty("root")
-    private String root;
+    /**
+     * the root id value varied in different level
+     * tenant -> tenant Id
+     * project -> project Id
+     * source -> source Id
+     * upload -> upload Id
+     */
+    @JsonProperty("rootId")
+    private String rootId;
 
     @JsonProperty("level")
     private DataReportRecord.Level level;
@@ -16,12 +23,12 @@ public class RollupDataReportStepConfiguration extends MicroserviceStepConfigura
     @JsonProperty("mode")
     private DataReportMode mode;
 
-    public String getRoot() {
-        return root;
+    public String getRootId() {
+        return rootId;
     }
 
-    public void setRoot(String root) {
-        this.root = root;
+    public void setRootId(String rootId) {
+        this.rootId = rootId;
     }
 
     public DataReportRecord.Level getLevel() {

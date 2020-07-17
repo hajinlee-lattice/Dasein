@@ -61,7 +61,7 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         DCPReportRequest request = new DCPReportRequest();
         request.setLevel(DataReportRecord.Level.Project);
         request.setMode(DataReportMode.RECOMPUTE_TREE);
-        request.setRoot(projectDetails.getProjectId());
+        request.setRootId(projectDetails.getProjectId());
 
         ApplicationId appId = reportProxy.rollupDataReport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
@@ -74,6 +74,8 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         System.out.println(JsonUtils.pprint(report));
         System.out.println(JsonUtils.pprint(report1));
         System.out.println(JsonUtils.pprint(projectReport));
+        report.combineReport(report1);
+        Assert.assertEquals(JsonUtils.pprint(report), JsonUtils.pprint(projectReport));
     }
 
 
@@ -116,7 +118,7 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
                 report);
         report1 = DataReportServiceImplTestNG.getDataReport();
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
-                DataReportServiceImplTestNG.getDataReport());
+                report1);
     }
 
 

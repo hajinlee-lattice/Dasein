@@ -10,8 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DCPReportRequest {
 
-    @JsonProperty("root")
-    private String root;
+    /**
+     * the root id value varied in different level
+     * tenant -> tenant Id
+     * project -> project Id
+     * source -> source Id
+     * upload -> upload Id
+     */
+    @JsonProperty("rootId")
+    private String rootId;
 
     @JsonProperty("level")
     private DataReportRecord.Level level;
@@ -19,12 +26,12 @@ public class DCPReportRequest {
     @JsonProperty("mode")
     private DataReportMode mode;
 
-    public String getRoot() {
-        return root;
+    public String getRootId() {
+        return rootId;
     }
 
-    public void setRoot(String root) {
-        this.root = root;
+    public void setRootId(String rootId) {
+        this.rootId = rootId;
     }
 
     public DataReportRecord.Level getLevel() {

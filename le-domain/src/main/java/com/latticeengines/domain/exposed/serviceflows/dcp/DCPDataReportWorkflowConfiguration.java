@@ -34,8 +34,8 @@ public class DCPDataReportWorkflowConfiguration extends BaseDCPWorkflowConfigura
             return this;
         }
 
-        public Builder root(String root) {
-            generateReport.setRoot(root);
+        public Builder rootId(String rootId) {
+            generateReport.setRootId(rootId);
             return this;
         }
 
