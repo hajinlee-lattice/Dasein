@@ -11,14 +11,19 @@ public class JourneyStageJobConfig extends SparkJobConfig {
     public static final String NAME = "journeyStageJob";
     private static final long serialVersionUID = -2466292899923863617L;
 
-    // TODO comments
+    /*-
+     * inputs
+     */
 
+    // latest journey stage table's index in input list
     @JsonProperty
-    public Integer masterAccountStoreIdx;
+    public Integer masterJourneyStageIdx;
 
+    // timeline master store's index in input list (required)
     @JsonProperty
     public Integer masterAccountTimeLineIdx;
 
+    // diff timeline store's index in input list (required)
     @JsonProperty
     public Integer diffAccountTimeLineIdx;
 
@@ -26,16 +31,27 @@ public class JourneyStageJobConfig extends SparkJobConfig {
     public Long currentEpochMilli;
 
     @JsonProperty
+    public String accountTimeLineId;
+
+    @JsonProperty
+    public String accountTimeLineVersion;
+
+    // non-default stages
+    @JsonProperty
     public List<JourneyStage> journeyStages;
+
+    @JsonProperty
+    public JourneyStage defaultStage;
 
     @Override
     public String getName() {
         return NAME;
     }
 
-    // TODO comments
+    // [ modified master timeline, modified diff timeline, master journey stage
+    // store ]
     @Override
     public int getNumTargets() {
-        return diffAccountTimeLineIdx == null ? 1 : 2;
+        return 3;
     }
 }

@@ -71,6 +71,7 @@ public class FrontEndQueryCreatorTestNG {
         log.info("size of fieldMappingMetadata " + fieldMappingMetadata.size());
         playLaunch = new PlayLaunch();
         playLaunch.setDestinationAccountId("sfdc3");
+        playLaunch.setDestinationContactId("sfdc3_contact");
         customerSpace = CustomerSpace.parse("tenant");
         playLaunchContext = new PlayLaunchContextBuilder().customerSpace(customerSpace) //
                 .playLaunch(playLaunch) //
@@ -110,7 +111,7 @@ public class FrontEndQueryCreatorTestNG {
         Assert.assertEquals(60, accountLookups.size());
         Assert.assertTrue(accountLookups
                 .contains(new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())));
-        Assert.assertEquals(15, contactLookups.size());
+        Assert.assertEquals(16, contactLookups.size());
         Assert.assertTrue(contactLookups
                 .contains(new AttributeLookup(BusinessEntity.Contact, InterfaceName.CustomerContactId.name())));
     }

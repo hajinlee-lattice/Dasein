@@ -62,6 +62,7 @@ public enum TableRoleInCollection {
     PeriodStores, //
     MetricsGroup, //
     TimelineProfile, //
+    AccountJourneyStage, //
     AccountMaster;
 
     static {
@@ -159,6 +160,8 @@ public enum TableRoleInCollection {
 
         TimelineProfile.partitionKey = InterfaceName.PartitionKey;
         TimelineProfile.rangeKey = InterfaceName.SortKey;
+
+        AccountJourneyStage.partitionKey = InterfaceName.AccountId;
 
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
