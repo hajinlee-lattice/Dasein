@@ -52,6 +52,17 @@ BOTO3 reference for automation:
 http://boto3.readthedocs.io/en/latest/reference/services/index.html
 """
 
+#
+# to allow for more than one active profile, provide a profile name as
+# a commandline argument so wer write that profile instead of the default
+# profile 'default'
+profilename = 'default'
+if len(sys.argv) == 2:
+    profilename = sys.argv[1]
+print(profilename, '   ', re.search('[\W, -]', profilename))
+if re.search('[\W,-]', profilename) is not None:
+    print("{0} is not a valid profile name must match [a-zA-Z0-9_-]".format(profilename))
+    sys.exit(-1)
 
 ##########################################################################
 # Variables
@@ -292,16 +303,16 @@ print('Role assumed, writing credential')
 config = configparser.RawConfigParser()
 config.read(filepath)
 
-# Put the credentials into default section
-if not config.has_section('default'):
-    config.add_section('default')
+# Put the credentials into named section
+if not config.has_section(profilename):
+    config.add_section(profilename)
 
-config.set('default', 'output', outputformat)
-config.set('default', 'region', region)
-config.set('default', 'aws_access_key_id', aws_sts_token_response['Credentials']['AccessKeyId'])
-config.set('default', 'aws_secret_access_key', aws_sts_token_response['Credentials']['SecretAccessKey'])
-config.set('default', 'aws_session_token', aws_sts_token_response['Credentials']['SessionToken'])
-config.set('default', 'expiration', aws_sts_token_response['Credentials']['Expiration'])
+config.set(profilename, 'output', outputformat)
+config.set(profilename, 'region', region)
+config.set(profilename, 'aws_access_key_id', aws_sts_token_response['Credentials']['AccessKeyId'])
+config.set(profilename, 'aws_secret_access_key', aws_sts_token_response['Credentials']['SecretAccessKey'])
+config.set(profilename, 'aws_session_token', aws_sts_token_response['Credentials']['SessionToken'])
+config.set(profilename, 'expiration', aws_sts_token_response['Credentials']['Expiration'])
 
 # Write the updated config file
 with open(filename, 'w+') as configfile:
@@ -310,8 +321,7 @@ with open(filename, 'w+') as configfile:
 # Give the user some basic info as to what has just happened
 print('\n\n-------------------------------------------------------------------')
 print('Your new access key pair has been stored in the AWS configuration file:')
-print('{0} under the default profile.'.format(filename))
+print('{0} under the {1} profile.'.format(filename, profilename))
 print('Note that it will expire at: {0}.'.format(aws_sts_token_response['Credentials']['Expiration']))
 print('Re-run script to refresh your credentials                              ')
 print('-------------------------------------------------------------------\n\n')
-
