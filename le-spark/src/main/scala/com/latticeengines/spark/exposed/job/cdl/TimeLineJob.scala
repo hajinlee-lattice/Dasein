@@ -192,6 +192,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     }
     val filterDf = formatRawStreamTable.select(TimelineStandardColumn.getColumnNames.asScala.map(columnName =>
       formatRawStreamTable.col(columnName)):_*)
+    logSpark("already filter DataFrame with required columns")
     populateProductPatternNames(filterDf, streamId, streamType, lattice)
   }
 
@@ -256,6 +257,8 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
       }
 
     })
+    val columns = df.columns.toString
+    logSpark(f"before update detail2, df columns=$columns%s")
     df.withColumn(Detail2.name(), when(df.col(Detail1.name()).isNotNull, filterFn(df.col(Detail1.name())
       , df.col(Detail2.name()))))
     logSpark("----- BEGIN SCRIPT OUTPUT -----")
