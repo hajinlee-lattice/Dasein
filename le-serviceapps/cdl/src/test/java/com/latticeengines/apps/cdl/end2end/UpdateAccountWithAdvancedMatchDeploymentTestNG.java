@@ -51,7 +51,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     private static final long SEGMENT3_ACCOUNT_CNT = 46;
     private static final long SEGMENT3_CONTACT_CNT = 46;
 
-    static final String CHECK_POINT = "entitymatch_update1";
+    public static final String CHECK_POINT = "entitymatch_update1";
 
     @Inject
     private MatchProxy matchProxy;
