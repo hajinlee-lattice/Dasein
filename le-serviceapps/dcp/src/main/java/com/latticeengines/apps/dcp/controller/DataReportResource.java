@@ -2,6 +2,7 @@ package com.latticeengines.apps.dcp.controller;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +14,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.DataReportService;
+import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
 import com.latticeengines.common.exposed.annotation.UseReaderConnection;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
@@ -30,6 +34,9 @@ public class DataReportResource {
 
     @Inject
     private DataReportService dataReportService;
+
+    @Inject
+    private DCPDataReportWorkflowSubmitter dataReportWorkflowSubmitter;
 
     @GetMapping
     @ResponseBody
@@ -142,4 +149,14 @@ public class DataReportResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataReportService.updateDataReport(customerSpace, level, ownerId, duplicationReport);
     }
+
+    @PostMapping("/rollup")
+    @ResponseBody
+    @ApiOperation(value = "roll up data report")
+    public String rollupDataReport(@PathVariable String customerSpace, @RequestBody DCPReportRequest request) {
+        ApplicationId appId = dataReportWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), request,
+                new WorkflowPidWrapper(-1L));
+        return appId.toString();
+    }
+
 }

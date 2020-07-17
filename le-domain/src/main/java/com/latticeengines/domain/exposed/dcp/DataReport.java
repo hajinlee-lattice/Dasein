@@ -95,6 +95,21 @@ public class DataReport {
         this.refreshTimestamp = refreshTimestamp;
     }
 
+    public DataReport combineReport(DataReport dataReport) {
+        Preconditions.checkNotNull(this.basicStats, "basic stats shouldn't be null");
+        Preconditions.checkNotNull(this.basicStats.getSuccessCnt(), "successful count shouldn't be null");
+        Preconditions.checkNotNull(dataReport.getBasicStats(), "basic stats shouldn't be null");
+        Preconditions.checkNotNull(dataReport.getBasicStats().getSuccessCnt(), "count shouldn't be null");
+        Long totalCnt1 = this.basicStats.getSuccessCnt();
+        Long totalCnt2 = dataReport.getBasicStats().getSuccessCnt();
+        this.basicStats.combineBasicStats(dataReport.getBasicStats());
+        this.inputPresenceReport.combineInputPresenceReport(dataReport.getInputPresenceReport(), totalCnt1, totalCnt2);
+        this.matchToDUNSReport.combineMatchToDUNSReport(dataReport.getMatchToDUNSReport(), totalCnt1, totalCnt2);
+        this.geoDistributionReport.combineGeoDistributionReport(dataReport.getGeoDistributionReport(), totalCnt1,
+                totalCnt2);
+        return this;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -165,6 +180,18 @@ public class DataReport {
         public void setUnmatchedCnt(Long unmatchedCnt) {
             this.unmatchedCnt = unmatchedCnt;
         }
+
+        public void combineBasicStats(BasicStats basicStats) {
+            if (basicStats == null) {
+                return ;
+            }
+            this.totalSubmitted += basicStats.getTotalSubmitted() == null ? 0L : basicStats.getTotalSubmitted();
+            this.successCnt += basicStats.getSuccessCnt() == null ? 0L : basicStats.getSuccessCnt();
+            this.errorCnt += basicStats.getErrorCnt() == null ? 0L : basicStats.getErrorCnt();
+            this.matchedCnt += basicStats.getMatchedCnt() == null ? 0L : basicStats.getMatchedCnt();
+            this.pendingReviewCnt += basicStats.getPendingReviewCnt() == null ? 0L : basicStats.getPendingReviewCnt();
+            this.unmatchedCnt += basicStats.getUnmatchedCnt() == null ? 0L : basicStats.getUnmatchedCnt();
+        }
     }
 
 
@@ -219,6 +246,40 @@ public class DataReport {
                 presenceItem.setRate(getScaledDouble((presenceCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             presenceMap.put(field, presenceItem);
+        }
+
+        /** totalCount1 represents the successful count in this report,
+         * totalCount2 represents the successful count in passing report
+         * pass these parameters as the rate is 0 will lose these data
+        */
+        @JsonIgnore
+        public void combineInputPresenceReport(InputPresenceReport inputPresenceReport, Long totalCount1,
+                                                         Long totalCount2) {
+            if (presenceMap == null) {
+                presenceMap = new HashMap<>();
+            }
+            if (inputPresenceReport == null) {
+                return ;
+            }
+            List<PresenceItem> items = inputPresenceReport.getPresenceList();
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.forEach(presenceItem -> {
+                    String field = presenceItem.getField();
+                    PresenceItem oldItem = presenceMap.get(field);
+                    if (oldItem == null) {
+                        presenceMap.put(field, presenceItem);
+                    } else {
+                        Long presenceCount = oldItem.getCount() + presenceItem.getCount();
+                        oldItem.setCount(presenceCount);
+                        Long totalCount = totalCount1 + totalCount2;
+                        if (totalCount == 0L) {
+                            oldItem.setRate(getScaledDouble(0.0));
+                        } else {
+                            oldItem.setRate(getScaledDouble((presenceCount.doubleValue() / totalCount.doubleValue()) * 100));
+                        }
+                    }
+                });
+            }
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -313,6 +374,41 @@ public class DataReport {
                 geographicalItem.setRate(getScaledDouble((recordCnt.doubleValue() / totalCnt.doubleValue()) * 100));
             }
             geographicalDistributionMap.put(countryCode, geographicalItem);
+        }
+
+        /** totalCount1 represents the successful count in this report,
+         * totalCount2 represents the successful count in passing report
+         * pass these parameters as the rate is 0 will lose these data
+         */
+        @JsonIgnore
+        public void combineGeoDistributionReport(GeoDistributionReport geoDistributionReport,
+                                                                  Long totalCount1,
+                                                                  Long totalCount2) {
+            if (geographicalDistributionMap == null) {
+                geographicalDistributionMap = new HashMap<>();
+            }
+            if (geoDistributionReport == null) {
+                return ;
+            }
+            List<GeographicalItem> items = geoDistributionReport.getGeographicalDistributionList();
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.forEach(geographicalItem -> {
+                    String geoCode = geographicalItem.getGeoCode();
+                    GeographicalItem oldItem = geographicalDistributionMap.get(geoCode);
+                    if (oldItem == null) {
+                        geographicalDistributionMap.put(geoCode, geographicalItem);
+                    } else {
+                        Long presenceCount = oldItem.getCount() + geographicalItem.getCount();
+                        oldItem.setCount(presenceCount);
+                        Long totalCount = totalCount1 + totalCount2;
+                        if (totalCount == 0L) {
+                            oldItem.setRate(getScaledDouble(0.0));
+                        } else {
+                            oldItem.setRate(getScaledDouble((presenceCount.doubleValue() / totalCount.doubleValue()) * 100));
+                        }
+                    }
+                });
+            }
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -445,6 +541,55 @@ public class DataReport {
                     (confidenceCode < 8 ? ConfidenceItem.Classification.Medium : ConfidenceItem.Classification.High);
             confidenceItem.setClassification(classification);
             confidenceRateMap.put(confidenceCode, confidenceItem);
+        }
+
+        /** totalCnt1 represents the successful count in this report,
+         * totalCnt2 represents the successful count in passing report
+         * pass these parameters as the rate is 0 will lose these data
+         */
+        @JsonIgnore
+        public void combineMatchToDUNSReport(MatchToDUNSReport matchToDUNSReport, Long totalCnt1,
+                                                          Long totalCnt2) {
+            if (confidenceRateMap == null) {
+                confidenceRateMap = new HashMap<>();
+            }
+            if (matchToDUNSReport == null) {
+                return ;
+            }
+            if (this.matched == null) {
+                this.matched = 0L;
+            }
+            this.matched += matchToDUNSReport.getMatched() == null ? 0L : matchToDUNSReport.getMatched();
+
+            if (this.unmatched == null) {
+                this.unmatched = 0L;
+            }
+            this.unmatched += matchToDUNSReport.getUnmatched() == null ? 0L : matchToDUNSReport.getUnmatched();
+
+            if (this.noMatchCnt == null) {
+                this.noMatchCnt = 0L;
+            }
+            this.noMatchCnt += matchToDUNSReport.getNoMatchCnt() == null ? 0L : matchToDUNSReport.getNoMatchCnt();
+
+            List<ConfidenceItem> items = matchToDUNSReport.getConfidenceRateList();
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.forEach(confidenceItem -> {
+                    Integer confidenceCode = confidenceItem.getConfidenceCode();
+                    ConfidenceItem oldItem = confidenceRateMap.get(confidenceCode);
+                    if (oldItem == null) {
+                        confidenceRateMap.put(confidenceCode, confidenceItem);
+                    } else {
+                        Long confidenceCount = oldItem.getCount() + confidenceItem.getCount();
+                        oldItem.setCount(confidenceCount);
+                        Long totalCount = totalCnt1 + totalCnt2;
+                        if (totalCount == 0L) {
+                            oldItem.setRate(getScaledDouble(0.0));
+                        } else {
+                            oldItem.setRate(getScaledDouble((confidenceCount.doubleValue() / totalCount.doubleValue()) * 100));
+                        }
+                    }
+                });
+            }
         }
 
         @JsonProperty("matchedRate")
