@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -275,5 +276,21 @@ public class DataFeedTaskResource {
     public Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getTemplateToDataFeedTaskMap(customerSpace);
+    }
+
+    @GetMapping("/summaries/{source}")
+    @ResponseBody
+    @ApiOperation(value = "Get DataFeedTask Summaries for Source")
+    public List<DataFeedTaskSummary> getDataFeedTaskSummaries(@PathVariable String customerSpace,
+                                                              @PathVariable String source) {
+        return dataFeedTaskService.getSummaryBySourceAndDataFeed(customerSpace, source);
+    }
+
+    @GetMapping("/exists/{source}/{dataFeedType}")
+    @ResponseBody
+    @ApiOperation(value = "Get DataFeedTask Summaries for Source")
+    public Boolean existsDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
+                                      @PathVariable String dataFeedType) {
+        return dataFeedTaskService.existsBySourceAndFeedType(customerSpace, source, dataFeedType);
     }
 }

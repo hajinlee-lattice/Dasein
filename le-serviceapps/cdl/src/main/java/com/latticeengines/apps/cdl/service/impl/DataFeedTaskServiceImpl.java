@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -436,6 +437,16 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             return null;
         }
         return dataFeedTaskEntityMgr.getSourceBySourceIdAndDataFeed(sourceId, dataFeed);
+    }
+
+    @Override
+    public List<DataFeedTaskSummary> getSummaryBySourceAndDataFeed(String customerSpace, String source) {
+        return dataFeedTaskEntityMgr.getSummaryBySourceAndDataFeed(source, CustomerSpace.parse(customerSpace).toString());
+    }
+
+    @Override
+    public boolean existsBySourceAndFeedType(String customerSpace, String source, String feedType) {
+        return dataFeedTaskEntityMgr.existsBySourceAndFeedType(source, feedType, CustomerSpace.parse(customerSpace).toString());
     }
 
     private String getSystemNameFromFeedType(String feedType) {

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
@@ -525,6 +526,34 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         } else {
             return getSource(result.get(0));
         }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<DataFeedTaskSummary> getSummaryBySourceAndDataFeed(String source, String customerSpace) {
+        List<Object[]> result = datafeedTaskRepository.findSummaryBySource(source, customerSpace);
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyList();
+        } else {
+            return result.stream().map(this::getDataFeedTaskSummary).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public boolean existsBySourceAndFeedType(String source, String feedType, String customerSpace) {
+        return datafeedTaskRepository.countBySourceAndFeedType(source, feedType, customerSpace) > 0;
+    }
+
+    private DataFeedTaskSummary getDataFeedTaskSummary(Object[] columns) {
+        DataFeedTaskSummary summary = new DataFeedTaskSummary();
+        summary.setSource((String) columns[0]);
+        summary.setEntity((String) columns[1]);
+        summary.setFeedType((String) columns[2]);
+        summary.setSubtype((DataFeedTask.SubType) columns[3]);
+        summary.setS3ImportStatus((DataFeedTask.S3ImportStatus) columns[4]);
+        summary.setLastUpdated((Date) columns[5]);
+        return summary;
     }
 
     private SourceInfo getSource(Object[] columns) {
