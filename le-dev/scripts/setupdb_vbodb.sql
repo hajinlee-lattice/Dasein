@@ -1,0 +1,7 @@
+DROP SCHEMA IF EXISTS `VboDB`;
+CREATE SCHEMA IF NOT EXISTS `VboDB`;
+GRANT ALL ON VboDB.* TO root@localhost;
+ALTER DATABASE VboDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+USE `VboDB`;
+
+SOURCE WSHOME/ddl_vbodb_mysql5innodb.sql;

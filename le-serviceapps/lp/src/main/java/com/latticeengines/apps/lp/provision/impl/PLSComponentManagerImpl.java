@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.lp.provision.PLSComponentManager;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -45,12 +46,21 @@ import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.util.ValidateEnrichAttributesUtils;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 import com.latticeengines.security.service.impl.IDaaSUser;
+
+import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component("lpComponentManager")
 public class PLSComponentManagerImpl implements PLSComponentManager {
@@ -306,7 +316,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         try {
             tenantDocument = getTenantDocument(space);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format("Getting tenant document error."), e);
+            throw new LedpException(LedpCode.LEDP_18028, "Getting tenant document error.", e);
         }
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
         String userName = tenantDocument.getTenantInfo().properties.userName;
@@ -392,8 +402,44 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } catch (Exception e) {
             log.info("no node exist {}.", e.getMessage());
         }
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
-                retrievedUsers, userName);
+        Map<String, String> parentCtxMap = null;
+        try {
+            String contextStr = configDir.get("/TracingContext").getDocument().getData();
+            Map<?, ?> rawMap = JsonUtils.deserialize(contextStr, Map.class);
+            parentCtxMap = JsonUtils.convertMap(rawMap, String.class, String.class);
+        } catch (Exception e) {
+            log.warn("no tracing context node exist {}.", e.getMessage());
+        }
+        long start = System.currentTimeMillis() * 1000;
+        Tracer tracer = GlobalTracer.get();
+        SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
+        Span provisionSpan = null;
+        try (Scope scope = startProvisionSpan(parentCtx, PLSTenantId, start)) {
+            provisionSpan = tracer.activeSpan();
+            provisionSpan.log("Provisioning lp component for tenant " + PLSTenantId);
+            provisionSpan.log(new ImmutableMap.Builder<String, String>()
+                    .put("superAdmin", JsonUtils.serialize(superAdminEmails))
+                    .put("internalAdmin", JsonUtils.serialize(internalAdminEmails))
+                    .put("externalAdmin", JsonUtils.serialize(externalAdminEmails))
+                    .put("thirdParty", JsonUtils.serialize(thirdPartyEmails))
+                    .put("iDaaSUsers", JsonUtils.serialize(retrievedUsers))
+                    .put("userName", userName)
+                    .build());
+            provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
+                    retrievedUsers, userName);
+        } finally {
+            TracingUtils.finish(provisionSpan);
+        }
+    }
+
+    private Scope startProvisionSpan(SpanContext parentContext, String tenantId, long startTimeStamp) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("PLSComponent Bootstrap") //
+                .addReference(References.FOLLOWS_FROM, parentContext) //
+                .withTag(TracingTags.TENANT_ID, tenantId) //
+                .withStartTimestamp(startTimeStamp) //
+                .start();
+        return tracer.activateSpan(span);
     }
 
 

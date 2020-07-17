@@ -42,6 +42,11 @@
             <artifactId>le-graphdb</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>

@@ -17,6 +17,10 @@ public class VboResponse {
     @ApiModelProperty(required = true, value = "message")
     private String message;
 
+    @JsonProperty("ackReferenceId")
+    @ApiModelProperty(value = "ackReferenceId")
+    private String ackReferenceId;
+
     public String getStatus() {
         return status;
     }
@@ -33,4 +37,11 @@ public class VboResponse {
         this.message = message;
     }
 
+    public String getAckReferenceId() {
+        return ackReferenceId;
+    }
+
+    public void setAckReferenceId(String ackReferenceId) {
+        this.ackReferenceId = ackReferenceId;
+    }
 }

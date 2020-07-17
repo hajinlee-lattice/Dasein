@@ -90,6 +90,21 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>admin_vbo</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
+                            <arguments>
+                                <argument>VboDB</argument>
+                                <argument>false</argument>
+                                <argument>com.latticeengines.domain.exposed.vbo</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
