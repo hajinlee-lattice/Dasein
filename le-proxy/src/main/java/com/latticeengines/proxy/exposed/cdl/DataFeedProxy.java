@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -179,6 +180,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("getDataFeedTask", url, DataFeedTask.class);
     }
 
+    public boolean existsDataFeedTask(String customerSpace, String source, String dataFeedType) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/exists/{source}/{dataFeedType}",
+                shortenCustomerSpace(customerSpace), source, dataFeedType);
+        Boolean result = get("getDataFeedTask", url, Boolean.class);
+        return Boolean.TRUE.equals(result);
+    }
+
     public DataFeedTask getDataFeedTask(String customerSpace, String id) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{id}",
                 shortenCustomerSpace(customerSpace), id);
@@ -221,6 +229,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace), entity);
         List<?> res = get("getDataFeedTaskWithSameEntity", url, List.class);
         return JsonUtils.convertList(res, DataFeedTask.class);
+    }
+
+    public List<DataFeedTaskSummary> getDataFeedTaskSummaries(String customerSpace, String source) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/summaries/{source}",
+                shortenCustomerSpace(customerSpace), source);
+        List<?> res = get("getDataFeedTaskSummaries", url, List.class);
+        return JsonUtils.convertList(res, DataFeedTaskSummary.class);
     }
 
     public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String customerSpace, String entity,

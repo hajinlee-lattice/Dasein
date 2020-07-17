@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 
 public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedTask, Long> {
@@ -68,5 +69,9 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
     List<SourceInfo> getSourcesBySystemPid(Long systemPid);
 
     SourceInfo getSourceBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
+
+    List<DataFeedTaskSummary> getSummaryBySourceAndDataFeed(String source, String customerSpace);
+
+    boolean existsBySourceAndFeedType(String source, String feedType, String customerSpace);
 
 }

@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 
 public interface DataFeedTaskService {
 
@@ -104,4 +105,13 @@ public interface DataFeedTaskService {
     List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid);
 
     SourceInfo getSourceBySourceId(String customerSpace, String sourceId);
+
+    /**
+     * Get basic info from DataFeedTask without inflate details from other table, to improve performance
+     * @param source "File", "VisiDB" ...
+     * @return List of {@link DataFeedTaskSummary}
+     */
+    List<DataFeedTaskSummary> getSummaryBySourceAndDataFeed(String customerSpace, String source);
+
+    boolean existsBySourceAndFeedType(String customerSpace, String source, String feedType);
 }

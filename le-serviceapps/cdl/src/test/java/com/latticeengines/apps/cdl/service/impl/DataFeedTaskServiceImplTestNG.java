@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -199,6 +200,20 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(templateSystemMap.get(template1), "SYSTEM1");
         Assert.assertEquals(templateSystemMap.get(template2), "SYSTEM2");
         Assert.assertEquals(templateSystemMap.get(template3), "SYSTEM3");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testGetTemplateByPriority")
+    public void testGetSummaryAndCheckExists() {
+        List<DataFeedTaskSummary> summaries = datafeedTaskService.getSummaryBySourceAndDataFeed(customerSpace.toString(),
+                "File");
+        Assert.assertNotNull(summaries);
+        Assert.assertTrue(summaries.size() > 0);
+
+        Assert.assertTrue(datafeedTaskService.existsBySourceAndFeedType(customerSpace.toString(),
+                summaries.get(0).getSource(), summaries.get(0).getFeedType()));
+
+        Assert.assertFalse(datafeedTaskService.existsBySourceAndFeedType(customerSpace.toString(),
+                summaries.get(0).getSource(), summaries.get(0).getFeedType() + "Error"));
     }
 }
 
