@@ -167,7 +167,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                 List<String> partialAttrs = new ArrayList<>(Arrays.asList(baseTable.getAttributeNames()));
                 if (CollectionUtils.isNotEmpty(reProfileAttrs)) {
                     // handle re-profile attrs
-                    log.info("There {} attributes need full stats calculation.", reProfileAttrs.size());
+                    log.info("There are {} attributes need full stats calculation.", reProfileAttrs.size());
                     HdfsDataUnit statsResult = calcStats(baseTable, profileData, reProfileAttrs);
                     statsResult.setName(baseRole + "Stats");
                     statsTables.add(statsResult);
@@ -177,7 +177,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                     log.info("There are no attributes need full stats calculation.");
                 }
                 if (CollectionUtils.isNotEmpty(partialAttrs)) {
-                    log.info("There {} attributes need partial stats calculation.", partialAttrs.size());
+                    log.info("There are {} attributes need partial stats calculation.", partialAttrs.size());
                     CalcStatsDeltaConfig deltaConfig = new CalcStatsDeltaConfig();
                     deltaConfig.setIncludeAttrs(partialAttrs);
                     deltaConfig.setInput(Arrays.asList( //
@@ -225,7 +225,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
             statsData = (HdfsDataUnit) statsDiffTables.get(0);
         }
         if (statsData != null) {
-            String statsDiffTableName = NamingUtils.timestamp("AccountStats");
+            String statsDiffTableName = NamingUtils.timestamp("AccountStatsDiff");
             statsDiffTbl = toTable(statsDiffTableName, PROFILE_ATTR_ATTRNAME, statsData);
             metadataProxy.createTable(customerSpaceStr, statsDiffTableName, statsDiffTbl);
         }
