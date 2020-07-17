@@ -45,7 +45,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         try {
             verifyProcess();
         } finally {
-            if (isLocalEnvironment()) {
+            if (isLocalEnvironment() || persistCheckpoint) {
                 saveCheckpoint(CHECK_POINT);
             }
         }

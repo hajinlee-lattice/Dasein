@@ -489,6 +489,19 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     @Value("${common.le.environment}")
     private String leEnv;
 
+    /*-
+     * system properties that are used to refresh checkpoint automatically
+     */
+
+    @Value("${test.e2e.checkpoint.persist:false}")
+    protected boolean persistCheckpoint;
+
+    @Value("${test.e2e.checkpoint.version:}")
+    private String propCheckpointVersion;
+
+    @Value("${test.e2e.checkpoint.name:}")
+    private String propCheckpointName;
+
     protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
 
@@ -512,6 +525,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             checkpointService.enableCopyToS3();
             checkpointAutoService.enableCopyToS3();
         }
+        log.info("Persist checkpoint = {}, overridden checkpoint name = {}, overridden checkpoint version = {}",
+                persistCheckpoint, propCheckpointName, propCheckpointVersion);
     }
 
     @AfterClass(groups = { "end2end", "precheckin" })
@@ -1248,7 +1263,16 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void saveCheckpoint(String checkpointName) throws IOException {
-        saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), false);
+        if (StringUtils.isNotBlank(propCheckpointName)) {
+            log.info("Checkpoint name is set in environment. Use its value = {}", propCheckpointName);
+            checkpointName = propCheckpointName;
+        }
+        String version = String.valueOf(S3_CHECKPOINTS_VERSION + 1);
+        if (StringUtils.isNotBlank(propCheckpointVersion)) {
+            log.info("Checkpoint version is set in environment. Use its value = {}", propCheckpointVersion);
+            version = propCheckpointVersion;
+        }
+        saveCheckpoint(checkpointName, version, persistCheckpoint);
     }
 
     void saveCheckpoint(String checkpointName, String checkpointVersion, boolean autoUpload) throws IOException {

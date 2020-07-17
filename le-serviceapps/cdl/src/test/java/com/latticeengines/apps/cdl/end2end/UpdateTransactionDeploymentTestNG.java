@@ -50,7 +50,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         try {
             verifyProcess();
         } finally {
-            if (isLocalEnvironment()) {
+            if (isLocalEnvironment() || persistCheckpoint) {
                 saveCheckpoint(saveToCheckPoint());
             }
         }
