@@ -453,4 +453,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         this.dataCollectionProxy = dataCollectionProxy;
     }
 
+    @VisibleForTesting
+    void setDataUnitProxy(DataUnitProxy dataUnitProxy) {
+        this.dataUnitProxy = dataUnitProxy;
+    }
+
 }
