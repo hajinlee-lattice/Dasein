@@ -257,21 +257,24 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
                 "entityMatchCheckpoint", //
                 "mergeAccount", //
                 "generateAccountLookup", //
-                "enrichAccount", //
-                "enrichAccount", //
-                "enrichAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
+                "enrichLatticeAccount", //
+                "enrichLatticeAccount", //
+                "updateAccountProfile ", //
+                "updateAccountProfile ", //
+                "updateAccountProfile ", //
+                "updateLatticeAccountProfile", //
+                "updateLatticeAccountProfile", //
+                "updateLatticeAccountProfile", //
+                "updateAccountExport", //
+                "updateAccountFeatures", //
+                "calcAccountStats", //
+                "updateBucketedAccount", //
+                "updateBucketedAccount", //
                 "mergeContact", //
-                "profileContact", //
+                "removeOrphanContact", //
+                "updateContactProfile", //
+                "calcContactStats", //
+                "calcContactStats", //
                 "combineStatistics", //
                 "exportToRedshift", //
                 "exportToDynamo", //
