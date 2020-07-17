@@ -265,7 +265,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long CONTACT_PA_EM_SERVING = 899L;
     // Number of total contact after ProcessAccount entity match test for GA tenants
     static final Long CONTACT_PA_EMGA = 900L;
-    static final Long CONTACT_PA_EMGA_SERVING = 899L; // excluding orphan contact
     // Number of total contact after UpdateContact test
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test

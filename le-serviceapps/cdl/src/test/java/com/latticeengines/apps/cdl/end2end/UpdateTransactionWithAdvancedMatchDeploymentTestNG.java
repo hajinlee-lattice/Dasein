@@ -52,9 +52,8 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
 
     @Override
     protected void verifyCheckPoint() {
-        // FIXME update expected no. after process txn e2e is updated to multi template
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_PA_EMGA);
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_PA_EM);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_PA_EM);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_PA_EM_SERVING);
         verifyTxnDailyStore(DAILY_TXN_DAYS_PT, MIN_TXN_DATE_PT, MAX_TXN_DATE_PT, //
                 VERIFY_DAILYTXN_AMOUNT_PT, //
                 VERIFY_DAILYTXN_QUANTITY_PT, //
@@ -113,7 +112,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_EM);
@@ -124,7 +123,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         return map;
     }
 
@@ -132,7 +131,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);
