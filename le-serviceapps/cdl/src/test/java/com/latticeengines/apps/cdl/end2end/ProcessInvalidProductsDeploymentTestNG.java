@@ -25,7 +25,8 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
 
     private DataCollection.Version initialVersion;
 
-    @Test(groups = "deployment", priority = 0)
+    // FIXME re-enable after EnrichLatticeAccount is refactored
+    @Test(groups = "deployment", priority = 0, enabled = false)
     public void testBundleProductMissingProductBundle() throws Exception {
         initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(4, "ProductBundle_MissingProductBundle");
@@ -33,7 +34,8 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
         verifyProcess(7);
     }
 
-    @Test(groups = "deployment", priority = 1)
+    // FIXME re-enable after EnrichLatticeAccount is refactored
+    @Test(groups = "deployment", priority = 1, enabled = false)
     public void testHierarchyProductMissingCategory() throws Exception {
         initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(5, "ProductHierarchies_MissingCategory");
@@ -41,7 +43,8 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
         verifyProcess(19);
     }
 
-    @Test(groups = "deployment", priority = 2)
+    // FIXME re-enable after EnrichLatticeAccount is refactored
+    @Test(groups = "deployment", priority = 2, enabled = false)
     public void testHierarchyProductMissingFamily() throws Exception {
         initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(6, "ProductHierarchies_MissingFamily");
