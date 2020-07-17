@@ -8,6 +8,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public enum EntityType {
@@ -74,6 +75,17 @@ public enum EntityType {
             return entityType;
         }
         return fromEntityAndSubType(BusinessEntity.getByName(task.getEntity()), task.getSubType());
+    }
+
+    public static EntityType fromDataFeedTaskSummary(DataFeedTaskSummary taskSummary) {
+        if (taskSummary == null) {
+            throw new IllegalArgumentException("Cannot get EntityType from NULL dataFeedTaskSummary!");
+        }
+        EntityType entityType = fromFeedTypeName(taskSummary.getFeedType());
+        if (entityType != null) {
+            return entityType;
+        }
+        return fromEntityAndSubType(BusinessEntity.getByName(taskSummary.getEntity()), taskSummary.getSubtype());
     }
 
     private static EntityType fromEntityAndSubType(BusinessEntity entity, SubType subType) {

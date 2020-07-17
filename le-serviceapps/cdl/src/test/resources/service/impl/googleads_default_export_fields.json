@@ -397,7 +397,7 @@
   },
   {
     "attrName": "Contact_Address_Street_1",
-    "displayName": "Address Street 1",
+    "displayName": "Contact Address Street 1",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "GoogleAds",
@@ -408,7 +408,7 @@
   },
   {
     "attrName": "Contact_Address_Street_2",
-    "displayName": "Address Street 2",
+    "displayName": "Contact Address Street 2",
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "GoogleAds",

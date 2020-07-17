@@ -33,6 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -60,6 +61,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
@@ -468,7 +470,10 @@ public class CDLServiceImpl implements CDLService {
     public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy,
             Set<EntityType> excludeTypes) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
-        List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
+        List<String> folderNames;
+        try (PerformanceTimer timer = new PerformanceTimer("Get sub folders from S3", log)) {
+            folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
+        }
         log.info("folderNames is : " + folderNames.toString());
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
         if (dropBoxSummary == null) {
@@ -478,97 +483,107 @@ public class CDLServiceImpl implements CDLService {
         if (CollectionUtils.isEmpty(folderNames)) {
             log.info(String.format("Empty path in s3 folders for tenant %s in", customerSpace));
         }
-        for (String folderName : folderNames) {
-            if (hideLegacyTemplate(customerSpace, folderName)) {
-                continue;
-            }
-            DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
-            if (task == null) {
-                EntityType entityType = EntityType
-                        .fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
-                if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
-                    continue;
-                }
-                if (entityType != null) {
-                    S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
-                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
-                            dropBoxSummary.getDropBox(), folderName));
-                    display.setExist(Boolean.FALSE);
-                    display.setTemplateName(entityType.getDefaultFeedTypeName());
-                    display.setEntity(entityType.getEntity());
-                    display.setObject(entityType.getDisplayName());
-                    display.setFeedType(folderName);
-                    display.setS3ImportSystem(
-                            getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
-                    display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
-                    display.setDataLoaded(Boolean.FALSE);
-                    templates.add(display);
-                }
-            } else {
-                S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
-                display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
-                        folderName));
-                display.setExist(Boolean.TRUE);
-                display.setLastEditedDate(task.getLastUpdated());
-                // get from data feed task
-                display.setTemplateName(task.getTemplateDisplayName());
-                EntityType entityType = EntityType.fromDataFeedTask(task);
-                if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
-                    continue;
-                }
-                display.setObject(entityType.getDisplayName());
-                display.setFeedType(task.getFeedType());
-                display.setEntity(entityType.getEntity());
-                display.setS3ImportSystem(
-                        getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
-                display.setImportStatus(task.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
-                        : task.getS3ImportStatus());
-                display.setDataLoaded(cdlProxy.hasPAConsumedActions(customerSpace, task.getSource(), task.getFeedType()));
-                templates.add(display);
+        Map<String, DataFeedTaskSummary> summaryMap = new HashMap<>();
+        try (PerformanceTimer timer = new PerformanceTimer("Get Task Summaries", log)) {
+            List<DataFeedTaskSummary> allTaskSummaries = dataFeedProxy.getDataFeedTaskSummaries(customerSpace, "File");
+            if (CollectionUtils.isNotEmpty(allTaskSummaries)) {
+                summaryMap = allTaskSummaries.stream()
+                        .collect(Collectors.toMap(DataFeedTaskSummary::getFeedType, summary -> summary));
             }
         }
 
-        if (StringUtils.isNotEmpty(sortBy)) {
-            Comparator<S3ImportTemplateDisplay> compareBySystemType = Comparator
-                    .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
-                            : s.getS3ImportSystem().getSystemType().name());
-            Comparator<S3ImportTemplateDisplay> compareBySystemName = Comparator
-                    .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
-                            : s.getS3ImportSystem().getDisplayName() == null ? ""
-                                    : s.getS3ImportSystem().getDisplayName());
-            Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType
-                    .thenComparing(compareBySystemName);
+        try (PerformanceTimer timer = new PerformanceTimer("Build S3ImportTemplateDisplay Object", log)) {
+            for (String folderName : folderNames) {
+                if (hideLegacyTemplate(folderName, summaryMap)) {
+                    continue;
+                }
+                if (!summaryMap.containsKey(folderName)) {
+                    EntityType entityType = EntityType
+                            .fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
+                    if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
+                        continue;
+                    }
+                    if (entityType != null) {
+                        S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
+                        display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
+                                dropBoxSummary.getDropBox(), folderName));
+                        display.setExist(Boolean.FALSE);
+                        display.setTemplateName(entityType.getDefaultFeedTypeName());
+                        display.setEntity(entityType.getEntity());
+                        display.setObject(entityType.getDisplayName());
+                        display.setFeedType(folderName);
+                        display.setS3ImportSystem(
+                                getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
+                        display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
+                        display.setDataLoaded(Boolean.FALSE);
+                        templates.add(display);
+                    }
+                } else {
+                    DataFeedTaskSummary taskSummary = summaryMap.get(folderName);
+                    S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
+                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                            folderName));
+                    display.setExist(Boolean.TRUE);
+                    display.setLastEditedDate(taskSummary.getLastUpdated());
+                    // get from data feed task
+                    display.setTemplateName(taskSummary.getTemplateDisplayName());
+                    EntityType entityType = EntityType.fromDataFeedTaskSummary(taskSummary);
+                    if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
+                        continue;
+                    }
+                    display.setObject(entityType.getDisplayName());
+                    display.setFeedType(taskSummary.getFeedType());
+                    display.setEntity(entityType.getEntity());
+                    display.setS3ImportSystem(
+                            getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
+                    display.setImportStatus(taskSummary.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
+                            : taskSummary.getS3ImportStatus());
+                    display.setDataLoaded(cdlProxy.hasPAConsumedActions(customerSpace, taskSummary.getSource(), taskSummary.getFeedType()));
+                    templates.add(display);
+                }
+            }
+        }
 
-            Comparator<S3ImportTemplateDisplay> compareBySystemPriority = Comparator
-                    .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? -1
-                            : s.getS3ImportSystem().getPriority());
-            if (sortBy.equalsIgnoreCase("SystemDisplay")) {
-                templates.sort(compareBySystem);
-            } else if (sortBy.equalsIgnoreCase("SystemPriority")) {
-                templates.sort(compareBySystemPriority);
+        try (PerformanceTimer timer = new PerformanceTimer("Sort S3ImportTemplateDisplay Object", log)) {
+            if (StringUtils.isNotEmpty(sortBy)) {
+                Comparator<S3ImportTemplateDisplay> compareBySystemType = Comparator
+                        .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
+                                : s.getS3ImportSystem().getSystemType().name());
+                Comparator<S3ImportTemplateDisplay> compareBySystemName = Comparator
+                        .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
+                                : s.getS3ImportSystem().getDisplayName() == null ? ""
+                                : s.getS3ImportSystem().getDisplayName());
+                Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType
+                        .thenComparing(compareBySystemName);
+
+                Comparator<S3ImportTemplateDisplay> compareBySystemPriority = Comparator
+                        .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? -1
+                                : s.getS3ImportSystem().getPriority());
+                if (sortBy.equalsIgnoreCase("SystemDisplay")) {
+                    templates.sort(compareBySystem);
+                } else if (sortBy.equalsIgnoreCase("SystemPriority")) {
+                    templates.sort(compareBySystemPriority);
+                }
             }
         }
         return templates;
     }
 
     // For migrated tenant, user may create the drop folder again. Need to hide these templates from UI.
-    private boolean hideLegacyTemplate(String customerSpace, String folderName) {
+    private boolean hideLegacyTemplate(String folderName, Map<String, DataFeedTaskSummary> summaryMap) {
         if (StringUtils.isEmpty(getSystemNameFromFeedType(folderName))) {
-            DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
-            if (task == null) {
-                task = dataFeedProxy.getDataFeedTask(customerSpace, "File", DEFAULT_SYSTEM + "_" + folderName);
-                return task != null;
+            if (!summaryMap.containsKey(folderName)) {
+                return summaryMap.containsKey(DEFAULT_SYSTEM + "_" + folderName);
             } else {
-                List<DataFeedTask> taskList = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace,
-                        task.getEntity());
-                if (CollectionUtils.size(taskList) > 1) {
-                    DataFeedTask finalTask = task;
-                    Optional<DataFeedTask> taskWithSystem = taskList.stream()
-                            .filter(dataFeedTask -> !dataFeedTask.getUniqueId().equals(finalTask.getUniqueId())
-                                && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType())))
-                            .findFirst();
-                    return taskWithSystem.isPresent();
-                }
+                DataFeedTaskSummary currentSummary = summaryMap.get(folderName);
+                Optional<DataFeedTaskSummary> summaryWithSystem =
+                        summaryMap.values()
+                                .stream()
+                                .filter(summary -> !summary.getFeedType().equals(folderName)
+                                        && summary.getEntity().equals(currentSummary.getEntity())
+                                        && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(summary.getFeedType())))
+                                .findFirst();
+                return summaryWithSystem.isPresent();
             }
         }
         return false;

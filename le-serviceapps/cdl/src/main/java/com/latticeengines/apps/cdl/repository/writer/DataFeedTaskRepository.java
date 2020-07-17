@@ -27,12 +27,23 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
 
     DataFeedTask findByDataFeedAndTaskUniqueName(DataFeed dataFeed, String taskUniqueName);
 
-    @Query("select dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
-            "from DataFeedTask as dft join dft.importSystem as s where s.pid = ?1 and dft.deleted != True")
+    @Query("SELECT dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
+            "FROM DataFeedTask AS dft JOIN dft.importSystem AS s WHERE s.pid = ?1 AND dft.deleted != True")
     List<Object[]> findSourceInfoBySystemPid(Long systemPid);
 
-    @Query("select dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
-            "from DataFeedTask as dft where dft.sourceId = ?1 and dft.dataFeed = ?2")
+    @Query("SELECT dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
+            "FROM DataFeedTask AS dft WHERE dft.sourceId = ?1 AND dft.dataFeed = ?2")
     List<Object[]> findBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
+
+    @Query("SELECT dft.source, dft.entity, dft.feedType, dft.subType, dft.s3ImportStatus, dft.lastUpdated " +
+            "FROM DataFeedTask dft " +
+            "INNER JOIN dft.dataFeed df " +
+            "INNER JOIN df.tenant t WHERE dft.source = ?1 AND t.id = ?2")
+    List<Object[]> findSummaryBySource(String source, String customerSpace);
+
+    @Query("SELECT count(dft) FROM DataFeedTask dft " +
+            "INNER JOIN dft.dataFeed df " +
+            "INNER JOIN df.tenant t WHERE dft.source = ?1 AND dft.feedType=?2 AND t.id = ?3")
+    int countBySourceAndFeedType(String source, String feedType, String customerSpace);
 
 }
