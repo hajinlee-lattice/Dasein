@@ -294,21 +294,24 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
                 "matchContact", //
                 "entityMatchCheckpoint", //
                 "mergeAccount", //
-                "enrichAccount", //
-                "enrichAccount", //
-                "enrichAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "profileAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
+                "enrichLatticeAccount", //
+                "enrichLatticeAccount", //
+                "updateAccountProfile ", //
+                "updateAccountProfile ", //
+                "updateAccountProfile ", //
+                "updateLatticeAccountProfile", //
+                "updateLatticeAccountProfile", //
+                "updateLatticeAccountProfile", //
+                "updateAccountExport", //
+                "updateAccountFeatures", //
+                "calcAccountStats", //
+                "updateBucketedAccount", //
+                "updateBucketedAccount", //
                 "mergeContact", //
-                "profileContact", //
+                "removeOrphanContact", //
+                "updateContactProfile", //
+                "calcContactStats", //
+                "calcContactStats", //
                 "mergeProduct", //
                 "profileProduct", //
                 "profileProductHierarchy", //
