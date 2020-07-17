@@ -217,7 +217,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         if (filePath.endsWith(config.getUploadRawFilePath())) {
             return UploadFileDownloadConfig.FileType.RAW;
         }
-        if (filePath.endsWith(config.getUploadImportedErrorFilePath())) {
+        if (config.getUploadImportedErrorFilePath() != null && filePath.endsWith(config.getUploadImportedErrorFilePath())) {
             return UploadFileDownloadConfig.FileType.IMPORT_ERRORS;
         }
         if (filePath.endsWith(config.getUploadMatchResultAccepted())) {
