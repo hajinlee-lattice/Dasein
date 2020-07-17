@@ -1,5 +1,9 @@
 package com.latticeengines.dcp.workflow.listeners;
 
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.ANALYSIS_PERCENTAGE;
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.INGESTION_PERCENTAGE;
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.MATCH_PERCENTAGE;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -76,6 +80,7 @@ public class SourceImportListener extends LEJobListener {
         uploadDiagnostics.setApplicationId(job.getApplicationId());
         if (BatchStatus.COMPLETED.equals(jobStatus)) {
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED, uploadDiagnostics);
+            uploadProxy.updateProgressPercentage(tenantId, uploadId, ANALYSIS_PERCENTAGE);
         } else {
             if (jobStatus.isUnsuccessful()) {
                 log.info("SourceImport workflow job {} failed with status {}", jobExecution.getId(), jobStatus);
@@ -83,6 +88,7 @@ public class SourceImportListener extends LEJobListener {
                 log.error("SourceImport workflow job {} failed with unknown status {}", jobExecution.getId(), jobStatus);
             }
             List<Throwable> exceptions = jobExecution.getAllFailureExceptions();
+            String processPercentage = "0";
             if (exceptions.size() > 0) {
                 Throwable exception = exceptions.get(0);
 
@@ -101,18 +107,22 @@ public class SourceImportListener extends LEJobListener {
                     case "importSource":
                     case "getStartTime":
                         uploadDiagnostics.setLastErrorStep("Ingestion");
+                        processPercentage = INGESTION_PERCENTAGE;
                         break;
                     case "matchImport":
                         uploadDiagnostics.setLastErrorStep("Match");
+                        processPercentage = MATCH_PERCENTAGE;
                         break;
                     case "splitImportMatchResult":
                     case "finishImportSource":
                         uploadDiagnostics.setLastErrorStep("Analysis");
+                        processPercentage = ANALYSIS_PERCENTAGE;
                         break;
                     default:
                         break;
                 }
             }
+            uploadProxy.updateProgressPercentage(tenantId, uploadId, processPercentage);
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR, uploadDiagnostics);
         }
 

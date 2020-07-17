@@ -138,4 +138,14 @@ public class UploadResource {
                 new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
+
+    @PutMapping("/update/{uploadId}/progressPercentage/{progressPercentage}")
+    @ResponseBody
+    @ApiOperation(value = "update the upload status")
+    public void updateProgressPercentage(@PathVariable String customerSpace,
+                             @PathVariable String uploadId,
+                             @PathVariable String progressPercentage) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        uploadService.updateProgressPercentage(customerSpace, uploadId, progressPercentage);
+    }
 }

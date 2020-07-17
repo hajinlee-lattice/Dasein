@@ -1,5 +1,7 @@
 package com.latticeengines.dcp.workflow.steps;
 
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.INGESTION_PERCENTAGE;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,5 +101,6 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
 
         String uploadId = configuration.getUploadId();
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_FINISHED, null);
+        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, INGESTION_PERCENTAGE);
     }
 }
