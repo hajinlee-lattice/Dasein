@@ -190,8 +190,10 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private void verifyAccountProfile() {
-        Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.Profile);
-        Assert.assertNotNull(table);
+        Table table1 = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.AccountProfile);
+        Assert.assertNotNull(table1);
+        Table table2 = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.LatticeAccountProfile);
+        Assert.assertNotNull(table2);
     }
 
     private void verifyDateAttrs() {

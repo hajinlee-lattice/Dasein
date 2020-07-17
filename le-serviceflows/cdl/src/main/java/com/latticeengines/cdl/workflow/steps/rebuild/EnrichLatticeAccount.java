@@ -393,7 +393,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         inputs.add(oldLatticeAccountDU); // fromTable: original table
         ChangeListConfig config = new ChangeListConfig();
         config.setInput(inputs);
-        config.setCreationMode(ChangeListConstants.VerticalMode);
+        config.setCreationMode(ChangeListConstants.HorizontalMode);
         config.setJoinKey(joinKey);
         config.setExclusionColumns(Arrays.asList( //
                 InterfaceName.CDLCreatedTime.name(), //

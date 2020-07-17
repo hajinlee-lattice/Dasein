@@ -77,11 +77,11 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
         if (servingTable != null) {
             log.info("Found account serving store in context, going through short-cut mode.");
         } else {
-            customerAccountTbl = attemptGetTableRole(ConsolidatedAccount, true);
-            customerProfileTbl = attemptGetTableRole(AccountProfile, true);
             latticeAccountTbl = attemptGetTableRole(LatticeAccount, false);
-            latticeProfileTbl = attemptGetTableRole(LatticeAccountProfile, false);
             if (shouldRunEncode()) {
+                latticeProfileTbl = attemptGetTableRole(LatticeAccountProfile, false);
+                customerAccountTbl = attemptGetTableRole(ConsolidatedAccount, true);
+                customerProfileTbl = attemptGetTableRole(AccountProfile, true);
                 HdfsDataUnit customerEncode = encode(customerAccountTbl.toHdfsDataUnit("Data"),
                         customerProfileTbl.toHdfsDataUnit("Profile"));
                 HdfsDataUnit mergeEncode;
