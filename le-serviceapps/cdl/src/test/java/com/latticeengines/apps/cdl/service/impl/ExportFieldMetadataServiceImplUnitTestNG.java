@@ -34,54 +34,17 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        defaultMarketoExportFields = getDefaultExportFields(CDLExternalSystemName.Marketo);
 
-        defaultMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.Marketo);
+        defaultS3ExportFields = getDefaultExportFields(CDLExternalSystemName.AWS_S3);
 
-        if (defaultMarketoExportFields.size() == 0) {
-            createDefaultExportFields(CDLExternalSystemName.Marketo);
-        } else {
-            defaultMarketoExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Marketo);
-        }
+        defaultLinkedInExportFields = getDefaultExportFields(CDLExternalSystemName.LinkedIn);
 
-        defaultS3ExportFields = exportService.getAllAttributes(CDLExternalSystemName.AWS_S3);
+        defaultFacebookExportFields = getDefaultExportFields(CDLExternalSystemName.Facebook);
 
-        if (defaultS3ExportFields.size() == 0) {
-            createDefaultExportFields(CDLExternalSystemName.AWS_S3);
-        } else {
-            defaultS3ExportFields = updateFieldMetadataDefault(CDLExternalSystemName.AWS_S3);
-        }
+        defaultOutreachExportFields = getDefaultExportFields(CDLExternalSystemName.Outreach);
 
-        defaultLinkedInExportFields = exportService.getAllAttributes(CDLExternalSystemName.LinkedIn);
-
-        if (defaultLinkedInExportFields.size() == 0) {
-            defaultLinkedInExportFields = createDefaultExportFields(CDLExternalSystemName.LinkedIn);
-        } else {
-            defaultLinkedInExportFields = updateFieldMetadataDefault(CDLExternalSystemName.LinkedIn);
-        }
-
-        defaultFacebookExportFields = exportService.getAllAttributes(CDLExternalSystemName.Facebook);
-
-        if (defaultFacebookExportFields.size() == 0) {
-            defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
-        } else {
-            defaultFacebookExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Facebook);
-        }
-
-        defaultOutreachExportFields = exportService.getAllAttributes(CDLExternalSystemName.Outreach);
-
-        if (defaultOutreachExportFields.size() == 0) {
-            defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
-        } else {
-            defaultOutreachExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Outreach);
-        }
-
-        defaultGoogleAdsExportFields = exportService.getAllAttributes(CDLExternalSystemName.GoogleAds);
-
-        if (defaultGoogleAdsExportFields.size() == 0) {
-            defaultGoogleAdsExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
-        } else {
-            defaultGoogleAdsExportFields = updateFieldMetadataDefault(CDLExternalSystemName.GoogleAds);
-        }
+        defaultGoogleAdsExportFields = getDefaultExportFields(CDLExternalSystemName.GoogleAds);
 
     }
 
@@ -135,9 +98,9 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     public void testS3() {
         defaultS3ExportFields = exportService.getAllAttributes(CDLExternalSystemName.AWS_S3);
 
-        assertEquals(defaultS3ExportFields.size(), 50);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 40);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 42);
+        assertEquals(defaultS3ExportFields.size(), 45);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 35);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 37);
 
         List<ExportFieldMetadataDefaults> enabledS3ExportFields = exportService
                 .getExportEnabledAttributes(CDLExternalSystemName.AWS_S3);
@@ -145,9 +108,9 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 .getExportEnabledAttributesForEntity(CDLExternalSystemName.AWS_S3, BusinessEntity.Account);
         List<ExportFieldMetadataDefaults> enabledContactS3ExportFields = exportService
                 .getExportEnabledAttributesForEntity(CDLExternalSystemName.AWS_S3, BusinessEntity.Contact);
-        assertEquals(enabledS3ExportFields.size(), 42);
+        assertEquals(enabledS3ExportFields.size(), 37);
         assertEquals(enabledAccountS3ExportFields.size(), 21);
-        assertEquals(enabledContactS3ExportFields.size(), 21);
+        assertEquals(enabledContactS3ExportFields.size(), 16);
     }
 
     @Test(groups = "functional")
@@ -207,24 +170,36 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 27);
 
     }
+    
+    private List<ExportFieldMetadataDefaults> getDefaultExportFields(CDLExternalSystemName systemName) {
+        List<ExportFieldMetadataDefaults> defaultExportFields = exportService.getAllAttributes(systemName);
+
+        if (defaultExportFields.size() == 0) {
+            createDefaultExportFields(systemName);
+        } else {
+            defaultExportFields = updateFieldMetadataDefault(systemName);
+        }
+
+        return defaultExportFields;
+    }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
-        String filePath = String.format("service/impl/%s_default_export_fields.json",
-                systemName.toString().toLowerCase());
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
-        List<ExportFieldMetadataDefaults> defaultExportFields = JsonUtils
-                .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
+        List<ExportFieldMetadataDefaults> defaultExportFields = getExportFieldMetadataDefaultsFromJson(systemName);
         exportService.createDefaultExportFields(defaultExportFields);
         return defaultExportFields;
     }
 
     private List<ExportFieldMetadataDefaults> updateFieldMetadataDefault(CDLExternalSystemName systemName) {
+        List<ExportFieldMetadataDefaults> defaultExportFields = getExportFieldMetadataDefaultsFromJson(systemName);
+        return exportService.updateDefaultFields(systemName, defaultExportFields);
+    }
+
+    private List<ExportFieldMetadataDefaults> getExportFieldMetadataDefaultsFromJson(CDLExternalSystemName systemName) {
         String filePath = String.format("service/impl/%s_default_export_fields.json",
                 systemName.toString().toLowerCase());
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
         List<ExportFieldMetadataDefaults> defaultExportFields = JsonUtils
                 .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
-        return exportService.updateDefaultFields(systemName, defaultExportFields);
+        return defaultExportFields;
     }
-
 }
