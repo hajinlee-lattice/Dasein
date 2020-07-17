@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 public class CDLRealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBase {
 
@@ -52,6 +53,9 @@ public class CDLRealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestN
 
     @Mock
     private DataCollectionProxy dataCollectionProxy;
+
+    @Mock
+    private DataUnitProxy dataUnitProxy;
 
     @Inject
     private RealTimeMatchPlanner realTimeMatchPlanner;
@@ -72,10 +76,12 @@ public class CDLRealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestN
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(zkConfigurationService.isCDLTenant(any())).thenReturn(true);
+        when(dataUnitProxy.getByNameAndType(anyString(), anyString(), any())).thenReturn(null);
 
         realTimeMatchPlanner.setZkConfigurationService(zkConfigurationService);
         cdlMetadataService.setServingStoreProxy(servingStoreProxy);
         cdlMetadataService.setDataCollectionProxy(dataCollectionProxy);
+        cdlMetadataService.setDataUnitProxy(dataUnitProxy);
 
         loadAccountSchema();
         loadRatingSchema();
