@@ -275,12 +275,20 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(plays.size(), 0);
         channel4.setIsAlwaysOn(false);
         playLaunchChannelEntityMgr.update(channel4);
-        playLaunchChannelEntityMgr.updateAttributeSetNameToDefault("attribute_set_name_s3");
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class), null);
         AtomicReference<PlayLaunchChannel> updatedChannel = new AtomicReference<>();
         retry.execute(context -> {
             updatedChannel.set(playLaunchChannelEntityMgr.findById(channel4.getId()));
             Assert.assertNotNull(updatedChannel.get());
+            Assert.assertFalse(updatedChannel.get().getIsAlwaysOn());
+            return true;
+        });
+        playLaunchChannelEntityMgr.updateAttributeSetNameToDefault("attribute_set_name_s3");
+        retry = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            updatedChannel.set(playLaunchChannelEntityMgr.findById(channel4.getId()));
+            Assert.assertNotNull(updatedChannel.get());
+            log.info("Channel4 id is {}.", channel4.getId());
             Assert.assertEquals(((S3ChannelConfig) updatedChannel.get().getChannelConfig()).getAttributeSetName(), AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
             return true;
         });

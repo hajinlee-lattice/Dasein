@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.provision.impl;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -26,6 +29,15 @@ import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.DataUnitCrossTenantService;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
+
+import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component
 public class CDLComponentManagerImpl implements CDLComponentManager {
@@ -73,25 +85,54 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         String camilleSpaceId = space.getSpaceId();
         String customerSpace = String.format("%s.%s.%s", camilleContractId, camilleTenantId, camilleSpaceId);
         log.info(String.format("Provisioning tenant %s", customerSpace));
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
-        MultiTenantContext.setTenant(tenant);
-        dataCollectionEntityMgr.createDefaultCollection();
-        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
-        log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
-        provisionDropBox(space);
-        attributeSetEntityMgr.createDefaultAttributeSet();
-        if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
-            if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
-                log.info("Create Default System for tenant: " + space.toString());
-                s3ImportSystemService.createDefaultImportSystem(space.toString());
-                dropBoxService.createTenantDefaultFolder(space.toString());
-            }
-            if (configDir.get("/ExportCronExpression") != null) {
-                String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
-                log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
-                atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
-            }
+        Map<String, String> parentCtxMap = null;
+        try {
+            String contextStr = configDir.get("/TracingContext").getDocument().getData();
+            Map<?, ?> rawMap = JsonUtils.deserialize(contextStr, Map.class);
+            parentCtxMap = JsonUtils.convertMap(rawMap, String.class, String.class);
+        } catch (Exception e) {
+            log.warn("no tracing context node exist {}.", e.getMessage());
         }
+        long start = System.currentTimeMillis() * 1000;
+        Tracer tracer = GlobalTracer.get();
+        SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
+        Span provisionSpan = null;
+        try (Scope scope = startProvisionSpan(parentCtx, customerSpace, start)) {
+            provisionSpan = tracer.activeSpan();
+            provisionSpan.log("Provisioning cdl component for tenant " + customerSpace);
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+            MultiTenantContext.setTenant(tenant);
+            dataCollectionEntityMgr.createDefaultCollection();
+            DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+            log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
+            provisionSpan.log("Initialized data collection " + dataFeed.getDataCollection().getName());
+            provisionDropBox(space);
+            attributeSetEntityMgr.createDefaultAttributeSet();
+            if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
+                if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
+                    log.info("Create Default System for tenant: " + space.toString());
+                    s3ImportSystemService.createDefaultImportSystem(space.toString());
+                    dropBoxService.createTenantDefaultFolder(space.toString());
+                }
+                if (configDir.get("/ExportCronExpression") != null) {
+                    String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
+                    log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
+                    atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+                }
+            }
+        } finally {
+            TracingUtils.finish(provisionSpan);
+        }
+    }
+
+    private Scope startProvisionSpan(SpanContext parentContext, String tenantId, long startTimeStamp) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("CDLComponent Bootstrap") //
+                .addReference(References.FOLLOWS_FROM, parentContext) //
+                .withTag(TracingTags.TENANT_ID, tenantId) //
+                .withStartTimestamp(startTimeStamp) //
+                .start();
+        return tracer.activateSpan(span);
     }
 
     @Override

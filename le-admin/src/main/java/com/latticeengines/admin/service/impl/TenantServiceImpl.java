@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.ServiceConfigService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.service.VboRequestLogService;
 import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
@@ -87,11 +89,18 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.service.impl.IDaaSUser;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component("adminTenantService")
 public class TenantServiceImpl implements TenantService {
@@ -109,6 +118,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Inject
     private ServiceService serviceService;
+
+    @Inject
+    private VboRequestLogService vboRequestLogService;
 
     @Inject
     private ComponentOrchestrator orchestrator;
@@ -148,7 +160,7 @@ public class TenantServiceImpl implements TenantService {
 
     @PostConstruct
     protected void uploadDefaultSpaceConfigAndSchemaByJson() {
-        boolean needToRegister = Boolean.valueOf(System.getProperty("com.latticeengines.registerBootstrappers"));
+        boolean needToRegister = Boolean.parseBoolean(System.getProperty("com.latticeengines.registerBootstrappers"));
         if (needToRegister) {
             String defaultJson = "space_default.json";
             String metadataJson = "space_metadata.json";
@@ -351,7 +363,7 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
-        Map<String, Boolean> externalEmailMap = new HashMap<String, Boolean>();
+        Map<String, Boolean> externalEmailMap = new HashMap<>();
 
         if (externalEmailList != null) {
             for (String email : externalEmailList) {
@@ -372,7 +384,7 @@ public class TenantServiceImpl implements TenantService {
                 .queryParam("useremail", externalEmail).build().toUri();
         log.info("Url Value " + attrUrl.toString());
         Boolean externalUserExists = restTemplate.getForObject(attrUrl, Boolean.class);
-        return externalUserExists.booleanValue();
+        return Boolean.TRUE.equals(externalUserExists);
     }
 
     @Override
@@ -636,99 +648,140 @@ public class TenantServiceImpl implements TenantService {
             String existingName = existingTenant.getName();
             log.error("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
-            return generateVBOResponse("failed",
+            VboResponse response = generateVBOResponse("failed",
                     "A tenant has already existed for this subscriber number");
+            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            return response;
         }
 
         String subName = vboRequest.getSubscriber().getName();
         String tenantName = constructTenantNameFromSubscriber(subName);
         if (StringUtils.isBlank(tenantName)) {
             log.error("system can't construct tenant name from subscriber name {}.", subName);
-            return generateVBOResponse("failed",
+            VboResponse response = generateVBOResponse("failed",
                     "system can't construct tenant name from subscriber name.");
+            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            return response;
         }
-        List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
+        Tracer tracer = GlobalTracer.get();
+        Span adminSpan = null;
+        long start = System.currentTimeMillis() * 1000;
+        try (Scope scope = startAdminSpan(tenantName, start)) {
+            adminSpan = tracer.activeSpan();
+            Map<String, String> tracingCtx = TracingUtils.getActiveTracingContext();
+            String traceId = adminSpan.context().toTraceId();
+            vboRequestLogService.createVboRequestLog(traceId, tenantName, vboRequest, null);
 
-        // TenantInfo
-        TenantProperties tenantProperties = new TenantProperties();
-        tenantProperties.description = "A tenant created by vbo request";
-        tenantProperties.displayName = tenantName;
-        TenantInfo tenantInfo = new TenantInfo(tenantProperties);
+            List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
 
-        // FeatureFlags
-        FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
-        FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
-        definitionMap.forEach((flagId, flagDef) -> {
-            if (flagDef.getAvailableProducts() != null) {
-                for(LatticeProduct product : flagDef.getAvailableProducts()) {
-                    if (productList.contains(product)) {
-                        boolean defaultVal = flagDef.getDefaultValue();
-                        defaultValueMap.put(flagId, defaultVal);
-                        break;
+            // TenantInfo
+            TenantProperties tenantProperties = new TenantProperties();
+            tenantProperties.description = "A tenant created by vbo request";
+            tenantProperties.displayName = tenantName;
+            TenantInfo tenantInfo = new TenantInfo(tenantProperties);
+
+            // FeatureFlags
+            FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
+            FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
+            definitionMap.forEach((flagId, flagDef) -> {
+                if (flagDef.getAvailableProducts() != null) {
+                    for (LatticeProduct product : flagDef.getAvailableProducts()) {
+                        if (productList.contains(product)) {
+                            boolean defaultVal = flagDef.getDefaultValue();
+                            defaultValueMap.put(flagId, defaultVal);
+                            break;
+                        }
                     }
+                } else {
+                    boolean defaultVal = flagDef.getDefaultValue();
+                    defaultValueMap.put(flagId, defaultVal);
                 }
-            } else{
-                boolean defaultVal = flagDef.getDefaultValue();
-                defaultValueMap.put(flagId, defaultVal);
+            });
+
+            // SpaceInfo
+            CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
+            spaceProperties.description = tenantProperties.description;
+            spaceProperties.displayName = tenantProperties.displayName;
+
+            CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, JsonUtils.serialize(defaultValueMap));
+
+            // SpaceConfiguration
+            SpaceConfiguration spaceConfiguration = getDefaultSpaceConfig();
+            spaceConfiguration.setProducts(productList);
+
+            List<String> services = Arrays.asList(PLSComponent.componentName, CDLComponent.componentName, DataCloudComponent.componentName, DCPComponent.componentName);
+
+            List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
+
+            // generate email list to be added and IDaaS user list
+            List<IDaaSUser> users = new ArrayList<>();
+            for (VboRequest.User user : vboRequest.getProduct().getUsers()) {
+                users.add(constructIDaaSUser(user, vboRequest.getSubscriber().getLanguage()));
             }
-        });
 
-        // SpaceInfo
-        CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
-        spaceProperties.description = tenantProperties.description;
-        spaceProperties.displayName = tenantProperties.displayName;
-
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, JsonUtils.serialize(defaultValueMap));
-
-        // SpaceConfiguration
-        SpaceConfiguration spaceConfiguration = getDefaultSpaceConfig();
-        spaceConfiguration.setProducts(productList);
-
-        List<String> services = Arrays.asList(PLSComponent.componentName, CDLComponent.componentName, DataCloudComponent.componentName, DCPComponent.componentName);
-
-        List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
-
-        // generate email list to be added and IDaaS user list
-        List<IDaaSUser> users = new ArrayList<>();
-        for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
-            users.add(constructIDaaSUser(user, vboRequest.getSubscriber().getLanguage()));
-        }
-
-        for (String component : services) {
-            SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
-            if(component.equalsIgnoreCase(PLSComponent.componentName)) {
-                // add users node
-                if (CollectionUtils.isNotEmpty(users)) {
+            for (String component : services) {
+                SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
+                if (component.equalsIgnoreCase(PLSComponent.componentName)) {
+                    // add users node
+                    if (CollectionUtils.isNotEmpty(users)) {
+                        SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
+                        node.setNode("IDaaSUsers");
+                        node.setData(JsonUtils.serialize(users));
+                        componentConfig.getNodes().add(node);
+                    }
+                    // add subscriberNum node
                     SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
-                    node.setNode("IDaaSUsers");
-                    node.setData(JsonUtils.serialize(users));
+                    node.setNode("SubscriberNumber");
+                    node.setData(subNumber);
                     componentConfig.getNodes().add(node);
-                }
-                // add subscriberNum node
-                SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
-                node.setNode("SubscriberNumber");
-                node.setData(subNumber);
-                componentConfig.getNodes().add(node);
-                // set null as document dir and serializable document dir are not consistent, document directory will
-                // be newly constructed from serializable document dir when needed
-                componentConfig.setDocumentDirectory(null);
-            }
-            componentConfig.setRootPath("/" + component);
-            configDirs.add(componentConfig);
-        }
+                    // set null as document dir and serializable document dir are not consistent, document directory will
+                    // be newly constructed from serializable document dir when needed
+                    componentConfig.setDocumentDirectory(null);
 
-        TenantRegistration registration = new TenantRegistration();
-        registration.setContractInfo(new ContractInfo(new ContractProperties()));
-        registration.setSpaceConfig(spaceConfiguration);
-        registration.setSpaceInfo(spaceInfo);
-        registration.setTenantInfo(tenantInfo);
-        registration.setConfigDirectories(configDirs);
-        boolean result = createTenant(tenantName, tenantName, registration, userName);
-        String status = result ? "success" : "failed";
-        String message = result ? "tenant created successfully via Vbo request" :
-                "tenant created failed via Vbo request";
-        log.info("create tenant {} from vbo request", tenantName);
-        return generateVBOResponse(status, message);
+                }
+                if (MapUtils.isNotEmpty(tracingCtx)) {
+                    SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
+                    node.setNode("TracingContext");
+                    node.setData(JsonUtils.serialize(tracingCtx));
+                    componentConfig.getNodes().add(node);
+                    componentConfig.setRootPath("/" + component);
+                    componentConfig.setDocumentDirectory(null);
+                } else {
+                    log.error("Cannot get current active tracing context.");
+                }
+                configDirs.add(componentConfig);
+            }
+
+            TenantRegistration registration = new TenantRegistration();
+            registration.setContractInfo(new ContractInfo(new ContractProperties()));
+            registration.setSpaceConfig(spaceConfiguration);
+            registration.setSpaceInfo(spaceInfo);
+            registration.setTenantInfo(tenantInfo);
+            registration.setConfigDirectories(configDirs);
+            boolean result = createTenant(tenantName, tenantName, registration, userName);
+            String status = result ? "success" : "failed";
+            String message = result ? "tenant created successfully via Vbo request" :
+                    "tenant created failed via Vbo request";
+            log.info("create tenant {} from vbo request", tenantName);
+            VboResponse response = generateVBOResponse(status, message, traceId);
+            vboRequestLogService.updateVboResponse(traceId, response);
+            return response;
+        } finally {
+            TracingUtils.finish(adminSpan);
+        }
+    }
+
+    private void saveVboRequestLog(String traceId, String tenantName, VboRequest vboRequest, VboResponse vboResponse) {
+
+    }
+
+    private Scope startAdminSpan(String tenantName, long startTimeStamp) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("Bootstrap Tenant - " + tenantName)
+                .withTag(TracingTags.TENANT_ID, tenantName)
+                .withStartTimestamp(startTimeStamp)
+                .start();
+        return tracer.activateSpan(span);
     }
 
     private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
@@ -780,9 +833,16 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private VboResponse generateVBOResponse(String status, String message) {
+        return generateVBOResponse(status, message, null);
+    }
+
+    private VboResponse generateVBOResponse(String status, String message, String traceId) {
         VboResponse vboResponse = new VboResponse();
         vboResponse.setStatus(status);
         vboResponse.setMessage(message);
+        if (StringUtils.isNotEmpty(traceId)) {
+            vboResponse.setAckReferenceId(traceId);
+        }
         return vboResponse;
     }
 

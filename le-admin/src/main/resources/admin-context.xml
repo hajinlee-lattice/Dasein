@@ -14,6 +14,7 @@
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
+    <import resource="classpath:admin-persistence-context.xml"/>
 
  	<import resource="classpath:documentdb-persistence-context.xml" />
     <jpa:repositories base-package="com.latticeengines.admin.document.repository.writer"
@@ -25,6 +26,16 @@
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="documentEntityManagerFactoryReader"
                       transaction-manager-ref="documentTransactionManagerReader"  />
+
+    <jpa:repositories base-package="com.latticeengines.admin.repository.writer"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="vboEntityManagerFactory"
+                      transaction-manager-ref="vboJpaTransactionManager"  />
+
+    <jpa:repositories base-package="com.latticeengines.admin.repository.reader"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="vboEntityManagerFactoryReader"
+                      transaction-manager-ref="vboJpaTransactionManagerReader"  />
 
     <context:component-scan base-package="com.latticeengines.admin">
         <!-- Need to exclude instantiating the swagger config except for bringing up the API

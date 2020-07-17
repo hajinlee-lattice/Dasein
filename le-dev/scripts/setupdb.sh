@@ -47,6 +47,7 @@ sourceProcessErrors "$WSHOME/le-dev/scripts/setupdb_oauth2.sh"
 sourceProcessErrors "$WSHOME/le-dev/scripts/setupdb_quartzdb.sh"
 sourceProcessErrors "$WSHOME/le-dev/scripts/setupdb_documentdb.sh"
 sourceProcessErrors "$WSHOME/le-dev/scripts/setupdb_ldc_collectiondb.sh"
+sourceProcessErrors "$WSHOME/le-dev/scripts/setupdb_vbodb.sh"
 # sourceProcessErrors "$WSHOME/le-dev/scripts/setupdb_dellebi.sh"
 
 # Expand aliases
@@ -55,4 +56,3 @@ shopt -s expand_aliases
 echo "Sourcing aliases file"
 source "$WSHOME/le-dev/aliases"
 runtest serviceapps/cdl -g registertable -t RegisterLocalTestBucketedAccountTableTestNG
-
