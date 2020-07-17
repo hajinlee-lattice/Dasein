@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface UploadService {
 
@@ -35,6 +34,4 @@ public interface UploadService {
     UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 
     String getMatchResultTableName(String uploadId);
-
-    List<Table> getMatchResultTables(String sourceId);
 }
