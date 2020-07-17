@@ -69,8 +69,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Account, ACCOUNT_PT_EM);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM);
@@ -80,8 +80,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Account, ACCOUNT_PT_EM);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
@@ -92,8 +92,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA_SERVING);
+        map.put(BusinessEntity.Account, ACCOUNT_PT_EM);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         return map;
     }
 
