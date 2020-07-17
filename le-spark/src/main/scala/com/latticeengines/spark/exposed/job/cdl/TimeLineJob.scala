@@ -257,8 +257,6 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
       }
 
     })
-    val columns = df.columns.toString
-    logSpark(f"before update detail2, df columns=$columns%s")
     df.withColumn(Detail2.name(), when(df.col(Detail1.name()).isNotNull, filterFn(df.col(Detail1.name())
       , df.col(Detail2.name()))))
     logSpark("----- BEGIN SCRIPT OUTPUT -----")
