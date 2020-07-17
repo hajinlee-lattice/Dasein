@@ -58,7 +58,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
         for (S3ImportTemplateDisplay display : templates) {
             List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace,
-                    display.getPath().substring(display.getPath().indexOf(dropBoxSummary.getDropBox() + dropBoxSummary.getDropBox().length())),
+                    display.getPath().substring(display.getPath().indexOf(dropBoxSummary.getDropBox()) + dropBoxSummary.getDropBox().length()),
                     "csv");
             log.info("under the path: " + display.getPath() + " , the fileLists is " + JsonUtils.serialize(fileLists));
             switch (display.getEntity().name()) {
