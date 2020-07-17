@@ -59,8 +59,11 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     private Table newAccountExportTable;
     private Table customerAccountChangelistTable;
     private Table latticeAccountChangelistTable;
-    private List<ColumnMetadata> exportSchema;
+    private List<String> exportAttrs;
     private String joinKey;
+
+    private Table customerAccount;
+    private Table latticeAccount;
 
     @Override
     public void execute() {
@@ -75,11 +78,10 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
             linkInactiveTable(AccountExport);
         } else {
             preExecution();
-
+            customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+            latticeAccount = attemptGetTableRole(LatticeAccount, false);
             if (shouldRebuild()) {
                 log.info("UpdateAccountExport, rebuild AccountExport table");
-                Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
-                Table latticeAccount = attemptGetTableRole(LatticeAccount, false);
                 HdfsDataUnit output;
                 if (latticeAccount == null) {
                     log.warn("This tenant does not have Lattice Account.");
@@ -115,7 +117,7 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         oldAccountExportTable = attemptGetTableRole(TableRoleInCollection.AccountExport, false);
         customerAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
         latticeAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
-        exportSchema = getExportSchema();
+        exportAttrs = getExportSchema();
     }
 
     protected void postExecution() {
@@ -145,7 +147,7 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     }
 
     private HdfsDataUnit select(HdfsDataUnit input) {
-        List<String> retainAttrs = exportSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        List<String> retainAttrs = new ArrayList<>(exportAttrs);
         CopyConfig config = new CopyConfig();
         config.setSelectAttrs(retainAttrs);
         config.setInput(Collections.singletonList(input));
@@ -154,7 +156,7 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     }
 
     private HdfsDataUnit join(HdfsDataUnit customerInput, HdfsDataUnit latticeInput) {
-        List<String> retainAttrs = exportSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        List<String> retainAttrs = new ArrayList<>(exportAttrs);
         JoinAccountStoresConfig config = new JoinAccountStoresConfig();
         config.setRetainAttrs(retainAttrs);
         config.setInput(Arrays.asList(customerInput, latticeInput));
@@ -165,7 +167,7 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         return result.getTargets().get(0);
     }
 
-    private List<ColumnMetadata> getExportSchema() {
+    private List<String> getExportSchema() {
         List<ColumnMetadata> exportSchema = servingStoreProxy
                 .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive) //
                 .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
@@ -180,12 +182,12 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
-        return exportSchema;
+        return retainAttrNames;
     }
 
     private void applyChangelist(HdfsDataUnit input) {
         log.info("UpdateAccountExport, apply changelist step");
-        List<String> retainAttrs = exportSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        List<String> retainAttrs = new ArrayList<>(exportAttrs);
         ApplyChangeListConfig config = new ApplyChangeListConfig();
         config.setInput(Arrays.asList( //
                 input, // source table
@@ -203,12 +205,11 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
     }
 
     private void setAccountExportTableSchema(Table table) {
-        overwriteServingSchema(table, exportSchema);
-    }
-
-    private void overwriteServingSchema(Table table, List<ColumnMetadata> schema) {
         Map<String, ColumnMetadata> colMap = new HashMap<>();
-        schema.forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        customerAccount.getColumnMetadata().forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        if (latticeAccount != null) {
+            latticeAccount.getColumnMetadata().forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        }
         List<Attribute> attrs = new ArrayList<>();
         table.getAttributes().forEach(attr0 -> {
             if (colMap.containsKey(attr0.getName())) {
