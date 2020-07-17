@@ -165,7 +165,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
             List<ExportFieldMetadataDefaults> historyEnabledDefaultFieldsFromJson = defaultExportFieldsFromJson.stream()
                     .filter(field -> field.getExternalSystemName().equals(systemName)
-                            && field.getExportEnabled() == true && field.getHistoryEnabled() == true)
+                            && field.getHistoryEnabled() == true)
                     .collect(Collectors.toList());
 
             if (!defaultExportFieldListsEqual(historyEnabledDefaultFields, historyEnabledDefaultFieldsFromJson)) {
@@ -208,6 +208,9 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
     private boolean defaultExportFieldListsEqual(
             List<ExportFieldMetadataDefaults> list1,
             List<ExportFieldMetadataDefaults> list2) {
+        if (list1.size() != list2.size())
+            return false;
+
         HashSet<String> list1InternalNames = new HashSet<>();
         for (ExportFieldMetadataDefaults fieldMetadata : list1) {
             list1InternalNames.add(fieldMetadata.getAttrName());
