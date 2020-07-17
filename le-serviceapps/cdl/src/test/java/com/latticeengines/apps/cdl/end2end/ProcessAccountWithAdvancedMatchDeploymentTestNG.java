@@ -225,7 +225,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PA_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         return map;
     }
 
@@ -241,7 +241,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of( //
                 BusinessEntity.Account, ACCOUNT_PA_EM, //
-                BusinessEntity.Contact, CONTACT_PA_EM //
+                BusinessEntity.Contact, CONTACT_PA_EM_SERVING //
         );
     }
 
