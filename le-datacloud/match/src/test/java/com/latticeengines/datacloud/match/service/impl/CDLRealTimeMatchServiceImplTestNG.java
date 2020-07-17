@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
@@ -67,6 +68,9 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
 
     @Mock
     private DataCollectionProxy dataCollectionProxy;
+
+    @Mock
+    private DataUnitProxy dataUnitProxy;
 
     @Mock
     private ServingStoreProxy servingStoreProxy;
@@ -143,11 +147,13 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
                         .peek(cm -> cm.setAttrState(AttrState.Active)).collect(Collectors.toList()));
         when(dataCollectionProxy.getDynamoDataUnits(anyString(), any(), any()))
                 .thenReturn(TestCDLMatchUtils.mockDynamoDataUnits());
+        when(dataUnitProxy.getByNameAndType(anyString(), anyString(), any())).thenReturn(null);
 
         realTimeMatchPlanner.setZkConfigurationService(zkConfigurationService);
         realTimeEntityMatchPlanner.setZkConfigurationService(zkConfigurationService);
         cdlColumnSelectionService.setServingStoreProxy(servingStoreProxy);
         cdlColumnSelectionService.setDataCollectionProxy(dataCollectionProxy);
+        cdlColumnSelectionService.setDataUnitProxy(dataUnitProxy);
         setupSeedLookupTable();
     }
 
