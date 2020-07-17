@@ -30,6 +30,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Listeners;
 
+import com.latticeengines.apps.cdl.service.impl.CheckpointAutoService;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -97,6 +98,9 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Inject
     protected CheckpointService checkpointService;
 
+    @Inject
+    protected CheckpointAutoService checkpointAutoService;
+
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;
 
@@ -134,6 +138,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
         checkpointService.setMainTestTenant(mainTestTenant);
+        checkpointAutoService.setMainTestTenant(mainTestTenant);
     }
 
     protected void setupTestEnvironmentByFile(String jsonFileName) {

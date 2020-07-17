@@ -87,7 +87,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyNumAttrsInAccount();
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
-                BusinessEntity.CuratedAccount);
+                BusinessEntity.CuratedAccount, BusinessEntity.CuratedContact);
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());

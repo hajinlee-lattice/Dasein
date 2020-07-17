@@ -63,8 +63,11 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     private Table newAccountFeaturesTable;
     private Table customerAccountChangelistTable;
     private Table latticeAccountChangelistTable;
-    private List<ColumnMetadata> featureSchema;
+    private List<String> featureAttrs;
     private String joinKey;
+
+    private Table customerAccount;
+    private Table latticeAccount;
 
     @Override
     public void execute() {
@@ -79,11 +82,10 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
             linkInactiveTable(AccountFeatures);
         } else {
             preExecution();
-
+            customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+            latticeAccount = attemptGetTableRole(LatticeAccount, false);
             if (shouldRebuild()) {
                 log.info("UpdateAccountFeatures, rebuild AccountFeatures table");
-                Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
-                Table latticeAccount = attemptGetTableRole(LatticeAccount, false);
                 HdfsDataUnit output;
                 if (latticeAccount == null) {
                     log.warn("This tenant does not have Lattice Account.");
@@ -108,7 +110,6 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
                     throw new RuntimeException("Full changelist doesn't exist, can't continue");
                 }
             }
-
             postExecution();
         }
     }
@@ -119,7 +120,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         customerAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
         latticeAccountChangelistTable = getTableSummaryFromKey(customerSpace.toString(), LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
         oldAccountFeaturesTable = attemptGetTableRole(TableRoleInCollection.AccountFeatures, false);
-        featureSchema = getFeatureSchema();
+        featureAttrs = getFeatureSchema();
     }
 
     protected void postExecution() {
@@ -150,7 +151,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     }
 
     private HdfsDataUnit select(HdfsDataUnit input) {
-        List<String> retainAttrs = featureSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        List<String> retainAttrs = new ArrayList<>(featureAttrs);
         CopyConfig config = new CopyConfig();
         config.setSelectAttrs(retainAttrs);
         config.setInput(Collections.singletonList(input));
@@ -159,7 +160,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     }
 
     private HdfsDataUnit join(HdfsDataUnit customerInput, HdfsDataUnit latticeInput) {
-        List<String> retainAttrs = featureSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        List<String> retainAttrs = new ArrayList<>(featureAttrs);
         JoinAccountStoresConfig config = new JoinAccountStoresConfig();
         config.setRetainAttrs(retainAttrs);
         config.setInput(Arrays.asList(customerInput, latticeInput));
@@ -167,7 +168,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         return result.getTargets().get(0);
     }
 
-    private List<ColumnMetadata> getFeatureSchema() {
+    private List<String> getFeatureSchema() {
         List<ColumnMetadata> featureSchema = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
                 .collectList().block();
@@ -184,12 +185,12 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
             retainAttrNames.add(InterfaceName.LatticeAccountId.name());
         }
-        return featureSchema;
+        return retainAttrNames;
     }
 
     private void applyChangelist(HdfsDataUnit input) {
         log.info("UpdateAccountFeatures, apply changelist step");
-        List<String> retainAttrs = featureSchema.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        List<String> retainAttrs = new ArrayList<>(featureAttrs);
         ApplyChangeListConfig config = new ApplyChangeListConfig();
         config.setInput(Arrays.asList( //
                 input, // source table
@@ -208,7 +209,7 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
     }
 
     private void setAccountFeatureTableSchema(Table table) {
-        overwriteServingSchema(table, featureSchema);
+        overwriteServingSchema(table);
         String dataCloudVersion = configuration.getDataCloudVersion();
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model,
                 dataCloudVersion);
@@ -227,9 +228,12 @@ public class UpdateAccountFeatures extends BaseProcessAnalyzeSparkStep<ProcessAc
         table.setAttributes(attrs);
     }
 
-    private void overwriteServingSchema(Table table, List<ColumnMetadata> schema) {
+    private void overwriteServingSchema(Table table) {
         Map<String, ColumnMetadata> colMap = new HashMap<>();
-        schema.forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        customerAccount.getColumnMetadata().forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        if (latticeAccount != null) {
+            latticeAccount.getColumnMetadata().forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        }
         List<Attribute> attrs = new ArrayList<>();
         table.getAttributes().forEach(attr0 -> {
             if (colMap.containsKey(attr0.getName())) {

@@ -93,7 +93,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA_SERVING);
         return map;
     }
 
