@@ -209,10 +209,6 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         boolean hasNewFetch;
         boolean hasDelete = false;
 
-        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
-        Preconditions.checkNotNull(accountChangeList, "Must have account change list.");
-        accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
-
         HdfsDataUnit enriched = enrich();
         hasNewFetch = (enriched != null);
 
@@ -253,6 +249,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             // Filter changelist from MergeAccount to get
             // 1: <AccountId, LatticeAccountId> pairs with LatticeAccountId added/updated
             // 2: Rows in changelist with LatticeAccountId deleted
+            Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+            Preconditions.checkNotNull(accountChangeList, "Must have account change list.");
+            accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
             filterChangelist();
             // If there are LatticeAccountIds changed
             if ((changed != null) && (changed.getCount() > 0)) {
