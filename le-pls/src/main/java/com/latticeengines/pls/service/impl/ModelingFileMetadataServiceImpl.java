@@ -866,19 +866,25 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
-        checkStandardFields(fieldMappingDocument, templateTable);
+        checkStandardFields(fieldMappingDocument, templateTable, schemaTable);
     }
 
-    private void checkStandardFields(FieldMappingDocument fieldMappingDocument, Table templateTable) {
+    private void checkStandardFields(FieldMappingDocument fieldMappingDocument, Table templateTable,
+                                     Table schemaTable) {
         if (templateTable == null) {
             return;
         }
+        Set<String> standardFields = schemaTable.getAttributes()
+                .stream()
+                .map(Attribute::getName)
+                .collect(Collectors.toSet());
         Map<String, String> map = templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName,
                 attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
                         attr.getDisplayName()));
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             String mappedField = mapping.getMappedField();
-            if (StringUtils.isBlank(mapping.getUserField()) && StringUtils.isNotBlank(map.get(mappedField))) {
+            if (standardFields.contains(mappedField) && StringUtils.isBlank(mapping.getUserField())
+                    && StringUtils.isNotBlank(map.get(mappedField))) {
                 throw new LedpException(LedpCode.LEDP_18249, new String[] { mappedField });
             }
         }
