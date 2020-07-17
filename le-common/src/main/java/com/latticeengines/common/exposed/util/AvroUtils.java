@@ -96,8 +96,7 @@ public final class AvroUtils {
     // java type -> (avro schema type, whether java type is primitive)
     // TODO: Java type as Date/Timestamp, List and Map are to be added
     private static final Map<Class<?>, Pair<Type, Boolean>> TYPE_MAP = ImmutableMap
-            .<Class<?>, Pair<Type, Boolean>> builder()
-            .put(double.class, Pair.of(Type.DOUBLE, Boolean.TRUE)) //
+            .<Class<?>, Pair<Type, Boolean>> builder().put(double.class, Pair.of(Type.DOUBLE, Boolean.TRUE)) //
             .put(Double.class, Pair.of(Type.DOUBLE, Boolean.FALSE)) //
             .put(float.class, Pair.of(Type.FLOAT, Boolean.TRUE)) //
             .put(Float.class, Pair.of(Type.FLOAT, Boolean.FALSE)) //
@@ -511,13 +510,15 @@ public final class AvroUtils {
             throw new IllegalArgumentException("Cannot parse null input string to a valid avro name.");
         }
 
-        String afStr = value.trim().replaceAll("\\s+", " "); // remove extra spaces
+        String afStr = value.trim().replaceAll("\\s+", " "); // remove extra
+                                                             // spaces
         afStr = afStr.replaceAll("[\r\n]", ""); // remove new line characters
         if (afStr.length() == 0) {
             throw new IllegalArgumentException("Cannot parse empty input string to a valid avro name.");
         }
 
-        // prepend a 'x' if starting with 0-9, because they are just invalid at the beginning of a string
+        // prepend a 'x' if starting with 0-9, because they are just invalid at
+        // the beginning of a string
         char firstChar = afStr.charAt(0);
         if (firstChar >= 48 && firstChar <= 57) { // 0-9
             afStr = "x" + afStr;
@@ -1087,7 +1088,7 @@ public final class AvroUtils {
             throw new IllegalArgumentException("Cannot convert AVRO CSV. Provide CSV Transformer");
         }
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile))) {
-            List<String> fieldNames = avroToCsvTransformer.getFieldNames(iterator.getSchema());
+            List<String> fieldNames = avroToCsvTransformer.getFieldNames();
             System.out.println(fieldNames);
             csvWriter.writeNext(fieldNames.toArray(new String[0]));
             while (iterator.hasNext()) {
@@ -1110,7 +1111,7 @@ public final class AvroUtils {
             throw new IllegalArgumentException("Cannot convert AVRO CSV. Provide CSV Transformer");
         }
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile))) {
-            List<String> fieldNames = avroToCsvTransformer.getFieldNames(reader.getSchema());
+            List<String> fieldNames = avroToCsvTransformer.getFieldNames();
             System.out.println(fieldNames);
             csvWriter.writeNext(fieldNames.toArray(new String[0]));
             while (reader.hasNext()) {
@@ -1616,7 +1617,7 @@ public final class AvroUtils {
     }
 
     public static void createAvroFileByRecords(Configuration yarnConfiguration, List<Pair<String, Class<?>>> columns,
-                                               List<GenericRecord> records, String avroDir, String avroFile) throws Exception {
+            List<GenericRecord> records, String avroDir, String avroFile) throws Exception {
         Map<String, Class<?>> schemaMap = new HashMap<>();
         for (Pair<String, Class<?>> column : columns) {
             schemaMap.put(column.getKey(), column.getValue());

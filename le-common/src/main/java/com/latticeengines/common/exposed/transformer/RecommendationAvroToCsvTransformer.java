@@ -1,12 +1,13 @@
 package com.latticeengines.common.exposed.transformer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,11 +35,15 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
     }
 
     @Override
-    public List<String> getFieldNames(Schema schema) {
+    public List<String> getFieldNames() {
         accountFields = new ArrayList<>(accountDisplayNames.keySet());
-        List<String> fieldNames = new ArrayList<>(accountDisplayNames.values());
+        Collections.sort(accountFields);
+        List<String> fieldNames = accountFields.stream().map(accountField -> accountDisplayNames.get(accountField))
+                .collect(Collectors.toList());
         contactFields = new ArrayList<>(contactDisplayNames.keySet());
-        fieldNames.addAll(contactDisplayNames.values());
+        Collections.sort(contactFields);
+        fieldNames.addAll(contactFields.stream().map(contactField -> contactDisplayNames.get(contactField))
+                .collect(Collectors.toList()));
         log.info("Fields: " + String.join(", ", fieldNames));
         return fieldNames;
     }
