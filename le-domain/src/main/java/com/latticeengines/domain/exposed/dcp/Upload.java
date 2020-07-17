@@ -85,6 +85,9 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Type(type = "json")
     private UploadDiagnostics uploadDiagnostics;
 
+    @Column(name = "PROGRESS_PERCENTAGE")
+    private Double progressPercentage;
+
     @Override
     public Long getPid() {
         return pid;
@@ -187,6 +190,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public void setUploadDiagnostics(UploadDiagnostics uploadDiagnostics) {
         this.uploadDiagnostics = uploadDiagnostics;
+    }
+
+    public Double getProgressPercentage() {
+        return progressPercentage;
+    }
+
+    public void setProgressPercentage(Double progressPercentage) {
+        this.progressPercentage = progressPercentage;
     }
 
     public enum Status{

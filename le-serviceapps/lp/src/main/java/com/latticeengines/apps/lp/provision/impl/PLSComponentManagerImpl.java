@@ -423,7 +423,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                     .put("externalAdmin", JsonUtils.serialize(externalAdminEmails))
                     .put("thirdParty", JsonUtils.serialize(thirdPartyEmails))
                     .put("iDaaSUsers", JsonUtils.serialize(retrievedUsers))
-                    .put("userName", userName)
+                    .put("userName", StringUtils.isBlank(userName) ? "Empty userName" : userName)
                     .build());
             provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
                     retrievedUsers, userName);

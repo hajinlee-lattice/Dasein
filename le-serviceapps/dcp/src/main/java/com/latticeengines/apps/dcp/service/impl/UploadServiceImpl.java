@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.MetadataService;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -45,9 +44,6 @@ public class UploadServiceImpl implements UploadService {
 
     @Inject
     private MetadataService metadataService;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
@@ -185,6 +181,18 @@ public class UploadServiceImpl implements UploadService {
         return uploadEntityMgr.findMatchResultTableNameByUploadId(uploadId);
     }
 
+    @Override
+    public void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
+        if (upload == null) {
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
+        }
+        if(progressPercentage != null) {
+            upload.setProgressPercentage(Double.valueOf(progressPercentage));
+            uploadEntityMgr.update(upload);
+        }
+    }
+
     private UploadStatsContainer findStats(String uploadId, Long statsId) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
@@ -236,6 +244,7 @@ public class UploadServiceImpl implements UploadService {
         details.setSourceId(upload.getSourceId());
         details.setUploadCreatedTime(upload.getCreated().getTime());
         details.setCreatedBy(upload.getCreatedBy());
+        details.setProgressPercentage(upload.getProgressPercentage());
         return details;
     }
 }

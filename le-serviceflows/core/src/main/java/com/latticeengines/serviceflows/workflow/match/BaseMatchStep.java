@@ -105,6 +105,7 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         if (StringUtils.isNotBlank(newEntitiesTableName) && input.isOutputNewEntities()) {
             bulkMatchService.registerNewEntitiesTable(customer, command, newEntitiesTableName);
         }
+        matchCompleted(input, command);
     }
 
     protected Map<MatchKey, String> getPotentialMatchKeyMapping() {
@@ -187,5 +188,7 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         metadataProxy.createTable(customerSpace.toString(), resultTable.getName(), resultTable);
         metadataProxy.deleteTable(customerSpace.toString(), avroResultTable.getName());
     }
+
+    protected abstract void matchCompleted(MatchInput input, MatchCommand command);
 
 }

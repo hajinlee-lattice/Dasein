@@ -354,7 +354,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         });
         uploadJobDetails.setUploadJobSteps(uploadJobSteps);
         uploadJobDetails.setCurrentStep(uploadJobSteps.get(uploadJobSteps.size()-1));
-        Double progressPercentage = (double) uploadJobSteps.size() / (double) 6;
+        Double progressPercentage = ((double) uploadJobSteps.size() / (double) 6) * 100;
         progressPercentage = BigDecimal.valueOf(progressPercentage).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         uploadJobDetails.setProgressPercentage(progressPercentage);
         return uploadJobDetails;

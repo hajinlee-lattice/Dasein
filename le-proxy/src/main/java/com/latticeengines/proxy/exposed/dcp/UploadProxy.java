@@ -99,4 +99,11 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         String appIdStr = post("Start DCP import", url, request, String.class);
         return ApplicationId.fromString(appIdStr);
     }
+
+    public void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/progressPercentage/{progressPercentage}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, progressPercentage);
+        log.info("Update progressPercentage for Upload " + uploadId + " to " + progressPercentage);
+        put("update Upload progressPercentage", url);
+    }
 }

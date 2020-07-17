@@ -38,6 +38,9 @@ public class UploadDetails {
     @JsonProperty("uploadCreatedTime")
     private Long uploadCreatedTime;
 
+    @JsonProperty("progressPercentage")
+    private Double progressPercentage;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -100,5 +103,13 @@ public class UploadDetails {
 
     public void setUploadCreatedTime(Long uploadCreatedTime) {
         this.uploadCreatedTime = uploadCreatedTime;
+    }
+
+    public Double getProgressPercentage() {
+        return progressPercentage;
+    }
+
+    public void setProgressPercentage(Double progressPercentage) {
+        this.progressPercentage = progressPercentage;
     }
 }
