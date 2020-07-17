@@ -1,9 +1,13 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -25,58 +29,24 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
     @Inject
     private ExportFieldMetadataDefaultsEntityMgr defaultExportFieldMetadataEntityMgr;
 
-    List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
-    List<ExportFieldMetadataDefaults> defaultS3ExportFields;
-    List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
-    List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
-    List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
-    List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields;
+    private List<CDLExternalSystemName> systemsToTest = Arrays.asList(
+            CDLExternalSystemName.Marketo,
+            CDLExternalSystemName.AWS_S3,
+            CDLExternalSystemName.LinkedIn,
+            CDLExternalSystemName.Facebook,
+            CDLExternalSystemName.Outreach, CDLExternalSystemName.GoogleAds);
+
+    private Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFieldsFromJsonMap;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        defaultExportFieldsFromJsonMap = new HashMap<>();
 
-        defaultMarketoExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Marketo);
+        for (CDLExternalSystemName systemName : systemsToTest) {
+            loadDefaultExportFieldsIfMissing(systemName);
 
-        if (defaultMarketoExportFields.size() == 0) {
-            createDefaultExportFields(CDLExternalSystemName.Marketo);
+            defaultExportFieldsFromJsonMap.put(systemName, getDefaultExportFieldsFromJson(systemName));
         }
-
-        defaultS3ExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.AWS_S3);
-
-        if (defaultS3ExportFields.size() == 0) {
-            createDefaultExportFields(CDLExternalSystemName.AWS_S3);
-        }
-
-        defaultLinkedInExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.LinkedIn);
-
-        if (defaultLinkedInExportFields.size() == 0) {
-            defaultLinkedInExportFields = createDefaultExportFields(CDLExternalSystemName.LinkedIn);
-        }
-
-        defaultFacebookExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Facebook);
-
-        if (defaultFacebookExportFields.size() == 0) {
-            defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
-        }
-
-        defaultOutreachExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
-
-        if (defaultOutreachExportFields.size() == 0) {
-            defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
-        }
-
-        defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.GoogleAds);
-
-        if (defaultGoogleAdsExportFields.size() == 0) {
-            defaultGoogleAdsExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
-        }
-
     }
 
     @AfterClass(groups = "functional")
@@ -85,134 +55,171 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
     }
 
     @Test(groups = "functional")
-    public void testMarketo() {
-        defaultMarketoExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Marketo);
+    public void testGetAllDefaultExportFieldMetadata() {
+        for (CDLExternalSystemName systemName : systemsToTest) {
+            List<ExportFieldMetadataDefaults> defaultExportFieldsFromJson = defaultExportFieldsFromJsonMap
+                    .get(systemName);
 
-        assertEquals(defaultMarketoExportFields.size(), 41);
-        assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
-        assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                23);
+            List<ExportFieldMetadataDefaults> defaultExportFields = defaultExportFieldMetadataEntityMgr
+                    .getAllDefaultExportFieldMetadata(systemName);
 
+            if (!defaultExportFieldListsEqual(defaultExportFields, defaultExportFieldsFromJson)) {
+                String failMsg = String.format(
+                        "%s: Database does not match JSON for all fields. Database length: %d JSON length: %d",
+                        systemName.toString(), defaultExportFields.size(), defaultExportFieldsFromJson.size());
+                fail(failMsg);
+            }
+        }
     }
 
     @Test(groups = "functional")
-    public void testS3() {
-        defaultS3ExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.AWS_S3);
+    public void testGetExportEnabledDefaultFieldMetadata() {
+        for (CDLExternalSystemName systemName : systemsToTest) {
+            List<ExportFieldMetadataDefaults> defaultExportFieldsFromJson = defaultExportFieldsFromJsonMap
+                    .get(systemName);
 
-        assertEquals(defaultS3ExportFields.size(), 50);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 40);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 42);
+            List<ExportFieldMetadataDefaults> exportEnabledDefaultFields = defaultExportFieldMetadataEntityMgr
+                    .getExportEnabledDefaultFieldMetadata(systemName);
 
+            List<ExportFieldMetadataDefaults> exportEnabledDefaultFieldsFromJson = defaultExportFieldsFromJson.stream()
+                    .filter(field -> field.getExternalSystemName().equals(systemName)
+                            && field.getExportEnabled() == true)
+                    .collect(Collectors.toList());
+
+            if (!defaultExportFieldListsEqual(exportEnabledDefaultFields, exportEnabledDefaultFieldsFromJson)) {
+                String failMsg = String.format(
+                        "%s: Database does not match JSON for export enabled. Database length: %d JSON length: %d",
+                        systemName.toString(), exportEnabledDefaultFields.size(),
+                        exportEnabledDefaultFieldsFromJson.size());
+                fail(failMsg);
+            }
+        }
     }
 
     @Test(groups = "functional")
-    public void testLinkedIn() {
-        defaultLinkedInExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.LinkedIn);
+    public void testGetExportEnabledDefaultFieldMetadataForEntity() {
+        for (CDLExternalSystemName systemName : systemsToTest) {
+            List<ExportFieldMetadataDefaults> defaultExportFieldsFromJson = defaultExportFieldsFromJsonMap
+                    .get(systemName);
 
-        assertEquals(defaultLinkedInExportFields.size(), 55);
-        List<ExportFieldMetadataDefaults> exportEnabledFields = defaultLinkedInExportFields.stream()
-                .filter(ExportFieldMetadataDefaults::getExportEnabled).collect((Collectors.toList()));
-        assertEquals(defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                25);
+            for (BusinessEntity businessEntity : BusinessEntity.values()) {
+                List<ExportFieldMetadataDefaults> defaultExportFieldsForEntity = defaultExportFieldMetadataEntityMgr
+                        .getExportEnabledDefaultFieldMetadataForEntity(systemName, businessEntity);
 
-        assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account).count(),
-                14);
-        assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact).count(),
-                11);
+                List<ExportFieldMetadataDefaults> defaultExportFieldsForEntityFromJson = defaultExportFieldsFromJson
+                        .stream()
+                        .filter(field -> field.getExternalSystemName().equals(systemName)
+                                && field.getExportEnabled() == true && field.getEntity().equals(businessEntity))
+                        .collect(Collectors.toList());
 
+                if (!defaultExportFieldListsEqual(defaultExportFieldsForEntity, defaultExportFieldsForEntityFromJson)) {
+                    String failMsg = String.format(
+                            "%s: Database does not match JSON for entity. Database length: %d JSON length: %d",
+                            systemName.toString(), defaultExportFieldsForEntity.size(),
+                            defaultExportFieldsForEntityFromJson.size());
+                    fail(failMsg);
+                }
+            }
+        }
     }
 
     @Test(groups = "functional")
-    public void testLinkedInAccounts() {
-        List<ExportFieldMetadataDefaults> defaultLinkedInAccountExportFields = defaultExportFieldMetadataEntityMgr
-                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.LinkedIn,
-                        AudienceType.ACCOUNTS);
+    public void testGetExportEnabledDefaultFieldMetadataForAudienceType() {
+        List<CDLExternalSystemName> systemsToTest = Arrays.asList(CDLExternalSystemName.AWS_S3,
+                CDLExternalSystemName.LinkedIn, CDLExternalSystemName.Facebook, CDLExternalSystemName.GoogleAds);
 
-        assertEquals(defaultLinkedInAccountExportFields.size(), 14);
+        for (CDLExternalSystemName systemName : systemsToTest) {
+            List<ExportFieldMetadataDefaults> defaultExportFieldsFromJson = defaultExportFieldsFromJsonMap
+                    .get(systemName);
+
+            for (AudienceType audienceType : AudienceType.values()) {
+                List<ExportFieldMetadataDefaults> defaultExportFieldsForAudienceType = defaultExportFieldMetadataEntityMgr
+                        .getExportEnabledDefaultFieldMetadataForAudienceType(systemName, audienceType);
+
+                List<ExportFieldMetadataDefaults> defaultExportFieldsForAudienceTypeFromJson = defaultExportFieldsFromJson
+                        .stream()
+                        .filter(field -> field.getExternalSystemName().equals(systemName)
+                                && field.getExportEnabled() == true && field.getAudienceTypes().contains(audienceType))
+                        .collect(Collectors.toList());
+
+                if (!defaultExportFieldListsEqual(defaultExportFieldsForAudienceType,
+                        defaultExportFieldsForAudienceTypeFromJson)) {
+                    String failMsg = String.format(
+                            "%s: Database does not match JSON for audience type. Database length: %d JSON length: %d",
+                            systemName.toString(), defaultExportFieldsForAudienceType.size(),
+                            defaultExportFieldsForAudienceTypeFromJson.size());
+                    fail(failMsg);
+                }
+            }
+        }
     }
 
     @Test(groups = "functional")
-    public void testLinkedInContacts() {
-        List<ExportFieldMetadataDefaults> defaultLinkedInContactsExportFields = defaultExportFieldMetadataEntityMgr
-                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.LinkedIn,
-                        AudienceType.CONTACTS);
+    public void testGetHistoryEnabledDefaultFieldMetadata() {
+        for (CDLExternalSystemName systemName : systemsToTest) {
+            List<ExportFieldMetadataDefaults> defaultExportFieldsFromJson = defaultExportFieldsFromJsonMap
+                    .get(systemName);
 
-        assertEquals(defaultLinkedInContactsExportFields.size(), 13);
+            List<ExportFieldMetadataDefaults> historyEnabledDefaultFields = defaultExportFieldMetadataEntityMgr
+                    .getHistoryEnabledDefaultFieldMetadata(systemName);
+
+            List<ExportFieldMetadataDefaults> historyEnabledDefaultFieldsFromJson = defaultExportFieldsFromJson.stream()
+                    .filter(field -> field.getExternalSystemName().equals(systemName)
+                            && field.getHistoryEnabled() == true)
+                    .collect(Collectors.toList());
+
+            if (!defaultExportFieldListsEqual(historyEnabledDefaultFields, historyEnabledDefaultFieldsFromJson)) {
+                String failMsg = String.format(
+                        "%s: Database does not match JSON for history enabled. Database length: %d JSON length: %d",
+                        systemName.toString(), historyEnabledDefaultFields.size(),
+                        historyEnabledDefaultFieldsFromJson.size());
+                fail(failMsg);
+            }
+        }
     }
 
-    @Test(groups = "functional")
-    public void testFacebook() {
-        defaultFacebookExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Facebook);
-
-        assertEquals(defaultFacebookExportFields.size(), 47);
-        assertEquals(
-                defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                40);
-        assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                11);
-
+    private void loadDefaultExportFieldsIfMissing(CDLExternalSystemName systemName) {
+        List<ExportFieldMetadataDefaults> defaultExportFields = defaultExportFieldMetadataEntityMgr
+                .getAllDefaultExportFieldMetadata(systemName);
+        
+        if (defaultExportFields.size() == 0) {
+            createDefaultExportFields(systemName);
+        }
     }
     
-    @Test(groups = "functional")
-    public void testFacebookContacts() {
-        List<ExportFieldMetadataDefaults> defaultFacebookContactsExportFields = defaultExportFieldMetadataEntityMgr
-                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.Facebook,
-                        AudienceType.CONTACTS);
-
-        assertEquals(defaultFacebookContactsExportFields.size(), 11);
-    }
-
-    @Test(groups = "functional")
-    public void testOutreach() {
-        defaultOutreachExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
-
-        assertEquals(defaultOutreachExportFields.size(), 37);
-        assertEquals(
-                defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                27);
-        assertEquals(defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                27);
-
-    }
-
-    @Test(groups = "functional")
-    public void testGoogleAds() {
-        defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
-                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.GoogleAds);
-
-        assertEquals(defaultGoogleAdsExportFields.size(), 43);
-        assertEquals(
-                defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                10);
-
-    }
-
-    @Test(groups = "functional")
-    public void testGoogleAdsContacts() {
-        List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields = defaultExportFieldMetadataEntityMgr
-                .getExportEnabledDefaultFieldMetadataForAudienceType(CDLExternalSystemName.GoogleAds,
-                        AudienceType.CONTACTS);
-
-        assertEquals(defaultGoogleAdsExportFields.size(), 10);
-    }
-
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
+        List<ExportFieldMetadataDefaults> defaultExportFields = getDefaultExportFieldsFromJson(systemName);
+
+        defaultExportFieldMetadataEntityMgr.createAll(defaultExportFields);
+        return defaultExportFields;
+    }
+
+    private List<ExportFieldMetadataDefaults> getDefaultExportFieldsFromJson(CDLExternalSystemName systemName) {
         String filePath = String.format("service/impl/%s_default_export_fields.json",
                 systemName.toString().toLowerCase());
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
 
-
         List<ExportFieldMetadataDefaults> defaultExportFields = JsonUtils
                 .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
 
-        defaultExportFieldMetadataEntityMgr.createAll(defaultExportFields);
         return defaultExportFields;
+    }
+
+    private boolean defaultExportFieldListsEqual(
+            List<ExportFieldMetadataDefaults> list1,
+            List<ExportFieldMetadataDefaults> list2) {
+        if (list1.size() != list2.size())
+            return false;
+
+        HashSet<String> list1InternalNames = new HashSet<>();
+        for (ExportFieldMetadataDefaults fieldMetadata : list1) {
+            list1InternalNames.add(fieldMetadata.getAttrName());
+        }
+        for (ExportFieldMetadataDefaults fieldMetadata : list2) {
+            if (!list1InternalNames.contains(fieldMetadata.getAttrName()))
+                return false;
+        }
+        return true;
     }
 
 }

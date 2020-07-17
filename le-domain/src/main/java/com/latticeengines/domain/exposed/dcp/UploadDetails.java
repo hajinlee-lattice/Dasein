@@ -35,8 +35,8 @@ public class UploadDetails {
     @JsonProperty("uploadDiagnostics")
     public UploadDiagnostics uploadDiagnostics;
 
-    @JsonProperty("ingestionStartTime")
-    private Long ingestionStartTime;
+    @JsonProperty("uploadCreatedTime")
+    private Long uploadCreatedTime;
 
     public String getUploadId() {
         return uploadId;
@@ -94,11 +94,11 @@ public class UploadDetails {
         this.uploadDiagnostics = uploadDiagnostics;
     }
 
-    public Long getIngestionStartTime() {
-        return ingestionStartTime;
+    public Long getUploadCreatedTime() {
+        return uploadCreatedTime;
     }
 
-    public void setIngestionStartTime(Long ingestionStartTime) {
-        this.ingestionStartTime = ingestionStartTime;
+    public void setUploadCreatedTime(Long uploadCreatedTime) {
+        this.uploadCreatedTime = uploadCreatedTime;
     }
 }

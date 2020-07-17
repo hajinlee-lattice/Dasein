@@ -11,7 +11,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.end2end.UpdateTransactionWithAdvancedMatchDeploymentTestNG;
+import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
+import com.latticeengines.apps.cdl.end2end.UpdateAccountWithAdvancedMatchDeploymentTestNG;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -44,8 +45,8 @@ public class PublishTableRoleWorkflowDeploymentTestNG extends CDLWorkflowFramewo
     public void setup() throws Exception {
         setupTestEnvironment();
         checkpointService.resumeCheckpoint( //
-                UpdateTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT, //
-                "25"); //FIXME: to be reverted to CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION
+                UpdateAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT, //
+                CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
         tableRoles.forEach(tableRole -> {
             String tableName = dataCollectionService //
                     .getTableNames(mainCustomerSpace, null, tableRole, null).get(0);
