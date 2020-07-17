@@ -47,12 +47,11 @@ public class PublishTableRoleWorkflowDeploymentTestNG extends CDLWorkflowFramewo
         setupTestEnvironment();
         checkpointService.resumeCheckpoint( //
                 UpdateTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT, //
-                CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
+                "25"); //FIXME: to be reverted to CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION
         tableRoles.forEach(tableRole -> {
             String tableName = dataCollectionService //
                     .getTableNames(mainCustomerSpace, null, tableRole, null).get(0);
             tableNames.add(tableName);
-            Table table = dataCollectionService.getTable(mainCustomerSpace, tableRole, null);
         });
         tableNames.forEach(tableName -> {
             DataUnit dataUnit = dataUnitService.findByNameTypeFromReader(tableName, DataUnit.StorageType.Dynamo);

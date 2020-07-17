@@ -168,7 +168,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    public static final int S3_CHECKPOINTS_VERSION = 25;
+    public static final int S3_CHECKPOINTS_VERSION = 26;
     private static final int S3_RATING_CHECKPOINTS_VERSION = 25;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -263,6 +263,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long CONTACT_PA_EM = 900L;
     // Number of total contact after ProcessAccount entity match test for GA tenants
     static final Long CONTACT_PA_EMGA = 900L;
+    static final Long CONTACT_PA_EMGA_SERVING = 899L; // excluding orphan contact
     // Number of total contact after UpdateContact test
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
