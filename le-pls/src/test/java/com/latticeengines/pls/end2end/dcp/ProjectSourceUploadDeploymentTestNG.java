@@ -1,5 +1,7 @@
 package com.latticeengines.pls.end2end.dcp;
 
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.ANALYSIS_PERCENTAGE;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
@@ -143,7 +145,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         uploadDetail = uploadDetails.get(0);
         UploadDetails retrievedDetail = testUploadProxy.getUpload(uploadDetail.getUploadId());
         Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
-        Assert.assertEquals(retrievedDetail.getProgressPercentage(), 1.00);
+        Assert.assertEquals(retrievedDetail.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
         String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
 
@@ -151,6 +153,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertNotNull(uploadJobDetails);
         Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 6);
         Assert.assertEquals(uploadJobDetails.getCurrentStep().getStepName(), "Analysis");
+        Assert.assertEquals(uploadJobDetails.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")

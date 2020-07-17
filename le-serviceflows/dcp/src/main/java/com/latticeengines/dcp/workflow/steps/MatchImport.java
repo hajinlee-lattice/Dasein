@@ -1,5 +1,7 @@
 package com.latticeengines.dcp.workflow.steps;
 
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.MATCH_PERCENTAGE;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,7 +92,7 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     protected void matchCompleted(MatchInput input, MatchCommand command){
         String uploadId = configuration.getUploadId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, "0.66");
+        uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, MATCH_PERCENTAGE);
     }
 
 }

@@ -14,6 +14,9 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
     public static final String UPLOAD_ID = "UPLOAD_ID";
     public static final String SOURCE_ID = "SOURCE_ID";
     public static final String PROJECT_ID = "PROJECT_ID";
+    public static final String INGESTION_PERCENTAGE = "33";
+    public static final String MATCH_PERCENTAGE = "66";
+    public static final String ANALYSIS_PERCENTAGE = "100";
 
     public DCPSourceImportWorkflowConfiguration() {
     }

@@ -1,5 +1,7 @@
 package com.latticeengines.dcp.workflow.steps;
 
+import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.ANALYSIS_PERCENTAGE;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         saveMatchResultTable();
         saveDunsCountTable();
         updateStats();
-        uploadProxy.updateProgressPercentage(customerSpaceStr, uploadId, "1.00");
+        uploadProxy.updateProgressPercentage(customerSpaceStr, uploadId, ANALYSIS_PERCENTAGE);
     }
 
     private void saveMatchResultTable() {
