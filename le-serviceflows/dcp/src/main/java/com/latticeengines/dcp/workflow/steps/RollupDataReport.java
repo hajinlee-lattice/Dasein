@@ -62,7 +62,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
 
     @Override
     protected RollupDataReportConfig configureJob(RollupDataReportStepConfiguration stepConfiguration) {
-        String root = stepConfiguration.getRoot();
+        String root = stepConfiguration.getRootId();
         DataReportRecord.Level level = stepConfiguration.getLevel();
         DataReportMode mode = stepConfiguration.getMode();
 
