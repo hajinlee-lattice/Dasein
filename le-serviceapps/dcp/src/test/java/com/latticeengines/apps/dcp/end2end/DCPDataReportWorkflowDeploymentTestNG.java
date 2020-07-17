@@ -75,7 +75,11 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         System.out.println(JsonUtils.pprint(report1));
         System.out.println(JsonUtils.pprint(projectReport));
         report.combineReport(report1);
-        Assert.assertEquals(JsonUtils.pprint(report), JsonUtils.pprint(projectReport));
+        Assert.assertEquals(JsonUtils.pprint(report.getBasicStats()), JsonUtils.pprint(projectReport.getBasicStats()));
+        Assert.assertEquals(JsonUtils.pprint(report.getGeoDistributionReport()),
+                JsonUtils.pprint(projectReport.getGeoDistributionReport()));
+        Assert.assertEquals(JsonUtils.pprint(report.getInputPresenceReport()),
+                JsonUtils.pprint(projectReport.getInputPresenceReport()));
     }
 
 
