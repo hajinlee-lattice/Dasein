@@ -743,6 +743,9 @@ public class TenantServiceImpl implements TenantService {
                     SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
                     node.setNode("TracingContext");
                     node.setData(JsonUtils.serialize(tracingCtx));
+                    if (componentConfig.getNodes() == null) {
+                        componentConfig.setNodes(new ArrayList<>());
+                    }
                     componentConfig.getNodes().add(node);
                     componentConfig.setRootPath("/" + component);
                     componentConfig.setDocumentDirectory(null);
