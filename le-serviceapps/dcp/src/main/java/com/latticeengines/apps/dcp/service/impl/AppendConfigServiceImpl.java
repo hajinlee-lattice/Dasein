@@ -29,6 +29,7 @@ public class AppendConfigServiceImpl implements AppendConfigService  {
         List<String> elementIds = Arrays.asList( //
                 "duns_number", //
                 "primaryname", //
+                "countryisoalpha2code", //
                 "tradestylenames_name", //
                 "primaryaddr_street_line1", //
                 "primaryaddr_street_line2", //
