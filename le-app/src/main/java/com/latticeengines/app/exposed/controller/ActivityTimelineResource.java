@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -21,8 +23,10 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
@@ -50,7 +54,8 @@ public class ActivityTimelineResource {
     @SuppressWarnings("ConstantConditions")
     public DataPage getAccountActivities(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
+            @RequestParam(value = "timeline-period", required = false) String timelinePeriod, //
+            @RequestParam(value = "include-journey-stages", required = false) boolean includeJourneyStages) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
             throw new LedpException(LedpCode.LEDP_32000,
@@ -59,7 +64,21 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving activity timeline data of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        return activityTimelineService.getAccountActivities(accountId, timelinePeriod, getOrgInfo(authToken));
+        DataPage data = activityTimelineService.getAccountActivities(accountId, timelinePeriod, getOrgInfo(authToken));
+        if (!includeJourneyStages)
+            filterJourneyStageData(data);
+        return data;
+    }
+
+    // Temporary, will be removed in M39 and add filtering capabilities if necessary
+    private void filterJourneyStageData(DataPage data) {
+        List<Map<String, Object>> filteredData = new ArrayList<>();
+        for (Map<String, Object> datum : data.getData()) {
+            if (!datum.containsKey(InterfaceName.StreamType.name())
+                    || !datum.get(InterfaceName.StreamType.name()).equals(AtlasStream.StreamType.JourneyStage.name()))
+                filteredData.add(datum);
+        }
+        data.setData(filteredData);
     }
 
     @GetMapping("/accounts/{accountId:.+}/contacts/{contactId:.+}")
@@ -80,68 +99,6 @@ public class ActivityTimelineResource {
                 contactId, accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
         return activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
-                getOrgInfo(authToken));
-    }
-
-    @GetMapping("/accounts/{accountId:.+}/reports/contacts")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve activity report aggregated by contacts")
-    @SuppressWarnings("ConstantConditions")
-    public DataPage getAccountAggregationReportByContact(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
-            @PathVariable String accountId, //
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
-        }
-        log.info(String.format(
-                "Retrieving activity report aggregated by contacts for accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-        return activityTimelineService.getAccountAggregationReportByContact(accountId, timelinePeriod,
-                getOrgInfo(authToken));
-    }
-
-    @GetMapping("/accounts/{accountId:.+}/reports/product-interest")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve activity report aggregated by  product interest")
-    @SuppressWarnings("ConstantConditions")
-    public DataPage getAccountAggregationReportByProductInterest(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
-            @PathVariable String accountId, //
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
-        }
-        log.info(String.format(
-                "Retrieving activity report aggregated by product interest accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-        return activityTimelineService.getAccountAggregationReportByProductInterest(accountId, timelinePeriod,
-                getOrgInfo(authToken));
-    }
-
-    @GetMapping("/accounts/{accountId:.+}/reports/event-type")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve activity report aggregated by event type")
-    @SuppressWarnings("ConstantConditions")
-    public DataPage getAccountAggregationReportByEventType(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
-            @PathVariable String accountId, //
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
-        }
-        log.info(String.format(
-                "Retrieving activity report aggregated by event type accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-
-        return activityTimelineService.getAccountAggregationReportByEventType(accountId, timelinePeriod,
                 getOrgInfo(authToken));
     }
 

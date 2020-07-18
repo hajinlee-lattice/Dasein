@@ -90,8 +90,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         reportChangeListTableName = getReportChangeListTableName();
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
-        // FIXME - put 3d retention to change list table mainly for debugging purpose to update dynamoDB accountLookup.
-        //  can add back to TEMPORARY_CDL_TABLES if stable enough
+        // FIXME - put 3d retention to change list table mainly for debugging purpose to
+        // update dynamoDB accountLookup.
+        // can add back to TEMPORARY_CDL_TABLES if stable enough
         addShortRetentionToTable(changeListTableName);
         updateEntityValueMapInContext(ENTITY_REPORT_CHANGELIST_TABLES, reportChangeListTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, reportChangeListTableName, String.class);
@@ -152,10 +153,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                     return false;
                 }
                 if (configuration.isEntityMatchEnabled()) {
-                    if (InterfaceName.AccountId.name().equals(name) || InterfaceName.ContactId.name().equals(name)) {
-                        return false;
-                    }
-                    return true;
+                    return !InterfaceName.AccountId.name().equals(name) && !InterfaceName.ContactId.name().equals(name);
                 }
                 return true;
             }).collect(Collectors.toSet());
@@ -263,9 +261,10 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             }
             // not wipe out customer attrs
             // in replace mode, delete the records in document db
-            // if (Boolean.TRUE.equals(configuration.getNeedReplace()) && !metadataProxy.isTenantInMigration(customerSpace.toString())) {
-            //     cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(),
-            //            configuration.getMainEntity());
+            // if (Boolean.TRUE.equals(configuration.getNeedReplace()) &&
+            // !metadataProxy.isTenantInMigration(customerSpace.toString())) {
+            // cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(),
+            // configuration.getMainEntity());
             // }
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
@@ -530,6 +529,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             }
             log.info("Queued for DynamoExport with config : " + JsonUtils.serialize(config));
             addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        } else {
+            log.info("Skipped publish to Dynamo for Table: %s" + tableName);
         }
     }
 
