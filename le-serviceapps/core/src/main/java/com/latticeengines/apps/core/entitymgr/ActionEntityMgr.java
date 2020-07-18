@@ -8,6 +8,7 @@ import org.springframework.lang.Nullable;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 
@@ -35,4 +36,6 @@ public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
 
     List<Long> findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType actionType, ActionStatus actionStatus,
                                                            String partialConfig);
+
+    List<ActionConfiguration> findConfigByTypeAndOwnerType(ActionType actionType, String ownerType);
 }

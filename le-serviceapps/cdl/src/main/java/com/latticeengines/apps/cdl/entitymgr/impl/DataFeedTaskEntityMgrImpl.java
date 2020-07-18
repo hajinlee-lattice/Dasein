@@ -553,6 +553,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         summary.setSubtype((DataFeedTask.SubType) columns[3]);
         summary.setS3ImportStatus((DataFeedTask.S3ImportStatus) columns[4]);
         summary.setLastUpdated((Date) columns[5]);
+        summary.setUniqueId((String) columns[6]);
         return summary;
     }
 
