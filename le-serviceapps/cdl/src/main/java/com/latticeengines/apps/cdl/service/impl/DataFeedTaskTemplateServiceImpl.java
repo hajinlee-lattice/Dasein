@@ -74,8 +74,10 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -569,6 +571,21 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             return CollectionUtils.isNotEmpty(getPAConsumedActions(dataFeedTask.getUniqueId()));
         }
         return false;
+    }
+
+    @Override
+    public List<String> getPAConsumedTemplates(String customerSpace) {
+        List<ActionConfiguration> allConfigs = actionService.findConfigByTypeAndOwnerType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW,
+                ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME);
+        Set<String> templateUUIDs = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(allConfigs)) {
+            allConfigs.forEach(config -> {
+                if (config instanceof ImportActionConfiguration) {
+                    templateUUIDs.add(((ImportActionConfiguration) config).getDataFeedTaskId());
+                }
+            });
+        }
+        return new ArrayList<>(templateUUIDs);
     }
 
     private List<String> getDependingTemplate(String customerSpace, String uniqueTaskId, Set<String> systemIdSet) {

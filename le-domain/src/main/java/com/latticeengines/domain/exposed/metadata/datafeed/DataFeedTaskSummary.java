@@ -29,6 +29,9 @@ public class DataFeedTaskSummary {
     @JsonProperty("subtype")
     private DataFeedTask.SubType subtype;
 
+    @JsonProperty("unique_id")
+    private String uniqueId;
+
     @JsonProperty("template_display_name")
     private String templateDisplayName;
 
@@ -68,6 +71,14 @@ public class DataFeedTaskSummary {
 
     public void setSubtype(DataFeedTask.SubType subtype) {
         this.subtype = subtype;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
     public String getTemplateDisplayName() {

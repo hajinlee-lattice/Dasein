@@ -768,5 +768,11 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
                 "?source={source}&feedType={feedType}", shortenCustomerSpace(customerSpace), source, feedType);
         return get("reset template", url, Boolean.class);
     }
+
+    public List<String> getPAConsumedTemplateIds(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/allPAConsumedTemplates", shortenCustomerSpace(customerSpace));
+        List<?> rawList = get("reset template", url, List.class);
+        return JsonUtils.convertList(rawList, String.class);
+    }
 }
 

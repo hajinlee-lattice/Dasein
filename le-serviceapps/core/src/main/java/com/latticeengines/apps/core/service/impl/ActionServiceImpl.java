@@ -158,4 +158,9 @@ public class ActionServiceImpl implements ActionService {
     public List<Long> findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType actionType, ActionStatus actionStatus, String partialConfig) {
         return actionEntityMgr.findPidWithoutOwnerByTypeAndStatusAndConfig(actionType, actionStatus, partialConfig);
     }
+
+    @Override
+    public List<ActionConfiguration> findConfigByTypeAndOwnerType(ActionType actionType, String ownerType) {
+        return actionEntityMgr.findConfigByTypeAndOwnerType(actionType, ownerType);
+    }
 }

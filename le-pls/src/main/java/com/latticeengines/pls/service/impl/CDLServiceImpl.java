@@ -492,6 +492,22 @@ public class CDLServiceImpl implements CDLService {
             }
         }
 
+        Map<String, S3ImportSystem> systemMap = new HashMap<>();
+        try (PerformanceTimer timer = new PerformanceTimer("Get System Map", log)) {
+            List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(customerSpace);
+            if (CollectionUtils.isNotEmpty(allSystems)) {
+                systemMap = allSystems.stream().collect(Collectors.toMap(S3ImportSystem::getName, system -> system));
+            }
+        }
+
+        Set<String> consumedTemplates = new HashSet<>();
+        try (PerformanceTimer timer = new PerformanceTimer("Get PA Consumed templates", log)) {
+            List<String> allTemplates = cdlProxy.getPAConsumedTemplateIds(customerSpace);
+            if (CollectionUtils.isNotEmpty(allTemplates)) {
+                consumedTemplates = new HashSet<>(allTemplates);
+            }
+        }
+
         try (PerformanceTimer timer = new PerformanceTimer("Build S3ImportTemplateDisplay Object", log)) {
             for (String folderName : folderNames) {
                 if (hideLegacyTemplate(folderName, summaryMap)) {
@@ -512,8 +528,7 @@ public class CDLServiceImpl implements CDLService {
                         display.setEntity(entityType.getEntity());
                         display.setObject(entityType.getDisplayName());
                         display.setFeedType(folderName);
-                        display.setS3ImportSystem(
-                                getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
+                        display.setS3ImportSystem(systemMap.get(S3PathBuilder.getSystemNameFromFeedType(folderName)));
                         display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
                         display.setDataLoaded(Boolean.FALSE);
                         templates.add(display);
@@ -534,11 +549,10 @@ public class CDLServiceImpl implements CDLService {
                     display.setObject(entityType.getDisplayName());
                     display.setFeedType(taskSummary.getFeedType());
                     display.setEntity(entityType.getEntity());
-                    display.setS3ImportSystem(
-                            getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
+                    display.setS3ImportSystem(systemMap.get(S3PathBuilder.getSystemNameFromFeedType(folderName)));
                     display.setImportStatus(taskSummary.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
                             : taskSummary.getS3ImportStatus());
-                    display.setDataLoaded(cdlProxy.hasPAConsumedActions(customerSpace, taskSummary.getSource(), taskSummary.getFeedType()));
+                    display.setDataLoaded(consumedTemplates.contains(taskSummary.getUniqueId()));
                     templates.add(display);
                 }
             }
