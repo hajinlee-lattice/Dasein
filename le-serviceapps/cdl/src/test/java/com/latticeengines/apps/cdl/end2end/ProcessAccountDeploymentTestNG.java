@@ -64,7 +64,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         try {
             verifyProcess();
         } finally {
-            if (isLocalEnvironment()) {
+            if (isLocalEnvironment() || persistCheckpoint) {
                 saveCheckpoint(saveToCheckPoint());
             }
         }

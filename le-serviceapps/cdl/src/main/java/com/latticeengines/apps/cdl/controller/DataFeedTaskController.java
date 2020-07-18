@@ -440,10 +440,17 @@ public class DataFeedTaskController {
 
     @GetMapping("/hasPAConsumedImportAction")
     @ResponseBody
-    @ApiOperation(value = "Reset template")
+    @ApiOperation(value = "Check if template used in PA")
     public boolean hasPAConsumedImportAction(@PathVariable String customerSpace,
                          @RequestParam(value = "source") String source,
                          @RequestParam(value = "feedType") String feedType) {
         return dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, source, feedType);
+    }
+
+    @GetMapping("/allPAConsumedTemplates")
+    @ResponseBody
+    @ApiOperation(value = "Get all template UUIDs consumed by PA")
+    public List<String> getAllPAConsumedTemplates(@PathVariable String customerSpace) {
+        return dataFeedTaskTemplateService.getPAConsumedTemplates(customerSpace);
     }
 }

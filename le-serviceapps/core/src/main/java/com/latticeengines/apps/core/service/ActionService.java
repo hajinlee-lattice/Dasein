@@ -3,6 +3,7 @@ package com.latticeengines.apps.core.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 
@@ -40,4 +41,6 @@ public interface ActionService {
 
     List<Long> findPidWithoutOwnerByTypeAndStatusAndConfig(ActionType actionType, ActionStatus actionStatus,
                                                            String partialConfig);
+
+    List<ActionConfiguration> findConfigByTypeAndOwnerType(ActionType actionType, String ownerType);
 }

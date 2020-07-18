@@ -16,10 +16,16 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component(FinishActivityStreamProcessing.BEAN_NAME)
@@ -30,11 +36,15 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
     private static final Logger log = LoggerFactory.getLogger(FinishActivityStreamProcessing.class);
     private static final String PARTITION_KEY_NAME = InterfaceName.PartitionKey.name();
     private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();
+    private static final String ENTITY_CLASS_NAME = GenericTableActivity.class.getCanonicalName();
 
     static final String BEAN_NAME = "finishActivityStreamProcessing";
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     private boolean skipPublishDynamo;
@@ -42,6 +52,7 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
     @Override
     public void execute() {
         publishTimelineDiffTablesToDynamo();
+        registerDataUnits();
     }
 
     public void publishTimelineDiffTablesToDynamo() {
@@ -71,6 +82,30 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
         config.setPartitionKey(PARTITION_KEY_NAME);
         config.setSortKey(SORT_KEY_NAME);
         addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+    }
+
+    private void registerDataUnits() {
+        Map<String, String> timelineMasterTables = getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class,
+                String.class);
+        if (MapUtils.isEmpty(timelineMasterTables)) {
+            log.info("No timeline master table found in context, skip create dataUnit");
+            return;
+        }
+        log.info("create timeline master tables {} to datanit", timelineMasterTables);
+        timelineMasterTables.values().forEach(this::registerSingleDataUnit);
+    }
+
+    private void registerSingleDataUnit(String tableName) {
+        String customerSpace = configuration.getCustomerSpace().toString();
+        DynamoDataUnit unit = new DynamoDataUnit();
+        unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
+        unit.setEntityClass(ENTITY_CLASS_NAME);
+        unit.setName(tableName);
+        unit.setPartitionKey(PARTITION_KEY_NAME);
+        unit.setSortKey(SORT_KEY_NAME);
+        unit.setSignature(configuration.getTimelineSignature());
+        DataUnit created = dataUnitProxy.create(customerSpace, unit);
+        log.info("Registered DataUnit: " + JsonUtils.pprint(created));
     }
 
     private boolean account360Enabled() {

@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -36,6 +37,9 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
     @Inject
     private ActionEntityMgr actionEntityMgr;
+
+    @Inject
+    private JdbcTemplate jdbcTemplate;
 
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 
@@ -188,6 +192,7 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = {"testDelete"})
     public void testGetWithNameQuery() {
+        Long ownerId = createFakeWorkflow(mainTestTenant.getPid());
         Action action = generateCDLImportAction();
         ImportActionConfiguration ac = new ImportActionConfiguration();
         String dftUUID = NamingUtils.uuid("DataFeedTask");
@@ -201,6 +206,33 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
                         ActionStatus.ACTIVE, dftUUID);
         Assert.assertEquals(CollectionUtils.size(actionPidList), 1);
         Assert.assertEquals(actionPidList.get(0), action.getPid());
+
+        action.setOwnerId(ownerId);
+        updateOwnerIdIn(ownerId, Collections.singletonList(action.getPid()));
+
+        List<ActionConfiguration> configList =
+                actionEntityMgr.findConfigByTypeAndOwnerType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, "processAnalyzeWorkflow");
+        Assert.assertNotNull(configList);
+        Assert.assertTrue(configList.get(0) instanceof ImportActionConfiguration);
+        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) configList.get(0);
+        Assert.assertEquals(importActionConfiguration.getDataFeedTaskId(), dftUUID);
+    }
+
+    private Long createFakeWorkflow(long tenantPid) {
+        int rand = new Random(System.currentTimeMillis()).nextInt(10000);
+        String appId = String.format("application_%d_%04d", System.currentTimeMillis(), rand);
+
+        String sql = "INSERT INTO `WORKFLOW_JOB` ";
+        sql += "(`TENANT_ID`, `FK_TENANT_ID`, `USER_ID`, `APPLICATION_ID`, `INPUT_CONTEXT`, `START_TIME`, `TYPE`) VALUES ";
+        sql += String.format("(%d, %d, 'DEFAULT_USER', '%s', '{}', NOW(), '%s')", tenantPid, tenantPid, appId, "processAnalyzeWorkflow");
+        jdbcTemplate.execute(sql);
+
+        sql = "SELECT `PID` FROM `WORKFLOW_JOB` WHERE ";
+        sql += String.format("`TENANT_ID` = %d", tenantPid);
+        sql += String.format(" AND `APPLICATION_ID` = '%s'", appId);
+        long pid = jdbcTemplate.queryForObject(sql, Long.class);
+        log.info("Created a fake workflow " + pid);
+        return pid;
     }
 
     protected void createAction(Action action) {

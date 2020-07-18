@@ -10,6 +10,7 @@ import org.springframework.lang.Nullable;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 
@@ -38,4 +39,9 @@ public interface ActionRepository extends BaseJpaRepository<Action, Long> {
     List<Long> findActionPidWithoutOwnerByTypeAndStatus(@Param("actionType") ActionType actionType,
                                                             @Param("actionStatus") ActionStatus actionStatus,
                                                             @Param("partialConfig") String partialConfig);
+
+    @Query("SELECT a.actionConfiguration FROM Action a JOIN WorkflowJob wj ON a.ownerId = wj.pid " +
+            "WHERE a.type = :actionType AND wj.type = :workflowType AND a.actionConfiguration IS NOT NULL")
+    List<ActionConfiguration> findConfigurationByActionTypeAndOwnerWorkflowType(@Param("actionType") ActionType actionType,
+                                                                                @Param("workflowType") String workflowType);
 }

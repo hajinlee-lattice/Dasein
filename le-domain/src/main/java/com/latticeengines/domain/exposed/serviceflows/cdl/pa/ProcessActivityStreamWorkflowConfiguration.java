@@ -118,6 +118,11 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder timelineDynamoSignature(String timelineSignature) {
+            processStepConfiguration.setTimelineSignature(timelineSignature);
+            return this;
+        }
+
         public ProcessActivityStreamWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processActivityStreamWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

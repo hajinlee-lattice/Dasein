@@ -1,16 +1,19 @@
 package com.latticeengines.apps.cdl.tray.entitymgr.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.tray.entitymgr.TrayConnectorTestEntityMgr;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTest;
@@ -43,8 +46,13 @@ public class TrayConnectorTestEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         TrayConnectorTest test = trayConnectorTestEntityMgr.updateTrayConnectorTest(newTest);
         Assert.assertEquals(test.getTestState(), DataIntegrationEventType.Completed);
 
-        test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
-        Assert.assertEquals(test.getTestState(), DataIntegrationEventType.Completed);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            TrayConnectorTest currTest = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
+            Assert.assertEquals(currTest.getTestState(), DataIntegrationEventType.Completed);
+            return true;
+        });
 
         trayConnectorTestEntityMgr.deleteByWorkflowRequestId(workflowRequestId);
         test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -134,4 +136,10 @@ public interface DataFeedTaskTemplateService {
     boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueName);
 
     boolean hasPAConsumedImportAction(String customerSpace, String source, String feedType);
+
+    /**
+     *
+     * @return All template UUIDs that being used by PA
+     */
+    List<String> getPAConsumedTemplates(String customerSpace);
 }

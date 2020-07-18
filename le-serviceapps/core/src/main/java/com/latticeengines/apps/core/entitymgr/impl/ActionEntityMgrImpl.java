@@ -19,6 +19,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 
@@ -125,5 +126,11 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
                                                          String partialConfig) {
         return actionRepository.findActionPidWithoutOwnerByTypeAndStatus(actionType,
                 actionStatus, partialConfig);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ActionConfiguration> findConfigByTypeAndOwnerType(ActionType actionType, String ownerType) {
+        return actionRepository.findConfigurationByActionTypeAndOwnerWorkflowType(actionType, ownerType);
     }
 }
