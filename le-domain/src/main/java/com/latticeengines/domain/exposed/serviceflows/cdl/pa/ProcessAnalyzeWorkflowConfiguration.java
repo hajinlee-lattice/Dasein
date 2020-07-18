@@ -235,6 +235,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder timelineDynamoSignature(String timelineSignature) {
             exportTimelineRawTableToDynamo.setDynamoSignature(timelineSignature);
+            processActivityStreamWorkflowBuilder.timelineDynamoSignature(timelineSignature);
             return this;
         }
 
