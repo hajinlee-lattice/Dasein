@@ -237,7 +237,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total account after ProcessTransaction entity match test (There
     // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
     // -- 994
-    static final Long ACCOUNT_PT_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_PT_EM;
+    // static final Long ACCOUNT_PT_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_PT_EM;
+    static final Long ACCOUNT_PT_EM = ACCOUNT_PA_EM; // we use GA flag in PT test, so no new accounts from trxn
     // Number of total account after UpdateTransaction entity match test (There
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     // -- 1184
