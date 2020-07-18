@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.spark.PrepareMatchDat
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
+import com.latticeengines.domain.exposed.spark.am.MapAttributeTxfmrConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
@@ -153,6 +154,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = FilterChangelistConfig.class, name = FilterChangelistConfig.NAME), //
         @JsonSubTypes.Type(value = GetColumnChangesConfig.class, name = GetColumnChangesConfig.NAME), //
         @JsonSubTypes.Type(value = GetRowChangesConfig.class, name = GetRowChangesConfig.NAME), //
+        @JsonSubTypes.Type(value = MapAttributeTxfmrConfig.class, name = MapAttributeTxfmrConfig.NAME), //
         @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME) })
 public abstract class SparkJobConfig implements Serializable {
 
