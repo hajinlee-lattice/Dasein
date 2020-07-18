@@ -92,9 +92,4 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
             workflowJobEntityMgr.delete(workflowJob);
         }
     }
-
-    public Long createWorkflowJob(WorkflowJob workflowJob) {
-        workflowJobEntityMgr.create(workflowJob);
-        return workflowJob.getPid();
-    }
 }
