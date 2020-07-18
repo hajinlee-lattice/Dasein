@@ -199,10 +199,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
-        return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_UA, //
-                TableRoleInCollection.AccountExport, ACCOUNT_UA //
-        );
+        return ImmutableMap.of(TableRoleInCollection.AccountFeatures, ACCOUNT_UA);
     }
 
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {

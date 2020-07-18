@@ -170,10 +170,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
 
     @Override
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
-        return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_UA_EM, //
-                TableRoleInCollection.AccountExport, ACCOUNT_UA_EM //
-        );
+        return ImmutableMap.of(TableRoleInCollection.AccountFeatures, ACCOUNT_UA_EM);
     }
 
     @Override
