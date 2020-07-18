@@ -82,7 +82,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         runCommonPAVerifications();
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
-                BusinessEntity.CuratedAccount);
+                BusinessEntity.CuratedAccount, BusinessEntity.CuratedContact);
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
         verifyServingStore(getExpectedServingStoreCounts());
