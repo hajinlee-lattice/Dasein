@@ -8,10 +8,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.SQSMessageClassifyService;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 
 @Component("sqsMessageClassifyService")
@@ -29,8 +31,9 @@ public class SQSMessageClassifyServiceImpl implements SQSMessageClassifyService 
     private int scanPeriod;
 
     @PostConstruct
+    @DependsOn("beanEnvironment")
     public void initialize() {
-        if (importEnabled) {
+        if (importEnabled && BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
             log.info(String.format("Import enabled for current stack, create scheduled task (scan period %d seconds) " +
                     "for import message classification.", scanPeriod));
             ThreadPoolUtils.getScheduledThreadPool("sqs-message-classification", 1).scheduleAtFixedRate(//
@@ -39,11 +42,6 @@ public class SQSMessageClassifyServiceImpl implements SQSMessageClassifyService 
     }
 
     private Runnable updateMessageUrlRunnable() {
-        return () -> {
-            if (importEnabled) {
-                log.info("Import enabled for current stack, start classify import message!");
-                s3ImportService.updateMessageUrl();
-            }
-        };
+        return () -> s3ImportService.updateMessageUrl();
     }
 }
