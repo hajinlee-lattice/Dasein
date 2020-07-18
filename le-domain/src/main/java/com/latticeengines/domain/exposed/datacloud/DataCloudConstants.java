@@ -162,6 +162,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MERGE_SYSTEM_BATCH_TXFMR = "MergeSystemBatchTxfmr";
     public static final String TRANSFORMER_PROFILE_TXFMR = "ProfileTxfmr";
     public static final String TRANSFORMER_BUCKET_TXFMR = "BucketEncodeTxfmr";
+    public static final String TRANSFORMER_MAP_ATTRIBUTE_TXFMR = "MapAttributeTxfmr";
     public static final String TRANSFORMER_CALC_STATS_TXFMR = "CalcStatsTxfmr";
     public static final String TRANSFORMER_MERGE_IMPORTS = "MergeImports";
     public static final String TRANSFORMER_APPEND_RAWSTREAM = "AppendRawStreamTxfmr";
