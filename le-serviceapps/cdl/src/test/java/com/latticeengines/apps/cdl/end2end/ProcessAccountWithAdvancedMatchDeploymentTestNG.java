@@ -231,10 +231,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
     @Override
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
-        return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EM, //
-                TableRoleInCollection.AccountExport, ACCOUNT_PA_EM //
-        );
+        return ImmutableMap.of(TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EM);
     }
 
     @Override

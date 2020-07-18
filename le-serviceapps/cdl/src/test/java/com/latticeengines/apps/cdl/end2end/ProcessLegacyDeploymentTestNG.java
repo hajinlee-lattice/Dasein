@@ -421,17 +421,11 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
-        return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_PA, //
-                TableRoleInCollection.AccountExport, ACCOUNT_PA //
-        );
+        return ImmutableMap.of(TableRoleInCollection.AccountFeatures, ACCOUNT_PA);
     }
 
     protected Map<TableRoleInCollection, Long> getUpsertExtraTableRoeCounts() {
-        return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_PA + NEW_ACCOUNT_PA, //
-                TableRoleInCollection.AccountExport, ACCOUNT_PA + NEW_CONTACT_PA //
-        );
+        return ImmutableMap.of(TableRoleInCollection.AccountFeatures, ACCOUNT_PA + NEW_ACCOUNT_PA);
     }
 
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
