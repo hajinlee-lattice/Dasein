@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.dcp
 
 import com.latticeengines.common.exposed.util.JsonUtils
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate
 import com.latticeengines.domain.exposed.dcp.DataReport
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
@@ -31,12 +32,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val ccAttr = config.getConfidenceCodeAttr
     val matchToDUNSReport = generateMatchToDunsReport(input, ccAttr, totalCnt)
 
+    val classificationAttr: String = config.getClassificationAttr
     val matchedDunsAttr: String = config.getMatchedDunsAttr
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
     val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
 
-    val (acceptedDF, acceptedCsv) = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
-    val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs)
+    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs)
     val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
     val report : DataReport = new DataReport
@@ -48,14 +50,16 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     lattice.output = acceptedCsv :: rejectedCsv :: dunsCount :: Nil
   }
 
-  private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]):
+  private def filterAccepted(input: DataFrame, classificationAttr: String, acceptedAttrs: Map[String, String]):
   (DataFrame, DataFrame) = {
-    val acceptedDF = input.filter(col(matchIndicator).isNotNull && col(matchIndicator) =!= "")
+    val accepted = DnBMatchCandidate.Classification.Accepted.name
+    val acceptedDF = input.filter(col(classificationAttr) === accepted)
     (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs))
   }
 
   private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {
-    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
+    val rejected = DnBMatchCandidate.Classification.Rejected.name
+    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected), rejectedAttrs)
   }
 
   private def generateGeoReport(input: DataFrame, countryAttr: String, totalCnt: Long, url: String, user: String,
@@ -67,7 +71,6 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
       val countryDF = CountryCodeUtils.convert(input, countryAttr, countryCodeAttr, url, user, password, key, salt)
         .groupBy(col(countryCodeAttr))
         .agg(count("*").alias("cnt"))
-        .persist(StorageLevel.DISK_ONLY)
       countryDF.collect().foreach(row => {
         val countryCodeVal: String = row.getAs(countryCodeAttr)
         val countryCode: String = if (StringUtils.isEmpty(countryCodeVal)) "indeterminate" else countryCodeVal

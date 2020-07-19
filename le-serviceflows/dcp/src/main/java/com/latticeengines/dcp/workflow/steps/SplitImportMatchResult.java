@@ -1,5 +1,6 @@
 package com.latticeengines.dcp.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.Classification;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
@@ -113,6 +114,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setInput(Collections.singletonList(input));
         jobConfig.setTotalCount(input.getCount());
 
+        jobConfig.setClassificationAttr(Classification);
         jobConfig.setMatchedDunsAttr(MatchedDuns);
         jobConfig.setCountryAttr(InterfaceName.Country.name());
         jobConfig.setManageDbUrl(url);
@@ -292,10 +294,11 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     private boolean isAttrToExclude(ColumnMetadata cm) {
-        return  Arrays.asList(
-                InterfaceName.InternalId.name(),
-                InterfaceName.CustomerAccountId.name(),
-                InterfaceName.LatticeAccountId.name()
+        return  Arrays.asList( //
+                InterfaceName.InternalId.name(), //
+                InterfaceName.CustomerAccountId.name(), //
+                InterfaceName.LatticeAccountId.name(), //
+                Classification //
         ).contains(cm.getAttrName());
     }
 

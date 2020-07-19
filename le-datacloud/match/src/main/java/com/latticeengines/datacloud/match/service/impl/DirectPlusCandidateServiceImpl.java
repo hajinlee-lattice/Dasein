@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.Classification;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
@@ -24,6 +25,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<Object> parseCandidate(DnBMatchCandidate candidate) {
         List<Object> data = new ArrayList<>();
+        data.add(candidate.getClassification().name());
         String duns = candidate.getDuns();
         data.add(duns);
         if (candidate.getMatchInsight() != null) {
@@ -55,6 +57,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<String> candidateOutputFields() {
         // hard coded for now, need to in sync with SplitImportMatchResult
         return Arrays.asList( //
+                Classification, //
                 MatchedDuns, //
                 ConfidenceCode, //
                 MatchGrade, //
@@ -67,6 +70,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<Pair<String, Class<?>>> candidateSchema() {
         return Arrays.asList( //
+                Pair.of(Classification, String.class), //
                 Pair.of(MatchedDuns, String.class), //
                 Pair.of(ConfidenceCode, Integer.class), //
                 Pair.of(MatchGrade, String.class), //
