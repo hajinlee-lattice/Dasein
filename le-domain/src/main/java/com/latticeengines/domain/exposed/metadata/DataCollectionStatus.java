@@ -382,4 +382,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public void setActivityPartitionKeyMigrated(boolean activityPartitionKeyMigrated) {
         this.detail.setActivityPartitionKeyMigrated(activityPartitionKeyMigrated);
     }
+
+    @JsonProperty("ActivityStreamLastRefresh")
+    public Map<String, Integer> getActivityStreamLastRefresh() {
+        return this.detail.getActivityStreamLastRefresh();
+    }
+
+    @JsonProperty("ActivityStreamLastRefresh")
+    public void setActivityStreamLastRefresh(Map<String, Integer> activityStreamLastRefresh) {
+        this.detail.setActivityStreamLastRefresh(activityStreamLastRefresh);
+    }
 }

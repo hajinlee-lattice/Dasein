@@ -34,6 +34,10 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("ActivityStreamMapStr")
     private String activityStreamMapStr;
 
+    // streamId -> dateId
+    @JsonProperty("ActivityStreamLastRefresh")
+    private Map<String, Integer> activityStreamLastRefresh;
+
     @JsonProperty("DimensionMetadataSignature")
     private String dimensionMetadataSignature;
 
@@ -274,5 +278,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setActivityPartitionKeyMigrated(boolean activityPartitionKeyMigrated) {
         this.activityPartitionKeyMigrated = activityPartitionKeyMigrated;
+    }
+
+    public Map<String, Integer> getActivityStreamLastRefresh() {
+        return activityStreamLastRefresh;
+    }
+
+    public void setActivityStreamLastRefresh(Map<String, Integer> activityStreamLastRefresh) {
+        this.activityStreamLastRefresh = activityStreamLastRefresh;
     }
 }

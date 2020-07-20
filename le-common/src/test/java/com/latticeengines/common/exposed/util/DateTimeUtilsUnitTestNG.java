@@ -36,6 +36,13 @@ public class DateTimeUtilsUnitTestNG {
         Assert.assertEquals(DateTimeUtils.subtractDays(date1, 30), date2);
     }
 
+    @Test(groups = "unit")
+    public void testEpochMilliToDateId() {
+        String date = "2020-11-19";
+        long milli = 1605814243000L;
+        Assert.assertEquals(DateTimeUtils.dateToDayPeriod(date), DateTimeUtils.fromEpochMilliToDateId(milli));
+    }
+
     @Test(groups = "manual")
     public void manualConversion1() {
         System.out.println(DateTimeUtils.dayPeriodToDate(85584));

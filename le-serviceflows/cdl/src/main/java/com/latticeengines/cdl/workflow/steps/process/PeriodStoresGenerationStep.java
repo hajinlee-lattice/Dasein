@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.PeriodStores;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +31,6 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -74,9 +75,16 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Set<String> skippedStreamIds = getSkippedStreamIds();
+        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        relinkStreams(streamsToRelink);
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.streams = stepConfiguration.getActivityStreamMap().values()
-                .stream().filter(stream -> !skippedStreamIds.contains(stream.getStreamId())).collect(Collectors.toList());
+                .stream()
+                .filter(stream -> !skippedStreamIds.contains(stream.getStreamId()) && !streamsToRelink.contains(stream.getStreamId()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(config.streams)) {
+            return null;
+        }
         config.evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
         Map<String, Table> dailyDeltaTables = getTablesFromMapCtxKey(customerSpace.toString(), DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME);
@@ -100,7 +108,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         if (periodStoreTableNames != null) {
             if (allTablesExist(periodStoreTableNames)) {
                 log.info("[{}] Period stores have been created before retry. Skip generating period stores", customerSpace);
-                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, TableRoleInCollection.PeriodStores, inactive);
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, PeriodStores, inactive);
                 return null;
             }
         }
@@ -149,6 +157,21 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         return config;
     }
 
+    private void relinkStreams(Set<String> streamsToRelink) {
+        if (CollectionUtils.isNotEmpty(streamsToRelink)) {
+            log.info("Streams to relink to inactive version: {}", streamsToRelink);
+            List<AtlasStream> streams = streamsToRelink.stream().map(streamId -> configuration.getActivityStreamMap().get(streamId)).collect(Collectors.toList());
+            List<String> signatures = new ArrayList<>();
+            streams.forEach(stream -> stream.getPeriods()
+                    .forEach(period -> signatures.add(String.format(PERIOD_STORE_TABLE_FORMAT, stream.getStreamId(), period))));
+            Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), PeriodStores, inactive.complement(), signatures);
+            if (MapUtils.isNotEmpty(signatureTableNames)) {
+                log.info("Linking existing period store tables to inactive version {}: {}", inactive, signatureTableNames.keySet());
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, PeriodStores, inactive);
+            }
+        }
+    }
+
     private Map<String, String> getPeriodStoreBatchTableNames(Set<String> incrementalStreams) {
         if (CollectionUtils.isEmpty(incrementalStreams)) {
             return Collections.emptyMap();
@@ -160,7 +183,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 signatures.add(String.format(PERIOD_STORE_TABLE_FORMAT, streamId, period));
             });
         });
-        return dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), TableRoleInCollection.PeriodStores, inactive.complement(), signatures);
+        return dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), PeriodStores, inactive.complement(), signatures);
     }
 
     @Override
@@ -181,7 +204,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             }
         });
         Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, PERIOD_STORE_TABLE_NAME);
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, PeriodStores, inactive);
     }
 
     private Set<String> getSkippedStreamIds() {

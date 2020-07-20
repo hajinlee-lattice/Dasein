@@ -81,15 +81,14 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
      *         idx ]
      */
     Optional<Pair<String, Integer>> appendRawStream(@NotNull List<TransformationStepConfig> steps,
-            @NotNull AtlasStream stream, @NotNull Long paTimestamp, String matchedImportTable, String activeBatchTable,
+            @NotNull AtlasStream stream, @NotNull Long evalTimeEpoch, String matchedImportTable, String activeBatchTable,
             String prefixFormat) {
         if (!needAppendRawStream(matchedImportTable, activeBatchTable)) {
             log.info("No matched import table and no active batch store for stream {}. Skip append raw stream step",
                     stream.getStreamId());
             return Optional.empty();
         }
-
-        return appendRawStream(steps, stream, paTimestamp,
+        return appendRawStream(steps, stream, evalTimeEpoch,
                 getConfigureAppendRawStreamInputFn(matchedImportTable, activeBatchTable), prefixFormat);
     }
 
