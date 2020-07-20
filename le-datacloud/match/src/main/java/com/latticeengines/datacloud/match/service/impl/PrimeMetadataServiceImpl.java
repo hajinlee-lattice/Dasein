@@ -166,6 +166,9 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 List<DataBlockLevel> levelList = blockMap.getOrDefault(block, new ArrayList<>());
                 levelList.add(level);
                 blockMap.put(block, levelList);
+                // always add baseinfo and entityresolution
+                blockMap.put(BLOCK_BASE_INFO, Collections.singletonList(DataBlockLevel.L1));
+                blockMap.put(BLOCK_ENTITY_RESOLUTION, Collections.singletonList(DataBlockLevel.L1));
                 recordTypeMap.put(recordType, blockMap);
                 domainMap.put(domain, recordTypeMap);
             }
