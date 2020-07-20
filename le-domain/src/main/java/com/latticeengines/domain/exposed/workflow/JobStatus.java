@@ -29,7 +29,8 @@ public enum JobStatus {
     READY(6, "Ready", false), //
     PENDING_RETRY(7, "Pending Retry", true), //
     RETRIED(8, "Retried", true), //
-    ENQUEUED(9, "Enqueued", false); //
+    ENQUEUED(9, "Enqueued", false), //
+    KILLED(10, "Killed", true); //
 
     private static final Logger log = LoggerFactory.getLogger(JobStatus.class);
     private static Map<String, JobStatus> statusCodeMap = new HashMap<>();
