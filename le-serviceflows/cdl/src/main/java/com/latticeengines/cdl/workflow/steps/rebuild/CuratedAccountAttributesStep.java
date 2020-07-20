@@ -318,7 +318,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         calculateNumOfContacts = shouldCalculateNumberOfContacts();
         calculateLastActivityDate = shouldCalculateLastActivityDate();
         calculateSystemLastUpdateTime = shouldCalculateSystemLastUpdateTime();
-        skipTransformation = !calculateNumOfContacts && !calculateLastActivityDate
+        skipTransformation = !calculateNumOfContacts && !calculateLastActivityDate && !calculateSystemLastUpdateTime
                 && BooleanUtils.isNotTrue(configuration.getRebuild());
 
         log.info(
