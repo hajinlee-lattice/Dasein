@@ -554,6 +554,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         summary.setS3ImportStatus((DataFeedTask.S3ImportStatus) columns[4]);
         summary.setLastUpdated((Date) columns[5]);
         summary.setUniqueId((String) columns[6]);
+        summary.setTemplateDisplayName((String) columns[7]);
         return summary;
     }
 
