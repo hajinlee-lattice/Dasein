@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +55,8 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
     @Value("${eai.export.dynamo.accountlookup.signature}")
     private String accountLookupSignature;
 
+    private String targetLookupSignature;
+
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
@@ -77,8 +80,7 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             log.info("No account lookup data unit found. Account lookup will be published after PA success.");
             return;
         }
-        curVersion = getCurrentVersion();
-        expTime = Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
+        initProps();
         List<DynamoExportConfig> configs = getExportConfigs();
         if (CollectionUtils.isEmpty(configs)) {
             log.info("No change list needs to populate, skip execution.");
@@ -86,7 +88,7 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
         }
         log.info("Going to populate changelist to account lookup: " + configs);
         log.info("Using dynamo table {}",
-                String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
+                String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, targetLookupSignature));
         List<AccountLookupExporter> exporters = getLookupExporters(configs);
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
@@ -113,14 +115,13 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
         }
     }
 
-    private int getCurrentVersion() {
+    private void initProps() {
         DynamoDataUnit unit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(
                 configuration.getCustomerSpace().toString(), ACCOUNT_LOOKUP_DATA_UNIT_NAME,
                 DataUnit.StorageType.Dynamo);
-        if (unit == null || unit.getVersion() == null) {
-            return 0;
-        }
-        return unit.getVersion();
+        curVersion = unit.getVersion() == null ? 0 : unit.getVersion();
+        expTime = Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
+        targetLookupSignature = StringUtils.isBlank(unit.getSignature()) ? accountLookupSignature : unit.getSignature();
     }
 
     private List<AccountLookupExporter> getLookupExporters(List<DynamoExportConfig> configs) {
@@ -149,7 +150,7 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_IDS, String.join(",", lookupIds));
             properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_VERSION, curVersion.toString());
             properties.put(HdfsToDynamoConfiguration.CONFIG_TABLE_NAME,
-                    String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, accountLookupSignature));
+                    String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, targetLookupSignature));
             properties.put(HdfsToDynamoConfiguration.CONFIG_ATLAS_LOOKUP_TTL, expTime.toString());
             properties.put(HdfsToDynamoConfiguration.CONFIG_EXPORT_TYPE,
                     AtlasAccountLookupExportStepConfiguration.NAME);

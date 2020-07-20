@@ -166,7 +166,7 @@ public class AccountLookupToDynamoStep extends BaseExportToDynamo<AccountLookupT
         unit.setName(ACCOUNT_LOOKUP_DATA_UNIT_NAME);
         unit.setVersion(0);
         unit.setPartitionKey(InterfaceName.AtlasLookupKey.name());
+        unit.setSignature(configuration.getDynamoSignature());
         return unit;
     }
-
 }
