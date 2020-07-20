@@ -53,7 +53,7 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         tenant.setName(TENANT_NAME);
 
         user = new User();
-        user.setEmail("test_email@lattice-engines.com");
+        user.setEmail("gengl@dnb.com");
         user.setUsername("test_user_name");
         user.setFirstName("test_first_name");
         user.setLastName("test_last_name");
