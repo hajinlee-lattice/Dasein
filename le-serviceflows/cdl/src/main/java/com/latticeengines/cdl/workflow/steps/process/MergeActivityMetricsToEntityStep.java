@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,15 +107,21 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         active = inactive.complement();
         streamMetadataCache = JsonUtils.deserializeByTypeRef(getStringValueFromContext(ACTIVITY_STREAM_METADATA_CACHE), streamMetadataCacheTypeRef);
         Set<String> skippedStreams = getSkippedStreamIds();
-        List<ActivityMetricsGroup> groups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
+        List<ActivityMetricsGroup> allGroups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
                 .filter(g -> !skippedStreams.contains(g.getStream().getStreamId())).collect(Collectors.toList());
+
+        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        relinkMergedGroup(allGroups.stream().filter(g -> streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList()));
+
+        List<ActivityMetricsGroup> groupsNeedProcess = allGroups.stream().filter(g -> !streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList());
+
         Map<String, List<ActivityMetricsGroup>> mergedTablesMap = new HashMap<>(); // merged table label -> groups to merge
         Set<String> activityMetricsServingEntities = new HashSet<>();
-        if (CollectionUtils.isEmpty(groups)) {
+        if (CollectionUtils.isEmpty(groupsNeedProcess)) {
             log.info("No groups to merge for tenant {}. Skip merging metrics groups", customerSpace);
             return null;
         }
-        groups.forEach(group -> {
+        groupsNeedProcess.forEach(group -> {
             activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).name());
             String mergedTableLabel = getMergedLabel(group); // entity_servingStore e.g. Account_OpportunityProfile
             mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
@@ -154,10 +161,23 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             MergeActivityMetricsJobConfig config = new MergeActivityMetricsJobConfig();
             config.inputMetadata = inputMetadata;
             config.mergedTableLabels = new ArrayList<>(mergedTablesMap.keySet());
-            appendActiveActivityMetrics(inputs, inputMetadata, groups);
+            appendActiveActivityMetrics(inputs, inputMetadata, groupsNeedProcess);
             config.setInput(inputs);
             return config;
         }
+    }
+
+    private void relinkMergedGroup(List<ActivityMetricsGroup> groups) {
+        // role CustomIntentProfile; signature entity (account/contact)
+        Set<TableRoleInCollection> rolesToRelink = groups.stream().map(group -> getServingStore(group.getCategory())).collect(Collectors.toSet());
+        List<String> allowedSignatures = Arrays.asList(BusinessEntity.Account.name(), BusinessEntity.Contact.name());
+        rolesToRelink.forEach(role -> {
+            Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), role, active, allowedSignatures);
+            if (MapUtils.isNotEmpty(signatureTableNames)) {
+                log.info("Linking existing {} metrics to inactive version{}: {}", role, inactive, signatureTableNames);
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, role, inactive);
+            }
+        });
     }
 
     private void appendActiveActivityMetrics(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata, List<ActivityMetricsGroup> groups) {
@@ -299,7 +319,6 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         to.setCategory(from.getCategory());
         to.setSubcategory(from.getSubcategory());
         to.setSecondarySubCategoryDisplayName(from.getSecondarySubCategoryDisplayName());
-
     }
 
     private void enrichAttribute(Attribute attr, String groupId, String[] rollupDimVals, String timeRange, TimeFilterTranslator translator) {

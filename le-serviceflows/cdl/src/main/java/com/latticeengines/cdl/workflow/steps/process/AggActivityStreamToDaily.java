@@ -88,6 +88,7 @@ public class AggActivityStreamToDaily
         if (MapUtils.isEmpty(stepConfiguration.getActivityStreamMap())) {
             return null;
         }
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
@@ -97,14 +98,17 @@ public class AggActivityStreamToDaily
                 RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME); // unprocessed raw input. will be processed to raw in this step
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
         Set<String> skippedStreamIds = getSkippedStreamIds();
-        Set<AtlasStream> notSkippedStream = streams.values().stream().filter(stream -> !skippedStreamIds.contains(stream.getStreamId())).collect(Collectors.toSet());
+        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        relinkStreams(streamsToRelink);
+        Set<AtlasStream> notSkippedStream = streams.values().stream()
+                .filter(stream -> !skippedStreamIds.contains(stream.getStreamId()) && !streamsToRelink.contains(stream.getStreamId()))
+                .collect(Collectors.toSet());
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         config.incrementalStreams = notSkippedStream.stream()
                 .filter(stream -> shouldIncrUpdate(stream.getStreamId()) && rawStreamDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId)
                 .collect(Collectors.toSet());
         streamsIncrUpdated.addAll(config.incrementalStreams);
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         shortCutMode = isShortcutMode(dailyTableNames, dailyDeltaTableNames);
         if (shortCutMode) {
             log.info(String.format("Found both aggregated daily stream tables %s and delta tables %s, going through shortcut mode.",
@@ -192,6 +196,17 @@ public class AggActivityStreamToDaily
             streamsIncrUpdated.addAll(config.incrementalStreams);
             log.info("Agg daily activity stream config = {}", JsonUtils.serialize(config));
             return config;
+        }
+    }
+
+    private void relinkStreams(Set<String> streamsToRelink) {
+        if (CollectionUtils.isNotEmpty(streamsToRelink)) {
+            log.info("Streams to relink to inactive version: {}", streamsToRelink);
+            Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), AggregatedActivityStream, inactive.complement(), new ArrayList<>(streamsToRelink));
+            if (MapUtils.isNotEmpty(signatureTableNames)) {
+                log.info("Linking existing daily store tables to inactive version: {}", signatureTableNames.keySet());
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, AggregatedActivityStream, inactive);
+            }
         }
     }
 
