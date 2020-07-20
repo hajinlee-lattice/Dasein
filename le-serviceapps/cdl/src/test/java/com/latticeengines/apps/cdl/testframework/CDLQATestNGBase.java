@@ -17,7 +17,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -73,9 +72,9 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected void checkBasicInfo() {
-        Preconditions.checkState(StringUtils.isNotEmpty(userName), "Username is required");
-        Preconditions.checkState(StringUtils.isNotEmpty(password), "Password is required");
-        Preconditions.checkState(StringUtils.isNotEmpty(mainTenant), "Main tenant is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(userName), "Username is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(password), "Password is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(mainTenant), "Main tenant is required");
     }
 
     @AfterClass(groups = { "qaend2end" })

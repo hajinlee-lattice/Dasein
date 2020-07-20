@@ -6,9 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.testframework.CDLQATestNGBase;
 import com.latticeengines.domain.exposed.query.EntityType;
 
@@ -37,12 +37,11 @@ public class ProcessAnalyzeImportCorrectnessQAEnd2EndTestNG extends CDLQATestNGB
     @Override
     protected void checkBasicInfo() {
         super.checkBasicInfo();
-        Preconditions.checkState(StringUtils.isNotEmpty(accountFilePath), "Account file is required");
-        Preconditions.checkState(StringUtils.isNotEmpty(contactFilePath), "Contact file is required");
-        Preconditions.checkState(StringUtils.isNotEmpty(transactionFilePath), "Transaction file is required");
-        Preconditions.checkState(StringUtils.isNotEmpty(productBundleFilePath), "Product bundle file is required");
-        Preconditions.checkState(StringUtils.isNotEmpty(productHierarchyFilePath),
-                "Product hierarchy file is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(accountFilePath), "Account file is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(contactFilePath), "Contact file is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(transactionFilePath), "Transaction file is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(productBundleFilePath), "Product bundle file is required");
+        Assert.assertTrue(StringUtils.isNotEmpty(productHierarchyFilePath), "Product hierarchy file is required");
     }
 
     @Test(groups = { "qaend2end" })
