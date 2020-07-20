@@ -7,7 +7,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"EXTERNAL_ID",
@@ -17,7 +18,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"AccountId",
@@ -27,7 +29,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LE_ACCOUNT_EXTERNAL_ID",
@@ -37,7 +40,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"PLAY_ID",
@@ -47,7 +51,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LAUNCH_ID",
@@ -57,7 +62,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"DESCRIPTION",
@@ -67,7 +73,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"LAUNCH_DATE",
@@ -77,7 +84,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"LAST_UPDATED_TIMESTAMP",
@@ -87,7 +95,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"MONETARY_VALUE",
@@ -97,7 +106,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LIKELIHOOD",
@@ -107,7 +117,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"CompanyName",
@@ -117,7 +128,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"SFDC_ACCOUNT_ID",
@@ -127,7 +139,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"PRIORITY_ID",
@@ -137,7 +150,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"PRIORITY_DISPLAY_NAME",
@@ -147,7 +161,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"MONETARY_VALUE_ISO4217_ID",
@@ -157,7 +172,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"LIFT",
@@ -167,7 +183,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"RATING_MODEL_ID",
@@ -177,7 +194,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"MODEL_SUMMARY_ID",
@@ -187,7 +205,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"SYNC_DESTINATION",
@@ -197,7 +216,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"DESTINATION_ORG_ID",
@@ -207,7 +227,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"DESTINATION_SYS_TYPE",
@@ -217,7 +238,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"TENANT_ID",
@@ -227,7 +249,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"DELETED",
@@ -237,7 +260,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"Website",
@@ -247,7 +271,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"DESTINATION_SYS_NAME",
@@ -257,7 +282,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"PLAY_NAME",
@@ -267,7 +293,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"RATING_MODEL_NAME",
@@ -277,7 +304,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"SEGMENT_NAME",
@@ -287,7 +315,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"Email",
@@ -297,7 +326,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"Address_Street_1",
@@ -307,7 +337,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"PhoneNumber",
@@ -317,7 +348,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"State",
@@ -327,7 +359,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"PostalCode",
@@ -337,7 +370,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"Country",
@@ -347,7 +381,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"SFDC_CONTACT_ID",
@@ -357,7 +392,8 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"City",
@@ -367,7 +403,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"ContactId",
@@ -377,7 +414,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":false,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": []
    },
    {
       "attrName":"ContactName",
@@ -387,7 +425,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true
+      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"FirstName",
@@ -397,7 +436,8 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LastName",
@@ -407,6 +447,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":false
+      "historyEnabled":false,
+      "audienceType": ["CONTACTS"]
    }
 ]
