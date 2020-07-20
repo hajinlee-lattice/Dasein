@@ -297,7 +297,7 @@ public class FuzzyMatchHelper implements DbHelper {
         Set<String> ids = new HashSet<>();
         for (InternalOutputRecord record : context.getInternalResults()) {
             String duns = record.getPrimeDuns();
-            if (StringUtils.isNotBlank(duns)) {
+            if (record.isMatched() && StringUtils.isNotBlank(duns)) {
                 ids.add(duns);
             }
         }
@@ -330,7 +330,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
         for (InternalOutputRecord record : context.getInternalResults()) {
             String duns = record.getPrimeDuns();
-            if (StringUtils.isNotBlank(duns)) {
+            if (record.isMatched() && StringUtils.isNotBlank(duns)) {
                 PrimeAccount primeAccount = dunsAccountMap.get(duns);
                 if (primeAccount != null) {
                     record.setPrimeAccount(primeAccount.getDeepCopy());
@@ -399,8 +399,12 @@ public class FuzzyMatchHelper implements DbHelper {
             // For entity match: record.queryResult is already prepared in
             // fetchEntityMatchResult(), so skip this part
             for (InternalOutputRecord record : context.getInternalResults()) {
-                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
-                        context.getInput().getDataCloudVersion());
+                if (BusinessEntity.PrimeAccount.name().equals(context.getInput().getTargetEntity())) {
+                    updateInternalRecordByPrimeAccount(record, context.getColumnSelection());
+                } else {
+                    updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
+                            context.getInput().getDataCloudVersion());
+                }
                 if (record.isMatched()) {
                     setMatchedValues(record);
                 }
@@ -440,25 +444,30 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
+    private void updateInternalRecordByPrimeAccount(InternalOutputRecord record, ColumnSelection columnSelection) {
+        Map<String, Object> queryResult = new HashMap<>();
+        Map<String, Object> primeAccount = parsePrimeAccount(record.getPrimeAccount(), columnSelection);
+        if (MapUtils.isNotEmpty(primeAccount)) {
+            queryResult.putAll(primeAccount);
+        }
+        if (record.isMatched() && record.getPrimeAccount() == null) {
+            record.setMatched(false);
+        }
+        record.setQueryResult(queryResult);
+    }
+
     private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, ColumnSelection columnSelection,
             String dataCloudVersion) {
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> latticeAccount = parseLatticeAccount(record.getLatticeAccount(), columnSelection,
                 dataCloudVersion);
-        Map<String, Object> primeAccount = parsePrimeAccount(record.getPrimeAccount(), columnSelection);
         if (MapUtils.isNotEmpty(latticeAccount)) {
             queryResult.putAll(latticeAccount);
-        }
-        if (MapUtils.isNotEmpty(primeAccount)) {
-            queryResult.putAll(primeAccount);
         }
         if (MapUtils.isNotEmpty(record.getCustomAccount())) {
             queryResult.putAll(record.getCustomAccount());
         }
         if (record.getLatticeAccount() != null && record.getLatticeAccount().getId() != null) {
-            record.setMatched(true);
-        }
-        if (record.getPrimeAccount() != null && record.getPrimeAccount().getId() != null) {
             record.setMatched(true);
         }
         record.setQueryResult(queryResult);

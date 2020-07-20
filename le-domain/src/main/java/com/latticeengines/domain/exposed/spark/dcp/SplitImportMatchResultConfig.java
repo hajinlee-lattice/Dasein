@@ -20,6 +20,9 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("MatchedDunsAttr")
     private String matchedDunsAttr;
 
+    @JsonProperty("classificationAttr")
+    private String classificationAttr;
+
     @JsonProperty("countryAttr")
     private String countryAttr;
 
@@ -77,6 +80,14 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public void setMatchedDunsAttr(String matchedDunsAttr) {
         this.matchedDunsAttr = matchedDunsAttr;
+    }
+
+    public String getClassificationAttr() {
+        return classificationAttr;
+    }
+
+    public void setClassificationAttr(String classificationAttr) {
+        this.classificationAttr = classificationAttr;
     }
 
     public String getCountryAttr() {
