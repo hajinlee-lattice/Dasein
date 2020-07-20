@@ -207,7 +207,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    protected void logout(UserDocument userDocument) {
+    public void logout(UserDocument userDocument) {
         useSessionDoc(userDocument);
         restTemplate.getForObject(plsApiHostPort + "/pls/logout", Object.class);
     }
@@ -501,8 +501,19 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     public FeatureFlagValueMap getFeatureFlags() {
         FeatureFlagValueMap map = getRestTemplate().getForObject(
                 plsApiHostPort + "/pls/tenant/featureflags", FeatureFlagValueMap.class);
-        
+
         return map;
     }
 
+    public Tenant useExistingQATenantAsMain(String tenantName) {
+        String fullTenantId = CustomerSpace.parse(tenantName).toString();
+        addExistingTenant(fullTenantId);
+        Tenant tenant = new Tenant(fullTenantId);
+        setMainTestTenant(tenant);
+        if (excludedCleanupTenantIds == null) {
+            excludedCleanupTenantIds = new ArrayList<>();
+        }
+        excludedCleanupTenantIds.add(fullTenantId);
+        return tenant;
+    }
 }
