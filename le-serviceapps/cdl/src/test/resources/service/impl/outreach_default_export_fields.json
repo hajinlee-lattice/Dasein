@@ -7,7 +7,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "AccountId",
@@ -17,7 +18,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "LE_ACCOUNT_EXTERNAL_ID",
@@ -27,7 +29,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "PLAY_ID",
@@ -37,7 +40,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "LAUNCH_ID",
@@ -47,7 +51,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DESCRIPTION",
@@ -57,7 +62,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LAUNCH_DATE",
@@ -67,7 +73,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LAST_UPDATED_TIMESTAMP",
@@ -77,7 +84,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "MONETARY_VALUE",
@@ -87,7 +95,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "LIKELIHOOD",
@@ -97,7 +106,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "CompanyName",
@@ -107,7 +117,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "PRIORITY_DISPLAY_NAME",
@@ -117,7 +128,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "MONETARY_VALUE_ISO4217_ID",
@@ -127,7 +139,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "LIFT",
@@ -137,7 +150,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "RATING_MODEL_ID",
@@ -147,7 +161,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DESTINATION_ORG_ID",
@@ -157,7 +172,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DESTINATION_SYS_TYPE",
@@ -167,7 +183,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "DELETED",
@@ -177,7 +194,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": false,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": []
   },
   {
     "attrName": "Website",
@@ -187,7 +205,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "DESTINATION_SYS_NAME",
@@ -197,7 +216,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "PLAY_NAME",
@@ -207,7 +227,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "RATING_MODEL_NAME",
@@ -217,7 +238,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "SEGMENT_NAME",
@@ -227,7 +249,8 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "SDR_Email",
@@ -237,7 +260,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "Email",
@@ -247,7 +271,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "Address_Street_1",
@@ -257,7 +282,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "PhoneNumber",
@@ -267,7 +293,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "State",
@@ -277,7 +304,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "PostalCode",
@@ -287,7 +315,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "Country",
@@ -297,7 +326,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "City",
@@ -307,7 +337,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "ContactId",
@@ -317,7 +348,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "ContactName",
@@ -327,7 +359,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": true
+    "historyEnabled": true,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "FirstName",
@@ -337,7 +370,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "LastName",
@@ -347,7 +381,8 @@
     "externalSystemName": "Outreach",
     "standardField": true,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "SFDC_CONTACT_ID",
@@ -357,16 +392,18 @@
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   },
   {
     "attrName": "SFDC_ACCOUNT_ID",
-    "displayName": "LookupId",
+    "displayName": "SFDC Account ID",
     "entity": "Account",
     "javaClass": "String",
     "externalSystemName": "Outreach",
     "standardField": false,
     "exportEnabled": true,
-    "historyEnabled": false
+    "historyEnabled": false,
+    "audienceType": ["CONTACTS"]
   }
 ]
