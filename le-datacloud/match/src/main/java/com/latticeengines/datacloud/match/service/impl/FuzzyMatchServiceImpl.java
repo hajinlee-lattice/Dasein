@@ -176,8 +176,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                                           InternalOutputRecord matchRecord, boolean multiCandidates) {
         matchRecord.setLatticeAccountId(result);
         if (StringUtils.isNotEmpty(result)) {
-            matchRecord.setMatched(true);
+            matchRecord.setMatched(traveler.isMatched());
         } else {
+            matchRecord.setMatched(false);
             matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
         }
         if (multiCandidates) {

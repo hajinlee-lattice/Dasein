@@ -260,13 +260,22 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             int count = 0;
             List<String> headers = new ArrayList<>();
             int nameIdx = -1;
+            int ccIdx = -1;
             while (nextRecord != null && (count++) < 10) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
                     verifyOutputHeaders(headers);
                     nameIdx = headers.indexOf("Company Name");
+                    ccIdx = headers.indexOf("Confidence Code");
                 } else {
-                    Assert.assertTrue(StringUtils.isNotBlank(nextRecord[nameIdx])); // Original Name is non-empty
+                    String companyName = nextRecord[nameIdx];
+                    Assert.assertTrue(StringUtils.isNotBlank(companyName)); // Original Name is non-empty
+                    if ("AAC Technologies Holdings".contains(companyName)) {
+                        log.info("CSV record for [Tencent]: {}", StringUtils.join(nextRecord, ","));
+                        String confidenceCode = nextRecord[ccIdx];
+                        Assert.assertTrue(StringUtils.isNotBlank(confidenceCode));
+                        Assert.assertTrue(Integer.parseInt(confidenceCode) < 6);
+                    }
                     nextRecord = csvReader.readNext();
                 }
             }

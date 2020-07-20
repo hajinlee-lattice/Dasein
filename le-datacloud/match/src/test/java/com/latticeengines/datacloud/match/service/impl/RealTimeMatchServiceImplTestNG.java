@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Accepted;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Rejected;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Address;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.City;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
@@ -25,6 +27,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -142,24 +145,44 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), data.length);
 
-        OutputRecord output1 = output.getResult().get(0); // Chevron - 7 - AZZZZZZZZFZ
+        OutputRecord output1 = output.getResult().get(0); // Chevron - 7 - AZZAAZZZFFA
         // System.out.println(JsonUtils.pprint(output1));
         Assert.assertTrue(output1.isMatched());
         Assert.assertEquals(output1.getOutput().get(0), "001382555");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output1.getCandidateOutput()));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output1.getCandidateOutput().get(0)));
+        Assert.assertEquals(output1.getCandidateOutput().get(0).get(0), Accepted.name()); // classification
+        Assert.assertEquals(output1.getCandidateOutput().get(0).get(1), "001382555"); // duns
+        Assert.assertEquals(output1.getCandidateOutput().get(0).get(2), 7); // confidence code
 
         OutputRecord output2 = output.getResult().get(1); // Google USA - 6 - AZZZAZZZFFZ
-        //System.out.println(JsonUtils.pprint(output2));
+        // System.out.println(JsonUtils.pprint(output2));
         Assert.assertTrue(output2.isMatched());
         Assert.assertEquals(output2.getOutput().get(0), "060902413");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output2.getCandidateOutput()));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output2.getCandidateOutput().get(0)));
+        Assert.assertEquals(output2.getCandidateOutput().get(0).get(0), Accepted.name()); // classification
+        Assert.assertEquals(output2.getCandidateOutput().get(0).get(1), "060902413"); // duns
+        Assert.assertEquals(output2.getCandidateOutput().get(0).get(2), 6); // confidence code
 
-        OutputRecord output3 = output.getResult().get(2); // Google UK - 6 - AZZZZZZZZFZ
-        //System.out.println(JsonUtils.pprint(output3));
+        OutputRecord output3 = output.getResult().get(2); // Google UK - 4 - BZZZZZZZZFZ
+        // System.out.println(JsonUtils.pprint(output3));
         Assert.assertFalse(output3.isMatched());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output3.getCandidateOutput()));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output3.getCandidateOutput().get(0)));
+        Assert.assertEquals(output3.getCandidateOutput().get(0).get(0), Rejected.name()); // classification
+        Assert.assertEquals(output3.getCandidateOutput().get(0).get(1), "239896579"); // duns
+        Assert.assertEquals(output3.getCandidateOutput().get(0).get(2), 4); // confidence code
 
         OutputRecord output4 = output.getResult().get(3); // BP - 7 - AZZAZZZZZFZ
-        //System.out.println(JsonUtils.pprint(output4));
+        // System.out.println(JsonUtils.pprint(output4));
         Assert.assertTrue(output4.isMatched());
         Assert.assertEquals(output4.getOutput().get(0), "210042669");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output4.getCandidateOutput()));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output4.getCandidateOutput().get(0)));
+        Assert.assertEquals(output4.getCandidateOutput().get(0).get(0), Accepted.name()); // classification
+        Assert.assertEquals(output4.getCandidateOutput().get(0).get(1), "210042669"); // duns
+        Assert.assertEquals(output4.getCandidateOutput().get(0).get(2), 7); // confidence code
     }
 
     @Test(groups = "functional")
@@ -199,7 +222,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         Assert.assertTrue(output.getResult().get(0).isMatched());
-        String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(2).toString();
+        String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(3).toString();
         Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
         Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
     }
@@ -291,11 +314,11 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         Assert.assertEquals(output.getStatistics().getRowsMatched().intValue(), data.length);
         // MatchGrade is AAAAAAAAAAA, if it was matched by DUNS
-        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(2), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
+        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
+        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
     }
 
     @Test(groups = "functional")
