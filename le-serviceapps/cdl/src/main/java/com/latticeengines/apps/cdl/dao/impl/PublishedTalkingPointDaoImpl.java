@@ -51,7 +51,7 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
 
         int index = 0;
         for (String attr : attributes) {
-            query.setParameter(String.format("attr%d", index++), "'%{!" + attr + "}%'");
+            query.setParameter(String.format("attr%d", index++), "%{!" + attr + "}%");
         }
 
         query.setParameter("tenant", MultiTenantContext.getTenant());
