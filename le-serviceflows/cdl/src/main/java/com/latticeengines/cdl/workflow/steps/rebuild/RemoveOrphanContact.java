@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -53,6 +54,10 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
     @Override
     public void execute() {
         bootstrap();
+        contactTable = attemptGetTableRole(ConsolidatedContact, false);
+        if (contactTable == null) {
+            resetEntity(Contact);
+        }
         if (isToReset(Contact)) {
             log.info("Should reset contact serving store, skip this step.");
         } else {
@@ -108,7 +113,7 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
 
     private HdfsDataUnit getContactData() {
         TableRoleInCollection contactRole = Contact.getBatchStore();
-        contactTable = attemptGetTableRole(contactRole, true);
+        Preconditions.checkNotNull(contactTable, "Must have ConsolidatedContact table.");
         return contactTable.toHdfsDataUnit("Contact");
     }
 
