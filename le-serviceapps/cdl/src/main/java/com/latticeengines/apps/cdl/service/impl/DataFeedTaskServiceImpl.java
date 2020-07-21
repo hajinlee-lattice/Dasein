@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -361,6 +362,24 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
                 }
                 return Pair.of(getDataFeedTaskUniqueName(customerSpace, task), importSystem);
             }).filter(pair -> pair.getValue() != null).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        }
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, List<String>> getSystemNameToUniqueIdsMap(String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        List<DataFeedTaskSummary> allSummaries = dataFeedTaskEntityMgr.getSummaryByDataFeed(customerSpace);
+        if (CollectionUtils.isNotEmpty(allSummaries)) {
+            Map<String, List<String>> systemToUniqueIdsMap = new HashMap<>();
+            allSummaries.forEach(taskSummary -> {
+                String systemName = getSystemNameFromFeedType(taskSummary.getFeedType());
+                if (StringUtils.isNotEmpty(systemName)) {
+                    systemToUniqueIdsMap.putIfAbsent(systemName, new ArrayList<>());
+                    systemToUniqueIdsMap.get(systemName).add(taskSummary.getUniqueId());
+                }
+            });
+            return systemToUniqueIdsMap;
         }
         return Collections.emptyMap();
     }
