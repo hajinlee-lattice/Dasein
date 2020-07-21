@@ -40,6 +40,11 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     }
 
     @Override
+    public List<PrimeColumn> getCandidateColumns() {
+        return _self.getCandidateColumnsFromDistributedCache();
+    }
+
+    @Override
     public List<DataBlock> getBlockElements(List<String> blockIds) {
         List<DataBlock> blockList = _self.getBlockElementsFromDistributedCache();
         if (CollectionUtils.isNotEmpty(blockIds)) {
@@ -77,6 +82,13 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     public DataBlockEntitlementContainer getBlockDrtMatrixFromDistributedCache() {
         String url = constructUrl("/drt-matrix");
         return get("get block drt matrix", url, DataBlockEntitlementContainer.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Cacheable(cacheNames = CacheName.Constants.PrimeMetadataCacheName, key = "T(java.lang.String).format(\"candidate_columns\")", unless = "#result == null")
+    public List<PrimeColumn> getCandidateColumnsFromDistributedCache() {
+        String url = constructUrl("/candidate-columns");
+        return getKryo("get candidate columns", url, List.class);
     }
 
 }

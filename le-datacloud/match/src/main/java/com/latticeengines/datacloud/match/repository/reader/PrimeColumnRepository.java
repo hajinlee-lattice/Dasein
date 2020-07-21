@@ -18,4 +18,6 @@ public interface PrimeColumnRepository extends BaseJpaRepository<PrimeColumn, Lo
     @QueryHints(value = { @QueryHint(name = "javax.persistence.query.timeout", value = "90000") })
     List<PrimeColumn> findAllByPrimeColumnIdIn(Collection<String> elementIds);
 
+    List<PrimeColumn> findAllByDataBlocks_Block(String block);
+
 }
