@@ -72,6 +72,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     List<DataFeedTaskSummary> getSummaryBySourceAndDataFeed(String source, String customerSpace);
 
+    List<DataFeedTaskSummary> getSummaryByDataFeed(String customerSpace);
+
     boolean existsBySourceAndFeedType(String source, String feedType, String customerSpace);
 
 }

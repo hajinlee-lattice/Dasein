@@ -249,13 +249,16 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
     private Set<String> validatePriorityChange(String customerSpace, List<S3ImportSystem> changedSystems) {
         Set<String> changedSystemNames =
                 changedSystems.stream().map(S3ImportSystem::getName).collect(Collectors.toSet());
-        Map<String, S3ImportSystem> taskSystemMap = dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
+        Map<String, List<String>> systemToUniqueIdsMap = dataFeedTaskService.getSystemNameToUniqueIdsMap(customerSpace);
         Set<String> warningSystems = new HashSet<>();
-        if (MapUtils.isNotEmpty(taskSystemMap)) {
-            taskSystemMap.forEach((taskName, importSystem) -> {
-                if (changedSystemNames.contains(importSystem.getName())) {
-                    if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, taskName)) {
-                        warningSystems.add(importSystem.getName());
+        if (MapUtils.isNotEmpty(systemToUniqueIdsMap)) {
+            systemToUniqueIdsMap.forEach((systemName, uniqueIdList) -> {
+                if (changedSystemNames.contains(systemName)) {
+                    for (String uniqueId: uniqueIdList) {
+                        if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, uniqueId)) {
+                            warningSystems.add(systemName);
+                            break;
+                        }
                     }
                 }
             });

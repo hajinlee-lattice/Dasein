@@ -541,6 +541,17 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<DataFeedTaskSummary> getSummaryByDataFeed(String customerSpace) {
+        List<Object[]> result = datafeedTaskRepository.findSummaryByDataFeed(customerSpace);
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyList();
+        } else {
+            return result.stream().map(this::getDataFeedTaskSummary).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public boolean existsBySourceAndFeedType(String source, String feedType, String customerSpace) {
         return datafeedTaskRepository.countBySourceAndFeedType(source, feedType, customerSpace) > 0;
     }
