@@ -22,6 +22,7 @@ import com.latticeengines.apps.cdl.entitymgr.S3ImportSystemEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -249,13 +250,17 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
     private Set<String> validatePriorityChange(String customerSpace, List<S3ImportSystem> changedSystems) {
         Set<String> changedSystemNames =
                 changedSystems.stream().map(S3ImportSystem::getName).collect(Collectors.toSet());
-        Map<String, S3ImportSystem> taskSystemMap = dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
+        Map<String, List<String>> systemToUniqueIdsMap = dataFeedTaskService.getSystemNameToUniqueIdsMap(customerSpace);
         Set<String> warningSystems = new HashSet<>();
-        if (MapUtils.isNotEmpty(taskSystemMap)) {
-            taskSystemMap.forEach((taskName, importSystem) -> {
-                if (changedSystemNames.contains(importSystem.getName())) {
-                    if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, taskName)) {
-                        warningSystems.add(importSystem.getName());
+        if (MapUtils.isNotEmpty(systemToUniqueIdsMap)) {
+            log.info("System to UniqueId maps: " + JsonUtils.serialize(systemToUniqueIdsMap));
+            systemToUniqueIdsMap.forEach((systemName, uniqueIdList) -> {
+                if (changedSystemNames.contains(systemName)) {
+                    for (String uniqueId: uniqueIdList) {
+                        if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, uniqueId)) {
+                            warningSystems.add(systemName);
+                            break;
+                        }
                     }
                 }
             });

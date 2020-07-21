@@ -556,12 +556,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueName) {
-        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTaskByTaskName(customerSpace, taskUniqueName, false);
-        if (dataFeedTask != null) {
-            return CollectionUtils.isNotEmpty(getPAConsumedActions(dataFeedTask.getUniqueId()));
-        }
-        return false;
+    public boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueId) {
+        return CollectionUtils.isNotEmpty(getPAConsumedActions(taskUniqueId));
     }
 
     @Override

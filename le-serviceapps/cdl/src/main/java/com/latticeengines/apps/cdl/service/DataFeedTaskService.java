@@ -89,6 +89,13 @@ public interface DataFeedTaskService {
     Map<String, S3ImportSystem> getTemplateToSystemObjectMap(String customerSpace);
 
     /**
+     *
+     *
+     * @return S3ImportSystemName -> List of templateUniqueId
+     */
+    Map<String, List<String>> getSystemNameToUniqueIdsMap(String customerSpace);
+
+    /**
      * \
      * @return templateName -> DataFeedTask
      */
