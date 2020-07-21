@@ -170,6 +170,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         verifyColumns.add(SORT_KEY);
         Map<String, List<String>> expectedDetail2Map = prepareExpectedDetail2Result();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
+            log.info(debugStr(record, verifyColumns));
             Object detail1 = record.get(InterfaceName.Detail1.name());
             if (detail1 != null) {
                 List<String> expectedDetail2 = expectedDetail2Map.get(detail1.toString());
@@ -179,7 +180,6 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(detail2Arr, expectedDetail2);
             }
             counter.incrementAndGet();
-            log.info(debugStr(record, verifyColumns));
         });
         log.info("Number of records = {}", counter.get());
         return true;
