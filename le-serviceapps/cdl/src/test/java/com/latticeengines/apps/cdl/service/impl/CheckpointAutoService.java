@@ -504,7 +504,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 }
             } else {
-                hdfsPath = hdfsPath.replaceAll("__TABLE_DATA_DIR__", tableName);
+                hdfsPath = hdfsPath.replaceAll(TABLE_DATA_DIR, tableName);
             }
 
             log.info("Parse extract path {}.", hdfsPath);
@@ -525,8 +525,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
                 if (hdfsPathSegment2.contains(tenantNames[0])) {
-                    String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
-                            + "/__TABLE_DATA_DIR__";
+                    String hdfsPathIntermediatePattern = String.format("%s/%s", hdfsPathSegment1.replaceAll(tenantNames[0],
+                            testTenant), TABLE_DATA_DIR); //
                     log.info("hdfsPath is {}", hdfsPath);
                     log.info("hdfsPathIntermediatePattern is {}.", hdfsPathIntermediatePattern);
                     String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
@@ -538,7 +538,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 }
                 log.info("tableName is {}", hdfsPathSegment2);
             }
-            Assert.assertFalse(str.contains("__TABLE_DATA_DIR__"));
+            Assert.assertFalse(str.contains(TABLE_DATA_DIR));
             tables.add(JsonUtils.deserialize(str, Table.class));
         }
 

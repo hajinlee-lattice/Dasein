@@ -111,6 +111,7 @@ public abstract class CheckpointServiceBase {
     protected static final String POD_DEFAULT = "/Pods/Default/";
     protected static final String POD_QA = "/Pods/QA/";
     protected static final String POD_PATTERN = "/Pods/%s/";
+    protected static final String TABLE_DATA_DIR = "__TABLE_DATA_DIR__";
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
