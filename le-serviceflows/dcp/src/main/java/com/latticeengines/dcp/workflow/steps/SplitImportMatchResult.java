@@ -2,11 +2,7 @@ package com.latticeengines.dcp.workflow.steps;
 
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.Classification;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
-import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
-import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
-import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.NameMatchScore;
-import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.OperatingStatusText;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -306,15 +302,12 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         return dataBlockDispNames.containsKey(cm.getAttrName());
     }
 
-    // to be changed to metadata driven
     private Map<String, String> candidateFieldDisplayNames() {
+        List<PrimeColumn> columns = primeMetadataProxy.getCandidateColumns();
         Map<String, String> dispNames = new HashMap<>();
-        dispNames.put(MatchedDuns, "Matched D-U-N-S Number");
-        dispNames.put(ConfidenceCode, "Confidence Code");
-        dispNames.put(MatchGrade, "Match Grade");
-        dispNames.put(MatchDataProfile, "Match Data Profile");
-        dispNames.put(NameMatchScore, "Name Match Score");
-        dispNames.put(OperatingStatusText, "Operating Status Text");
+        columns.forEach(c -> {
+            dispNames.put(c.getPrimeColumnId(), c.getDisplayName());
+        });
         return dispNames;
     }
 

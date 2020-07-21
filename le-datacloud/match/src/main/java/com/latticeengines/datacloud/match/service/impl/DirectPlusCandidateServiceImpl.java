@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 @Service
 public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateService {
@@ -77,6 +78,24 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
                 Pair.of(MatchDataProfile, String.class), //
                 Pair.of(NameMatchScore, String.class), //
                 Pair.of(OperatingStatusText, String.class) //
+        );
+    }
+
+    @Override
+    public List<PrimeColumn> candidateColumns() {
+        return Arrays.asList( //
+                new PrimeColumn(MatchedDuns, "Matched D-U-N-S Number", //
+                        "matchCandidates.organization.duns"), //
+                new PrimeColumn(ConfidenceCode, "Match Confidence Code", //
+                        "matchCandidates.matchQualityInformation.confidenceCode"), //
+                new PrimeColumn(MatchGrade, "Match Grade", //
+                        "matchCandidates.matchQualityInformation.matchGrade"), //
+                new PrimeColumn(MatchDataProfile, "Match Data Profile", //
+                        "matchCandidates.matchQualityInformation.matchDataProfile"), //
+                new PrimeColumn(NameMatchScore, "Name Match Score", //
+                        "matchCandidates.matchQualityInformation.nameMatchScore"), //
+                new PrimeColumn(OperatingStatusText, "Operating Status Text", //
+                        "matchCandidates.matchQualityInformation.confidenceCode") //
         );
     }
 
