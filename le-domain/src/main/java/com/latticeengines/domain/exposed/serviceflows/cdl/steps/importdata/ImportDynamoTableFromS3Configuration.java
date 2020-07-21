@@ -10,6 +10,8 @@ public class ImportDynamoTableFromS3Configuration extends ImportExportS3StepConf
 
     private String dynamoSignature;
 
+    private String contextKey;
+
     public List<String> getTableNames() {
         return tableNames;
     }
@@ -24,5 +26,13 @@ public class ImportDynamoTableFromS3Configuration extends ImportExportS3StepConf
 
     public void setDynamoSignature(String dynamoSignature) {
         this.dynamoSignature = dynamoSignature;
+    }
+
+    public String getContextKey() {
+        return contextKey;
+    }
+
+    public void setContextKey(String contextKey) {
+        this.contextKey = contextKey;
     }
 }

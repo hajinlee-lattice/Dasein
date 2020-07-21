@@ -27,7 +27,7 @@ public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfigura
     }
 
     @Override
-    public boolean registerDataUnit() {
+    public boolean getRegisterDataUnit() {
         return true;
     }
 
