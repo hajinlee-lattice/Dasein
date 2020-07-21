@@ -26,8 +26,10 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -45,16 +47,19 @@ public class UploadServiceImpl implements UploadService {
     @Inject
     private MetadataService metadataService;
 
+    @Inject
+    private SourceFileProxy sourceFileProxy;
+
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
-        return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
+        return uploads.stream().map(upload -> getUploadDetails(customerSpace, upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
-        return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
+        return uploads.stream().map(upload -> getUploadDetails(customerSpace, upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
@@ -72,7 +77,7 @@ public class UploadServiceImpl implements UploadService {
         upload.setUploadConfig(uploadConfig);
         uploadEntityMgr.create(upload);
 
-        return getUploadDetails(upload, Boolean.TRUE);
+        return getUploadDetails(customerSpace, upload, Boolean.TRUE);
     }
 
     @Override
@@ -150,7 +155,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public UploadDetails setLatestStatistics(String uploadId, Long statsId) {
+    public UploadDetails setLatestStatistics(String customerSpace, String uploadId, Long statsId) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
@@ -167,13 +172,13 @@ public class UploadServiceImpl implements UploadService {
         }
         statisticsEntityMgr.setAsLatest(container);
         upload.setStatistics(container.getStatistics());
-        return getUploadDetails(upload, Boolean.TRUE);
+        return getUploadDetails(customerSpace, upload, Boolean.TRUE);
     }
 
     @Override
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
-        return getUploadDetails(upload, includeConfig);
+        return getUploadDetails(customerSpace, upload, includeConfig);
     }
 
     @Override
@@ -228,7 +233,7 @@ public class UploadServiceImpl implements UploadService {
         return randomUploadId;
     }
 
-    private UploadDetails getUploadDetails(Upload upload, Boolean includeConfig) {
+    private UploadDetails getUploadDetails(String customerSpace, Upload upload, Boolean includeConfig) {
         UploadDetails details = new UploadDetails();
         details.setUploadId(upload.getUploadId());
         details.setStatistics(upload.getStatistics());
@@ -245,6 +250,19 @@ public class UploadServiceImpl implements UploadService {
         details.setUploadCreatedTime(upload.getCreated().getTime());
         details.setCreatedBy(upload.getCreatedBy());
         details.setProgressPercentage(upload.getProgressPercentage());
+
+        if(upload.getUploadConfig().getDropFilePath() != null) {
+            String fileId = upload.getUploadConfig().getDropFilePath();
+            fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
+            SourceFile file = sourceFileProxy.findByName(customerSpace, fileId);
+            details.setDisplayName(file != null ? file.getDisplayName() : fileId);
+        } else {
+            String file = upload.getUploadConfig().getUploadRawFilePath();
+            if (file != null) {
+                file = file.substring(file.lastIndexOf('/') + 1);
+            }
+            details.setDisplayName(file);
+        }
         return details;
     }
 }

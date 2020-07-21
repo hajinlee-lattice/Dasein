@@ -46,7 +46,6 @@ import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.dcp.UploadJobStep;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -54,7 +53,6 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
-import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Service
 public class UploadServiceImpl implements UploadService, FileDownloader<UploadFileDownloadConfig> {
@@ -78,9 +76,6 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Inject
     private WorkflowJobService workflowJobService;
-
-    @Inject
-    private SourceFileProxy sourceFileProxy;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -127,15 +122,13 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         Preconditions.checkState(CollectionUtils.isNotEmpty(pathsToDownload),
                 String.format("empty settings in upload config for %s", uploadId));
 
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         String fileId = config.getDropFilePath();
         if (fileId == null) {
             fileId = config.getUploadRawFilePath();
         }
         fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
-        String displayName;
-        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, fileId);
-        displayName = (sourceFile == null) ? fileId : sourceFile.getDisplayName();
+
+        String displayName = upload.getDisplayName();
         String displayPrefix = displayName.substring(0, displayName.lastIndexOf('.')); // strip file extension
 
         response.setHeader("Content-Encoding", "gzip");

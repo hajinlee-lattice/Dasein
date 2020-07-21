@@ -142,7 +142,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         UploadDetails upload2 = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId(), Boolean.FALSE);
         Assert.assertNull(upload2.getStatistics());
 
-        upload2 = uploadService.setLatestStatistics(upload.getUploadId(), container.getPid());
+        upload2 = uploadService.setLatestStatistics(mainCustomerSpace, upload.getUploadId(), container.getPid());
         Assert.assertNotNull(upload2.getStatistics());
         RetryTemplate retry = RetryUtils.getRetryTemplate(5,
                 Collections.singleton(AssertionError.class), null);
@@ -164,7 +164,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         container1.setStatistics(stats);
         uploadService.appendStatistics(upload.getUploadId(), container1);
         Assert.assertNotEquals(container1.getPid(), container.getPid());
-        UploadDetails upload4 = uploadService.setLatestStatistics(upload.getUploadId(), container1.getPid());
+        UploadDetails upload4 = uploadService.setLatestStatistics(mainCustomerSpace, upload.getUploadId(), container1.getPid());
         Assert.assertEquals(upload4.getStatistics().getImportStats().getFailedIngested(), Long.valueOf(3));
         retry.execute(ctx -> {
             UploadDetails u = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId(), Boolean.FALSE);
