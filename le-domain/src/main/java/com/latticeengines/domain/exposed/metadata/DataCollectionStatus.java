@@ -363,6 +363,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         return this.detail.getTimelineVersionMap();
     }
 
+    @JsonProperty("timeline_rebuild_flag")
+    public void setTimelineRebuildFlag(Boolean timelineRebuildFlag) {
+        this.detail.setTimelineRebuildFlag(timelineRebuildFlag);
+    }
+
+    @JsonProperty("timeline_rebuild_flag")
+    public Boolean getTimelineRebuildFlag() {
+        return this.detail.isTimelineRebuildFlag();
+    }
+
     @JsonProperty("TransactionRebuilt")
     public Boolean getTransactionRebuilt() {
         return this.detail.getTransactionRebuilt();
