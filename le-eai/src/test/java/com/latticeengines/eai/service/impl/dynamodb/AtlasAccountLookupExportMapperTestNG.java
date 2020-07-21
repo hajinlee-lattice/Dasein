@@ -129,7 +129,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
     @AfterClass(groups = "dynamo")
     public void cleanup() throws IOException {
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.INFO);
-//        dynamoService.deleteTable(dynamoTableName);
+        dynamoService.deleteTable(dynamoTableName);
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
         super.clear();
@@ -272,7 +272,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
                 .set(COLUMN_ID, ATTR_LOOKUP_ID_1) //
                 .set(DELETED, null) //
                 .set(FROM_STRING, toLookupId1(2)) //
-                .set(TO_STRING, toLookupId1(200)) //
+                .set(TO_STRING, toLookupId1(200).toUpperCase()) // should be converted to lowercase by mapper
                 .build() //
         );
         // delete lookup Id value
@@ -318,11 +318,11 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
     }
 
     private String toLookupId1(int idx) {
-        return String.format("%09d", 200000 + idx);
+        return String.format("aaa%09d", 200000 + idx);
     }
 
     private String toLookupId2(int idx) {
-        return String.format("%09d", 300000 + idx);
+        return String.format("bbb%09d", 300000 + idx);
     }
 
 }
