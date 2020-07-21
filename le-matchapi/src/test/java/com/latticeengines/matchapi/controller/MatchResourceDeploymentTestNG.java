@@ -103,6 +103,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
 
+    @Value("${datacloud.match.block.attempts.max}")
+    private Integer maxBlockAttempts;
+
     @Inject
     private YarnClient yarnClient;
 
@@ -429,7 +432,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 appId.toString());
         Set<String> killedAppIds = new HashSet<>();
         command = waitForMatchBlockCreated(command, appId);
-        while (killedAppIds.size() < 2) {
+        while (killedAppIds.size() < maxBlockAttempts) {
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
             blockAppId = command.getMatchBlocks().get(0).getApplicationId();
             if (killedAppIds.contains(blockAppId)) {
