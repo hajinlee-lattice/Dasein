@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,9 @@ import com.latticeengines.domain.exposed.spark.cdl.TruncateLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConstants;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.common.FilterByJoinConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
+import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
@@ -61,11 +64,14 @@ import com.latticeengines.spark.exposed.job.cdl.MergeLatticeAccount;
 import com.latticeengines.spark.exposed.job.cdl.TruncateLatticeAccount;
 import com.latticeengines.spark.exposed.job.common.CopyJob;
 import com.latticeengines.spark.exposed.job.common.CreateChangeListJob;
+import com.latticeengines.spark.exposed.job.common.FilterByJoinJob;
 import com.latticeengines.spark.exposed.job.common.FilterChangelistJob;
+import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
 @Lazy
 @Component(EnrichLatticeAccount.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAccountStepConfiguration> {
 
     static final String BEAN_NAME = "enrichLatticeAccount";
@@ -88,32 +94,39 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     private Table newLatticeAccountTable = null;
     private Table latticeAccountChangeListTable = null;
     private Table accountBatchStore = null;
+    private Table accountChangeList = null;
     private String joinKey;
     private String ldcTablePrefix;
-    private DataUnit accountChangeListDU;
-    private DataUnit oldLatticeAccountDU;
+    private DataUnit accountChangeListDU = null;
+    private DataUnit oldLatticeAccountDU = null;
     private HdfsDataUnit deleted = null;
     private HdfsDataUnit changed = null;
 
     private List<String> fetchAttrs;
+    private List<String> attrs2Remove;
+    private List<String> attrs2Add;
+    private List<String> attrs2Update;
     private boolean fetchAll;
     private boolean rebuildDownstream;
+    private boolean hasAttrChanges;
     private List<DataUnit> changeLists = new ArrayList<>();
+    private ColumnSelection allActiveColumns;
 
     @Override
     public void execute() {
         bootstrap();
-        if (shouldDoNothing()) {
-            linkInactiveTable(LatticeAccount);
+
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpaceStr.toLowerCase(),
+                Arrays.asList(LATTICE_ACCOUNT_TABLE_NAME, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME));
+        boolean shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
+        if (shortCutMode) {
+            log.info("Found LatticeAccount and LatticeAccount changelist in context, go through short-cut mode.");
+            String latticeAccountTableName = tablesInCtx.get(0).getName();
+            dataCollectionProxy.upsertTable(customerSpace.toString(), latticeAccountTableName, LatticeAccount,
+                    inactive);
         } else {
-            Table tableInCtx = getTableSummaryFromKey(customerSpaceStr.toLowerCase(), LATTICE_ACCOUNT_TABLE_NAME);
-            boolean shortCutMode = tableInCtx != null;
-            if (shortCutMode) {
-                // LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME exists for sure, if applicable
-                log.info("Found Lattice account in context, go through short-cut mode.");
-                String latticeAccountTableName = tableInCtx.getName();
-                dataCollectionProxy.upsertTable(customerSpace.toString(), latticeAccountTableName,
-                        LatticeAccount, inactive);
+            if (shouldDoNothing()) {
+                linkInactiveTable(LatticeAccount);
             } else {
                 preExecution();
                 buildLatticeAccount();
@@ -136,9 +149,10 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             fetchAttrs = getFetchAttrs();
             fetchAll = shouldFetchAll();
             rebuildDownstream = shouldRebuildDownstream();
-            boolean doNothing = !(hasAccountChange || fetchAll|| rebuildDownstream);
-            log.info("hasAccountChange={}, fetchAll={}, rebuildDownstream={}: doNothing={}",
-                    hasAccountChange, fetchAll, rebuildDownstream, doNothing);
+            hasAttrChanges = hasAttrChanges();
+            boolean doNothing = !(hasAccountChange || fetchAll || rebuildDownstream || hasAttrChanges);
+            log.info("hasAccountChange={}, fetchAll={}, rebuildDownstream={}, hasAttrChanges={}: doNothing={}",
+                    hasAccountChange, fetchAll, rebuildDownstream, hasAttrChanges, doNothing);
             return doNothing;
         }
     }
@@ -155,14 +169,24 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MAJOR_CHANGE, Boolean.class));
         boolean hasDataCloudMinorChange = //
                 Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MINOR_CHANGE, Boolean.class));
-        boolean hasAttrs2Add = !findAttrs2Add().isEmpty();
-        Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
+        accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
         boolean missAccountChangeList = isChanged(ConsolidatedAccount) && (accountChangeList == null);
-        boolean shouldFetchAll = hasDataCloudMajorChange || hasDataCloudMinorChange || hasAttrs2Add || missAccountChangeList;
-        log.info("hasDataCloudMajorChange={}, hasDataCloudMinorChange={}, hasAttrs2Add={}, " + //
-                        "missAccountChangeList={}: shouldFetchAll={}", //
-                hasDataCloudMajorChange, hasDataCloudMinorChange, hasAttrs2Add, missAccountChangeList, shouldFetchAll);
+        boolean missLatticeAccountTable = (oldLatticeAccountTable == null);
+        boolean shouldFetchAll = hasDataCloudMajorChange || hasDataCloudMinorChange || missAccountChangeList
+                || missLatticeAccountTable;
+        log.info("hasDataCloudMajorChange={}, hasDataCloudMinorChange={}, missAccountChangeList={}," + //
+                "missLatticeAccountTable={}: shouldFetchAll={}", //
+                hasDataCloudMajorChange, hasDataCloudMinorChange, missAccountChangeList, missLatticeAccountTable,
+                shouldFetchAll);
         return shouldFetchAll;
+    }
+
+    private boolean hasAttrChanges() {
+        attrs2Remove = findAttrs2Remove();
+        attrs2Add = findAttrs2Add();
+        attrs2Update = findAttrs2Update();
+        return CollectionUtils.isNotEmpty(attrs2Remove) || CollectionUtils.isNotEmpty(attrs2Add)
+                || CollectionUtils.isNotEmpty(attrs2Update);
     }
 
     private void preExecution() {
@@ -170,14 +194,25 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         log.info("joinKey {}", joinKey);
         ldcTablePrefix = LatticeAccount.name();
         accountBatchStore = attemptGetTableRole(BusinessEntity.Account.getBatchStore(), true);
+        allActiveColumns = selectActiveDataCloudAttrs();
+    }
+
+    protected void postExecution() {
+        if (rebuildDownstream) {
+            markRebuildFlag();
+        } else {
+            saveLatticeAccountChangelist();
+        }
+
+        saveLatticeAccount();
     }
 
     private void buildLatticeAccount() {
-        if (rebuildDownstream) {
-            log.info("EnrichLatticeAccount, rebuild LatticeAccount and full account table");
+        if (fetchAll) {
+            log.info("EnrichLatticeAccount, rebuild LatticeAccount by fetching all accounts");
             rebuildLatticeAccount();
         } else {
-            log.info("EnrichLatticeAccount, deal with changelist from MergeAccount");
+            log.info("EnrichLatticeAccount, update LatticeAccount based on Account changelist");
             updateLatticeAccount();
         }
     }
@@ -191,7 +226,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         HdfsDataUnit selected = select(accountTable);
 
         // fetch by bulk match
-        HdfsDataUnit fetched = fetch(selected);
+        HdfsDataUnit fetched = fetch(selected, allActiveColumns);
 
         // convert to parquet
         CopyConfig copyConfig = new CopyConfig();
@@ -200,109 +235,60 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         SparkJobResult result = runSparkJob(CopyJob.class, copyConfig);
         HdfsDataUnit newLatticeAccount = result.getTargets().get(0);
 
+        // Only create LatticeAccount changelist when rebuildDownstream is set to false,
+        // which means LatticeAccount changelist will be used in downstream
+        if (!rebuildDownstream) {
+            createLatticeAccountChangelist(newLatticeAccount);
+        }
+
         // save LatticeAccount table
         String latticeAccountTableName = NamingUtils.timestamp(ldcTablePrefix);
         newLatticeAccountTable = toTable(latticeAccountTableName, newLatticeAccount);
     }
 
+    // Categorize all possible changes in LatticeAccount table, truncate or fetch
+    // LDC accordingly to update LatticeAccount table and generate changelist.
+    // The principle is to minimize fetch and changelist generation steps
+    // as they can be costly
     private void updateLatticeAccount() {
-        boolean hasNewFetch;
-        boolean hasDelete = false;
+        Preconditions.checkNotNull(oldLatticeAccountTable, "Old LatticeAccount table must exist.");
 
-        HdfsDataUnit enriched = enrich();
-        hasNewFetch = (enriched != null);
-
-        if (!fetchAll) {
-            // If there are LatticeAccountIds to be deleted or attributes to be removed
-            List<String> attrs2Remove = findAttrs2Remove();
-            if (CollectionUtils.isNotEmpty(attrs2Remove) || (deleted != null && deleted.getCount() > 0)) {
-                hasDelete = true;
-                applyDelete(deleted, attrs2Remove);
-            }
-        }
-
-        if (hasNewFetch) {
-            createFetchChangeList(enriched);
-        }
-
-        if (hasNewFetch || hasDelete) {
-            // even it was fetch all, these steps are still useful
-            // Merge with current LatticeAccount table
-            merge(enriched);
-            // Use old and new LatticeAccount table to generate changelist
-            mergeChangeList();
-        } else {
-            log.info("There is no change to LatticeAccount");
-        }
-    }
-
-    /**
-     * When returning null, it means no fetch happened
-     */
-    private HdfsDataUnit enrich() {
-        HdfsDataUnit enriched = null;
-        if (fetchAll) {
-            // even in update mode, still need to fetch for all Accounts
-            rebuildLatticeAccount();
-            enriched = newLatticeAccountTable.toHdfsDataUnit("Enriched");
-        } else {
-            // Filter changelist from MergeAccount to get
-            // 1: <AccountId, LatticeAccountId> pairs with LatticeAccountId added/updated
-            // 2: Rows in changelist with LatticeAccountId deleted
-            Table accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
-            Preconditions.checkNotNull(accountChangeList, "Must have account change list.");
+        if (accountChangeList != null) {
             accountChangeListDU = toDataUnit(accountChangeList, "AccountChangeList");
-            filterChangelist();
-            // If there are LatticeAccountIds changed
-            if ((changed != null) && (changed.getCount() > 0)) {
-                // Run fetch only bulk match
-                enriched = fetch(changed);
-            } else {
-                log.info("Nothing needs to be fetched from LDC.");
-            }
         }
-        return enriched;
-    }
 
-    protected void postExecution() {
-        saveLatticeAccountChangelist();
-        saveLatticeAccount();
-        markRebuildFlag();
-    }
+        // First, filter Account changelist to get deleted accounts
+        // and accounts have changed LatticeAccountId
+        filterChangelist();
 
-    private void saveLatticeAccountChangelist() {
-        if (latticeAccountChangeListTable != null) {
-            log.info("EnrichLatticeAccount, save lattice account changelist table");
-            metadataProxy.createTable(customerSpace.toString(), latticeAccountChangeListTable.getName(), latticeAccountChangeListTable);
-            exportToS3AndAddToContext(latticeAccountChangeListTable, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
-            addToListInContext(TEMPORARY_CDL_TABLES, latticeAccountChangeListTable.getName(), String.class);
+        // When there are deleted accounts or removed attributes,
+        // truncate the LatticeAccount table directly and generate changelist
+        // accordingly
+        if (CollectionUtils.isNotEmpty(attrs2Remove) || (deleted != null && deleted.getCount() > 0)) {
+            truncateLatticeAccount(deleted, attrs2Remove);
         }
-    }
 
-    private void saveLatticeAccount() {
-        if (newLatticeAccountTable != null) { // LatticeAccount table changed or rebuilt
-            log.info("EnrichLatticeAccount, save new LatticeAccount table");
-            metadataProxy.createTable(customerSpace.toString(), newLatticeAccountTable.getName(),
-                    newLatticeAccountTable);
-            dataCollectionProxy.upsertTable(customerSpace.toString(), newLatticeAccountTable.getName(),
-                    LatticeAccount, inactive);
-            exportToS3AndAddToContext(newLatticeAccountTable, LATTICE_ACCOUNT_TABLE_NAME);
-        } else { // No new change -> reuse old version LatticeAccount
-            log.info("EnrichLatticeAccount, use current LatticeAccount table as the latest one");
-            linkInactiveTable(LatticeAccount);
-            putStringValueInContext(LATTICE_ACCOUNT_TABLE_NAME, oldLatticeAccountTable.getName());
+        // When there are attributes added or updated, fetch vertically
+        if (CollectionUtils.isNotEmpty(attrs2Add) || CollectionUtils.isNotEmpty(attrs2Update)) {
+            verticalFetch(attrs2Add, attrs2Update);
         }
-    }
 
-    private void markRebuildFlag() {
-        if (rebuildDownstream) {
-            // inform downstream jobs to treat LatticeAccount as rebuild
-            putObjectInContext(REBUILD_LATTICE_ACCOUNT, true);
+        // When there are accounts have changed LatticeAccountIds, fetch horizontally
+        if ((changed != null) && (changed.getCount() > 0)) {
+            horizontalFetch(changed);
         }
+
+        // Concatenate all possible changelist generated above to
+        // get final LatticeAccount changelist
+        mergeChangeList();
+
+        // save LatticeAccount table
+        String latticeAccountTableName = NamingUtils.timestamp(ldcTablePrefix);
+        newLatticeAccountTable = toTable(latticeAccountTableName, (HdfsDataUnit) oldLatticeAccountDU);
     }
 
     private HdfsDataUnit select(HdfsDataUnit input) {
-        log.info("UpdateAccountExport, select step");
+        log.info("EnrichLatticeAccount, select <AccountId, LatticeAccountId> pairs from Account batch");
 
         CopyConfig config = new CopyConfig();
         List<DataUnit> inputs = new LinkedList<>();
@@ -318,81 +304,226 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         return result.getTargets().get(0);
     }
 
-    // find <AccountId, LatticeAccountId> that has changed or deleted
-    private void filterChangelist() {
-        log.info("EnrichLatticeAccount, filter step");
-
-        FilterChangelistConfig config = new FilterChangelistConfig();
+    private void createLatticeAccountChangelist(HdfsDataUnit newLatticeAccountDU) {
+        log.info("EnrichLatticeAccount, create LatticeAccount changelist for rebuild");
         List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(accountChangeListDU);
+        inputs.add(newLatticeAccountDU); // toTable: new table
+        if (oldLatticeAccountDU != null) {
+            inputs.add(oldLatticeAccountDU); // fromTable: original table
+        }
+        ChangeListConfig config = new ChangeListConfig();
         config.setInput(inputs);
-        config.setKey(InterfaceName.AccountId.name());
-        config.setColumnId(InterfaceName.LatticeAccountId.name());
-        config.setSelectColumns(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name()));
+        config.setJoinKey(joinKey);
+        config.setExclusionColumns(Arrays.asList( //
+                InterfaceName.CDLCreatedTime.name(), //
+                InterfaceName.CDLUpdatedTime.name(), //
+                joinKey, //
+                InterfaceName.LatticeAccountId.name() //
+        ));
+        setPartitionMultiplier(4);
+        SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
+        setPartitionMultiplier(1);
 
-        SparkJobResult result = runSparkJob(FilterChangelistJob.class, config);
-        changed = result.getTargets().get(0);
-        deleted = result.getTargets().get(1);
-        log.info("There are {} accounts have changed LatticeAccountId", changed.getCount());
-        log.info("There are {} accounts deleted", deleted.getCount());
+        // Save change list table
+        String tableName = NamingUtils.timestamp("LatticeAccountChangeList");
+        latticeAccountChangeListTable = toTable(tableName, result.getTargets().get(0));
     }
 
-    private void applyDelete(HdfsDataUnit deletion, List<String> attrs2Remove) {
-        // Only apply deletion when current LatticeAccount table exists
-        if (oldLatticeAccountDU != null) {
-            log.info("EnrichLatticeAccount, apply deletion step");
+    // Filter Account changelist to get deleted accounts
+    // and accounts have changed LatticeAccountId
+    private void filterChangelist() {
+        if (accountChangeListDU != null) {
+            log.info(
+                    "EnrichLatticeAccount, filter Account changelist to get accounts deleted or LatticeAccountId changed");
 
-            TruncateLatticeAccountConfig config = new TruncateLatticeAccountConfig();
-            config.setRemoveAttrs(attrs2Remove);
-            config.setIgnoreAttrs(Arrays.asList( //
-                    InterfaceName.CDLCreatedTime.name(), //
-                    InterfaceName.CDLUpdatedTime.name(), //
-                    joinKey, //
-                    InterfaceName.LatticeAccountId.name() //
-            ));
-            if ((changed != null) && (changed.getCount() > 0)) {
-                // enrich step will handle remove attrs change list
-                config.setIgnoreRemoveAttrsChangeList(true);
-            }
+            FilterChangelistConfig config = new FilterChangelistConfig();
             List<DataUnit> inputs = new LinkedList<>();
-            inputs.add(oldLatticeAccountDU); // source table: current LatticeAccount table
-            if (deletion != null && deletion.getCount() > 0) {
-                inputs.add(deletion); // delete changelist
-            }
+            inputs.add(accountChangeListDU);
             config.setInput(inputs);
-            config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-            SparkJobResult result = runSparkJob(TruncateLatticeAccount.class, config);
+            config.setKey(InterfaceName.AccountId.name());
+            config.setColumnId(InterfaceName.LatticeAccountId.name());
+            config.setSelectColumns(
+                    Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name()));
 
-            // Update latticeAccountDU as new merge base
-            oldLatticeAccountDU = result.getTargets().get(0);
-            if (result.getTargets().get(1).getCount() > 0) {
-                changeLists.add(result.getTargets().get(1));
-            }
+            SparkJobResult result = runSparkJob(FilterChangelistJob.class, config);
+            changed = result.getTargets().get(0);
+            deleted = result.getTargets().get(1);
+            log.info("There are {} accounts have changed LatticeAccountId", changed.getCount());
+            log.info("There are {} accounts deleted", deleted.getCount());
         }
     }
 
-    private HdfsDataUnit fetch(HdfsDataUnit inputData) {
+    private void truncateLatticeAccount(HdfsDataUnit deletion, List<String> attrs2Remove) {
+        log.info("EnrichLatticeAccount, truncate LatticeAccount table directly");
+
+        TruncateLatticeAccountConfig config = new TruncateLatticeAccountConfig();
+        config.setRemoveAttrs(attrs2Remove);
+        config.setIgnoreAttrs(Arrays.asList( //
+                InterfaceName.CDLCreatedTime.name(), //
+                InterfaceName.CDLUpdatedTime.name(), //
+                joinKey, //
+                InterfaceName.LatticeAccountId.name() //
+        ));
+        List<DataUnit> inputs = new LinkedList<>();
+        inputs.add(oldLatticeAccountDU); // source table: current LatticeAccount table
+        if (deletion != null && deletion.getCount() > 0) {
+            inputs.add(deletion); // delete changelist
+        }
+        config.setInput(inputs);
+        config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+        SparkJobResult result = runSparkJob(TruncateLatticeAccount.class, config);
+
+        // Update oldLatticeAccountDU as new base
+        oldLatticeAccountDU = result.getTargets().get(0);
+        if (result.getTargets().get(1).getCount() > 0) {
+            changeLists.add(result.getTargets().get(1));
+        }
+    }
+
+    private void verticalFetch(List<String> attrs2Add, List<String> attrs2Update) {
+        log.info("EnrichLatticeAccount, fetch vertically and merge into LatticeAccount");
+
+        // Merge added & updated attributes and generate ColumnSelection for fetch
+        List<String> changedCols = new ArrayList<>();
+        changedCols.addAll(attrs2Add);
+        changedCols.addAll(attrs2Update);
+        List<Column> colsToFetch = changedCols.stream().map(Column::new).collect(Collectors.toList());
+        ColumnSelection cs = new ColumnSelection();
+        cs.setColumns(colsToFetch);
+
+        // Get vertical changed rows(all rows - changed rows) from LatticeAccount
+        HdfsDataUnit verticalChanged = getVerticalChangedRows();
+        HdfsDataUnit fetched = fetch(verticalChanged, cs);
+        createFetchChangeList(fetched, ChangeListConstants.VerticalMode);
+        // Merge fetched result with existing LatticeAccount Table
+        merge(fetched, ChangeListConstants.VerticalMode);
+    }
+
+    private void horizontalFetch(HdfsDataUnit changedRows) {
+        log.info("EnrichLatticeAccount, fetch horizontally and merge into LatticeAccount");
+
+        // Fetch and select all active attributes
+        HdfsDataUnit fetched = fetch(changedRows, allActiveColumns);
+        createFetchChangeList(fetched, ChangeListConstants.HorizontalMode);
+        // Merge fetched result with existing LatticeAccount Table
+        merge(fetched, ChangeListConstants.HorizontalMode);
+    }
+
+    private HdfsDataUnit getVerticalChangedRows() {
+        HdfsDataUnit verticalChanged = (HdfsDataUnit) oldLatticeAccountDU;
+        // Only do join when deleted data set exists
+        if ((changed != null) && (changed.getCount() > 0)) {
+            FilterByJoinConfig config = new FilterByJoinConfig();
+            config.setKey(InterfaceName.AccountId.name());
+            config.setJoinType("left_anti");
+            SparkJobResult result = runSparkJob(FilterByJoinJob.class, config);
+            verticalChanged = result.getTargets().get(0);
+        }
+        return verticalChanged;
+    }
+
+    private HdfsDataUnit fetch(HdfsDataUnit inputData, ColumnSelection cs) {
         log.info("EnrichLatticeAccount, fetch & match step");
 
         String avroDir = inputData.getPath();
-        MatchInput matchInput = constructMatchInput(avroDir);
+        MatchInput matchInput = constructMatchInput(avroDir, cs);
         MatchCommand command = bulkMatchService.match(matchInput, null);
         log.info("Bulk match finished: {}", JsonUtils.serialize(command));
 
         return bulkMatchService.getResultDataUnit(command, "MatchResult");
     }
 
+    private MatchInput constructMatchInput(String avroDir, ColumnSelection cs) {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
+        matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
+
+        AvroInputBuffer inputBuffer = new AvroInputBuffer();
+        inputBuffer.setAvroDir(avroDir);
+        matchInput.setInputBuffer(inputBuffer);
+
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
+        matchInput.setKeyMap(keyMap);
+        matchInput.setSkipKeyResolution(true);
+
+        matchInput.setCustomSelection(cs);
+
+        matchInput.setFetchOnly(true);
+        matchInput.setDataCloudOnly(true);
+        return matchInput;
+    }
+
+    private void merge(HdfsDataUnit inputData, String creationMode) {
+        log.info("EnrichLatticeAccount, merge fetch result into current LatticeAccount");
+        HdfsDataUnit output = null;
+        SparkJobResult result = null;
+        if (inputData == null) { // no need to really merge
+            output = (HdfsDataUnit) oldLatticeAccountDU;
+        } else {
+            switch (creationMode) {
+            case ChangeListConstants.HorizontalMode:
+                MergeLatticeAccountConfig jobConfig = new MergeLatticeAccountConfig();
+                jobConfig.setInput(Arrays.asList(oldLatticeAccountDU, // old table
+                        inputData // new table
+                ));
+                jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+                setPartitionMultiplier(4);
+                result = runSparkJob(MergeLatticeAccount.class, jobConfig);
+                setPartitionMultiplier(1);
+                output = result.getTargets().get(0);
+                break;
+            case ChangeListConstants.VerticalMode:
+                UpsertConfig upsertConfig = new UpsertConfig();
+                upsertConfig.setJoinKey(InterfaceName.AccountId.name());
+                upsertConfig.setInput(Arrays.asList(oldLatticeAccountDU, inputData));
+                upsertConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+                result = runSparkJob(UpsertJob.class, upsertConfig);
+                output = result.getTargets().get(0);
+                break;
+            default:
+                log.warn("Unsupported creationMode!");
+            }
+        }
+
+        // Update oldLatticeAccountDU as new base
+        oldLatticeAccountDU = output;
+    }
+
+    private void mergeChangeList() {
+        log.info("EnrichLatticeAccount, merge all generated changelists during updateLatticeAccount");
+
+        HdfsDataUnit output;
+        if (changeLists.size() > 1) {
+            MergeImportsConfig config = new MergeImportsConfig();
+            config.setInput(changeLists);
+            // Since it's for appending, no dedup is needed
+            config.setDedupSrc(false);
+            config.setJoinKey(null);
+            config.setAddTimestamps(false);
+
+            SparkJobResult result = runSparkJob(MergeImportsJob.class, config);
+            output = result.getTargets().get(0);
+        } else {
+            output = (HdfsDataUnit) changeLists.get(0);
+        }
+
+        // Save change list table
+        String tableName = NamingUtils.timestamp("LatticeAccountChangeList");
+        latticeAccountChangeListTable = toTable(tableName, output);
+    }
+
     /**
-     * comparing the fetch result with the old table
+     * comparing the fetch result with the old table to generate changelist
      */
-    private void createFetchChangeList(HdfsDataUnit fetchResult) {
-        log.info("EnrichLatticeAccount, generate createFetchChangeList step");
+    private void createFetchChangeList(HdfsDataUnit fetchResult, String creationMode) {
+        log.info("EnrichLatticeAccount, create changelist using the fetch results");
         List<DataUnit> inputs = new LinkedList<>();
         inputs.add(fetchResult); // toTable: new table
         inputs.add(oldLatticeAccountDU); // fromTable: original table
         ChangeListConfig config = new ChangeListConfig();
         config.setInput(inputs);
-        config.setCreationMode(ChangeListConstants.HorizontalMode);
+        config.setCreationMode(creationMode);
         config.setJoinKey(joinKey);
         config.setExclusionColumns(Arrays.asList( //
                 InterfaceName.CDLCreatedTime.name(), //
@@ -406,25 +537,35 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         changeLists.add(result.getTargets().get(0));
     }
 
-    private void merge(HdfsDataUnit inputData) {
-        log.info("EnrichLatticeAccount, merge step");
-        HdfsDataUnit output;
-        if (inputData == null) { // no need to really merge
-            output = (HdfsDataUnit) oldLatticeAccountDU;
-        } else {
-            MergeLatticeAccountConfig jobConfig = new MergeLatticeAccountConfig();
-            jobConfig.setInput(Arrays.asList(
-                    oldLatticeAccountDU, // old table
-                    inputData // new table
-            ));
-            jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-            setPartitionMultiplier(4);
-            SparkJobResult result = runSparkJob(MergeLatticeAccount.class, jobConfig);
-            setPartitionMultiplier(1);
-            output = result.getTargets().get(0);
+    private void saveLatticeAccountChangelist() {
+        if (latticeAccountChangeListTable != null) {
+            log.info("EnrichLatticeAccount, save lattice account changelist table");
+            metadataProxy.createTable(customerSpace.toString(), latticeAccountChangeListTable.getName(),
+                    latticeAccountChangeListTable);
+            exportToS3AndAddToContext(latticeAccountChangeListTable, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
         }
-        String tableName = NamingUtils.timestamp(ldcTablePrefix);
-        newLatticeAccountTable = toTable(tableName, output);
+    }
+
+    private void saveLatticeAccount() {
+        if (newLatticeAccountTable != null) { // LatticeAccount table changed or rebuilt
+            log.info("EnrichLatticeAccount, save new LatticeAccount table");
+            metadataProxy.createTable(customerSpace.toString(), newLatticeAccountTable.getName(),
+                    newLatticeAccountTable);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), newLatticeAccountTable.getName(), LatticeAccount,
+                    inactive);
+            exportToS3AndAddToContext(newLatticeAccountTable, LATTICE_ACCOUNT_TABLE_NAME);
+        } else { // No new change -> reuse old version LatticeAccount
+            log.info("EnrichLatticeAccount, use current LatticeAccount table as the latest one");
+            linkInactiveTable(LatticeAccount);
+            putStringValueInContext(LATTICE_ACCOUNT_TABLE_NAME, oldLatticeAccountTable.getName());
+        }
+    }
+
+    private void markRebuildFlag() {
+        if (rebuildDownstream) {
+            // inform downstream jobs to treat LatticeAccount as rebuild
+            putObjectInContext(REBUILD_LATTICE_ACCOUNT, true);
+        }
     }
 
     private List<String> findAttrs2Remove() {
@@ -456,48 +597,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         return attrs2Add;
     }
 
-    private void mergeChangeList() {
-        log.info("EnrichLatticeAccount, merge LatticeAccount changelist step");
-
-        HdfsDataUnit output;
-        if (changeLists.size() > 1) {
-            MergeImportsConfig config = new MergeImportsConfig();
-            config.setInput(changeLists);
-            // Since it's for appending, no dedup is needed
-            config.setDedupSrc(false);
-            config.setJoinKey(null);
-            config.setAddTimestamps(false);
-
-            SparkJobResult result = runSparkJob(MergeImportsJob.class, config);
-            output = result.getTargets().get(0);
-        } else {
-            output = (HdfsDataUnit) changeLists.get(0);
-        }
-
-        // Save change list table
-        String tableName = NamingUtils.timestamp("LatticeAccountChangeList");
-        latticeAccountChangeListTable = toTable(tableName, output);
-    }
-
-    private MatchInput constructMatchInput(String avroDir) {
-        MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
-        matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
-
-        AvroInputBuffer inputBuffer = new AvroInputBuffer();
-        inputBuffer.setAvroDir(avroDir);
-        matchInput.setInputBuffer(inputBuffer);
-
-        Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
-        matchInput.setKeyMap(keyMap);
-        matchInput.setSkipKeyResolution(true);
-
-        matchInput.setCustomSelection(selectActiveDataCloudAttrs());
-
-        matchInput.setFetchOnly(true);
-        matchInput.setDataCloudOnly(true);
-        return matchInput;
+    private List<String> findAttrs2Update() {
+        // Placecholder, return empty list for now
+        return new ArrayList<>();
     }
 
     private ColumnSelection selectActiveDataCloudAttrs() {
@@ -509,7 +611,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> getFetchAttrs() {
-        //FIXME: (M38) using serving stores in PA is bad practice. need to find a workaround
+        // FIXME: (M38) using serving stores in PA is bad practice. need to find a
+        // workaround
         List<String> modelAttrs = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), false, inactive) //
                 .map(ColumnMetadata::getAttrName) //
