@@ -368,6 +368,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public Map<String, List<String>> getSystemNameToUniqueIdsMap(String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         List<DataFeedTaskSummary> allSummaries = dataFeedTaskEntityMgr.getSummaryByDataFeed(customerSpace);
         if (CollectionUtils.isNotEmpty(allSummaries)) {
             Map<String, List<String>> systemToUniqueIdsMap = new HashMap<>();
