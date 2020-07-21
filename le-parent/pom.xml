@@ -200,9 +200,11 @@
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
         <functional.classes.include>**/*TestNG.java</functional.classes.include>
         <functional.classes.exclude>**/*UnitTestNG.java</functional.classes.exclude>
+        <qaend2end.classes.include>**/*QAEnd2EndTestNG.java</qaend2end.classes.include>
         <surefire.and.failsafe.report.dir>target/test-report</surefire.and.failsafe.report.dir>
         <functional.groups>functional</functional.groups>
         <deployment.groups>deployment</deployment.groups>
+        <qaend2end.groups>qaend2end</qaend2end.groups>
         <infrastructure.groups>infrastructure</infrastructure.groups>
         <unit.groups>unit</unit.groups>
         <load.groups>load</load.groups>
@@ -982,6 +984,66 @@
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>qaend2end</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <shutdown>kill</shutdown>
+                            <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>deployment-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>qa-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${qaend2end.classes.include}</include>
+                                    </includes>
+                                    <groups>${qaend2end.groups}</groups>
+                                    <runOrder>
+                                        alphabetical
+                                    </runOrder>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
