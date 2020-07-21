@@ -61,6 +61,7 @@ import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("workflowApiWorkflowJobService")
 @EnableScheduling
@@ -81,6 +82,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Value("${common.microservice.url}")
     private String microserviceUrl;
+
+    @Inject
+    private JobService jobService;
 
     @Inject
     private JobCacheService jobCacheService;
@@ -118,6 +122,63 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public WorkflowJob getWorkflowJobByPid(String customerSpace, Long workflowPid) {
         return workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+    }
+
+    @Override
+    @WithCustomerSpace
+    public Boolean cancelWorkflowByWorkflowJobPid(String customerSpace, Long workflowJobPid) {
+        // TODO - seems changing blank application ID status to CANCELLED won't prevent submitting. Can only cancel with real/fake appId now
+        // TODO - so this method is not open to any API
+        WorkflowJob workflowJob = getWorkflowJobByPid(customerSpace, workflowJobPid);
+        if (workflowJob == null) {
+            throw new IllegalStateException(String.format("WorkflowJob with pid %s not found.", workflowJobPid));
+        }
+        return cancelWorkflow(customerSpace, workflowJob);
+    }
+
+    @Override
+    @WithCustomerSpace
+    public Boolean cancelWorkflowByApplicationId(String customerSpace, String applicationId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            throw new IllegalStateException(String.format("WorkflowJob with appId %s not found.", applicationId));
+        }
+        return cancelWorkflow(customerSpace, workflowJob);
+    }
+
+    @WithCustomerSpace
+    private Boolean cancelWorkflow(String customerSpace, WorkflowJob workflowJob) {
+        String podId = CamilleEnvironment.getPodId();
+        try {
+            lockEnvironment(podId); // share lock with workflow throttling submission
+            String appId = workflowJob.getApplicationId();
+            if (StringUtils.isNotBlank(appId) && !FakeApplicationId.isFakeApplicationId(appId)) {
+                jobService.killJob(ApplicationId.fromString(appId));
+                WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.deleteByWorkflowPid(workflowJob.getPid());
+                if (jobUpdate == null) {
+                    log.warn("WorkflowJobUpdate is missing for workflowJob pid=" + workflowJob.getPid());
+                }
+
+                jobCacheService.evict(MultiTenantContext.getTenant());
+                if (workflowJob.getWorkflowId() != null) {
+                    jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                }
+                updateStatus(workflowJob);
+            }
+            updateStatus(workflowJob);
+        } catch (Exception e) {
+            log.error("Failed to cancel workflow for tenant {}: Pid = {}", customerSpace, workflowJob.getPid());
+            throw e;
+        } finally {
+            unlockEnvironment(podId);
+        }
+        WorkflowJob canceledJob = getWorkflowJobByPid(customerSpace, workflowJob.getPid());
+        return JobStatus.CANCELLED.name().equals(canceledJob.getStatus());
+    }
+
+    private void updateStatus(WorkflowJob workflowJob) {
+        workflowJob.setStatus(JobStatus.KILLED.name());
+        workflowJobEntityMgr.update(workflowJob);
     }
 
     @Override

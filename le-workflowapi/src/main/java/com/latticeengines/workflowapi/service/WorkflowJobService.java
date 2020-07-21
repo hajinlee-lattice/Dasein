@@ -17,6 +17,10 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 public interface WorkflowJobService {
     WorkflowJob getWorkflowJobByPid(String customerSpace, Long workflowPid);
 
+    Boolean cancelWorkflowByWorkflowJobPid(String customerSpace, Long workflowJobPid);
+
+    Boolean cancelWorkflowByApplicationId(String customerSpace, String applicationId);
+
     WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId);
 
     WorkflowExecutionId getWorkflowExecutionIdByWorkflowPid(String customerSpace, Long pid);
