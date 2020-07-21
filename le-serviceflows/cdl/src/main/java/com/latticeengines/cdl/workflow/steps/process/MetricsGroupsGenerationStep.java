@@ -80,7 +80,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     @Override
     protected DeriveActivityMetricGroupJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         Set<String> skippedStreams = getSkippedStreamIds();
-        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        Set<String> streamsToRelink = getRelinkStreamIds();
         List<AtlasStream> streams = stepConfiguration.getActivityStreamMap().values().stream()
                 .filter(s -> !skippedStreams.contains(s.getStreamId()) && !streamsToRelink.contains(s.getStreamId())).collect(Collectors.toList());
         List<ActivityMetricsGroup> allGroups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
@@ -228,6 +228,15 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
         log.info("Stream IDs skipped for metrics processing = {}", skippedStreamIds);
         return skippedStreamIds;
+    }
+
+    private Set<String> getRelinkStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_RELINK)) {
+            return Collections.emptySet();
+        }
+        Set<String> streams = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        log.info("Stream IDs to relink = {}", streams);
+        return streams;
     }
 
     private void updateStreamMetadataCache(AtlasStream stream) {
