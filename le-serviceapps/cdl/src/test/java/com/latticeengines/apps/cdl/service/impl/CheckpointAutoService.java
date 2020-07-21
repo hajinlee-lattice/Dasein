@@ -499,9 +499,9 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             String hdfsPath = json.get("extracts_directory").asText();
             if (StringUtils.isBlank(hdfsPath)) {
                 hdfsPath = json.get("extracts").get(0).get("path").asText();
-                if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
-                    hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
-                }
+            }
+            if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
+                hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
             }
             log.info("Parse extract path {}.", hdfsPath);
             Pattern pattern = Pattern.compile(PATH_PATTERN);
@@ -532,8 +532,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 } else {
                     str = str.replaceAll(tenantNames[0], testTenant);
                 }
+                log.info("tableName is {}", hdfsPathSegment2);
             }
-            log.info("table is {}", str);
             Assert.assertFalse(str.contains("__TABLE_DATA_DIR__"));
             tables.add(JsonUtils.deserialize(str, Table.class));
         }
