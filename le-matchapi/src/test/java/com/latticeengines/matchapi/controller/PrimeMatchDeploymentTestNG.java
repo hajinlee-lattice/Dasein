@@ -1,5 +1,7 @@
 package com.latticeengines.matchapi.controller;
 
+import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +31,8 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -99,6 +103,12 @@ public class PrimeMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 //        matchInput.setOperationalMode(OperationalMode.MULTI_CANDIDATES);
         matchInput.setPredefinedSelection(null);
         matchInput.setCustomSelection(getColumnSelection());
+        DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}.*"))
+                .exclude(OutOfBusiness) //
+                .review(4, 6, Collections.singleton("A.*"));
+        DplusMatchConfig dplusMatchConfig = new DplusMatchConfig(baseRule);
+        matchInput.setDplusMatchConfig(dplusMatchConfig);
+
     }
 
     private Map<MatchKey, List<String>> prepareKeyMap() {
@@ -131,17 +141,17 @@ public class PrimeMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private ColumnSelection getColumnSelection() {
         List<Column> columns = Stream.of(
-                DataCloudConstants.ATTR_LDC_DUNS,
-                DataCloudConstants.ATTR_LDC_NAME,
-                "TRADESTYLE_NAME",
-                "LDC_Street",
-                "STREET_ADDRESS_2",
-                DataCloudConstants.ATTR_CITY,
-                DataCloudConstants.ATTR_STATE,
-                DataCloudConstants.ATTR_ZIPCODE,
-                DataCloudConstants.ATTR_COUNTRY,
-                "TELEPHONE_NUMBER",
-                "LE_SIC_CODE"
+                "duns_number", //
+                "primaryname", //
+                "tradestylenames_name", //
+                "primaryaddr_street_line1", //
+                "primaryaddr_street_line2", //
+                "primaryaddr_addrlocality_name", //
+                "primaryaddr_addrregion_name", //
+                "primaryaddr_postalcode", //
+                "primaryaddr_country_name", //
+                "telephone_telephonenumber", //
+                "primaryindcode_ussicv4" //
         ).map(Column::new).collect(Collectors.toList());
         ColumnSelection cs = new ColumnSelection();
         cs.setColumns(columns);
