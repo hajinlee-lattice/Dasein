@@ -2,10 +2,15 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountProfile;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccount;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -95,6 +101,20 @@ public class UpdateAccountProfile extends UpdateProfileBase<ProcessAccountStepCo
             retainAttrNames.add(InterfaceName.CDLUpdatedTime.name());
         }
         return retainAttrNames;
+    }
+
+    @Override
+    protected boolean hasNewAttrs() {
+        Set<String> newAttrs = new HashSet<>(includeAttrs);
+        Table servingStore = attemptGetTableRole(BucketedAccount, false);
+        if (servingStore != null) {
+            newAttrs.removeAll(Arrays.asList(servingStore.getAttributeNames()));
+        }
+        Table latticeAccount = attemptGetTableRole(LatticeAccount, false);
+        if (latticeAccount != null) {
+            newAttrs.removeAll(Arrays.asList(latticeAccount.getAttributeNames()));
+        }
+        return !newAttrs.isEmpty();
     }
 
 }

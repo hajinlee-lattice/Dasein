@@ -148,8 +148,14 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
         } else if (isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME)) {
             log.info("Should run encode, because customer account has changes");
             shouldRunEncode = true;
+        } else if (isChanged(AccountProfile)) {
+            log.info("Should run encode, because account profile has changes");
+            shouldRunEncode = true;
         } else if (latticeAccountTbl != null && isChanged(LatticeAccount, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME)) {
             log.info("Should run encode, because lattice account has changes");
+            shouldRunEncode = true;
+        } else if (latticeAccountTbl != null && isChanged(LatticeAccountProfile)) {
+            log.info("Should run encode, because lattice account profile has changes");
             shouldRunEncode = true;
         }
         return shouldRunEncode;
