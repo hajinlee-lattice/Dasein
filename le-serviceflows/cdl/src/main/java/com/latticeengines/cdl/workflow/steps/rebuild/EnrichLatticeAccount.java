@@ -410,16 +410,21 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private HdfsDataUnit getVerticalChangedRows() {
-        HdfsDataUnit verticalChanged = (HdfsDataUnit) oldLatticeAccountDU;
-        // Only do join when deleted data set exists
+        log.info("EnrichLatticeAccount, get vertical changed rows from LatticeAccount table");
+
+        FilterByJoinConfig config = new FilterByJoinConfig();
+        List<DataUnit> inputs = new LinkedList<>();
+        inputs.add(oldLatticeAccountDU);
         if ((changed != null) && (changed.getCount() > 0)) {
-            FilterByJoinConfig config = new FilterByJoinConfig();
-            config.setKey(InterfaceName.AccountId.name());
-            config.setJoinType("left_anti");
-            SparkJobResult result = runSparkJob(FilterByJoinJob.class, config);
-            verticalChanged = result.getTargets().get(0);
+            inputs.add(changed);
         }
-        return verticalChanged;
+        config.setInput(inputs);
+        config.setKey(InterfaceName.AccountId.name());
+        config.setJoinType("left_anti");
+        // Set output format as avro as the match step afterwards only take avro input
+        config.setSpecialTarget(0, DataUnit.DataFormat.AVRO);
+        SparkJobResult result = runSparkJob(FilterByJoinJob.class, config);
+        return result.getTargets().get(0);
     }
 
     private HdfsDataUnit fetch(HdfsDataUnit inputData, ColumnSelection cs) {
