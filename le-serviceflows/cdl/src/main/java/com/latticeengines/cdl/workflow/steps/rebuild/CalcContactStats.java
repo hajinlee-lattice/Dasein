@@ -47,27 +47,31 @@ public class CalcContactStats extends BaseCalcStatsStep<ProcessContactStepConfig
     @Override
     public void execute() {
         prepare();
-        enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
-        if (shouldDoNothing()) {
-            log.info("No need to update Account stats.");
-            linkStatsContainer();
+        if (isToReset(getServingEntity())) {
+            log.info("Need to remove calc stats for {}, as it is to be reset.", getServingEntity());
+            cleanupStatsCube();
         } else {
-            statsTbl = getTableSummaryFromKey(customerSpaceStr, getStatsTableCtxKey());
-            statsDiffTbl = getTableSummaryFromKey(customerSpaceStr, CONTACT_STATS_DIFF_TABLE_NAME);
-            if (statsTbl == null && statsDiffTbl == null) {
-                updateContactStats();
-                mergeStats();
-                mergeStatsDiff();
+            if (shouldDoNothing()) {
+                log.info("No need to update Account stats.");
+                linkStatsContainer();
+            } else {
+                statsTbl = getTableSummaryFromKey(customerSpaceStr, getStatsTableCtxKey());
+                statsDiffTbl = getTableSummaryFromKey(customerSpaceStr, CONTACT_STATS_DIFF_TABLE_NAME);
+                if (statsTbl == null && statsDiffTbl == null) {
+                    updateContactStats();
+                    mergeStats();
+                    mergeStatsDiff();
 
-                // for retry
-                if (statsTbl != null) {
-                    exportToS3AndAddToContext(statsTbl, getStatsTableCtxKey());
+                    // for retry
+                    if (statsTbl != null) {
+                        exportToS3AndAddToContext(statsTbl, getStatsTableCtxKey());
+                    }
+                    if (statsDiffTbl != null) {
+                        exportToS3AndAddToContext(statsDiffTbl, CONTACT_STATS_DIFF_TABLE_NAME);
+                    }
                 }
-                if (statsDiffTbl != null) {
-                    exportToS3AndAddToContext(statsDiffTbl, CONTACT_STATS_DIFF_TABLE_NAME);
-                }
+                upsertStatsCube();
             }
-            upsertStatsCube();
         }
     }
 
@@ -78,14 +82,12 @@ public class CalcContactStats extends BaseCalcStatsStep<ProcessContactStepConfig
 
     private boolean shouldDoNothing() {
         boolean doNothing;
-        if (super.isToReset(getServingEntity())) {
-            log.info("No need to calc stats for {}, as it is to be reset.", getServingEntity());
-            doNothing = true;
-        } else {
-            contactChanged = isChanged(SortedContact, CONTACT_CHANGELIST_TABLE_NAME);
-            doNothing = !(enforceRebuild || contactChanged);
-            log.info("contactChanged={}, enforceRebuild={}, doNothing={}", contactChanged, enforceRebuild, doNothing);
-        }
+        enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
+        contactChanged = isChanged(SortedContact, CONTACT_CHANGELIST_TABLE_NAME);
+        boolean profileChanged = isChanged(ContactProfile);
+        doNothing = !(enforceRebuild || profileChanged || contactChanged);
+        log.info("enforceRebuild={}, contactChanged={}, profileChanged={}, doNothing={}", //
+                enforceRebuild, contactChanged, profileChanged, doNothing);
         return doNothing;
     }
 

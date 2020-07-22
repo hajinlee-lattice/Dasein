@@ -9,7 +9,10 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.C
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -100,6 +104,16 @@ public class UpdateContactProfile extends UpdateProfileBase<ProcessContactStepCo
         autoDetectCategorical = true;
         autoDetectDiscrete = true;
         updateProfile();
+    }
+
+    @Override
+    protected boolean hasNewAttrs() {
+        Set<String> newAttrs = new HashSet<>(includeAttrs);
+        Table servingStore = attemptGetTableRole(SortedContact, false);
+        if (servingStore != null) {
+            newAttrs.removeAll(Arrays.asList(servingStore.getAttributeNames()));
+        }
+        return !newAttrs.isEmpty();
     }
 
 }
