@@ -110,7 +110,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         List<ActivityMetricsGroup> allGroups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
                 .filter(g -> !skippedStreams.contains(g.getStream().getStreamId())).collect(Collectors.toList());
 
-        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        Set<String> streamsToRelink = getRelinkStreamIds();
         relinkMergedGroup(allGroups.stream().filter(g -> streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList()));
 
         List<ActivityMetricsGroup> groupsNeedProcess = allGroups.stream().filter(g -> !streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList());
@@ -511,6 +511,15 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
         log.info("Stream IDs skipped for metrics processing = {}", skippedStreamIds);
         return skippedStreamIds;
+    }
+
+    private Set<String> getRelinkStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_RELINK)) {
+            return Collections.emptySet();
+        }
+        Set<String> streams = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        log.info("Stream IDs to relink = {}", streams);
+        return streams;
     }
 
     private List<PeriodStrategy> getPeriodStrategies(BusinessCalendar calendar) {
