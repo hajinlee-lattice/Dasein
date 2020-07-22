@@ -198,8 +198,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return true;
     }
 
-    private String getInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
+    private String getInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String rawLookupIdValue) {
         if (lookupDataUnit != null) {
+            String lookupIdValue = rawLookupIdValue.toLowerCase();
             String signature = extractAccountLookupSignature(lookupDataUnit);
             String tenantId = lookupDataUnit.getTenant();
             Integer version = lookupDataUnit.getVersion();
