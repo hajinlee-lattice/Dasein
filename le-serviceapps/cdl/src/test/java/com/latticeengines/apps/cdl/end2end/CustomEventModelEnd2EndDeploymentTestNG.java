@@ -135,7 +135,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
                     hdfsDataDir + "/*Aggregated*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
-                    hdfsDataDir + "/*Calculated**", s3DataDir, "");
+                    hdfsDataDir + "/*Calculated*", s3DataDir, "");
             HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
             HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
         } catch (Exception ex) {
