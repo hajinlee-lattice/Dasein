@@ -63,6 +63,7 @@ import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
+import com.latticeengines.domain.exposed.spark.common.FilterByJoinConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
 import com.latticeengines.domain.exposed.spark.common.GetColumnChangesConfig;
 import com.latticeengines.domain.exposed.spark.common.GetRowChangesConfig;
@@ -155,6 +156,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = GetColumnChangesConfig.class, name = GetColumnChangesConfig.NAME), //
         @JsonSubTypes.Type(value = GetRowChangesConfig.class, name = GetRowChangesConfig.NAME), //
         @JsonSubTypes.Type(value = MapAttributeTxfmrConfig.class, name = MapAttributeTxfmrConfig.NAME), //
+        @JsonSubTypes.Type(value = FilterByJoinConfig.class, name = FilterByJoinConfig.NAME), //
         @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME) })
 public abstract class SparkJobConfig implements Serializable {
 
