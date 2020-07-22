@@ -75,7 +75,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Set<String> skippedStreamIds = getSkippedStreamIds();
-        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        Set<String> streamsToRelink = getRelinkStreamIds();
         relinkStreams(streamsToRelink);
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.streams = stepConfiguration.getActivityStreamMap().values()
@@ -215,6 +215,15 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
         log.info("Stream IDs skipped for period stores generation = {}", skippedStreamIds);
         return skippedStreamIds;
+    }
+
+    private Set<String> getRelinkStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_RELINK)) {
+            return Collections.emptySet();
+        }
+        Set<String> streams = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        log.info("Stream IDs to relink = {}", streams);
+        return streams;
     }
 
     private boolean shouldIncrUpdate(String streamId) {
