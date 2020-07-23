@@ -52,6 +52,9 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "UPLOAD_ID", nullable = false)
     private String uploadId;
 
+    @Column(name = "DISPLAY_NAME")
+    private String displayName;
+
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
@@ -104,6 +107,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public void setUploadId(String uploadId) {
         this.uploadId = uploadId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override

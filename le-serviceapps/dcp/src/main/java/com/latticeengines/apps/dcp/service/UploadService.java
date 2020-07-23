@@ -31,7 +31,7 @@ public interface UploadService {
 
     void updateStatistics(String uploadId, Long statsTimestamp, UploadStats uploadStats);
 
-    UploadDetails setLatestStatistics(String customerSpace, String uploadId, Long statsTimestamp);
+    UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 
     String getMatchResultTableName(String uploadId);
 

@@ -53,13 +53,13 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
-        return uploads.stream().map(upload -> getUploadDetails(customerSpace, upload, includeConfig)).collect(Collectors.toList());
+        return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
         List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
-        return uploads.stream().map(upload -> getUploadDetails(customerSpace, upload, includeConfig)).collect(Collectors.toList());
+        return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
@@ -70,6 +70,7 @@ public class UploadServiceImpl implements UploadService {
         String uploadId = generateRandomUploadId();
         Upload upload = new Upload();
         upload.setUploadId(uploadId);
+        upload.setDisplayName(retrieveDisplayName(customerSpace, uploadConfig));
         upload.setSourceId(sourceId);
         upload.setCreatedBy(userId);
         upload.setTenant(MultiTenantContext.getTenant());
@@ -77,7 +78,7 @@ public class UploadServiceImpl implements UploadService {
         upload.setUploadConfig(uploadConfig);
         uploadEntityMgr.create(upload);
 
-        return getUploadDetails(customerSpace, upload, Boolean.TRUE);
+        return getUploadDetails(upload, Boolean.TRUE);
     }
 
     @Override
@@ -114,6 +115,7 @@ public class UploadServiceImpl implements UploadService {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         upload.setUploadConfig(uploadConfig);
+        upload.setDisplayName(retrieveDisplayName(customerSpace, uploadConfig));
         uploadEntityMgr.update(upload);
     }
 
@@ -155,7 +157,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public UploadDetails setLatestStatistics(String customerSpace, String uploadId, Long statsId) {
+    public UploadDetails setLatestStatistics(String uploadId, Long statsId) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
@@ -172,13 +174,13 @@ public class UploadServiceImpl implements UploadService {
         }
         statisticsEntityMgr.setAsLatest(container);
         upload.setStatistics(container.getStatistics());
-        return getUploadDetails(customerSpace, upload, Boolean.TRUE);
+        return getUploadDetails(upload, Boolean.TRUE);
     }
 
     @Override
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
-        return getUploadDetails(customerSpace, upload, includeConfig);
+        return getUploadDetails(upload, includeConfig);
     }
 
     @Override
@@ -233,9 +235,10 @@ public class UploadServiceImpl implements UploadService {
         return randomUploadId;
     }
 
-    private UploadDetails getUploadDetails(String customerSpace, Upload upload, Boolean includeConfig) {
+    private UploadDetails getUploadDetails(Upload upload, Boolean includeConfig) {
         UploadDetails details = new UploadDetails();
         details.setUploadId(upload.getUploadId());
+        details.setDisplayName(upload.getDisplayName());
         details.setStatistics(upload.getStatistics());
         details.setStatus(upload.getStatus());
         if(upload.getUploadDiagnostics() != null) {
@@ -250,19 +253,25 @@ public class UploadServiceImpl implements UploadService {
         details.setUploadCreatedTime(upload.getCreated().getTime());
         details.setCreatedBy(upload.getCreatedBy());
         details.setProgressPercentage(upload.getProgressPercentage());
+        return details;
+    }
 
-        if(upload.getUploadConfig().getDropFilePath() != null) {
-            String fileId = upload.getUploadConfig().getDropFilePath();
+    private String retrieveDisplayName(String customerSpace, UploadConfig config) {
+        if (config == null) {
+            return null;
+        }
+
+        if(config.getDropFilePath() != null) {
+            String fileId = config.getDropFilePath();
             fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
             SourceFile file = sourceFileProxy.findByName(customerSpace, fileId);
-            details.setDisplayName(file != null ? file.getDisplayName() : fileId);
+            return file != null ? file.getDisplayName() : fileId;
         } else {
-            String file = upload.getUploadConfig().getUploadRawFilePath();
-            if (file != null) {
-                file = file.substring(file.lastIndexOf('/') + 1);
+            String rawFile = config.getUploadRawFilePath();
+            if (rawFile != null) {
+                rawFile = rawFile.substring(rawFile.lastIndexOf('/') + 1);
             }
-            details.setDisplayName(file);
+            return rawFile;
         }
-        return details;
     }
 }
