@@ -1044,6 +1044,17 @@ public class Attribute
         }
     }
 
+    public String getRegistrationNumberTypeCode() {
+        Object raw = properties.get("RegistrationNumberTypeCode");
+        return raw == null ? null : raw.toString();
+    }
+
+    public void setRegistrationNumberTypeCode(String typeCode) {
+        if (typeCode != null) {
+            properties.put("RegistrationNumberTypeCode", typeCode);
+        }
+    }
+
     public String getLastDataRefresh() {
         Object raw = properties.get("LastDataRefresh");
         if (raw == null) {

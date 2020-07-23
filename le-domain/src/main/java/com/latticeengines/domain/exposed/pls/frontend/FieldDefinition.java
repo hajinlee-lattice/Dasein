@@ -74,6 +74,10 @@ public class FieldDefinition {
     @JsonProperty
     protected String timeZone;
 
+    // Represents the Registration Number Type Code.
+    @JsonProperty
+    protected String registrationNumberTypeCode;
+
 
     //
     // Properties defined by the template specification (Spec) which may need to be propagated by the UI back to the
@@ -224,6 +228,14 @@ public class FieldDefinition {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public String getRegistrationNumberTypeCode() {
+        return registrationNumberTypeCode;
+    }
+
+    public void setRegistrationNumberTypeCode(String registrationNumberTypeCode) {
+        this.registrationNumberTypeCode = registrationNumberTypeCode;
     }
 
     public List<String> getMatchingColumnNames() {
