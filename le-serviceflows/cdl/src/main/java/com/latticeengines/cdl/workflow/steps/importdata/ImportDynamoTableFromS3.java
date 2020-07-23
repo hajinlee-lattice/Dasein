@@ -102,6 +102,6 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
             config.setSortKey(dynamoDataUnit.getSortKey());
         }
         config.setLinkTableName(dynamoDataUnit.getLinkedTable());
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        addToListInContext(configuration.getContextKey(), config, DynamoExportConfig.class);
     }
 }

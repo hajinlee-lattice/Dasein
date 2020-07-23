@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
@@ -19,9 +18,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.MigrateDynamoW
 @Component
 public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
 
-    @Value("${eai.export.dynamo.signature}")
-    private String signature;
-
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull CustomerSpace customerSpace, @NotNull MigrateDynamoRequest request,
                                 @NotNull WorkflowPidWrapper pidWrapper) {
@@ -34,6 +30,6 @@ public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
 
     private MigrateDynamoWorkflowConfiguration configure(CustomerSpace customerSpace, MigrateDynamoRequest request) {
         return new MigrateDynamoWorkflowConfiguration.Builder().customer(customerSpace).tableNames(request.getTableNames())
-                .dynamoSignature(signature).migrateTable(Boolean.TRUE).build();
+                .setContextKey(request.getEntityClass()).dynamoSignature(request.getSignature()).migrateTable(Boolean.TRUE).build();
     }
 }

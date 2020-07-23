@@ -30,7 +30,7 @@ public class AtlasAccountLookupExportStepConfiguration extends BaseExportToDynam
     }
 
     @Override
-    public boolean registerDataUnit() {
+    public boolean getRegisterDataUnit() {
         return false;
     }
 }
