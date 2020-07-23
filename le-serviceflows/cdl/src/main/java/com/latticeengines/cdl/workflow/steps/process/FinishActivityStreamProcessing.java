@@ -56,7 +56,7 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
     }
 
     public void publishTimelineDiffTablesToDynamo() {
-        if (shouldPublishTimelineToDynamo()) {
+        if (!shouldPublishTimelineToDynamo()) {
             log.info("Skip publishing timeline diff table to dynamo. Account360 enabled = {}, skipPublishDynamo = {}", account360Enabled(), skipPublishDynamo);
             return;
         }
