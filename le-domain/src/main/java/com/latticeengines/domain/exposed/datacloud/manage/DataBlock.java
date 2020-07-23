@@ -21,7 +21,12 @@ import com.google.common.collect.ImmutableMap;
 )
 public class DataBlock {
 
+    public static final String BLOCK_BASE_INFO = "baseinfo";
+    public static final String BLOCK_ENTITY_RESOLUTION = "entityresolution";
+
     private static final ImmutableMap<String, String> blockNameMap = ImmutableMap.<String, String>builder() //
+            .put(BLOCK_BASE_INFO, "Base Information") //
+            .put(BLOCK_ENTITY_RESOLUTION, "Company Entity Resolution") //
             .put("companyfinancials", "Company Financials") //
             .put("companyinfo", "Company Information") //
             .put("diversityinsight", "Diversity Insights") //

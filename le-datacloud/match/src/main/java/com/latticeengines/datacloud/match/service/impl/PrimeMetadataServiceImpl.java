@@ -1,5 +1,10 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.manage.DataBlock.BLOCK_BASE_INFO;
+import static com.latticeengines.domain.exposed.datacloud.manage.DataBlock.BLOCK_ENTITY_RESOLUTION;
+
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +22,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -26,6 +34,7 @@ import com.latticeengines.datacloud.match.repository.reader.DataBlockDomainEntit
 import com.latticeengines.datacloud.match.repository.reader.DataBlockElementRepository;
 import com.latticeengines.datacloud.match.repository.reader.DataBlockLevelMetadataRepository;
 import com.latticeengines.datacloud.match.repository.reader.PrimeColumnRepository;
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockDomainEntitlement;
@@ -41,6 +50,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 @Service
 public class PrimeMetadataServiceImpl implements PrimeMetadataService {
 
+    private static final Logger log = LoggerFactory.getLogger(PrimeMetadataServiceImpl.class);
+
     @Inject
     private PrimeColumnRepository primeColumnRepository;
 
@@ -52,6 +63,9 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
 
     @Inject
     private DataBlockDomainEntitlementRepository entitlementRepository;
+
+    @Inject
+    private DirectPlusCandidateService candidateService;
 
     @Override
     public DataBlockMetadataContainer getDataBlockMetadata() {
@@ -77,6 +91,8 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 levels.sort(Comparator.comparing(DataBlock.Level::getLevel));
                 blocks.add(new DataBlock(block, levels));
             }
+            blocks.add(getBaseInfoBlock(false));
+            blocks.add(getEntityResolutionBlock(false));
             DataBlockMetadataContainer container = new DataBlockMetadataContainer();
             container.setBlocks(blocks.stream().collect(Collectors.toMap(DataBlock::getBlockId, Function.identity())));
             return container;
@@ -125,6 +141,8 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                     blocks.add(new DataBlock(block, levels));
                 }
             }
+            blocks.add(getBaseInfoBlock(true));
+            blocks.add(getEntityResolutionBlock(true));
             blocks.sort(Comparator.comparing(DataBlock::getBlockId));
             return blocks;
         }
@@ -148,6 +166,9 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 List<DataBlockLevel> levelList = blockMap.getOrDefault(block, new ArrayList<>());
                 levelList.add(level);
                 blockMap.put(block, levelList);
+                // always add baseinfo and entityresolution
+                blockMap.put(BLOCK_BASE_INFO, Collections.singletonList(DataBlockLevel.L1));
+                blockMap.put(BLOCK_ENTITY_RESOLUTION, Collections.singletonList(DataBlockLevel.L1));
                 recordTypeMap.put(recordType, blockMap);
                 domainMap.put(domain, recordTypeMap);
             }
@@ -269,6 +290,41 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         }
         elementIdsToRemove.forEach(elementIdToBlockElementMap::remove);
         blockIdToBlockElementMap.put(blockId, elements);
+    }
+
+    private DataBlock getBaseInfoBlock(boolean includeElements) {
+        DataBlock.Level level;
+        if (includeElements) {
+            List<PrimeColumn> primeColumns = primeColumnRepository.findAllByDataBlocks_Block("baseinfo");
+            List<DataBlock.Element> elements = primeColumns.stream() //
+                    .map(DataBlock.Element::new).collect(Collectors.toList());
+            level = new DataBlock.Level(DataBlockLevel.L1, "Base information", elements);
+        } else {
+            level = new DataBlock.Level(DataBlockLevel.L1, "Base information");
+        }
+        return new DataBlock(BLOCK_BASE_INFO, Collections.singleton(level));
+    }
+
+    private DataBlock getEntityResolutionBlock(boolean includeElements) {
+        String description = "Entity resolution diagnostic information";
+        try {
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream( //
+                    "com/latticeengines/datacloud/match/entity_resolution_block_description");
+            Preconditions.checkNotNull(is);
+            description = IOUtils.toString(is, Charset.defaultCharset());
+        } catch (Exception e) {
+            log.error("Failed to get entity resolution block description.", e);
+        }
+        DataBlock.Level level;
+        if (includeElements) {
+            List<PrimeColumn> primeColumns = candidateService.candidateColumns();
+            List<DataBlock.Element> elements = primeColumns.stream() //
+                    .map(DataBlock.Element::new).collect(Collectors.toList());
+            level = new DataBlock.Level(DataBlockLevel.L1, description, elements);
+        } else {
+            level = new DataBlock.Level(DataBlockLevel.L1, description);
+        }
+        return new DataBlock(BLOCK_ENTITY_RESOLUTION, Collections.singleton(level));
     }
 
 }

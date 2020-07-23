@@ -1,10 +1,5 @@
 package com.latticeengines.apps.dcp.service.impl;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +9,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -32,9 +26,7 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
@@ -47,11 +39,6 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
-        WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
-        Job job1 = new Job();
-        job1.setApplicationId("application_1553048841184_0001");
-        when(workflowProxy.getJobByWorkflowJobPid(anyString(), anyLong())).thenReturn(job1);
-        ReflectionTestUtils.setField(uploadService, "workflowProxy", workflowProxy);
     }
 
     @Test(groups = "functional")

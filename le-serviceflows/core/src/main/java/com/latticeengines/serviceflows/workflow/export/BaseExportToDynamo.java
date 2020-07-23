@@ -146,7 +146,7 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
                     throw new RuntimeException("Yarn application " + appId + " did not finish in SUCCEEDED status, but " //
                             + jobStatus.getStatus() + " instead.");
                 }
-                if (configuration.registerDataUnit()) {
+                if (configuration.getRegisterDataUnit()) {
                     registerDataUnit();
                 }
             }

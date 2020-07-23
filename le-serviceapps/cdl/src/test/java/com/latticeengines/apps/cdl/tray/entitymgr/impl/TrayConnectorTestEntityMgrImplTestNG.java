@@ -55,8 +55,11 @@ public class TrayConnectorTestEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         });
 
         trayConnectorTestEntityMgr.deleteByWorkflowRequestId(workflowRequestId);
-        test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
-        Assert.assertNull(test);
+        retry.execute(context -> {
+            TrayConnectorTest currTest = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
+            Assert.assertNull(currTest);
+            return true;
+        });
     }
 
 }

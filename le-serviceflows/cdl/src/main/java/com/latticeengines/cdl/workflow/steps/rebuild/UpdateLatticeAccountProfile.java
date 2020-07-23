@@ -1,13 +1,16 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.LatticeAccountProfile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -108,6 +111,23 @@ public class UpdateLatticeAccountProfile extends UpdateProfileBase<ProcessAccoun
     protected boolean getEnforceRebuild() {
         return Boolean.TRUE.equals(configuration.getRebuild()) && //
                 Boolean.TRUE.equals(getObjectFromContext(REBUILD_LATTICE_ACCOUNT, Boolean.class));
+    }
+
+    @Override
+    protected boolean hasNewAttrs() {
+        Table latticeAccount = attemptGetTableRole(LatticeAccount, false);
+        if (latticeAccount != null) {
+            Set<String> newAttrs = new HashSet<>(includeAttrs);
+            Table servingStore = attemptGetTableRole(BucketedAccount, false);
+            if (servingStore != null) {
+                newAttrs.removeAll(Arrays.asList(servingStore.getAttributeNames()));
+            }
+            Table customerAccount = attemptGetTableRole(ConsolidatedAccount, true);
+            newAttrs.removeAll(Arrays.asList(customerAccount.getAttributeNames()));
+            return !newAttrs.isEmpty();
+        } else {
+            return false;
+        }
     }
 
 }

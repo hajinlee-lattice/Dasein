@@ -98,7 +98,7 @@ public class AggActivityStreamToDaily
                 RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME); // unprocessed raw input. will be processed to raw in this step
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
         Set<String> skippedStreamIds = getSkippedStreamIds();
-        Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        Set<String> streamsToRelink = getRelinkStreamIds();
         relinkStreams(streamsToRelink);
         Set<AtlasStream> notSkippedStream = streams.values().stream()
                 .filter(stream -> !skippedStreamIds.contains(stream.getStreamId()) && !streamsToRelink.contains(stream.getStreamId()))
@@ -321,5 +321,14 @@ public class AggActivityStreamToDaily
         Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
         log.info("Stream IDs skipped for daily aggregation = {}", skippedStreamIds);
         return skippedStreamIds;
+    }
+
+    private Set<String> getRelinkStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_RELINK)) {
+            return Collections.emptySet();
+        }
+        Set<String> streams = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        log.info("Stream IDs to relink = {}", streams);
+        return streams;
     }
 }

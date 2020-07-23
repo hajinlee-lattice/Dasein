@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -124,6 +125,18 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                     rawStreamTableNames);
             dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
                     inactive);
+
+            Set<String> streamsToRelink = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+            DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+            Map<String, Integer> refreshDateMap = getRefreshDateMap(status);
+            if (CollectionUtils.isNotEmpty(streamsToRelink)) {
+                relinkStreams(new ArrayList<>(streamsToRelink));
+                streamsToRelink.stream().filter(streamId -> !streamsToRelink.contains(streamId)).forEach(streamId -> {
+                    refreshDateMap.put(streamId, DateTimeUtils.fromEpochMilliToDateId(evalTimeEpoch));
+                });
+            }
+            status.setActivityStreamLastRefresh(refreshDateMap);
+            putObjectInContext(CDL_COLLECTION_STATUS, status);
             return null;
         }
         PipelineTransformationRequest request = new PipelineTransformationRequest();
@@ -153,10 +166,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
             String activeTable = configuration.isRematchMode() ? null : getRawStreamActiveTable(streamId, stream);
             String targetTablePrefixFormat = configuration.isRematchMode() ? REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT
                     : RAWSTREAM_TABLE_PREFIX_FORMAT;
-            if (StringUtils.isNotBlank(matchedImportTable)
-                    || needRefresh(refreshDateMap, streamId)
-                    || deletePerformed()
-            ) {
+            if (StringUtils.isNotBlank(matchedImportTable) || needRefresh(refreshDateMap, streamId)
+                    || deletePerformed()) {
                 // has import, over 30 days not refreshed, or performed soft delete
                 appendRawStream(steps, stream, evalTimeEpoch, matchedImportTable, activeTable, targetTablePrefixFormat)
                         .ifPresent(pair -> {
@@ -164,19 +175,13 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                             refreshDateMap.put(stream.getStreamId(),
                                     DateTimeUtils.fromEpochMilliToDateId(evalTimeEpoch));
                         });
-            } else if (StringUtils.isNotBlank(activeTable)){ // TODO - streams with no import and batch should not relink
+            } else if (StringUtils.isNotBlank(activeTable)) {
                 streamsNeedReLink.add(streamId);
             }
         });
         status.setActivityStreamLastRefresh(refreshDateMap);
         putObjectInContext(CDL_COLLECTION_STATUS, status);
-        Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(
-                customerSpace.toString(), ConsolidatedActivityStream, active, streamsNeedReLink);
-        if (MapUtils.isNotEmpty(signatureTableNames)) {
-            log.info("Linking existing raw stream tables to inactive version {}: {}", inactive, signatureTableNames.keySet());
-            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames,
-                    ConsolidatedActivityStream, inactive);
-        }
+        relinkStreams(streamsNeedReLink);
         putObjectInContext(ACTIVITY_STREAMS_RELINK, new HashSet<>(streamsNeedReLink));
         return steps;
     }
@@ -323,5 +328,16 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
     private boolean deletePerformed() {
         return softDeleteEntities.containsKey(entity) || hardDeleteEntities.containsKey(entity);
+    }
+
+    private void relinkStreams(List<String> streamsNeedReLink) {
+        Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(
+                customerSpace.toString(), ConsolidatedActivityStream, active, streamsNeedReLink);
+        if (MapUtils.isNotEmpty(signatureTableNames)) {
+            log.info("Linking existing raw stream tables to inactive version {}: {}", inactive,
+                    signatureTableNames.keySet());
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames,
+                    ConsolidatedActivityStream, inactive);
+        }
     }
 }

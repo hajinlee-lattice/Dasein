@@ -25,6 +25,8 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
+import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
+import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -58,6 +60,9 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
 
     @Value("${eai.export.dynamo.signature}")
     private String signature;
+
+    @Value("${eai.export.dynamo.timeline.signature}")
+    private String timelineSignature;
 
     @Value("${common.adminconsole.url}")
     private String quartzMicroserviceHostPort;
@@ -107,19 +112,23 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
     @Override
     public Boolean migrateDynamo() {
         List<DataUnit> dataUnits = dataUnitService.findByStorageType(DataUnit.StorageType.Dynamo);
-        log.info("Migrate dynamo table task started and total dynamo data unit count is %d.", dataUnits.size());
+        log.info(String.format("Migrate dynamo table task started and total dynamo data unit count is %d.", dataUnits.size()));
         Map<String, Tenant> tenantMap = new HashMap<>();
         Map<String, List<Job>> jobMap = new HashMap<>();
         Map<String, List<String>> tableMap = new HashMap<>();
         int totalSize = 0;
-        Map<String, List<String>> tableNamesNeedToMigrate = new HashMap<>();
+        Map<String, Map<String, List<String>>> tableNamesNeedToMigrate = new HashMap<>();
         for (DataUnit dataUnit : dataUnits) {
             if (totalSize >= migrateSize) {
                 log.info("Already found {} dynamo data units in progress of migration.", migrateSize);
                 break;
             }
             DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnit;
-            if (!signature.equals(dynamoDataUnit.getSignature())) {
+            String entityClass = dynamoDataUnit.getEntityClass();
+            if (StringUtils.isEmpty(entityClass)) {
+                entityClass = GenericTableEntity.class.getCanonicalName();
+            }
+            if (needMigrate(dynamoDataUnit)) {
                 String linkedTenantName = dynamoDataUnit.getLinkedTenant();
                 if (StringUtils.isEmpty(linkedTenantName)) {
                     String shortTenantId = dynamoDataUnit.getTenant();
@@ -137,8 +146,9 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
                                 if (tableNames.contains(tableName)) {
                                     if (!isTableInMigration(tenantId, tableName, jobMap)) {
                                         totalSize++;
-                                        tableNamesNeedToMigrate.putIfAbsent(tenantId, new ArrayList<>());
-                                        tableNamesNeedToMigrate.get(tenantId).add(tableName);
+                                        tableNamesNeedToMigrate.putIfAbsent(entityClass, new HashMap<>());
+                                        tableNamesNeedToMigrate.get(entityClass).putIfAbsent(tenantId, new ArrayList<>());
+                                        tableNamesNeedToMigrate.get(entityClass).get(tenantId).add(tableName);
                                     }
                                 } else {
                                     log.info("Table info can't be found in dynamo data unit with name {} and tenant {}.",
@@ -169,6 +179,28 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
         return true;
     }
 
+    private boolean needMigrate(DynamoDataUnit dynamoDataUnit) {
+        String entityClass = dynamoDataUnit.getEntityClass();
+        if (StringUtils.isEmpty(entityClass)) {
+            return !signature.equals(dynamoDataUnit.getSignature());
+        }
+        if (entityClass.equals(GenericTableActivity.class.getCanonicalName())) {
+            return !timelineSignature.equals(dynamoDataUnit.getSignature());
+        } else if (entityClass.equals(GenericTableEntity.class.getCanonicalName())) {
+            return !signature.equals(dynamoDataUnit.getSignature());
+        }
+        return false;
+    }
+
+    private String getSignature(String entityClass) {
+        if (entityClass.equals(GenericTableActivity.class.getCanonicalName())) {
+            return timelineSignature;
+        } else if (entityClass.equals(GenericTableEntity.class.getCanonicalName())) {
+            return signature;
+        }
+        return signature;
+    }
+
     // just update data unit to make it safe
     private void updateDataUnit(DynamoDataUnit dynamoDataUnit) {
         dataUnitService.updateSignature(dynamoDataUnit, signature);
@@ -196,23 +228,32 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
         MultiTenantContext.setTenant(preTenant);
     }
 
-    private void migrateTables(Map<String, List<String>> tableNamesNeedToMigrate) {
-        for (Map.Entry<String, List<String>> entry : tableNamesNeedToMigrate.entrySet()) {
-            String tenantId = entry.getKey();
-            List<String> tableNames = entry.getValue();
-            List<List<String>> batchList = Lists.partition(tableNames, batchSize);
-            for (List<String> subTableNames : batchList) {
-                log.info("Tables {} in tenant {} will be migrated to signature {}.", subTableNames, tenantId, signature);
-                migrateTable(tenantId, subTableNames);
-                SleepUtils.sleep(TimeUnit.SECONDS.toMillis(30));
+    private void migrateTables(Map<String, Map<String, List<String>>> tableNamesNeedToMigrateMap) {
+        for (Map.Entry<String, Map<String, List<String>>> entry : tableNamesNeedToMigrateMap.entrySet()) {
+            String entityClass = entry.getKey();
+            String signature = getSignature(entityClass);
+            Map<String, List<String>> tableNamesNeedToMigrate = entry.getValue();
+            if (MapUtils.isNotEmpty(tableNamesNeedToMigrate)) {
+                for (Map.Entry<String, List<String>> tableEntry : tableNamesNeedToMigrate.entrySet()) {
+                    String tenantId = tableEntry.getKey();
+                    List<String> tableNames = tableEntry.getValue();
+                    List<List<String>> batchList = Lists.partition(tableNames, batchSize);
+                    for (List<String> subTableNames : batchList) {
+                        log.info("Tables {} in tenant {} will be migrated to signature {}.", subTableNames, tenantId, getSignature(entityClass));
+                        migrateTable(entityClass, tenantId, subTableNames, signature);
+                        SleepUtils.sleep(TimeUnit.SECONDS.toMillis(30));
+                    }
+                }
             }
         }
     }
 
-    private void migrateTable(String tenantId, List<String> tableNames) {
+    private void migrateTable(String entityClass, String tenantId, List<String> tableNames, String signature) {
         try {
             MigrateDynamoRequest migrateDynamoRequest = new MigrateDynamoRequest();
             migrateDynamoRequest.setTableNames(tableNames);
+            migrateDynamoRequest.setEntityClass(entityClass);
+            migrateDynamoRequest.setSignature(signature);
             cdlProxy.submitMigrateDynamoJob(tenantId, migrateDynamoRequest);
         } catch (Exception e) {
             log.error("Failed to submit migrate dynamo job with exception {}.", e.getMessage());

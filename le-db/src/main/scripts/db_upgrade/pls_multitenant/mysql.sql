@@ -57,7 +57,6 @@ CREATE PROCEDURE `UpdateSchema`()
       
       ALTER TABLE `DCP_UPLOAD` ADD COLUMN `DISPLAY_NAME` varchar(255);
 
-
   END //
 -- ##############################################################
 

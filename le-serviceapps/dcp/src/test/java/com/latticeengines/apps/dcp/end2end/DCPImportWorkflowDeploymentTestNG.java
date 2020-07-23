@@ -267,7 +267,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     headers.addAll(Arrays.asList(nextRecord));
                     verifyOutputHeaders(headers);
                     nameIdx = headers.indexOf("Company Name");
-                    ccIdx = headers.indexOf("Confidence Code");
+                    ccIdx = headers.indexOf("Match Confidence Code");
                 } else {
                     String companyName = nextRecord[nameIdx];
                     Assert.assertTrue(StringUtils.isNotBlank(companyName)); // Original Name is non-empty

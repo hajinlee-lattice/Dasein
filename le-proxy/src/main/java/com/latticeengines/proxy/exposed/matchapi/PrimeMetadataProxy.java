@@ -13,5 +13,6 @@ public interface PrimeMetadataProxy {
     DataBlockMetadataContainer getBlockMetadata();
     DataBlockEntitlementContainer getBlockDrtMatrix();
     List<PrimeColumn> getPrimeColumns(List<String> elementIds);
+    List<PrimeColumn> getCandidateColumns();
 
 }

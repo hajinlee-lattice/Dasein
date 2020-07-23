@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParamet
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 
 public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfiguration> extends BaseCalcStatsStep<T> {
@@ -27,12 +28,14 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
     protected abstract List<String> getIncludeAttrs();
     protected abstract String getBaseChangeListCtxKey();
     protected abstract String getReProfileAttrsCtxKey();
+    protected abstract boolean hasNewAttrs();
 
     private TableRoleInCollection baseTableRole;
     private TableRoleInCollection profileRole;
     private String baseChangeListKey;
     protected boolean ignoreDateAttrs;
     protected boolean considerAMAttrs;
+    List<String> includeAttrs;
 
     @Override
     protected List<ProfileParameters.Attribute> getDeclaredAttrs() {
@@ -47,10 +50,17 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
     }
 
     public void updateProfile() {
+        BusinessEntity servingEntity = getServingEntity();
+        if (isToReset(servingEntity)) {
+            log.info("Should reset {}, skip this step", servingEntity);
+            return;
+        }
+
         baseTableRole = getBaseTableRole();
         profileRole = getProfileRole();
         baseChangeListKey = getBaseChangeListCtxKey();
         String profileCtxKey = getProfileTableCtxKey();
+        includeAttrs = getIncludeAttrs();
 
         Table tblInCtx = getTableSummaryFromKey(customerSpace.toString(), profileCtxKey);
         if (tblInCtx != null) {
@@ -62,7 +72,6 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
             putStringValueInContext(profileCtxKey, profileTableName);
         } else {
             Table baseTable = attemptGetTableRole(baseTableRole, true);
-            List<String> includeAttrs = getIncludeAttrs();
             if (shouldRecalculateProfile()) {
                 log.info("Should rebuild {}.", profileRole);
                 log.info("considerAMAttrs={}", considerAMAttrs);
@@ -86,9 +95,15 @@ public abstract class UpdateProfileBase<T extends BaseProcessEntityStepConfigura
     private boolean shouldDoNothing() {
         boolean hasBaseTableChange = isChanged(baseTableRole, baseChangeListKey);
         boolean enforceRebuild = getEnforceRebuild();
-        boolean shouldRelinkProfile = !enforceRebuild && !hasBaseTableChange;
-        log.info("hasBaseTableChange={}, enforceRebuild={}, shouldRelinkProfile={}",
-                hasBaseTableChange, enforceRebuild, shouldRelinkProfile);
+        boolean hasOldProfile= attemptGetTableRole(profileRole, false) != null;
+        boolean shouldRelinkProfile = !enforceRebuild && !hasBaseTableChange && hasOldProfile;
+        log.info("hasBaseTableChange={}, enforceRebuild={}, hasOldProfile={}, shouldRelinkProfile={}",
+                hasBaseTableChange, enforceRebuild, hasOldProfile, shouldRelinkProfile);
+        if (shouldRelinkProfile) {
+            boolean hasNewAttrs = hasNewAttrs();
+            shouldRelinkProfile = !hasNewAttrs;
+            log.info("hasNewAttrs={}, shouldRelinkProfile={}", hasNewAttrs, shouldRelinkProfile);
+        }
         return shouldRelinkProfile;
     }
 

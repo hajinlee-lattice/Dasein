@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
@@ -26,6 +27,9 @@ public class PrimeMetadataResource {
 
     @Inject
     private PrimeMetadataService primeMetadataService;
+
+    @Inject
+    private DirectPlusCandidateService candidateService;
 
     @GetMapping("/elements")
     @ResponseBody
@@ -51,6 +55,12 @@ public class PrimeMetadataResource {
     @GetMapping("/columns")
     public List<PrimeColumn> getPrimeColumns(@RequestParam("elementIds") List<String> elementIds) {
         return primeMetadataService.getPrimeColumns(elementIds);
+    }
+
+    // The entity resolution block
+    @GetMapping("/candidate-columns")
+    public List<PrimeColumn> getCandidateColumns() {
+        return candidateService.candidateColumns();
     }
 
 }
