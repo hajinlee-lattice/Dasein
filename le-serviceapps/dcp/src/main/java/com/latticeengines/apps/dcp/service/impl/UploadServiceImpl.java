@@ -26,8 +26,10 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -44,6 +46,9 @@ public class UploadServiceImpl implements UploadService {
 
     @Inject
     private MetadataService metadataService;
+
+    @Inject
+    private SourceFileProxy sourceFileProxy;
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
@@ -65,6 +70,7 @@ public class UploadServiceImpl implements UploadService {
         String uploadId = generateRandomUploadId();
         Upload upload = new Upload();
         upload.setUploadId(uploadId);
+        upload.setDisplayName(retrieveDisplayName(customerSpace, uploadConfig));
         upload.setSourceId(sourceId);
         upload.setCreatedBy(userId);
         upload.setTenant(MultiTenantContext.getTenant());
@@ -109,6 +115,7 @@ public class UploadServiceImpl implements UploadService {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         upload.setUploadConfig(uploadConfig);
+        upload.setDisplayName(retrieveDisplayName(customerSpace, uploadConfig));
         uploadEntityMgr.update(upload);
     }
 
@@ -231,6 +238,7 @@ public class UploadServiceImpl implements UploadService {
     private UploadDetails getUploadDetails(Upload upload, Boolean includeConfig) {
         UploadDetails details = new UploadDetails();
         details.setUploadId(upload.getUploadId());
+        details.setDisplayName(upload.getDisplayName());
         details.setStatistics(upload.getStatistics());
         details.setStatus(upload.getStatus());
         if(upload.getUploadDiagnostics() != null) {
@@ -246,5 +254,24 @@ public class UploadServiceImpl implements UploadService {
         details.setCreatedBy(upload.getCreatedBy());
         details.setProgressPercentage(upload.getProgressPercentage());
         return details;
+    }
+
+    private String retrieveDisplayName(String customerSpace, UploadConfig config) {
+        if (config == null) {
+            return null;
+        }
+
+        if(config.getDropFilePath() != null) {
+            String fileId = config.getDropFilePath();
+            fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
+            SourceFile file = sourceFileProxy.findByName(customerSpace, fileId);
+            return file != null ? file.getDisplayName() : fileId;
+        } else {
+            String rawFile = config.getUploadRawFilePath();
+            if (rawFile != null) {
+                rawFile = rawFile.substring(rawFile.lastIndexOf('/') + 1);
+            }
+            return rawFile;
+        }
     }
 }
