@@ -87,7 +87,7 @@ public enum Category {
             return ActivityStoreUtils.defaultTimeFilterDisplayName();
         }
     },
-    DNBINTENTDATA_PROFILE("D&B Custom Intent", 21); //
+    DNBINTENTDATA_PROFILE("D&B Intent", 21); //
 
 
 
