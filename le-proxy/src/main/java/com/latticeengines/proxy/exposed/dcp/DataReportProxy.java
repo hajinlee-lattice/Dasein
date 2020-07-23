@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.dcp;
 
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
@@ -20,22 +22,22 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
     }
 
     public void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
-                                  String tableName) {
-        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount/{tableName}?level={level}";
-        String url;
-        if (StringUtils.isNotEmpty(ownerId)) {
-            baseUrl += "&ownerId={ownerId}";
-            url = constructUrl(baseUrl, customerSpace, tableName, level, ownerId);
-        } else {
-            url = constructUrl(baseUrl, customerSpace, tableName, level);
-        }
-        put("Register duns count", url);
+                                  DunsCountCache cache) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount?level={level}";
+        String url = getUrl(customerSpace, level, ownerId, baseUrl);
+        put("Register duns count", url, cache);
     }
 
     public DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId) {
         String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
         return get("Get duns count", url, DunsCountCache.class);
+    }
+
+    public Set<String> getSubOwnerIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/subownerids?level={level}";
+        String url = getUrl(customerSpace, level, ownerId, baseUrl);
+        return getSet("Get sub owner ids", url, String.class);
     }
 
     public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {

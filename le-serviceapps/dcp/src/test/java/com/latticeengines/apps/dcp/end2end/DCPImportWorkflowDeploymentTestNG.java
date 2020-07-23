@@ -232,7 +232,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyMatchResult(UploadDetails upload) {
         String uploadId = upload.getUploadId();
-        String matchResultName = uploadService.getMatchResultTableName(uploadId);
+        String matchResultName = uploadService.getMatchResultTableName(uploadId, mainCustomerSpace);
         Assert.assertNotNull(matchResultName);
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
         Assert.assertNotNull(matchResult);
@@ -342,25 +342,25 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 , uploadId);
         Assert.assertNotNull(uploadCache);
         Assert.assertNotNull(uploadCache.getSnapshotTimestamp());
-        Assert.assertNotNull(uploadCache.getDunsCount());
+        Assert.assertNotNull(uploadCache.getDunsCountTableName());
         System.out.println(JsonUtils.pprint(uploadCache));
 
         DunsCountCache sourceCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Source,
                 source.getSourceId());
         Assert.assertNotNull(sourceCache);
         Assert.assertNotNull(sourceCache.getSnapshotTimestamp());
-        Assert.assertNotNull(sourceCache.getDunsCount());
+        Assert.assertNotNull(sourceCache.getDunsCountTableName());
 
         DunsCountCache projectCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Project,
                 projectDetails.getProjectId());
         Assert.assertNotNull(projectCache);
         Assert.assertNotNull(projectCache.getSnapshotTimestamp());
-        Assert.assertNotNull(projectCache.getDunsCount());
+        Assert.assertNotNull(projectCache.getDunsCountTableName());
 
         DunsCountCache tenantCache = dataReportProxy.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Tenant,
                 CustomerSpace.parse(mainCustomerSpace).toString());
         Assert.assertNotNull(tenantCache);
         Assert.assertNotNull(tenantCache.getSnapshotTimestamp());
-        Assert.assertNotNull(tenantCache.getDunsCount());
+        Assert.assertNotNull(tenantCache.getDunsCountTableName());
     }
 }

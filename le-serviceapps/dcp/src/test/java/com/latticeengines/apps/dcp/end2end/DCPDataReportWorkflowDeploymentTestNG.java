@@ -1,9 +1,13 @@
 package com.latticeengines.apps.dcp.end2end;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Date;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -12,12 +16,18 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.service.impl.DataReportServiceImplTestNG;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -27,11 +37,14 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadRequest;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -50,13 +63,22 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
     @Inject
     private DataReportProxy reportProxy;
 
+    @Inject
+    private MetadataProxy metadataProxy;
+
+    @Inject
+    private Configuration yarnConfiguration;
+
+    private static final String localPathBase = ClassLoader
+            .getSystemResource("avro").getPath();
+
     @BeforeClass(groups = { "deployment" })
     public void setup() {
         setupTestEnvironment();
     }
 
     @Test(groups = "deployment")
-    public void testRecomputeTree() {
+    public void testRecomputeTree() throws IOException {
         prepareTenant();
         DCPReportRequest request = new DCPReportRequest();
         request.setLevel(DataReportRecord.Level.Project);
@@ -82,8 +104,7 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
                 JsonUtils.pprint(projectReport.getInputPresenceReport()));
     }
 
-
-    private void prepareTenant() {
+    private void prepareTenant() throws IOException {
         // Create Project
         ProjectRequest projectRequest = new ProjectRequest();
         projectRequest.setDisplayName("ReportEnd2EndProject");
@@ -116,6 +137,7 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
                 uploadRequest1);
         uploadProxy.updateUploadStatus(mainCustomerSpace, uploadDetails1.getUploadId(), Upload.Status.FINISHED, null);
 
+
         // register report in upload level
         report = DataReportServiceImplTestNG.getDataReport();
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
@@ -123,8 +145,41 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         report1 = DataReportServiceImplTestNG.getDataReport();
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
                 report1);
+
+        String tableName = setupTables();
+        DunsCountCache cache = new DunsCountCache();
+        cache.setSnapshotTimestamp(new Date());
+        cache.setDunsCountTableName(tableName);
+        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
+                cache);
+        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
+                cache);
     }
 
+
+
+    private String setupTables() throws IOException {
+        Table dunsCountTable = JsonUtils
+                .deserialize("tables/DunsCountTable.json", Table.class);
+        String dunsCountTableName = NamingUtils.timestamp("dunsCount");
+        dunsCountTable.setName(dunsCountTableName);
+        Extract extract = dunsCountTable.getExtracts().get(0);
+        extract.setPath(PathBuilder
+                .buildDataTablePath(CamilleEnvironment.getPodId(),
+                        CustomerSpace.parse(mainCustomerSpace))
+                .append(dunsCountTableName).toString()
+                + "/*.avro");
+        dunsCountTable.setExtracts(Collections.singletonList(extract));
+        metadataProxy.createTable(mainCustomerSpace, dunsCountTableName, dunsCountTable);
+
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, //
+                  localPathBase + "/part1.avro", //
+                PathBuilder
+                        .buildDataTablePath(CamilleEnvironment.getPodId(),
+                                CustomerSpace.parse(mainCustomerSpace))
+                        .append(dunsCountTableName).append("part1.avro").toString());
+        return dunsCountTableName;
+    }
 
     private UploadRequest generateUpload(ProjectDetails details, Source source) {
         UploadRequest uploadRequest = new UploadRequest();

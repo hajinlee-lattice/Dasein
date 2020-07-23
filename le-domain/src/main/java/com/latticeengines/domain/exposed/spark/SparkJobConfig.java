@@ -70,6 +70,8 @@ import com.latticeengines.domain.exposed.spark.common.GetRowChangesConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
+import com.latticeengines.domain.exposed.spark.dcp.PrepareDataReportConfig;
+import com.latticeengines.domain.exposed.spark.dcp.RollupDataReportConfig;
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
 import com.latticeengines.domain.exposed.spark.stats.AdvancedCalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
@@ -158,6 +160,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MapAttributeTxfmrConfig.class, name = MapAttributeTxfmrConfig.NAME), //
         @JsonSubTypes.Type(value = FilterByJoinConfig.class, name = FilterByJoinConfig.NAME), //
         @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME) })
+        @JsonSubTypes.Type(value = RollupDataReportConfig.class, name = RollupDataReportConfig.NAME), //
+        @JsonSubTypes.Type(value = PrepareDataReportConfig.class, name = PrepareDataReportConfig.NAME) })
 public abstract class SparkJobConfig implements Serializable {
 
     /**

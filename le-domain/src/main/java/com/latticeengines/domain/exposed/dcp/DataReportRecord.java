@@ -26,6 +26,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -79,6 +80,7 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_DUNS_COUNT")
+    @JsonProperty("DunsCount")
     private com.latticeengines.domain.exposed.metadata.Table dunsCount;
 
     @Column(name = "REFRESH_TIME")

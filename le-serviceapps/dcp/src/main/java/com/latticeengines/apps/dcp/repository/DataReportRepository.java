@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
 
@@ -37,4 +38,8 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
     @Query("select d.ownerId, d.basicStats from DataReportRecord d join DataReportRecord d2 on d.parentId = d2.pid " +
             "where d2.level = ?1 AND d2.ownerId = ?2")
     List<Object[]> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId);
+
+    @Query("select d.ownerId from DataReportRecord d join DataReportRecord d2 on d.parentId = d2.pid " +
+            "where d2.level = ?1 AND d2.ownerId = ?2")
+    Set<String> findSubOwnerIdsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId);
 }

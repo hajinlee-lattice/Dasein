@@ -1,0 +1,51 @@
+{
+  "name": "dunsCount_2020_07_23_08_39_55_UTC",
+  "display_name": "topLevelRecord",
+  "attributes": [
+    {
+      "name": "MatchedDuns",
+      "display_name": "MatchedDuns",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "cnt",
+      "display_name": "cnt",
+      "nullable": false,
+      "physical_data_type": "long",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    }
+  ],
+  "level_hierarchies": [],
+  "extracts": [
+    {
+      "name": "extract",
+      "path": "/Pods/QA/Contracts/LETest1595492817304/Tenants/LETest1595492817304/Spaces/Production/Data/Tables/dunsCount_2020_07_23_08_39_55_UTC/*.avro",
+      "extraction_ts": 1595493592443,
+      "processed_records": 17
+    }
+  ],
+  "primary_key": null,
+  "last_modified_key": null,
+  "interpretation": null,
+  "marked_for_purge": false,
+  "data_rules": [],
+  "storage_mechanism": {
+    "hdfsStorage": {
+      "name": "HDFS",
+      "table_name": "dunsCount_2020_07_23_08_39_55_UTC"
+    }
+  },
+  "namespace": null,
+  "count": null,
+  "updatedby": null,
+  "created": 1595493596000,
+  "updated": 1595493638000,
+  "retentionPolicy": "KEEP_FOREVER",
+  "extracts_directory":  null
+}
