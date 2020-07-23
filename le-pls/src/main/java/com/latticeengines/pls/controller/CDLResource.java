@@ -507,9 +507,8 @@ public class CDLResource {
             }
         } catch (LedpException e) {
             if (LedpCode.LEDP_40091.equals(e.getCode())) {
-                String warningMsg = LedpException.buildMessage(LedpCode.LEDP_18246,
-                        new String[]{removeExceptionCode(LedpCode.LEDP_40091, e.getMessage())});
-                return ImmutableMap.of(UIMessage.class.getSimpleName(), generateUIMessage(Status.Warning, warningMsg));
+                return ImmutableMap.of(UIMessage.class.getSimpleName(), generateUIMessage(Status.Warning,
+                        LedpCode.LEDP_18246.getMessage()));
             } else {
                 if (!LedpCode.LEDP_18248.equals(e.getCode())) {
                     log.error("Unknown exception code: " + e.getCode());

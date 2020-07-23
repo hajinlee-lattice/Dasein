@@ -374,7 +374,7 @@ public enum LedpCode {
     LEDP_18244("This template cannot be reset {0}. Please contact support for further assistance."), //
     LEDP_18245("Cannot reset template {0}."), //
     LEDP_18246("Updating the priorities of the following systems will update the matching and the merging behavior of" +
-            " data. This will affect the data imported going forward." + System.lineSeparator() + "{0}"), //
+            " data. This will affect the data imported going forward."), //
     LEDP_18247("{0}, Please confirm need to reset template."), //
     LEDP_18248("Cannot validate and update system priority."), //
     LEDP_18249("standard field {0} is unmapped but is mapped previously"),//
