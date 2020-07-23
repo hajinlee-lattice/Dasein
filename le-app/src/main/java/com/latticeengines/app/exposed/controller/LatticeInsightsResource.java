@@ -4,9 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +29,6 @@ import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -190,25 +187,6 @@ public class LatticeInsightsResource {
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
         return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, considerInternalAttributes);
-    }
-
-    // M37: This api is deprecated (replaced by the token api below)
-    @GetMapping(INSIGHTS_PATH + "/downloadcsv")
-    @ResponseBody
-    @ApiOperation(value = "Download lead enrichment attributes")
-    public void downloadEnrichmentCSV(HttpServletRequest request, HttpServletResponse response,
-            @ApiParam(value = "Should get only selected attribute") //
-            @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        DateFormat dateFormat = DateTimeUtils.getSimpleDateFormatObj("MM-dd-yyyy");
-        String dateString = dateFormat.format(new Date());
-        String fileName = onlySelectedAttributes != null && onlySelectedAttributes
-                ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
-                : String.format("enrichmentAttributes_%s.csv", dateString);
-        attributeService.downloadAttributes(request, response, "application/csv", fileName, tenant,
                 onlySelectedAttributes, considerInternalAttributes);
     }
 

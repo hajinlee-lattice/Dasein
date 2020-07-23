@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -108,7 +109,6 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     private List<String> attrs2Update;
     private boolean fetchAll;
     private boolean rebuildDownstream;
-    private boolean hasAttrChanges;
     private List<DataUnit> changeLists = new ArrayList<>();
     private ColumnSelection allActiveColumns;
 
@@ -149,7 +149,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             fetchAttrs = getFetchAttrs();
             fetchAll = shouldFetchAll();
             rebuildDownstream = shouldRebuildDownstream();
-            hasAttrChanges = hasAttrChanges();
+            boolean hasAttrChanges = hasAttrChanges();
             boolean doNothing = !(hasAccountChange || fetchAll || rebuildDownstream || hasAttrChanges);
             log.info("hasAccountChange={}, fetchAll={}, rebuildDownstream={}, hasAttrChanges={}: doNothing={}",
                     hasAccountChange, fetchAll, rebuildDownstream, hasAttrChanges, doNothing);
@@ -167,17 +167,13 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         // examples are: activating new attributes, data cloud weekly refresh
         boolean hasDataCloudMajorChange = //
                 Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MAJOR_CHANGE, Boolean.class));
-        boolean hasDataCloudMinorChange = //
-                Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MINOR_CHANGE, Boolean.class));
         accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
         boolean missAccountChangeList = isChanged(ConsolidatedAccount) && (accountChangeList == null);
         boolean missLatticeAccountTable = (oldLatticeAccountTable == null);
-        boolean shouldFetchAll = hasDataCloudMajorChange || hasDataCloudMinorChange || missAccountChangeList
-                || missLatticeAccountTable;
-        log.info("hasDataCloudMajorChange={}, hasDataCloudMinorChange={}, missAccountChangeList={}," + //
-                "missLatticeAccountTable={}: shouldFetchAll={}", //
-                hasDataCloudMajorChange, hasDataCloudMinorChange, missAccountChangeList, missLatticeAccountTable,
-                shouldFetchAll);
+        boolean shouldFetchAll = hasDataCloudMajorChange || missAccountChangeList || missLatticeAccountTable;
+        log.info("hasDataCloudMajorChange={}, missAccountChangeList={}, missLatticeAccountTable={}: " + //
+                        "shouldFetchAll={}", //
+                hasDataCloudMajorChange, missAccountChangeList, missLatticeAccountTable, shouldFetchAll);
         return shouldFetchAll;
     }
 
@@ -603,8 +599,18 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> findAttrs2Update() {
-        // Placecholder, return empty list for now
-        return new ArrayList<>();
+        List<String> attrs2Update = new ArrayList<>();
+        boolean hasDataCloudMinorChange = //
+                Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MINOR_CHANGE, Boolean.class));
+        if (hasDataCloudMinorChange) {
+            Set<String> refreshedLDCAttrs = columnMetadataProxy.getAllColumns(getConfiguration().getDataCloudVersion())
+                    .stream().filter(column -> RefreshFrequency.WEEK.equals(column.getRefreshFrequency())) //
+                    .map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+            attrs2Update.addAll(refreshedLDCAttrs);
+            attrs2Update.retainAll(fetchAttrs);
+            log.info("Going to update {} LDC attributes due to data cloud minor release.", attrs2Update.size());
+        }
+        return attrs2Update;
     }
 
     private ColumnSelection selectActiveDataCloudAttrs() {
@@ -616,8 +622,8 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> getFetchAttrs() {
-        // FIXME: (M38) using serving stores in PA is bad practice. need to find a
-        // workaround
+        // FIXME: (M38) using serving stores in PA is bad practice.
+        // FIXME: need to find a workaround
         List<String> modelAttrs = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), false, inactive) //
                 .map(ColumnMetadata::getAttrName) //
