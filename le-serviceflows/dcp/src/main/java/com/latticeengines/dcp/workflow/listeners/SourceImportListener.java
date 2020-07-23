@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.dcp.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dcp.ProjectDetails;
-import com.latticeengines.domain.exposed.dcp.Upload;
-import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
-import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -28,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflo
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -48,6 +46,9 @@ public class SourceImportListener extends LEJobListener {
 
     @Inject
     private UploadProxy uploadProxy;
+
+    @Inject
+    private SourceProxy sourceProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -74,6 +75,8 @@ public class SourceImportListener extends LEJobListener {
         String sourceId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.SOURCE_ID);
 
         ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId, Boolean.FALSE);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(tenantId, uploadId, Boolean.FALSE);
+        Source source = sourceProxy.getSource(tenantId, sourceId);
 
         BatchStatus jobStatus = jobExecution.getStatus();
         UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();
@@ -130,6 +133,9 @@ public class SourceImportListener extends LEJobListener {
         uploadEmailInfo.setProjectId(projectId);
         uploadEmailInfo.setSourceId(sourceId);
         uploadEmailInfo.setUploadId(uploadId);
+        uploadEmailInfo.setProjectDisplayName(project.getProjectDisplayName());
+        uploadEmailInfo.setSourceDisplayName(source.getSourceDisplayName());
+        uploadEmailInfo.setUploadDisplayName(upload.getDisplayName());
         uploadEmailInfo.setRecipientList(project.getRecipientList());
         uploadEmailInfo.setJobStatus(jobStatus.name());
         log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
