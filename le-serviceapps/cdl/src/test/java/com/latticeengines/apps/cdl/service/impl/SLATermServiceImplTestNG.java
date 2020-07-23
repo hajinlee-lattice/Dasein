@@ -126,11 +126,11 @@ public class SLATermServiceImplTestNG extends CDLFunctionalTestNGBase {
         slaTermService.createOrUpdate(mainCustomerSpace, slaTerm);
         retry.execute(context -> {
             createdAtom.set(slaTermService.findByPid(mainCustomerSpace, term.getPid()));
-            Assert.assertNotNull(createdAtom.get());
+            Assert.assertEquals(createdAtom.get().getTermName(), newTermName);
             return true;
         });
         slaTerm = createdAtom.get();
-        Assert.assertNotNull(slaTerm);
+        Assert.assertEquals(slaTerm.getTermName(), newTermName);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testUpdateSlaTerm")
@@ -149,7 +149,7 @@ public class SLATermServiceImplTestNG extends CDLFunctionalTestNGBase {
         AtomicReference<List<SLAFulfillment>> createdAtom1 = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom1.set(slaFulfillmentService.findByTenant(mainCustomerSpace));
-            Assert.assertEquals(createdAtom1.get().size(), 1);
+            Assert.assertEquals(createdAtom1.get().get(0).getFulfillmentStatus(), SLAFulfillment.SLAFulfillmentStatus.Violated);
             return true;
         });
         slaFulfillment = createdAtom1.get().get(0);
