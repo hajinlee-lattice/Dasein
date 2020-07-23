@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "journeyStages", description = "REST resource for timeline management")
+@Api(value = "journeyStages", description = "REST resource for JourneyStage management")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/journeyStages")
 public class JourneyStageResource {
