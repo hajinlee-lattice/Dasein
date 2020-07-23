@@ -16,6 +16,9 @@ public class UploadDetails {
     @JsonProperty("uploadId")
     private String uploadId;
 
+    @JsonProperty("displayName")
+    private String displayName;
+
     @JsonProperty("sourceId")
     private String sourceId;
 
@@ -47,6 +50,14 @@ public class UploadDetails {
 
     public void setUploadId(String uploadId) {
         this.uploadId = uploadId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getSourceId() {

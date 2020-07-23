@@ -152,6 +152,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
 
+        Assert.assertEquals(upload.getDisplayName(), TEST_ACCOUNT_DATA_FILE);
         Assert.assertEquals(upload.getCreatedBy(), USER);
         Assert.assertEquals(upload.getStatus(), Upload.Status.FINISHED);
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
