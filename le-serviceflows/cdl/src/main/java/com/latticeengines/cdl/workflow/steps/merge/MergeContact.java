@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -244,9 +242,4 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE, factory);
     }
 
-    @Override
-    protected boolean shouldPublishDynamo() {
-        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
-        return !skipPublishDynamo && hasAccount360;
-    }
 }
