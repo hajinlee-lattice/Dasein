@@ -371,6 +371,12 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
                     idEntity.name().toLowerCase());
             throw new IllegalArgumentException(msg);
         }
+        if (MarketingActivity.equals(deleteEntityType) && Account.equals(idEntity)
+                && StringUtils.isNotBlank(deleteFilename)) {
+            // FIXME remove this when delete contact level stream by account id is supported
+            throw new UnsupportedOperationException(
+                    "Delete marketing activity data by Account ID is not supported at the moment");
+        }
     }
 
     private Action createTimeRangeDeleteAction(@NotNull CustomerSpace customerSpace, @NotNull DeleteRequest request) {
