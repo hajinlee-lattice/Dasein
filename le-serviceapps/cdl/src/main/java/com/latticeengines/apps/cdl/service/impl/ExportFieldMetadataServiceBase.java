@@ -233,12 +233,12 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             ColumnMetadata cm;
 
             if (defaultField.getStandardField() && accountAttributesMap.containsKey(attrName)
-                    && accountAttributesMap.get(attrName).getEntity() != BusinessEntity.Contact) {
+                    && defaultField.getEntity() != BusinessEntity.Contact) {
                 cm = accountAttributesMap.get(attrName);
                 cm.setDisplayName(defaultField.getDisplayName());
                 accountAttributesMap.remove(attrName);
             } else if (defaultField.getStandardField() && contactAttributesMap.containsKey(attrName)
-                    && contactAttributesMap.get(attrName).getEntity() == BusinessEntity.Contact) {
+                    && defaultField.getEntity() == BusinessEntity.Contact) {
                 cm = contactAttributesMap.get(attrName);
                 cm.setDisplayName(defaultField.getDisplayName());
                 contactAttributesMap.remove(attrName);
