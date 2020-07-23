@@ -104,6 +104,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.ActivityStream)) {
                 activityStreamSparkConfiguration.setShouldRebuild(true);
                 timeLineSparkStepConfiguration.setShouldRebuild(true);
+                processStepConfiguration.setShouldRebuild(true);
             }
             return this;
         }

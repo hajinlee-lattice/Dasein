@@ -27,6 +27,9 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
     @JsonProperty("active_raw_stream_tables")
     private Map<String, String> activeRawStreamTables;
 
+    @JsonProperty("rebuild_activity_streams")
+    private boolean shouldRebuild;
+
     private boolean isReplaceMode;
 
     private boolean isRematchMode;
@@ -85,6 +88,14 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
 
     public void setEntityMatchGAOnly(boolean entityMatchGAOnly) {
         this.entityMatchGAOnly = entityMatchGAOnly;
+    }
+
+    public boolean isShouldRebuild() {
+        return shouldRebuild;
+    }
+
+    public void setShouldRebuild(boolean shouldRebuild) {
+        this.shouldRebuild = shouldRebuild;
     }
 
     @JsonProperty("replace_mode")

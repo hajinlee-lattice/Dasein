@@ -206,7 +206,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
                 .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-        log.info("Building raw stream tables, tables={}, pipelineVersion={}", rawStreamTableNames, pipelineVersion);
+        log.info("Building raw stream tables, tables={}, pipelineVersion={}, batchStore={}, version={}", rawStreamTableNames, pipelineVersion, batchStore, inactive);
 
         // link all tables and use streamId as signature
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
