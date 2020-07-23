@@ -1,10 +1,14 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 
 public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
     public static final String NAME = "ExportTimelineRawTableToDynamoStepConfiguration";
+
+    @JsonProperty("registerDataUnit")
+    private boolean registerDataUnit;
 
     @Override
     public boolean needEmptyFailed() {
@@ -32,7 +36,11 @@ public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportT
     }
 
     @Override
-    public boolean registerDataUnit() {
-        return false;
+    public boolean getRegisterDataUnit() {
+        return registerDataUnit;
+    }
+
+    public void setRegisterDataUnit(boolean registerDataUnit) {
+        this.registerDataUnit = registerDataUnit;
     }
 }

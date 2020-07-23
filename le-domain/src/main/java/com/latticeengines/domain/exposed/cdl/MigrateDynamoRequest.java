@@ -18,6 +18,11 @@ public class MigrateDynamoRequest {
     @JsonProperty("tableNames")
     private List<String> tableNames;
 
+    @JsonProperty("entityClass")
+    private String entityClass;
+
+    @JsonProperty("signature")
+    private String signature;
 
     public List<String> getTableNames() {
         return tableNames;
@@ -25,5 +30,21 @@ public class MigrateDynamoRequest {
 
     public void setTableNames(List<String> tableNames) {
         this.tableNames = tableNames;
+    }
+
+    public String getEntityClass() {
+        return entityClass;
+    }
+
+    public void setEntityClass(String entityClass) {
+        this.entityClass = entityClass;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 }
