@@ -7,6 +7,7 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
@@ -73,16 +75,65 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
             .getSystemResource("avro").getPath();
 
     @BeforeClass(groups = { "deployment" })
-    public void setup() {
+    public void setup() throws IOException {
         setupTestEnvironment();
+        prepareTenant();
     }
 
     @Test(groups = "deployment")
-    public void testRecomputeTree() throws IOException {
-        prepareTenant();
+    public void testRecomputeRoot() {
+        DCPReportRequest request = new DCPReportRequest();
+        request.setLevel(DataReportRecord.Level.Source);
+        request.setMode(DataReportMode.RECOMPUTE_ROOT);
+        request.setRootId(source.getSourceId());
+
+        ApplicationId appId = reportProxy.rollupDataReport(mainCustomerSpace, request);
+        JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        DataReport sourceReport = reportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Source,
+                source.getSourceId());
+
+
+        System.out.println(JsonUtils.pprint(report));
+        System.out.println(JsonUtils.pprint(report1));
+        System.out.println(JsonUtils.pprint(sourceReport));
+        Assert.assertEquals(JsonUtils.pprint(report.getBasicStats()), JsonUtils.pprint(sourceReport.getBasicStats()));
+        Assert.assertEquals(JsonUtils.pprint(report.getGeoDistributionReport()),
+                JsonUtils.pprint(sourceReport.getGeoDistributionReport()));
+        Assert.assertEquals(JsonUtils.pprint(report.getInputPresenceReport()),
+                JsonUtils.pprint(sourceReport.getInputPresenceReport()));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testRecomputeRoot")
+    public void testRecomputeTree() {
+        DCPReportRequest request = new DCPReportRequest();
+        request.setLevel(DataReportRecord.Level.Source);
+        request.setMode(DataReportMode.RECOMPUTE_TREE);
+        request.setRootId(source1.getSourceId());
+
+        ApplicationId appId = reportProxy.rollupDataReport(mainCustomerSpace, request);
+        JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        DataReport sourceReport = reportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Source,
+                source1.getSourceId());
+
+        System.out.println(JsonUtils.pprint(report));
+        System.out.println(JsonUtils.pprint(report1));
+        System.out.println(JsonUtils.pprint(sourceReport));
+        Assert.assertEquals(JsonUtils.pprint(report1.getBasicStats()), JsonUtils.pprint(sourceReport.getBasicStats()));
+        Assert.assertEquals(JsonUtils.pprint(report1.getGeoDistributionReport()),
+                JsonUtils.pprint(sourceReport.getGeoDistributionReport()));
+        Assert.assertEquals(JsonUtils.pprint(report1.getInputPresenceReport()),
+                JsonUtils.pprint(sourceReport.getInputPresenceReport()));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testRecomputeTree")
+    public void testUpdate() {
         DCPReportRequest request = new DCPReportRequest();
         request.setLevel(DataReportRecord.Level.Project);
-        request.setMode(DataReportMode.RECOMPUTE_TREE);
+        request.setMode(DataReportMode.UPDATE);
         request.setRootId(projectDetails.getProjectId());
 
         ApplicationId appId = reportProxy.rollupDataReport(mainCustomerSpace, request);
@@ -91,7 +142,6 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
 
         DataReport projectReport = reportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Project,
                 projectDetails.getProjectId());
-
 
         System.out.println(JsonUtils.pprint(report));
         System.out.println(JsonUtils.pprint(report1));
@@ -146,21 +196,36 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
                 report1);
 
+        // register duns count in level
         String tableName = setupTables();
         DunsCountCache cache = new DunsCountCache();
         cache.setSnapshotTimestamp(new Date());
         cache.setDunsCountTableName(tableName);
+
+        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Project,
+                projectDetails.getProjectId(), cache);
+        SleepUtils.sleep(1000);
+        cache.setSnapshotTimestamp(new Date());
+        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source.getSourceId(),
+                cache);
+        SleepUtils.sleep(1000);
+        cache.setSnapshotTimestamp(new Date());
+        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source1.getSourceId(),
+                cache);
+        SleepUtils.sleep(1000);
+        cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
                 cache);
+        SleepUtils.sleep(1000);
+        cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
                 cache);
     }
 
-
-
     private String setupTables() throws IOException {
         Table dunsCountTable = JsonUtils
-                .deserialize("tables/DunsCountTable.json", Table.class);
+                .deserialize(IOUtils.toString(ClassLoader.getSystemResourceAsStream(
+                        "tables/DunsCountTable.json"), "UTF-8"), Table.class);
         String dunsCountTableName = NamingUtils.timestamp("dunsCount");
         dunsCountTable.setName(dunsCountTableName);
         Extract extract = dunsCountTable.getExtracts().get(0);

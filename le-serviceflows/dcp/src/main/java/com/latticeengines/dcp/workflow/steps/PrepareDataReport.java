@@ -62,7 +62,7 @@ public class PrepareDataReport extends RunSparkJob<RollupDataReportStepConfigura
         String rootId = stepConfiguration.getRootId();
         Set<String> uploadIds = getUploadIds(level, rootId);
         List<DataUnit> inputs = new ArrayList<>();
-        Map<Integer, String> indexToUploadId = new HashMap<>();
+        indexToUploadId = new HashMap<>();
         int index = 0;
         for (String uploadId : uploadIds) {
             DunsCountCache cache = dataReportProxy.getDunsCount(customerSpace.toString(), DataReportRecord.Level.Upload,

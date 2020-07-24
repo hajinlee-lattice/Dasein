@@ -409,7 +409,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             Date snapshotTime = pair.getRight();
             HdfsDataUnit unit = units.get(index);
             // register duns count cache
-            String dunsCountTableName = NamingUtils.timestamp("dunsCount");
+            String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId));
             Table dunsCount = toTable(dunsCountTableName, null, unit);
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
             DunsCountCache cache = new DunsCountCache();
