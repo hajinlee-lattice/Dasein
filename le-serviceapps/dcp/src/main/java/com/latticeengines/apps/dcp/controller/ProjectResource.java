@@ -44,10 +44,10 @@ public class ProjectResource {
             ProjectDetails result;
             if(projectRequest.getProjectId() == null) {
                 result = projectService.createProject(customerSpace, projectRequest.getDisplayName(),
-                        projectRequest.getProjectType(), user);
+                        projectRequest.getProjectType(), user, projectRequest.getTeamId());
             } else {
                 result = projectService.createProject(customerSpace, projectRequest.getProjectId(),
-                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user);
+                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user, projectRequest.getTeamId());
             }
             return ResponseDocument.successResponse(result);
         } catch (LedpException e) {

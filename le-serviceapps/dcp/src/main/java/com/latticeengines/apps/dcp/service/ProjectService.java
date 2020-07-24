@@ -12,10 +12,10 @@ import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 public interface ProjectService {
 
     ProjectDetails createProject(String customerSpace, String displayName,
-                                 Project.ProjectType projectType, String user);
+                                 Project.ProjectType projectType, String user, String teamId);
 
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                 Project.ProjectType projectType, String user);
+                                 Project.ProjectType projectType, String user, String teamId);
 
     List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources);
 

@@ -66,11 +66,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
-                                        Project.ProjectType projectType, String user) {
+                                        Project.ProjectType projectType, String user, String teamId) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(projectId);
         S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system, teamId));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -81,11 +81,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                        Project.ProjectType projectType, String user) {
+                                        Project.ProjectType projectType, String user, String teamId) {
         validateProjectId(projectId);
         String rootPath = generateRootPath(projectId);
         S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system, teamId));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -207,6 +207,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setCreated(projectInfo.getCreated().getTime());
         details.setUpdated(projectInfo.getUpdated().getTime());
         details.setCreatedBy(projectInfo.getCreatedBy());
+        details.setTeamId(projectInfo.getTeamId());
         return details;
     }
 
@@ -225,12 +226,13 @@ public class ProjectServiceImpl implements ProjectService {
         summary.setCreated(projectInfo.getCreated().getTime());
         summary.setUpdated(projectInfo.getUpdated().getTime());
         summary.setCreatedBy(projectInfo.getCreatedBy());
+        summary.setTeamId(projectInfo.getTeamId());
         return summary;
     }
 
     private Project generateProjectObject(String projectId, String displayName,
                                           Project.ProjectType projectType, String user, String rootPath,
-                                          S3ImportSystem system) {
+                                          S3ImportSystem system, String teamId) {
         Project project = new Project();
         project.setCreatedBy(user);
         project.setProjectDisplayName(displayName);
@@ -241,6 +243,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setRootPath(rootPath);
         project.setS3ImportSystem(system);
         project.setRecipientList(Collections.singletonList(user));
+        project.setTeamId(teamId);
         return project;
     }
 

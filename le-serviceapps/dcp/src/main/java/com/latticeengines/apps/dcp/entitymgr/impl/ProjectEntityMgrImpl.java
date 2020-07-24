@@ -122,6 +122,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setCreatedBy((String) columns[6]);
         info.setRecipientList((List<String>) columns[7]);
         info.setSystemId((Long) columns[8]);
+        info.setTeamId((String) columns[9]);
         return info;
     }
 }

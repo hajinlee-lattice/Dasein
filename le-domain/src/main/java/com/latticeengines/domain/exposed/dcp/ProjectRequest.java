@@ -21,6 +21,10 @@ public class ProjectRequest {
     @ApiModelProperty(required = true, value = "projectType")
     private Project.ProjectType projectType;
 
+    @JsonProperty("teamId")
+    @ApiModelProperty(required = false, value = "teamId")
+    private String teamId;
+
     public String getDisplayName() {
         return displayName;
     }
@@ -41,4 +45,11 @@ public class ProjectRequest {
 
     public void setProjectType(Project.ProjectType projectType) { this.projectType = projectType; }
 
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
 }
