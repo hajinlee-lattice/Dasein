@@ -165,7 +165,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_UA_EM, //
-                BusinessEntity.Contact, CONTACT_UA_EM);
+                BusinessEntity.Contact, CONTACT_UA_EM_SERVING);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_UA_EM, //
-                BusinessEntity.Contact, CONTACT_UA_EM);
+                BusinessEntity.Contact, CONTACT_UA_EM_SERVING);
     }
 
     @Override

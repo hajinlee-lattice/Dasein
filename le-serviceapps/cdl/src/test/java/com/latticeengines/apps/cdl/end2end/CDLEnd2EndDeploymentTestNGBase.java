@@ -269,6 +269,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
     static final Long CONTACT_UA_EM = 1005L;
+    static final Long CONTACT_UA_EM_SERVING = 1001L;
     // Number of new contact after UpdateContact test
     static final Long NEW_CONTACT_UC = 100L;
     // Number of new contact after UpdateAccount entity match test
