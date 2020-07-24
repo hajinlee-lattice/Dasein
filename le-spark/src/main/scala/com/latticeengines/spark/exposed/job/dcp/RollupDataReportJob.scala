@@ -24,7 +24,8 @@ class RollupDataReportJob extends AbstractSparkJob[RollupDataReportConfig] {
     if (mode == DataReportMode.RECOMPUTE_ROOT) {
       val (dupReport, dunsCntDF) =  generateDunsCount(inputs.toSet, matchedDunsAttr)
       lattice.output = dunsCntDF :: Nil
-      lattice.outputStr = JsonUtils.serialize(dupReport :: Nil)
+      val reports = dupReport :: Nil
+      lattice.outputStr = JsonUtils.serialize(reports.asJava)
     } else {
       val inputOwnerIdToIndex = config.getInputOwnerIdToIndex.asScala.toMap
       val parentIdToChildren : Map[String, util.Set[String]]= config.getParentIdToChildren.asScala.toMap
