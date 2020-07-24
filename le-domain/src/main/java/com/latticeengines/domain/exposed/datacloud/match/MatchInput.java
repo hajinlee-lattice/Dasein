@@ -77,6 +77,10 @@ public class MatchInput implements Fact, Dimension {
     private Map<MatchKey, List<String>> keyMap;
     @JsonProperty("LookupId")
     private String lookupId;
+    // registration number type, the code given by Direct+ category
+    // https://directplus.documentation.dnb.com/openAPI.html?apiID=refDataCodes
+    @JsonProperty("RegNumberType")
+    private String regNumberType;
     // =========================
     // BEGIN: column selections
     // =========================
@@ -276,6 +280,13 @@ public class MatchInput implements Fact, Dimension {
     // END ENTITY MATCH PROPERTIES
     // ====================
 
+    public String getRegNumberType() {
+        return regNumberType;
+    }
+
+    public void setRegNumberType(String regNumberType) {
+        this.regNumberType = regNumberType;
+    }
 
     public MatchRequestSource getRequestSource() {
         return requestSource;
