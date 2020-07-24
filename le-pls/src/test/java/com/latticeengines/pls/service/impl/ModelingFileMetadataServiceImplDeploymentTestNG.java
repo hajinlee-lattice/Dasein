@@ -101,6 +101,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         boolean longitudeExist = false;
         boolean latitudeExist = false;
         boolean accountIdExist = false;
+        boolean websiteExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -110,6 +111,11 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
             if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
                 fieldMapping.setUserField(null);
                 accountIdExist = true;
+            }
+            // this will trigger two warnings
+            if (InterfaceName.Website.name().equals(fieldMapping.getMappedField())) {
+                fieldMapping.setMappedField(null);
+                websiteExist = true;
             }
             if ("Lattitude".equals(fieldMapping.getUserField())) {
                 fieldMapping.setMappedField(InterfaceName.Longitude.name());
@@ -123,6 +129,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         Assert.assertTrue(longitudeExist);
         Assert.assertTrue(latitudeExist);
         Assert.assertTrue(accountIdExist);
+        Assert.assertTrue(websiteExist);
 
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
@@ -133,13 +140,13 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .filter(validation -> FieldValidation.ValidationStatus.WARNING.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 2);
+        Assert.assertEquals(warningValidations.size(), 3);
 
         // verify error
         List<FieldValidation> errorValidations =
                 validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 1);
+        Assert.assertEquals(errorValidations.size(), 2);
 
         try {
             modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,

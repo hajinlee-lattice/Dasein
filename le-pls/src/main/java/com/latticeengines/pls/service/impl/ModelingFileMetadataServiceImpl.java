@@ -403,7 +403,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
-        compareStandardFields(documentBestEffort, fieldMappingDocument, standardAttrNames, validations);
+        compareStandardFields(templateTable, fieldMappingDocument, standardAttrNames, validations, customerSpace);
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
@@ -494,16 +494,36 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return fieldValidationResult;
     }
 
-    private void compareStandardFields(FieldMappingDocument documentBestEffort,
+    private void compareStandardFields(Table templateTable,
                                        FieldMappingDocument fieldMappingDocument,
                                        Set<String> standardAttrNames,
-                                       List<FieldValidation> validations) {
-        Map<String, String> previousStandardFieldMapping = new HashMap<>();
-        documentBestEffort.getFieldMappings().stream().forEach(mapping -> {
-            if (standardAttrNames.contains(mapping.getMappedField())) {
-                previousStandardFieldMapping.put(mapping.getMappedField(), mapping.getUserField());
-            }
-        });
+                                       List<FieldValidation> validations,
+                                       CustomerSpace customerSpace) {
+        if (templateTable == null) {
+            return;
+        }
+        List<S3ImportSystem> allImportSystem = cdlService.getAllS3ImportSystem(customerSpace.toString());
+        if (CollectionUtils.isNotEmpty(allImportSystem)) {
+            Set<String> matchIds = new HashSet<>();
+            allImportSystem.forEach(s3ImportSystem -> {
+                if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
+                    matchIds.add(s3ImportSystem.getAccountSystemId());
+                }
+                if (StringUtils.isNotBlank(s3ImportSystem.getContactSystemId())) {
+                    matchIds.add(s3ImportSystem.getContactSystemId());
+                }
+                if (StringUtils.isNotBlank(s3ImportSystem.getSecondaryContactId(EntityType.Leads))) {
+                    matchIds.add(s3ImportSystem.getSecondaryContactId(EntityType.Leads));
+                }
+            });
+            standardAttrNames.addAll(matchIds);
+        }
+        Map<String, String> previousStandardFieldMapping =
+                templateTable.getAttributes()
+                        .stream()
+                        .filter(attr -> standardAttrNames.contains(attr.getName()))
+                        .collect(Collectors.toMap(Attribute::getName, attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
+                        attr.getDisplayName()));
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (standardAttrNames.contains(mapping.getMappedField())) {
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
@@ -512,13 +532,23 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     String message = String.format("standard field %s is unmapped this time but is mapped previously.",
                             mapping.getMappedField());
                     validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.ERROR, message));
-                } else if (!StringUtils.equals(preUserField, userField)) {
+                } else if (StringUtils.isNotBlank(preUserField) && StringUtils.isNotBlank(userField) &&
+                        !preUserField.equals(userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
                     validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.WARNING, message));
                 }
+                previousStandardFieldMapping.remove(mapping.getMappedField());
             }
         }
+        // lost mapping in previous mapping
+        previousStandardFieldMapping.forEach((mappedField, userField) -> {
+            if (StringUtils.isNotBlank(userField)) {
+                String message = String.format("standard field %s is unmapped this time but is mapped previously.",
+                        mappedField);
+                validations.add(createValidation(userField, mappedField, ValidationStatus.ERROR, message));
+            }
+        });
     }
 
     private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate,
@@ -866,11 +896,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
-        checkStandardFields(fieldMappingDocument, templateTable, schemaTable);
+        checkStandardFields(fieldMappingDocument, templateTable, schemaTable, customerSpace);
     }
 
     private void checkStandardFields(FieldMappingDocument fieldMappingDocument, Table templateTable,
-                                     Table schemaTable) {
+                                     Table schemaTable, CustomerSpace customerSpace) {
         if (templateTable == null) {
             return;
         }
@@ -878,6 +908,22 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .stream()
                 .map(Attribute::getName)
                 .collect(Collectors.toSet());
+        List<S3ImportSystem> allImportSystem = cdlService.getAllS3ImportSystem(customerSpace.toString());
+        if (CollectionUtils.isNotEmpty(allImportSystem)) {
+            Set<String> matchIds = new HashSet<>();
+            allImportSystem.forEach(s3ImportSystem -> {
+                if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
+                    matchIds.add(s3ImportSystem.getAccountSystemId());
+                }
+                if (StringUtils.isNotBlank(s3ImportSystem.getContactSystemId())) {
+                    matchIds.add(s3ImportSystem.getContactSystemId());
+                }
+                if (StringUtils.isNotBlank(s3ImportSystem.getSecondaryContactId(EntityType.Leads))) {
+                    matchIds.add(s3ImportSystem.getSecondaryContactId(EntityType.Leads));
+                }
+            });
+            standardFields.addAll(matchIds);
+        }
         Map<String, String> map = templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName,
                 attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
                         attr.getDisplayName()));
