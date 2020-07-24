@@ -406,7 +406,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 if (CollectionUtils.isNotEmpty(tables)) {
                     for (Table table : tables) {
                         if (table != null) {
-                            log.info("Creating table {} for {} in version {}.", table.getName(), role, version);
+                            log.info("Creating table {} for {} in version {}, table Path is {}.", table.getName(), role,
+                                    version, table.getExtractsDirectory());
                             if (!uploadedTables.contains(table.getName())) {
                                 metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                                 uploadedTables.add(table.getName());

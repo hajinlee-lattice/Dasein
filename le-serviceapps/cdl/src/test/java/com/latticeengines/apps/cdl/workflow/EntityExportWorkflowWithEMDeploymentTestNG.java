@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -16,6 +17,8 @@ import com.latticeengines.apps.cdl.service.impl.CheckpointAutoService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 /**
  * dpltc deploy -a admin,pls,lp,cdl,metadata,matchapi,workflowapi
@@ -26,6 +29,8 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
 
     @Inject
     protected CheckpointAutoService checkpointAutoService;
+    @Inject
+    protected MetadataProxy metadataProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -37,6 +42,8 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
         checkpointAutoService.resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT,
                 CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
         log.info("Setup Complete!");
+        List<Table> tableList = metadataProxy.getTables(mainTestCustomerSpace.toString());
+        log.info("tables is {}.", JsonUtils.serialize(tableList));
         configExportAttrs();
         saveCsvToLocal = false;
     }
