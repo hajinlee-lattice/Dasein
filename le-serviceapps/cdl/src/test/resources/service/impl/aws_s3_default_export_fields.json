@@ -397,7 +397,7 @@
    },
    {
       "attrName":"SFDC_CONTACT_ID",
-      "displayName":"Contact SFDC ID",
+      "displayName":"SFDC Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
