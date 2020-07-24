@@ -261,7 +261,7 @@ public class UploadServiceImpl implements UploadService {
             return null;
         }
 
-        if(config.getDropFilePath() != null) {
+        if (config.getDropFilePath() != null) {
             String fileId = config.getDropFilePath();
             fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
             SourceFile file = sourceFileProxy.findByName(customerSpace, fileId);
