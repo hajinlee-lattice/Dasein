@@ -112,7 +112,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 fieldMapping.setUserField(null);
                 accountIdExist = true;
             }
-            // this will trigger two warnings
             if (InterfaceName.Website.name().equals(fieldMapping.getMappedField())) {
                 fieldMapping.setMappedField(null);
                 websiteExist = true;
@@ -140,7 +139,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .filter(validation -> FieldValidation.ValidationStatus.WARNING.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 3);
+        Assert.assertEquals(warningValidations.size(), 2);
 
         // verify error
         List<FieldValidation> errorValidations =
