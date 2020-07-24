@@ -879,6 +879,7 @@ public final class ImportWorkflowUtils {
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
                             validations, fieldNameInExistingAndCurrentTemplate, sectionName, customFieldsSectionName);
                     checkIDFields(definition, sectionName, validations);
+                    checkRegistrationNumber(definition, validations);
                 }
             } else {
                 // Run checks for Standard (Lattice) Fields.
@@ -1007,7 +1008,7 @@ public final class ImportWorkflowUtils {
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
                             validations, fieldNameInExistingAndCurrentTemplate, sectionName, customFieldsSectionName);
                     checkIDFields(definition, sectionName, validations);
-
+                    checkRegistrationNumber(definition, validations);
                 }
 
                 if (CollectionUtils.isNotEmpty(requiredFieldNames)) {
@@ -1336,6 +1337,23 @@ public final class ImportWorkflowUtils {
                                 ".", definition.getColumnName(), sectionName, definition.getFieldType()),
                         FieldValidationMessage.MessageLevel.ERROR));
             }
+        }
+    }
+
+    private static void checkRegistrationNumber(FieldDefinition definition, List<FieldValidationMessage> validations) {
+        if (InterfaceName.RegistrationNumber.name().equals(definition.getFieldName())) {
+            if (!UserDefinedType.TEXT.equals(definition.getFieldType())) {
+                validations.add(new FieldValidationMessage(definition.getFieldName(), definition.getColumnName(),
+                        String.format("Field mapped to %s has type %s but is required to have type Text.",
+                                definition.getColumnName(), definition.getFieldType()),
+                        FieldValidationMessage.MessageLevel.ERROR));
+            }
+            if (StringUtils.isBlank(definition.getRegistrationNumberTypeCode())) {
+                validations.add(new FieldValidationMessage(definition.getFieldName(), definition.getColumnName(),
+                        "Field RegistrationNumber should have a non-null Type Code",
+                        FieldValidationMessage.MessageLevel.ERROR));
+            }
+            // TODO: validate type code after DCP-987 completed.
         }
     }
 
