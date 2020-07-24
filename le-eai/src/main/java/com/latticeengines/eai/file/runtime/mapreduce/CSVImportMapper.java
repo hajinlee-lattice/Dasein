@@ -41,6 +41,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -50,6 +54,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -78,9 +83,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.common.exposed.util.CompressionUtils.CompressType;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -170,8 +178,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         LOG.info("schema is: " + schema.toString());
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
-        LOG.info("Deduplicate enable = false");
-
         idColumnName = conf.get("eai.id.column.name");
         LOG.info("Import file id column is: " + idColumnName);
         if (StringUtils.isEmpty(idColumnName)) {
@@ -207,7 +213,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private void handleProcess(int index) throws IOException {
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         String avroFileName = getFileName(avroFile, ".avro", index);
-        boolean uploadAvroRecord = false;
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
             try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(getFileName("error", ".csv", index)),
@@ -216,6 +221,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 while (true) {
                     try {
                         RecordLine recordLine = recordQueue.poll(10, TimeUnit.SECONDS);
+                        SleepUtils.sleep(1000l);
                         if (recordLine != null) {
                             convertCSVToAvro.process(recordLine.csvRecord, recordLine.lineNum);
                         }
@@ -228,41 +234,36 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         LOG.info("Record queue was interrupted");
                     }
                 }
-                if (convertCSVToAvro.hasAvroRecord) {
-                    uploadAvroRecord = true;
-                }
                 if (convertCSVToAvro.hasErrorRecord) {
                     uploadErrorRecord = true;
                 }
             }
         }
-        if (!uploadAvroRecord) {
-            File file = new File(avroFileName);
-            if (!file.delete()) {
-                LOG.error("Cannot delete file " + avroFileName);
+    }
+
+    private InputStream getInputStreamFromS3() {
+        String s3Bucket = conf.get("eai.import.aws.s3.bucket");
+        String objectKey = sanitizePathToKey(conf.get("eai.import.aws.s3.object.key"));
+        if (s3Client.doesObjectExist(s3Bucket, objectKey)) {
+            GetObjectRequest getObjectRequest = new GetObjectRequest(s3Bucket, objectKey);
+            try {
+                S3Object s3Object = s3Client.getObject(getObjectRequest);
+                LOG.info(String.format("Reading the object %s of type %s and size %s", objectKey,
+                        s3Object.getObjectMetadata().getContentType(),
+                        FileUtils.byteCountToDisplaySize(s3Object.getObjectMetadata().getContentLength())));
+                return s3Object.getObjectContent();
+            } catch (AmazonS3Exception e) {
+                throw new RuntimeException("Failed to get object " + objectKey + " from S3 bucket " + s3Bucket, e);
             }
+        } else {
+            LOG.error("Object " + objectKey + " does not exist in bucket " + s3Bucket);
+            throw new RuntimeException("Not able to find csv file from s3!");
         }
     }
 
     private InputStream getInputFileStream(Context context) throws IOException {
         if (useS3Input) {
-            String s3Bucket = conf.get("eai.import.aws.s3.bucket");
-            String objectKey = sanitizePathToKey(conf.get("eai.import.aws.s3.object.key"));
-            if (s3Client.doesObjectExist(s3Bucket, objectKey)) {
-                GetObjectRequest getObjectRequest = new GetObjectRequest(s3Bucket, objectKey);
-                try {
-                    S3Object s3Object = s3Client.getObject(getObjectRequest);
-                    LOG.info(String.format("Reading the object %s of type %s and size %s", objectKey,
-                            s3Object.getObjectMetadata().getContentType(),
-                            FileUtils.byteCountToDisplaySize(s3Object.getObjectMetadata().getContentLength())));
-                    return s3Object.getObjectContent();
-                } catch (AmazonS3Exception e) {
-                    throw new RuntimeException("Failed to get object " + objectKey + " from S3 bucket " + s3Bucket, e);
-                }
-            } else {
-                LOG.error("Object " + objectKey + " does not exist in bucket " + s3Bucket);
-                throw new RuntimeException("Not able to find csv file from s3!");
-            }
+            return getInputStreamFromS3();
         } else {
             String csvFileName = getCSVFilePath(context.getCacheFiles());
             if (csvFileName == null) {
@@ -282,42 +283,91 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return path;
     }
 
+    private CompressType getCompressType() throws IOException {
+        CompressType compressType = CompressType.NO_COMPRESSION;
+        if (useS3Input) {
+            // need to determine file type
+            compressType = CompressionUtils.getCompressType(getInputStreamFromS3());
+            if (CompressType.GZ.equals(compressType)) {
+                compressType = CompressionUtils.getCompressType(new GzipCompressorInputStream(getInputStreamFromS3()));
+                if (!CompressType.TAR.equals(compressType)) {
+                    compressType = CompressType.GZ;
+                }
+            }
+        }
+        return compressType;
+    }
+
+    private List<CompletableFuture<?>> initFutures (int cores){
+        List<CompletableFuture<?>> futures = new ArrayList<>();
+        for (int i = 1; i <= cores; i++) {
+            int index = i;
+            futures.add(CompletableFuture.runAsync(() -> {
+                try {
+                    handleProcess(index);
+                } catch (IOException e) {
+                    LOG.info(String.format("IOException %s happened when process csv record.", e.getMessage()));
+                }
+            }, service));
+        }
+        return futures;
+    }
+
     private void process(Context context) {
         if (StringUtils.isEmpty(table.getName())) {
             avroFile = "file";
         } else {
             avroFile = table.getName();
         }
-        long lineNum = 2;
+        MutableLong lineNum = new MutableLong(2);
         int cores = conf.getInt("mapreduce.map.cpu.vcores", 1);
+        cores = 8;
+        service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", cores);
         CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
-        try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
-                new BOMInputStream(getInputFileStream(context), false, ByteOrderMark.UTF_8,
-                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
-                        ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
-            headerMap = parser.getHeaderMap();
+        List<CompletableFuture<?>> futures = initFutures(cores);
+        try {
+            CompressType compressType = getCompressType();
+            LOG.info("compress type is: " + compressType);
+            idColumnName = conf.get("eai.id.column.name");
+            try (InputStream inputStream = CompressionUtils.getCompressInputStream(new BOMInputStream(getInputFileStream(context), false,
+                    ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                    ByteOrderMark.UTF_32BE), compressType)) {
+                if (inputStream instanceof ArchiveInputStream) {
+                    ArchiveEntry archiveEntry;
+                    ArchiveInputStream archiveInputStream = (ArchiveInputStream) inputStream;
+                    while ((archiveEntry = archiveInputStream.getNextEntry()) != null) {
+                        if (CompressionUtils.isValidArchiveEntry(archiveEntry)) {
+                            parseCSV(inputStream, format, lineNum);
+                        }
+                    }
+                } else {
+                    parseCSV(inputStream, format, lineNum);
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Can't process csv file: {}.", e.getMessage());
+        } finally {
+            finishReading = true;
+            // wait for all the threads done
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            service.shutdown();
+        }
+    }
+
+    private void parseCSV(InputStream inputStream, CSVFormat format, MutableLong lineNum) {
+        try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), format)) {
+            if (MapUtils.isEmpty(headerMap)) {
+                headerMap = parser.getHeaderMap();
+            }
             Iterator<CSVRecord> iter = parser.iterator();
             String ERROR_FILE = getFileName("error", ".csv", 0);
             try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
                     LECSVFormat.format.withHeader((String[]) null))) {
-                service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", cores);
-                List<CompletableFuture<?>> futures = new ArrayList<>();
-                for (int i = 1; i <= cores; i++) {
-                    int index = i;
-                    futures.add(CompletableFuture.runAsync(() -> {
-                        try {
-                            handleProcess(index);
-                        } catch (IOException e) {
-                            LOG.info(String.format("IOException %s happened when process csv record.", e.getMessage()));
-                        }
-                    }, service));
-                }
                 while (true) {
                     // capture IO exception produced during dealing with line
                     try {
                         CSVRecord csvRecord = iter.next();
-                        recordQueue.put(new RecordLine(csvRecord, lineNum));
-                        lineNum++;
+                        recordQueue.put(new RecordLine(csvRecord, lineNum.getValue()));
                     } catch (IllegalStateException ex) {
                         LOG.warn(ex.getMessage(), ex);
                         rowErrorVal.increment();
@@ -331,14 +381,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     } catch (NoSuchElementException e) {
                         break;
                     }
+                    lineNum.increment();
                 }
-                finishReading = true;
-                // wait for all the threads done
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-                service.shutdown();
             }
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("Exception happened during the process of parsing CSV file: ", e);
         }
     }
 
@@ -442,8 +489,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         FilenameFilter filenameFilter = (file, name) -> name.endsWith(AVRO_SUFFIX_NAME);
         File[] avroFiles = directory.listFiles(filenameFilter);
         if (avroFiles != null) {
-            for (File avroFile2 : avroFiles) {
-                String avroFileName = avroFile2.getName();
+            for (File avroFile : avroFiles) {
+                String avroFileName = avroFile.getName();
                 RetryTemplate retry = RetryUtils.getRetryTemplate(3);
                 retry.execute(ctx -> {
                     if (ctx.getRetryCount() > 0) {
@@ -536,8 +583,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         private DataFileWriter<GenericRecord> dataFileWriter;
 
-        private boolean hasAvroRecord = false;
-
         private boolean hasErrorRecord = false;
 
         ConvertCSVToAvro(CSVPrinter csvFilePrinter, DataFileWriter<GenericRecord> dataFileWriter) {
@@ -552,7 +597,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             if (checkCSVRecord(csvRecord)) {
                 GenericRecord currentAvroRecord = toGenericRecord(csvRecord, lineNum);
                 if (errorMap.size() == 0 && duplicateMap.size() == 0) {
-                    hasAvroRecord = true;
                     dataFileWriter.append(currentAvroRecord);
                     importedRecords.increment();
                 } else {
@@ -614,8 +658,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
-            Map<String, String> headerCaseMapping = headerMap.keySet()
-                                                    .stream()
+            Map<String, String> headerCaseMapping = headerMap.keySet().stream()
                                                     .collect(Collectors.toMap(String::toLowerCase, header -> header));
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;

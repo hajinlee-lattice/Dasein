@@ -11,8 +11,11 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarConstants;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,8 @@ public final class CompressionUtils {
     }
 
     private static final Logger log = LoggerFactory.getLogger(CompressionUtils.class);
+
+    private static final int headTotalLengthToCheck = TarConstants.VERSION_OFFSET + TarConstants.VERSIONLEN;
 
     public static byte[] decompressByteArray(final byte[] input) {
         return decompressByteArray(input, 1024);
@@ -127,8 +132,63 @@ public final class CompressionUtils {
                 dest.close();
             }
         }
-
         tarIn.close();
         log.info("Successfully untared into " + destDir);
+    }
+
+
+
+    public static CompressType getCompressType(InputStream inputStream) {
+        try (InputStream inputStream2 = inputStream) {
+            int totalLength = TarConstants.VERSION_OFFSET + TarConstants.VERSIONLEN;
+            byte[] buffer = new byte[totalLength];
+            int offset = 0;
+            while (offset < totalLength) {
+                offset += inputStream2.read(buffer, offset, totalLength - offset);
+            }
+            if (GzipUtils.isCompressed(buffer)) {
+                return CompressType.GZ;
+            } else if (ZipArchiveInputStream.matches(buffer, totalLength)) {
+                return CompressType.ZIP;
+            } else if (TarArchiveInputStream.matches(buffer, totalLength)) {
+                return CompressType.TAR;
+            }
+            return CompressType.NO_COMPRESSION;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to determine to file type!");
+        }
+    }
+
+    public static InputStream getCompressInputStream(InputStream inputStream, CompressType compressType) throws IOException {
+        switch (compressType) {
+            case GZ:
+                return new GzipCompressorInputStream(inputStream);
+            case TAR:
+                return new TarArchiveInputStream(inputStream);
+            case ZIP:
+                return new ZipArchiveInputStream(inputStream);
+            case TAR_GZ:
+                return new TarArchiveInputStream(new GzipCompressorInputStream(inputStream));
+            default:
+                return inputStream;
+        }
+    }
+
+    public static boolean isValidArchiveEntry(ArchiveEntry archiveEntry) {
+        if (archiveEntry.isDirectory()) {
+            return false;
+        }
+        String entryName = archiveEntry.getName();
+        int index = entryName.lastIndexOf("/");
+        // file name should not start with "."
+        if (index > 0 && entryName.substring(index).startsWith(".")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public enum CompressType {
+        ZIP, GZ, TAR, TAR_GZ, NO_COMPRESSION
     }
 }
