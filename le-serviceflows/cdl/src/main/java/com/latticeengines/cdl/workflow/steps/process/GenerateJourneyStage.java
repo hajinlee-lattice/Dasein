@@ -240,7 +240,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
                 + NamingUtils.timestamp(AccountJourneyStage.name());
         metadataProxy.createTable(customerSpace.toString(), journeyStageTableName,
                 toTable(journeyStageTableName, unit));
-        putObjectInContext(JOURNEY_STAGE_TABLE_NAME, journeyStageTableName);
+        putStringValueInContext(JOURNEY_STAGE_TABLE_NAME, journeyStageTableName);
         linkJourneyStageTableToInactive();
     }
 
