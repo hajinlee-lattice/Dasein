@@ -232,7 +232,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyMatchResult(UploadDetails upload) {
         String uploadId = upload.getUploadId();
-        String matchResultName = uploadService.getMatchResultTableName(uploadId, mainCustomerSpace);
+        String matchResultName = uploadService.getMatchResultTableName(mainCustomerSpace, uploadId);
         Assert.assertNotNull(matchResultName);
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
         Assert.assertNotNull(matchResult);
