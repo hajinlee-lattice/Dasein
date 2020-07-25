@@ -543,6 +543,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
 //                } else {
 //                    str = str.replaceAll(tenantNames[0], testTenant);
 //                }
+                log.info("str is {}.", str);
                 log.info("tableName is {}", hdfsPathSegment2);
             }
             Assert.assertFalse(str.contains(TABLE_DATA_DIR));
