@@ -403,7 +403,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
-        compareStandardFields(templateTable, fieldMappingDocument, standardAttrNames, validations, customerSpace);
+        compareStandardFields(templateTable, fieldMappingDocument, standardAttrNames, validations, customerSpace, enableEntityMatch);
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
@@ -498,9 +498,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                        FieldMappingDocument fieldMappingDocument,
                                        Set<String> standardAttrNames,
                                        List<FieldValidation> validations,
-                                       CustomerSpace customerSpace) {
+                                       CustomerSpace customerSpace,
+                                       boolean entityMatchEnabled) {
         if (templateTable == null) {
             return;
+        }
+        if (!entityMatchEnabled) {
+            return ;
         }
         List<S3ImportSystem> allImportSystem = cdlService.getAllS3ImportSystem(customerSpace.toString());
         if (CollectionUtils.isNotEmpty(allImportSystem)) {
@@ -529,8 +533,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
                 String userField = mapping.getUserField();
                 if (StringUtils.isNotBlank(preUserField) && StringUtils.isBlank(userField)) {
-                    String message = String.format("standard field %s is unmapped this time but is mapped previously.",
-                            mapping.getMappedField());
+                    String message = String.format("%s was previously mapped to %s. " +
+                                    "This mapping can be changed, but removing the mapping is currently not supported.",
+                            mapping.getMappedField(), preUserField);
                     validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.ERROR, message));
                 } else if (StringUtils.isNotBlank(preUserField) && StringUtils.isNotBlank(userField) &&
                         !preUserField.equals(userField)) {
@@ -544,8 +549,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // lost mapping in previous mapping
         previousStandardFieldMapping.forEach((mappedField, userField) -> {
             if (StringUtils.isNotBlank(userField)) {
-                String message = String.format("standard field %s is unmapped this time but is mapped previously.",
-                        mappedField);
+                String message = String.format("%s was previously mapped to %s. " +
+                                "This mapping can be changed, but removing the mapping is currently not supported.",
+                        mappedField, userField);
                 validations.add(createValidation(userField, mappedField, ValidationStatus.ERROR, message));
             }
         });
@@ -903,6 +909,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                      Table schemaTable, CustomerSpace customerSpace) {
         if (templateTable == null) {
             return;
+        }
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        if (!enableEntityMatch) {
+            return ;
         }
         Set<String> standardFields = schemaTable.getAttributes()
                 .stream()

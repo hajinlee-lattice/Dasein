@@ -1,6 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,7 +40,10 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String flag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> map = new HashMap<>();
+        map.put(flag, Boolean.TRUE);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, map);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
