@@ -81,6 +81,7 @@ public class GenerateDimensionMetadata
 
     @Override
     protected ProcessDimensionConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
+        // TODO -skip this one
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
         Map<String, Table> catalogTableNames = getTablesFromMapCtxKey(customerSpace.toString(), CATALOG_TABLE_NAME);
         Map<String, Table> rawStreamTableNames = getTablesFromMapCtxKey(customerSpace.toString(),

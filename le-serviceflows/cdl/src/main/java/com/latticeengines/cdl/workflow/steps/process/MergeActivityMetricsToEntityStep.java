@@ -90,11 +90,12 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private boolean shortCutMode = false;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
-    private Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
-    private static TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
+    private final Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
+    private static final TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
     };
-    private Set<String> dateRangeEvaluatedSet = new HashSet<>();
-    private Set<Category> updatedCategories = new HashSet<>();
+    private final Set<String> dateRangeEvaluatedSet = new HashSet<>();
+    private final Set<Category> updatedCategories = new HashSet<>();
+    private final Map<String, String> relinkedMetrics = new HashMap<>();
 
     @Override
     protected Class<? extends AbstractSparkJob<MergeActivityMetricsJobConfig>> getJobClz() {
@@ -168,6 +169,10 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     }
 
     private void relinkMergedGroup(List<ActivityMetricsGroup> groups) {
+        if (CollectionUtils.isEmpty(groups)) {
+            log.info("No metrics need to relink.");
+            return;
+        }
         // role CustomIntentProfile; signature entity (account/contact)
         Set<TableRoleInCollection> rolesToRelink = groups.stream().map(group -> getServingStore(group.getCategory())).collect(Collectors.toSet());
         List<String> allowedSignatures = Arrays.asList(BusinessEntity.Account.name(), BusinessEntity.Contact.name());
@@ -176,6 +181,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             if (MapUtils.isNotEmpty(signatureTableNames)) {
                 log.info("Linking existing {} metrics to inactive version{}: {}", role, inactive, signatureTableNames);
                 dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, role, inactive);
+                relinkedMetrics.putAll(signatureTableNames);
             }
         });
     }
@@ -251,6 +257,11 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             log.info("Processed date ranges for {}: {}", servingStore, dateRangeEvaluatedSet);
         });
         updateDataRefreshTimeForCategories();
+        mergedMetricsGroupTables.putAll(relinkedMetrics.entrySet().stream().map(entry -> {
+            String groupId = entry.getKey();
+            String tableName = entry.getValue();
+            return Pair.of(groupId, getTableSummary(customerSpace.toString(), tableName));
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
         exportToS3AndAddToContext(mergedMetricsGroupTables, MERGED_METRICS_GROUP_TABLE_NAME);

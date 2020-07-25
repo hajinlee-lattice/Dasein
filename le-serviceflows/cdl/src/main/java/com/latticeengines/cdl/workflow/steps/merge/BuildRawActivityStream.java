@@ -74,6 +74,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     private String evaluationDate;
     private Integer evaluationDateId;
     private Map<String, Long> tenantOverride; // streamId -> count
+    private final Map<String, String> relinkedTables = new HashMap<>();
 
     @Override
     protected void initializeConfiguration() {
@@ -112,6 +113,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         }
         // TODO add diff report
         Map<String, String> rawStreamTables = buildRawStreamBatchStore();
+        rawStreamTables.putAll(relinkedTables);
+        log.info("Raw stream tables: {}", rawStreamTables);
         exportToS3AndAddToContext(rawStreamTables, RAW_ACTIVITY_STREAM_TABLE_NAME);
         exportToS3AndAddToContext(matchedStreamImportTables, RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME);
     }
@@ -130,7 +133,6 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
             Map<String, Integer> refreshDateMap = getRefreshDateMap(status);
             if (CollectionUtils.isNotEmpty(streamsToRelink)) {
-                relinkStreams(new ArrayList<>(streamsToRelink));
                 streamsToRelink.stream().filter(streamId -> !streamsToRelink.contains(streamId)).forEach(streamId -> {
                     refreshDateMap.put(streamId, DateTimeUtils.fromEpochMilliToDateId(evalTimeEpoch));
                 });
@@ -146,7 +148,10 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         List<TransformationStepConfig> steps = getBuildRawStreamSteps();
 
         if (CollectionUtils.isEmpty(steps)) {
-            log.info("No existing/new activity stream found, skip build raw stream step");
+            log.info("No activity stream needs processing, skip build raw stream step");
+            if (MapUtils.isNotEmpty(relinkedTables)) {
+                putObjectInContext(RAW_ACTIVITY_STREAM_TABLE_NAME, relinkedTables);
+            }
             return null;
         }
 
@@ -166,7 +171,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
             String activeTable = configuration.isRematchMode() ? null : getRawStreamActiveTable(streamId, stream);
             String targetTablePrefixFormat = configuration.isRematchMode() ? REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT
                     : RAWSTREAM_TABLE_PREFIX_FORMAT;
-            if (StringUtils.isNotBlank(matchedImportTable) || needRefresh(refreshDateMap, streamId)
+            if (configuration.isShouldRebuild() || Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))
+                    || StringUtils.isNotBlank(matchedImportTable) || needRefresh(refreshDateMap, streamId)
                     || deletePerformed()) {
                 // has import, over 30 days not refreshed, or performed soft delete
                 appendRawStream(steps, stream, evalTimeEpoch, matchedImportTable, activeTable, targetTablePrefixFormat)
@@ -331,6 +337,10 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     }
 
     private void relinkStreams(List<String> streamsNeedReLink) {
+        if (CollectionUtils.isEmpty(streamsNeedReLink)) {
+            log.info("No streams need to relink.");
+            return;
+        }
         Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(
                 customerSpace.toString(), ConsolidatedActivityStream, active, streamsNeedReLink);
         if (MapUtils.isNotEmpty(signatureTableNames)) {
@@ -338,6 +348,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                     signatureTableNames.keySet());
             dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames,
                     ConsolidatedActivityStream, inactive);
+            relinkedTables.putAll(signatureTableNames);
         }
     }
 }
