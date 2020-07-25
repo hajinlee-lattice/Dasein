@@ -276,7 +276,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
 
         // Concatenate all possible changelist generated above to
         // get final LatticeAccount changelist
-        mergeChangeList();
+        if (changeLists.size() > 0) {
+            mergeChangeList();
+        }
 
         // save LatticeAccount table
         String latticeAccountTableName = NamingUtils.timestamp(ldcTablePrefix);
