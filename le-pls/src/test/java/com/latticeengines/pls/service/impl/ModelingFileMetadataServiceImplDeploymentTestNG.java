@@ -115,7 +115,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 fieldMapping.setMappedToLatticeField(false);
             }
             // unmap the standard field
-            if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
+            if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
                 fieldMapping.setUserField(null);
                 accountIdExist = true;
             }
