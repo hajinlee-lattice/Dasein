@@ -507,6 +507,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             } else {
                 hdfsPath = hdfsPath.replaceAll(TABLE_DATA_DIR, tableName);
             }
+            hdfsPath = hdfsPath.replaceAll(POD_DEFAULT, String.format(POD_PATTERN, podId));
+            hdfsPath = hdfsPath.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
 
             log.info("Parse extract path {}.", hdfsPath);
             Pattern pattern = Pattern.compile(PATH_PATTERN);
@@ -545,8 +547,6 @@ public class CheckpointAutoService extends CheckpointServiceBase {
 //                } else {
 //                    str = str.replaceAll(tenantNames[0], testTenant);
 //                }
-                log.info("str is {}.", str);
-                log.info("tableName is {}", hdfsPathSegment2);
             }
             Assert.assertFalse(str.contains(TABLE_DATA_DIR));
             tables.add(JsonUtils.deserialize(str, Table.class));
