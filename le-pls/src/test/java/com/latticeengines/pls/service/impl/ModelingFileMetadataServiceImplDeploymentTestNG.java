@@ -46,6 +46,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, map);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")
