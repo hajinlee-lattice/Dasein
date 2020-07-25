@@ -525,18 +525,24 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 String testTenant = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
                 String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
-                if (hdfsPathSegment2.contains(tenantNames[0])) {
-                    String hdfsPathIntermediatePattern = String.format("%s/%s", hdfsPathSegment1.replaceAll(tenantNames[0],
-                            testTenant), TABLE_DATA_DIR); //
-                    log.info("hdfsPath is {}", hdfsPath);
-                    log.info("hdfsPathIntermediatePattern is {}.", hdfsPathIntermediatePattern);
-                    String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
-                    str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
-                    str = str.replaceAll(tenantNames[0], testTenant);
-                    str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
-                } else {
-                    str = str.replaceAll(tenantNames[0], testTenant);
-                }
+                String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
+                String hdfsPathReplace = hdfsPath.replaceAll(tenantNames[0], testTenant);
+                str = str.replace(tenantNames[0], testTenant);
+                str = str.replace(hdfsPathReplace, hdfsPathFinal);
+//                if (hdfsPathSegment2.contains(tenantNames[0])) {
+//                    String hdfsPathIntermediatePattern = String.format("%s/%s", hdfsPathSegment1.replaceAll(tenantNames[0],
+//                            testTenant), TABLE_DATA_DIR); //
+//                    log.info("hdfsPath is {}", hdfsPath);
+//                    log.info("hdfsPathSegment1 is {}", hdfsPathSegment1);
+//                    log.info("hdfsPathSegment2 is {}", hdfsPathSegment2);
+//                    log.info("hdfsPathIntermediatePattern is {}.", hdfsPathIntermediatePattern);
+//                    String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
+//                    str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
+//                    str = str.replaceAll(tenantNames[0], testTenant);
+//                    str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
+//                } else {
+//                    str = str.replaceAll(tenantNames[0], testTenant);
+//                }
                 log.info("tableName is {}", hdfsPathSegment2);
             }
             Assert.assertFalse(str.contains(TABLE_DATA_DIR));
