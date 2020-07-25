@@ -527,8 +527,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
                 String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
                 String hdfsPathReplace = hdfsPath.replaceAll(tenantNames[0], testTenant);
-                str = str.replace(tenantNames[0], testTenant);
-                str = str.replace(hdfsPathReplace, hdfsPathFinal);
+                str = str.replaceAll(tenantNames[0], testTenant);
+                str = str.replaceAll(hdfsPathReplace, hdfsPathFinal);
 //                if (hdfsPathSegment2.contains(tenantNames[0])) {
 //                    String hdfsPathIntermediatePattern = String.format("%s/%s", hdfsPathSegment1.replaceAll(tenantNames[0],
 //                            testTenant), TABLE_DATA_DIR); //
