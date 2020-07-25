@@ -276,11 +276,16 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
 
         // Concatenate all possible changelist generated above to
         // get final LatticeAccount changelist
-        mergeChangeList();
+        if (changeLists.size() > 0) {
+            mergeChangeList();
+            // save LatticeAccount table
+            String latticeAccountTableName = NamingUtils.timestamp(ldcTablePrefix);
+            newLatticeAccountTable = toTable(latticeAccountTableName, (HdfsDataUnit) oldLatticeAccountDU);
+        } else {
+            log.info("No meaningful changes, relink LatticeAccount table.");
+            linkInactiveTable(LatticeAccount);
+        }
 
-        // save LatticeAccount table
-        String latticeAccountTableName = NamingUtils.timestamp(ldcTablePrefix);
-        newLatticeAccountTable = toTable(latticeAccountTableName, (HdfsDataUnit) oldLatticeAccountDU);
     }
 
     private HdfsDataUnit select(HdfsDataUnit input) {
