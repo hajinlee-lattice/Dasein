@@ -82,6 +82,7 @@ public class AggActivityStreamToDaily
     private DataCollection.Version inactive;
     private Set<String> streamsIncrUpdated = new HashSet<>();
     private Set<String> streamsPerformedDelete = new HashSet<>();
+    private Map<String, String> relinkedDailyStores = new HashMap<>();
 
     @Override
     protected AggDailyActivityConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
@@ -204,8 +205,9 @@ public class AggActivityStreamToDaily
             log.info("Streams to relink to inactive version: {}", streamsToRelink);
             Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), AggregatedActivityStream, inactive.complement(), new ArrayList<>(streamsToRelink));
             if (MapUtils.isNotEmpty(signatureTableNames)) {
-                log.info("Linking existing daily store tables to inactive version: {}", signatureTableNames.keySet());
+                log.info("Linking existing daily store tables to inactive version: {}", signatureTableNames);
                 dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, AggregatedActivityStream, inactive);
+                relinkedDailyStores.putAll(signatureTableNames);
             }
         }
     }
@@ -259,6 +261,13 @@ public class AggActivityStreamToDaily
         // create daily tables
         Map<String, Table> dailyAggTables = dataUnitMapToTableMap(dailyAggUnits, DAILY_STORE_TABLE_FORMAT, null);
         Map<String, Table> dailyDeltaTables = dataUnitMapToTableMap(dailyDeltaUnits, DAILY_STORE_DELTA_TABLE_FORMAT, createRetentionPolicy());
+
+        // add relinked tables to context
+        dailyAggTables.putAll(relinkedDailyStores.entrySet().stream().map(entry -> {
+            String streamId = entry.getKey();
+            String tableName = entry.getValue();
+            return Pair.of(streamId, getTableSummary(customerSpace.toString(), tableName));
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
 
         // link table to role in collection
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
