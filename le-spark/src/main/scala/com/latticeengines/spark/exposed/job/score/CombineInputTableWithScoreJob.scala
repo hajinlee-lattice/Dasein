@@ -16,17 +16,17 @@ import scala.collection.JavaConverters._
 
 class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWithScoreJobConfig] {
 
-    val ratingField = ScoreResultField.Rating.displayName
-    
+    private val ratingField = ScoreResultField.Rating.displayName
+
     override def runJob(spark: SparkSession, lattice: LatticeContext[CombineInputTableWithScoreJobConfig]): Unit = {
 
       val config: CombineInputTableWithScoreJobConfig = lattice.config
       var inputTable: DataFrame = lattice.input.head
       var scoreTable: DataFrame = lattice.input(1)
-      
+
       val noRatingColumnInScoreTable = !scoreTable.columns.contains(ratingField)
       val notPMMLModel = config.modelType == null || config.modelType == ModelType.PYTHONMODEL.getModelType
-  
+
       if (StringUtils.isNotBlank(config.modelIdField)) {
           // "Enter multi-model mode"
           val bucketMetadataMap = config.bucketMetadataMap.asScala.toMap
@@ -36,7 +36,7 @@ class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWi
             BucketMetadataUtils.bucketScore(bucketMetadataMap(modelId), score)
           })
           scoreTable = scoreTable.withColumn(ratingField, addRatingColumnUdf(col(scoreField), col(modelIdField)))
-          
+
       } else if (noRatingColumnInScoreTable && notPMMLModel) {
           // "Enter single-model mode"
           val bucketMetadata = config.bucketMetadata
@@ -46,7 +46,7 @@ class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWi
           })
           scoreTable = scoreTable.withColumn(ratingField, addRatingColumnUdf(col(scoreField)))
       }
-        
+
       var idColumn = InterfaceName.InternalId.name
       var groupByColumn = InterfaceName.InternalId.name
       if (StringUtils.isNotEmpty(config.idColumn)) {
@@ -55,7 +55,7 @@ class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWi
       } else if (inputTable.columns.contains(InterfaceName.InternalId.name)) {
           idColumn = InterfaceName.InternalId.name
       }
-  
+
       val scoreFields = for (col <- scoreTable.columns) yield col.toUpperCase
       var dropFields : scala.collection.immutable.List[String] = scala.collection.immutable.List()
       inputTable.columns.foreach(c => {
@@ -64,11 +64,11 @@ class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWi
           }
       })
 
-      if (dropFields.size > 0) {   
+      if (dropFields.nonEmpty) {
         inputTable = inputTable.drop(dropFields:_*)
       }
-    
-      var combinedResultTable = inputTable.join(scoreTable, Seq(idColumn), joinType = "left")
+
+      val combinedResultTable = inputTable.join(scoreTable, Seq(idColumn), joinType = "left")
       val result = combinedResultTable.dropDuplicates(groupByColumn)
       lattice.output = result::Nil
     }
