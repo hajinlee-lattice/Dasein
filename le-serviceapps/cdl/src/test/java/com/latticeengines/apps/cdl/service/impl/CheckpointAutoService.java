@@ -533,20 +533,6 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 log.info("hdfsPathReplace is {}.", hdfsPathReplace);
                 str = str.replaceAll(tenantNames[0], testTenant);
                 str = str.replaceAll(hdfsPathReplace, hdfsPathFinal);
-//                if (hdfsPathSegment2.contains(tenantNames[0])) {
-//                    String hdfsPathIntermediatePattern = String.format("%s/%s", hdfsPathSegment1.replaceAll(tenantNames[0],
-//                            testTenant), TABLE_DATA_DIR); //
-//                    log.info("hdfsPath is {}", hdfsPath);
-//                    log.info("hdfsPathSegment1 is {}", hdfsPathSegment1);
-//                    log.info("hdfsPathSegment2 is {}", hdfsPathSegment2);
-//                    log.info("hdfsPathIntermediatePattern is {}.", hdfsPathIntermediatePattern);
-//                    String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
-//                    str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
-//                    str = str.replaceAll(tenantNames[0], testTenant);
-//                    str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
-//                } else {
-//                    str = str.replaceAll(tenantNames[0], testTenant);
-//                }
             }
             Assert.assertFalse(str.contains(TABLE_DATA_DIR));
             tables.add(JsonUtils.deserialize(str, Table.class));
