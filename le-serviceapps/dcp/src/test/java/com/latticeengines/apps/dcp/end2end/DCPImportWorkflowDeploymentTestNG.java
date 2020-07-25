@@ -60,6 +60,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
 
+    private static final String TEST_DATA_DIR = "le-serviceapps/dcp/deployment/testdata";
+    private static final String TEST_DATA_VERSION = "6";
+    private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
     private static final String TEST_ACCOUNT_ERROR_FILE = "Account_dup_header.csv";
 
     private static final String USER = "test@dnb.com";
@@ -261,13 +264,17 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             int count = 0;
             List<String> headers = new ArrayList<>();
             int nameIdx = -1;
+            int dunsIdx = -1;
             int ccIdx = -1;
+            int nationalIdIdx = -1;
             while (nextRecord != null && (count++) < 10) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
                     verifyOutputHeaders(headers);
                     nameIdx = headers.indexOf("Company Name");
+                    dunsIdx = headers.indexOf("Matched D-U-N-S Number");
                     ccIdx = headers.indexOf("Match Confidence Code");
+                    nationalIdIdx = headers.indexOf("National ID");
                 } else {
                     String companyName = nextRecord[nameIdx];
                     Assert.assertTrue(StringUtils.isNotBlank(companyName)); // Original Name is non-empty
@@ -277,6 +284,28 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                         Assert.assertTrue(StringUtils.isNotBlank(confidenceCode));
                         Assert.assertTrue(Integer.parseInt(confidenceCode) < 6);
                     }
+
+                    String regNumber = nextRecord[nationalIdIdx];
+                    if (StringUtils.isNotBlank(regNumber)) {
+                        String matcheDuns = nextRecord[dunsIdx];
+                        log.info("CSV record for [{}]: {}", regNumber, StringUtils.join(nextRecord, ","));
+                        switch (regNumber) {
+                            case "432126092":
+                                Assert.assertEquals(matcheDuns, "268487989");
+                                break;
+                            case "DE129273398":
+                                Assert.assertEquals(matcheDuns, "315369934");
+                                break;
+                            case "77-0493581":
+                                Assert.assertTrue(StringUtils.isBlank(matcheDuns));
+                                break;
+                            case "160043":
+                                Assert.assertEquals(matcheDuns, "229515499");
+                                break;
+                            default:
+                        }
+                    }
+
                     nextRecord = csvReader.readNext();
                 }
             }

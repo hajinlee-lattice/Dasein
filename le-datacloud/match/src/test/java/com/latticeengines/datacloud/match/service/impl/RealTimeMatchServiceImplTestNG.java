@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.City;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.DUNS;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.RegNumber;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Zipcode;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.NonHeadQuarters;
@@ -28,6 +29,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -225,6 +227,93 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(3).toString();
         Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
         Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
+    }
+
+    @Test(groups = "functional", dataProvider = "registrationNumberTestCases")
+    public void testRegistrationNumber(String regNumber, String name, String country, String regType, //
+                                       String expectedDUNS, boolean matchedById) {
+        // Schema: ID, RegistrationNumber, CompanyName, Country
+        Object[][] data = new Object[][] {
+                { 123, regNumber, name, country } //
+        };
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data, //
+                new String[]{ "ID", "RegistrationNumber", "CompanyName", "Country" });
+        input.setUseDirectPlus(true);
+        input.setRegNumberType(regType);
+        DplusMatchRule baseRule = new DplusMatchRule(6, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+        input.setDplusMatchConfig(new DplusMatchConfig(baseRule));
+        input.setTargetEntity(BusinessEntity.PrimeAccount.name());
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
+                .put(RegNumber, Collections.singletonList("RegistrationNumber"))
+                .put(Name, Collections.singletonList("CompanyName"))
+                .put(Country, Collections.singletonList("Country"))
+                .build());
+        input.setSkipKeyResolution(true);
+        List<Column> columns = Stream.of(
+                "duns_number",
+                "primaryname",
+                "tradestylenames_name",
+                "telephone_telephonenumber",
+                "primaryindcode_ussicv4"
+        ).map(c -> new Column(c, c)).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
+        MatchOutput output = realTimeMatchService.match(input);
+        System.out.println(JsonUtils.pprint(output));
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        if (StringUtils.isNotBlank(expectedDUNS)) {
+            Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+            Assert.assertTrue(output.getResult().get(0).isMatched());
+            String matchedDuns = output.getResult().get(0).getOutput().get(0).toString();
+            Assert.assertEquals(matchedDuns, expectedDUNS);
+            String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(3).toString();
+            if (matchGrade.length() > 9) {
+                if (matchedById) {
+                    Assert.assertEquals(matchGrade.charAt(9), 'A'); // National ID
+                } else {
+                    Assert.assertNotEquals(matchGrade.charAt(9), 'A'); // National ID
+                }
+            }
+            int confidenceCode = (int) output.getResult().get(0).getCandidateOutput().get(0).get(2);
+            if (matchedById) {
+                Assert.assertEquals(confidenceCode, 10);
+            } else {
+                Assert.assertNotEquals(confidenceCode, 10);
+            }
+        }
+    }
+
+    @DataProvider(name = "registrationNumberTestCases")
+    public Object[][] provideRegistrationNumberTestCases() {
+        return new Object[][]{ // regNumber, name, country, regType, expectedDUNS, matchedById
+                { null, "Dun & BradStreet", "UK", "2541", "229515499", false },
+                { "00160043", "Google", "UK", "2541", "229515499", true },
+
+                // Google, US
+                { "77-0493581", null, "US", "6863", null, false }, // no match! seems not supported in US
+
+                // DNB, UK
+                { "00160043", null, "UK", "2541", "229515499", true },
+                { "00160043", null, "UK", null, "229515499", true },
+                { "00160043", null, "UK", "6863", null, false }, // no match!
+
+                // Google, France
+                { "432126092", null, "FR", null, "268487989", true },
+                { "43212609200027", null, "FR", null, "268487989", true },
+                { "432126092", null, "FR", "2078", "268487989", true },
+                { "43212609200027", null, "FR", "2081", "268487989", true },
+                { "43212609200027", null, "FR", "2078", null, false }, // no match!
+
+                // BMW, Germany
+                { "DE129273398", null, "DE", "6867", "315369934", true },
+                { "80333B42243", null, "DE", "6862", "315369934", true },
+                { "DE129273398", null, "DE", null, "315369934", true },
+                { "80333B42243", null, "DE", null, "315369934", true },
+                { "DE129273398", null, "DE", "6862", null, false } // no match!
+        };
     }
 
     @Test(groups = "functional")

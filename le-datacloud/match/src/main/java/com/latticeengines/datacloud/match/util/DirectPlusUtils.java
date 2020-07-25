@@ -74,33 +74,38 @@ public final class DirectPlusUtils {
 
     private static List<String> getLocationParams(NameLocation nl) {
         List<String> parts = new ArrayList<>();
-        if (!StringUtils.isEmpty(nl.getName())) {
+        if (!isValidNameLocation(nl)) {
+            throw new LedpException(LedpCode.LEDP_25023);
+        }
+        if (StringUtils.isNotBlank(nl.getName())) {
             parts.add(String.format("name=%s", urlEncode(nl.getName())));
-        } else {
-            throw new LedpException(LedpCode.LEDP_25023);
         }
-        if (!StringUtils.isEmpty(nl.getCountryCode())) {
+        if (StringUtils.isNotBlank(nl.getCountryCode())) {
             parts.add(String.format("countryISOAlpha2Code=%s", nl.getCountryCode()));
-        } else {
-            throw new LedpException(LedpCode.LEDP_25023);
         }
-        if (!StringUtils.isEmpty(nl.getCity())) {
+        if (StringUtils.isNotBlank(nl.getRegistrationNumber())) {
+            parts.add(String.format("registrationNumber=%s", urlEncode(nl.getRegistrationNumber())));
+            if (StringUtils.isNotBlank(nl.getRegistrationNumberType())) {
+                parts.add(String.format("registrationNumberType=%s", nl.getRegistrationNumberType()));
+            }
+        }
+        if (StringUtils.isNotBlank(nl.getCity())) {
             parts.add(String.format("addressLocality=%s", urlEncode(nl.getCity())));
         }
-        if (!StringUtils.isEmpty(nl.getState())) {
+        if (StringUtils.isNotBlank(nl.getState())) {
             String stateCode = LocationUtils.getStardardStateCode(nl.getCountry(), nl.getState());
             parts.add(String.format("addressRegion=%s", urlEncode(stateCode)));
         }
-        if (StringUtils.isNotEmpty(nl.getZipcode())) {
+        if (StringUtils.isNotBlank(nl.getZipcode())) {
             parts.add(String.format("postalCode=%s", urlEncode(nl.getZipcode())));
         }
-        if (StringUtils.isNotEmpty(nl.getPhoneNumber())) {
+        if (StringUtils.isNotBlank(nl.getPhoneNumber())) {
             parts.add(String.format("telephoneNumber=%s", urlEncode(nl.getPhoneNumber())));
         }
-        if (StringUtils.isNotEmpty(nl.getStreet())) {
+        if (StringUtils.isNotBlank(nl.getStreet())) {
             parts.add(String.format("streetAddressLine1=%s", urlEncode(nl.getStreet())));
         }
-        if (StringUtils.isNotEmpty(nl.getStreet2())) {
+        if (StringUtils.isNotBlank(nl.getStreet2())) {
             parts.add(String.format("streetAddressLine2=%s", urlEncode(nl.getStreet2())));
         }
         return parts;
@@ -269,6 +274,14 @@ public final class DirectPlusUtils {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean isValidNameLocation(NameLocation nameLocation) {
+        boolean hasName = StringUtils.isNotBlank(nameLocation.getName());
+        boolean hasPhone = StringUtils.isNotBlank(nameLocation.getPhoneNumber());
+        boolean hasRegNumber = StringUtils.isNotBlank(nameLocation.getRegistrationNumber());
+        boolean hasCountryCode = StringUtils.isNotBlank(nameLocation.getCountryCode());
+        return hasCountryCode && (hasName || hasPhone || hasRegNumber);
     }
 
 

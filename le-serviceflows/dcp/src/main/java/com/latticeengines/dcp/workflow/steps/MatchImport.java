@@ -99,7 +99,9 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         matchInput.setCustomSelection(columnSelection);
-        matchInput.setRegNumberType(regNumberType);
+
+        // based on investigation, better not to enforce regNumberType
+        // matchInput.setRegNumberType(regNumberType);
     }
 
     @Override

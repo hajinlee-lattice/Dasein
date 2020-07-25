@@ -49,7 +49,9 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
             return false;
         }
 
-        return StringUtils.isNotBlank(matchKeyTuple.getName());
+        boolean hasName = StringUtils.isNotBlank(matchKeyTuple.getName());
+        boolean hasRegNumber = StringUtils.isNotBlank(matchKeyTuple.getRegistrationNumber());
+        return hasName || hasRegNumber;
     }
 
     @Override

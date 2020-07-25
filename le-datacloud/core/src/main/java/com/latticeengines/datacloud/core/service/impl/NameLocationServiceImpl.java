@@ -32,7 +32,8 @@ public class NameLocationServiceImpl implements NameLocationService {
         String cleanZipCode = StringStandardizationUtils.getStandardString(nameLocation.getZipcode());
         String cleanStreet = StringStandardizationUtils.getStandardString(nameLocation.getStreet());
         String cleanStreet2 = StringStandardizationUtils.getStandardString(nameLocation.getStreet2());
-
+        String cleanRegNumber = StringStandardizationUtils.getTrimmedString(nameLocation.getRegistrationNumber());
+        String cleanRegNumberType = StringStandardizationUtils.getTrimmedString(nameLocation.getRegistrationNumberType());
 
         nameLocation.setName(cleanName);
         nameLocation.setState(cleanState);
@@ -41,6 +42,9 @@ public class NameLocationServiceImpl implements NameLocationService {
         nameLocation.setCity(cleanCity);
         nameLocation.setStreet(cleanStreet);
         nameLocation.setStreet2(cleanStreet2);
+
+        nameLocation.setRegistrationNumber(cleanRegNumber);
+        nameLocation.setRegistrationNumberType(cleanRegNumberType);
 
         nameLocation.setZipcode(cleanZipCode);
         nameLocation.setPhoneNumber(cleanPhoneNumber);

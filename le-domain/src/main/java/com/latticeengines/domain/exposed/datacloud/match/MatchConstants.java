@@ -32,6 +32,8 @@ public final class MatchConstants {
     public static final String LID_FIELD = "LatticeAccountId";
     public static final String ADDRESS_FIELD = "Address";
     public static final String ADDRESS2_FIELD = "Address2";
+    public static final String REG_NUMBER_FIELD = "RegistrationNumber";
+    public static final String REG_NUMBER_TYPE_FIELD = "RegistrationNumberType";
 
     // these are the same as column names in AM, if applicable
     public static final String AM_DOMAIN_FIELD = "Domain";
