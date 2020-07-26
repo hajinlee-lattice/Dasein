@@ -79,7 +79,7 @@ public class RestApiClient extends BaseRestApiProxy {
     }
 
     public <T> T get(final Class<T> returnValueClazz, final String path, final String... variables) {
-        String fullUrl = constructUrl(path, (Object[]) variables);
+        String fullUrl = (variables) == null ? path :  constructUrl(path, (Object[]) variables);
         return super.get("generic get", fullUrl, returnValueClazz);
     }
 
@@ -93,6 +93,10 @@ public class RestApiClient extends BaseRestApiProxy {
 
     public <T> T post(final Class<T> returnValueClazz, final HttpEntity<String> entity, final String url) {
         return super.postForEntity("generic post", url, entity, returnValueClazz);
+    }
+
+    public <T, B> T post(final String url, B body, final Class<T> returnValueClazz) {
+        return super.post("generic post", url, body, returnValueClazz);
     }
 
     public <B> void put(final String url, final B body, final Map<String, String> headers) {

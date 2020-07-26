@@ -111,6 +111,19 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         // =========================
 
         // =========================
+        // BEGIN: idaas entitlement
+        // =========================
+        RedisCacheConfiguration idaasEntitlementCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(1)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.IDaaSEntitlementCacheName));
+        // =========================
+        // END: idaas entitlement
+        // =========================
+
+        // =========================
         // BEGIN: datalake service
         // =========================
         RedisCacheConfiguration dataLakeCMCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
@@ -197,6 +210,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
         cacheConfigs.put(CacheName.Constants.DnBRealTimeLookup, dnbRealTimeLookupCacheConfig);
         cacheConfigs.put(CacheName.Constants.PrimeMetadataCacheName, primeMetadataCacheConfig);
+        cacheConfigs.put(CacheName.Constants.IDaaSEntitlementCacheName, idaasEntitlementCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);

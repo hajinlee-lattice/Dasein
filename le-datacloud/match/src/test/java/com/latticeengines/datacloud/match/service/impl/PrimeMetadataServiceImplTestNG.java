@@ -17,7 +17,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
@@ -45,14 +44,6 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(container);
         Assert.assertTrue(container.getBlocks().containsKey(BLOCK_BASE_INFO));
         Assert.assertTrue(container.getBlocks().containsKey(BLOCK_ENTITY_RESOLUTION));
-    }
-
-    // mainly just test parsing
-    @Test(groups = "functional")
-    private void testGetBaseEntitlement() {
-        DataBlockEntitlementContainer container = primeMetadataService.getBaseEntitlement();
-        // System.out.println(JsonUtils.pprint(container));
-        Assert.assertNotNull(container);
     }
 
     @Test(groups ="functional")
