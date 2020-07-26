@@ -506,21 +506,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (!entityMatchEnabled) {
             return ;
         }
-        List<S3ImportSystem> allImportSystem = cdlService.getAllS3ImportSystem(customerSpace.toString());
-        if (CollectionUtils.isNotEmpty(allImportSystem)) {
-            Set<String> matchIds = new HashSet<>();
-            allImportSystem.forEach(s3ImportSystem -> {
-                if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
-                    matchIds.add(s3ImportSystem.getAccountSystemId());
-                }
-                if (StringUtils.isNotBlank(s3ImportSystem.getContactSystemId())) {
-                    matchIds.add(s3ImportSystem.getContactSystemId());
-                }
-                if (StringUtils.isNotBlank(s3ImportSystem.getSecondaryContactId(EntityType.Leads))) {
-                    matchIds.add(s3ImportSystem.getSecondaryContactId(EntityType.Leads));
-                }
-            });
-            standardAttrNames.addAll(matchIds);
+        Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
+        if (CollectionUtils.isNotEmpty(allImportSystemIds)) {
+            standardAttrNames.addAll(allImportSystemIds);
         }
         Map<String, String> previousStandardFieldMapping =
                 templateTable.getAttributes()
@@ -918,21 +906,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .stream()
                 .map(Attribute::getName)
                 .collect(Collectors.toSet());
-        List<S3ImportSystem> allImportSystem = cdlService.getAllS3ImportSystem(customerSpace.toString());
-        if (CollectionUtils.isNotEmpty(allImportSystem)) {
-            Set<String> matchIds = new HashSet<>();
-            allImportSystem.forEach(s3ImportSystem -> {
-                if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
-                    matchIds.add(s3ImportSystem.getAccountSystemId());
-                }
-                if (StringUtils.isNotBlank(s3ImportSystem.getContactSystemId())) {
-                    matchIds.add(s3ImportSystem.getContactSystemId());
-                }
-                if (StringUtils.isNotBlank(s3ImportSystem.getSecondaryContactId(EntityType.Leads))) {
-                    matchIds.add(s3ImportSystem.getSecondaryContactId(EntityType.Leads));
-                }
-            });
-            standardFields.addAll(matchIds);
+        Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
+        if (CollectionUtils.isNotEmpty(allImportSystemIds)) {
+            standardFields.addAll(allImportSystemIds);
         }
         Map<String, String> map = templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName,
                 attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
