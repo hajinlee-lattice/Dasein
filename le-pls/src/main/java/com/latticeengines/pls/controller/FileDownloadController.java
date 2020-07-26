@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.FileDownloadService;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
@@ -44,9 +45,9 @@ public class FileDownloadController {
         } catch (Exception e) {
             log.error("failed to download config: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error, "");
+            return UIActionUtils.generateUIAction("", View.Banner, Status.Error, "");
         }
-        return graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success, "");
+        return UIActionUtils.generateUIAction("", View.Banner, Status.Success, "");
     }
 
 }

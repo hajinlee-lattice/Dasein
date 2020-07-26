@@ -22,11 +22,12 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -241,7 +242,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         UIAction uiAction = null;
         try {
             deleteSegmentByName(segmentName, hardDelete);
-            uiAction = graphDependencyToUIActionUtil.generateUIAction("Segment is deleted successfully", View.Notice,
+            uiAction = UIActionUtils.generateUINotification("Segment is deleted successfully", View.Notice,
                     Status.Success, null);
         } catch (LedpException ex) {
             uiAction = graphDependencyToUIActionUtil.handleDeleteFailedDueToDependency(ex, LedpCode.LEDP_40042,

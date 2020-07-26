@@ -25,10 +25,11 @@ import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
@@ -62,7 +63,7 @@ public class ProjectResource {
             return projectService.createProject(customerSpace.toString(), projectRequest, MultiTenantContext.getEmailAddress());
         } catch (LedpException e) {
             log.error("Failed to create project: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }
@@ -82,7 +83,7 @@ public class ProjectResource {
             return projectService.getAllProjects(customerSpace.toString(), includeSources);
         } catch (LedpException e) {
             log.error("Failed to get all projects: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }
@@ -103,7 +104,7 @@ public class ProjectResource {
             return projectService.getProjectByProjectId(customerSpace.toString(), projectId, includeSources);
         } catch (LedpException e) {
             log.error("Failed to get project by projectId: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }
@@ -123,7 +124,7 @@ public class ProjectResource {
             projectService.deleteProject(customerSpace.toString(), projectId);
         } catch (LedpException e) {
             log.error("Failed to archive project by projectId: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }
@@ -143,7 +144,7 @@ public class ProjectResource {
             return projectService.getDropFolderAccessByProjectId(customerSpace.toString(), projectId);
         } catch (LedpException e) {
             log.error("Failed to get dropFolderAccess by projectId: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }

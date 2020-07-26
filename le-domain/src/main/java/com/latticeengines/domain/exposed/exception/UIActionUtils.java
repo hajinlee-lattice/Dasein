@@ -1,11 +1,4 @@
-package com.latticeengines.domain.exposed.util;
-
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.UIActionException;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
+package com.latticeengines.domain.exposed.exception;
 
 public final class UIActionUtils {
 
@@ -15,6 +8,8 @@ public final class UIActionUtils {
 
     private static String title = "Action failed";
 
+    // use UIActionCode.
+    @Deprecated
     public static UIAction generateUIAction(String title, View view, Status status, String message) {
         UIAction uiAction;
         uiAction = new UIAction();
@@ -22,6 +17,32 @@ public final class UIActionUtils {
         uiAction.setView(view);
         uiAction.setStatus(status);
         uiAction.setMessage(message);
+        return uiAction;
+    }
+
+    public static UIAction generateUIError(String title, View view, UIActionCode code) {
+        return generateUIAction(title, view, Status.Error, code);
+    }
+
+    public static UIAction generateUIAction(String title, View view, Status status, UIActionCode code) {
+        UIAction uiAction;
+        uiAction = new UIAction(code);
+        uiAction.setTitle(title);
+        uiAction.setView(view);
+        uiAction.setStatus(status);
+        return uiAction;
+    }
+
+    // non-exception
+    public static UIAction generateUINotification(String title, View view, Status status, String message) {
+        if (Status.Error.equals(status)) {
+            throw new IllegalArgumentException("Please use generateUIError for exceptions!");
+        }
+        UIAction uiAction;
+        uiAction = new UIAction();
+        uiAction.setTitle(title);
+        uiAction.setView(view);
+        uiAction.setStatus(status);
         return uiAction;
     }
 
