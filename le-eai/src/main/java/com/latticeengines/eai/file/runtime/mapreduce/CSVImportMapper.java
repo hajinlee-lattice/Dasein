@@ -34,8 +34,10 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.file.DataFileStream;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
@@ -44,7 +46,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -88,7 +89,6 @@ import com.latticeengines.common.exposed.util.CompressionUtils.CompressType;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -221,7 +221,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 while (true) {
                     try {
                         RecordLine recordLine = recordQueue.poll(10, TimeUnit.SECONDS);
-                        SleepUtils.sleep(1000l);
                         if (recordLine != null) {
                             convertCSVToAvro.process(recordLine.csvRecord, recordLine.lineNum);
                         }
@@ -283,17 +282,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return path;
     }
 
-    private CompressType getCompressType() throws IOException {
+    private CompressType getCompressType() {
         CompressType compressType = CompressType.NO_COMPRESSION;
         if (useS3Input) {
-            // need to determine file type
             compressType = CompressionUtils.getCompressType(getInputStreamFromS3());
-            if (CompressType.GZ.equals(compressType)) {
-                compressType = CompressionUtils.getCompressType(new GzipCompressorInputStream(getInputStreamFromS3()));
-                if (!CompressType.TAR.equals(compressType)) {
-                    compressType = CompressType.GZ;
-                }
-            }
         }
         return compressType;
     }
@@ -321,7 +313,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         MutableLong lineNum = new MutableLong(2);
         int cores = conf.getInt("mapreduce.map.cpu.vcores", 1);
-        cores = 8;
         service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", cores);
         CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
         List<CompletableFuture<?>> futures = initFutures(cores);
@@ -355,7 +346,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private void parseCSV(InputStream inputStream, CSVFormat format, MutableLong lineNum) {
-        try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), format)) {
+        try {
+            CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), format);
             if (MapUtils.isEmpty(headerMap)) {
                 headerMap = parser.getHeaderMap();
             }
@@ -500,9 +492,22 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     if (HdfsUtils.fileExists(conf, hdfsPath)) {
                         HdfsUtils.rmdir(conf, hdfsPath);
                     }
-                    HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, hdfsPath);
+                    if (hasRecord(avroFile)) {
+                        HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, hdfsPath);
+                    }
                     return null;
                 });
+            }
+        }
+    }
+
+    private boolean hasRecord(File avroFile) throws IOException {
+        try (DataFileStream<GenericRecord> reader = new DataFileStream<>(new FileInputStream(avroFile),
+                new GenericDatumReader<>())) {
+            if (reader.hasNext()) {
+                return true;
+            } else {
+                return false;
             }
         }
     }

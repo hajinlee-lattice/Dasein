@@ -19,6 +19,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
@@ -37,6 +39,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.CSVConstants;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.common.exposed.util.CompressionUtils.CompressType;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -106,12 +110,27 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         boolean needUpdateTask = false;
         List<String> warnings = new ArrayList<>();
         checkFileSize(s3Bucket, s3FilePath);
+        CompressType compressType = CompressionUtils.getCompressType(s3Service.readObjectAsStream(s3Bucket, s3FilePath));
         try (InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath)) {
-            InputStreamReader reader = new InputStreamReader(
-                    new BOMInputStream(fileStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                            ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                    StandardCharsets.UTF_8);
-
+            InputStream inputStream = CompressionUtils.getCompressInputStream(new BOMInputStream(fileStream, false,
+                    ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                    ByteOrderMark.UTF_32BE), compressType);
+            InputStreamReader reader = null;
+            if (inputStream instanceof ArchiveInputStream) {
+                ArchiveEntry archiveEntry;
+                ArchiveInputStream archiveInputStream = (ArchiveInputStream) inputStream;
+                while ((archiveEntry = archiveInputStream.getNextEntry()) != null) {
+                    if (CompressionUtils.isValidArchiveEntry(archiveEntry)) {
+                        reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                        break;
+                    }
+                }
+            } else {
+                reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            }
+            if (reader == null) {
+                throw new RuntimeException("Can't find valid input stream from uploaded file.");
+            }
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             Set<String> headerFields = parser.getHeaderMap().keySet();
@@ -256,7 +275,6 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         String sourceBucket = configuration.getSourceBucket();
         String targetBucket = configuration.getDestBucket();
         String target = configuration.getDestKey();
-
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AmazonS3Exception.class), null);
         retry.execute(context -> {
