@@ -128,7 +128,6 @@ public final class ImportWorkflowSpecUtils {
                 .dateFormatString(definition.getDateFormat()) //
                 .timeFormatString(definition.getTimeFormat()) //
                 .timezone(definition.getTimeZone()) //
-                .registrationNumberTypeCode(definition.getRegistrationNumberTypeCode()) //
                 // TODO(jwinter): Determine if we need this.
                 .allowedDisplayNames(definition.getMatchingColumnNames()) //
                 .required(definition.isRequired()) //
