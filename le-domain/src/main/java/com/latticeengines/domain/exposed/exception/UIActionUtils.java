@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.exception;
 
+import java.util.Collections;
+import java.util.Map;
+
 public final class UIActionUtils {
 
     protected UIActionUtils() {
@@ -25,8 +28,12 @@ public final class UIActionUtils {
     }
 
     public static UIAction generateUIAction(String title, View view, Status status, UIActionCode code) {
+        return generateUIAction(title, view, status, code, Collections.emptyMap());
+    }
+
+    public static UIAction generateUIAction(String title, View view, Status status, UIActionCode code, Map<String, Object> params) {
         UIAction uiAction;
-        uiAction = new UIAction(code);
+        uiAction = new UIAction(code, params);
         uiAction.setTitle(title);
         uiAction.setView(view);
         uiAction.setStatus(status);
@@ -48,20 +55,18 @@ public final class UIActionUtils {
 
     public static UIActionException handleException(Exception ex) {
         UIAction uiAction;
-        LedpCode code;
+        UIActionCode uiActionCode;
+        Map<String, Object> params = null;
         if (ex instanceof UIActionException) {
             return (UIActionException) ex;
         } else if (ex instanceof LedpException) {
-            code = ((LedpException) ex).getCode();
+            LedpException ledpException = (LedpException) ex;
+            uiActionCode = UIActionCode.fromLedpCode(ledpException.getCode());
+            params = ledpException.getParamsMap();
         } else {
-            code = LedpCode.LEDP_00002;
+            uiActionCode = UIActionCode.SYSTEM_000;
         }
-        String removeStartingText = code.name() + ": ";
-        String message = ex.getMessage();
-        if (message.startsWith(removeStartingText)) {
-            message = message.substring(removeStartingText.length());
-        }
-        uiAction = generateUIAction(title, View.Banner, Status.Error, message);
-        return new UIActionException(uiAction, code);
+        uiAction = generateUIAction(title, View.Banner, Status.Error, uiActionCode, params);
+        return UIActionException.fromAction(uiAction);
     }
 }

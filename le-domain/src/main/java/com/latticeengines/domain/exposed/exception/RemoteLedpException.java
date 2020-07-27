@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.exception;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 
 public class RemoteLedpException extends LedpException {
@@ -8,6 +10,7 @@ public class RemoteLedpException extends LedpException {
 
     private String remoteStackTrace;
     private HttpStatus httpStatus;
+    private Map<String, Object> errorParamsMap;
 
     public RemoteLedpException(LedpCode code) {
         super(code);
@@ -31,6 +34,14 @@ public class RemoteLedpException extends LedpException {
         super(code, msg, null);
         this.remoteStackTrace = remoteStackTrace;
         this.httpStatus = httpStatus;
+    }
+
+    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,
+                               String msg, Map<String, Object> errorParamsMap) {
+        super(code, msg, null);
+        this.remoteStackTrace = remoteStackTrace;
+        this.httpStatus = httpStatus;
+        this.errorParamsMap = errorParamsMap;
     }
 
     public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,

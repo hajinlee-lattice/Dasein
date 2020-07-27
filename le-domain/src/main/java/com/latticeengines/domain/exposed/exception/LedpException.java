@@ -1,11 +1,15 @@
 package com.latticeengines.domain.exposed.exception;
 
+import java.util.Map;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class LedpException extends RuntimeException {
 
     private static final long serialVersionUID = 4758154339163073679L;
     private final LedpCode code;
+
+    private Map<String, Object> paramsMap;
 
     public LedpException(LedpCode code) {
         this(code, null, new String[] {});
@@ -22,6 +26,16 @@ public class LedpException extends RuntimeException {
     public LedpException(LedpCode code, Throwable t, Object[] params) {
         super(buildMessage(code, params), t);
         this.code = code;
+    }
+
+    public LedpException(LedpCode code, Throwable t, Map<String, Object> paramsMap) {
+        super(buildMessage(code, paramsMap.values().toArray()), t);
+        this.code = code;
+        this.paramsMap = paramsMap;
+    }
+
+    public LedpException(LedpCode code, Map<String, Object> paramsMap) {
+        this(code, null, paramsMap);
     }
 
     public LedpException(LedpCode code, String msg, Throwable t) {
@@ -56,5 +70,9 @@ public class LedpException extends RuntimeException {
     public ErrorDetails getErrorDetails() {
         String stackTrace = ExceptionUtils.getStackTrace(this);
         return new ErrorDetails(code, getMessage(), stackTrace);
+    }
+
+    public Map<String, Object> getParamsMap() {
+        return paramsMap;
     }
 }
