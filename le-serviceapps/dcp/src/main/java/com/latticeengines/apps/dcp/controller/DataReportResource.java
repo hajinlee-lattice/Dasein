@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.controller;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -69,15 +71,25 @@ public class DataReportResource {
         dataReportService.updateDataReport(customerSpace, level, ownerId, dataReport);
     }
 
-    @PutMapping("/dunscount/{tableName}")
+    @PutMapping("/dunscount")
     @ResponseBody
     @ApiOperation(value = "Register duns count")
     public void registerDunsCount(@PathVariable String customerSpace,
-                                  @PathVariable String tableName,
                                   @RequestParam DataReportRecord.Level level,
-                                  @RequestParam(required = false) String ownerId) {
+                                  @RequestParam(required = false) String ownerId,
+                                  @RequestBody DunsCountCache cache) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataReportService.registerDunsCount(customerSpace, level, ownerId, tableName);
+        dataReportService.registerDunsCount(customerSpace, level, ownerId, cache);
+    }
+
+    @GetMapping("/subownerids")
+    @ResponseBody
+    @ApiOperation(value = "Get sub owner ids")
+    public Set<String> getSubOwnerIds(@PathVariable String customerSpace,
+                                      @RequestParam DataReportRecord.Level level,
+                                      @RequestParam(required = false) String ownerId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataReportService.getSubOwnerIds(customerSpace, level, ownerId);
     }
 
     @GetMapping("/dunscount")

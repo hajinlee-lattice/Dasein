@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
@@ -24,7 +25,9 @@ public interface DataReportService {
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport dataReport);
 
     void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
-                      String tableName);
+                      DunsCountCache cache);
+
+    Set<String> getSubOwnerIds(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId);
 

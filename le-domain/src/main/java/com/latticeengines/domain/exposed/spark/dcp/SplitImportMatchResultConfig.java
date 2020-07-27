@@ -20,10 +20,10 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("MatchedDunsAttr")
     private String matchedDunsAttr;
 
-    @JsonProperty("classificationAttr")
+    @JsonProperty("ClassificationAttr")
     private String classificationAttr;
 
-    @JsonProperty("countryAttr")
+    @JsonProperty("CountryAttr")
     private String countryAttr;
 
     @JsonProperty("ConfidenceCodeAttr")

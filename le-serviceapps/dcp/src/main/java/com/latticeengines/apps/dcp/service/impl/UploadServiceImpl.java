@@ -92,7 +92,7 @@ public class UploadServiceImpl implements UploadService {
             throw new RuntimeException("Cannot find Upload match result table with name: " + tableName);
         }
         boolean hasOldTable = false;
-        String oldTableName = getMatchResultTableName(uploadId);
+        String oldTableName = getMatchResultTableName(customerSpace, uploadId);
         if (StringUtils.isNotBlank(oldTableName)) {
             hasOldTable = true;
         }
@@ -184,7 +184,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public String getMatchResultTableName(String uploadId) {
+    public String getMatchResultTableName(String customerSpace, String uploadId) {
         return uploadEntityMgr.findMatchResultTableNameByUploadId(uploadId);
     }
 

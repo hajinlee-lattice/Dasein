@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -22,8 +23,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
-import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.metadata.entitymgr.TableEntityMgr;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component("dataReportEntityMgr")
 public class DataReportEntityMgrImpl
@@ -64,12 +64,8 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId, boolean inflate) {
-        DataReportRecord record = getReadOrWriteRepository().findByLevelAndOwnerId(level, ownerId);
-        if (inflate) {
-            TableEntityMgr.inflateTable(record.getDunsCount());
-        }
-        return record;
+    public DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findByLevelAndOwnerId(level, ownerId);
     }
 
     @Override
@@ -122,6 +118,12 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Set<String> getSubOwnerIds(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findSubOwnerIdsByParentLevelAndOwnerId(level, ownerId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Long findDataReportPid(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findPidByLevelAndOwnerId(level, ownerId);
     }
@@ -140,9 +142,9 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
-    public void uploadDataReportRecord(Long pid, DunsCountCache dunsCount) {
-        dataReportWriterRepository.updateDataReport(pid, new Date(), dunsCount.getSnapshotTimestamp(),
-                dunsCount.getDunsCount());
+    public void uploadDataReportRecord(Long pid, Table dunsCountTable, Date snapShotTime) {
+        dataReportWriterRepository.updateDataReport(pid, new Date(), snapShotTime,
+                dunsCountTable);
     }
 
     @Override

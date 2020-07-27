@@ -24,13 +24,9 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.serviceflows.workflow.match.BaseMatchStep;
@@ -44,9 +40,6 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
 
     @Inject
     private UploadProxy uploadProxy;
-
-    @Inject
-    private DataFeedProxy dataFeedProxy;
 
     @Inject
     private MatchRuleProxy matchRuleProxy;
@@ -73,21 +66,15 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     @Override
     protected void preMatchProcessing(MatchInput matchInput) {
         String uploadId = configuration.getUploadId();
-        String sourceId = configuration.getSourceId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
 
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_STARTED, null);
 
         MatchRuleConfiguration matchRuleConfiguration = matchRuleProxy.getMatchConfig(customerSpace.toString(), configuration.getSourceId());
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace.toString(), sourceId);
-        Attribute regNumber = dataFeedTask.getImportTemplate().getAttribute(InterfaceName.RegistrationNumber.name());
-        String regNumberType = regNumber == null ? null : regNumber.getRegistrationNumberTypeCode();
 
         log.info("MatchRuleConfiguration of source " + configuration.getSourceId() + " : " + JsonUtils.serialize(matchRuleConfiguration));
 
         log.info("After translate into DplusMatchConfig : " + JsonUtils.serialize(configuration.getMatchConfig()));
-
-        log.info("Registration number type is: " + regNumberType);
 
         matchInput.setUseDirectPlus(true);
         matchInput.setDplusMatchConfig(configuration.getMatchConfig());
@@ -99,7 +86,6 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
         matchInput.setCustomSelection(columnSelection);
-        matchInput.setRegNumberType(regNumberType);
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -16,8 +15,8 @@ public class DunsCountCache {
     @JsonProperty("snapshotTimestamp")
     private Date snapshotTimestamp;
 
-    @JsonProperty("dunsCount")
-    private Table dunsCount;
+    @JsonProperty("dunsCountTableName")
+    private String dunsCountTableName;
 
     public Date getSnapshotTimestamp() {
         return snapshotTimestamp;
@@ -27,12 +26,11 @@ public class DunsCountCache {
         this.snapshotTimestamp = snapshotTimestamp;
     }
 
-    public Table getDunsCount() {
-        return dunsCount;
+    public String getDunsCountTableName() {
+        return dunsCountTableName;
     }
 
-    public void setDunsCount(Table dunsCount) {
-        this.dunsCount = dunsCount;
+    public void setDunsCountTableName(String dunsCountTableName) {
+        this.dunsCountTableName = dunsCountTableName;
     }
-
 }

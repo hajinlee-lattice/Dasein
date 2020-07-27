@@ -8,9 +8,11 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
@@ -55,6 +57,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         ReflectionTestUtils.setField(dataReportService, "uploadService", uploadService);
     }
 
+
     @Test(groups = "functional")
     public void testCRUD() {
         DataReport dataReport = getDataReport();
@@ -66,8 +69,12 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         DunsCountCache cache = dataReportService.getDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload,
                 "uploadUID");
         Assert.assertNotNull(cache);
-        Assert.assertNull(cache.getDunsCount());
+        Assert.assertNull(cache.getDunsCountTableName());
         Assert.assertNull(cache.getSnapshotTimestamp());
+
+        Set<String> subOwnerIds = dataReportService.getSubOwnerIds(mainCustomerSpace, DataReportRecord.Level.Source,
+                "sourceUID");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(subOwnerIds));
 
         // verify upload node has no brothers
         DunsCountCopy copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
@@ -75,6 +82,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(copy);
         Assert.assertTrue(copy.isOnlyChild());
         Assert.assertNotNull(copy.getParentOwnerId());
+
 
         // test find Pid and corresponding duns count table name
         List<Object[]> result = dataReportEntityMgr.findPidAndDunsCountTableName(DataReportRecord.Level.Upload,

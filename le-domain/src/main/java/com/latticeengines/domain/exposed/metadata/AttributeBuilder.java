@@ -122,11 +122,6 @@ public class AttributeBuilder {
         return this;
     }
 
-    public AttributeBuilder registrationNumberTypeCode(String typeCode) {
-        attribute.setRegistrationNumberTypeCode(typeCode);
-        return this;
-    }
-
     public AttributeBuilder defaultValueStr(String defaultValueStr) {
         attribute.setDefaultValueStr(defaultValueStr);
         return this;

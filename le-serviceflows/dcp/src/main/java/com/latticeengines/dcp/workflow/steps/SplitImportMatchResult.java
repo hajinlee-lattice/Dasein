@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
@@ -197,8 +199,11 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         String dunsCountTableName = NamingUtils.timestamp("dunsCount");
         Table dunsCount = toTable(dunsCountTableName, null, unit);
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
+        DunsCountCache cache = new DunsCountCache();
+        cache.setSnapshotTimestamp(new Date());
+        cache.setDunsCountTableName(dunsCountTableName);
         dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
-                uploadId, dunsCountTableName);
+                uploadId, cache);
         // set table name to variable, then set table policy forever at finish step
         putStringValueInContext(DUNS_COUNT_TABLE_NAME, dunsCountTableName);
         DataReportRecord.Level level = DataReportRecord.Level.Upload;
@@ -209,7 +214,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                     ownerId);
             if (copy.isOnlyChild()) {
                 dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), level.getParentLevel()
-                        , copy.getParentOwnerId(), dunsCountTableName);
+                        , copy.getParentOwnerId(), cache);
                 ownerId = copy.getParentOwnerId();
             } else {
                 break;
