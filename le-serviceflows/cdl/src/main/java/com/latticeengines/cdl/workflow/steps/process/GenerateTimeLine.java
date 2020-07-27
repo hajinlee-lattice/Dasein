@@ -109,6 +109,10 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = inactive.complement();
         dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus.getTimelineRebuildFlag() == null || Boolean.TRUE.equals(dcStatus.getTimelineRebuildFlag())) {
+            needRebuild = true;
+            dcStatus.setTimelineRebuildFlag(Boolean.FALSE);
+        }
         timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
         activeTimelineMasterTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
                 TableRoleInCollection.TimelineProfile, active, null);
