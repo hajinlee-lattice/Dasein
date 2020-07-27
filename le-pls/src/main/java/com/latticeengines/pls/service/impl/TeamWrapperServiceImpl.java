@@ -20,7 +20,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
-import com.latticeengines.domain.exposed.auth.TeamEntities;
+import com.latticeengines.domain.exposed.auth.TeamEntityList;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -111,10 +111,10 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     public List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
         String tenantId = MultiTenantContext.getTenant().getId();
         List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
-        TeamEntities teamEntities = teamProxy.getTeamEntities(tenantId);
-        List<MetadataSegment> metadataSegments = teamEntities.getMetadataSegments();
-        List<RatingEngineSummary> ratingEngineSummaries = teamEntities.getRatingEngineSummaries();
-        List<Play> plays = teamEntities.getPlays();
+        TeamEntityList teamEntityList = teamProxy.getTeamEntities(tenantId);
+        List<MetadataSegment> metadataSegments = teamEntityList.getMetadataSegments();
+        List<RatingEngineSummary> ratingEngineSummaries = teamEntityList.getRatingEngineSummaries();
+        List<Play> plays = teamEntityList.getPlays();
         Map<String, TeamInfo> teamMapForSegment = extractTeamMap(metadataSegments);
         Map<String, TeamInfo> teamMapForRatingEngine = extractTeamMap(ratingEngineSummaries);
         Map<String, TeamInfo> teamMapForPlay = extractTeamMap(plays);
