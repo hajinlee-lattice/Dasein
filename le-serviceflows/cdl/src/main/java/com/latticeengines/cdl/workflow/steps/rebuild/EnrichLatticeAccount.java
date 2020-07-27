@@ -137,7 +137,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
 
     private boolean shouldDoNothing() {
         // some special tenants do not want to use LDC attributes
-        boolean noLDC = batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId());
+        boolean noLDC = batonService.shouldExcludeDataCloudAttrs(customerSpace.getTenantId());
         if (noLDC) {
             return true;
         } else {

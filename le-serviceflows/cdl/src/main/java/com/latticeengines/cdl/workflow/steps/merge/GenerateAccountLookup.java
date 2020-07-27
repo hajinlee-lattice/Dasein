@@ -53,9 +53,15 @@ public class GenerateAccountLookup extends BaseProcessAnalyzeSparkStep<ProcessAc
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     private boolean skipPublishDynamo;
 
+    @Value("${cdl.processAnalyze.accountlookup.legacy.publication.enabled}")
+    private boolean legacyPublicationEnabled;
+
     @Override
     public void execute() {
         bootstrap();
+        if (!legacyPublicationEnabled) {
+            log.info("Old account lookup to dynamo publication disabled.");
+        }
         if (shouldGenerateAccountLookup()) {
             Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_LOOKUP_TABLE_NAME);
             if (tableInCtx == null) {
@@ -127,7 +133,7 @@ public class GenerateAccountLookup extends BaseProcessAnalyzeSparkStep<ProcessAc
     private boolean shouldPublishDynamo() {
         boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
         boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
-        return !skipPublishDynamo && (hasAccount360 || enableTp);
+        return !skipPublishDynamo && (hasAccount360 || enableTp) && legacyPublicationEnabled;
     }
 
 }

@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -63,6 +64,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
 
     private Set<String> streamsPerformedDelete = new HashSet<>();
 
+    private final Map<String, Table> periodStoreTables = new HashMap<>();
+
 
     @Override
     protected Class<? extends AbstractSparkJob<DailyStoreToPeriodStoresJobConfig>> getJobClz() {
@@ -83,6 +86,9 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 .filter(stream -> !skippedStreamIds.contains(stream.getStreamId()) && !streamsToRelink.contains(stream.getStreamId()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(config.streams)) {
+            if (MapUtils.isNotEmpty(periodStoreTables)) {
+                exportToS3AndAddToContext(periodStoreTables, PERIOD_STORE_TABLE_NAME);
+            }
             return null;
         }
         config.evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
@@ -168,6 +174,11 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             if (MapUtils.isNotEmpty(signatureTableNames)) {
                 log.info("Linking existing period store tables to inactive version {}: {}", inactive, signatureTableNames.keySet());
                 dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, PeriodStores, inactive);
+                periodStoreTables.putAll(signatureTableNames.entrySet().stream().map(entry -> {
+                    String signature = entry.getKey();
+                    String tableName = entry.getValue();
+                    return Pair.of(signature, getTableSummary(customerSpace.toString(), tableName));
+                }).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
             }
         }
     }
@@ -192,7 +203,6 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         log.info("Generated output metadata: {}", outputMetadataStr);
         log.info("Generated {} output metrics tables", result.getTargets().size());
         Map<String, Details> metadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
-        Map<String, Table> signatureTables = new HashMap<>();
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
                 String period = details.getLabels().get(offset);
@@ -200,10 +210,10 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
-                signatureTables.put(ctxKey, periodStoreTable); // use ctxKey name as signature
+                periodStoreTables.put(ctxKey, periodStoreTable); // use ctxKey name as signature
             }
         });
-        Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, PERIOD_STORE_TABLE_NAME);
+        Map<String, String> signatureTableNames = exportToS3AndAddToContext(periodStoreTables, PERIOD_STORE_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, PeriodStores, inactive);
     }
 

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls.frontend;
+package com.latticeengines.domain.exposed.exception;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -33,6 +33,10 @@ public class UIMessage {
         return message;
     }
 
+    // forbidden directly set UI messages.
+    // must come from some well curated view templates.
+    // such as UIActionCode.template
+    @Deprecated
     public void setMessage(String message) {
         this.message = message;
     }
