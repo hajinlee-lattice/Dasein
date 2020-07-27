@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
@@ -137,10 +138,10 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         if (createOrClone) {
             List<AttributeSet> attributeSets = attributeSetEntityMgr.findAll();
             if (attributeSets.size() > ATTRIBUTE_SET_LIMITATION) {
-                throw new LedpException(LedpCode.LEDP_40084, new String[]{String.valueOf(ATTRIBUTE_SET_LIMITATION)});
+                throw new LedpException(LedpCode.LEDP_40084, ImmutableMap.of("size", ATTRIBUTE_SET_LIMITATION));
             }
             if (StringUtils.isBlank(attributeSet.getDisplayName())) {
-                throw new LedpException(LedpCode.LEDP_40085, new String[]{});
+                throw new LedpException(LedpCode.LEDP_40085);
             }
         }
         String displayName = attributeSet.getDisplayName();
@@ -149,7 +150,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
             attributeSet.setDisplayName(displayName);
             AttributeSet attributeSet2 = attributeSetEntityMgr.findByDisPlayName(displayName);
             if (attributeSet2 != null && !attributeSet2.getName().equals(attributeSet.getName())) {
-                throw new LedpException(LedpCode.LEDP_40086, new String[]{displayName});
+                throw new LedpException(LedpCode.LEDP_40086, ImmutableMap.of("attributeSetName", attributeSet.getName()));
             }
         }
     }
