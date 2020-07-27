@@ -3,9 +3,9 @@ package com.latticeengines.pls.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface MetadataSegmentService {

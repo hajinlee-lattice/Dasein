@@ -22,13 +22,14 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
@@ -63,7 +64,7 @@ public class SourceResource {
             return sourceService.createSource(sourceRequest);
         } catch (RuntimeException e) {
             log.error("Failed to create source: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, LedpCode.LEDP_60001);
         }
@@ -82,7 +83,7 @@ public class SourceResource {
             return sourceService.updateSource(updateRequest);
         } catch (Exception e) {
             log.error("Failed to update source", e);
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, LedpCode.LEDP_60009);
         }
@@ -131,7 +132,7 @@ public class SourceResource {
             return sourceService.getSourceMappings(sourceId, entityType, fileImportId);
         } catch (Exception e) {
             log.error("Fetch Field Definition Failed with Exception.", e);
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, LedpCode.LEDP_60002);
         }
@@ -155,7 +156,7 @@ public class SourceResource {
             return validateFieldDefinitionsResponse;
         } catch (Exception e) {
             log.error("Failed to validate definitions", e);
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, LedpCode.LEDP_60003);
         }

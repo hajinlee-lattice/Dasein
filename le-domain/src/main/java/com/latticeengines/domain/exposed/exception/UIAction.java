@@ -1,4 +1,9 @@
-package com.latticeengines.domain.exposed.pls.frontend;
+package com.latticeengines.domain.exposed.exception;
+
+import java.util.Collections;
+import java.util.Map;
+
+import org.apache.commons.collections4.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,11 +21,39 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 )
 public class UIAction extends UIMessage {
 
+    @JsonProperty("code")
+    private UIActionCode code;
+
     @JsonProperty("title")
     private String title;
 
     @JsonProperty("view")
     private View view;
+
+    public UIAction() {
+    }
+
+    public UIAction(UIActionCode code) {
+        this(code, Collections.emptyMap());
+    }
+
+    public UIAction(UIActionCode code, Map<String, Object> params) {
+        if (MapUtils.isNotEmpty(params)) {
+            setMessage(code.renderMessage(params));
+        } else {
+            setMessage(code.renderMessage(Collections.emptyMap()));
+        }
+        this.code = code;
+    }
+
+    public UIAction(UIActionCode code, UIActionParams params) {
+        if (params != null) {
+            setMessage(code.renderMessage(params));
+        } else {
+            setMessage(code.renderMessage(Collections.emptyMap()));
+        }
+        this.code = code;
+    }
 
     public String getTitle() {
         return this.title;
@@ -36,6 +69,10 @@ public class UIAction extends UIMessage {
 
     public void setView(View view) {
         this.view = view;
+    }
+
+    public UIActionCode getCode() {
+        return code;
     }
 
     @Override

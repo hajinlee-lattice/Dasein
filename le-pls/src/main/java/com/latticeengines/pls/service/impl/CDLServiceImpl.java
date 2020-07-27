@@ -54,7 +54,10 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -74,10 +77,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
@@ -282,8 +282,8 @@ public class CDLServiceImpl implements CDLService {
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Error);
-            uiAction.setMessage(generateDeleteResultMsg("<p>Cleanup operation does not support entity match tenant " +
-                    "</p>"));
+            uiAction.setMessage( //
+                    generateDeleteResultMsg("<p>Cleanup operation does not support entity match tenant</p>"));
             throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
 

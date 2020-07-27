@@ -206,6 +206,10 @@ public final class JsonUtils {
         return mapper;
     }
 
+    public static JsonNode convertToJsonNode(Object raw) {
+        return getObjectMapper().valueToTree(raw);
+    }
+
     public static <T> T convertValue(Object rawField, Class<T> clazz) {
         return getObjectMapper().convertValue(rawField, clazz);
     }
