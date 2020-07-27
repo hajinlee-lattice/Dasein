@@ -26,7 +26,6 @@
     <import resource="classpath:python/dataplatform-mr-python-context.xml" />
     <import resource="classpath:camille-runtime-context.xml" />
     <import resource="classpath:db-context.xml" />
-    <import resource="classpath:dataplatform-persistence-context.xml" />
     <import resource="classpath:dataplatform-validation-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />

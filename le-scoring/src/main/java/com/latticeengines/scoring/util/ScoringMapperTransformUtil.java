@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 
 public final class ScoringMapperTransformUtil {
@@ -76,9 +75,9 @@ public final class ScoringMapperTransformUtil {
         // use the uuid to identify a model. It is a contact that when
         // mapper localizes the model, it changes its name to be the
         // uuid
-        decodeSupportedFilesToFile(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
-        writeScoringScript(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
-        log.info("modelName is " + modelJsonObj.get(ScoringDaemonService.MODEL_NAME));
+        decodeSupportedFilesToFile(uuid, modelJsonObj.get(ScoringConstants.MODEL));
+        writeScoringScript(uuid, modelJsonObj.get(ScoringConstants.MODEL));
+        log.info("modelName is " + modelJsonObj.get(ScoringConstants.MODEL_NAME));
         models.put(uuid, modelJsonObj);
         log.info("Has localized " + models.size() + " models.");
         return models;
@@ -96,7 +95,7 @@ public final class ScoringMapperTransformUtil {
     static void decodeSupportedFilesToFile(String uuid, JsonNode modelObject) throws IOException {
 
         ArrayNode compressedSupportedFiles = (ArrayNode) modelObject
-                .get(ScoringDaemonService.MODEL_COMPRESSED_SUPPORT_Files);
+                .get(ScoringConstants.MODEL_COMPRESSED_SUPPORT_Files);
         for (JsonNode compressedFile : compressedSupportedFiles) {
             String compressedFileName = uuid + compressedFile.get("Key").asText();
             log.info("compressedFileName is " + compressedFileName);
@@ -108,8 +107,8 @@ public final class ScoringMapperTransformUtil {
     @VisibleForTesting
     static void writeScoringScript(String uuid, JsonNode modelObject) throws IOException {
 
-        String scriptContent = modelObject.get(ScoringDaemonService.MODEL_SCRIPT).asText();
-        String fileName = uuid + ScoringDaemonService.SCORING_SCRIPT_NAME;
+        String scriptContent = modelObject.get(ScoringConstants.MODEL_SCRIPT).asText();
+        String fileName = uuid + ScoringConstants.SCORING_SCRIPT_NAME;
         log.info("fileName is " + fileName);
         File file = new File(fileName);
         FileUtils.writeStringToFile(file, scriptContent, charSet);
@@ -215,7 +214,7 @@ public final class ScoringMapperTransformUtil {
 
     public static String transformRecord(JsonNode jsonNode, JsonNode modelJsonObject, String uniqueKeyColumn)
             throws UnsupportedEncodingException {
-        ArrayNode metadata = (ArrayNode) modelJsonObject.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
+        ArrayNode metadata = (ArrayNode) modelJsonObject.get(ScoringConstants.INPUT_COLUMN_METADATA);
 
         // parse the avro file since it is in json format
         ObjectNode jsonObj = new ObjectMapper().createObjectNode();
@@ -241,7 +240,7 @@ public final class ScoringMapperTransformUtil {
             } else {
                 typeAndValue = String.format("%s|", type);
             }
-            serializedValueAndTypeObj.put(ScoringDaemonService.LEAD_SERIALIZE_TYPE_KEY, typeAndValue);
+            serializedValueAndTypeObj.put(ScoringConstants.LEAD_SERIALIZE_TYPE_KEY, typeAndValue);
             jsonArray.add(columnObj);
         }
         return jsonObj.toString();
@@ -274,8 +273,8 @@ public final class ScoringMapperTransformUtil {
         File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
         String modelStr = FileUtils.readFileToString(modelFile, charSet);
         JsonNode modelObject = new ObjectMapper().readTree(modelStr);
-        decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
-        writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
+        decodeSupportedFilesToFile("e2e", modelObject.get(ScoringConstants.MODEL));
+        writeScoringScript("e2e", modelObject.get(ScoringConstants.MODEL));
 
     }
 

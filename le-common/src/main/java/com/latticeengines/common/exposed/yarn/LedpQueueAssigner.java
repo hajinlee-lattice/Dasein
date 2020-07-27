@@ -1,0 +1,84 @@
+package com.latticeengines.common.exposed.yarn;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LedpQueueAssigner {
+
+    protected LedpQueueAssigner() {
+        throw new UnsupportedOperationException();
+    }
+    private static final Logger log = LoggerFactory.getLogger(LedpQueueAssigner.class);
+
+    public static final String PRIORITY = "Priority";
+
+    private static final String RTSBULKSCORING_QUEUE_NAME = "RTSBulkScoring";
+    private static final String SCORING_QUEUE_NAME = "Scoring";
+    private static final String MODELING_QUEUE_NAME = "Modeling";
+    private static final String PROPDATA_QUEUE_NAME = "PropData";
+    private static final String WORKFLOW_QUEUE_NAME = "Workflow";
+    private static final String DATAFLOW_QUEUE_NAME = "Dataflow";
+    private static final String EAI_QUEUE_NAME = "Eai";
+    private static final String DEFAULT_QUEUE_NAME = "default";
+
+    public static String getRtsBulkScoringQueueNameForSubmission() {
+        return RTSBULKSCORING_QUEUE_NAME;
+    }
+
+    public static String getScoringQueueNameForSubmission() {
+        return SCORING_QUEUE_NAME;
+    }
+
+    public static String getModelingQueueNameForSubmission() {
+        return MODELING_QUEUE_NAME;
+    }
+
+    public static String getPropDataQueueNameForSubmission() {
+        return PROPDATA_QUEUE_NAME;
+    }
+
+    public static String getWorkflowQueueNameForSubmission() {
+        return WORKFLOW_QUEUE_NAME;
+    }
+
+    public static String getDataflowQueueNameForSubmission() {
+        return DATAFLOW_QUEUE_NAME;
+    }
+
+    public static String getEaiQueueNameForSubmission() {
+        return EAI_QUEUE_NAME;
+    }
+
+    public static String getDefaultQueueNameForSubmission() {
+        return DEFAULT_QUEUE_NAME;
+    }
+
+    public static String overwriteQueueAssignment(String queue, String queueScheme) {
+        String translatedQueue = queue;
+        if (queue == null) {
+            return queue;
+        }
+
+        switch (queueScheme.toLowerCase()) {
+            case "default":
+                translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
+                break;
+            case "legacy":
+                if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) //
+                        || queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) //
+                        || queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
+                    translatedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+                }
+                break;
+            default:
+        }
+
+        if (!translatedQueue.equals(queue)) {
+            log.info("Overwite queue " + queue + " to " + translatedQueue);
+        }
+
+        return translatedQueue;
+    }
+
+}

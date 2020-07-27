@@ -33,11 +33,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-/**
- *
- * @startuml
- *
- */
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE_STEP", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "NAME" }) })

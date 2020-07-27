@@ -14,11 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-/**
- *
- * @startuml
- *
- */
+
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE_PROPERTY_VALUE")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })

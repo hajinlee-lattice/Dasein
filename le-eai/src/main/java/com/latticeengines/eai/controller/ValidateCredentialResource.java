@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.network.exposed.eai.ValidateCredentialInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "validateCredential")
 @RestController
 @RequestMapping("/validatecredential/customerspaces/{customerSpace}")
-public class ValidateCredentialResource implements ValidateCredentialInterface {
+public class ValidateCredentialResource {
 
     @Inject
     private ValidateCredentialResourceHelper validateCredentialResourceHelper;

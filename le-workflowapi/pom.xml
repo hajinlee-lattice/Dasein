@@ -212,12 +212,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-network</artifactId>
-            <version>${project.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>

@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInp
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
@@ -124,7 +123,7 @@ public final class ScoringMapperPredictUtil {
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
 
         log.info("uuid is " + uuid);
-        String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        String fileName = uuid + "-" + taskId + ScoringConstants.AVRO_FILE_SUFFIX;
         // key: leadID, value: list of raw scores for that lead
         Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
         Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
@@ -241,7 +240,7 @@ public final class ScoringMapperPredictUtil {
         }
         boolean hasRevenue = revenues.size() > 0;
 
-        String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        String fileName = uuid + "-" + taskId + ScoringConstants.AVRO_FILE_SUFFIX;
 
         File outputFile = new File(fileName);
         DatumWriter userDatumWriter = null;
@@ -318,7 +317,7 @@ public final class ScoringMapperPredictUtil {
             Map<String, List<Double>> revenues, String type) throws IOException, DecoderException {
 
         int rawScoreNum = 0;
-        String fileName = uuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";
+        String fileName = uuid + ScoringConstants.SCORING_OUTPUT_PREFIX + index + ".txt";
         File f = new File(fileName);
         if (!f.exists()) {
             throw new LedpException(LedpCode.LEDP_20012, new String[] { fileName });
@@ -356,29 +355,29 @@ public final class ScoringMapperPredictUtil {
         Double probability = null;
 
         // perform calibration
-        ArrayNode calibrationRanges = (ArrayNode) model.get(ScoringDaemonService.CALIBRATION);
+        ArrayNode calibrationRanges = (ArrayNode) model.get(ScoringConstants.CALIBRATION);
         if (calibrationRanges != null) {
             for (int i = 0; i < calibrationRanges.size(); i++) {
                 JsonNode range = calibrationRanges.get(i);
-                JsonNode lowerBoundObj = range.get(ScoringDaemonService.CALIBRATION_MINIMUMSCORE);
-                JsonNode upperBoundObj = range.get(ScoringDaemonService.CALIBRATION_MAXIMUMSCORE);
+                JsonNode lowerBoundObj = range.get(ScoringConstants.CALIBRATION_MINIMUMSCORE);
+                JsonNode upperBoundObj = range.get(ScoringConstants.CALIBRATION_MAXIMUMSCORE);
                 Double lowerBound = lowerBoundObj.isNull() ? null : lowerBoundObj.asDouble();
                 Double upperBound = upperBoundObj.isNull() ? null : upperBoundObj.asDouble();
                 if (betweenBounds(score, lowerBound, upperBound)) {
-                    JsonNode probabilityObj = range.get(ScoringDaemonService.CALIBRATION_PROBABILITY);
+                    JsonNode probabilityObj = range.get(ScoringConstants.CALIBRATION_PROBABILITY);
                     probability = probabilityObj.isNull() ? null : probabilityObj.asDouble();
                     break;
                 }
             }
         }
 
-        JsonNode averageProbabilityObj = model.get(ScoringDaemonService.AVERAGE_PROBABILITY);
+        JsonNode averageProbabilityObj = model.get(ScoringConstants.AVERAGE_PROBABILITY);
         Double averageProbability = averageProbabilityObj.isNull() ? null : averageProbabilityObj.asDouble();
         Double lift = averageProbability != null && averageProbability != 0 ? probability / averageProbability : null;
 
         // perform bucketing
         String bucket = null;
-        ArrayNode bucketRanges = (ArrayNode) model.get(ScoringDaemonService.BUCKETS);
+        ArrayNode bucketRanges = (ArrayNode) model.get(ScoringConstants.BUCKETS);
         if (bucketRanges != null) {
             for (int i = 0; i < bucketRanges.size(); i++) {
                 Double value = probability;
@@ -387,15 +386,15 @@ public final class ScoringMapperPredictUtil {
                     value = score;
                 }
                 // "0 - Probability, 1 - Lift"
-                if (range.get(ScoringDaemonService.BUCKETS_TYPE).asInt() == 1) {
+                if (range.get(ScoringConstants.BUCKETS_TYPE).asInt() == 1) {
                     value = lift;
                 }
-                JsonNode lowerBoundObj = range.get(ScoringDaemonService.BUCKETS_MINIMUMSCORE);
-                JsonNode upperBoundObj = range.get(ScoringDaemonService.BUCKETS_MAXIMUMSCORE);
+                JsonNode lowerBoundObj = range.get(ScoringConstants.BUCKETS_MINIMUMSCORE);
+                JsonNode upperBoundObj = range.get(ScoringConstants.BUCKETS_MAXIMUMSCORE);
                 Double lowerBound = lowerBoundObj.isNull() ? null : lowerBoundObj.asDouble();
                 Double upperBound = upperBoundObj.isNull() ? null : upperBoundObj.asDouble();
                 if (value != null && betweenBounds(value, lowerBound, upperBound)) {
-                    bucket = range.get(ScoringDaemonService.BUCKETS_NAME).asText();
+                    bucket = range.get(ScoringConstants.BUCKETS_NAME).asText();
                     break;
                 }
             }
@@ -403,7 +402,7 @@ public final class ScoringMapperPredictUtil {
 
         // bucket into percentiles
         Integer percentile = null;
-        ArrayNode percentileRanges = (ArrayNode) model.get(ScoringDaemonService.PERCENTILE_BUCKETS);
+        ArrayNode percentileRanges = (ArrayNode) model.get(ScoringConstants.PERCENTILE_BUCKETS);
         if (percentileRanges != null) {
             Double topPercentileMaxScore = 0.0;
             Double bottomPercentileMinScore = 1.0;
@@ -413,11 +412,11 @@ public final class ScoringMapperPredictUtil {
             boolean foundbottomPercentileMinScore = false;
             for (int i = 0; i < percentileRanges.size(); i++) {
                 JsonNode range = percentileRanges.get(i);
-                JsonNode minObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MINIMUMSCORE);
-                JsonNode maxObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MAXIMUMSCORE);
+                JsonNode minObject = range.get(ScoringConstants.PERCENTILE_BUCKETS_MINIMUMSCORE);
+                JsonNode maxObject = range.get(ScoringConstants.PERCENTILE_BUCKETS_MAXIMUMSCORE);
                 Double min = minObject.isNull() ? null : minObject.asDouble();
                 Double max = maxObject.isNull() ? null : maxObject.asDouble();
-                JsonNode percentObj = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_PERCENTILE);
+                JsonNode percentObj = range.get(ScoringConstants.PERCENTILE_BUCKETS_PERCENTILE);
                 Integer percent = percentObj.isNull() ? null : percentObj.asInt();
                 if (max > topPercentileMaxScore) {
                     topPercentileMaxScore = max;
@@ -438,11 +437,11 @@ public final class ScoringMapperPredictUtil {
             } else {
                 for (int i = 0; i < percentileRanges.size(); i++) {
                     JsonNode range = percentileRanges.get(i);
-                    JsonNode minObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MINIMUMSCORE);
-                    JsonNode maxObject = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_MAXIMUMSCORE);
+                    JsonNode minObject = range.get(ScoringConstants.PERCENTILE_BUCKETS_MINIMUMSCORE);
+                    JsonNode maxObject = range.get(ScoringConstants.PERCENTILE_BUCKETS_MAXIMUMSCORE);
                     Double min = minObject.isNull() ? null : minObject.asDouble();
                     Double max = maxObject.isNull() ? null : maxObject.asDouble();
-                    JsonNode percentObj = range.get(ScoringDaemonService.PERCENTILE_BUCKETS_PERCENTILE);
+                    JsonNode percentObj = range.get(ScoringConstants.PERCENTILE_BUCKETS_PERCENTILE);
                     Integer percent = percentObj.isNull() ? null : percentObj.asInt();
                     if (betweenBounds(score, min, max)) {
                         percentile = percent;
