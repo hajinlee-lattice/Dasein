@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchType;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.NameMatchScore;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.OperatingStatusText;
@@ -26,9 +27,10 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<Object> parseCandidate(DnBMatchCandidate candidate) {
         List<Object> data = new ArrayList<>();
-        data.add(candidate.getClassification().name());
+        data.add(candidate.getClassification().name()); // classification
+        data.add(candidate.getMatchType()); // match type
         String duns = candidate.getDuns();
-        data.add(duns);
+        data.add(duns); // duns
         if (candidate.getMatchInsight() != null) {
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             data.add(matchInsight.getConfidenceCode());
@@ -59,6 +61,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
         // hard coded for now, need to in sync with SplitImportMatchResult
         return Arrays.asList( //
                 Classification, //
+                MatchType, //
                 MatchedDuns, //
                 ConfidenceCode, //
                 MatchGrade, //
@@ -72,6 +75,7 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<Pair<String, Class<?>>> candidateSchema() {
         return Arrays.asList( //
                 Pair.of(Classification, String.class), //
+                Pair.of(MatchType, String.class), //
                 Pair.of(MatchedDuns, String.class), //
                 Pair.of(ConfidenceCode, Integer.class), //
                 Pair.of(MatchGrade, String.class), //
@@ -84,6 +88,8 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<PrimeColumn> candidateColumns() {
         return Arrays.asList( //
+                new PrimeColumn(MatchType, "Match Type", //
+                        "matchDataCriteria"), //
                 new PrimeColumn(MatchedDuns, "Matched D-U-N-S Number", //
                         "matchCandidates.organization.duns"), //
                 new PrimeColumn(ConfidenceCode, "Match Confidence Code", //

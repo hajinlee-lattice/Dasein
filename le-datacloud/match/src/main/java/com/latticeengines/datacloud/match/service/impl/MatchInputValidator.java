@@ -392,7 +392,7 @@ public final class MatchInputValidator {
         } else if (keySet.contains(MatchKey.DUNS)) {
             // valid for DUNS match
             valid = true;
-        } else if ((keySet.contains(MatchKey.Name) || keySet.contains(MatchKey.RegNumber)) && keySet.contains(MatchKey.Country)) {
+        } else if (keySet.contains(MatchKey.Name) || keySet.contains(MatchKey.RegNumber) || keySet.contains(MatchKey.PhoneNumber)) {
             // valid for name location match
             valid = true;
         } else if (keySet.contains(MatchKey.LatticeAccountID)) {

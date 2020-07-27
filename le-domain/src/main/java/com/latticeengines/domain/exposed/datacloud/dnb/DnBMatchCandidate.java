@@ -19,6 +19,7 @@ public class DnBMatchCandidate {
 
     public static class Attr {
         public static final String Classification = "Classification";
+        public static final String MatchType = "MatchType";
         public static final String MatchedDuns = "MatchedDuns";
         public static final String ConfidenceCode = "ConfidenceCode";
         public static final String MatchGrade = "MatchGrade";
@@ -26,6 +27,9 @@ public class DnBMatchCandidate {
         public static final String NameMatchScore = "NameMatchScore";
         public static final String OperatingStatusText = "OperatingStatusText";
     }
+
+    @JsonProperty("MatchType")
+    private String matchType;
 
     @JsonProperty("DUNS")
     private String duns;
@@ -41,6 +45,14 @@ public class DnBMatchCandidate {
 
     @JsonProperty("Classification")
     private Classification classification;
+
+    public String getMatchType() {
+        return matchType;
+    }
+
+    public void setMatchType(String matchType) {
+        this.matchType = matchType;
+    }
 
     public String getDuns() {
         return duns;

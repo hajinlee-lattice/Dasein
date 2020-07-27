@@ -185,10 +185,13 @@ public final class DirectPlusUtils {
 
     private static List<DnBMatchCandidate> parseRealTimeCandidates(JsonNode jsonNode) {
         List<DnBMatchCandidate> candidates = new ArrayList<>();
+        String matchType = JsonUtils.parseStringValueAtPath(jsonNode, "matchDataCriteria");
         JsonNode candidatesNode = JsonUtils.tryGetJsonNode(jsonNode, "matchCandidates");
         if (candidatesNode != null) {
             for (JsonNode node: candidatesNode) {
-                candidates.add(parseCandidate(node));
+                DnBMatchCandidate candidate = parseCandidate(node);
+                candidate.setMatchType(matchType);
+                candidates.add(candidate);
                 if (candidates.size() >= 50) { // no more than 50 candidates
                     break;
                 }

@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.Classification;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Accepted;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Rejected;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Address;
@@ -51,6 +55,7 @@ import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputService;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputUtils;
@@ -100,6 +105,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Inject
     private CountryCodeService countryCodeService;
+
+    @Inject
+    private DirectPlusCandidateService candidateService;
 
     @Test(groups = "functional")
     public void testSimpleMatchWithDplusConfig() {
@@ -153,9 +161,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output1.getOutput().get(0), "001382555");
         Assert.assertTrue(CollectionUtils.isNotEmpty(output1.getCandidateOutput()));
         Assert.assertTrue(CollectionUtils.isNotEmpty(output1.getCandidateOutput().get(0)));
-        Assert.assertEquals(output1.getCandidateOutput().get(0).get(0), Accepted.name()); // classification
-        Assert.assertEquals(output1.getCandidateOutput().get(0).get(1), "001382555"); // duns
-        Assert.assertEquals(output1.getCandidateOutput().get(0).get(2), 7); // confidence code
+        Assert.assertEquals(getCandidateField(output1, Classification), Accepted.name());
+        Assert.assertEquals(getCandidateField(output1, MatchedDuns), "001382555");
+        Assert.assertEquals(getCandidateField(output1, ConfidenceCode), 7);
 
         OutputRecord output2 = output.getResult().get(1); // Google USA - 6 - AZZZAZZZFFZ
         // System.out.println(JsonUtils.pprint(output2));
@@ -163,18 +171,18 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output2.getOutput().get(0), "060902413");
         Assert.assertTrue(CollectionUtils.isNotEmpty(output2.getCandidateOutput()));
         Assert.assertTrue(CollectionUtils.isNotEmpty(output2.getCandidateOutput().get(0)));
-        Assert.assertEquals(output2.getCandidateOutput().get(0).get(0), Accepted.name()); // classification
-        Assert.assertEquals(output2.getCandidateOutput().get(0).get(1), "060902413"); // duns
-        Assert.assertEquals(output2.getCandidateOutput().get(0).get(2), 6); // confidence code
+        Assert.assertEquals(getCandidateField(output2, Classification), Accepted.name());
+        Assert.assertEquals(getCandidateField(output2, MatchedDuns), "060902413");
+        Assert.assertEquals(getCandidateField(output2, ConfidenceCode), 6);
 
         OutputRecord output3 = output.getResult().get(2); // Google UK - 4 - BZZZZZZZZFZ
         // System.out.println(JsonUtils.pprint(output3));
         Assert.assertFalse(output3.isMatched());
         Assert.assertTrue(CollectionUtils.isNotEmpty(output3.getCandidateOutput()));
         Assert.assertTrue(CollectionUtils.isNotEmpty(output3.getCandidateOutput().get(0)));
-        Assert.assertEquals(output3.getCandidateOutput().get(0).get(0), Rejected.name()); // classification
-        Assert.assertEquals(output3.getCandidateOutput().get(0).get(1), "239896579"); // duns
-        Assert.assertEquals(output3.getCandidateOutput().get(0).get(2), 4); // confidence code
+        Assert.assertEquals(getCandidateField(output3, Classification), Rejected.name());
+        Assert.assertEquals(getCandidateField(output3, MatchedDuns), "239896579");
+        Assert.assertEquals(getCandidateField(output3, ConfidenceCode), 4);
 
         OutputRecord output4 = output.getResult().get(3); // BP - 7 - AZZAZZZZZFZ
         // System.out.println(JsonUtils.pprint(output4));
@@ -182,9 +190,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output4.getOutput().get(0), "210042669");
         Assert.assertTrue(CollectionUtils.isNotEmpty(output4.getCandidateOutput()));
         Assert.assertTrue(CollectionUtils.isNotEmpty(output4.getCandidateOutput().get(0)));
-        Assert.assertEquals(output4.getCandidateOutput().get(0).get(0), Accepted.name()); // classification
-        Assert.assertEquals(output4.getCandidateOutput().get(0).get(1), "210042669"); // duns
-        Assert.assertEquals(output4.getCandidateOutput().get(0).get(2), 7); // confidence code
+        Assert.assertEquals(getCandidateField(output4, Classification), Accepted.name());
+        Assert.assertEquals(getCandidateField(output4, MatchedDuns), "210042669");
+        Assert.assertEquals(getCandidateField(output4, ConfidenceCode), 7);
     }
 
     @Test(groups = "functional")
@@ -224,7 +232,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         Assert.assertTrue(output.getResult().get(0).isMatched());
-        String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(3).toString();
+        String matchGrade = getCandidateField(output.getResult().get(0), MatchGrade).toString();
         Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
         Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
     }
@@ -269,7 +277,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             Assert.assertTrue(output.getResult().get(0).isMatched());
             String matchedDuns = output.getResult().get(0).getOutput().get(0).toString();
             Assert.assertEquals(matchedDuns, expectedDUNS);
-            String matchGrade = output.getResult().get(0).getCandidateOutput().get(0).get(3).toString();
+            String matchGrade = getCandidateField(output.getResult().get(0), MatchGrade).toString();
             if (matchGrade.length() > 9) {
                 if (matchedById) {
                     Assert.assertEquals(matchGrade.charAt(9), 'A'); // National ID
@@ -277,7 +285,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                     Assert.assertNotEquals(matchGrade.charAt(9), 'A'); // National ID
                 }
             }
-            int confidenceCode = (int) output.getResult().get(0).getCandidateOutput().get(0).get(2);
+            int confidenceCode = (int) getCandidateField(output.getResult().get(0), ConfidenceCode);
             if (matchedById) {
                 Assert.assertEquals(confidenceCode, 10);
             } else {
@@ -288,31 +296,33 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @DataProvider(name = "registrationNumberTestCases")
     public Object[][] provideRegistrationNumberTestCases() {
-        return new Object[][]{ // regNumber, name, country, regType, expectedDUNS, matchedById
-                { null, "Dun & BradStreet", "UK", "2541", "229515499", false },
-                { "00160043", "Google", "UK", "2541", "229515499", true },
+        return new Object[][]{
+                // regNumber, name, country, regType, expectedDUNS, matchedById
+                { "123", "Dun & BradStreet", "UK", "2541", "229515499", false }, // DNB UK, match by name
+                { "00160043", "Google", "UK", "2541", "229515499", true }, // DNB UI, match by regNumber
 
                 // Google, US
+                { "77-0493581", null, "US", null, null, false }, // no match! seems not supported in US
                 { "77-0493581", null, "US", "6863", null, false }, // no match! seems not supported in US
 
                 // DNB, UK
-                { "00160043", null, "UK", "2541", "229515499", true },
-                { "00160043", null, "UK", null, "229515499", true },
-                { "00160043", null, "UK", "6863", null, false }, // no match!
+                { "00160043", null, "UK", "2541", "229515499", true }, // match by regNumber and correct regNumberType
+                { "00160043", null, "UK", null, "229515499", true }, // match by regNumber and no regNumberType
+                { "00160043", null, "UK", "6863", null, false }, // no match! regNumberType is wrong
 
                 // Google, France
-                { "432126092", null, "FR", null, "268487989", true },
-                { "43212609200027", null, "FR", null, "268487989", true },
-                { "432126092", null, "FR", "2078", "268487989", true },
-                { "43212609200027", null, "FR", "2081", "268487989", true },
-                { "43212609200027", null, "FR", "2078", null, false }, // no match!
+                { "432126092", null, "FR", null, "268487989", true }, // match by regNumber and no regNumberType
+                { "43212609200027", null, "FR", null, "268487989", true }, // match by regNumber and no regNumberType
+                { "432126092", null, "FR", "2078", "268487989", true }, // match by regNumber and correct regNumberType
+                { "43212609200027", null, "FR", "2081", "268487989", true }, // match by regNumber and correct regNumberType
+                { "43212609200027", null, "FR", "2078", null, false }, // no match! regNumberType is wrong
 
                 // BMW, Germany
-                { "DE129273398", null, "DE", "6867", "315369934", true },
-                { "80333B42243", null, "DE", "6862", "315369934", true },
-                { "DE129273398", null, "DE", null, "315369934", true },
-                { "80333B42243", null, "DE", null, "315369934", true },
-                { "DE129273398", null, "DE", "6862", null, false } // no match!
+                { "DE129273398", null, "DE", "6867", "315369934", true }, // match by regNumber and correct regNumberType
+                { "80333B42243", null, "DE", "6862", "315369934", true }, // match by regNumber and correct regNumberType
+                { "DE129273398", null, "DE", null, "315369934", true }, // match by regNumber and no regNumberType
+                { "80333B42243", null, "DE", null, "315369934", true }, // match by regNumber and no regNumberType
+                { "DE129273398", null, "DE", "6862", null, false } // no match! regNumberType is wrong
         };
     }
 
@@ -403,11 +413,11 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         Assert.assertEquals(output.getStatistics().getRowsMatched().intValue(), data.length);
         // MatchGrade is AAAAAAAAAAA, if it was matched by DUNS
-        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(3), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
+        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
+        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
+        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
     }
 
     @Test(groups = "functional")
@@ -921,5 +931,18 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             }
         }
         return false;
+    }
+
+    private Object getCandidateField(OutputRecord outputRecord, String fieldName) {
+        List<Object> candidateFields = outputRecord.getCandidateOutput().get(0);
+        return getCandidateField(candidateFields, fieldName);
+    }
+
+    private Object getCandidateField(List<Object> candidateFields, String fieldName) {
+        int idx = candidateService.candidateOutputFields().indexOf(fieldName);
+        if (idx < 0) {
+            throw new UnsupportedOperationException("Cannot find " + fieldName + " from candidate output");
+        }
+        return candidateFields.get(idx);
     }
 }
