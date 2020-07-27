@@ -23,6 +23,15 @@ public class UploadEmailInfo {
     @JsonProperty("job_status")
     private String jobStatus;
 
+    @JsonProperty("projectDisplayName")
+    private String projectDisplayName;
+
+    @JsonProperty("sourceDisplayName")
+    private String sourceDisplayName;
+
+    @JsonProperty("uploadDisplayName")
+    private String uploadDisplayName;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -30,6 +39,10 @@ public class UploadEmailInfo {
     public void setUploadId(String uploadId) {
         this.uploadId = uploadId;
     }
+
+    public String getUploadDisplayName() { return uploadDisplayName; }
+
+    public void setUploadDisplayName(String uploadDisplayName) { this.uploadDisplayName = uploadDisplayName; }
 
     public String getSourceId() {
         return sourceId;
@@ -39,6 +52,10 @@ public class UploadEmailInfo {
         this.sourceId = sourceId;
     }
 
+    public String getSourceDisplayName() { return sourceDisplayName; }
+
+    public void setSourceDisplayName(String sourceDisplayName) { this.sourceDisplayName = sourceDisplayName; }
+
     public String getProjectId() {
         return projectId;
     }
@@ -46,6 +63,10 @@ public class UploadEmailInfo {
     public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
+
+    public String getProjectDisplayName() { return projectDisplayName; }
+
+    public void setProjectDisplayName(String projectDisplayName) { this.projectDisplayName = projectDisplayName; }
 
     public List<String> getRecipientList() {
         return recipientList;

@@ -74,7 +74,7 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
 
         Set<String> ids = getExternalSystemIds(type, entity);
         if (CollectionUtils.isNotEmpty(ids)) {
-            ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account,
+            ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(entity,
                     dataCollectionService.getActiveVersion(customerSpace));
             systems = cms.flatMap(cm -> {
                 if (cm.isEnabledFor(ColumnSelection.Predefined.LookupId) && ids.contains(cm.getAttrName())) {

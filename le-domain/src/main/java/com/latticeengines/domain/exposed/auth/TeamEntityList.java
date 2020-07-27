@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TeamEntities {
+public class TeamEntityList {
     @JsonProperty("MetadataSegments")
     private List<MetadataSegment> metadataSegments;
 
