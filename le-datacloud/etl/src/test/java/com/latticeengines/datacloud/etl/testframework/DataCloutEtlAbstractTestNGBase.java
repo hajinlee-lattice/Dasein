@@ -53,9 +53,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
     @Value("${datacloud.test.env}")
     protected String testEnv;
 
-    @Value("${datacloud.collection.sqoop.mapper.number:4}")
-    private int numMappers;
-
     @Value("${datacloud.collection.s3bucket}")
     protected String s3Bucket;
 

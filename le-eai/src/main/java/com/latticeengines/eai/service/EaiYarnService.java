@@ -6,11 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.common.exposed.util.JacocoUtils;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.BaseContext;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 

@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
@@ -28,11 +30,11 @@ import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("internalScoringApiProxy")
-public class InternalScoringApiProxy extends BaseRestApiProxy implements InternalScoringApiInterface {
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class InternalScoringApiProxy extends BaseRestApiProxy {
 
     private static class ScoringErrorHandler implements ResponseErrorHandler {
         @Override
@@ -61,7 +63,6 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         setErrorHandler(new ScoringErrorHandler());
     }
 
-    @Override
     public List<Model> getActiveModels(ModelType type, String tenantIdentifier) {
         String url = null;
         if (type != null) {
@@ -69,7 +70,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         } else {
             url = constructUrl("/models?tenantIdentifier={tenantIdentifier}",tenantIdentifier);
         }
-            
+
         List<?> resultList = get("getActiveModels", url, List.class);
         List<Model> models = new ArrayList<>();
         if (resultList != null) {
@@ -83,14 +84,12 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         return models;
     }
 
-    @Override
     public Fields getModelFields(String modelId, String tenantIdentifier) {
         String url = constructUrl("/models/{modelId}/fields?tenantIdentifier={tenantIdentifier}", modelId,
                 tenantIdentifier);
         return get("getModelFields", url, Fields.class);
     }
 
-    @Override
     public int getModelCount(Date start, boolean considerAllStatus, String tenantIdentifier) {
         String url = "/modeldetails/count?considerAllStatus={considerAllStatus}&tenantIdentifier={tenantIdentifier}";
         if (start != null) {
@@ -102,7 +101,6 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         return get("getModelCount", url, Integer.class);
     }
 
-    @Override
     public List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
             String tenantIdentifier, boolean considerDeleted) {
         String url = "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&tenantIdentifier={tenantIdentifier}&considerDeleted={considerDeleted}";
@@ -126,21 +124,17 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         return paginatedModels;
     }
 
-
-    @Override
     public List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
             String tenantIdentifier) {
         return getPaginatedModels(start, considerAllStatus, offset, maximum, tenantIdentifier, false);
     }
 
-    @Override
     public ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier,
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
         String url = constructUrl("/record?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
         return post("scorePercentileRecord", url, scoreRequest, ScoreResponse.class);
     }
 
-    @Override
     public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
             String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             boolean enableMatching) {
@@ -160,7 +154,6 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         return recordScoreResponseList;
     }
 
-    @Override
     public List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
             String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             boolean enableMatching) {
@@ -181,14 +174,12 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         return recordScoreResponseList;
     }
 
-    @Override
     public DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier,
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
         String url = constructUrl("/record/debug?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
         return post("scoreProbabilityRecord", url, scoreRequest, DebugScoreResponse.class);
     }
 
-    @Override
     public DebugScoreResponse scoreAndEnrichRecordApiConsole(ScoreRequest scoreRequest, String tenantIdentifier,
             boolean enrichInternalAttributes, boolean enforceFuzzyMatch, boolean skipDnBCache) {
         String url = constructUrl(

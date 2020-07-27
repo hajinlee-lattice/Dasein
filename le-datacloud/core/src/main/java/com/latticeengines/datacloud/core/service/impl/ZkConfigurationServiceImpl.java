@@ -1,14 +1,8 @@
 package com.latticeengines.datacloud.core.service.impl;
 
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -16,23 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.base.Preconditions;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.camille.exposed.paths.PathConstants;
-import com.latticeengines.datacloud.core.datasource.DataSourceConnection;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 
 @Component("zkConfigurationService")
 public class ZkConfigurationServiceImpl implements ZkConfigurationService {
@@ -43,16 +30,9 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private String podId;
     private static Boolean relaxPublicDomain;
     private static final String PROPDATA_SERVICE = "PropData";
-    private static final String DATASOURCES = "DataSources";
     private static final String MATCH_SERVICE = "Match";
     private static final String USE_REMOTE_DNB_GLOBAL = "UseRemoteDnB";
     private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
-
-    @Value("${datacloud.source.db.json}")
-    private String sourceDbsJson;
-
-    @Value("${datacloud.target.db.json}")
-    private String targetDbsJson;
 
     @Value("${common.le.stack}")
     private String leStack;
@@ -75,50 +55,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     }
 
     private void bootstrapCamille() throws Exception {
-        try (InputStream is = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("datasource/" + sourceDbsJson)) {
-            Preconditions.checkNotNull(is);
-            String json = IOUtils.toString(is, Charset.defaultCharset());
-            Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
-            if (!camille.exists(poolPath)) {
-                log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");
-                camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            }
-            // Flag of UseRemoteDnBGlobal
-            Path useRemoteDnBPath = useRemoteDnBGlobalPath();
-            if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
-                camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            }
+        // Flag of UseRemoteDnBGlobal
+        Path useRemoteDnBPath = useRemoteDnBGlobalPath();
+        if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
+            camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         }
-    }
-
-    @Override
-    public List<DataSourceConnection> getConnectionsInPool(DataSourcePool pool) {
-        ObjectMapper mapper = new ObjectMapper();
-        Path poolPath = dbPoolPath(pool);
-        try {
-            List<DataSourceConnection> connections = new ArrayList<>();
-            String data = camille.get(poolPath).getData();
-            if (StringUtils.isBlank(data)) {
-                return connections;
-            }
-            ArrayNode arrayNode = mapper.readValue(data, ArrayNode.class);
-            for (JsonNode jsonNode : arrayNode) {
-                connections.add(mapper.treeToValue(jsonNode, DataSourceConnection.class));
-            }
-            return connections;
-        } catch (Exception e) {
-            log.error("Failed to get Connections in Pool", e);
-            return null;
-        }
-    }
-
-    private Path dbPoolPath(DataSourcePool pool) {
-        Path propDataPath = PathBuilder.buildServicePath(podId, PROPDATA_SERVICE);
-        if (StringUtils.isNotEmpty(leStack)) {
-            propDataPath = propDataPath.append(PathConstants.STACKS).append(leStack);
-        }
-        return propDataPath.append(DATASOURCES).append(pool.name());
     }
 
     @Override

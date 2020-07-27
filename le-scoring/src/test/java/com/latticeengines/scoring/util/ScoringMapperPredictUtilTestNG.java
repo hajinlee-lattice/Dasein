@@ -33,7 +33,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtilTestNG {
@@ -172,7 +171,7 @@ public class ScoringMapperPredictUtilTestNG {
         }
 
         Configuration config = new Configuration();
-        config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(), ScoringDaemonService.UNIQUE_KEY_COLUMN);
+        config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(), ScoringConstants.UNIQUE_KEY_COLUMN);
         // ScoringMapperPredictUtil.writeToOutputFile(expectedResultList,
         // config, tempOutputPath);
 

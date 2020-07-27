@@ -238,7 +238,7 @@ public class Publication implements HasPid {
     }
 
     public enum PublicationType {
-        SQL, DYNAMO
+        DYNAMO
     }
 
     public enum MaterialType {

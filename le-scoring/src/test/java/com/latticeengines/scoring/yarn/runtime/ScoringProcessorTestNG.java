@@ -51,7 +51,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.util.ScoringConstants;
 public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private ScoringProcessor bulkScoringProcessor;
@@ -95,7 +95,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @AfterMethod(groups = "functional", enabled = false)
     public void AfterMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dir);
-        FileUtils.deleteQuietly(new File(ScoringDaemonService.IMPORT_ERROR_FILE_NAME));
+        FileUtils.deleteQuietly(new File(ScoringConstants.IMPORT_ERROR_FILE_NAME));
     }
 
     @Test(groups = "functional", enabled = false)
@@ -330,13 +330,13 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(record.get("Id"), "2");
             Assert.assertEquals(record.get("ErrorMessage"), "some error occurred");
         }
-        FileUtils.deleteQuietly(new File(ScoringDaemonService.IMPORT_ERROR_FILE_NAME));
+        FileUtils.deleteQuietly(new File(ScoringConstants.IMPORT_ERROR_FILE_NAME));
     }
 
     private void generateScoreResponseAvroAndCopyToHdfs(List<RecordScoreResponse> recordScoreResponseList,
             Map<String, Schema.Type> leadEnrichmentAttributeMap,
             Map<String, String> leadEnrichmentAttributeDisplayNameMap, String targetDir) throws IOException {
-        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        String fileName = UUID.randomUUID() + ScoringConstants.AVRO_FILE_SUFFIX;
         Schema schema = bulkScoringProcessor.createOutputSchema(leadEnrichmentAttributeMap,
                 leadEnrichmentAttributeDisplayNameMap);
         try (CSVPrinter csvFilePrinter = bulkScoringProcessor.initErrorCSVFilePrinter("")) {

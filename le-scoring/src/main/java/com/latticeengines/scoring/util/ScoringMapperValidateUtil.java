@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ModelAndRecordInfo.ModelInfo;
 
 public final class ScoringMapperValidateUtil {
@@ -82,7 +81,7 @@ public final class ScoringMapperValidateUtil {
         }
 
         // validate the datatype file with the model.json
-        ArrayNode metadata = (ArrayNode) model.get(ScoringDaemonService.INPUT_COLUMN_METADATA);
+        ArrayNode metadata = (ArrayNode) model.get(ScoringConstants.INPUT_COLUMN_METADATA);
         List<String> msgs = validate(datatype, modelGuid, metadata);
         if (msgs.size() != 0) {
             modelFailures.put(modelGuid, msgs);
@@ -98,9 +97,9 @@ public final class ScoringMapperValidateUtil {
         List<String> toReturn = new ArrayList<>();
         if (metadata != null) {
             for (JsonNode obj : metadata) {
-                String name = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_NAME).asText();
-                int purpose = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_PURPOSE).asInt();
-                long type = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_VALUETYPE).asLong();
+                String name = obj.get(ScoringConstants.INPUT_COLUMN_METADATA_NAME).asText();
+                int purpose = obj.get(ScoringConstants.INPUT_COLUMN_METADATA_PURPOSE).asInt();
+                long type = obj.get(ScoringConstants.INPUT_COLUMN_METADATA_VALUETYPE).asLong();
                 if (purpose != MetadataPurpose.FEATURE.value) {
                     continue;
                 }
@@ -117,7 +116,7 @@ public final class ScoringMapperValidateUtil {
             }
         } else {
             String msg = String.format("%s does not contain %s. ", modelGuid,
-                    ScoringDaemonService.INPUT_COLUMN_METADATA);
+                    ScoringConstants.INPUT_COLUMN_METADATA);
             toReturn.add(msg);
         }
         return toReturn;

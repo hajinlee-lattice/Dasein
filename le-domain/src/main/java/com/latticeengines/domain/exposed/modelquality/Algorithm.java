@@ -28,12 +28,8 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmType;
 
-/**
- *
- * @startuml
- *
- */
 @Entity
 @Table(name = "MODELQUALITY_ALGORITHM", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "NAME" }) })

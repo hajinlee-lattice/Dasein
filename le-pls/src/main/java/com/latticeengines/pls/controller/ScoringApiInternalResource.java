@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
+import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 
@@ -50,7 +50,7 @@ import io.swagger.annotations.ApiParam;
 public class ScoringApiInternalResource {
 
     @Inject
-    protected InternalScoringApiInterface internalScoringApiProxy;
+    protected InternalScoringApiProxy internalScoringApiProxy;
 
     @Inject
     private SessionService sessionService;

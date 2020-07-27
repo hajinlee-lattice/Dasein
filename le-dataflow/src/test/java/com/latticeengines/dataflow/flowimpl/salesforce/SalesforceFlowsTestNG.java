@@ -18,11 +18,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SalesforceFlowsTestNG.class);

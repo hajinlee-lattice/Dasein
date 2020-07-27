@@ -1,12 +1,7 @@
 package com.latticeengines.dataplatform.controller;
 
-import java.util.Arrays;
-
 import javax.inject.Inject;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,20 +18,16 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
-import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
-import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "REST resource for machine learning models")
 @RestController
-public class ModelResource implements ModelInterface {
-    private static final Logger log = LoggerFactory.getLogger(ModelResource.class);
+public class ModelResource {
 
     @Inject
     private ModelingService modelingService;
@@ -44,66 +35,27 @@ public class ModelResource implements ModelInterface {
     @Inject
     private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
-    public ModelResource() {
-        // Need to set java.class.path in order for the Sqoop dynamic java
-        // compilation to work
-        log.info("Java Home = " + System.getProperty("java.home"));
-        System.setProperty("java.class.path", System.getProperty("java.class.path") + addToClassPath());
-        log.info("Class path = " + System.getProperty("java.class.path"));
-    }
-
-    private String addToClassPath() {
-        return ":" + System.getProperty("jetty.class.path");
-    }
-
-    @Override
     @PostMapping("/models")
     @ResponseBody
     @ApiOperation(value = "Submit models")
     public AppSubmission submit(@RequestBody Model model) {
-        AppSubmission submission = new AppSubmission(modelingService.submitModel(model));
-        return submission;
+        return new AppSubmission(modelingService.submitModel(model));
     }
 
-    @Override
-    @PostMapping("/samples")
+   @PostMapping("/samples")
     @ResponseBody
     @ApiOperation(value = "Create named samples to be used by profiling or modeling")
     public AppSubmission createSamples(@RequestBody SamplingConfiguration config) {
-        AppSubmission submission = new AppSubmission(
-                Arrays.<ApplicationId> asList(modelingService.createSamples(config)));
-        return submission;
+       return new AppSubmission(modelingService.createSamples(config));
     }
 
-    @Override
     @PostMapping("/eventcounter")
     @ResponseBody
     @ApiOperation(value = "Create named event counter to be used by profiling or modeling")
     public AppSubmission createEventCounter(@RequestBody EventCounterConfiguration config) {
-        AppSubmission submission = new AppSubmission(
-                Arrays.<ApplicationId> asList(modelingService.createEventCounter(config)));
-        return submission;
+        return new AppSubmission(modelingService.createEventCounter(config));
     }
 
-    @Override
-    @PostMapping("/dataloads")
-    @ResponseBody
-    @ApiOperation(value = "Load data from a database table")
-    public AppSubmission loadData(@RequestBody LoadConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.loadData(config)));
-        return submission;
-    }
-
-    @Override
-    @PostMapping("/dataexports")
-    @ResponseBody
-    @ApiOperation(value = "Export data from HDFS to a database table")
-    public AppSubmission exportData(@RequestBody ExportConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.exportData(config)));
-        return submission;
-    }
-
-    @Override
     @GetMapping("/modelingjobs/{applicationId}")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
@@ -111,26 +63,20 @@ public class ModelResource implements ModelInterface {
         return modelingService.getJobStatus(applicationId);
     }
 
-    @Override
     @PostMapping("/profiles")
     @ResponseBody
     @ApiOperation(value = "Profile data")
     public AppSubmission profile(@RequestBody DataProfileConfiguration config) {
-        AppSubmission submission = new AppSubmission(
-                Arrays.<ApplicationId> asList(modelingService.profileData(config)));
-        return submission;
+        return new AppSubmission(modelingService.profileData(config));
     }
 
-    @Override
     @PostMapping("/reviews")
     @ResponseBody
     @ApiOperation(value = "Review data")
     public AppSubmission review(@RequestBody ModelReviewConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.reviewData(config)));
-        return submission;
+        return new AppSubmission(modelingService.reviewData(config));
     }
 
-    @Override
     @PostMapping("/features")
     @ResponseBody
     @ApiOperation(value = "Get list of features generated by the data profile")
@@ -138,7 +84,6 @@ public class ModelResource implements ModelInterface {
         return new StringList(modelingService.getFeatures(model, false));
     }
 
-    @Override
     @GetMapping("/model/{modelId}")
     @ResponseBody
     @ApiOperation(value = "Get model by modelId")

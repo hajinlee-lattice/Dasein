@@ -26,9 +26,9 @@ import org.apache.hadoop.util.ToolRunner;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class EventDataSamplingJobUnitTestNG {
 

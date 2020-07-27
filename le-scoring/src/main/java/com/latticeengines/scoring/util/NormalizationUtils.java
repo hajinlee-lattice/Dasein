@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 public final class NormalizationUtils {
 
@@ -45,11 +44,11 @@ public final class NormalizationUtils {
         if (cdl) {
             if (hasRevenue) {
                 List<NormalizationBucket> buckets = getNormalizationBuckets(model,
-                        ScoringDaemonService.NORMALIZATION_EXPECTEDREVENUE);
+                        ScoringConstants.NORMALIZATION_EXPECTEDREVENUE);
                 normalizer = new ExpectedRevenueScoreNormalizer(buckets);
             } else {
                 List<NormalizationBucket> buckets = getNormalizationBuckets(model,
-                        ScoringDaemonService.NORMALIZATION_PROBABILITY);
+                        ScoringConstants.NORMALIZATION_PROBABILITY);
                 normalizer = new ProbabilityScoreNormalizer(buckets);
             }
         }
@@ -58,14 +57,14 @@ public final class NormalizationUtils {
 
     private static List<NormalizationBucket> getNormalizationBuckets(JsonNode model, String bucketType) {
         List<NormalizationBucket> result = new ArrayList<>();
-        JsonNode buckets = model.get(ScoringDaemonService.NORMALIZATION_BUCKETS);
+        JsonNode buckets = model.get(ScoringConstants.NORMALIZATION_BUCKETS);
         ArrayNode normalizationBuckets = (ArrayNode) buckets.get(bucketType);
         if (normalizationBuckets != null) {
             for (int i = 0; i < normalizationBuckets.size(); i++) {
                 JsonNode normalizationBucket = normalizationBuckets.get(i);
-                JsonNode startNode = normalizationBucket.get(ScoringDaemonService.NORMALIZATION_START);
-                JsonNode endNode = normalizationBucket.get(ScoringDaemonService.NORMALIZATION_END);
-                JsonNode cumPctNode = normalizationBucket.get(ScoringDaemonService.NORMALIZATION_CUMULATIVEPERCENTAGE);
+                JsonNode startNode = normalizationBucket.get(ScoringConstants.NORMALIZATION_START);
+                JsonNode endNode = normalizationBucket.get(ScoringConstants.NORMALIZATION_END);
+                JsonNode cumPctNode = normalizationBucket.get(ScoringConstants.NORMALIZATION_CUMULATIVEPERCENTAGE);
                 Double start = startNode.isNull() ? 0 : startNode.asDouble();
                 Double end = endNode.isNull() ? 0 : endNode.asDouble();
                 Double cumPct = cumPctNode.isNull() ? 0 : cumPctNode.asDouble();

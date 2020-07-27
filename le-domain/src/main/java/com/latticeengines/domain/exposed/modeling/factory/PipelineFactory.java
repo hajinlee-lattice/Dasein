@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyDef;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyValue;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
-import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public final class PipelineFactory extends ModelFactory {
 

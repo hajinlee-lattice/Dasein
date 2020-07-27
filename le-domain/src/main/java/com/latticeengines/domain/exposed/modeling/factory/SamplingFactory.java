@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.domain.exposed.modelquality.SamplingPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.SamplingPropertyValue;
-import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public final class SamplingFactory extends ModelFactory {
 
