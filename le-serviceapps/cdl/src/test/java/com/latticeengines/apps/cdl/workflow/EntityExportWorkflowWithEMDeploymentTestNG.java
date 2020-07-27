@@ -37,6 +37,7 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
         checkpointAutoService.resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT,
                 CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
         log.info("Setup Complete!");
+        configExportAttrs();
         saveCsvToLocal = false;
     }
 
