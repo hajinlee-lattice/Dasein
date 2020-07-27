@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
@@ -49,7 +50,7 @@ public class ActionResource {
             if (action.getActionStatus() != ActionStatus.CANCELED) {
                 throw new RuntimeException("Cannot cancel this action!");
             }
-            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Notice, Status.Success,
+            UIAction uiAction = UIActionUtils.generateUIAction("", View.Notice, Status.Success,
                     CANCELSUCCESS_MSG);
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {

@@ -41,7 +41,11 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -50,9 +54,6 @@ import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.pls.service.FileUploadService;
@@ -260,13 +261,13 @@ public class ModelingFileUploadResource {
                     cleanupOperationType, batonService.isEntityMatchEnabled(customerSpace));
             return ResponseDocument.successResponse(resultSourceFile);
         }  catch (LedpException ledp) {
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+            UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             log.error("Failed to upload cleanup file template.", ledp);
             throw new UIActionException(action, ledp.getCode());
         } catch (RuntimeException e) {
             LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { e.getMessage() });
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+            UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
         }
@@ -332,11 +333,11 @@ public class ModelingFileUploadResource {
             return fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream, outsizeFlag);
         } catch (IOException e) {
             LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+            UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
         } catch (LedpException ledp) {
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+            UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
         } finally {
@@ -344,7 +345,7 @@ public class ModelingFileUploadResource {
                 closeableResourcePool.close();
             } catch (IOException e) {
                 LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
-                UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                         Status.Error, ledp.getMessage());
                 throw new UIActionException(action, ledp.getCode());
             }
@@ -356,7 +357,7 @@ public class ModelingFileUploadResource {
             log.info(String.format("Uploading file %s (csvFileName=%s)", csvFile.getFileName(), csvFile.getFileName()));
             return fileUploadService.createSourceFileFromS3(csvFile, entity);
         } catch (LedpException ledp) {
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+            UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
         }
