@@ -347,8 +347,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         List<String> templates = new ArrayList<>();
         if (CollectionUtils.isEmpty(convertedRematchTableNames)) { // if only regular imports
             inputTableNames.forEach(t -> {
-                log.info("inputTable=" + t + ", templateName=" + tableTemplateMap.get(t));
-                templates.add(tableTemplateMap.get(t));
+                String templateName = tableTemplateMap.get(t);
+                log.info("inputTable={}, templateName={}", t, templateName);
+                templates.add(templateName);
+                if (StringUtils.isEmpty(templateName)) {
+                    log.warn("Template for table {} is empty or null", t);
+                }
             });
         } else { // if has rematch fake imports
             if (inputStep != -1) { // for case when both regular imports and fake imports are present
@@ -363,8 +367,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             if (MapUtils.isNotEmpty(rematchTables)) {
                 List<String> tables = rematchTables.get(entity.name());
                 tables.forEach(table -> {
-                    log.info("rematchTable=" + table + ", templateName=" + tableTemplateMap.get(table));
-                    templates.add(tableTemplateMap.get(table));
+                    String templateName = tableTemplateMap.get(table);
+                    log.info("rematchTable={}, templateName={}", table, templateName);
+                    templates.add(templateName);
+                    if (StringUtils.isEmpty(templateName)) {
+                        log.warn("Template for table {} is empty or null", table);
+                    }
                 });
             }
         }
