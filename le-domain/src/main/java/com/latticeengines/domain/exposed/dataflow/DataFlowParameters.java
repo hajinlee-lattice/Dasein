@@ -64,8 +64,10 @@ public class DataFlowParameters {
 
     private static final Logger log = LoggerFactory.getLogger(DataFlowParameters.class);
 
-    @JsonProperty("no_flink")
-    public boolean noFlink = false;
+    @JsonIgnore
+    public boolean allowFlink() {
+        return false;
+    }
 
     @Transient
     @JsonIgnore

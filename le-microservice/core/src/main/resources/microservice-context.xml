@@ -8,7 +8,6 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-    <import resource="classpath:network-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:common-webapp-env-context.xml"/>
     <import resource="classpath:security-aspect-context.xml"/>

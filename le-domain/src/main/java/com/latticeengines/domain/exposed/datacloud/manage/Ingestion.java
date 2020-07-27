@@ -234,9 +234,7 @@ public class Ingestion implements HasPid, Serializable {
 
     public enum IngestionType {
         SFTP, // generic
-        SQL_TO_CSVGZ, // deprecated
         API, // generic
-        SQL_TO_SOURCE, // deprecated
         S3, // only for datacloud collector
         BW_RAW, // only for datacloud collector
         PATCH_BOOK // only for datacloud patch book;

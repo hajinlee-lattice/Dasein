@@ -9,7 +9,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.datacloud.controller.*" />
     </context:component-scan>
 
-    <import resource="classpath:datacloud-etl-collection-context.xml"/>
     <import resource="classpath:datacloudapi-engine-context.xml" />
 
     <aop:aspectj-autoproxy proxy-target-class="true"/>

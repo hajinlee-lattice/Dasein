@@ -49,12 +49,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-network</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -79,7 +73,6 @@
         <module>scoring</module>
         <module>workflowapi</module>
         <module>quartz</module>
-        <module>modelquality</module>
         <module>objectapi</module>
         <module>cdl</module>
         <module>lp</module>

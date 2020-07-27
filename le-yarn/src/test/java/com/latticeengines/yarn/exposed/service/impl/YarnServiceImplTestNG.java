@@ -16,12 +16,13 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedule
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.testng.annotations.Test;
 
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.YarnService;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
+
 public class YarnServiceImplTestNG extends YarnFunctionalTestNGBase {
 
     @Inject

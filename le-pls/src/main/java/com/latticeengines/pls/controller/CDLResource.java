@@ -49,7 +49,12 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.UIMessage;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -58,11 +63,7 @@ import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.UIMessage;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
@@ -198,18 +199,18 @@ public class CDLResource {
             if (importData) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                             String.format(editS3TemplateAndImportMsg, entity));
                 } else {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                             String.format(createS3TemplateAndImportMsg, entity));
                 }
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                             String.format(editS3TemplateMsg, entity));
                 } else {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                             String.format(createS3TemplateMsg, entity));
                 }
             }
@@ -235,7 +236,7 @@ public class CDLResource {
                 throw new RuntimeException("Cannot find template for S3 import!");
             }
             cdlService.submitS3ImportOnlyData(customerSpace.toString(), dataFeedTask.getUniqueId(), templateFileName);
-            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+            UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     importUsingTemplateMsg);
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
@@ -301,7 +302,7 @@ public class CDLResource {
         Preconditions.checkNotNull(customerSpace);
         try {
             cdlService.resetTemplate(customerSpace.toString(), templateDisplay.getFeedType(), forceReset);
-            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+            UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     resetTemplateMsg);
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (LedpException e) {
@@ -426,12 +427,12 @@ public class CDLResource {
         }
         try {
             cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType, primary);
-            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+            UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     String.format(createS3ImportSystemMsg, systemDisplayName));
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (LedpException e) {
             log.error("Failed to create S3ImportSystem: " + e.getMessage());
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }
@@ -482,7 +483,7 @@ public class CDLResource {
         }
         try {
             cdlService.updateS3ImportSystemPriorityBasedOnSequence(customerSpace.toString(), systemList);
-            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+            UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     updateS3ImportSystemPriorityMsg);
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
@@ -499,7 +500,7 @@ public class CDLResource {
         Preconditions.checkNotNull(customerSpace);
         try {
             if (cdlService.validateAndUpdateS3ImportSystemPriority(customerSpace.toString(), systemList)) {
-                UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                         validateAndUpdatePriorityMsg);
                 return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             } else {

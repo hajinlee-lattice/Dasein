@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 
 public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandler {
 
@@ -41,15 +41,30 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public JsonNode handleException(UIActionException.UserError e) {
+        logError(e);
+        return JsonUtils.getObjectMapper() //
+                .valueToTree(ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public JsonNode handleException(UIActionException.SystemError e) {
+        logError(e);
+        return JsonUtils.getObjectMapper() //
+                .valueToTree(ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public JsonNode handleException(UIActionException e) {
         logError(e);
         return JsonUtils.getObjectMapper() //
-                .valueToTree(ImmutableMap.of(
-                        "errorCode", e.getCode(), //
-                        UIAction.class.getSimpleName(), e.getUIAction() //
-                ));
+                .valueToTree(ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
     }
 
     @ExceptionHandler
@@ -91,7 +106,7 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
 
     private JsonNode getJsonView(LedpException e) {
         return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", e.getCode().name(), //
-                "errorMsg", e.getMessage()));
+                "errorMsg", e.getMessage(), "errorParamsMap", e.getParamsMap()));
     }
 
 }

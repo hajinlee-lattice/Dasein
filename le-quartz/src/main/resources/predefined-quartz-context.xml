@@ -61,28 +61,6 @@
         <property name="jobTimeout" value="${quartz.playmaker.recommendationcleanup.job.timeout:3600}"/>
     </bean>
 
-    <bean name="dataplatformDLOrchestration" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="dlOrchestrationQuartzJob"/>
-        <property name="cronTrigger" value="${quartz.dataplatform.dlorchestration.job.cron:0/15 * * * * ?}"/>
-        <property name="destUrl" value="${quartz.dataplatform.predefined.job.primary.url:}"/>
-        <property name="secondaryDestUrl" value="${quartz.dataplatform.predefined.job.secondary.url:}"/>
-        <property name="queryApi" value="${quartz.dataplatform.predefined.job.query.api:}"/>
-        <property name="checkJobBeanUrl" value="${quartz.dataplatform.predefined.job.check.bean.url:}"/>
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dlOrchestrationQuartzJob&quot;}"/>
-        <property name="jobTimeout" value="${quartz.dataplatform.dlorchestration.job.timeout:3600}"/>
-    </bean>
-
-    <bean name="dataplatformJobWatchdog" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="jobWatchdog"/>
-        <property name="cronTrigger" value="${quartz.dataplatform.jobwatchdog.job.cron:0/20 * * * * ?}"/>
-        <property name="destUrl" value="${quartz.dataplatform.predefined.job.primary.url:}"/>
-        <property name="secondaryDestUrl" value="${quartz.dataplatform.predefined.job.secondary.url:}"/>
-        <property name="queryApi" value="${quartz.dataplatform.predefined.job.query.api:}"/>
-        <property name="checkJobBeanUrl" value="${quartz.dataplatform.predefined.job.check.bean.url:}"/>
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;jobWatchdog&quot;}"/>
-        <property name="jobTimeout" value="${quartz.dataplatform.jobwatchdog.job.timeout:3600}"/>
-    </bean>
-
     <bean name="dataCloudRefresh" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dataCloudRefresh"/>
         <property name="cronTrigger" value="${quartz.datacloudapi.refresh.job.cron:*/10 * * * * ?}"/>
@@ -92,28 +70,6 @@
         <property name="checkJobBeanUrl" value="${quartz.datacloudapi.predefined.job.check.bean.url:}"/>
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dataCloudRefresh&quot;}"/>
         <property name="jobTimeout" value="${quartz.datacloudapi.refresh.job.timeout:3600}"/>
-    </bean>
-
-    <bean name="scoringManagerJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="scoringManagerJob"/>
-        <property name="cronTrigger" value="${quartz.scoring.scoringmanager.job.cron:0/15 * * * * ?}"/>
-        <property name="destUrl" value="${quartz.scoring.predefined.job.primary.url:}"/>
-        <property name="secondaryDestUrl" value="${quartz.scoring.predefined.job.secondary.url:}"/>
-        <property name="queryApi" value="${quartz.scoring.predefined.job.query.api:}"/>
-        <property name="checkJobBeanUrl" value="${quartz.scoring.predefined.job.check.bean.url:}"/>
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;scoringManagerJob&quot;}"/>
-        <property name="jobTimeout" value="${quartz.scoring.scoringmanager.job.timeout:3600}"/>
-    </bean>
-
-    <bean name="matchCommandClean" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="matchCommandClean"/>
-        <property name="cronTrigger" value="${quartz.matchapi.matchcommandclean.refresh.job.cron:0 0 0 1/1 * ? *}"/>
-        <property name="destUrl" value="${quartz.matchapi.matchcommandclean.predefined.job.primary.url:}"/>
-        <property name="secondaryDestUrl" value="${quartz.matchapi.matchcommandclean.predefined.job.secondary.url:}"/>
-        <property name="queryApi" value="${quartz.matchapi.matchcommandclean.predefined.job.query.api:}"/>
-        <property name="checkJobBeanUrl" value="${quartz.matchapi.matchcommandclean.predefined.job.check.bean.url:}"/>
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;matchCommandCleanerBean&quot;}"/>
-        <property name="jobTimeout" value="${quartz.matchapi.matchcommandclean.refresh.job.timeout:3600}"/>
     </bean>
 
     <bean name="cdlImportJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
@@ -276,12 +232,8 @@
         <ref bean="lpEmrScaling"/>
         <ref bean="plsSegmentExportCleanupJob"/>
         <ref bean="playmakerRecommendationCleanupJob"/>
-        <ref bean="dataplatformDLOrchestration"/>
-        <ref bean="dataplatformJobWatchdog"/>
         <ref bean="dataCloudRefresh"/>
         <ref bean="datacloudCollectionJob"/>
-        <ref bean="scoringManagerJob"/>
-        <ref bean="matchCommandClean"/>
         <ref bean="cdlImportJob"/>
         <ref bean="cdlOrchestrationJob"/>
         <ref bean="cdlDateFeedExecutionCleanupJob"/>

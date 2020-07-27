@@ -4,7 +4,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.auth.TeamEntities;
+import com.latticeengines.domain.exposed.auth.TeamEntityList;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.TeamProxy;
 
@@ -16,9 +16,9 @@ public class TeamProxyImpl extends MicroserviceRestApiProxy implements TeamProxy
     }
 
     @Override
-    public TeamEntities getTeamEntities(String customerSpace) {
+    public TeamEntityList getTeamEntities(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/teams/team-entities", //
                 shortenCustomerSpace(customerSpace));
-        return get("find atlas export by id", url, TeamEntities.class);
+        return get("find atlas export by id", url, TeamEntityList.class);
     }
 }

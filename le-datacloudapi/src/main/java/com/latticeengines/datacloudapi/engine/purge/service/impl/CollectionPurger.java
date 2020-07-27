@@ -8,10 +8,8 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
-import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
@@ -33,12 +31,6 @@ public abstract class CollectionPurger implements SourcePurger {
 
     @Inject
     protected Configuration yarnConfiguration;
-
-    @Inject
-    protected HiveTableService hiveTableService;
-
-    @Inject
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     protected long DAY_IN_MS = 1000 * 60 * 60 * 24;
 

@@ -18,7 +18,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
-import com.latticeengines.network.exposed.oauth.Oauth2Interface;
+import com.latticeengines.pls.service.Oauth2Service;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +30,7 @@ public class Oauth2Resource {
     private static final Logger log = LoggerFactory.getLogger(Oauth2Resource.class);
 
     @Inject
-    private Oauth2Interface oauth2Service;
+    private Oauth2Service oauth2Service;
 
     @GetMapping("/apitoken")
     @ResponseBody

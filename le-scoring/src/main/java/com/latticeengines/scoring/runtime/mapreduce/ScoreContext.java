@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ModelAndRecordInfo;
+import com.latticeengines.scoring.util.ScoringConstants;
 import com.latticeengines.scoring.util.ScoringMapperValidateUtil;
 
 public class ScoreContext {
@@ -95,7 +95,7 @@ public class ScoreContext {
             while (context.nextKeyValue()) {
                 Record origRecord = context.getCurrentKey().datum();
                 Record record = new Record(origRecord, true);
-                String modelGuid = (String) record.get(ScoringDaemonService.MODEL_GUID);
+                String modelGuid = (String) record.get(ScoringConstants.MODEL_GUID);
                 String uuid = UuidUtils.extractUuid(modelGuid);
                 res.putIfAbsent(uuid, new ArrayList<>());
                 res.get(uuid).add(record);

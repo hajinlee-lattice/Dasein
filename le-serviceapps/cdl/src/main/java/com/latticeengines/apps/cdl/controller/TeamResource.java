@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
-import com.latticeengines.domain.exposed.auth.TeamEntities;
+import com.latticeengines.domain.exposed.auth.TeamEntityList;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,13 +32,13 @@ public class TeamResource {
 
     @GetMapping("/team-entities")
     @ResponseBody
-    @ApiOperation(value = "get all entities that can append to team")
-    public TeamEntities getTeamEntities(@PathVariable String customerSpace) {
-        TeamEntities teamEntities = new TeamEntities();
-        teamEntities.setMetadataSegments(segmentService.getSegments());
-        teamEntities.setPlays(playService.getAllPlays());
-        teamEntities.setRatingEngineSummaries(ratingEngineService.getRatingEngineSummaries());
-        return teamEntities;
+    @ApiOperation(value = "get all entities that can assign team")
+    public TeamEntityList getTeamEntities(@PathVariable String customerSpace) {
+        TeamEntityList teamEntityList = new TeamEntityList();
+        teamEntityList.setMetadataSegments(segmentService.getSegments());
+        teamEntityList.setPlays(playService.getAllPlays());
+        teamEntityList.setRatingEngineSummaries(ratingEngineService.getRatingEngineSummaries());
+        return teamEntityList;
     }
 
 }

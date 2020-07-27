@@ -26,8 +26,6 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.BWRawDestination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
@@ -102,29 +100,6 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             progress.setVersion(apiProviderService.getTargetVersion(apiConfig));
             progress.setDestination(
                     ingestionDir.append(progress.getVersion()).append(apiConfig.getFileName()).toString());
-            break;
-        case SQL_TO_CSVGZ:
-            SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) ingestion
-                    .getProviderConfiguration();
-            progress.setSource(sqlToTextConfig.getDbTable());
-            if (StringUtils.isBlank(version)) {
-                progress.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-            } else {
-                progress.setVersion(version);
-            }
-            progress.setDestination(ingestionDir.append(progress.getVersion()).append(file).toString());
-            break;
-        case SQL_TO_SOURCE:
-            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
-                    .getProviderConfiguration();
-            progress.setSource(sqlToSourceConfig.getDbTable());
-            if (StringUtils.isBlank(version)) {
-                progress.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-            } else {
-                progress.setVersion(version);
-            }
-            progress.setDestination(hdfsPathBuilder.constructTransformationSourceDir(
-                    sourceService.findBySourceName(sqlToSourceConfig.getSource()), progress.getVersion()).toString());
             break;
         case S3:
             S3Configuration s3Configuration = (S3Configuration) ingestion.getProviderConfiguration();

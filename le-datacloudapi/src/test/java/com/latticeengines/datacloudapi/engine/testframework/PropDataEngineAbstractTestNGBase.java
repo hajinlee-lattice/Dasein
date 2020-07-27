@@ -22,9 +22,6 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
     @Value("${datacloud.test.env}")
     protected String testEnv;
 
-    @Value("${datacloud.collection.sqoop.mapper.number}")
-    private int numMappers;
-
     @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 

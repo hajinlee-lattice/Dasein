@@ -1,16 +1,18 @@
 package com.latticeengines.apps.dcp.entitymgr;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
-import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportRecord, Long> {
 
-    DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId, boolean inflate);
+    DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId);
 
     DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId);
 
@@ -18,6 +20,8 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     Map<String, DataReport.BasicStats> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel,
                                                                              String parentOwnerId);
+
+    Set<String> getSubOwnerIds(DataReportRecord.Level level, String ownerId);
 
     List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
 
@@ -29,7 +33,7 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     Long findParentId(Long pid);
 
-    void uploadDataReportRecord(Long pid, DunsCountCache dunsCount);
+    void uploadDataReportRecord(Long pid, Table dunsCountTable, Date snapshotTime);
 
     void updateDataReportRecord(Long pid, DataReport.BasicStats basicStats);
 

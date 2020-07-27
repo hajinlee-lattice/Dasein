@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 
@@ -37,7 +36,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @Component("columnMetadataProxyMatchapi")
-public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
+public class ColumnMetadataProxy extends BaseRestApiProxy {
     private static final Logger log = LoggerFactory.getLogger(ColumnMetadataProxy.class);
 
     private static final String STATS_CUBE = "StatsCube";
@@ -74,7 +73,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return columnSelection(selectName, "");
     }
 
-    @Override
     public List<ColumnMetadata> columnSelection(Predefined selectName, String dataCloudVersion) {
         String msg = "Load mdatadata of predefined selection " + selectName + " data cloud version " + dataCloudVersion;
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
@@ -100,7 +98,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return latestVersion("");
     }
 
-    @Override
     public DataCloudVersion latestVersion(String compatibleVersion) {
         if (StringUtils.isBlank(compatibleVersion)) {
             compatibleVersion = DEFAULT;

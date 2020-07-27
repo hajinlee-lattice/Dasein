@@ -45,9 +45,9 @@ if CATALINA_HOME is None or CATALINA_HOME == '':
 else:
     logger.info('CATALINA_HOME=%s' % CATALINA_HOME)
 
-LE_APPS = ['api', 'admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
+LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['ms-core', 'dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz',
-              'modelquality', 'datacloudapi', 'objectapi', 'cdl', 'lp', 'dcp']
+              'datacloudapi', 'objectapi', 'cdl', 'lp', 'dcp']
 
 LE_APPS = [ app for app in LE_APPS + MS_MODULES if app != 'microservice' ]
 
@@ -61,7 +61,6 @@ APP_URL = {
     'oauth': "%s:9072" % APP_ROOT,
     'oauth2': "%s:9072" % APP_ROOT,
     'scoringapi': "%s:9073" % APP_ROOT,
-    'api': "%s:9074" % APP_ROOT,
     'ulysses': "%s:9075" % APP_ROOT,
     'matchapi': "%s:9076" % APP_ROOT
 }
@@ -70,42 +69,22 @@ PRESETS = {
     'cdl': {
         'apps': ['admin', 'pls', 'lp', 'cdl', 'matchapi', 'metadata',
                  'scoringapi', 'dataflowapi', 'workflowapi', 'objectapi',
-                 'eai', 'modeling', 'scoring', 'datacloudapi', 'quartz']
+                 'eai', 'modeling', 'scoring', 'datacloudapi']
     },
     'lp': {
         'apps': ['admin', 'pls', 'lp', 'cdl', 'oauth2', 'saml', 'scoringapi', 'matchapi', 'metadata',
-                 'playmaker', 'dataflowapi', 'eai', 'modeling', 'scoring', 'workflowapi', 'quartz']
+                 'playmaker', 'dataflowapi', 'eai', 'modeling', 'scoring', 'workflowapi']
     },
     'dcp': {
         'apps': ['admin', 'pls', 'lp', 'cdl', 'dcp', 'matchapi', 'metadata', 'modeling',
                  'dataflowapi', 'workflowapi', 'eai', 'datacloudapi']
     },
-    'benchmark': {
-        'apps': ['pls', 'lp', 'cdl', 'matchapi', 'metadata', 'dataflowapi', 'eai', 'modeling',
-                 'scoring', 'workflowapi', 'quartz']
-    },
-    'etl': {
-        'apps': ['microservice', 'matchapi', 'metadata', 'workflowapi', 'datacloudapi', 'eai']
-    },
-    'mq': {
-        'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'saml',
-                 'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi',
-                 'lp', 'quartz', 'modelquality']
-    },
-    'core': {
-            'apps': ['admin', 'pls', 'lp', 'cdl', 'matchapi', 'metadata',
-                     'dataflowapi', 'workflowapi', 'objectapi', 'eai',
-                     'datacloudapi']
-        },
     'all': {
         'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml',
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz',
                  'datacloudapi', 'cdl', 'objectapi', 'dcp']
     }
 }
-
-PRESETS['cdl_pre_checkin'] = PRESETS['cdl']
-
 
 @contextlib.contextmanager
 def no_ssl_verification():

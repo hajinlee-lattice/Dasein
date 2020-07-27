@@ -64,10 +64,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             case API:
                 ingestionAPIProviderService.ingest(progress);
                 break;
-            case SQL_TO_CSVGZ:
-            case SQL_TO_SOURCE:
-                ingestionSQLProviderService.ingest(progress);
-                break;
             case S3:
                 ingestionS3Provider.ingest(progress);
                 break;

@@ -17,14 +17,13 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
@@ -241,11 +240,14 @@ public class AMCleanerTestNG extends PipelineTransformationTestNGBase {
 
     private void verifySourceAttrs(GenericRecord record, List<Field> amfields,
             Map<String, String> mapFieldType)
-            throws JsonProcessingException, JSONException {
+            throws JsonProcessingException {
         Set<String> argsToBeDropped = new HashSet<>(Arrays.asList("IsPublicDomain", "IsMatched"));
         Set<String> mustPresentItemsSet = new HashSet<>(mustPresentItems);
+        String step2 = getAMCleanerConfigStep2();
+        JsonNode jsonNode = JsonUtils.deserialize(step2, JsonNode.class);
+        String dataCloudVersion = jsonNode.get("DataCloudVersion").asText();
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER,
-                AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME, new JSONObject(getAMCleanerConfigStep2()).getString("DataCloudVersion"), false); // extracting datacloudversion from config step
+                AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME, dataCloudVersion, false); // extracting datacloudversion from config step
         int count = 0;
         int techInd = 0;
         int ldcAttr = 0;
@@ -349,7 +351,7 @@ public class AMCleanerTestNG extends PipelineTransformationTestNGBase {
         }
         try {
             verifySourceAttrs(record, amfields, mapFieldType);
-        } catch (JsonProcessingException | JSONException e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         // verifying srcAttrs record Value Data

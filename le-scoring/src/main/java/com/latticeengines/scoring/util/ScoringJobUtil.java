@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 public final class ScoringJobUtil {
 
@@ -57,7 +56,7 @@ public final class ScoringJobUtil {
                 if (fileStatus == null) {
                     return false;
                 }
-                Pattern p = Pattern.compile(".*model" + ScoringDaemonService.JSON_SUFFIX);
+                Pattern p = Pattern.compile(".*model" + ScoringConstants.JSON_SUFFIX);
                 Matcher matcher = p.matcher(fileStatus.getPath().getName());
                 return matcher.matches();
             });

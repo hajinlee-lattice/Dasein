@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
@@ -21,11 +23,11 @@ import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
 import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
 import com.latticeengines.domain.exposed.scoringapi.EnrichResponseMetadata;
-import com.latticeengines.network.exposed.scoringapi.ScoringApiEnrichInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("scoringApiEnrichProxy")
-public class ScoringApiEnrichProxy extends BaseRestApiProxy implements ScoringApiEnrichInterface {
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class ScoringApiEnrichProxy extends BaseRestApiProxy {
 
     private static class ScoringErrorHandler implements ResponseErrorHandler {
         @Override
@@ -55,7 +57,6 @@ public class ScoringApiEnrichProxy extends BaseRestApiProxy implements ScoringAp
         setErrorHandler(new ScoringErrorHandler());
     }
 
-    @Override
     public EnrichResponse enrichRecord(EnrichRequest request, String tenantIdentifier, String credentialId) {
         String uuid = UuidUtils.packUuid(tenantIdentifier, credentialId);
         String url = constructUrl("/record/{uuid}", uuid);

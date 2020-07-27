@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -28,7 +29,6 @@ import com.latticeengines.eai.file.runtime.mapreduce.CSVExportJob;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.impl.ExportStrategy;
 import com.latticeengines.eai.util.EaiJobUtil;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 @Component("csvFileExportStrategyBase")

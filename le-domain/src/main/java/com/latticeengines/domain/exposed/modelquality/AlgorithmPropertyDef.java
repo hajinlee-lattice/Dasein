@@ -27,11 +27,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-/**
- *
- * @startuml
- *
- */
 @Entity
 @Table(name = "MODELQUALITY_ALGORITHM_PROPERTY_DEF")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })

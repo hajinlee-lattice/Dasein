@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -94,7 +95,7 @@ public class OrphanRecordsServiceImpl implements OrphanRecordsService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         String filePath = dataCollectionProxy.getDataCollectionArtifactPath(customerSpace, exportId);
         if (StringUtils.isEmpty(filePath)) {
-            throw new LedpException(LedpCode.LEDP_18243, new Object[]{exportId});
+            throw new LedpException(LedpCode.LEDP_18243, ImmutableMap.of("exportId", exportId));
         }
         String filename = exportId + ".csv";
         ExportUtils.downloadS3ExportFile(filePath, filename, MediaType.APPLICATION_OCTET_STREAM, request, response, importFromS3Service, batonService);
