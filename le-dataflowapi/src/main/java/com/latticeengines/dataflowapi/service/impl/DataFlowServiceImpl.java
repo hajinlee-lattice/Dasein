@@ -79,7 +79,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
-                && !dataFlowConfig.getDataFlowParameters().noFlink)) {
+                && dataFlowConfig.getDataFlowParameters().allowFlink())) {
             appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
             appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));
             containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
