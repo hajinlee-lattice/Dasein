@@ -33,7 +33,7 @@ public interface UploadService {
 
     UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 
-    String getMatchResultTableName(String uploadId);
+    String getMatchResultTableName(String customerSpace, String uploadId);
 
     void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage);
 }

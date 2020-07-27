@@ -60,6 +60,12 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         put("register Upload match result", url);
     }
 
+    public String getMatchResultTableName(String customerSpace, String uploadId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}/matchresulttableName";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+        return get("get match result table name", url, String.class);
+    }
+
     public void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/config";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
