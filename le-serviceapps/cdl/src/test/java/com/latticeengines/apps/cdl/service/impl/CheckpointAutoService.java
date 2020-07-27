@@ -406,7 +406,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 if (CollectionUtils.isNotEmpty(tables)) {
                     for (Table table : tables) {
                         if (table != null) {
-                            log.info("Creating table {} for {} in version {}.", table.getName(), role, version);
+                            log.info("Creating table {} for {} in version {}, table Path is {}.", table.getName(), role,
+                                    version, table.getExtractsDirectory());
                             if (!uploadedTables.contains(table.getName())) {
                                 metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                                 uploadedTables.add(table.getName());
@@ -496,16 +497,19 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         Iterator<JsonNode> iter = arrNode.elements();
         while (iter.hasNext()) {
             JsonNode json = iter.next();
-            String hdfsPath = json.get("extracts_directory").asText();
             String tableName = json.get("name").asText();
+            String hdfsPath = json.get("extracts_directory").asText();
             if (StringUtils.isBlank(hdfsPath)) {
                 hdfsPath = json.get("extracts").get(0).get("path").asText();
                 if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
                     hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 }
             } else {
-                hdfsPath = hdfsPath.replaceAll("\\$\\$TABLE_DATA_DIR\\$\\$", tableName);
+                hdfsPath = hdfsPath.replaceAll(TABLE_DATA_DIR, tableName);
             }
+            hdfsPath = hdfsPath.replaceAll(POD_DEFAULT, String.format(POD_PATTERN, podId));
+            hdfsPath = hdfsPath.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
+
             log.info("Parse extract path {}.", hdfsPath);
             Pattern pattern = Pattern.compile(PATH_PATTERN);
             Matcher matcher = pattern.matcher(hdfsPath);
@@ -523,20 +527,14 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 String testTenant = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
                 String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
-                if (hdfsPathSegment2.contains(tenantNames[0])) {
-                    String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
-                            + "/__TABLE_DATA_DIR__";
-                    log.info("hdfsPath is {}", hdfsPath);
-                    log.info("hdfsPathIntermediatePattern is {}.", hdfsPathIntermediatePattern);
-                    String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
-                    str = str.replaceAll(hdfsPath, Matcher.quoteReplacement(hdfsPathIntermediatePattern));
-                    str = str.replaceAll(tenantNames[0], testTenant);
-                    str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
-                } else {
-                    str = str.replaceAll(tenantNames[0], testTenant);
-                }
+                String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
+                String hdfsPathReplace = hdfsPath.replaceAll(tenantNames[0], testTenant);
+                log.info("hdfsPathFinal is {}.", hdfsPathFinal);
+                log.info("hdfsPathReplace is {}.", hdfsPathReplace);
+                str = str.replaceAll(tenantNames[0], testTenant);
+                str = str.replaceAll(hdfsPathReplace, hdfsPathFinal);
             }
-            Assert.assertFalse(str.contains("__TABLE_DATA_DIR__"));
+            Assert.assertFalse(str.contains(TABLE_DATA_DIR));
             tables.add(JsonUtils.deserialize(str, Table.class));
         }
 
