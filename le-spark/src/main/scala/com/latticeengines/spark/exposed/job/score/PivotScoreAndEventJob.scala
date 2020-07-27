@@ -1,33 +1,31 @@
 package com.latticeengines.spark.exposed.job.score
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig
-import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.domain.exposed.scoring.ScoreResultField
 import com.latticeengines.domain.exposed.cdl.scoring.CalculatePositiveEventsFunction
-import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.{BUCKET_AVG_SCORE, BUCKET_LIFT, BUCKET_SUM};
-import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.{BUCKET_TOTAL_EVENTS, BUCKET_TOTAL_POSITIVE_EVENTS};
-import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils.{MODEL_AVG, MODEL_GUID, MODEL_SUM};
-
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.scoring.ScoreResultField
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig
+import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils._
+import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.DoubleType
-import org.apache.spark.sql.functions.{when, udf, col, lit, count, avg, sum, asc}
+import org.apache.spark.sql.{DataFrame, SparkSession}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig] {
-    val MODEL_GUID = ScoreResultField.ModelId.displayName
+    private val MODEL_GUID = ScoreResultField.ModelId.displayName
 
     override def runJob(spark: SparkSession, lattice: LatticeContext[PivotScoreAndEventJobConfig]): Unit = {
 
       val scoreResult: DataFrame = lattice.input.head
       val config: PivotScoreAndEventJobConfig = lattice.config
-      
+
       val avgScoresMap = config.avgScores.asScala.toMap
       val scoreFieldMap = config.scoreFieldMap.asScala.toMap
       val scoreDerivationMap = config.scoreDerivationMap.asScala.toMap
       val fitFunctionParametersMap = config.fitFunctionParametersMap.asScala.toMap
-      
+
       val nodes : scala.collection.mutable.Map[String, DataFrame] = splitNodes(scoreResult, scoreFieldMap)
       var outputs = new ListBuffer[DataFrame]()
       for ((modelGuid, node) <- nodes) {
@@ -44,11 +42,19 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
           val output = createLift(aggregatedNode, total, avgScore, scoreDerivation, fitFunctionParams, isEV, useEvent)
           outputs += output
       }
-      val result = outputs.reduce(_ union _)
-    
+      val result: DataFrame = outputs.zipWithIndex.reduce((t1, t2) => {
+        val idx = t1._2 + 1
+        val u = t1._1 union t2._1
+        if ((idx + 1) % 16 == 0) {
+          (u.checkpoint(), idx - 15)
+        } else {
+          (u, idx)
+        }
+      })._1
+
       lattice.output = result::Nil
     }
-    
+
     def aggregate(input : DataFrame, scoreField : String, isEV : Boolean, useEvent : Boolean) : DataFrame = {
         var node = input
         val percentileScoreField = ScoreResultField.Percentile.displayName
@@ -56,7 +62,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
             node = node.withColumn("IsPositiveEvent", when(col(scoreField) === lit(true), lit(1)).otherwise(lit(0)))
             node.groupBy(percentileScoreField, ScoreResultField.ModelId.displayName)
               .agg(
-                  count(percentileScoreField).alias(BUCKET_TOTAL_EVENTS), 
+                  count(percentileScoreField).alias(BUCKET_TOTAL_EVENTS),
                   sum(col("IsPositiveEvent") * 1.0).alias(BUCKET_TOTAL_POSITIVE_EVENTS)).sort(asc(percentileScoreField))
         } else {
              node.groupBy(percentileScoreField, ScoreResultField.ModelId.displayName)
@@ -66,7 +72,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
                   sum(scoreField).alias(BUCKET_SUM)).sort(asc(percentileScoreField))
         }
     }
-    
+
     def getTotal(input : DataFrame, modelGuid : String, origScoreField : String, isEV : Boolean, useEvent : Boolean) : DataFrame = {
         var node = input
         var scoreField = origScoreField
@@ -85,16 +91,16 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
         }
     }
 
-    
+
     def splitNodes(scoreResult : DataFrame, scoreFieldMap : Map[String, String]) : scala.collection.mutable.Map[String, DataFrame] = {
         val nodes = scala.collection.mutable.Map[String, DataFrame]()
-        for ((modelGuid, scoreField) <- scoreFieldMap) {
-            var model = scoreResult.filter(col(MODEL_GUID) === modelGuid)
+        for ((modelGuid, _) <- scoreFieldMap) {
+            val model = scoreResult.filter(col(MODEL_GUID) === modelGuid)
             nodes(modelGuid) = model
         }
         nodes
     }
-    
+
      def createLift(aggregatedNode : DataFrame, total : DataFrame, avgScore : Option[java.lang.Double], scoreDerivation : String, fitFunctionParams : String,
             isEV : Boolean, useEvent : Boolean) : DataFrame = {
         if (useEvent) {
@@ -111,7 +117,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
                 aggrNode = aggrNode.withColumn(BUCKET_AVG_SCORE, lit(null).cast(DoubleType))
                 aggrNode = aggrNode.withColumn(BUCKET_SUM, lit(null).cast(DoubleType))
             } else {
-                aggrNode = aggrNode.withColumn(BUCKET_TOTAL_POSITIVE_EVENTS, when(col(BUCKET_TOTAL_EVENTS) === 0, 
+                aggrNode = aggrNode.withColumn(BUCKET_TOTAL_POSITIVE_EVENTS, when(col(BUCKET_TOTAL_EVENTS) === 0,
                     lit(0.0)).otherwise(col(BUCKET_TOTAL_EVENTS) * col(BUCKET_SUM) / col(MODEL_SUM) * 1.0))
             }
             aggrNode.select(col(ScoreResultField.ModelId.displayName), col(ScoreResultField.Percentile.displayName),
@@ -131,7 +137,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
 
     def getTotalPositiveEventsUsingFitFunction(aggregatedNode : DataFrame, scoreDerivation : String,
             fitFunctionParams : String, isEV : Boolean) : DataFrame = {
-        val calculatePositiveEventsFunc = new CalculatePositiveEventsFunction(scoreDerivation, fitFunctionParams, isEV) 
+        val calculatePositiveEventsFunc = new CalculatePositiveEventsFunction(scoreDerivation, fitFunctionParams, isEV)
         val positiveEventsUdf = udf((avgScore : Double, totalEvents : Long) => {
           calculatePositiveEventsFunc.calculate(avgScore, totalEvents)
         })

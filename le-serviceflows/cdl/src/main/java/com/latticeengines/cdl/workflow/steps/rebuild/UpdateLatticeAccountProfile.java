@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -35,6 +36,9 @@ public class UpdateLatticeAccountProfile extends UpdateProfileBase<ProcessAccoun
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     protected TableRoleInCollection getBaseTableRole() {
@@ -78,11 +82,14 @@ public class UpdateLatticeAccountProfile extends UpdateProfileBase<ProcessAccoun
     @Override
     public void execute() {
         bootstrap();
-        autoDetectCategorical = true;
-        autoDetectDiscrete = true;
-        considerAMAttrs = true;
-        ignoreDateAttrs = true;
-        updateProfile();
+        boolean noLDC = batonService.shouldExcludeDataCloudAttrs(customerSpace.getTenantId());
+        if (!noLDC) {
+            autoDetectCategorical = true;
+            autoDetectDiscrete = true;
+            considerAMAttrs = true;
+            ignoreDateAttrs = true;
+            updateProfile();
+        }
     }
 
     private List<String> getRetrainAttrNames() {
