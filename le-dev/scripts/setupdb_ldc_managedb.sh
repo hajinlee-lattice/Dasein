@@ -58,9 +58,6 @@ gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockElement.csv.gz > $W
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockLevelMetadata.csv
 
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv
-
 source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true

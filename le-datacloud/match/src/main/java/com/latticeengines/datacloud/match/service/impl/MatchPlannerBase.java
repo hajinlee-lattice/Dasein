@@ -39,6 +39,7 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -287,12 +288,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
                     input.getFields(), keyPositionMap, domainSet, nameLocationSet,
-                    input.isPublicDomainAsNormalDomain());
-            if (record != null) {
-                record.setLookupIdKey(lookupIdKey);
-                record.setColumnMatched(new ArrayList<>());
-                records.add(record);
-            }
+                    input.isPublicDomainAsNormalDomain(), input.getRegNumberType());
+            record.setLookupIdKey(lookupIdKey);
+            record.setColumnMatched(new ArrayList<>());
+            records.add(record);
         }
 
         context.setInternalResults(records);
@@ -425,7 +424,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
             int rowNum, List<String> fields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
-            Set<NameLocation> nameLocationSet, boolean treatPublicDomainAsNormal) {
+            Set<NameLocation> nameLocationSet, boolean treatPublicDomainAsNormal, String regNumberType) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -438,7 +437,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
 
-        parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
+        parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record, regNumberType);
         parseRecordForDuns(inputRecord, keyPositionMap, record);
         parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
         parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
@@ -537,13 +536,16 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-            Set<NameLocation> nameLocationSet, InternalOutputRecord record) {
+            Set<NameLocation> nameLocationSet, InternalOutputRecord record, String regNumberType) {
         try {
             String originalName = null;
             if (keyPositionMap.containsKey(MatchKey.Name)) {
                 List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
                 for (Integer namePos : namePosList) {
                     originalName = (String) inputRecord.get(namePos);
+                    if (StringUtils.isNotBlank(originalName)) {
+                        break;
+                    }
                 }
             }
             String originalCountry = null;
@@ -551,6 +553,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
                 for (Integer countryPos : countryPosList) {
                     originalCountry = (String) inputRecord.get(countryPos);
+                    if (StringUtils.isNotBlank(originalCountry)) {
+                        break;
+                    }
                 }
             }
             String originalState = null;
@@ -558,12 +563,18 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
                 for (Integer statePos : statePosList) {
                     originalState = (String) inputRecord.get(statePos);
+                    if (StringUtils.isNotBlank(originalState)) {
+                        break;
+                    }
                 }
             }
             String originalCity = null;
             if (keyPositionMap.containsKey(MatchKey.City)) {
                 for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
                     originalCity = (String) inputRecord.get(cityPos);
+                    if (StringUtils.isNotBlank(originalCity)) {
+                        break;
+                    }
                 }
             }
             String originalZipCode = null;
@@ -576,6 +587,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                                 || inputRecord.get(pos) instanceof Integer) {
                             originalZipCode = inputRecord.get(pos).toString();
                         }
+                    }
+                    if (StringUtils.isNotBlank(originalZipCode)) {
+                        break;
                     }
                 }
             }
@@ -590,30 +604,68 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                             originalPhoneNumber = inputRecord.get(pos).toString();
                         }
                     }
+                    if (StringUtils.isNotBlank(originalPhoneNumber)) {
+                        break;
+                    }
                 }
             }
             String originalStreet = null;
             if (keyPositionMap.containsKey(MatchKey.Address)) {
                 for (Integer streetPos : keyPositionMap.get(MatchKey.Address)) {
                     originalStreet = (String) inputRecord.get(streetPos);
+                    if (StringUtils.isNotBlank(originalStreet)) {
+                        break;
+                    }
                 }
             }
             String originalStreet2 = null;
             if (keyPositionMap.containsKey(MatchKey.Address2)) {
                 for (Integer streetPos : keyPositionMap.get(MatchKey.Address2)) {
                     originalStreet2 = (String) inputRecord.get(streetPos);
+                    if (StringUtils.isNotBlank(originalStreet2)) {
+                        break;
+                    }
+                }
+            }
+            String originalRegNumber = null;
+            if (keyPositionMap.containsKey(MatchKey.RegNumber)) {
+                for (Integer pos : keyPositionMap.get(MatchKey.RegNumber)) {
+                    originalRegNumber = (String) inputRecord.get(pos);
+                    if (StringUtils.isNotBlank(originalRegNumber)) {
+                        break;
+                    }
                 }
             }
 
-            NameLocation origNameLocation = getNameLocation(originalName, originalCountry, originalState, originalCity,
-                    originalZipCode, originalPhoneNumber, originalStreet, originalStreet2);
+            NameLocation origNameLocation = getNameLocation( //
+                    originalName, //
+                    originalCountry, //
+                    originalRegNumber, //
+                    regNumberType, //
+                    originalState, //
+                    originalCity, //
+                    originalZipCode, //
+                    originalPhoneNumber, //
+                    originalStreet, //
+                    originalStreet2 //
+            );
             record.setOrigNameLocation(origNameLocation);
 
-            NameLocation nameLocation = getNameLocation(originalName, originalCountry, originalState, originalCity,
-                    originalZipCode, originalPhoneNumber, originalStreet, originalStreet2);
+            NameLocation nameLocation = getNameLocation( //
+                    originalName, //
+                    originalCountry, //
+                    originalRegNumber, //
+                    regNumberType, //
+                    originalState, //
+                    originalCity, //
+                    originalZipCode, //
+                    originalPhoneNumber, //
+                    originalStreet, //
+                    originalStreet2 //
+            );
             nameLocationService.normalize(nameLocation);
             record.setParsedNameLocation(nameLocation);
-            if (isValidNameLocation(nameLocation)) {
+            if (DirectPlusUtils.isValidNameLocation(nameLocation)) {
                 nameLocationSet.add(nameLocation);
             }
         } catch (Exception e) {
@@ -623,22 +675,19 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    private static boolean isValidNameLocation(NameLocation nameLocation) {
-        return (StringUtils.isNotBlank(nameLocation.getName()) || StringUtils.isNotBlank(nameLocation.getPhoneNumber()))
-                && StringUtils.isNotBlank(nameLocation.getCountryCode());
-    }
-
-    private NameLocation getNameLocation(String originalName, String originalCountry, String originalState,
-            String originalCity, String originalZipCode, String originalPhoneNumber, String originalStreet, String originalStreet2) {
+    private NameLocation getNameLocation(String name, String country, String regNumber, String regNumberType, //
+            String state, String city, String zipCode, String phoneNumber, String street, String street2) {
         NameLocation nameLocation = new NameLocation();
-        nameLocation.setName(originalName);
-        nameLocation.setState(originalState);
-        nameLocation.setCountry(originalCountry);
-        nameLocation.setCity(originalCity);
-        nameLocation.setZipcode(originalZipCode);
-        nameLocation.setPhoneNumber(originalPhoneNumber);
-        nameLocation.setStreet(originalStreet);
-        nameLocation.setStreet2(originalStreet2);
+        nameLocation.setName(name);
+        nameLocation.setState(state);
+        nameLocation.setCountry(country);
+        nameLocation.setRegistrationNumber(regNumber);
+        nameLocation.setRegistrationNumberType(regNumberType);
+        nameLocation.setCity(city);
+        nameLocation.setZipcode(zipCode);
+        nameLocation.setPhoneNumber(phoneNumber);
+        nameLocation.setStreet(street);
+        nameLocation.setStreet2(street2);
         return nameLocation;
     }
 

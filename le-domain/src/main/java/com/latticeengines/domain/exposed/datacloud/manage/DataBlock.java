@@ -21,23 +21,42 @@ import com.google.common.collect.ImmutableMap;
 )
 public class DataBlock {
 
+    public static final class Id {
+        protected Id() {
+            throw new UnsupportedOperationException();
+        }
+        public static final String baseinfo = "baseinfo";
+        public static final String entityresolution = "entityresolution";
+        public static final String companyfinancials = "companyfinancials";
+        public static final String companyinfo = "companyinfo";
+        public static final String diversityinsight = "diversityinsight";
+        public static final String eventfilings = "eventfilings";
+        public static final String financialstrengthinsight = "financialstrengthinsight";
+        public static final String hierarchyconnections = "hierarchyconnections";
+        public static final String ownershipinsight = "ownershipinsight";
+        public static final String paymentinsight = "paymentinsight";
+        public static final String principalscontacts = "principalscontacts";
+        public static final String salesmarketinginsight = "salesmarketinginsight";
+        public static final String thirdpartyriskinsight = "thirdpartyriskinsight";
+    }
+
     public static final String BLOCK_BASE_INFO = "baseinfo";
     public static final String BLOCK_ENTITY_RESOLUTION = "entityresolution";
 
-    private static final ImmutableMap<String, String> blockNameMap = ImmutableMap.<String, String>builder() //
-            .put(BLOCK_BASE_INFO, "Base Information") //
-            .put(BLOCK_ENTITY_RESOLUTION, "Company Entity Resolution") //
-            .put("companyfinancials", "Company Financials") //
-            .put("companyinfo", "Company Information") //
-            .put("diversityinsight", "Diversity Insights") //
-            .put("eventfilings", "Filings and Events") //
-            .put("financialstrengthinsight", "Financial Strength Insights") //
-            .put("hierarchyconnections", "Hierarchies and Connections") //
-            .put("ownershipinsight", "Ownership Insights") //
-            .put("paymentinsight", "Payment Insights") //
-            .put("principalscontacts", "Principal and Contacts") //
-            .put("salesmarketinginsight", "Sales and Marketing Insights") //
-            .put("thirdpartyriskinsight", "Third-Party Risk Insights") //
+    public static final ImmutableMap<String, String> blockNameMap = ImmutableMap.<String, String>builder() //
+            .put(Id.baseinfo, "Base Information") //
+            .put(Id.entityresolution, "Company Entity Resolution") //
+            .put(Id.companyfinancials, "Company Financials") //
+            .put(Id.companyinfo, "Company Information") //
+            .put(Id.diversityinsight, "Diversity Insights") //
+            .put(Id.eventfilings, "Filings and Events") //
+            .put(Id.financialstrengthinsight, "Financial Strength Insights") //
+            .put(Id.hierarchyconnections, "Hierarchies and Connections") //
+            .put(Id.ownershipinsight, "Ownership Insights") //
+            .put(Id.paymentinsight, "Payment Insights") //
+            .put(Id.principalscontacts, "Principal and Contacts") //
+            .put(Id.salesmarketinginsight, "Sales and Marketing Insights") //
+            .put(Id.thirdpartyriskinsight, "Third-Party Risk Insights") //
             .build();
 
     @JsonProperty("blockId")
@@ -93,15 +112,13 @@ public class DataBlock {
         // for jackson
         private Level() {}
 
-        public Level(DataBlockLevel level, String description, Collection<Element> elements) {
+        public Level(DataBlockLevel level, Collection<Element> elements) {
             this.level = level;
-            this.description = description;
             this.elements = new ArrayList<>(elements);
         }
 
-        public Level(DataBlockLevel level, String description) {
+        public Level(DataBlockLevel level) {
             this.level = level;
-            this.description = description;
         }
 
         public DataBlockLevel getLevel() {

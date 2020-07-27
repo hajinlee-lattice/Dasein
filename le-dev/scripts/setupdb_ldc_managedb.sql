@@ -126,13 +126,6 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,Block,Level,Description);
 
-LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/DataBlockDomainEntitlement.csv' INTO TABLE `DataBlockDomainEntitlement`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(PID,Domain,RecordType,DataBlockLevel);
-
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges, Description, JunctionGraphs, Entity, Retries)
 VALUES
   ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', '0', '0:1|1:2', NULL, NULL, 'LatticeAccount', NULL),

@@ -225,6 +225,8 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     public void setInputNameLocation(MatchKeyTuple matchKeyTuple) {
         inputNameLocation.setName(matchKeyTuple.getName());
         inputNameLocation.setCountry(matchKeyTuple.getCountry());
+        inputNameLocation.setRegistrationNumber(matchKeyTuple.getRegistrationNumber());
+        inputNameLocation.setRegistrationNumberType(matchKeyTuple.getRegistrationNumberType());
         inputNameLocation.setCountryCode(matchKeyTuple.getCountryCode());
         inputNameLocation.setState(matchKeyTuple.getState());
         inputNameLocation.setCity(matchKeyTuple.getCity());

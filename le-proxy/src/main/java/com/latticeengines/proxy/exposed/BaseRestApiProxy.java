@@ -243,7 +243,7 @@ public abstract class BaseRestApiProxy {
         template.setInterceptors(interceptors);
     }
 
-    void setAuthHeader(String authToken) {
+    public void setAuthHeader(String authToken) {
         AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);

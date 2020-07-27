@@ -37,6 +37,19 @@
         </dependency>
 
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>${javax.servlet.version}</version>

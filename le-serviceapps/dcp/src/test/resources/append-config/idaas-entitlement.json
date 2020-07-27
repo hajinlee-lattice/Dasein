@@ -1,0 +1,183 @@
+{
+  "code": "200",
+  "message": "success",
+  "products": [
+    {
+      "name": "D&B for Sales & Marketing",
+      "packages": [
+        {
+          "name": "Domain Use",
+          "RUM_limits": [
+            {
+              "region": "LATAM Records",
+              "limit": 1000,
+              "overage": [
+                {
+                  "entitlement_canonical_name": null,
+                  "overage_selling_price": 0.0
+                }
+              ]
+            },
+            {
+              "region": "APAC Records",
+              "limit": 1000,
+              "overage": [
+                {
+                  "entitlement_canonical_name": null,
+                  "overage_selling_price": 0.0
+                }
+              ]
+            },
+            {
+              "region": "US-Canada Records",
+              "limit": 1000,
+              "overage": [
+                {
+                  "entitlement_canonical_name": null,
+                  "overage_selling_price": 0.0
+                }
+              ]
+            },
+            {
+              "region": "EU Records",
+              "limit": 1000,
+              "overage": [
+                {
+                  "entitlement_canonical_name": null,
+                  "overage_selling_price": 0.0
+                }
+              ]
+            }
+          ],
+          "wallet": {
+            "allowance": 0,
+            "rate_card": []
+          },
+          "meter": null,
+          "entitlements": [
+            {
+              "canonical_name": "hierarchyconnections",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            {
+              "canonical_name": "salesmarketinginsight",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            {
+              "canonical_name": "companyfinancials",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            {
+              "canonical_name": "paymentinsight",
+              "level": "Level 4",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3",
+                "L4"
+              ]
+            },
+            {
+              "canonical_name": "principalscontacts",
+              "level": "Level 4",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3",
+                "L4"
+              ]
+            },
+            {
+              "canonical_name": "eventfilings",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            {
+              "canonical_name": "companyentityresolution",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companyinfo",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            {
+              "canonical_name": "diversityinsight",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            {
+              "canonical_name": "companynews",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "industryprofile",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            }
+          ]
+        }
+      ],
+      "domain_add_ons": [
+        {
+          "level": null,
+          "canonical_name": "contacts",
+          "status": "Active",
+          "meter": null
+        },
+        {
+          "level": null,
+          "canonical_name": "research",
+          "status": "Active",
+          "meter": null
+        }
+      ]
+    }
+  ]
+}
