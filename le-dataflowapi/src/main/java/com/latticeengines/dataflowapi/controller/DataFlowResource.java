@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.dataflowapi.service.DataFlowService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
-import com.latticeengines.network.exposed.dataflowapi.DataFlowInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "dataflowapi", description = "REST resource for transformations")
 @RestController
 @RequestMapping("/dataflows")
-public class DataFlowResource implements DataFlowInterface {
+public class DataFlowResource {
 
     @Inject
     private DataFlowService dataFlowService;

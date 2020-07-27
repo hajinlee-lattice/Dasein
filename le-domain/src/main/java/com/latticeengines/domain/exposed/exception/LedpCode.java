@@ -557,7 +557,7 @@ public enum LedpCode {
     LEDP_25020("Failed to get current version for predefined column selection [{0}]"), //
     LEDP_25021("unsupported_match_version_type", "Unsupported match version {0}"), //
     LEDP_25022("InputSourceConfig is not FileInputSourceConfig"), //
-    LEDP_25023("Name and CountryCode are required in DnB realtime entity matching"), //
+    LEDP_25023("CountryCode and (Name || RegistrationNumber || PhoneNumber) are required in DnB realtime entity matching"), //
     LEDP_25024("Email is required in DnB realtime email matching"), //
     LEDP_25025("DnBAPIType {0} is not supported in DnB realtime matching"), //
     LEDP_25026("Updated metadata: {0} for version: {1} is not valid due to approved usage conflict"), //

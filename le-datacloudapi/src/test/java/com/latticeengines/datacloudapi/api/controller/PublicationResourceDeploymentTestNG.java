@@ -25,14 +25,12 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
-import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.publication.DynamoDestination;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
-import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.PublicationProxy;
 import com.latticeengines.yarn.exposed.service.JobService;
@@ -81,35 +79,6 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         dynamoService.deleteTable(tableName);
     }
 
-    // DataCloud SQL Servers are shutdown. Disable the test
-    @Test(groups = "deployment", enabled = false)
-    public void testPublish() {
-        publicationName.set("Test" + SQL_SOURCE + "Publication");
-
-        prepareCleanPod(POD_ID);
-        uploadSourceAtVersion(SQL_SOURCE, CURRENT_VERSION);
-        hdfsSourceEntityMgr.setCurrentVersion(SQL_SOURCE, CURRENT_VERSION);
-        PublicationRequest publicationRequest = new PublicationRequest();
-        publicationRequest.setSubmitter(SUBMITTER);
-        publicationRequest.setSourceVersion(CURRENT_VERSION);
-
-        publicationEntityMgr.removePublication(publicationName.get());
-        Publication publication = registerSqlPublication(publicationName.get());
-
-        List<PublicationProgress> progressList = publicationProxy.scan(POD_ID);
-        Assert.assertTrue(progressList.size() >= 1, "Should trigger at least one progress.");
-        PublicationProgress progress = progressList.get(0);
-
-        JobStatus jobStatus = jobService.waitFinalJobStatus(progress.getApplicationId(), 3600);
-        Assert.assertEquals(jobStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
-
-        List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);
-        Assert.assertTrue(progresses.size() >= 1, "Should have at least one progress for the testing publication");
-        Assert.assertEquals(progresses.get(0).getStatus(), ProgressStatus.FINISHED,
-                "The final status of the progress is not " + ProgressStatus.FINISHED + ", but "
-                        + progresses.get(0).getStatus());
-    }
-
     @Test(groups = "deployment")
     public void testPublishDynamo() {
         publicationName.set("Test" + ACCOUNT_MASTER + "Publication");
@@ -141,23 +110,6 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         Assert.assertEquals(progresses.get(0).getStatus(), ProgressStatus.FINISHED,
                 "The final status of the progress is not " + ProgressStatus.FINISHED + ", but "
                         + progresses.get(0).getStatus());
-    }
-
-    private Publication registerSqlPublication(String publicationName) {
-        Publication publication = new Publication();
-        publication.setPublicationName(publicationName);
-        publication.setSourceName(SQL_SOURCE);
-        publication.setNewJobMaxRetry(3);
-        publication.setSchedularEnabled(true);
-        publication.setPublicationType(Publication.PublicationType.SQL);
-        publication.setMaterialType(MaterialType.SOURCE);
-        PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
-        configuration.setAlias(PublishToSqlConfiguration.Alias.TestDB);
-        configuration.setDefaultTableName(SQL_SOURCE);
-        configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.VERSIONED);
-        publication.setDestinationConfiguration(configuration);
-
-        return publicationEntityMgr.addPublication(publication);
     }
 
     private Publication registerDynamoPublication(String publicationName) {

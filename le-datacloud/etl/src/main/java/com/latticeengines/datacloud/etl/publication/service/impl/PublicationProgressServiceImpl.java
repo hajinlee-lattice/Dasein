@@ -146,8 +146,6 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     private PublicationDestination constructDestination(Publication publication, String version) {
         try {
             switch (publication.getPublicationType()) {
-            case SQL:
-                return constructSqlDestination(publication, version);
             case DYNAMO:
                 return constructDynamoDestination(publication);
             default:

@@ -34,9 +34,7 @@ import com.latticeengines.domain.exposed.mapreduce.counters.WorkflowCounter;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
-import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
@@ -100,15 +98,6 @@ public class ModelingServiceExecutor {
                 true);
     }
 
-    public void runPipeline() throws Exception {
-        writeMetadataFiles();
-        loadData();
-        sample();
-        profile();
-        review();
-        model();
-    }
-
     public void writeMetadataFiles() throws Exception {
         String metadataHdfsPath = String.format("%s/%s/data/%s/metadata.avsc", modelingServiceHdfsBaseDir,
                 builder.getCustomer(), builder.getMetadataTable());
@@ -116,28 +105,6 @@ public class ModelingServiceExecutor {
                 builder.getCustomer(), builder.getMetadataTable());
         HdfsUtils.writeToFile(yarnConfiguration, metadataHdfsPath, builder.getMetadataContents());
         HdfsUtils.writeToFile(yarnConfiguration, rtsHdfsPath, builder.getDataCompositionContents());
-    }
-
-    public void loadData() throws Exception {
-        LoadConfiguration config = new LoadConfiguration();
-
-        DbCreds.Builder credsBldr = new DbCreds.Builder();
-        credsBldr.host(builder.getHost()) //
-                .port(builder.getPort()) //
-                .db(builder.getDb()) //
-                .user(builder.getUser()) //
-                .clearTextPassword(builder.getPassword()) //
-                .dbType(builder.getDbType());
-        DbCreds creds = new DbCreds(credsBldr);
-        config.setCreds(creds);
-        config.setCustomer(builder.getCustomer());
-        config.setTable(builder.getTable());
-        config.setMetadataTable(builder.getMetadataTable());
-        config.setKeyCols(Collections.singletonList(builder.getKeyColumn()));
-        AppSubmission submission = modelProxy.loadData(config);
-        String appId = submission.getApplicationIds().get(0);
-        log.info(String.format("App id for load: %s", appId));
-        waitForAppId(appId);
     }
 
     public String eventCounter() throws Exception {

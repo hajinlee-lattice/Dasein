@@ -9,11 +9,9 @@
 
     <import resource="classpath:datacloud-core-context.xml" />
     <import resource="classpath:datacloud-etl-aspect-context.xml" />
-    <import resource="classpath:datacloud-etl-persistence-legacy-context.xml" />
     <import resource="classpath:dataflow-context.xml" />
     <import resource="classpath:yarn-context.xml" />
     <import resource="classpath:spark-context.xml" />
-    <import resource="classpath:metadata-hive-context.xml"/>
     <import resource="classpath:datacloud-collection-context.xml"/>
 
     <bean id="simpleCascadingExecutor" class="com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor">

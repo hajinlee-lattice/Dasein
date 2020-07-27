@@ -1,10 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
 
-
 import static com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevelMetadata.TABLE_NAME;
-
-import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -15,11 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -42,10 +35,6 @@ public class DataBlockLevelMetadata {
 
     @Column(name = "Description", length = 1024)
     private String description;
-
-    @LazyCollection(LazyCollectionOption.TRUE)
-    @OneToMany(mappedBy = "dataBlockLevel")
-    private List<DataBlockDomainEntitlement> entitlements;
 
     public Long getPid() {
         return pid;
@@ -77,14 +66,6 @@ public class DataBlockLevelMetadata {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public List<DataBlockDomainEntitlement> getEntitlements() {
-        return entitlements;
-    }
-
-    public void setEntitlements(List<DataBlockDomainEntitlement> entitlements) {
-        this.entitlements = entitlements;
     }
 
     // w/o version

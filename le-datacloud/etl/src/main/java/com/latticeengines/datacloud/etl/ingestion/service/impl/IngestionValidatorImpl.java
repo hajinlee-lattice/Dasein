@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -24,8 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.ingestion.PatchBookConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration.CollectCriteria;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -89,26 +86,6 @@ public class IngestionValidatorImpl implements IngestionValidator {
             if (!SftpUtils.ifFileExists(sftpConfig, request.getFileName())) {
                 throw new IllegalArgumentException(String.format("File %s does not exist in SFTP % dir %s",
                         request.getFileName(), sftpConfig.getSftpHost(), sftpConfig.getSftpDir()));
-            }
-            return;
-        case SQL_TO_SOURCE:
-            if (StringUtils.isBlank(request.getSourceVersion())) {
-                request.setSourceVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-            }
-            try {
-                HdfsPathBuilder.dateFormat.parse(request.getSourceVersion());
-            } catch (ParseException e) {
-                throw new IllegalArgumentException(String.format(
-                        "Version %s is not in valid format. eg. 2017-01-01_00-00-00_UTC", request.getSourceVersion()));
-            }
-            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
-                    .getProviderConfiguration();
-            if (sqlToSourceConfig.getCollectCriteria() == CollectCriteria.NEW_DATA) {
-                String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(sqlToSourceConfig.getSource());
-                if (currentVersion != null && currentVersion.compareTo(request.getSourceVersion()) >= 0) {
-                    throw new IllegalArgumentException(
-                            "For collect criteria NEW_DATA, target source version cannot be earlier than current version");
-                }
             }
             return;
         case S3:

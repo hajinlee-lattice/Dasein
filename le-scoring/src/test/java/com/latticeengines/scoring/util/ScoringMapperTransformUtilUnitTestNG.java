@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 
 public class ScoringMapperTransformUtilUnitTestNG {
@@ -86,17 +85,17 @@ public class ScoringMapperTransformUtilUnitTestNG {
         String[] targetFiles = { "encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py",
                 "STPipelineBinary.p" };
         JsonNode modelJson = ScoringMapperTransformUtil.parseFileContentToJsonNode(modelPath);
-        ScoringMapperTransformUtil.decodeSupportedFilesToFile(UUID, modelJson.get(ScoringDaemonService.MODEL));
-        ScoringMapperTransformUtil.writeScoringScript(UUID, modelJson.get(ScoringDaemonService.MODEL));
+        ScoringMapperTransformUtil.decodeSupportedFilesToFile(UUID, modelJson.get(ScoringConstants.MODEL));
+        ScoringMapperTransformUtil.writeScoringScript(UUID, modelJson.get(ScoringConstants.MODEL));
         Assert.assertNotNull(modelJson);
-        Assert.assertEquals(modelJson.get(ScoringDaemonService.AVERAGE_PROBABILITY).asDouble(), 0.011919253398255223);
-        Assert.assertNotNull(modelJson.get(ScoringDaemonService.BUCKETS));
-        Assert.assertNotNull(modelJson.get(ScoringDaemonService.CALIBRATION));
-        Assert.assertNotNull(modelJson.get(ScoringDaemonService.INPUT_COLUMN_METADATA));
-        Assert.assertNotNull(modelJson.get(ScoringDaemonService.MODEL));
+        Assert.assertEquals(modelJson.get(ScoringConstants.AVERAGE_PROBABILITY).asDouble(), 0.011919253398255223);
+        Assert.assertNotNull(modelJson.get(ScoringConstants.BUCKETS));
+        Assert.assertNotNull(modelJson.get(ScoringConstants.CALIBRATION));
+        Assert.assertNotNull(modelJson.get(ScoringConstants.INPUT_COLUMN_METADATA));
+        Assert.assertNotNull(modelJson.get(ScoringConstants.MODEL));
         Assert.assertNotNull(modelJson.get(SUMMARY));
-        Assert.assertEquals(modelJson.get(ScoringDaemonService.BUCKETS_NAME).asText(), MODEL_NAME);
-        Assert.assertNotNull(modelJson.get(ScoringDaemonService.PERCENTILE_BUCKETS));
+        Assert.assertEquals(modelJson.get(ScoringConstants.BUCKETS_NAME).asText(), MODEL_NAME);
+        Assert.assertNotNull(modelJson.get(ScoringConstants.PERCENTILE_BUCKETS));
         for (int i = 0; i < targetFiles.length; i++) {
             System.out.println("Current target file is " + targetFiles[i]);
             assertTrue(compareFiles(targetFiles[i]), "parseModelFiles should be successful");
@@ -155,7 +154,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         scoreContext.recordFileBufferMap = leadFileBufferMap;
         scoreContext.modelInfoMap = modelInfoMap;
         scoreContext.recordFileThreshold = 10000;
-        scoreContext.uniqueKeyColumn = ScoringDaemonService.UNIQUE_KEY_COLUMN;
+        scoreContext.uniqueKeyColumn = ScoringConstants.UNIQUE_KEY_COLUMN;
         scoreContext.uuidToModeId.put(UUID, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
         ScoringMapperTransformUtil.transformAndWriteRecord(UUID, scoreContext, jsonNode, dataType, models);
 
@@ -247,7 +246,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
             scoreContext.modelInfoMap = modelInfoMap;
             scoreContext.recordFileBufferMap = leadFileBufferMap;
             scoreContext.recordFileThreshold = 10000;
-            scoreContext.uniqueKeyColumn = ScoringDaemonService.UNIQUE_KEY_COLUMN;
+            scoreContext.uniqueKeyColumn = ScoringConstants.UNIQUE_KEY_COLUMN;
             ScoringMapperTransformUtil.transformAndWriteRecord(UUID, scoreContext, jsonNode, dataType, models);
             Assert.fail("Should have thrown expcetion.");
         } catch (LedpException e) {

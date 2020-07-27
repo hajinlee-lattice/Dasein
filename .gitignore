@@ -12,6 +12,8 @@
 # Mac
 .DS_Store
 
+/spark-warehouse
+
 # Maven
 log/
 target/

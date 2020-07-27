@@ -67,7 +67,7 @@ import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.util.ScoringConstants;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
         implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
@@ -170,7 +170,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             throw new LedpException(LedpCode.LEDP_20033);
         }
 
-        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        String fileName = UUID.randomUUID() + ScoringConstants.AVRO_FILE_SUFFIX;
         long recordCount = checkForInternalIdAndCountRecords(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
         log.info(String.format("schema is %s", schema));
@@ -191,10 +191,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         CSVFormat format = LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage");
         if (StringUtils.isNotEmpty(importErrorPath) && HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, importErrorPath, ".");
-            FileUtils.deleteQuietly(new File("." + ScoringDaemonService.IMPORT_ERROR_FILE_NAME + ".crc"));
+            FileUtils.deleteQuietly(new File("." + ScoringConstants.IMPORT_ERROR_FILE_NAME + ".crc"));
             format = format.withSkipHeaderRecord();
         }
-        return new CSVPrinter(new FileWriter(ScoringDaemonService.IMPORT_ERROR_FILE_NAME, true), format); //
+        return new CSVPrinter(new FileWriter(ScoringConstants.IMPORT_ERROR_FILE_NAME, true), format); //
 
     }
 
@@ -204,7 +204,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         log.info(String.format("The output score path is %s", scorePath));
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, scorePath);
 
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringDaemonService.IMPORT_ERROR_FILE_NAME,
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringConstants.IMPORT_ERROR_FILE_NAME,
                 targetDir + "/error.csv");
     }
 

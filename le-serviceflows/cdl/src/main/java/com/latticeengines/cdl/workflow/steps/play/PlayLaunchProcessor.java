@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,13 +17,11 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -33,7 +30,6 @@ import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchCo
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
-import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -41,7 +37,6 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -62,8 +57,6 @@ import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("playLaunchProcessor")
@@ -88,9 +81,6 @@ public class PlayLaunchProcessor {
 
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
-
-    @Inject
-    private SqoopProxy sqoopProxy;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -287,35 +277,9 @@ public class PlayLaunchProcessor {
         return recAvroHdfsFilePath;
     }
 
+    @SuppressWarnings("unused")
     private boolean export(PlayLaunchContext playLaunchContext, String avroPath) {
-        String queue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
-        String tenant = playLaunchContext.getTenant().getId();
-
-        log.info("Trying to submit sqoop job for exporting recommendations from " + avroPath);
-        DbCreds.Builder credsBldr = new DbCreds.Builder();
-        String connector = dataDbUrl.contains("?") ? "&" : "?";
-        credsBldr.user(dataDbUser).dbType(dataDbType).driverClass(dataDbDriver)
-                .jdbcUrl(dataDbUrl + connector + "user=" + dataDbUser + "&password=" + dataDbPassword);
-
-        DbCreds dataDbCreds = new DbCreds(credsBldr);
-
-        SqoopExporter exporter = new SqoopExporter.Builder() //
-                .setQueue(queue)//
-                .setTable("Recommendation") //
-                .setSourceDir(avroPath) //
-                .setDbCreds(dataDbCreds) //
-                .setCustomer(tenant) //
-                .build();
-
-        String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
-        log.info("Submitted sqoop jobs: " + appId);
-
-        FinalApplicationStatus sqoopJobStatus = jobService
-                .waitFinalJobStatus(appId, (Long.valueOf(TimeUnit.MINUTES.toSeconds(60L))).intValue()).getStatus();
-
-        log.info("Sqoop job final status: " + sqoopJobStatus.name());
-
-        return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
+        throw new UnsupportedOperationException("Sqoop has ben disabled!");
     }
 
     private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount,
@@ -475,7 +439,7 @@ public class PlayLaunchProcessor {
             long segmentAccountsCount) {
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
-        playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
+        playLaunch.setLaunchCompletionPercent(100. * processedSegmentAccountsCount / segmentAccountsCount);
         playLaunch.setAccountsLaunched(playLaunchContext.getCounter().getAccountLaunched().get());
         playLaunch.setContactsLaunched(playLaunchContext.getCounter().getContactLaunched().get());
         playLaunch.setAccountsErrored(playLaunchContext.getCounter().getAccountErrored().get());
@@ -537,108 +501,8 @@ public class PlayLaunchProcessor {
                         .collect(Collectors.toList());
 
         log.info(String.format("Extracting contacts for accountIds: %s",
-                Arrays.deepToString(accountIds.toArray(new Object[accountIds.size()]))));
+                Arrays.deepToString(accountIds.toArray(new Object[0]))));
         return accountIds;
-    }
-
-    @VisibleForTesting
-    void setPageSize(long pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    @VisibleForTesting
-    void setAccountFetcher(AccountFetcher accountFetcher) {
-        this.accountFetcher = accountFetcher;
-    }
-
-    @VisibleForTesting
-    void setContactFetcher(ContactFetcher contactFetcher) {
-        this.contactFetcher = contactFetcher;
-    }
-
-    @VisibleForTesting
-    void setRecommendationCreator(RecommendationCreator recommendationCreator) {
-        this.recommendationCreator = recommendationCreator;
-    }
-
-    @VisibleForTesting
-    void setFrontEndQueryCreator(FrontEndQueryCreator frontEndQueryCreator) {
-        this.frontEndQueryCreator = frontEndQueryCreator;
-    }
-
-    @VisibleForTesting
-    void setPlayProxy(PlayProxy playProxy) {
-        this.playProxy = playProxy;
-    }
-
-    @VisibleForTesting
-    void setLookupIdMappingProxy(LookupIdMappingProxy lookupIdMappingProxy) {
-        this.lookupIdMappingProxy = lookupIdMappingProxy;
-    }
-
-    @VisibleForTesting
-    void setMetadataProxy(MetadataProxy metadataProxy) {
-        this.metadataProxy = metadataProxy;
-    }
-
-    @VisibleForTesting
-    void setSqoopProxy(SqoopProxy sqoopProxy) {
-        this.sqoopProxy = sqoopProxy;
-    }
-
-    @VisibleForTesting
-    void setRatingEngineProxy(RatingEngineProxy ratingEngineProxy) {
-        this.ratingEngineProxy = ratingEngineProxy;
-    }
-
-    @VisibleForTesting
-    void setYarnConfiguration(Configuration yarnConfiguration) {
-        this.yarnConfiguration = yarnConfiguration;
-    }
-
-    @VisibleForTesting
-    void setJobService(JobService jobService) {
-        this.jobService = jobService;
-    }
-
-    @VisibleForTesting
-    void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
-        this.dataCollectionProxy = dataCollectionProxy;
-    }
-
-    @VisibleForTesting
-    void setDataDbDriver(String dataDbDriver) {
-        this.dataDbDriver = dataDbDriver;
-    }
-
-    @VisibleForTesting
-    void setDataDbUrl(String dataDbUrl) {
-        this.dataDbUrl = dataDbUrl;
-    }
-
-    @VisibleForTesting
-    void setDataDbUser(String dataDbUser) {
-        this.dataDbUser = dataDbUser;
-    }
-
-    @VisibleForTesting
-    void setDataDbPassword(String dataDbPassword) {
-        this.dataDbPassword = dataDbPassword;
-    }
-
-    @VisibleForTesting
-    void setDataDbDialect(String dataDbDialect) {
-        this.dataDbDialect = dataDbDialect;
-    }
-
-    @VisibleForTesting
-    void setDataDbType(String dataDbType) {
-        this.dataDbType = dataDbType;
-    }
-
-    @VisibleForTesting
-    void setBatonService(BatonService batonService) {
-        this.batonService = batonService;
     }
 
 }

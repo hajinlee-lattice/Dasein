@@ -1,7 +1,5 @@
 package com.latticeengines.scoringapi.controller;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import org.testng.Assert;
@@ -12,14 +10,15 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
 import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
-import com.latticeengines.network.exposed.scoringapi.ScoringApiEnrichInterface;
+import com.latticeengines.proxy.exposed.scoringapi.ScoringApiEnrichProxy;
+
 public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
     @Inject
-    private ScoringApiEnrichInterface scoringApiEnrichProxy;
+    private ScoringApiEnrichProxy scoringApiEnrichProxy;
 
-    @Test(groups = "deployment", enabled = true)
-    public void enrichRecord() throws IOException {
+    @Test(groups = "deployment")
+    public void enrichRecord() {
         EnrichRequest enrichRequest = new EnrichRequest();
         enrichRequest.setDomain("mojesbscg@salesforce.com");
         enrichRequest.setCompany("Arrow Electronics");
@@ -33,11 +32,11 @@ public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTes
         Assert.assertNotNull(enrichResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
                 + enrichResponse.getEnrichmentAttributeValues().size() + "\n\n" + JsonUtils.serialize(enrichResponse));
-        Assert.assertTrue(enrichResponse.getEnrichmentAttributeValues().size() == 6);
+        Assert.assertEquals(enrichResponse.getEnrichmentAttributeValues().size(), 6);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void enrichRecordWithCompany() throws IOException {
+    @Test(groups = "deployment")
+    public void enrichRecordWithCompany() {
         EnrichRequest enrichRequest = new EnrichRequest();
         enrichRequest.setDomain("");
         enrichRequest.setCompany("Arrow Electronics");
@@ -51,11 +50,11 @@ public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTes
         Assert.assertNotNull(enrichResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
                 + enrichResponse.getEnrichmentAttributeValues().size() + "\n\n" + JsonUtils.serialize(enrichResponse));
-        Assert.assertTrue(enrichResponse.getEnrichmentAttributeValues().size() == 6);
+        Assert.assertEquals(enrichResponse.getEnrichmentAttributeValues().size(), 6);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void enrichRecordWithDuns() throws IOException {
+    @Test(groups = "deployment")
+    public void enrichRecordWithDuns() {
         EnrichRequest enrichRequest = new EnrichRequest();
         enrichRequest.setDomain("");
         enrichRequest.setCompany("");
@@ -68,11 +67,11 @@ public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTes
         Assert.assertNotNull(enrichResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
                 + enrichResponse.getEnrichmentAttributeValues().size() + "\n\n" + JsonUtils.serialize(enrichResponse));
-        Assert.assertTrue(enrichResponse.getEnrichmentAttributeValues().size() == 6);
+        Assert.assertEquals(enrichResponse.getEnrichmentAttributeValues().size(), 6);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void enrichRecordFail() throws IOException {
+    @Test(groups = "deployment")
+    public void enrichRecordFail() {
         EnrichRequest enrichRequest = new EnrichRequest();
         enrichRequest.setDomain("");
         enrichRequest.setCompany("");

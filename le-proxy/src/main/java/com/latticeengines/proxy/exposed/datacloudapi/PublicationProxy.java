@@ -4,24 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationResponse;
-import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("publicationProxy")
-public class PublicationProxy extends MicroserviceRestApiProxy implements PublicationInterface {
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class PublicationProxy extends MicroserviceRestApiProxy {
 
     public PublicationProxy() {
         super("datacloudapi/publications");
     }
 
     @Deprecated // No use in production
-    @Override
     public List<PublicationProgress> scan(String hdfsPod) {
         String url;
         if (StringUtils.isBlank(hdfsPod)) {
@@ -39,7 +40,6 @@ public class PublicationProxy extends MicroserviceRestApiProxy implements Public
         return progresses;
     }
 
-    @Override
     public PublicationResponse publish(String publicationName, PublicationRequest publicationRequest, String hdfsPod) {
         String url;
         if (StringUtils.isBlank(hdfsPod)) {

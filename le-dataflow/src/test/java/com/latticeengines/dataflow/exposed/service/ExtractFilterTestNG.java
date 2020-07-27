@@ -19,6 +19,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.dataflow.exposed.builder.ExtractFilterBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.dataflow.TimestampExtractFilter;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
 
     public static final String OUTPUT_PATH = "/tmp/ExtractFilterTest/output";

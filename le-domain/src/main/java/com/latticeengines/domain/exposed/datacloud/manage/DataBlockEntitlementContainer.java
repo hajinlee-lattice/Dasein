@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +89,11 @@ public class DataBlockEntitlementContainer {
         public Block(String blockId, List<DataBlockLevel> levels) {
             this.blockId = blockId;
             this.levels = levels;
+        }
+
+        public Block(String blockId, DataBlockLevel... levels) {
+            this.blockId = blockId;
+            this.levels = Arrays.asList(levels);
         }
 
         public String getBlockId() {

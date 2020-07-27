@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
@@ -43,13 +42,6 @@ public class PrimeMetadataResource {
     @ApiOperation(value = "Get all block metadata")
     public DataBlockMetadataContainer getBlockMetadata() {
         return primeMetadataService.getDataBlockMetadata();
-    }
-
-    @GetMapping("/drt-matrix")
-    @ResponseBody
-    @ApiOperation(value = "Get block - drt matrix")
-    public DataBlockEntitlementContainer getBlockDrtMatrix() {
-        return primeMetadataService.getBaseEntitlement();
     }
 
     @GetMapping("/columns")

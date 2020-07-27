@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -59,11 +58,6 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         return _self.getBlockMetadataFromDistributedCache();
     }
 
-    @Override
-    public DataBlockEntitlementContainer getBlockDrtMatrix() {
-        return _self.getBlockDrtMatrixFromDistributedCache();
-    }
-
     @Cacheable(cacheNames = CacheName.Constants.PrimeMetadataCacheName, key = "T(java.lang.String).format(\"prime_elements\")", unless = "#result == null")
     public List<DataBlock> getBlockElementsFromDistributedCache() {
         String url = constructUrl("/elements");
@@ -76,12 +70,6 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     public DataBlockMetadataContainer getBlockMetadataFromDistributedCache() {
         String url = constructUrl("/blocks");
         return get("get block metadata", url, DataBlockMetadataContainer.class);
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.PrimeMetadataCacheName, key = "T(java.lang.String).format(\"prime_drtmatrix\")", unless = "#result == null")
-    public DataBlockEntitlementContainer getBlockDrtMatrixFromDistributedCache() {
-        String url = constructUrl("/drt-matrix");
-        return get("get block drt matrix", url, DataBlockEntitlementContainer.class);
     }
 
     @SuppressWarnings("unchecked")

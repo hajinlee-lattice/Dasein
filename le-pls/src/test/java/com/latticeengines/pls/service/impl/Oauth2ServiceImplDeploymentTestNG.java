@@ -16,13 +16,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
-import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.Oauth2Service;
+
 public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
-    private Oauth2Interface oauth2Service;
+    private Oauth2Service oauth2Service;
 
     @Inject
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;

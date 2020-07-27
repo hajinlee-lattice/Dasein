@@ -1,3 +1,0 @@
-#!/bin/bash
-mv /tmp/usr/hdp/current/hadoop-yarn-resourcemanager/* /usr/hdp/current/hadoop-yarn-resourcemanager
-mv /tmp/etc/hadoop/conf/* /etc/hadoop/conf

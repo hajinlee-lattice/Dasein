@@ -8,6 +8,7 @@
       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
     <import resource="classpath:db-context.xml" />
+    <import resource="classpath:remote-context.xml" />
     <import resource="classpath:serviceapps-core-context.xml"/>
     <import resource="classpath:serviceapps-dcp-aspect-context.xml"/>
 

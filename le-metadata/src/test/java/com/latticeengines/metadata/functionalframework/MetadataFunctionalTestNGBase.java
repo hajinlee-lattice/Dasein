@@ -1,14 +1,6 @@
 package com.latticeengines.metadata.functionalframework;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
-import javax.sql.DataSource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -39,7 +31,6 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.metadata.entitymgr.AttributeEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
-import com.latticeengines.metadata.hive.util.HiveUtils;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -71,9 +62,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Value("${common.test.microservice.url}")
     private String hostPort;
 
-    @Value("${metadata.hive.enabled:false}")
-    private boolean hiveEnabled;
-
     @Inject
     protected AttributeEntityMgr attributeEntityMgr;
 
@@ -82,9 +70,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Inject
     protected TenantEntityMgr tenantEntityMgr;
-
-    @Inject
-    private DataSource hiveDataSource;
 
     @Inject
     protected TableTypeHolder tableTypeHolder;
@@ -111,10 +96,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
                 CustomerSpace.parse(customerSpace1), "x.y.z");
         tableLocation2 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(customerSpace2), "x.y.z");
-
-        if (hiveEnabled) {
-            dropAllHiveTables();
-        }
         copyExtractsToHdfs();
         setupTables();
     }
@@ -156,37 +137,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         createTable(tenant2, tbl, false);
         // Tenant2, Type=IMPORTTABLE
         createTable(tenant2, tbl, true);
-    }
-
-    private void dropAllHiveTables() {
-        log.info("dropAllHiveTables");
-        try (Connection connection = hiveDataSource.getConnection()) {
-
-            List<String> tables = getAllHiveTables(connection);
-            for (String table : tables) {
-                dropTable(connection, table);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private List<String> getAllHiveTables(Connection connection) throws SQLException {
-        List<String> tables = new ArrayList<>();
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute("SHOW TABLES");
-            ResultSet results = stmt.getResultSet();
-            while (results.next()) {
-                tables.add(results.getString("tab_name"));
-            }
-        }
-        return tables;
-    }
-
-    private void dropTable(Connection connection, String tableName) throws SQLException {
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(HiveUtils.getDropStatement(tableName, true));
-        }
     }
 
     private void createTable(Tenant tenant, Table table, boolean isImport) {
