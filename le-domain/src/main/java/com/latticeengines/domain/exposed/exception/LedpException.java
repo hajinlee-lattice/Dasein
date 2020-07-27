@@ -28,19 +28,21 @@ public class LedpException extends RuntimeException {
         this.code = code;
     }
 
-    public LedpException(LedpCode code, Throwable t, Map<String, Object> paramsMap) {
-        super(buildMessage(code, paramsMap.values().toArray()), t);
+    public LedpException(LedpCode code, Map<String, Object> paramsMap) {
+        super(buildMessage(code, paramsMap.values().toArray()), null);
         this.code = code;
         this.paramsMap = paramsMap;
-    }
-
-    public LedpException(LedpCode code, Map<String, Object> paramsMap) {
-        this(code, null, paramsMap);
     }
 
     public LedpException(LedpCode code, String msg, Throwable t) {
         super(code.name() + ": " + msg, t);
         this.code = code;
+    }
+
+    public LedpException(LedpCode code, String msg, Throwable t, Map<String, Object> paramsMap) {
+        super(code.name() + ": " + msg, t);
+        this.code = code;
+        this.paramsMap = paramsMap;
     }
 
     public static String buildMessage(LedpCode code, Object[] params) {

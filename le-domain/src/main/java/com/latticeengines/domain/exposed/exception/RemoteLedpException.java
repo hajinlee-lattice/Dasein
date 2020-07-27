@@ -10,7 +10,6 @@ public class RemoteLedpException extends LedpException {
 
     private String remoteStackTrace;
     private HttpStatus httpStatus;
-    private Map<String, Object> errorParamsMap;
 
     public RemoteLedpException(LedpCode code) {
         super(code);
@@ -38,10 +37,9 @@ public class RemoteLedpException extends LedpException {
 
     public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,
                                String msg, Map<String, Object> errorParamsMap) {
-        super(code, msg, null);
+        super(code, msg, null, errorParamsMap);
         this.remoteStackTrace = remoteStackTrace;
         this.httpStatus = httpStatus;
-        this.errorParamsMap = errorParamsMap;
     }
 
     public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code,
