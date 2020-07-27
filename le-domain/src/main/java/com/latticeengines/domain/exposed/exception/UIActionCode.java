@@ -31,7 +31,17 @@ public enum UIActionCode {
     LOOKUP_ID_03(Level.User, LedpCode.LEDP_40081, "A connection with the same system name already exists."), //
 
     // teams
-    TEAMS_00(Level.User, LedpCode.LEDP_18241), // team name already exists
+    TEAMS_00(Level.User, LedpCode.LEDP_18241, "Team name \"${teamName}\" already exists in tenant ${tenantName}."),
+    TEAMS_01(Level.User, LedpCode.LEDP_18242, LedpCode.LEDP_18242.getMessage()),
+
+    // orphan records
+    ORPHAN_RECORDS_01(Level.User, LedpCode.LEDP_18243, "Could not download result of export job ${exportId}," +
+            " download path can't be found, please try to export and download it again."),
+
+    // attribute management
+    ATTR_MANAGEMENT_001(Level.User, LedpCode.LEDP_40084, "Failed to add attribute group, exceed size limitation: ${size}."),
+    ATTR_MANAGEMENT_002(Level.User, LedpCode.LEDP_40085, LedpCode.LEDP_40085.getMessage()),
+    ATTR_MANAGEMENT_003(Level.User, LedpCode.LEDP_40086, "Attribute group name \"${attributeSetName}\" already exists."),
 
     // UIActionUnitTestNG
     TEST_00(Level.User, LedpCode.LEDP_00009), //
