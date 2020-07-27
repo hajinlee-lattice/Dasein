@@ -141,7 +141,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
 
                 Pair<Date, DataReport> result = constructParentReport(parentOwnerId, parentLevel, parentReport,
                         childLevel, childOwnerIdToReport, updatedOwnerIdToLevelAndDate, ownerIdToDunsCount,
-                        mode, level);
+                        mode);
 
                 // write report back if needed
                 if (result != null && result.getLeft() != null) {
@@ -162,8 +162,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                                                          Map<String, DataReport> childOwnerIdToReport,
                                                          Map<String, Pair<DataReportRecord.Level, Date>> updatedOwnerIdToLevelAndDate,
                                                          Map<String, Table> ownerIdToDunsCount,
-                                                         DataReportMode mode,
-                                                         DataReportRecord.Level level) {
+                                                         DataReportMode mode) {
         DataReport updatedParentReport = initializeReport();
         // only when the parent node need to update, return the snapshot time
         DunsCountCache parentCache = dataReportProxy.getDunsCount(customerSpace.toString(), parentLevel,
@@ -180,7 +179,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
         switch (mode) {
             case UPDATE:
                 maxChildDate = parentTime;
-                // traverse the adjacent child node to judge to whether to update parental node
+                // traverse the adjacent child node to judge whether to update parental node
                 Set<String> childOwnerIds = childOwnerIdToReport.keySet();
                 for (String childOwnerId : childOwnerIds) {
                     if (updatedOwnerIdToLevelAndDate.containsKey(childOwnerId)) {
@@ -412,6 +411,8 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId));
             Table dunsCount = toTable(dunsCountTableName, null, unit);
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
+            registerTable(dunsCountTableName);
+
             DunsCountCache cache = new DunsCountCache();
             cache.setDunsCountTableName(dunsCountTableName);
             cache.setSnapshotTimestamp(snapshotTime);

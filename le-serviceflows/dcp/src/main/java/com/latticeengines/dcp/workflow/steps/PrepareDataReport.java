@@ -140,9 +140,10 @@ public class PrepareDataReport extends RunSparkJob<RollupDataReportStepConfigura
         for (Integer index : indexToUploadId.keySet()) {
             String uploadId = indexToUploadId.get(index);
             HdfsDataUnit unit = units.get(index);
-            String dunsCountTableName = NamingUtils.timestamp("dunsCount");
+            String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", uploadId));
             Table dunsCount = toTable(dunsCountTableName, null, unit);
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
+            registerTable(dunsCountTableName);
             DataReport report = dataReportProxy.getDataReport(customerSpace.toString(), DataReportRecord.Level.Upload,
                     uploadId);
             DunsCountCache cache = new DunsCountCache();
