@@ -650,6 +650,10 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 true, expectedCount, orgId, destinationSystemType);
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "launchState",
                 false, expectedCount, orgId, destinationSystemType);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "uiLaunchState",
+                true, expectedCount, orgId, destinationSystemType);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "uiLaunchState",
+                false, expectedCount, orgId, destinationSystemType);
     }
 
     private void checkForEntriesDashboardWithSortOrder(Long playId, List<LaunchState> states, Long startTimestamp,
