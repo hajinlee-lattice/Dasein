@@ -294,12 +294,12 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Override
     public void deleteAttributeSetByName(String name) {
         if (AttributeUtils.isDefaultAttributeSet(name)) {
-            throw new LedpException(LedpCode.LEDP_40087, new String[]{AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME});
+            throw new LedpException(LedpCode.LEDP_40087, ImmutableMap.of("attributeSetName", AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME));
         }
         List<Play> plays = playService.findByAlwaysOnAndAttributeSetName(name);
         if (CollectionUtils.isNotEmpty(plays)) {
-            throw new LedpException(LedpCode.LEDP_40094,
-                    new String[]{plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))});
+            throw new LedpException(LedpCode.LEDP_40094, ImmutableMap.of("campaignNames",
+                    new String[]{plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))}));
         }
         attributeSetEntityMgr.deleteByName(name);
         Tenant tenant = MultiTenantContext.getTenant();

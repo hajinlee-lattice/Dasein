@@ -42,6 +42,9 @@ public enum UIActionCode {
     ATTR_MANAGEMENT_001(Level.User, LedpCode.LEDP_40084, "Failed to add attribute group, exceed size limitation: ${size}."),
     ATTR_MANAGEMENT_002(Level.User, LedpCode.LEDP_40085, LedpCode.LEDP_40085.getMessage()),
     ATTR_MANAGEMENT_003(Level.User, LedpCode.LEDP_40086, "Attribute group name \"${attributeSetName}\" already exists."),
+    ATTR_MANAGEMENT_004(Level.User, LedpCode.LEDP_40087, "Can't delete attribute group \"${attributeSetName}\"."),
+    ATTR_MANAGEMENT_005(Level.User, LedpCode.LEDP_40094, "This attribute group is used with \"${campaignNames}\" always-on campaign. " +
+            "Please make the change to the campaign first and then try to delete the attribute campaign."),
 
     // UIActionUnitTestNG
     TEST_00(Level.User, LedpCode.LEDP_00009), //
