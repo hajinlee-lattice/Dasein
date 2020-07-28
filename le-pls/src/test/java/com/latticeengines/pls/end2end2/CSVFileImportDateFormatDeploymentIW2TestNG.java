@@ -127,7 +127,7 @@ public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDep
         }
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true, false);
         String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
         Assert.assertNotNull(fileContent);
         String[] mappings = fileContent.split("\n");
