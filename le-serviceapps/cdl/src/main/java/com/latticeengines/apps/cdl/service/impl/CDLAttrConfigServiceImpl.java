@@ -299,7 +299,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         List<Play> plays = playService.findByAlwaysOnAndAttributeSetName(name);
         if (CollectionUtils.isNotEmpty(plays)) {
             throw new LedpException(LedpCode.LEDP_40094, ImmutableMap.of("campaignNames",
-                    new String[]{plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))}));
+                    plays.stream().limit(CAMPAIGN_LIMIT).map(Play::getDisplayName).collect(Collectors.joining(","))));
         }
         attributeSetEntityMgr.deleteByName(name);
         Tenant tenant = MultiTenantContext.getTenant();
