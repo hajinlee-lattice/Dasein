@@ -34,8 +34,8 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         return get("Get duns count", url, DunsCountCache.class);
     }
 
-    public Set<String> getSubOwnerIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
-        String baseUrl = "/customerspaces/{customerSpace}/datareport/subownerids?level={level}";
+    public Set<String> getChildrenIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/childrenids?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
         return getSet("Get sub owner ids", url, String.class);
     }

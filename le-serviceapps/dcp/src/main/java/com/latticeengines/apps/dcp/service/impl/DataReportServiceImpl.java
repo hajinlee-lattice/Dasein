@@ -166,11 +166,11 @@ public class DataReportServiceImpl implements DataReportService {
     }
 
     @Override
-    public Set<String> getSubOwnerIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
+    public Set<String> getChildrenIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        Set<String> subOwnerIds = dataReportEntityMgr.getSubOwnerIds(level, ownerId);
+        Set<String> subOwnerIds = dataReportEntityMgr.getChildrenIds(level, ownerId);
         if (subOwnerIds == null) {
             return new HashSet<>();
         } else {

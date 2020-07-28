@@ -27,7 +27,7 @@ public interface DataReportService {
     void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
                       DunsCountCache cache);
 
-    Set<String> getSubOwnerIds(String customerSpace, DataReportRecord.Level level, String ownerId);
+    Set<String> getChildrenIds(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId);
 
