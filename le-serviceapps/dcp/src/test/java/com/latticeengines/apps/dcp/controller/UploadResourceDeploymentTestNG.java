@@ -139,6 +139,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String rawPath2 = uploadDirKey + uploadTS2 + "/raw/file3.csv";
         config2.setUploadRawFilePath(rawPath2);
         uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), uploadRequest2);
+
+        List<UploadDetails> uploadDetails = uploadProxy.getUploads(mainCustomerSpace);
+        Assert.assertEquals(uploadDetails.size(), 2);
     }
 
 

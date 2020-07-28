@@ -55,6 +55,12 @@ public class UploadServiceImpl implements UploadService {
     private SourceFileProxy sourceFileProxy;
 
     @Override
+    public List<UploadDetails> getUploads(String customerSpace) {
+        List<Upload> uploads = uploadEntityMgr.findAll();
+        return uploads.stream().map(upload -> getUploadDetails(upload, false)).collect(Collectors.toList());
+    }
+
+    @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
         return getUploads(customerSpace, sourceId, includeConfig, 0, MAX_PAGE_SIZE);
     }

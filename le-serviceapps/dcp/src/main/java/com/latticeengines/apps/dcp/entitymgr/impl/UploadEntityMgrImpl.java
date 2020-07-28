@@ -62,6 +62,12 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Upload> findAll() {
+        return getReadOrWriteRepository().findAll();
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Long countBySourceId(String sourceId) {
         return getReadOrWriteRepository().countBySourceId(sourceId);
     }

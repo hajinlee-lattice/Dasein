@@ -12,6 +12,8 @@ public interface UploadRepository extends BaseJpaRepository<Upload, Long> {
 
     List<Upload> findBySourceId(String sourceId, Pageable pageable);
 
+    List<Upload> findAll();
+
     Long countBySourceId(String sourceId);
 
     List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status, Pageable pageable);

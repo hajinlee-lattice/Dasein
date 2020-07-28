@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 
 public interface UploadService {
 
+    List<UploadDetails> getUploads(String customerSpace);
+
     List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig);
 
     List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig,

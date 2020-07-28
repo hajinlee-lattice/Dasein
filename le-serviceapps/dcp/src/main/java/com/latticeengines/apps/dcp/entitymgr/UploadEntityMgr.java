@@ -15,6 +15,8 @@ public interface UploadEntityMgr extends BaseEntityMgrRepository<Upload, Long> {
 
     List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status, Pageable pageable);
 
+    List<Upload> findAll();
+
     Long countBySourceIdAndStatus(String sourceId, Upload.Status status);
 
     Upload findByUploadId(String uploadId);

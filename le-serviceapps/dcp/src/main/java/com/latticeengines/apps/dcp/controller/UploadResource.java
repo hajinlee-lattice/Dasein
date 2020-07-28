@@ -76,6 +76,13 @@ public class UploadResource {
         }
     }
 
+    @GetMapping("")
+    @ResponseBody
+    @ApiOperation(value = "get upload list in tenant")
+    public List<UploadDetails> getUploads(@PathVariable String customerSpace) {
+        return uploadService.getUploads(customerSpace);
+    }
+
     @GetMapping("/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by uploadId")
