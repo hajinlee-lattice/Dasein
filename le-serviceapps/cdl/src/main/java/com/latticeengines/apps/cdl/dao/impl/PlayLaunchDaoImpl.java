@@ -412,7 +412,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         if (sortNeeded) {
             String sortDirection = descending ? "DESC" : "ASC";
 
-            if (sortby == "uiLaunchState"){
+            if (StringUtils.isNotBlank(sortby) && sortby.equals("uiLaunchState")){
                 sortby = "launchState";
             }
 
