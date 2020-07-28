@@ -230,6 +230,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         columnMetadata.setDisplayName(accountId);
         columnMetadata.setEntity(businessEntity);
         metadataList.get(Category.ACCOUNT_ATTRIBUTES.getOrder()).add(columnMetadata);
+        schemaMap.get(businessEntity).add(columnMetadata);
+        WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
     }
 
     private void addContactId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList,
@@ -240,6 +242,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         columnMetadata.setDisplayName(contactId);
         columnMetadata.setEntity(businessEntity);
         metadataList.get(Category.CONTACT_ATTRIBUTES.getOrder()).add(columnMetadata);
+        schemaMap.get(businessEntity).add(columnMetadata);
+        WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
     }
 
     private List<Lookup> convertToLookup(List<List<ColumnMetadata>> columnMetadataList) {
