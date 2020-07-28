@@ -71,7 +71,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
 
     private JsonNode getJsonView(LedpException e, String stackTrace) {
         String serialized = JsonUtils.serialize(ImmutableMap.of("errorCode", e.getCode().name(), //
-                "errorMsg", emptyStringIfNull(e.getMessage()), "stackTrace", stackTrace));
+                "errorMsg", emptyStringIfNull(e.getMessage()), "stackTrace", stackTrace, "errorParamsMap", e.getParamsMap()));
         return JsonUtils.deserialize(serialized, JsonNode.class);
     }
 
