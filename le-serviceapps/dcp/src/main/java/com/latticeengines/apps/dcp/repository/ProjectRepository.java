@@ -2,6 +2,7 @@ package com.latticeengines.apps.dcp.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -20,7 +21,7 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
             " from Project as p join p.importSystem as s")
-    List<Object[]> findAllProjects();
+    List<Object[]> findAllProjects(Pageable pageable);
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
             " from Project as p join p.importSystem as s join DataFeedTask as dft on s.pid = dft.importSystem" +

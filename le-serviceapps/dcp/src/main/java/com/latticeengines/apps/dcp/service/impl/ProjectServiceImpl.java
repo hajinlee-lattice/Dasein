@@ -12,6 +12,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.core.service.DropBoxService;
@@ -44,6 +46,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String SYSTEM_NAME_PATTERN = "ProjectSystem_%s";
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project path}
     private static final int MAX_RETRY = 3;
+    private static final int MAX_PAGE_SIZE = 100;
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
@@ -94,7 +97,9 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources) {
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
+            Sort sort = Sort.by(Sort.Direction.DESC, "pid");
+            PageRequest pageRequest = PageRequest.of(0, MAX_PAGE_SIZE, sort);
+            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);
