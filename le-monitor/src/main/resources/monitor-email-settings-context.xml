@@ -12,4 +12,14 @@
         <property name="useSTARTTLS" value="${monitor.emailsettings.useSTARTTLS:false}" />
     </bean>
 
+    <bean id="sendgridEmailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
+        <property name="from" value="${monitor.sendgrid.emailsettings.from:no-reply@connect.dnb.com}" />
+        <property name="server" value="${monitor.sendgrid.emailsettings.from.server:smtp.sendgrid.net}" />
+        <property name="username" value="${monitor.sendgrid.emailsettings.from.username:apikey}" />
+        <property name="password" value="${monitor.sendgrid.emailsettings.from.password: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}" />
+        <property name="port" value="${monitor.sendgrid.emailsettings.port:25}" />
+        <property name="useSSL" value="${monitor.sendgrid.emailsettings.useSSL:false}" />
+        <property name="useSTARTTLS" value="${monitor.sendgrid.emailsettings.useSTARTTLS:false}" />
+    </bean>
+
 </beans>
