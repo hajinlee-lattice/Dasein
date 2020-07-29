@@ -553,6 +553,7 @@ public class CDLServiceImpl implements CDLService {
                     display.setImportStatus(taskSummary.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
                             : taskSummary.getS3ImportStatus());
                     display.setDataLoaded(consumedTemplates.contains(taskSummary.getUniqueId()));
+                    display.setSpecType(taskSummary.getSpecType());
                     templates.add(display);
                 }
             }

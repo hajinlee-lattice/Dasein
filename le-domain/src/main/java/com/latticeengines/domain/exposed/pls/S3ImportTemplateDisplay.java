@@ -44,6 +44,9 @@ public class S3ImportTemplateDisplay {
     @JsonProperty("DataLoaded")
     private Boolean dataLoaded;
 
+    @JsonProperty("SpecType")
+    private String specType;
+
     public String getObject() {
         return object;
     }
@@ -127,5 +130,13 @@ public class S3ImportTemplateDisplay {
 
     public void setDataLoaded(Boolean dataLoaded) {
         this.dataLoaded = dataLoaded;
+    }
+
+    public String getSpecType() {
+        return specType;
+    }
+
+    public void setSpecType(String specType) {
+        this.specType = specType;
     }
 }

@@ -57,6 +57,9 @@ CREATE PROCEDURE `UpdateSchema`()
       
       ALTER TABLE `DCP_UPLOAD` ADD COLUMN `DISPLAY_NAME` varchar(255);
 
+      ALTER TABLE `PLS_MultiTenant`.`DATAFEED_TASK`
+      ADD COLUMN `SPEC_TYPE` VARCHAR(255) NULL AFTER `SUBTYPE`;
+
   END //
 -- ##############################################################
 

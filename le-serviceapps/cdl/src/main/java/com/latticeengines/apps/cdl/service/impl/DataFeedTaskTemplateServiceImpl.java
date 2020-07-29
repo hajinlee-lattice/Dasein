@@ -155,11 +155,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private Boolean useEmr;
 
     @Override
-    public boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
+    public boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
+                                        String systemDisplayName) {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         EntityType entityType = simpleTemplateMetadata.getEntityType();
         S3ImportSystem websiteSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.Website,
-                S3ImportSystem.SystemType.Website.getDefaultSystemName());
+                S3ImportSystem.SystemType.Website.getDefaultSystemName(), systemDisplayName);
 
         Table standardTable = SchemaRepository.instance().getSchema(websiteSystem.getSystemType(), entityType,
                 batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()));
@@ -170,11 +171,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return true;
     }
 
-    public boolean setupWebVisitProfile2(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
+    public boolean setupWebVisitProfile2(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
+                                         String systemDisplayName) {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         EntityType entityType = simpleTemplateMetadata.getEntityType();
         S3ImportSystem websiteSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.Website,
-                S3ImportSystem.SystemType.Website.getDefaultSystemName());
+                S3ImportSystem.SystemType.Website.getDefaultSystemName(), systemDisplayName);
 
         ImportWorkflowSpec spec;
         try {
@@ -195,7 +197,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     private S3ImportSystem setupSystems(String customerSpace, EntityType entityType,
-                                        S3ImportSystem.SystemType systemType, String systemName) {
+                                        S3ImportSystem.SystemType systemType, String systemName,
+                                        String systemDisplayName) {
         if (!systemType.getEntityTypes().contains(entityType)) {
             log.error("Cannot create template for: {}, systemType is {}.", entityType.getDisplayName(), systemType);
             throw new RuntimeException("Cannot create template for: " + entityType.getDisplayName());
@@ -209,7 +212,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
             }
         } else {
-            importSystem = createS3ImportSystem(customerSpace, systemName, systemType);
+            importSystem = createS3ImportSystem(customerSpace, systemName, systemDisplayName, systemType);
             log.debug("Successfully created S3ImportSystem for entity type {}:\n{}", entityType,
                     JsonUtils.pprint(importSystem));
         }
@@ -218,6 +221,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     private DataFeedTask setupDataFeedTask(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
                                            EntityType entityType, S3ImportSystem websiteSystem, Table standardTable) {
+        return setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, websiteSystem, standardTable, null);
+    }
+
+    private DataFeedTask setupDataFeedTask(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
+                                           EntityType entityType, S3ImportSystem websiteSystem, Table standardTable,
+                                           String systemType) {
         Table templateTable = generateTemplate(standardTable, simpleTemplateMetadata);
         templateTable.setName(templateTable.getName() + System.currentTimeMillis());
         metadataProxy.createImportTable(customerSpace, templateTable.getName(), templateTable);
@@ -235,6 +244,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTask.setLastUpdated(new Date());
         dataFeedTask.setSubType(entityType.getSubType());
         dataFeedTask.setTemplateDisplayName(dataFeedTask.getFeedType());
+        dataFeedTask.setSpecType(systemType);
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
@@ -375,10 +385,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                             "systemType is {}, entityType is {}.", customerSpace, systemName, systemType, entityType);
             return false;
         }
-        if (!S3ImportSystem.SystemType.Eloqua.name().equalsIgnoreCase(systemType) && !S3ImportSystem.SystemType.Marketo.name().equalsIgnoreCase(systemType)) {
-            log.error("systemType isn't match eloqua/marketo, customerSpace is {}, systemName is {}, systemType is " +
+        List<String> validSystemTypes = Arrays.asList(S3ImportSystem.SystemType.Eloqua.name().toLowerCase(),
+                S3ImportSystem.SystemType.Marketo.name().toLowerCase(), "lattice", "pardot");
+        if (!validSystemTypes.contains(systemType.toLowerCase())) {
+            log.error("systemType isn't match list {}, customerSpace is {}, systemName is {}, systemType is " +
                     "{}," +
-                    " entityType is {}.", customerSpace, systemName, systemType, entityType);
+                    " entityType is {}.", validSystemTypes, customerSpace, systemName, systemType, entityType);
             return false;
         }
         S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
@@ -460,10 +472,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public boolean createDefaultDnbIntentDataTemplate(String customerSpace) {
+    public boolean createDefaultDnbIntentDataTemplate(String customerSpace, String systemDisplayName) {
         EntityType entityType = EntityType.CustomIntent;
         S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.DnbIntent,
-                S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName());
+                S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName(), systemDisplayName);
         log.info("importSystem is {}.", JsonUtils.serialize(importSystem));
         log.info("setup dnb Intent data for tenant {}, systemName {}.", customerSpace, importSystem.getName());
         DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
@@ -475,13 +487,15 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType, SimpleTemplateMetadata simpleTemplateMetadata) {
+    public boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType,
+                                               SimpleTemplateMetadata simpleTemplateMetadata,
+                                               String systemDisplayName) {
         if (!EntityType.CustomIntent.equals(entityType)) {
             throw new IllegalArgumentException(String.format("createDnbIntentDataTemplate cannot support entityType " +
                     "%s.", entityType));
         }
         S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.DnbIntent,
-                S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName());
+                S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName(), systemDisplayName);
         log.info("setup dnb Intent data for tenant {}, systemName {}.", customerSpace, importSystem.getName());
         DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
                 entityType, simpleTemplateMetadata);
@@ -669,7 +683,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);
 
         return setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, importSystem,
-                standardTable);
+                standardTable, systemType);
     }
 
     private DataFeedTask createDnbIntentDataTemplateOnly(String customerSpace, String systemName, EntityType entityType,
@@ -858,12 +872,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return new ArrayList<>(allApprovedUsages);
     }
 
-    private S3ImportSystem createS3ImportSystem(String customerSpace, String systemName,
+    private S3ImportSystem createS3ImportSystem(String customerSpace, String systemName, String systemDisplayName,
                                                 S3ImportSystem.SystemType systemType) {
         S3ImportSystem s3ImportSystem = new S3ImportSystem();
         s3ImportSystem.setSystemType(systemType);
         s3ImportSystem.setName(systemName);
-        s3ImportSystem.setDisplayName(systemName);
+        s3ImportSystem.setDisplayName(StringUtils.isBlank(systemDisplayName)? systemName : systemDisplayName);
         s3ImportSystem.setTenant(tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString()));
         s3ImportSystemService.createS3ImportSystem(customerSpace, s3ImportSystem);
         dropBoxService.createFolder(customerSpace, systemName, null, null);

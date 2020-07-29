@@ -36,14 +36,14 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
     List<Object[]> findBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
 
     @Query("SELECT dft.source, dft.entity, dft.feedType, dft.subType, dft.s3ImportStatus,"
-            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName " +
+            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName, dft.specType " +
             "FROM DataFeedTask dft " +
             "INNER JOIN dft.dataFeed df " +
             "INNER JOIN df.tenant t WHERE dft.source = ?1 AND t.id = ?2")
     List<Object[]> findSummaryBySource(String source, String customerSpace);
 
     @Query("SELECT dft.source, dft.entity, dft.feedType, dft.subType, dft.s3ImportStatus,"
-            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName " +
+            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName, dft.specType " +
             "FROM DataFeedTask dft " +
             "INNER JOIN dft.dataFeed df " +
             "INNER JOIN df.tenant t WHERE t.id = ?1")

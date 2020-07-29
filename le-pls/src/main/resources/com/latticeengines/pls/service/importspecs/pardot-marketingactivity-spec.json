@@ -1,0 +1,90 @@
+{
+  "systemObject": "Marketing Activity",
+  "fieldDefinitionsRecordsMap": {
+    "General": [
+      {
+        "fieldName": "ActivityDate",
+        "fieldType": "DATE",
+        "columnName": "created_at",
+        "screenName": "created_at",
+        "matchingColumnNames": [
+          "ActivityDate",
+          "Activity_Date",
+          "created_at",
+          "ACTIVITY DATE"
+        ],
+        "required": true,
+        "nullable": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "logicalDataType": "Date",
+        "fundamentalType": "DATE"
+      },
+      {
+        "fieldName": "ActivityType",
+        "fieldType": "TEXT",
+        "columnName": "type_name",
+        "screenName": "type_name",
+        "matchingColumnNames": [
+          "type_name",
+          "Activity Type",
+          "ACTIVITY TYPE"
+        ],
+        "required": true,
+        "nullable": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CampaignId",
+        "fieldType": "TEXT",
+        "columnName": "campaign_id",
+        "screenName": "campaign_id",
+        "matchingColumnNames": [
+          "CampaignId",
+          "CAMPAIGN ID",
+          "campaign_id"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "ContactCookieId",
+        "fieldType": "TEXT",
+        "columnName": "visitor_id",
+        "screenName": "visitor_id",
+        "matchingColumnNames": [
+          "ContactCookieId",
+          "visitor_id"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Match to Contacts - ID": [
+      {
+        "fieldType": "TEXT",
+        "columnName": "prospect_id",
+        "screenName": "prospect_id",
+        "matchingColumnNames": [
+          "ContactId",
+          "leadId"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ]
+  }
+}
