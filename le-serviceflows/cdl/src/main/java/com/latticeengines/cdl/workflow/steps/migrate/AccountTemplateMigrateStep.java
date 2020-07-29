@@ -50,9 +50,9 @@ public class AccountTemplateMigrateStep extends BaseImportTemplateMigrateStep<Ac
         }
         String displayName = accountId.getDisplayName();
         templateTable.removeAttribute(InterfaceName.AccountId.name());
-        templateTable.addAttribute(getCustomerAccountId(displayName));
+        templateTable.addAttribute(getCustomerAccountId(displayName, accountId.getSourceAttrName(), accountId.getNullable()));
         if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
-            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), displayName));
+            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), displayName, accountId.getSourceAttrName()));
         }
     }
 

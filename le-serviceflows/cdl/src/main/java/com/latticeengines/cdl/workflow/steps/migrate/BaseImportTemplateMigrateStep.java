@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -114,7 +115,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
         return getStringValueFromContext(PRIMARY_IMPORT_SYSTEM);
     }
 
-    Attribute getCustomerAccountId(String displayName) {
+    Attribute getCustomerAccountId(String displayName, String sourceAttrName, Boolean nullable) {
         Attribute attribute = new Attribute();
         attribute.setName(InterfaceName.CustomerAccountId.name());
         attribute.setDisplayName(displayName);
@@ -124,10 +125,14 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
         attribute.setLogicalDataType(LogicalDataType.Id);
         attribute.setFundamentalType(FundamentalType.ALPHA);
         attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setNullable(nullable);
+        if (StringUtils.isNotEmpty(sourceAttrName)) {
+            attribute.setSourceAttrName(sourceAttrName);
+        }
         return attribute;
     }
 
-    Attribute getCustomerContactId(String displayName) {
+    Attribute getCustomerContactId(String displayName, String sourceAttrName, Boolean nullable) {
         Attribute attribute = new Attribute();
         attribute.setName(InterfaceName.CustomerContactId.name());
         attribute.setDisplayName(displayName);
@@ -137,10 +142,14 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
         attribute.setLogicalDataType(LogicalDataType.Id);
         attribute.setFundamentalType(FundamentalType.ALPHA);
         attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setNullable(nullable);
+        if (StringUtils.isNotEmpty(sourceAttrName)) {
+            attribute.setSourceAttrName(sourceAttrName);
+        }
         return attribute;
     }
 
-    Attribute getSystemId(String attrName, String displayName) {
+    Attribute getSystemId(String attrName, String displayName, String sourceAttrName) {
         Attribute attribute = new Attribute();
         attribute.setName(attrName);
         attribute.setDisplayName(displayName);
@@ -148,6 +157,10 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
         attribute.setLogicalDataType(LogicalDataType.Id);
         attribute.setFundamentalType(FundamentalType.ALPHA);
         attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setNullable(Boolean.TRUE);
+        if (StringUtils.isNotEmpty(sourceAttrName)) {
+            attribute.setSourceAttrName(sourceAttrName);
+        }
         return attribute;
     }
 

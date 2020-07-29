@@ -117,14 +117,13 @@ public class MigrateImportService
                 }
                 break;
             case Contact:
+            case Transaction:
                 if (StringUtils.isNotEmpty(importSystem.getContactSystemId())) {
                     dupMap.put(InterfaceName.ContactId.name(), importSystem.getContactSystemId());
                 }
                 if (StringUtils.isNotEmpty(importSystem.getAccountSystemId())) {
                     dupMap.put(InterfaceName.AccountId.name(), importSystem.getAccountSystemId());
                 }
-                break;
-            case Transaction:
                 break;
             default:
                 throw new IllegalArgumentException("Not supported entity: " + config.getEntity().name());

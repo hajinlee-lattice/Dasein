@@ -46,8 +46,9 @@ public class ContactTemplateMigrateStep extends BaseImportTemplateMigrateStep<Co
                 throw new IllegalArgumentException("Migrated tenant Contact template already have CustomerAccountId!");
             }
             templateTable.removeAttribute(InterfaceName.AccountId.name());
-            templateTable.addAttribute(getCustomerAccountId(accountId.getDisplayName()));
-            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), accountId.getDisplayName()));
+            templateTable.addAttribute(getCustomerAccountId(accountId.getDisplayName(), accountId.getSourceAttrName(), accountId.getNullable()));
+            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), accountId.getDisplayName(),
+                    accountId.getSourceAttrName()));
         }
         Attribute contactId = templateTable.getAttribute(InterfaceName.ContactId);
         if (contactId != null) {
@@ -56,10 +57,10 @@ public class ContactTemplateMigrateStep extends BaseImportTemplateMigrateStep<Co
                 throw new IllegalArgumentException("Migrated tenant Contact template already have CustomerContactId!");
             }
             templateTable.removeAttribute(InterfaceName.ContactId.name());
-            templateTable.addAttribute(getCustomerContactId(contactId.getDisplayName()));
+            templateTable.addAttribute(getCustomerContactId(contactId.getDisplayName(), contactId.getSourceAttrName(), contactId.getNullable()));
             if (StringUtils.isNotEmpty(s3ImportSystem.getContactSystemId())) {
                 templateTable.addAttribute(getSystemId(s3ImportSystem.getContactSystemId(),
-                        contactId.getDisplayName()));
+                        contactId.getDisplayName(), contactId.getSourceAttrName()));
             }
         }
     }
