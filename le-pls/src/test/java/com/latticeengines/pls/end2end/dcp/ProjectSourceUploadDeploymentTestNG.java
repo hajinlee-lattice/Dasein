@@ -151,9 +151,10 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
-        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 6);
-        Assert.assertEquals(uploadJobDetails.getCurrentStep().getStepName(), "Analysis");
+        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
+        Assert.assertNull(uploadJobDetails.getCurrentStep());
         Assert.assertEquals(uploadJobDetails.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
+        System.out.println(JsonUtils.serialize(uploadJobDetails));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
