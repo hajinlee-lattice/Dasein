@@ -4,11 +4,14 @@ import javax.inject.Inject;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.pls.service.dcp.DataReportService;
@@ -32,5 +35,12 @@ public class DataReportResource {
                                     @RequestParam(value = "ownerId", required = false) String ownerId,
                                     @RequestParam(value = "mock", required = false, defaultValue = "false") Boolean mock) {
         return dataReportService.getDataReport(level, ownerId, mock);
+    }
+
+    @PostMapping("/rollup")
+    @ResponseBody
+    @ApiOperation(value = "Invoke DCP Data Report workflow.")
+    public String rollupDataReport(@RequestBody DCPReportRequest request) {
+        return dataReportService.rollupDataReport(request);
     }
 }

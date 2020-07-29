@@ -5,15 +5,14 @@ import java.util
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor.MappingType
 import com.latticeengines.domain.exposed.cdl.activity.{EventFieldExtractor, TimeLine}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, CDLTemplateName, ContactId, ContactName,
-  Detail2, Detail1, PathPatternId, PathPattern, PathPatternName}
+import com.latticeengines.domain.exposed.metadata.InterfaceName._
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig
-import com.latticeengines.domain.exposed.util.{ActivityStoreUtils, TimeLineStoreUtils}
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
+import com.latticeengines.domain.exposed.util.{ActivityStoreUtils, TimeLineStoreUtils}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.json4s.jackson.Serialization
 
 import scala.collection.JavaConverters._
@@ -33,7 +32,6 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val needRebuild: Boolean = config.needRebuild
     val masterStoreInputIdx = config.masterStoreInputIdx.asScala
     val timelineRelatedMasterTables = config.timelineRelatedMasterTables.asScala
-    val metadataMap = config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val suffix: String = config.tableRoleSuffix
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
@@ -237,17 +235,17 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     }
     val metadataMap = lattice.config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val metadataInStream = metadataMap(streamId)
-    if (metadataInStream.isEmpty || !metadataInStream.contains(PathPatternId.name()) || metadataInStream.get
-    (PathPatternId.name()).isEmpty) {
+    if (metadataInStream.isEmpty || !metadataInStream.contains(PathPatternId.name)) {
       return df
     }
 
-    val dimValues = metadataInStream(PathPatternId.name()).getDimensionValues.asScala.map(_.asScala.toMap).toList
+    val dimValues = metadataInStream(PathPatternId.name).getDimensionValues.asScala.map(_.asScala.toMap).toList
     val pathPatternMap = immutable.Map(dimValues.map(p => (ActivityStoreUtils.modifyPattern(p(PathPattern
-      .name()).asInstanceOf[String]).r.pattern, p(PathPatternName.name()).asInstanceOf[String])):_*)
+      .name()).asInstanceOf[String]).r.pattern, p(PathPatternName.name()).asInstanceOf[String])): _*)
+    print(pathPatternMap)
     val filterFn = udf((detailString1: String, detailString2: String)
     => {
-      val pathNameString = pathPatternMap.filter(_._1.matcher(detailString1).matches).map(_._2.toString).mkString(",")
+      val pathNameString = pathPatternMap.filter(_._1.matcher(detailString1).matches).values.mkString(",")
       if (pathNameString == null || pathNameString.isEmpty) {
         detailString2
       } else if (detailString2 == null || detailString2.isEmpty) {
@@ -255,14 +253,12 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
       } else {
         pathNameString + "," + detailString2
       }
-
     })
-    df.withColumn(Detail2.name(), when(df.col(Detail1.name()).isNotNull, filterFn(df.col(Detail1.name())
-      , df.col(Detail2.name()))))
     logSpark("----- BEGIN SCRIPT OUTPUT -----")
     df.printSchema
     logSpark("----- END SCRIPT OUTPUT -----")
-    df
+    df.withColumn(Detail2.name(), when(df.col(Detail1.name()).isNotNull, filterFn(df.col(Detail1.name())
+      , df.col(Detail2.name()))))
   }
 }
 

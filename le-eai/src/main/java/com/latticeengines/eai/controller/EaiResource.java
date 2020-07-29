@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
-import com.latticeengines.network.exposed.eai.EaiInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "REST resource for importing/exporting data into/from Lattice")
 @RestController
 @RequestMapping("")
-public class EaiResource implements EaiInterface {
+public class EaiResource {
 
     @Inject
     private EaiService eaiService;

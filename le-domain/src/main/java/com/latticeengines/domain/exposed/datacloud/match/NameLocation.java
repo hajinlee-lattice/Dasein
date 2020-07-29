@@ -46,6 +46,12 @@ public class NameLocation implements Fact, Serializable {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
+    @JsonProperty("RegistrationNumber")
+    private String registrationNumber;
+
+    @JsonProperty("RegistrationNumberType")
+    private String registrationNumberType;
+
     public static NameLocation fromMatchKeyTuple(MatchKeyTuple keyTuple) {
         NameLocation nameLocation = new NameLocation();
         nameLocation.setName(keyTuple.getName());
@@ -53,6 +59,8 @@ public class NameLocation implements Fact, Serializable {
         nameLocation.setState(keyTuple.getState());
         nameLocation.setCountry(keyTuple.getCountry());
         nameLocation.setZipcode(keyTuple.getZipcode());
+        nameLocation.setRegistrationNumber(keyTuple.getRegistrationNumber());
+        nameLocation.setRegistrationNumberType(keyTuple.getRegistrationNumberType());
         nameLocation.setPhoneNumber(keyTuple.getPhoneNumber());
         nameLocation.setStreet(keyTuple.getAddress());
         nameLocation.setStreet2(keyTuple.getAddress2());
@@ -146,6 +154,24 @@ public class NameLocation implements Fact, Serializable {
         this.phoneNumber = phoneNumber;
     }
 
+    @MetricField(name = "RegistrationNumber")
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
+    @MetricField(name = "RegistrationNumberType")
+    public String getRegistrationNumberType() {
+        return registrationNumberType;
+    }
+
+    public void setRegistrationNumberType(String registrationNumberType) {
+        this.registrationNumberType = registrationNumberType;
+    }
+
     @Override
     public int hashCode() {
         return toString().hashCode();
@@ -155,13 +181,15 @@ public class NameLocation implements Fact, Serializable {
     public boolean equals(Object that) {
         if (that instanceof NameLocation) {
             NameLocation nameLocation = (NameLocation) that;
-            return StringUtils.equals(this.name, nameLocation.name)
-                    && StringUtils.equals(this.city, nameLocation.city)
-                    && StringUtils.equals(this.state, nameLocation.state)
-                    && StringUtils.equals(this.zipcode, nameLocation.zipcode)
-                    && StringUtils.equals(this.country, nameLocation.country)
-                    && StringUtils.equals(this.phoneNumber, nameLocation.phoneNumber)
-                    && StringUtils.equals(this.street, nameLocation.street)
+            return StringUtils.equals(this.name, nameLocation.name) //
+                    && StringUtils.equals(this.city, nameLocation.city) //
+                    && StringUtils.equals(this.state, nameLocation.state) //
+                    && StringUtils.equals(this.zipcode, nameLocation.zipcode) //
+                    && StringUtils.equals(this.country, nameLocation.country) //
+                    && StringUtils.equals(this.phoneNumber, nameLocation.phoneNumber) //
+                    && StringUtils.equals(this.registrationNumber, nameLocation.registrationNumber) //
+                    && StringUtils.equals(this.registrationNumberType, nameLocation.registrationNumberType) //
+                    && StringUtils.equals(this.street, nameLocation.street) //
                     && StringUtils.equals(this.street2, nameLocation.street2);
         } else {
             return false;
@@ -176,6 +204,8 @@ public class NameLocation implements Fact, Serializable {
         toReturn += (state == null ? "null" : state);
         toReturn += (zipcode == null ? "null" : zipcode);
         toReturn += (country == null ? "null" : country);
+        toReturn += String.valueOf(registrationNumber);
+        toReturn += String.valueOf(registrationNumberType);
         toReturn += (phoneNumber == null ? "null" : phoneNumber);
         toReturn += (street == null ? "null" : street);
         toReturn += (street2 == null ? "null" : street2);

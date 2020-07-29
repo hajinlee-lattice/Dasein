@@ -94,6 +94,15 @@ public class UploadResource {
         uploadService.registerMatchResult(customerSpace, uploadId, tableName);
     }
 
+    @GetMapping("/uploadId/{uploadId}/matchresulttableName")
+    @ResponseBody
+    @ApiOperation(value = "get match result table name")
+    public String getMatchResultTableName(@PathVariable String customerSpace,
+                                          @PathVariable String uploadId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return uploadService.getMatchResultTableName(customerSpace, uploadId);
+    }
+
     @PutMapping("/update/{uploadId}/config")
     @ResponseBody
     @ApiOperation(value = "update the upload config")

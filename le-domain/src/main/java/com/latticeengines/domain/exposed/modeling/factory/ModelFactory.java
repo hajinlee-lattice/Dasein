@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public abstract class ModelFactory {
 
@@ -20,9 +19,7 @@ public abstract class ModelFactory {
         }
         try {
             log.info("Model Config=" + runTimeParams.get(MODEL_CONFIG));
-            SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG),
-                    SelectedConfig.class);
-            return selectedConfig;
+            return JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG), SelectedConfig.class);
         } catch (Exception ex) {
             log.warn("Failed to get model config!");
         }

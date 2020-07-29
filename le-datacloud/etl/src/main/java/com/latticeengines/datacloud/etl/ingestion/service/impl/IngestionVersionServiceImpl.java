@@ -19,14 +19,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
@@ -65,12 +63,6 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
     public boolean isCompleteVersion(Ingestion ingestion, String version) {
         com.latticeengines.domain.exposed.camille.Path versionPath;
         switch (ingestion.getIngestionType()) {
-        case SQL_TO_SOURCE:
-            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
-                    .getProviderConfiguration();
-            Source source = sourceService.findBySourceName(sqlToSourceConfig.getSource());
-            versionPath = hdfsPathBuilder.constructTransformationSourceDir(source, version);
-            break;
         default:
             versionPath = hdfsPathBuilder.constructIngestionDir(ingestion.getIngestionName(), version);
             break;
@@ -103,50 +95,34 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
 
     @Override
     public String findCurrentVersion(Ingestion ingestion) {
-        switch (ingestion.getIngestionType()) {
-        case SQL_TO_SOURCE:
-            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
-                    .getProviderConfiguration();
-            return hdfsSourceEntityMgr.getCurrentVersion(sqlToSourceConfig.getSource());
-        default:
-            String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
-            String currentVersion = null;
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
-                    currentVersion = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
-                    currentVersion = StringUtils.trim(currentVersion.replace("\n", ""));
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(
-                        String.format("Could not get current version of ingestion %s", ingestion.getIngestionName()),
-                        e);
+        String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
+        String currentVersion = null;
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
+                currentVersion = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
+                currentVersion = StringUtils.trim(currentVersion.replace("\n", ""));
             }
-            return currentVersion;
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Could not get current version of ingestion %s", ingestion.getIngestionName()),
+                    e);
         }
+        return currentVersion;
     }
 
     private synchronized void setCurrentVersion(Ingestion ingestion, String version) {
-        switch (ingestion.getIngestionType()) {
-        case SQL_TO_SOURCE:
-            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
-                    .getProviderConfiguration();
-            hdfsSourceEntityMgr.setCurrentVersion(sqlToSourceConfig.getSource(), version);
-            break;
-        default:
-            String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
-                    HdfsUtils.rmdir(yarnConfiguration, versionFile);
-                }
-                HdfsUtils.writeToFile(yarnConfiguration, versionFile, version);
-                log.info(String.format("Updated current version for ingestion %s: %s", ingestion.getIngestionName(),
-                        version));
-            } catch (IOException e) {
-                throw new RuntimeException(
-                        String.format("Could not set current version of ingestion %s", ingestion.getIngestionName()),
-                        e);
+        String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
+                HdfsUtils.rmdir(yarnConfiguration, versionFile);
             }
-            break;
+            HdfsUtils.writeToFile(yarnConfiguration, versionFile, version);
+            log.info(String.format("Updated current version for ingestion %s: %s", ingestion.getIngestionName(),
+                    version));
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Could not set current version of ingestion %s", ingestion.getIngestionName()),
+                    e);
         }
 
     }

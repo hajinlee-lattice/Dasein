@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -40,6 +39,11 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     }
 
     @Override
+    public List<PrimeColumn> getCandidateColumns() {
+        return _self.getCandidateColumnsFromDistributedCache();
+    }
+
+    @Override
     public List<DataBlock> getBlockElements(List<String> blockIds) {
         List<DataBlock> blockList = _self.getBlockElementsFromDistributedCache();
         if (CollectionUtils.isNotEmpty(blockIds)) {
@@ -52,11 +56,6 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     @Override
     public DataBlockMetadataContainer getBlockMetadata() {
         return _self.getBlockMetadataFromDistributedCache();
-    }
-
-    @Override
-    public DataBlockEntitlementContainer getBlockDrtMatrix() {
-        return _self.getBlockDrtMatrixFromDistributedCache();
     }
 
     @Cacheable(cacheNames = CacheName.Constants.PrimeMetadataCacheName, key = "T(java.lang.String).format(\"prime_elements\")", unless = "#result == null")
@@ -73,10 +72,11 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         return get("get block metadata", url, DataBlockMetadataContainer.class);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.PrimeMetadataCacheName, key = "T(java.lang.String).format(\"prime_drtmatrix\")", unless = "#result == null")
-    public DataBlockEntitlementContainer getBlockDrtMatrixFromDistributedCache() {
-        String url = constructUrl("/drt-matrix");
-        return get("get block drt matrix", url, DataBlockEntitlementContainer.class);
+    @SuppressWarnings("unchecked")
+    @Cacheable(cacheNames = CacheName.Constants.PrimeMetadataCacheName, key = "T(java.lang.String).format(\"candidate_columns\")", unless = "#result == null")
+    public List<PrimeColumn> getCandidateColumnsFromDistributedCache() {
+        String url = constructUrl("/candidate-columns");
+        return getKryo("get candidate columns", url, List.class);
     }
 
 }

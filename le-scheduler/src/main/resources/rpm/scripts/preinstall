@@ -1,5 +1,0 @@
-#!/bin/bash
-rm -rf /tmp/usr/lib/hadoop-yarn
-rm -rf /tmp/etc/hadoop/conf
-rm -f /etc/hadoop/conf/fair-scheduler.xml
-rm -f /usr/hdp/current/hadoop-yarn-resourcemanager/le*.jar

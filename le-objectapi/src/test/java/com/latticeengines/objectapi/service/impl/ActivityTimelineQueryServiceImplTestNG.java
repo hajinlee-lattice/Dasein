@@ -129,7 +129,7 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
         Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testTimelineQuery1() {
         TimeLineProxy spiedTimelineProxy = spy(new TimeLineProxy());
         TimeLine tl = new TimeLine();

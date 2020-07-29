@@ -62,6 +62,10 @@ final class DnBResultProcessor {
         if (res.getDnbCode() != DnBReturnCode.OK) {
             if (StringUtils.isNotEmpty(res.getDuns())) {
                 res.setDuns(null);
+                if (BusinessEntity.PrimeAccount.name().equals(traveler.getEntity())) {
+                    traveler.setCandidates(res.getCandidates());
+                    traveler.setMatched(false);
+                }
             }
             traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", //
                     actorClz.getSimpleName(), //
@@ -72,19 +76,22 @@ final class DnBResultProcessor {
             }
             if (BusinessEntity.PrimeAccount.name().equals(traveler.getEntity())) {
                 traveler.setCandidates(res.getCandidates());
-                traveler.setMatched(matchedToDuns(res));
+                String duns = parseMatchedDuns(res);
+                traveler.setMatched(StringUtils.isNotBlank(duns));
+                traveler.setResult(duns);
             }
         }
         response.setResult(null);
     }
 
-    static boolean matchedToDuns(DnBMatchContext res) {
-        boolean matched = false;
+    private static String parseMatchedDuns(DnBMatchContext res) {
         if (CollectionUtils.isNotEmpty(res.getCandidates())) {
             DnBMatchCandidate candidate = res.getCandidates().get(0);
-            matched = candidate != null && StringUtils.isNotBlank(candidate.getDuns());
+            if (candidate != null && StringUtils.isNotBlank(candidate.getDuns())) {
+                return candidate.getDuns();
+            }
         }
-        return matched;
+        return null;
     }
 
 }

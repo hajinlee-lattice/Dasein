@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -70,6 +72,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     private DataCollection.Version inactive;
     private String signature;
     private boolean shortCutMode = false;
+    private final Map<String, String> relinkedGroupsTables = new HashMap<>();
 
     @Override
     protected Class<? extends AbstractSparkJob<DeriveActivityMetricGroupJobConfig>> getJobClz() {
@@ -79,19 +82,23 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     @Override
     protected DeriveActivityMetricGroupJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         Set<String> skippedStreams = getSkippedStreamIds();
+        Set<String> streamsToRelink = getRelinkStreamIds();
         List<AtlasStream> streams = stepConfiguration.getActivityStreamMap().values().stream()
-                .filter(s -> !skippedStreams.contains(s.getStreamId())).collect(Collectors.toList());
-        List<ActivityMetricsGroup> groups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
+                .filter(s -> !skippedStreams.contains(s.getStreamId()) && !streamsToRelink.contains(s.getStreamId())).collect(Collectors.toList());
+        List<ActivityMetricsGroup> allGroups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
                 .filter(g -> !skippedStreams.contains(g.getStream().getStreamId())).collect(Collectors.toList());
-        Set<BusinessEntity> requiredBatchStoreEntities = groups.stream().map(ActivityMetricsGroup::getEntity).collect(Collectors.toSet());
-        for (ActivityMetricsGroup group : groups) {
+        List<ActivityMetricsGroup> groupsNeedProcess = configuration.isShouldRebuild() ? allGroups :
+                allGroups.stream().filter(g -> !streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList());
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        relinkGroup(allGroups.stream().filter(g -> streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList()));
+        Set<BusinessEntity> requiredBatchStoreEntities = groupsNeedProcess.stream().map(ActivityMetricsGroup::getEntity).collect(Collectors.toSet());
+        for (ActivityMetricsGroup group : groupsNeedProcess) {
             log.info("Retrieved group {}", group.getGroupId());
         }
-        if (CollectionUtils.isEmpty(streams) || CollectionUtils.isEmpty(groups)) {
+        if (CollectionUtils.isEmpty(streams) || CollectionUtils.isEmpty(groupsNeedProcess)) {
             log.info("No groups to generate for tenant {}. Skip generating metrics groups", customerSpace);
             return null;
         }
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         signature = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class).getDimensionMetadataSignature();
         streamMetadataCache = new ConcurrentHashMap<>();
         streams.forEach(this::updateStreamMetadataCache);
@@ -130,9 +137,9 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), groupTableNames, TableRoleInCollection.MetricsGroup, inactive);
             return null;
         } else {
-            validateInputTableCountMatch(groups, inputs, stepConfiguration);
+            validateInputTableCountMatch(groupsNeedProcess, inputs, stepConfiguration);
             DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
-            config.activityMetricsGroups = groups;
+            config.activityMetricsGroups = groupsNeedProcess;
             config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
             config.streamMetadataMap = streamMetadataCache;
             requiredBatchStoreEntities.forEach(entity -> appendBatchStore(entity, inputs, inputMetadata));
@@ -141,6 +148,19 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
             config.currentVersionStamp = getLongValueFromContext(PA_TIMESTAMP);
             return config;
+        }
+    }
+
+    private void relinkGroup(List<ActivityMetricsGroup> groups) {
+        if (CollectionUtils.isNotEmpty(groups)) {
+            List<String> signatures = groups.stream().map(ActivityMetricsGroup::getGroupId).collect(Collectors.toList());
+            log.info("Groups to relink to inactive version: {}", signatures);
+            Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), TableRoleInCollection.MetricsGroup, inactive.complement(), signatures);
+            if (MapUtils.isNotEmpty(signatureTableNames)) {
+                log.info("Linking existing metrics group tables to inactive version: {}", signatureTableNames.keySet());
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.MetricsGroup, inactive);
+                relinkedGroupsTables.putAll(signatureTableNames);
+            }
         }
     }
 
@@ -187,6 +207,11 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             metadataProxy.createTable(customerSpace.toString(), tableName, metricsGroupTable);
             signatureTables.put(groupId, metricsGroupTable); // use groupId as signature
         });
+        signatureTables.putAll(relinkedGroupsTables.entrySet().stream().map(entry -> {
+            String groupId = entry.getKey();
+            String tableName = entry.getValue();
+            return Pair.of(groupId, getTableSummary(customerSpace.toString(), tableName));
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
         Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, METRICS_GROUP_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.MetricsGroup, inactive);
     }
@@ -211,6 +236,15 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
         log.info("Stream IDs skipped for metrics processing = {}", skippedStreamIds);
         return skippedStreamIds;
+    }
+
+    private Set<String> getRelinkStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_RELINK)) {
+            return Collections.emptySet();
+        }
+        Set<String> streams = getSetObjectFromContext(ACTIVITY_STREAMS_RELINK, String.class);
+        log.info("Stream IDs to relink = {}", streams);
+        return streams;
     }
 
     private void updateStreamMetadataCache(AtlasStream stream) {

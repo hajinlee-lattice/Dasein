@@ -131,7 +131,8 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
 
     protected void updateStats(boolean baseChanged, boolean enforceRebuild, TableRoleInCollection baseRole, //
                                TableRoleInCollection profileRole, String reProfileAttrsKey, String changeListKey) {
-        if (baseChanged || enforceRebuild) {
+        boolean profileChanged = isChanged(profileRole);
+        if (baseChanged || profileChanged || enforceRebuild) {
             Table baseTable = attemptGetTableRole(baseRole, true);
             Table profileTbl = attemptGetTableRole(profileRole, true);
             Table changeListTbl = null;
@@ -146,7 +147,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
                     log.info("Need to fully re-calculate {} stats, because there is no change list table.", baseRole);
                     fullReCalc = true;
                 } else {
-                    if (isChanged(profileRole)) {
+                    if (profileChanged) {
                         reProfileAttrs = getListObjectFromContext(reProfileAttrsKey, String.class);
                         if (reProfileAttrs == null) {
                             log.info("Need to fully re-calculate {} stats, because there is no list in {}", //
@@ -578,6 +579,18 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
     protected long getBaseTableCount() {
         Table baseTbl = attemptGetTableRole(getBaseTableRole(), true);
         return baseTbl.toHdfsDataUnit("Base").getCount();
+    }
+
+    protected void cleanupStatsCube() {
+        String lockName = acquireStatsLock(CustomerSpace.shortenCustomerSpace(customerSpaceStr), inactive);
+        try {
+            String cubeName = configuration.getMainEntity().name();
+            Map<String, StatsCube> cubeMap = getCurrentCubeMap();
+            cubeMap.remove(cubeName);
+            saveStatsContainer(cubeMap);
+        } finally {
+            LockManager.releaseWriteLock(lockName);
+        }
     }
 
     protected void upsertStatsCube() {

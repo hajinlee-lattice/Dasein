@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.manage.DataBlock.BLOCK_BASE_INFO;
+import static com.latticeengines.domain.exposed.datacloud.manage.DataBlock.BLOCK_ENTITY_RESOLUTION;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,20 +24,16 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.datacloud.match.repository.reader.DataBlockDomainEntitlementRepository;
 import com.latticeengines.datacloud.match.repository.reader.DataBlockElementRepository;
 import com.latticeengines.datacloud.match.repository.reader.DataBlockLevelMetadataRepository;
 import com.latticeengines.datacloud.match.repository.reader.PrimeColumnRepository;
+import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockDomainEntitlement;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockElement;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevelMetadata;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
-import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
-import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 @Service
@@ -51,7 +49,7 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
     private DataBlockLevelMetadataRepository levelMetadataRepository;
 
     @Inject
-    private DataBlockDomainEntitlementRepository entitlementRepository;
+    private DirectPlusCandidateService candidateService;
 
     @Override
     public DataBlockMetadataContainer getDataBlockMetadata() {
@@ -71,12 +69,13 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 Map<DataBlockLevel, DataBlockLevelMetadata> levelMap = blockMap.get(block);
                 List<DataBlock.Level> levels = new ArrayList<>();
                 for (DataBlockLevel level: levelMap.keySet()) {
-                    DataBlockLevelMetadata levelMetadata = levelMap.get(level);
-                    levels.add(new DataBlock.Level(level, levelMetadata.getDescription()));
+                    levels.add(new DataBlock.Level(level));
                 }
                 levels.sort(Comparator.comparing(DataBlock.Level::getLevel));
                 blocks.add(new DataBlock(block, levels));
             }
+            blocks.add(getBaseInfoBlock(false));
+            blocks.add(getEntityResolutionBlock(false));
             DataBlockMetadataContainer container = new DataBlockMetadataContainer();
             container.setBlocks(blocks.stream().collect(Collectors.toMap(DataBlock::getBlockId, Function.identity())));
             return container;
@@ -117,7 +116,7 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                         List<PrimeColumn> columnList = levelMap.get(level);
                         List<DataBlock.Element> elements = columnList.stream() //
                                 .map(DataBlock.Element::new).collect(Collectors.toList());
-                        levels.add(new DataBlock.Level(level, levelMetadata.getDescription(), elements));
+                        levels.add(new DataBlock.Level(level, elements));
                     }
                 }
                 if (CollectionUtils.isNotEmpty(levels)) {
@@ -125,49 +124,10 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                     blocks.add(new DataBlock(block, levels));
                 }
             }
+            blocks.add(getBaseInfoBlock(true));
+            blocks.add(getEntityResolutionBlock(true));
             blocks.sort(Comparator.comparing(DataBlock::getBlockId));
             return blocks;
-        }
-    }
-
-    @Override
-    public DataBlockEntitlementContainer getBaseEntitlement() {
-        String msg = "Fetch and construct data block metadata container.";
-        try (PerformanceTimer time = new PerformanceTimer(msg)) {
-            List<DataBlockDomainEntitlement> entitlementList = entitlementRepository.findAll();
-            Map<DataDomain, Map<DataRecordType, Map<String, List<DataBlockLevel>>>> domainMap = new HashMap<>();
-            for (DataBlockDomainEntitlement entitlement: entitlementList) {
-                DataDomain domain = entitlement.getDomain();
-                DataRecordType recordType = entitlement.getRecordType();
-                DataBlockLevelMetadata levelMetadata = entitlement.getDataBlockLevel();
-                String block = levelMetadata.getBlock();
-                DataBlockLevel level = levelMetadata.getLevel();
-                Map<DataRecordType, Map<String, List<DataBlockLevel>>> recordTypeMap = //
-                        domainMap.getOrDefault(domain, new HashMap<>());
-                Map<String, List<DataBlockLevel>> blockMap = recordTypeMap.getOrDefault(recordType, new HashMap<>());
-                List<DataBlockLevel> levelList = blockMap.getOrDefault(block, new ArrayList<>());
-                levelList.add(level);
-                blockMap.put(block, levelList);
-                recordTypeMap.put(recordType, blockMap);
-                domainMap.put(domain, recordTypeMap);
-            }
-            List<DataBlockEntitlementContainer.Domain> domains = new ArrayList<>();
-            for (DataDomain domain: domainMap.keySet()) {
-                Map<DataRecordType, Map<String, List<DataBlockLevel>>> recordTypeMap = domainMap.get(domain);
-                Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> recordTypes = new TreeMap<>();
-                for (DataRecordType recordType: recordTypeMap.keySet()) {
-                    Map<String, List<DataBlockLevel>> blockMap = recordTypeMap.get(recordType);
-                    List<DataBlockEntitlementContainer.Block> blocks = new ArrayList<>();
-                    for (String blockId: blockMap.keySet()) {
-                        blocks.add(new DataBlockEntitlementContainer.Block(blockId, blockMap.get(blockId)));
-                    }
-                    blocks.sort(Comparator.comparing(DataBlockEntitlementContainer.Block::getBlockId));
-                    recordTypes.put(recordType, blocks);
-                }
-                domains.add(new DataBlockEntitlementContainer.Domain(domain, recordTypes));
-            }
-            domains.sort(Comparator.comparing(domain -> domain.getDomain().ordinal()));
-            return new DataBlockEntitlementContainer(domains);
         }
     }
 
@@ -269,6 +229,32 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         }
         elementIdsToRemove.forEach(elementIdToBlockElementMap::remove);
         blockIdToBlockElementMap.put(blockId, elements);
+    }
+
+    private DataBlock getBaseInfoBlock(boolean includeElements) {
+        DataBlock.Level level;
+        if (includeElements) {
+            List<PrimeColumn> primeColumns = primeColumnRepository.findAllByDataBlocks_Block("baseinfo");
+            List<DataBlock.Element> elements = primeColumns.stream() //
+                    .map(DataBlock.Element::new).collect(Collectors.toList());
+            level = new DataBlock.Level(DataBlockLevel.L1, elements);
+        } else {
+            level = new DataBlock.Level(DataBlockLevel.L1);
+        }
+        return new DataBlock(BLOCK_BASE_INFO, Collections.singleton(level));
+    }
+
+    private DataBlock getEntityResolutionBlock(boolean includeElements) {
+        DataBlock.Level level;
+        if (includeElements) {
+            List<PrimeColumn> primeColumns = candidateService.candidateColumns();
+            List<DataBlock.Element> elements = primeColumns.stream() //
+                    .map(DataBlock.Element::new).collect(Collectors.toList());
+            level = new DataBlock.Level(DataBlockLevel.L1, elements);
+        } else {
+            level = new DataBlock.Level(DataBlockLevel.L1);
+        }
+        return new DataBlock(BLOCK_ENTITY_RESOLUTION, Collections.singleton(level));
     }
 
 }

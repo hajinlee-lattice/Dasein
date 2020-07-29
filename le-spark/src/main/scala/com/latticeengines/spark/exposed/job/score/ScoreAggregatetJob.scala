@@ -13,24 +13,24 @@ class ScoreAggregateJob extends AbstractSparkJob[ScoreAggregateJobConfig] {
     private val expectedRevenueField = InterfaceName.ExpectedRevenue.name
     private val probabilityField = InterfaceName.Probability.name
     private val avgField = InterfaceName.AverageScore.name
-    
+
     override def runJob(spark: SparkSession, lattice: LatticeContext[ScoreAggregateJobConfig]): Unit = {
 
       val scoreResult: DataFrame = lattice.input.head
       val config: ScoreAggregateJobConfig = lattice.config
-      var result = 
+      val result =
         if (config.scoreFieldMap != null) aggregateMultiModel(scoreResult, config) else aggregateSingleModel(scoreResult, config)
-    
+
       lattice.output = result::Nil
     }
-  
+
     def aggregateMultiModel(scoreResult: DataFrame, config: ScoreAggregateJobConfig) : DataFrame = {
       val modelGuidField = config.modelGuidField
       val scoreFieldMap = config.scoreFieldMap.asScala.toMap
-      var scoredColumns = scoreFieldMap.values.toSet
+      val scoredColumns = scoreFieldMap.values.toSet
       val selectedColumns = scoredColumns + modelGuidField
-      
-      var exprs = scoredColumns.map((_ -> "avg")).toMap
+
+      val exprs = scoredColumns.map((_ -> "avg")).toMap
       val aggregateResult = scoreResult //
         .select(selectedColumns.toSeq.map(name=>col(name)): _*) //
         .na.fill(0) //
@@ -41,14 +41,14 @@ class ScoreAggregateJob extends AbstractSparkJob[ScoreAggregateJobConfig] {
         val scoreField = scoreFieldMap(modelId)
         r.getAs[Double](s"avg($scoreField)")
       }
-      
+
       val createAvgUdf = udf(createAvgFunc)
-      aggregateResult.withColumn(avgField, createAvgUdf(struct(aggregateResult.columns map col: _*))).select(modelGuidField, avgField) 
+      aggregateResult.withColumn(avgField, createAvgUdf(struct(aggregateResult.columns map col: _*))).select(modelGuidField, avgField)
 
     }
-  
+
     def aggregateSingleModel(scoreResult: DataFrame, config: ScoreAggregateJobConfig) : DataFrame = {
-      val scoreFieldName = 
+      val scoreFieldName =
         if (config.expectedValue != null && config.expectedValue) expectedRevenueField else probabilityField
       scoreResult //
         .select(scoreFieldName) //

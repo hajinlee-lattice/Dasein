@@ -42,7 +42,10 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.AttributeSetResponse;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -58,9 +61,6 @@ import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.Subcatego
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -82,6 +82,8 @@ import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
+
+import j2html.TagCreator;
 
 @Component("attrConfigService")
 public class AttrConfigServiceImpl implements AttrConfigService {
@@ -166,10 +168,10 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             AttrConfigSelection categoryOverview = new AttrConfigSelection();
             categoryOverview.setLimit(activationOverview.getLimit());
             categoryOverview.setTotalAttrs(activationOverview.getTotalAttrs());
-            categoryOverview.setSelected(
-                    activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active) != null
-                            ? activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active)
-                            : 0L);
+            Map<AttrState, Long> summary = activationOverview.getPropSummary().get(ColumnMetadataKey.State);
+            long activeAttrs = summary.getOrDefault(AttrState.Active, 0L);
+            long deprecatedAttrs = summary.getOrDefault(AttrState.Deprecated, 0L);
+            categoryOverview.setSelected(activeAttrs + deprecatedAttrs);
             categoryOverview.setDisplayName(category.getName());
             selections.add(categoryOverview);
         }
@@ -352,9 +354,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             MutablePair<Integer, Set<String>> pair = errorMap.get(type);
             Set<String> details = pair.getRight();
             html.append((b(String.format(type.getMessage(), pair.getLeft()) + ":").render()));
+            //
             html.append(ul().with( //
-                    each(details, attr -> //
-                            li(attr))).render());
+                    each(details, TagCreator::li)).render());
         }
         return html.toString();
     }

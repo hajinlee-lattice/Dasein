@@ -26,6 +26,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -54,7 +55,6 @@ import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
@@ -96,6 +96,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private boolean entityMatchEnabled;
 
+    private boolean entityMatchGAOnly;
+
     private boolean emptyRawStore;
 
     @Override
@@ -105,6 +107,10 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         entityMatchEnabled = configuration.isEntityMatchEnabled();
         if (entityMatchEnabled) {
             log.info("Entity match is enabled for transaction merge");
+        }
+        entityMatchGAOnly = configuration.isEntityMatchGAOnly();
+        if (entityMatchGAOnly) {
+            log.info("Only Entity match GA is enabled for transaction merge");
         }
 
         mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
@@ -129,7 +135,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         longFields = new ArrayList<>();
         intFields = new ArrayList<>();
         Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true,
-                entityMatchEnabled);
+                entityMatchEnabled, entityMatchGAOnly);
         getTableFields(rawTemplate, stringFields, longFields, intFields);
 
         List<String> curStringFields = new ArrayList<>();
@@ -461,7 +467,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private Table buildPeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
-        Table table = SchemaRepository.instance().getSchema(schema, true, entityMatchEnabled);
+        Table table = SchemaRepository.instance().getSchema(schema, true, entityMatchEnabled, entityMatchGAOnly);
         String tableName = NamingUtils.timestamp(role.name());
         table.setName(tableName);
         String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();

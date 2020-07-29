@@ -59,7 +59,6 @@ import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
@@ -67,9 +66,6 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 public class TableEntityMgrImpl implements TableEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(TableEntityMgrImpl.class);
-
-    @Value("${metadata.hive.enabled:false}")
-    private boolean hiveEnabled;
 
     @Inject
     private AttributeDao attributeDao;
@@ -88,9 +84,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Inject
     private TableDao tableDao;
-
-    @Inject
-    private HiveTableDao hiveTableDao;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -112,9 +105,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
-
-    @Value("${common.le.environment}")
-    private String leEnv;
 
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("table-mgr", ThreadPoolUtils.NUM_CORES * 2);
 
@@ -156,10 +146,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 dataRuleDao.create(dataRule);
             }
         }
-
-        if (hiveEnabled) {
-            hiveTableDao.create(entity);
-        }
     }
 
     @Override
@@ -194,9 +180,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         final Table entity = findByName(name, false);
         if (entity != null) {
             tableDao.delete(entity);
-            if (hiveEnabled) {
-                hiveTableDao.deleteIfExists(entity);
-            }
         }
     }
 

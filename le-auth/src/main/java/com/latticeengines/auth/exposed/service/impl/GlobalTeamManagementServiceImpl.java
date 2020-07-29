@@ -2,6 +2,7 @@ package com.latticeengines.auth.exposed.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTeamEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
@@ -64,14 +66,15 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         if (StringUtils.isEmpty(teamName)) {
             throw new LedpException(LedpCode.LEDP_18242);
         }
+        Map<String, Object> paramsMap = ImmutableMap.of("teamName", teamName, "tenantName", globalAuthTenant.getName());
         if (teamName.equals(TeamUtils.GLOBAL_TEAM)) {
-            throw new LedpException(LedpCode.LEDP_18241, new String[]{teamName, globalAuthTenant.getName()});
+            throw new LedpException(LedpCode.LEDP_18241, paramsMap);
         }
         globalTeamData.setTeamName(teamName);
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
                 globalTeamData.getTeamName());
         if (globalAuthTeam != null && !globalAuthTeam.getTeamId().equals(teamId)) {
-            throw new LedpException(LedpCode.LEDP_18241, new String[]{teamName, globalAuthTenant.getName()});
+            throw new LedpException(LedpCode.LEDP_18241, paramsMap);
         }
     }
 

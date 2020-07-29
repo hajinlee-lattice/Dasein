@@ -13,14 +13,14 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
-import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
+import com.latticeengines.pls.service.Oauth2Service;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 @Component("oauth2Service")
-public class Oauth2ServiceImpl implements Oauth2Interface {
+public class Oauth2ServiceImpl implements Oauth2Service {
 
     @Inject
     private Oauth2RestApiProxy oauth2RestApiProxy;

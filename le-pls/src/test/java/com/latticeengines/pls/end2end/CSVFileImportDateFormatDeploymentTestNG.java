@@ -143,7 +143,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         }
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true, false);
         String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
         Assert.assertNotNull(fileContent);
         String[] mappings = fileContent.split("\n");
@@ -258,7 +258,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
 
         Assert.assertEquals(dfId, dfIdExtra);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true, false);
         String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
 
         Assert.assertNotNull(fileContent);

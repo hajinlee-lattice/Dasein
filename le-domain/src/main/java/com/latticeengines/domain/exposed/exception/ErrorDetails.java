@@ -10,8 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ErrorDetails {
     @JsonProperty
     private LedpCode errorCode;
+
     @JsonProperty
     private String errorMsg;
+
     @JsonProperty
     private String stackTrace;
 

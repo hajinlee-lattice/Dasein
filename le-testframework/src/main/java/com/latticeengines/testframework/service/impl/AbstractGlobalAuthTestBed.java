@@ -321,6 +321,13 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         return tenant;
     }
 
+    protected Tenant addExistingTenant(String fullTenantId) {
+        String tenantId = CustomerSpace.parse(fullTenantId).toString();
+        Tenant retrievedTenant = getTenantBasedOnId(tenantId);
+        testTenants.add(retrievedTenant);
+        return retrievedTenant ;
+    }
+
     @Override
     public void excludeTestTenantsForCleanup(List<Tenant> tenants) {
         excludedCleanupTenantIds.addAll(tenants.stream().map(Tenant::getId).collect(Collectors.toList()));

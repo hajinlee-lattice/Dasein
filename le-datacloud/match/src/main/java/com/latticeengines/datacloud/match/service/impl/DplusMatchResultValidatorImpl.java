@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Accepted;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Rejected;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,34 +33,48 @@ public class DplusMatchResultValidatorImpl implements DnBMatchResultValidator {
             return true;
         }
 
-        DplusMatchRule matchRule = res.getMatchRule();
         DnBMatchCandidate candidate = CollectionUtils.isNotEmpty(res.getCandidates()) ? res.getCandidates().get(0) : null;
-        if (matchRule != null && candidate != null) {
-            DnBMatchInsight insight = candidate.getMatchInsight();
-            DplusMatchRule.ClassificationCriterion ac = matchRule.getAcceptCriterion();
-            int confidenceCode = insight.getConfidenceCode();
-            int lowest = ac.getLowestConfidenceCode();
-            int highest = ac.getHighestConfidenceCode();
-            if (confidenceCode >= lowest && confidenceCode <= highest) {
+        if (candidate != null) {
+            DnBMatchCandidate.Classification classification = Accepted;
+            DplusMatchRule matchRule = res.getMatchRule();
+            if (matchRule != null) {
+                classification = classifyCandidate(candidate, matchRule);
+            }
+            candidate.setClassification(classification);
+            if (Accepted.equals(classification)) {
                 res.setACPassed(true);
                 return true;
-            } else if (CollectionUtils.isNotEmpty(ac.getMatchGradePatterns())) {
-                String matchGrade = insight.getMatchGrade().getRawCode();
-                log.info("Checking match grade {}, because the confidence code {} is out of the range [{}, {}]", //
-                        matchGrade, confidenceCode, lowest, highest);
-                boolean match = ac.getCompiledMatchGradePatterns().stream() //
-                        .anyMatch(pattern -> pattern.matcher(matchGrade).matches());
-                if (match) {
-                    res.setACPassed(true);
-                    return true;
-                }
+            } else {
+                res.setDnbCode(DnBReturnCode.DISCARD);
+                res.setACPassed(false);
+                return false;
             }
-            res.setDnbCode(DnBReturnCode.DISCARD);
-            res.setACPassed(false);
-            return false;
         }
         res.setACPassed(true);
         return true;
+    }
+
+    private DnBMatchCandidate.Classification classifyCandidate(DnBMatchCandidate candidate, DplusMatchRule matchRule) {
+        DnBMatchCandidate.Classification classification = Rejected;
+        DnBMatchInsight insight = candidate.getMatchInsight();
+        DplusMatchRule.ClassificationCriterion ac = matchRule.getAcceptCriterion();
+        int confidenceCode = insight.getConfidenceCode();
+        int lowest = ac.getLowestConfidenceCode();
+        int highest = ac.getHighestConfidenceCode();
+        if (confidenceCode >= lowest && confidenceCode <= highest) {
+            candidate.setClassification(Accepted);
+            classification = Accepted;
+        } else if (CollectionUtils.isNotEmpty(ac.getMatchGradePatterns())) {
+            String matchGrade = insight.getMatchGrade().getRawCode();
+            log.info("Checking match grade {}, because the confidence code {} is out of the range [{}, {}]", //
+                    matchGrade, confidenceCode, lowest, highest);
+            boolean match = ac.getCompiledMatchGradePatterns().stream() //
+                    .anyMatch(pattern -> pattern.matcher(matchGrade).matches());
+            if (match) {
+                classification = Accepted;
+            }
+        }
+        return classification;
     }
 
 }

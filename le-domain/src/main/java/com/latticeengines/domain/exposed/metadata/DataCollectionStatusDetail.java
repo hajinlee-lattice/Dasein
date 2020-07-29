@@ -34,6 +34,10 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("ActivityStreamMapStr")
     private String activityStreamMapStr;
 
+    // streamId -> dateId
+    @JsonProperty("ActivityStreamLastRefresh")
+    private Map<String, Integer> activityStreamLastRefresh;
+
     @JsonProperty("DimensionMetadataSignature")
     private String dimensionMetadataSignature;
 
@@ -95,6 +99,9 @@ public class DataCollectionStatusDetail implements Serializable {
 
     @JsonProperty("activityPartitionKeyMigrated")
     private boolean activityPartitionKeyMigrated = false;
+
+    @JsonProperty("timeline_rebuild_flag")
+    private Boolean timelineRebuildFlag;
 
     public Integer getMinTxnDate() {
         return minTxnDate;
@@ -274,5 +281,21 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setActivityPartitionKeyMigrated(boolean activityPartitionKeyMigrated) {
         this.activityPartitionKeyMigrated = activityPartitionKeyMigrated;
+    }
+
+    public Map<String, Integer> getActivityStreamLastRefresh() {
+        return activityStreamLastRefresh;
+    }
+
+    public void setActivityStreamLastRefresh(Map<String, Integer> activityStreamLastRefresh) {
+        this.activityStreamLastRefresh = activityStreamLastRefresh;
+    }
+
+    public Boolean isTimelineRebuildFlag() {
+        return timelineRebuildFlag;
+    }
+
+    public void setTimelineRebuildFlag(Boolean timelineRebuildFlag) {
+        this.timelineRebuildFlag = timelineRebuildFlag;
     }
 }

@@ -809,9 +809,9 @@ public class EmailServiceImpl implements EmailService {
                 EmailTemplateBuilder builder = new EmailTemplateBuilder(
                         EmailTemplateBuilder.Template.DCP_UPLOAD_COMPLETED);
 
-                builder.replaceToken("{{uploadId}}", uploadEmailInfo.getUploadId());
-                builder.replaceToken("{{sourceId}}", uploadEmailInfo.getSourceId());
-                builder.replaceToken("{{projectId}}", uploadEmailInfo.getProjectId());
+                builder.replaceToken("{{uploadDisplayName}}", uploadEmailInfo.getUploadDisplayName());
+                builder.replaceToken("{{sourceDisplayName}}", uploadEmailInfo.getSourceDisplayName());
+                builder.replaceToken("{{projectDisplayName}}", uploadEmailInfo.getProjectDisplayName());
 
                 Multipart mp = builder.buildMultipart();
                 sendMultiPartEmail(EmailSettings.DCP_UPLOAD_COMPLETED_SUBJECT,
@@ -832,9 +832,9 @@ public class EmailServiceImpl implements EmailService {
                 EmailTemplateBuilder builder = new EmailTemplateBuilder(
                         Template.DCP_UPLOAD_FAILED);
 
-                builder.replaceToken("{{uploadId}}", uploadEmailInfo.getUploadId());
-                builder.replaceToken("{{sourceId}}", uploadEmailInfo.getSourceId());
-                builder.replaceToken("{{projectId}}", uploadEmailInfo.getProjectId());
+                builder.replaceToken("{{uploadDisplayName}}", uploadEmailInfo.getUploadDisplayName());
+                builder.replaceToken("{{sourceDisplayName}}", uploadEmailInfo.getSourceDisplayName());
+                builder.replaceToken("{{projectDisplayName}}", uploadEmailInfo.getProjectDisplayName());
 
                 Multipart mp = builder.buildMultipart();
                 sendMultiPartEmail(EmailSettings.DCP_UPLOAD_FAILED_SUBJECT,

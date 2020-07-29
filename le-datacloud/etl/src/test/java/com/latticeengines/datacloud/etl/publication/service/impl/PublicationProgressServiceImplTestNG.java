@@ -18,9 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
-import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
@@ -46,7 +44,6 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
         prepareCleanPod(POD_ID);
         publicationEntityMgr.removePublication(SQL_PUBLICATION_NAME);
         publicationEntityMgr.removePublication(DYNAMO_PUBLICATION_NAME);
-        sqlPublication = createSQLPublication();
         createDynamoPublication();
     }
 
@@ -107,22 +104,6 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
         PublicationProgress progress = publicationProgressService.publishVersion(publication, null, CURRENT_VERSION,
                 SUBMITTER);
         Assert.assertNotNull(progress.getDestination());
-    }
-
-    private Publication createSQLPublication() {
-        Publication publication = new Publication();
-        publication.setPublicationName(SQL_PUBLICATION_NAME);
-        publication.setSourceName("TestSource");
-        publication.setNewJobMaxRetry(3);
-        publication.setPublicationType(Publication.PublicationType.SQL);
-        publication.setMaterialType(MaterialType.INGESTION);
-        PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
-        configuration.setDefaultTableName("DefaultTable");
-        configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.VERSIONED);
-        publication.setDestinationConfiguration(configuration);
-        publication.setSchedularEnabled(false);
-
-        return publicationEntityMgr.addPublication(publication);
     }
 
     private SqlDestination getDestination() {

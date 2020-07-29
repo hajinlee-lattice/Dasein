@@ -32,7 +32,7 @@ public class AccountLookupToDynamoStepConfiguration extends BaseExportToDynamoCo
     }
 
     @Override
-    public boolean registerDataUnit() {
+    public boolean getRegisterDataUnit() {
         return false;
     }
 }

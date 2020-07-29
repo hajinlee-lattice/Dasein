@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.importdata.ImportDynamoTableFromS3;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.MigrateDynamoWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportTimelineRawTableToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -25,8 +26,11 @@ public class MigrateDynamoWorkflow extends AbstractWorkflow<MigrateDynamoWorkflo
     @Inject
     private ExportToDynamo exportToDynamo;
 
+    @Inject
+    private ExportTimelineRawTableToDynamo exportTimelineRawTableToDynamo;
+
     @Override
     public Workflow defineWorkflow(MigrateDynamoWorkflowConfiguration config) {
-        return new WorkflowBuilder(name(), config).next(importDynamoTableFromS3).next(exportToDynamo).build();
+        return new WorkflowBuilder(name(), config).next(importDynamoTableFromS3).next(exportToDynamo).next(exportTimelineRawTableToDynamo).build();
     }
 }

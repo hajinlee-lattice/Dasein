@@ -46,6 +46,12 @@ public class MatchKeyTuple implements Fact {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
+    @JsonProperty("RegistrationNumber")
+    private String registrationNumber;
+
+    @JsonProperty("RegistrationNumberType")
+    private String registrationNumberType;
+
     @JsonProperty("DUNS")
     private String duns;
 
@@ -196,6 +202,24 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
+    @MetricField(name = MatchConstants.REG_NUMBER_FIELD)
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+        refreshCachedStrings();
+    }
+
+    @MetricField(name = MatchConstants.REG_NUMBER_TYPE_FIELD)
+    public String getRegistrationNumberType() {
+        return registrationNumberType;
+    }
+
+    public void setRegistrationNumberType(String registrationNumberType) {
+        this.registrationNumberType = registrationNumberType;
+    }
 
     public List<Pair<String, String>> getSystemIds() {
         return systemIds;
@@ -242,6 +266,10 @@ public class MatchKeyTuple implements Fact {
         return StringUtils.isNotEmpty(phoneNumber);
     }
 
+    public boolean hasRegNumber() {
+        return StringUtils.isNotEmpty(registrationNumber);
+    }
+
     public boolean hasDuns() {
         return StringUtils.isNotEmpty(duns);
     }
@@ -265,7 +293,7 @@ public class MatchKeyTuple implements Fact {
 
     public boolean hasDomainOnly() {
         return hasDomain()
-                && !(hasName() || hasLocation() || hasPhoneNumber() || hasDuns() || hasEmail() || hasSystemIds());
+                && !(hasName() || hasLocation() || hasPhoneNumber() || hasDuns() || hasEmail() || hasSystemIds() || hasRegNumber());
     }
 
     public boolean hasLocation() {
@@ -331,6 +359,12 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(zipcode)) {
             sb.append(String.format("%s=%s, ", MatchConstants.ZIPCODE_FIELD, zipcode));
         }
+        if (hasRegNumber()) {
+            sb.append(String.format("%s=%s, ", MatchKey.RegNumber.name(), registrationNumber));
+            if (StringUtils.isNotBlank(registrationNumberType)) {
+                sb.append(String.format("%s=%s, ", MatchKey.RegNumberType.name(), registrationNumberType));
+            }
+        }
         if (StringUtils.isNotEmpty(country)) {
             sb.append(String.format("%s=%s, ", MatchConstants.COUNTRY_FIELD, country));
         }
@@ -380,6 +414,10 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(zipcode)) {
             appendKey(sb, MatchKey.Zipcode.name());
         }
+        if (hasRegNumber()) {
+            appendKey(sb, MatchKey.RegNumber.name());
+            appendKey(sb, MatchKey.RegNumberType.name());
+        }
         if (StringUtils.isNotEmpty(country)) {
             appendKey(sb, MatchKey.Country.name());
         }
@@ -425,6 +463,10 @@ public class MatchKeyTuple implements Fact {
         }
         if (StringUtils.isNotEmpty(zipcode)) {
             appendKeyValue(sb, MatchKey.Zipcode.name(), zipcode);
+        }
+        if (hasRegNumber()) {
+            appendKeyValue(sb, MatchKey.RegNumber.name(), registrationNumber);
+            appendKeyValue(sb, MatchKey.RegNumberType.name(), registrationNumberType);
         }
         if (StringUtils.isNotEmpty(country)) {
             appendKeyValue(sb, MatchKey.Country.name(), country);
@@ -486,6 +528,11 @@ public class MatchKeyTuple implements Fact {
 
         public Builder withState(String state) {
             matchKeyTuple.setState(state);
+            return this;
+        }
+
+        public Builder withRegNumber(String regNumber) {
+            matchKeyTuple.setRegistrationNumber(regNumber);
             return this;
         }
 

@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <bean id="emailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
-        <property name="from" value="${monitor.emailsettings.from:no-reply@dnb.com}" />
+        <property name="from" value="${monitor.emailsettings.from:no-reply@lattice-engines.com}" />
         <property name="server" value="${monitor.emailsettings.server:smtprelay.lattice.local}" />
         <property name="username" value="${monitor.emailsettings.username:build@lattice-engines.com}" />
         <property name="password" value="${monitor.emailsettings.password:ryTy2wEiaw51Le9qTXxx3w==}" />

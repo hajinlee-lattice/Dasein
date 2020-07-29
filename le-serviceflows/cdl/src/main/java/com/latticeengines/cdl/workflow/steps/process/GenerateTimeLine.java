@@ -62,7 +62,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private static final String TIMELINE_TABLE_PREFIX = "Timeline_%s";
     private static final String PARTITION_KEY_NAME = InterfaceName.PartitionKey.name();
     private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();
-    private static final String SUFFIX = "_TABLE_ROLE";
+    private static final String SUFFIX = String.format("_%s", TableRoleInCollection.TimelineProfile.name());
     static final String BEAN_NAME = "generateTimeline";
     private static final TypeReference<Map<String, Map<String, DimensionMetadata>>> METADATA_MAP_TYPE = new TypeReference<Map<String, Map<String, DimensionMetadata>>>() {
     };
@@ -109,6 +109,10 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = inactive.complement();
         dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus.getTimelineRebuildFlag() == null || Boolean.TRUE.equals(dcStatus.getTimelineRebuildFlag())) {
+            needRebuild = true;
+            dcStatus.setTimelineRebuildFlag(Boolean.FALSE);
+        }
         timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
         activeTimelineMasterTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
                 TableRoleInCollection.TimelineProfile, active, null);

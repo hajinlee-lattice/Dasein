@@ -385,10 +385,25 @@ public final class MatchInputValidator {
      * @param keySet
      */
     private static void validateLDCAccountMatchKeys(Set<MatchKey> keySet) {
-        if (!keySet.contains(MatchKey.DUNS) && !keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
-                && !keySet.contains(MatchKey.LatticeAccountID) && !keySet.contains(MatchKey.LookupId)) {
-            throw new IllegalArgumentException(
-                    "Neither domain nor name nor duns nor lattice account id not cdl id is provided for LDC 2.0 matcher");
+        boolean valid = false;
+        if (keySet.contains(MatchKey.Domain)) {
+            // valid for domain match
+            valid = true;
+        } else if (keySet.contains(MatchKey.DUNS)) {
+            // valid for DUNS match
+            valid = true;
+        } else if (keySet.contains(MatchKey.Name) || keySet.contains(MatchKey.RegNumber) || keySet.contains(MatchKey.PhoneNumber)) {
+            // valid for name location match
+            valid = true;
+        } else if (keySet.contains(MatchKey.LatticeAccountID)) {
+            // valid for LDC fetch
+            valid = true;
+        } else if (keySet.contains(MatchKey.LookupId)) {
+            // valid for CDL lookup
+            valid = true;
+        }
+        if (!valid) {
+            throw new IllegalArgumentException("None of valid match key combinations is provided for LDC 2.0 matcher");
         }
     }
 

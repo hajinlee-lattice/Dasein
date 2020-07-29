@@ -21,12 +21,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.Status;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 
 @Component
 public class GraphDependencyToUIActionUtil {
@@ -79,14 +80,8 @@ public class GraphDependencyToUIActionUtil {
         return uiAction;
     }
 
-    public UIAction generateUIAction(String title, View view, Status status, String message) {
-        UIAction uiAction;
-        uiAction = new UIAction();
-        uiAction.setTitle(title);
-        uiAction.setView(view);
-        uiAction.setStatus(status);
-        uiAction.setMessage(message);
-        return uiAction;
+    private UIAction generateUIAction(String title, View view, Status status, String message) {
+        return UIActionUtils.generateUIAction(title, view, status, message);
     }
 
     private String generateHtmlMsgWithTeamInfo(String entity, GlobalTeam authTeam) {
@@ -171,11 +166,13 @@ public class GraphDependencyToUIActionUtil {
             String titleForSpecificCode, String messageHeaderForSpecificCode, View viewForSpecificCode,
             String defaultTitle, View defaultView) {
         UIAction uiAction;
-        if (ex instanceof LedpException && ((LedpException) ex).getCode() == codeToProcess) {
+        if (ex != null && ex.getCode() == codeToProcess) {
             uiAction = generateUIAction(titleForSpecificCode, viewForSpecificCode, Status.Error, generateHtmlMsg(
                     extractDependencies(ex.getMessage(), LedpCode.LEDP_40042), messageHeaderForSpecificCode, null));
-        } else {
+        } else if (ex != null) {
             uiAction = generateUIAction(defaultTitle, defaultView, Status.Error, ex.getMessage());
+        } else {
+            uiAction = generateUIAction(defaultTitle, defaultView, Status.Error, "Unknown error.");
         }
         return uiAction;
     }

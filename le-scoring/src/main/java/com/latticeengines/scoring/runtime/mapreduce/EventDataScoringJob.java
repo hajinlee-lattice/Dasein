@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.util.ScoringConstants;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
@@ -41,7 +41,7 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
 
     @Override
     public String getJobType() {
-        return ScoringDaemonService.SCORING_JOB_TYPE;
+        return ScoringConstants.SCORING_JOB_TYPE;
     }
 
     @Override

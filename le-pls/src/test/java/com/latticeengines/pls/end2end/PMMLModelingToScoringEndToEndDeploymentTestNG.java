@@ -58,8 +58,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -75,7 +75,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     private SourceFile sourceFile;
 
     @Inject
-    protected InternalScoringApiInterface internalScoringApiProxy;
+    protected InternalScoringApiProxy internalScoringApiProxy;
 
     @Inject
     private WorkflowProxy workflowProxy;

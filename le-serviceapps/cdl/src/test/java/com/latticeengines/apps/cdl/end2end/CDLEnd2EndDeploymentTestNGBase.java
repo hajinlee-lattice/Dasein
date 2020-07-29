@@ -247,7 +247,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_UT_EM = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EM;
     // Number of total account after UpdateTransaction entity match test for GA
     // tenants (use ACCOUNT_PT_EM since checkpoint is not changed yet)
-    static final Long ACCOUNT_UT_EMGA = ACCOUNT_PA_EMGA + NEW_ACCOUNT_UT_EMGA;
+    static final Long ACCOUNT_UT_EMGA = ACCOUNT_PA_EM + NEW_ACCOUNT_UT_EMGA;
     // Number of total account after UpdateAccount entity match test -- 1016
     static final Long ACCOUNT_UA_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_UA_EM;
 
@@ -268,7 +268,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total contact after UpdateContact test
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
-    static final Long CONTACT_UA_EM = 1001L; // was 1005L before
+    static final Long CONTACT_UA_EM = 1005L;
+    static final Long CONTACT_UA_EM_SERVING = 1001L;
     // Number of new contact after UpdateContact test
     static final Long NEW_CONTACT_UC = 100L;
     // Number of new contact after UpdateAccount entity match test

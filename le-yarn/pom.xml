@@ -137,12 +137,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-scheduler</artifactId>
-            <version>${project.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-swlib</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>

@@ -1,5 +1,12 @@
 package com.latticeengines.domain.exposed.exception;
 
+/**
+ * IMPORTANT!!!
+ *
+ * This is the master dictionary of platform error code.
+ * Majority of them are not suitable to be exposed to external facing apis and UI.
+ * For UI facing exceptions, register LedpCode in UIActionCode
+ */
 //@formatter:off
 @SuppressWarnings("checkstyle:lineLength")
 public enum LedpCode {
@@ -13,6 +20,10 @@ public enum LedpCode {
     LEDP_00006("Match failed. Please go to match block log to find root cause."), //
     LEDP_00007("Generic rest call error."), //
     LEDP_00008("Match failed. Error: {0}"), //
+    LEDP_00009("Test exception 1"), //
+    LEDP_00010("Test exception 2"), //
+    LEDP_00011("Test exception 3"), //
+    LEDP_00012("Test exception 4"), //
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //
@@ -374,7 +385,7 @@ public enum LedpCode {
     LEDP_18244("This template cannot be reset {0}. Please contact support for further assistance."), //
     LEDP_18245("Cannot reset template {0}."), //
     LEDP_18246("Updating the priorities of the following systems will update the matching and the merging behavior of" +
-            " data. This will affect the data imported going forward." + System.lineSeparator() + "{0}"), //
+            " data. This will affect the data imported going forward."), //
     LEDP_18247("{0}, Please confirm need to reset template."), //
     LEDP_18248("Cannot validate and update system priority."), //
     LEDP_18249("standard field {0} is unmapped but is mapped previously"),//
@@ -546,7 +557,7 @@ public enum LedpCode {
     LEDP_25020("Failed to get current version for predefined column selection [{0}]"), //
     LEDP_25021("unsupported_match_version_type", "Unsupported match version {0}"), //
     LEDP_25022("InputSourceConfig is not FileInputSourceConfig"), //
-    LEDP_25023("Name and CountryCode are required in DnB realtime entity matching"), //
+    LEDP_25023("CountryCode and (Name || RegistrationNumber || PhoneNumber) are required in DnB realtime entity matching"), //
     LEDP_25024("Email is required in DnB realtime email matching"), //
     LEDP_25025("DnBAPIType {0} is not supported in DnB realtime matching"), //
     LEDP_25026("Updated metadata: {0} for version: {1} is not valid due to approved usage conflict"), //
@@ -913,10 +924,8 @@ public enum LedpCode {
     LEDP_60005("Cannot locate raw input file {0}: {1} on S3"), //
     LEDP_60006("CSV file {0} is empty!"), //
     LEDP_60007("Cannot read raw input file {0}: {1}"), //
-    LEDP_60008("Invalid CSV file: {0}"),
+    LEDP_60008("Invalid CSV file: {0}"), //
     LEDP_60009("Error when updating source");
-
-
 
     private String message;
 

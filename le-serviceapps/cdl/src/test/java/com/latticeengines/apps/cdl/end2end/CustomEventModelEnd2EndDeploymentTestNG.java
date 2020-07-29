@@ -122,20 +122,20 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, customerS3Bucket);
             System.out.println("HDFS Path=" + hdfsDataDir);
             System.out.println("S3 Path=" + s3DataDir);
-            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*",
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/*Account*",
                     s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/BucketedAccount*",
                     s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
                     hdfsDataDir + "/AnalyticPurchaseState*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
-                    hdfsDataDir + "/SortedContact*", s3DataDir, "");
+                    hdfsDataDir + "/*Contact*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
                     hdfsDataDir + "/SortedProduct*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
-                    hdfsDataDir + "/Aggregated*", s3DataDir, "");
+                    hdfsDataDir + "/*Aggregated*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
-                    hdfsDataDir + "/Calculated**", s3DataDir, "");
+                    hdfsDataDir + "/*Calculated*", s3DataDir, "");
             HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
             HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
         } catch (Exception ex) {

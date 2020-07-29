@@ -2,6 +2,7 @@ package com.latticeengines.security.exposed.serviceruntime.exception;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -46,15 +48,22 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
             log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
         }
         try {
-            JsonNode node = new ObjectMapper().readTree(body);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode node = objectMapper.readTree(body);
             JsonNode stackTrace = node.get("stackTrace");
             String stackTraceString = null;
             if (stackTrace != null) {
                 stackTraceString = stackTrace.asText();
             }
             LedpCode code = LedpCode.valueOf(node.get("errorCode").asText());
+            JsonNode errorParamsMap = node.get("errorParamsMap");
             String message = node.get("errorMsg").asText();
-            exception = new RemoteLedpException(stackTraceString, status, code, message);
+            Map<String, Object> map = null;
+            if (errorParamsMap != null) {
+                map = objectMapper.convertValue(errorParamsMap, new TypeReference<Map<String, Object>>() {
+                });
+            }
+            exception = new RemoteLedpException(stackTraceString, status, code, message, map);
         } catch (Exception e) {
             log.warn("Failed parse remote exception body " + body);
             return false;

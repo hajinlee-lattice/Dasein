@@ -243,7 +243,7 @@ public abstract class BaseRestApiProxy {
         template.setInterceptors(interceptors);
     }
 
-    void setAuthHeader(String authToken) {
+    public void setAuthHeader(String authToken) {
         AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
@@ -424,6 +424,11 @@ public abstract class BaseRestApiProxy {
     protected <T> List<T> getList(final String method, final String url, final Class<T> returnValueClazz) {
         List<?> list = get(method, url, List.class, false);
         return JsonUtils.convertList(list, returnValueClazz);
+    }
+
+    protected <T> Set<T> getSet(final String method, final String url, final Class<T> returnValueClazz) {
+        Set<?> set = get(method, url, Set.class, false);
+        return JsonUtils.convertSet(set, returnValueClazz);
     }
 
     protected <T> T getNoTracing(final String method, final String url, final Class<T> returnValueClazz) {

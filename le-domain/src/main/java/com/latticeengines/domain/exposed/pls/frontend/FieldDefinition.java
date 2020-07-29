@@ -74,7 +74,6 @@ public class FieldDefinition {
     @JsonProperty
     protected String timeZone;
 
-
     //
     // Properties defined by the template specification (Spec) which may need to be propagated by the UI back to the
     // backend to be stored in the template (Attribute Metadata Table).  Some of these fields are used for

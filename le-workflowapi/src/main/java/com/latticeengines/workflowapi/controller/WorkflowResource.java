@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -303,6 +304,18 @@ public class WorkflowResource {
     @ApiOperation(value = "Delete a workflow from YARN applicationId")
     public void deleteByTenantPid(@PathVariable Long tenantPid, @RequestParam(required = false) String customerSpace) {
         workflowJobService.deleteByTenantPid(customerSpace, tenantPid);
+    }
+
+//    @DeleteMapping("/yarnapps/job/customerSpace/{customerSpace}/cancelWorkflow/{workflowJobPid}")
+//    @ApiOperation(value = "cancel a workflow")
+//    public ResponseDocument<Boolean> cancelByWorkflowJobPid(@PathVariable String customerSpace, @PathVariable Long workflowJobPid) {
+//        return ResponseDocument.successResponse(workflowJobService.cancelWorkflowByWorkflowJobPid(customerSpace, workflowJobPid));
+//    }
+
+    @DeleteMapping("/yarnapps/job/customerSpace/{customerSpace}/cancelWorkflow/applications/{applicationId}")
+    @ApiOperation(value = "cancel a workflow")
+    public ResponseDocument<Boolean> cancelByApplicationId(@PathVariable String customerSpace, @PathVariable String applicationId) {
+        return ResponseDocument.successResponse(workflowJobService.cancelWorkflowByApplicationId(customerSpace, applicationId));
     }
 
     @DeleteMapping("/caches/jobs")

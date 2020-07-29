@@ -234,7 +234,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     }
     
     var finalDfs = new ListBuffer[DataFrame]()
-    var contactNums = new Array[Long](2)
+    val contactNums = new Array[Long](2)
     if (createRecommendationDataFrame) {
       val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable)
       val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)

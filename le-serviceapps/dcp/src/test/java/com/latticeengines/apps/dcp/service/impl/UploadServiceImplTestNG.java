@@ -1,6 +1,5 @@
 package com.latticeengines.apps.dcp.service.impl;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,9 +31,9 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
@@ -47,11 +46,11 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
-        WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
-        Job job1 = new Job();
-        job1.setApplicationId("application_1553048841184_0001");
-        when(workflowProxy.getJobByWorkflowJobPid(anyString(), anyLong())).thenReturn(job1);
-        ReflectionTestUtils.setField(uploadService, "workflowProxy", workflowProxy);
+        SourceFile sourceFile = new SourceFile();
+        sourceFile.setDisplayName("TestDisplayName");
+        SourceFileProxy sourceFileProxy = mock(SourceFileProxy.class);
+        when(sourceFileProxy.findByName(anyString(), anyString())).thenReturn(sourceFile);
+        ReflectionTestUtils.setField(uploadService, "sourceFileProxy", sourceFileProxy);
     }
 
     @Test(groups = "functional")
@@ -101,12 +100,12 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     private void updateMatchResultTable(UploadDetails upload) {
         String uploadId = upload.getUploadId();
-        String matchResult = uploadService.getMatchResultTableName(uploadId);
+        String matchResult = uploadService.getMatchResultTableName(mainCustomerSpace, uploadId);
         Assert.assertTrue(StringUtils.isBlank(matchResult));
 
         Table table = createTable();
         uploadService.registerMatchResult(mainCustomerSpace, uploadId, table.getName());
-        matchResult = uploadService.getMatchResultTableName(uploadId);
+        matchResult = uploadService.getMatchResultTableName(mainCustomerSpace, uploadId);
         Assert.assertEquals(matchResult, table.getName());
         Table matchedTable = tableEntityMgr.findByName(matchResult);
         Assert.assertNotNull(matchedTable);
@@ -114,7 +113,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         Table table2 = createTable();
         uploadService.registerMatchResult(mainCustomerSpace, uploadId, table2.getName());
-        matchResult = uploadService.getMatchResultTableName(uploadId);
+        matchResult = uploadService.getMatchResultTableName(mainCustomerSpace, uploadId);
         Assert.assertEquals(matchResult, table2.getName());
         matchedTable = tableEntityMgr.findByName(matchResult);
         Assert.assertNotNull(matchedTable);

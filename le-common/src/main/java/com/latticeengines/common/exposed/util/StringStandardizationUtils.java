@@ -34,6 +34,17 @@ public class StringStandardizationUtils {
         return singletonUtil.getStandardStringInternal(str);
     }
 
+    public static String getTrimmedString(String str) {
+        String cleanStr = str;
+        if (cleanStr != null) {
+            cleanStr = cleanStr.trim();
+        }
+        if (StringUtils.isBlank(cleanStr)) {
+            cleanStr = null;
+        }
+        return cleanStr;
+    }
+
     public static String cleanNullString(String str) {
         if (StringUtils.isBlank(str)) {
             return null;

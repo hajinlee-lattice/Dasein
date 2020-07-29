@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.dcp.DataReportService;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 
@@ -36,6 +40,16 @@ public class DataReportServiceImpl implements DataReportService {
             return mockReturn();
         }
         return dataReportProxy.getDataReport(customerSpace.toString(), level, ownerId);
+    }
+
+    @Override
+    public String rollupDataReport(DCPReportRequest request) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        ApplicationId appId = dataReportProxy.rollupDataReport(customerSpace.toString(), request);
+        return appId.toString();
     }
 
     /**

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 public interface DirectPlusCandidateService {
 
@@ -15,5 +16,7 @@ public interface DirectPlusCandidateService {
     List<String> candidateOutputFields();
 
     List<Pair<String, Class<?>>> candidateSchema();
+
+    List<PrimeColumn> candidateColumns();
 
 }

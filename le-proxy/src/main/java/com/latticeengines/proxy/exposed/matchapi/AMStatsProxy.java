@@ -6,11 +6,10 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
-import com.latticeengines.network.exposed.propdata.AMStatsInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("amStatsProxy")
-public class AMStatsProxy extends BaseRestApiProxy implements AMStatsInterface {
+public class AMStatsProxy extends BaseRestApiProxy {
 
     public AMStatsProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/amstats");

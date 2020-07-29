@@ -81,15 +81,14 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
      *         idx ]
      */
     Optional<Pair<String, Integer>> appendRawStream(@NotNull List<TransformationStepConfig> steps,
-            @NotNull AtlasStream stream, @NotNull Long paTimestamp, String matchedImportTable, String activeBatchTable,
+            @NotNull AtlasStream stream, @NotNull Long evalTimeEpoch, String matchedImportTable, String activeBatchTable,
             String prefixFormat) {
         if (!needAppendRawStream(matchedImportTable, activeBatchTable)) {
             log.info("No matched import table and no active batch store for stream {}. Skip append raw stream step",
                     stream.getStreamId());
             return Optional.empty();
         }
-
-        return appendRawStream(steps, stream, paTimestamp,
+        return appendRawStream(steps, stream, evalTimeEpoch,
                 getConfigureAppendRawStreamInputFn(matchedImportTable, activeBatchTable), prefixFormat);
     }
 
@@ -207,7 +206,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
                 .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-        log.info("Building raw stream tables, tables={}, pipelineVersion={}", rawStreamTableNames, pipelineVersion);
+        log.info("Building raw stream tables, tables={}, pipelineVersion={}, batchStore={}, version={}", rawStreamTableNames, pipelineVersion, batchStore, inactive);
 
         // link all tables and use streamId as signature
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,

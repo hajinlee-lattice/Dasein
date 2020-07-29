@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.joda.time.DateTime;
-import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,11 +16,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
@@ -93,8 +93,8 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
                 String.class);
         String responseBody = responseEntity.getBody();
         Assert.assertNotNull(responseBody);
-        JSONObject jsonObject = new JSONObject(responseBody);
-        UIAction uiAction = JsonUtils.deserialize(jsonObject.getString("UIAction"), UIAction.class);
+        JsonNode jsonNode = JsonUtils.deserialize(responseBody, JsonNode.class);
+        UIAction uiAction = JsonUtils.deserialize(jsonNode.get("UIAction").asText(), UIAction.class);
         Assert.assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 
@@ -110,8 +110,8 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
                 String.class);
         String responseBody = responseEntity.getBody();
         Assert.assertNotNull(responseBody);
-        JSONObject jsonObject = new JSONObject(responseBody);
-        UIAction uiAction = JsonUtils.deserialize(jsonObject.getString("UIAction"), UIAction.class);
+        JsonNode jsonNode = JsonUtils.deserialize(responseBody, JsonNode.class);
+        UIAction uiAction = JsonUtils.deserialize(jsonNode.get("UIAction").asText(), UIAction.class);
         Assert.assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 

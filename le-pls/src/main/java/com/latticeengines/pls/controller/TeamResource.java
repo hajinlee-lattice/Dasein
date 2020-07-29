@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.util.UIActionUtils;
 import com.latticeengines.pls.service.TeamWrapperService;
 
 import io.swagger.annotations.Api;

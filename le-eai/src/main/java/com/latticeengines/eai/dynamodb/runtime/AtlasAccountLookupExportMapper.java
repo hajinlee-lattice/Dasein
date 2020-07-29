@@ -227,7 +227,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
     }
 
     private String constructLookupKey(String tenant, String lookupId, String lookupVal) {
-        return String.format(KEY_FORMAT, tenant, currentVersion, lookupId, lookupVal);
+        return String.format(KEY_FORMAT, tenant, currentVersion, lookupId, lookupVal.toLowerCase());
     }
 
     private void commitBuffer(Counter whiteCounter, Counter blackCounter) {

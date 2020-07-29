@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_GENERATE_CURATED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
@@ -318,7 +319,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         calculateNumOfContacts = shouldCalculateNumberOfContacts();
         calculateLastActivityDate = shouldCalculateLastActivityDate();
         calculateSystemLastUpdateTime = shouldCalculateSystemLastUpdateTime();
-        skipTransformation = !calculateNumOfContacts && !calculateLastActivityDate
+        skipTransformation = !calculateNumOfContacts && !calculateLastActivityDate && !calculateSystemLastUpdateTime
                 && BooleanUtils.isNotTrue(configuration.getRebuild());
 
         log.info(
@@ -508,6 +509,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
 
     protected boolean shouldPublishDynamo() {
         boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
-        return !skipPublishDynamo && enableTp;
+        boolean hasAccount360 = batonService.isEnabled(customerSpace, ENABLE_ACCOUNT360);
+        return !skipPublishDynamo && (enableTp || hasAccount360);
     }
 }

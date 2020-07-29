@@ -2,11 +2,10 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -14,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +22,7 @@ import com.latticeengines.apps.cdl.entitymgr.S3ImportSystemEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -227,35 +228,47 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             }
         }
 
-        List<S3ImportSystem> changedSystems = new ArrayList<>();
+        // Mark the changed systems and also the priority delta.
+        List<Pair<S3ImportSystem, Integer>> changedSystems = new ArrayList<>();
         for (S3ImportSystem importSystem : currentSystems) {
             S3ImportSystem newSystem = systemMap.get(importSystem.getName());
             if (newSystem.getPriority() != importSystem.getPriority()) {
+                changedSystems.add(Pair.of(importSystem, newSystem.getPriority() - importSystem.getPriority()));
                 importSystem.setPriority(newSystem.getPriority());
-                changedSystems.add(importSystem);
             }
         }
         if (CollectionUtils.isNotEmpty(changedSystems)) {
-            Set<String> warningSystems = validatePriorityChange(customerSpace, changedSystems);
-            if (CollectionUtils.isEmpty(warningSystems)) {
-                changedSystems.forEach(importSystem -> s3ImportSystemEntityMgr.update(importSystem));
+            Map<String, Integer> warningSystems = validatePriorityChange(customerSpace, changedSystems);
+            if (MapUtils.isEmpty(warningSystems)) {
+                changedSystems.forEach(systemPair -> s3ImportSystemEntityMgr.update(systemPair.getLeft()));
             } else {
-                throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems,
-                        System.lineSeparator())});
+                // If the all changed system(with data) has the same delta,
+                // then means the relative position is not changed.
+                if (warningSystems.values().stream().distinct().count() > 1) {
+                    throw new LedpException(LedpCode.LEDP_40091, new String[]{StringUtils.join(warningSystems.keySet(),
+                            System.lineSeparator())});
+                } else {
+                    changedSystems.forEach(systemPair -> s3ImportSystemEntityMgr.update(systemPair.getLeft()));
+                }
             }
         }
     }
 
-    private Set<String> validatePriorityChange(String customerSpace, List<S3ImportSystem> changedSystems) {
-        Set<String> changedSystemNames =
-                changedSystems.stream().map(S3ImportSystem::getName).collect(Collectors.toSet());
-        Map<String, S3ImportSystem> taskSystemMap = dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
-        Set<String> warningSystems = new HashSet<>();
-        if (MapUtils.isNotEmpty(taskSystemMap)) {
-            taskSystemMap.forEach((taskName, importSystem) -> {
-                if (changedSystemNames.contains(importSystem.getName())) {
-                    if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, taskName)) {
-                        warningSystems.add(importSystem.getName());
+    private Map<String, Integer> validatePriorityChange(String customerSpace,
+                                              List<Pair<S3ImportSystem, Integer>> changedSystems) {
+        Map<String, Integer> changedSystemNames =
+                changedSystems.stream().collect(Collectors.toMap(pair -> pair.getLeft().getName(), Pair::getRight));
+        Map<String, List<String>> systemToUniqueIdsMap = dataFeedTaskService.getSystemNameToUniqueIdsMap(customerSpace);
+        Map<String, Integer> warningSystems = new HashMap<>();
+        if (MapUtils.isNotEmpty(systemToUniqueIdsMap)) {
+            log.info("System to UniqueId maps: " + JsonUtils.serialize(systemToUniqueIdsMap));
+            systemToUniqueIdsMap.forEach((systemName, uniqueIdList) -> {
+                if (changedSystemNames.containsKey(systemName)) {
+                    for (String uniqueId: uniqueIdList) {
+                        if (dataFeedTaskTemplateService.hasPAConsumedImportAction(customerSpace, uniqueId)) {
+                            warningSystems.put(systemName, changedSystemNames.get(systemName));
+                            break;
+                        }
                     }
                 }
             });

@@ -186,6 +186,17 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         cloneTableService.linkInactiveTable(tableRole);
     }
 
+    protected void resetEntity(BusinessEntity servingEntity) {
+        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        if (CollectionUtils.isEmpty(resetEntities)) {
+            resetEntities = new HashSet<>();
+        } else {
+            resetEntities = new HashSet<>(resetEntities);
+        }
+        resetEntities.add(servingEntity);
+        putObjectInContext(RESET_ENTITIES, resetEntities);
+    }
+
     // reset means remove this entity from serving stores
     protected boolean isToReset(BusinessEntity servingEntity) {
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);

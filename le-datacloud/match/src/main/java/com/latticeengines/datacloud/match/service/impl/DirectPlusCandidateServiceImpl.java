@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.Classification;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchType;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.NameMatchScore;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.OperatingStatusText;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 @Service
 public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateService {
@@ -24,8 +27,10 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<Object> parseCandidate(DnBMatchCandidate candidate) {
         List<Object> data = new ArrayList<>();
+        data.add(candidate.getClassification().name()); // classification
+        data.add(candidate.getMatchType()); // match type
         String duns = candidate.getDuns();
-        data.add(duns);
+        data.add(duns); // duns
         if (candidate.getMatchInsight() != null) {
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             data.add(matchInsight.getConfidenceCode());
@@ -55,6 +60,8 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<String> candidateOutputFields() {
         // hard coded for now, need to in sync with SplitImportMatchResult
         return Arrays.asList( //
+                Classification, //
+                MatchType, //
                 MatchedDuns, //
                 ConfidenceCode, //
                 MatchGrade, //
@@ -67,12 +74,34 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<Pair<String, Class<?>>> candidateSchema() {
         return Arrays.asList( //
+                Pair.of(Classification, String.class), //
+                Pair.of(MatchType, String.class), //
                 Pair.of(MatchedDuns, String.class), //
                 Pair.of(ConfidenceCode, Integer.class), //
                 Pair.of(MatchGrade, String.class), //
                 Pair.of(MatchDataProfile, String.class), //
                 Pair.of(NameMatchScore, String.class), //
                 Pair.of(OperatingStatusText, String.class) //
+        );
+    }
+
+    @Override
+    public List<PrimeColumn> candidateColumns() {
+        return Arrays.asList( //
+                new PrimeColumn(MatchType, "Match Type", //
+                        "matchDataCriteria"), //
+                new PrimeColumn(MatchedDuns, "Matched D-U-N-S Number", //
+                        "matchCandidates.organization.duns"), //
+                new PrimeColumn(ConfidenceCode, "Match Confidence Code", //
+                        "matchCandidates.matchQualityInformation.confidenceCode"), //
+                new PrimeColumn(MatchGrade, "Match Grade", //
+                        "matchCandidates.matchQualityInformation.matchGrade"), //
+                new PrimeColumn(MatchDataProfile, "Match Data Profile", //
+                        "matchCandidates.matchQualityInformation.matchDataProfile"), //
+                new PrimeColumn(NameMatchScore, "Name Match Score", //
+                        "matchCandidates.matchQualityInformation.nameMatchScore"), //
+                new PrimeColumn(OperatingStatusText, "Operating Status Text", //
+                        "matchCandidates.matchQualityInformation.confidenceCode") //
         );
     }
 

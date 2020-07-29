@@ -21,16 +21,16 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.base.Joiner;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.hadoop.exposed.service.ManifestService;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
+import com.latticeengines.scoring.util.ScoringConstants;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.service.JobService;
@@ -104,7 +104,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         } else {
             log.info("Using specified python 2 conda env {}", properties.getProperty(ScoringProperty.CONDA_ENV.name()));
         }
-        return jobService.submitMRJob(ScoringDaemonService.SCORING_JOB_TYPE, properties);
+        return jobService.submitMRJob(ScoringConstants.SCORING_JOB_TYPE, properties);
     }
 
     @Override

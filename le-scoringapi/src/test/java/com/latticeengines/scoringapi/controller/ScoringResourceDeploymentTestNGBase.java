@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -70,7 +69,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
 
     @Inject
-    protected InternalScoringApiInterface internalScoringApiProxy;
+    protected InternalScoringApiProxy internalScoringApiProxy;
 
     @Inject
     protected MetadataProxy metadataProxy;

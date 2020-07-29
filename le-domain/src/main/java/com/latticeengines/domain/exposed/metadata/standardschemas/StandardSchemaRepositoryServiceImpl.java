@@ -12,7 +12,8 @@ import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 public class StandardSchemaRepositoryServiceImpl implements StandardSchemaService {
 
     @Override
-    public Table getStandardSchema(S3ImportSystem.SystemType systemType, String feedType, boolean enableEntityMatch) {
+    public Table getStandardSchema(S3ImportSystem.SystemType systemType, String feedType, boolean enableEntityMatch,
+                                   boolean onlyGA) {
         if (StringUtils.isBlank(feedType)) {
             return null;
         }
@@ -20,6 +21,6 @@ public class StandardSchemaRepositoryServiceImpl implements StandardSchemaServic
         if (entityType == null) {
             return null;
         }
-        return SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch);
+        return SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch, onlyGA);
     }
 }

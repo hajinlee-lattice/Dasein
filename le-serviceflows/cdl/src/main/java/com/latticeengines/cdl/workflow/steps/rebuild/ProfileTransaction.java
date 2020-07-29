@@ -92,6 +92,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private boolean entityMatchEnabled;
 
+    private boolean entityMatchGAOnly;
+
     private boolean shortCut = false;
 
     @Override
@@ -163,6 +165,10 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
             if (entityMatchEnabled) {
                 log.info("Entity match is enabled for transaction rebuild");
             }
+            entityMatchGAOnly = configuration.isEntityMatchGAOnly();
+            if (entityMatchGAOnly) {
+                log.info("Only entity match GA is enabled for transaction rebuild");
+            }
 
         }
     }
@@ -202,7 +208,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         List<String> tableNames = new ArrayList<>();
         for (String tablePrefix : tablePrefixes) {
-            Table table = SchemaRepository.instance().getSchema(schema, false, entityMatchEnabled);
+            Table table = SchemaRepository.instance().getSchema(schema, false, entityMatchEnabled, entityMatchGAOnly);
             String tableName = tablePrefix + NamingUtils.timestamp(role.name());
             table.setName(tableName);
             String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "")

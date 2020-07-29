@@ -20,7 +20,7 @@
                     "COMPANY NAME",
                     "DISPLAY NAME"
                 ],
-                "required": false
+                "required": true
             },
             {
                 "fieldName": "Address_Street_1",

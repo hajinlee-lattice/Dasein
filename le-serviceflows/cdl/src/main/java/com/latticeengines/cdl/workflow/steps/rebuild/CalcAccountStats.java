@@ -101,16 +101,23 @@ public class CalcAccountStats extends BaseCalcStatsStep<ProcessAccountStepConfig
             doNothing = true;
         } else {
             customerAccountChanged = isChanged(ConsolidatedAccount, ACCOUNT_CHANGELIST_TABLE_NAME);
+            boolean accountProfileChanged = isChanged(AccountProfile);
             Table latticeAccountTbl = attemptGetTableRole(LatticeAccount, false);
+            boolean latticeAccountProfileChanged;
             if (latticeAccountTbl == null) {
                 log.info("This tenant does not have lattice account table.");
                 latticeAccountChanged = false;
+                latticeAccountProfileChanged = false;
             } else {
                 latticeAccountChanged = isChanged(LatticeAccount, LATTICE_ACCOUNT_CHANGELIST_TABLE_NAME);
+                latticeAccountProfileChanged = isChanged(LatticeAccountProfile);
             }
-            doNothing = !(enforceRebuild || customerAccountChanged || latticeAccountChanged);
-            log.info("customerAccountChanged={}, latticeAccountChanged={}, enforceRebuild={}, doNothing={}",
-                    customerAccountChanged, latticeAccountChanged, enforceRebuild, doNothing);
+            doNothing = !(enforceRebuild || customerAccountChanged || accountProfileChanged //
+                    || latticeAccountChanged || latticeAccountProfileChanged);
+            log.info("enforceRebuild={}, customerAccountChanged={}, accountProfileChanged={}, " + //
+                            "latticeAccountChanged={}, latticeAccountProfileChanged={}, doNothing={}",
+                    enforceRebuild, customerAccountChanged, accountProfileChanged, //
+                    latticeAccountChanged, latticeAccountProfileChanged, doNothing);
         }
         return doNothing;
     }

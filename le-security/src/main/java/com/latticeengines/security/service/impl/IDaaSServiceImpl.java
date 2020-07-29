@@ -18,12 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
@@ -49,10 +51,15 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
 
-    public static final String DCP_PRODUCT = "Data Cloud Portal";
-    private static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
+    public static final String DCP_PRODUCT = "DnB Connect";
+    private static final String DCP_ROLE = "DNB_CONNECT_ACCESS";
 
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    private final RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
+            .maximumSize(1000) //
+            .expireAfterWrite(1, TimeUnit.HOURS) //
+            .build(this::refreshOAuthTokens);
+    private volatile String tokenInUse;
 
     @Inject
     private SessionService sessionService;
@@ -78,11 +85,9 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Value("${security.idaas.enabled}")
     private boolean enabled;
 
-    private volatile boolean initialized = false;
-
     @Override
     public LoginDocument login(Credentials credentials) {
-        initialize();
+        refreshToken();
         LoginDocument doc = new LoginDocument();
         doc.setErrors(Collections.singletonList("Failed to authenticate the user."));
         boolean authenticated = authenticate(credentials);
@@ -155,7 +160,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public IDaaSUser getIDaaSUser(String email) {
         if (enabled) {
-            initialize();
+            refreshToken();
             IDaaSUser user = null;
             try {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
@@ -191,7 +196,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public IDaaSUser updateIDaaSUser(IDaaSUser user) {
         if (enabled) {
-            initialize();
+            refreshToken();
             String email = user.getEmailAddress();
             IDaaSUser returnedUser = null;
             try {
@@ -223,7 +228,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         user.setSource(DCP_PRODUCT);
         user.setRequestor(DCP_PRODUCT);
         if (enabled) {
-            initialize();
+            refreshToken();
             String email = user.getEmailAddress();
             IDaaSUser returnedUser = null;
             try {
@@ -259,7 +264,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         request.setRequestor(DCP_PRODUCT);
         request.setProducts(Collections.singletonList(DCP_PRODUCT));
         if (enabled) {
-            initialize();
+            refreshToken();
             IDaaSResponse response = null;
             String email = request.getEmailAddress();
             try {
@@ -295,7 +300,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public IDaaSResponse addRoleToUser(RoleRequest request) {
         if (enabled) {
-            initialize();
+            refreshToken();
             IDaaSResponse response = null;
             String email = request.getEmailAddress();
             try {
@@ -325,7 +330,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         return user.getApplications().contains(DCP_PRODUCT) || user.getRoles().contains(DCP_ROLE);
     }
 
-    private void refreshOAuthTokens() {
+    private String refreshOAuthTokens(String cacheKey) {
         Map<String, String> payload = ImmutableMap.of("grant_type", "client_credentials");
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         String headerValue = String.format("client_id:%s,client_secret:%s", clientId, clientSecret);
@@ -346,29 +351,22 @@ public class IDaaSServiceImpl implements IDaaSService {
         String accessToken = jsonNode.get("access_token").asText();
         String refreshToken = jsonNode.get("refresh_token").asText();
 //        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
-        setOauthToken(accessToken);
+        return accessToken;
     }
 
-    private void setOauthToken(String accessToken) {
-        String headerValue = "Bearer " + accessToken;
-        ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
-        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-        interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
-        interceptors.add(authHeader);
-        restTemplate.setInterceptors(interceptors);
-    }
-
-    private void initialize() {
-        if (!initialized) {
+    private void refreshToken() {
+        String token = tokenCache.get("token");
+        Preconditions.checkNotNull(token, "oauth token cannot be null");
+        if (!token.equals(tokenInUse)) {
             synchronized (this) {
-                if (!initialized) {
-                    refreshOAuthTokens();
-                    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-                    scheduler.setPoolSize(1);
-                    scheduler.setThreadNamePrefix("idaas-oauth-token");
-                    scheduler.initialize();
-                    scheduler.scheduleWithFixedDelay(this::refreshOAuthTokens, TimeUnit.HOURS.toMillis(1));
-                    initialized = true;
+                if (!token.equals(tokenInUse)) {
+                    tokenInUse = token;
+                    String headerValue = "Bearer " + tokenInUse;
+                    ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
+                    List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+                    interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
+                    interceptors.add(authHeader);
+                    restTemplate.setInterceptors(interceptors);
                 }
             }
         }

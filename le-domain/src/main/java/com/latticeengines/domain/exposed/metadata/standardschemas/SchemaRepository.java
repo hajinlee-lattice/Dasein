@@ -150,7 +150,8 @@ public class SchemaRepository {
         return AtlasExportType.getDefaultExportAttributes(entity, enableEntityMatch);
     }
 
-    public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {
+    public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch,
+                           boolean onlyGA) {
         Table table;
         switch (entity) {
         case Account:
@@ -163,7 +164,7 @@ public class SchemaRepository {
             table = getProductSchema();
             break;
         case Transaction:
-            table = getTransactionSchema(enableEntityMatch);
+            table = getTransactionSchema(enableEntityMatch, onlyGA);
             break;
         case PeriodTransaction:
             table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false,
@@ -179,23 +180,23 @@ public class SchemaRepository {
     }
 
     public Table getSchema(BusinessEntity entity) {
-        return getSchema(entity, true, false, false);
+        return getSchema(entity, true, false, false, false);
     }
 
     public Table getSchema(SchemaInterpretation schema) {
-        return getSchema(schema, false, false, false);
+        return getSchema(schema, false, false, false, false);
     }
 
     public Table getSchema(SchemaInterpretation schema, boolean withoutId) {
-        return getSchema(schema, false, withoutId, false);
+        return getSchema(schema, false, withoutId, false, false);
     }
 
-    public Table getSchema(SchemaInterpretation schema, boolean withoutId, boolean enableEntityMatch) {
-        return getSchema(schema, false, withoutId, enableEntityMatch);
+    public Table getSchema(SchemaInterpretation schema, boolean withoutId, boolean enableEntityMatch, boolean onlyGA) {
+        return getSchema(schema, false, withoutId, enableEntityMatch, onlyGA);
     }
 
     public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps, boolean withoutId,
-            boolean enableEntityMatch) {
+            boolean enableEntityMatch, boolean onlyGA) {
         Table table;
         switch (schema) {
         case SalesforceAccount:
@@ -223,7 +224,7 @@ public class SchemaRepository {
             table = getCategorySchema();
             break;
         case Transaction:
-            table = getTransactionSchema(enableEntityMatch);
+            table = getTransactionSchema(enableEntityMatch, onlyGA);
             break;
         case TransactionRaw:
             table = getRawTransactionSchema(includeCdlTimestamps, enableEntityMatch);
@@ -951,7 +952,7 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getTransactionSchema(boolean enableEntityMatch) {
+    private Table getTransactionSchema(boolean enableEntityMatch, boolean onlyGA) {
         Table table = createTable(SchemaInterpretation.Transaction);
 
         table.addAttribute(attr(InterfaceName.TransactionId.name()) //
@@ -962,53 +963,8 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        // use Customer{Account/Contact}Id column when entity match is enabled, use
-        // {Account/Contact}Id column if not. accountId is required even if entity
-        // match is enabled because currently there are no other account field
-        InterfaceName accountId = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
-        InterfaceName contactId = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
-        if (enableEntityMatch) {
-            table.addAttribute(attr(accountId.name()) //
-                    .allowedDisplayNames(
-                            Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
-                    .physicalDataType(Schema.Type.STRING) //
-                    .interfaceName(accountId) //
-                    .logicalDataType(LogicalDataType.Id) //
-                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                    .build());
-            table.addAttribute(attr(contactId.name()) //
-                    .allowedDisplayNames(
-                            Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
-                    .physicalDataType(Schema.Type.STRING) //
-                    .interfaceName(contactId) //
-                    .logicalDataType(LogicalDataType.Id) //
-                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                    .build());
-        } else {
-            table.addAttribute(attr(accountId.name()) //
-                    .allowedDisplayNames(
-                            Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
-                    .physicalDataType(Schema.Type.STRING) //
-                    .notNull() //
-                    .required() //
-                    .interfaceName(accountId) //
-                    .logicalDataType(LogicalDataType.Id) //
-                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                    .build());
-            table.addAttribute(attr(contactId.name()) //
-                    .allowedDisplayNames(
-                            Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
-                    .physicalDataType(Schema.Type.STRING) //
-                    .defaultValueStr("")
-                    .interfaceName(contactId) //
-                    .logicalDataType(LogicalDataType.Id) //
-                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                    .build());
-        }
+        table.addAttribute(getTransactionAccount(enableEntityMatch, onlyGA));
+        table.addAttribute(getTransactionContact(enableEntityMatch, onlyGA));
         table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID")) //
                 .physicalDataType(Schema.Type.STRING) //
@@ -1083,6 +1039,38 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         return table;
+    }
+
+    private Attribute getTransactionAccount(boolean enableEntityMatch, boolean onlyGA) {
+        InterfaceName accountId = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
+        AttributeBuilder builder = attr(accountId.name()) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(accountId) //
+                .logicalDataType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA);
+        if (!enableEntityMatch || onlyGA) {
+            builder.required().notNull();
+        }
+        return builder.build();
+    }
+
+    private Attribute getTransactionContact(boolean enableEntityMatch, boolean onlyGA) {
+        InterfaceName contactId = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
+        AttributeBuilder builder = attr(contactId.name()) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(contactId) //
+                .logicalDataType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA);
+        if (!enableEntityMatch || onlyGA) {
+            builder.defaultValueStr("");
+        }
+        return builder.build();
     }
 
     private Table getRawTransactionSchema(boolean includeCdlTimestamps, boolean enableEntityMatch) {
@@ -1584,7 +1572,8 @@ public class SchemaRepository {
         return Collections.emptyList();
     }
 
-    public Table getSchema(S3ImportSystem.SystemType systemType, EntityType entityType, boolean enableEntityMatch) {
+    public Table getSchema(S3ImportSystem.SystemType systemType, EntityType entityType, boolean enableEntityMatch,
+                           boolean onlyGA) {
         Preconditions.checkNotNull(entityType);
         Preconditions.checkNotNull(systemType);
         Table schemaTable = null;
@@ -1605,7 +1594,7 @@ public class SchemaRepository {
             }
             break;
         case ProductPurchases:
-            schemaTable = getTransactionSchema(enableEntityMatch);
+            schemaTable = getTransactionSchema(enableEntityMatch, onlyGA);
             break;
         case ProductBundles:
         case ProductHierarchy:

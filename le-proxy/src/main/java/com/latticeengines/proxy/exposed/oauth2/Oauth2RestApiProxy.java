@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,13 +21,12 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("oauth2RestApiProxy")
-public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interface {
-    private static final Logger log = LoggerFactory.getLogger(Oauth2RestApiProxy.class);
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class Oauth2RestApiProxy extends BaseRestApiProxy {
 
     @Value("${common.oauth.url}")
     protected String oauth2AuthHostPort;
@@ -41,7 +40,6 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
         super(PropertyUtils.getProperty("common.microservice.url"), "/lp");
     }
 
-    @Override
     public String createAPIToken(String userId) {
         String url = constructUrl("/oauthotps?user={userId}", userId);
         @SuppressWarnings("rawtypes")
@@ -137,12 +135,10 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
         return res;
     }
 
-    @Override
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId) {
         return createOAuth2AccessToken(tenantId, appId, OauthClientType.LP);
     }
 
-    @Override
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId, OauthClientType type) {
         String apiToken = createAPIToken(tenantId);
         oAuth2RestTemplate

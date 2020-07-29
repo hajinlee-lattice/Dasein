@@ -11,13 +11,12 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmType;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
-import com.latticeengines.domain.exposed.modelquality.AlgorithmType;
-import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public final class AlgorithmFactory extends ModelFactory {
 
@@ -25,9 +24,6 @@ public final class AlgorithmFactory extends ModelFactory {
         throw new UnsupportedOperationException();
     }
 
-    public static final String ALGORITHM_NAME_RF = "RF";
-    public static final String ALGORITHM_NAME_LR = "LR";
-    public static final String ALGORITHM_NAME_DT = "DT";
     public static final String RF_SEED_KEY = "model.algorithm.randomforest.seed";
     private static final Logger log = LoggerFactory.getLogger(AlgorithmFactory.class);
     private static final String SAMPLE_NAME = "all";

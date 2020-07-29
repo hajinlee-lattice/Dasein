@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="classpath:common-testclient-env-context.xml"/>
+    <import resource="classpath:serviceapps-cdl-context.xml"/>
+    <import resource="classpath:testframework-qa-end2end-context.xml"/>
+    <import resource="classpath:metadata-context.xml"/>
+    <import resource="classpath:db-context.xml"/>
+    <import resource="classpath:workflowapi-context.xml"/>
+
+    <bean id="checkpointService"
+          class="com.latticeengines.apps.cdl.service.impl.CheckpointService">
+    </bean>
+</beans>

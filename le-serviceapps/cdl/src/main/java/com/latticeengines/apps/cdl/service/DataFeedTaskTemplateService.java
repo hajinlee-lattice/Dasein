@@ -133,7 +133,7 @@ public interface DataFeedTaskTemplateService {
      */
     boolean resetTemplate(String customerSpace, String source, String feedType, Boolean forceDelete);
 
-    boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueName);
+    boolean hasPAConsumedImportAction(String customerSpace, String taskUniqueId);
 
     boolean hasPAConsumedImportAction(String customerSpace, String source, String feedType);
 

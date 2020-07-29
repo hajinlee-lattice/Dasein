@@ -363,6 +363,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         return this.detail.getTimelineVersionMap();
     }
 
+    @JsonProperty("timeline_rebuild_flag")
+    public void setTimelineRebuildFlag(Boolean timelineRebuildFlag) {
+        this.detail.setTimelineRebuildFlag(timelineRebuildFlag);
+    }
+
+    @JsonProperty("timeline_rebuild_flag")
+    public Boolean getTimelineRebuildFlag() {
+        return this.detail.isTimelineRebuildFlag();
+    }
+
     @JsonProperty("TransactionRebuilt")
     public Boolean getTransactionRebuilt() {
         return this.detail.getTransactionRebuilt();
@@ -381,5 +391,15 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     @JsonProperty("activityPartitionKeyMigrated")
     public void setActivityPartitionKeyMigrated(boolean activityPartitionKeyMigrated) {
         this.detail.setActivityPartitionKeyMigrated(activityPartitionKeyMigrated);
+    }
+
+    @JsonProperty("ActivityStreamLastRefresh")
+    public Map<String, Integer> getActivityStreamLastRefresh() {
+        return this.detail.getActivityStreamLastRefresh();
+    }
+
+    @JsonProperty("ActivityStreamLastRefresh")
+    public void setActivityStreamLastRefresh(Map<String, Integer> activityStreamLastRefresh) {
+        this.detail.setActivityStreamLastRefresh(activityStreamLastRefresh);
     }
 }

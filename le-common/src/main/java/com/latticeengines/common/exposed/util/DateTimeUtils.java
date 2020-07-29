@@ -174,6 +174,11 @@ public final class DateTimeUtils {
         return dateFormat;
     }
 
+    public static Integer fromEpochMilliToDateId(long epoch) {
+        String date = toDateOnlyFromMillis(Long.toString(epoch));
+        return dateToDayPeriod(date);
+    }
+
     public static void main(String[] args) {
         CommandLineParser parser = new DefaultParser();
         Options options = new Options();

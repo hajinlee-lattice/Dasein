@@ -1007,7 +1007,6 @@ public final class ImportWorkflowUtils {
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
                             validations, fieldNameInExistingAndCurrentTemplate, sectionName, customFieldsSectionName);
                     checkIDFields(definition, sectionName, validations);
-
                 }
 
                 if (CollectionUtils.isNotEmpty(requiredFieldNames)) {
@@ -1338,5 +1337,4 @@ public final class ImportWorkflowUtils {
             }
         }
     }
-
 }

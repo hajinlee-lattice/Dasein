@@ -228,6 +228,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
     protected static final String PROCESS_ACCOUNT_FULL_PROFILE = "PROCESS_ACCOUNT_FULL_PROFILE";
     protected static final String ACTIVITY_STREAMS_NEED_REBUILD = "ACTIVITY_STREAMS_NEED_REBUILD";
+    protected static final String ACTIVITY_STREAMS_RELINK = "ACTIVITY_STREAMS_RELINK";
     protected static final String ACTIVITY_PARTITION_MIGRATION_PERFORMED = "ACTIVITY_PARTITION_MIGRATION_PERFORMED";
     protected static final String ACTIVITY_MIGRATED_RAW_STREAM = "ACTIVITY_MIGRATED_RAW_STREAM";
     protected static final String ACTIVITY_MIGRATED_DAILY_STREAM = "ACTIVITY_MIGRATED_DAILY_STREAM";
@@ -295,6 +296,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE = "ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE";
     protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME = "RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME";
+    protected static final String RAW_ACTIVITY_STREAM_RELINKED_TABLE_NAME = "RAW_ACTIVITY_STREAM_RELINKED_TABLE_NAME";
     protected static final String AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME = "AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME = "DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME";
     protected static final String LAST_ACTIVITY_DATE_TABLE_NAME = "LAST_ACTIVITY_DATE_TABLE_NAME";
@@ -303,7 +305,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
-    protected static final String JOURNEY_STAGE_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
+    protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -446,7 +448,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_REMATCH_STAGING_VERSION, //
             NEW_RECORD_CUT_OFF_TIME, //
             CONSOLIDATE_INPUT_TEMPLATES, //
-            PROCESS_ACCOUNT_STATS_MERGE);
+            PROCESS_ACCOUNT_STATS_MERGE, //
+            ACTIVITY_STREAMS_RELINK //
+    );
 
     @Autowired
     protected Configuration yarnConfiguration;

@@ -176,8 +176,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                                           InternalOutputRecord matchRecord, boolean multiCandidates) {
         matchRecord.setLatticeAccountId(result);
         if (StringUtils.isNotEmpty(result)) {
-            matchRecord.setMatched(true);
+            matchRecord.setMatched(traveler.isMatched());
         } else {
+            matchRecord.setMatched(false);
             matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
         }
         if (multiCandidates) {
@@ -439,6 +440,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         NameLocation nameLocationInfo = matchRecord.getParsedNameLocation();
         if (nameLocationInfo != null) {
             matchKeyTuple.setCity(nameLocationInfo.getCity());
+            matchKeyTuple.setRegistrationNumber(nameLocationInfo.getRegistrationNumber());
+            matchKeyTuple.setRegistrationNumberType(nameLocationInfo.getRegistrationNumberType());
             matchKeyTuple.setCountry(nameLocationInfo.getCountry());
             matchKeyTuple.setCountryCode(nameLocationInfo.getCountryCode());
             matchKeyTuple.setName(nameLocationInfo.getName());

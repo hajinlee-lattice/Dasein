@@ -28,6 +28,7 @@ import com.latticeengines.aws.elasticache.ElasticCacheService;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -45,7 +46,6 @@ import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 import com.latticeengines.eai.util.EaiJobUtil;
 import com.latticeengines.eai.util.HdfsUriGenerator;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 @Component("fileEventTableImportStrategyBase")

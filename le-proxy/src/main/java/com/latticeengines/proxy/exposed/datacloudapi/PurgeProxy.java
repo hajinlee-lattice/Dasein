@@ -3,20 +3,21 @@ package com.latticeengines.proxy.exposed.datacloudapi;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
-import com.latticeengines.network.exposed.propdata.PurgeInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("purgeProxy")
-public class PurgeProxy extends MicroserviceRestApiProxy implements PurgeInterface {
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class PurgeProxy extends MicroserviceRestApiProxy {
     public PurgeProxy() {
         super("datacloudapi/purge");
     }
 
-    @Override
     public List<PurgeSource> getPurgeSources(String hdfsPod) {
         String url = constructUrl("/sources?HdfsPod={hdfsPod}", hdfsPod);
         List<?> list = get("purge_source", url, List.class);
@@ -32,11 +33,8 @@ public class PurgeProxy extends MicroserviceRestApiProxy implements PurgeInterfa
         return purgeSrcs;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
     public List<String> getUnknownSources(String hdfsPod) {
         String url = constructUrl("/sources/unknown?HdfsPod={hdfsPod}", hdfsPod);
-        List<String> list = get("unknown_source", url, List.class);
-        return list;
+        return getList("unknown_source", url, String.class);
     }
 }

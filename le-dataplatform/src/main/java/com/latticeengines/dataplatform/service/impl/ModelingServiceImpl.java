@@ -1,8 +1,6 @@
 package com.latticeengines.dataplatform.service.impl;
 
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,29 +38,21 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.ModelValidationService;
-import com.latticeengines.dataplatform.service.SqoopMetadataService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
-import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataSchema;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
-import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
-import com.latticeengines.domain.exposed.modeling.Field;
-import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
@@ -74,10 +64,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorit
 import com.latticeengines.domain.exposed.modeling.algorithm.DataReviewAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
-import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.hadoop.exposed.service.ManifestService;
-import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
@@ -103,16 +90,10 @@ public class ModelingServiceImpl implements ModelingService {
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Inject
-    private SqoopMetadataService sqoopMetadataService;
-
-    @Inject
     private VersionManager versionManager;
 
     @Inject
     private ManifestService manifestService;
-
-    @Inject
-    private SqoopProxy sqoopProxy;
 
     @Resource(name = "parallelDispatchService")
     private DispatchService dispatchService;
@@ -131,54 +112,6 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
-
-    @Override
-    public ApplicationId loadData(LoadConfiguration config) {
-        Model model = new Model();
-        model.setCustomer(config.getCustomer());
-        model.setTable(config.getTable());
-        model.setMetadataTable(config.getMetadataTable());
-        setupModelProperties(model);
-        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-
-        String targetDir = config.getTargetHdfsDir();
-
-        if (targetDir == null) {
-            targetDir = model.getDataHdfsPath();
-        }
-
-        SqoopImporter.Builder builder = new SqoopImporter.Builder() //
-                .setTargetDir(targetDir)//
-                .setDbCreds(config.getCreds()) //
-                .setQueue(assignedQueue)//
-                .setCustomer(model.getCustomer())//
-                .setSplitColumn(StringUtils.join(config.getKeyCols(), ","))//
-                .setTable(config.getTable());
-        if (config.getQuery() != null) {
-            builder.setQuery(config.getQuery());
-            builder.setMode(SqoopImporter.Mode.QUERY);
-        } else {
-            builder.setColumnsToInclude(Arrays
-                    .asList(columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()).split(",")));
-        }
-        String appId = sqoopProxy.importData(builder.build()).getApplicationIds().get(0);
-        return ApplicationIdUtils.toApplicationIdObj(appId);
-
-    }
-
-    @Override
-    public ApplicationId exportData(ExportConfiguration config) {
-        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-        SqoopExporter exporter = new SqoopExporter.Builder() //
-                .setQueue(assignedQueue)//
-                .setTable(config.getTable()) //
-                .setSourceDir(config.getHdfsDirPath()) //
-                .setDbCreds(config.getCreds()) //
-                .setCustomer(config.getCustomer())//
-                .build();
-        String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
-        return ApplicationIdUtils.toApplicationIdObj(appId);
-    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -542,7 +475,6 @@ public class ModelingServiceImpl implements ModelingService {
             return script;
         }
 
-//        return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
         return manifestService.getLedsPath() + afterPart;
     }
 
@@ -642,19 +574,6 @@ public class ModelingServiceImpl implements ModelingService {
         }
 
         return index >= config.getJobRankCutoff();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void throttle(ThrottleConfiguration config) {
-        config.setTimestampLong(System.currentTimeMillis());
-        throttleConfigurationEntityMgr.create(config);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void resetThrottle() {
-        throttleConfigurationEntityMgr.deleteAll();
     }
 
     private List<String> getFeatureList(DataProfileConfiguration dataProfileConfig, Model m) {
@@ -840,57 +759,6 @@ public class ModelingServiceImpl implements ModelingService {
         eventList.addAll(eventSet);
 
         return eventList;
-    }
-
-    private String columnsToInclude(String table, DbCreds creds, Map<String, String> properties) {
-        StringBuilder lb = new StringBuilder();
-        try {
-            DataSchema dataSchema = sqoopMetadataService.createDataSchema(creds, table);
-            List<Field> fields = dataSchema.getFields();
-
-            boolean excludeTimestampCols = Boolean
-                    .parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
-            boolean first = true;
-            for (Field field : fields) {
-
-                // The scoring engine does not know how to convert datetime
-                // columns into a numeric value,
-                // which Sqoop does automatically. This should not be a problem
-                // now since dates are
-                // typically not predictive anyway so we can safely exclude them
-                // for now.
-                // We can start including TIMESTAMP and TIME columns by
-                // explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
-                // in the load configuration.
-                if (excludeTimestampCols
-                        && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
-                    continue;
-                }
-                String name = field.getName();
-                String colName = field.getColumnName();
-
-                if (name == null) {
-                    log.warn("Field name is null.");
-                    continue;
-                }
-                if (colName == null) {
-                    log.warn("Column name is null.");
-                    continue;
-                }
-                if (!first) {
-                    lb.append(",");
-                } else {
-                    first = false;
-                }
-                lb.append(colName);
-                if (!colName.equals(name)) {
-                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_11005, new String[] { colName, name }));
-                }
-            }
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_11004, e, new String[] { table });
-        }
-        return lb.toString();
     }
 
     @Override

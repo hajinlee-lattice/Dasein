@@ -137,7 +137,7 @@
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
-      "standardField":false,
+      "standardField":true,
       "exportEnabled":true,
       "historyEnabled":true,
       "audienceType": ["ACCOUNTS", "CONTACTS"]
@@ -397,11 +397,11 @@
    },
    {
       "attrName":"SFDC_CONTACT_ID",
-      "displayName":"Contact SFDC ID",
+      "displayName":"SFDC Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
-      "standardField":false,
+      "standardField":true,
       "exportEnabled":true,
       "historyEnabled":true,
       "audienceType": ["CONTACTS"]

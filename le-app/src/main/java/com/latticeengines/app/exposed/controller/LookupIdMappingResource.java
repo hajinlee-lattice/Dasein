@@ -24,14 +24,14 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.remote.tray.TraySettings;
-import com.latticeengines.domain.exposed.util.UIActionUtils;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 import io.swagger.annotations.Api;
@@ -69,32 +69,24 @@ public class LookupIdMappingResource {
         try {
             return lookupIdMappingProxy.registerExternalSystem(MultiTenantContext.getTenant().getId(), lookupIdMap);
         } catch (LedpException e) {
-            String title = "Cannot create new connection";
-            String message;
-
             switch (e.getCode()) {
             case LEDP_40071:
                 log.error("Failed to create connection because of duplicate credentials", e);
-                message = "A connection with the credentials you entered already exists. Enter different credentials.";
                 break;
-
             case LEDP_40080:
                 log.error("Failed to create connection because empty org name", e);
-                message = "System name cannot be empty";
                 break;
-
             case LEDP_40081:
                 log.error("Failed to create connection because of duplicate org name", e);
-                message = "A connection with the same system name already exists";
                 break;
-
             default:
-                message = e.getMessage();
+                log.error("Failed to create connection because of unknown error", e);
                 break;
             }
-            UIAction action = UIActionUtils.generateUIAction(title, View.Banner, Status.Error, message);
-
-            throw new UIActionException(action, e.getCode());
+            String title = "Cannot create new connection";
+            UIActionCode uiActionCode = UIActionCode.fromLedpCode(e.getCode());
+            UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+            throw UIActionException.fromAction(action);
         }
     }
 
@@ -120,27 +112,21 @@ public class LookupIdMappingResource {
         try {
             return lookupIdMappingProxy.updateLookupIdMap(MultiTenantContext.getTenant().getId(), id, lookupIdMap);
         } catch (LedpException e) {
-            String title = "Cannot edit connection";
-            String message;
-
             switch (e.getCode()) {
             case LEDP_40080:
                 log.error("Failed to edit connection because empty org name", e);
-                message = "System name cannot be empty";
                 break;
-
             case LEDP_40081:
                 log.error("Failed to edit connection because of duplicate org name", e);
-                message = "A connection with the same system name already exists";
                 break;
-
             default:
-                message = e.getMessage();
+                log.error("Failed to edit connection because of unknown error", e);
                 break;
             }
-            UIAction action = UIActionUtils.generateUIAction(title, View.Banner, Status.Error, message);
-
-            throw new UIActionException(action, e.getCode());
+            UIActionCode uiActionCode = UIActionCode.fromLedpCode(e.getCode());
+            String title = "Cannot edit connection";
+            UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+            throw UIActionException.fromAction(action);
         }
     }
 

@@ -66,6 +66,7 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         vboResponse.setMessage("Test");
         vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
         vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
+        SleepUtils.sleep(500);
         List<VboRequestLog> nullLog = vboRequestLogService.getVboRequestLogByTenantId(tenantId);
         Assert.assertNotNull(nullLog);
         Assert.assertEquals(nullLog.size(), 2);
