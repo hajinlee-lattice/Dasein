@@ -180,18 +180,11 @@ public class SourceImportListener extends LEJobListener {
         if (BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
             String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
             log.info("tenantId=" + tenantId);
-            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-            if (job == null) {
-                log.error("Cannot locate workflow job with id {}", jobExecution.getId());
-                throw new IllegalArgumentException("Cannot locate workflow job with id " + jobExecution.getId());
-            }
 
-            String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
             String rootId = CustomerSpace.parse(tenantId).toString();
             List<UploadDetails> details = uploadProxy.getUploads(tenantId);
             Set<Upload.Status> statuses =
                     details.stream()
-                            .filter(upload -> !upload.getUploadId().equals(uploadId))
                             .map(UploadDetails::getStatus)
                             .collect(Collectors.toSet());
             log.info("upload status " + statuses);
