@@ -2,7 +2,6 @@ package com.latticeengines.apps.dcp.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -51,7 +50,7 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         int pageSize = 3;
         int pageIndex = 0;
         do {
-            Sort sort = Sort.by(Sort.Direction.DESC, "pid");
+            Sort sort = Sort.by(Sort.Direction.DESC, "updated");
             PageRequest pageRequest = PageRequest.of(pageIndex, pageSize, sort);
             projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
             if (pageIndex < 6) {
@@ -68,7 +67,9 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
         Assert.assertEquals(CollectionUtils.size(projectInfoList), 0);
 
-        Assert.assertEquals(CollectionUtils.size(allProjects), 20);
+        long allProjectsCount = projectEntityMgr.countAllProjects();
+
+        Assert.assertEquals(CollectionUtils.size(allProjects), allProjectsCount);
         for (int i = 0; i < allProjects.size(); i++) {
             Assert.assertEquals(allProjects.get(i).getProjectId(), projectIdList.get(19 - i));
         }
@@ -101,8 +102,6 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
 
 
     private Long createImportSystem(long tenantPid, String systemName, int priority) {
-        int rand = new Random(System.currentTimeMillis()).nextInt(10000);
-
         String sql = "INSERT INTO `ATLAS_S3_IMPORT_SYSTEM` ";
         sql += "(`TENANT_ID`, `FK_TENANT_ID`, `SYSTEM_TYPE`, `NAME`, `PRIORITY`, `DISPLAY_NAME`) VALUES ";
         sql += String.format("(%d, %d, 'DCP', '%s', '%d', '%s')", tenantPid, tenantPid, systemName, priority, systemName);

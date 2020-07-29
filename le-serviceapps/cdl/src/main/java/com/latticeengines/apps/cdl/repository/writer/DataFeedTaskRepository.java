@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.repository.writer;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -29,7 +30,11 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
 
     @Query("SELECT dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
             "FROM DataFeedTask AS dft JOIN dft.importSystem AS s WHERE s.pid = ?1 AND dft.deleted != True")
-    List<Object[]> findSourceInfoBySystemPid(Long systemPid);
+    List<Object[]> findSourceInfoBySystemPid(Long systemPid, Pageable pageable);
+
+    @Query("SELECT count(dft) " +
+            "FROM DataFeedTask AS dft JOIN dft.importSystem AS s WHERE s.pid = ?1 AND dft.deleted != True")
+    Long countSourceInfoBySystemPid(Long systemPid);
 
     @Query("SELECT dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
             "FROM DataFeedTask AS dft WHERE dft.sourceId = ?1 AND dft.dataFeed = ?2")

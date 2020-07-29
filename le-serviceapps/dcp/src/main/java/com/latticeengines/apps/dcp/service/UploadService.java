@@ -13,7 +13,17 @@ public interface UploadService {
 
     List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig);
 
+    List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig,
+                                   int pageIndex, int pageSize);
+
     List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig);
+
+    List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig,
+                                   int pageIndex, int pageSize);
+
+    Long getUploadsCount(String customerSpace, String sourceId);
+
+    Long getUploadsCount(String customerSpace, String sourceId, Upload.Status status);
 
     UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig);
 

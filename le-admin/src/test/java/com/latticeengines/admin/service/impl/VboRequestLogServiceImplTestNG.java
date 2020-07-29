@@ -44,13 +44,13 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         vboResponse.setMessage("Test");
         vboResponse.setAckReferenceId(traceId);
         vboRequestLogService.createVboRequestLog(traceId, "TenantId", vboRequest, null);
-        SleepUtils.sleep(500);
+        SleepUtils.sleep(1000);
         requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
         Assert.assertNotNull(requestLog);
         Assert.assertNotNull(requestLog.getVboRequest());
         Assert.assertNull(requestLog.getVboResponse());
         vboRequestLogService.updateVboResponse(traceId, vboResponse);
-        SleepUtils.sleep(500);
+        SleepUtils.sleep(1000);
         requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
         Assert.assertNotNull(requestLog);
         Assert.assertNotNull(requestLog.getVboRequest());
@@ -66,7 +66,7 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         vboResponse.setMessage("Test");
         vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
         vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
-        SleepUtils.sleep(500);
+        SleepUtils.sleep(1000);
         List<VboRequestLog> nullLog = vboRequestLogService.getVboRequestLogByTenantId(tenantId);
         Assert.assertNotNull(nullLog);
         Assert.assertEquals(nullLog.size(), 2);

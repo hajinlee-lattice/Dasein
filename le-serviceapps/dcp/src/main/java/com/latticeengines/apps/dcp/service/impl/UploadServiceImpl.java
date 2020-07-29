@@ -10,8 +10,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.dcp.entitymgr.UpdateStatisticsEntityMgr;
 import com.latticeengines.apps.dcp.entitymgr.UploadEntityMgr;
 import com.latticeengines.apps.dcp.service.UploadService;
@@ -37,6 +40,7 @@ public class UploadServiceImpl implements UploadService {
     private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
 
     private static final String RANDOM_UPLOAD_ID_PATTERN = "Upload_%s";
+    private static final int MAX_PAGE_SIZE = 100;
 
     @Inject
     private UploadEntityMgr uploadEntityMgr;
@@ -52,14 +56,36 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig) {
-        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
+        return getUploads(customerSpace, sourceId, includeConfig, 0, MAX_PAGE_SIZE);
+    }
+
+    @Override
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig, int pageIndex, int pageSize) {
+        PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId, pageRequest));
         return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
     }
 
     @Override
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig) {
-        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
+        return getUploads(customerSpace, sourceId, status, includeConfig, 0, MAX_PAGE_SIZE);
+    }
+
+    @Override
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status, Boolean includeConfig, int pageIndex, int pageSize) {
+        PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status, pageRequest));
         return uploads.stream().map(upload -> getUploadDetails(upload, includeConfig)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long getUploadsCount(String customerSpace, String sourceId) {
+        return uploadEntityMgr.countBySourceId(sourceId);
+    }
+
+    @Override
+    public Long getUploadsCount(String customerSpace, String sourceId, Upload.Status status) {
+        return uploadEntityMgr.countBySourceIdAndStatus(sourceId, status);
     }
 
     @Override
@@ -273,5 +299,13 @@ public class UploadServiceImpl implements UploadService {
             }
             return rawFile;
         }
+    }
+
+    private PageRequest getPageRequest(int pageIndex, int pageSize) {
+        Preconditions.checkState(pageIndex >= 0);
+        Preconditions.checkState(pageSize > 0);
+        pageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+        Sort sort = Sort.by(Sort.Direction.DESC, "updated");
+        return PageRequest.of(pageIndex, pageSize, sort);
     }
 }

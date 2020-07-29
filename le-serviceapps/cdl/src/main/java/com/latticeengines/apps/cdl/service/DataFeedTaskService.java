@@ -111,6 +111,8 @@ public interface DataFeedTaskService {
 
     List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid);
 
+    List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid, int pageIndex, int pageSize);
+
     SourceInfo getSourceBySourceId(String customerSpace, String sourceId);
 
     /**

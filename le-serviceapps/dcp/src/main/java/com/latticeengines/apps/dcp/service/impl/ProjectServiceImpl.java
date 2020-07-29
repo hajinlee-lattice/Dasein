@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
@@ -95,10 +96,20 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources) {
+        return getAllProject(customerSpace, includeSources, 0, MAX_PAGE_SIZE);
+    }
+
+    @Override
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+        Preconditions.checkState(pageIndex >= 0);
+        Preconditions.checkState(pageSize > 0);
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            Sort sort = Sort.by(Sort.Direction.DESC, "pid");
-            PageRequest pageRequest = PageRequest.of(0, MAX_PAGE_SIZE, sort);
+            if (pageSize > MAX_PAGE_SIZE) {
+                pageSize = MAX_PAGE_SIZE;
+            }
+            Sort sort = Sort.by(Sort.Direction.DESC, "updated");
+            PageRequest pageRequest = PageRequest.of(pageIndex, pageSize, sort);
             List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,

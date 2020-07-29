@@ -21,8 +21,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
@@ -48,6 +51,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskServiceImpl.class);
     private static final String SYSTEM_SPLITTER = "_";
     private static final String UNIQUE_NAME_PATTERN = "Task_%s";
+    private static final int MAX_PAGE_SIZE = 100;
 
     @Inject
     private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
@@ -446,7 +450,13 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid) {
-        return dataFeedTaskEntityMgr.getSourcesBySystemPid(systemPid);
+        return getSourcesBySystemPid(customerSpace, systemPid, 0, MAX_PAGE_SIZE);
+    }
+
+    @Override
+    public List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid, int pageIndex, int pageSize) {
+        PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
+        return dataFeedTaskEntityMgr.getSourcesBySystemPid(systemPid, pageRequest);
     }
 
     @Override
@@ -481,5 +491,13 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             taskName = String.format(UNIQUE_NAME_PATTERN, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
         } while (dataFeedTaskEntityMgr.getDataFeedTaskByTaskName(taskName, dataFeed, Boolean.FALSE) != null);
         return taskName;
+    }
+
+    private PageRequest getPageRequest(int pageIndex, int pageSize) {
+        Preconditions.checkState(pageIndex >= 0);
+        Preconditions.checkState(pageSize > 0);
+        pageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+        Sort sort = Sort.by(Sort.Direction.DESC, "lastUpdated");
+        return PageRequest.of(pageIndex, pageSize, sort);
     }
 }

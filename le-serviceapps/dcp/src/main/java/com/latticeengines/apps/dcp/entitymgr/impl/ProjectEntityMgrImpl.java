@@ -89,6 +89,12 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countAllProjects() {
+        return getReadOrWriteRepository().count();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ProjectInfo findProjectInfoBySourceId(String sourceId) {
         List<Object[]> result = getReadOrWriteRepository().findProjectInfoBySourceId(sourceId);
         if (CollectionUtils.isEmpty(result)) {
