@@ -1,9 +1,12 @@
 package com.latticeengines.apps.cdl.dao.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +36,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     private static final String CREATED_COL = "created";
     private static final String DEST_ORG_ID = "destinationOrgId";
     private static final String DEST_SYS_TYPE = "destinationSysType";
+
+    private String[] columns = new String[] { "updated","createdBy","launchId","accountsSelected",
+            "accountsSuppressed","accountsErrored","contactsSelected","contactsSuppressed","contactsErrored",
+            "launchState" };
+    private Set<String> sortColumns = new HashSet<String>(Arrays.asList(columns));
 
     @Override
     protected Class<PlayLaunch> getEntityClass() {
@@ -404,7 +412,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         if (sortNeeded) {
             String sortDirection = descending ? "DESC" : "ASC";
 
-            if (StringUtils.isBlank(sortby) || sortby.trim().equalsIgnoreCase(CREATED_COL)) {
+            if (StringUtils.isNotBlank(sortby) && "uiLaunchState".equals(sortby)){
+                sortby = "launchState";
+            }
+
+            if (StringUtils.isBlank(sortby) || sortby.trim().equalsIgnoreCase(CREATED_COL) || !sortColumns.contains(sortby)) {
                 queryStr += String.format(" ORDER BY pl.%s %s ", CREATED_COL, sortDirection);
             } else {
                 queryStr += String.format(" ORDER BY pl.%s %s, pl.%s %s ", sortby, sortDirection, CREATED_COL,

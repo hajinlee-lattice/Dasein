@@ -162,7 +162,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 S3ImportSystem.SystemType.Website.getDefaultSystemName());
 
         Table standardTable = SchemaRepository.instance().getSchema(websiteSystem.getSystemType(), entityType,
-                batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()));
+                batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()),
+                batonService.onlyEntityMatchGAEnabled(MultiTenantContext.getCustomerSpace()));
 
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, websiteSystem,
                 standardTable);

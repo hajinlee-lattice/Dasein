@@ -145,7 +145,8 @@ public class ModelingFileUploadResource {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             return ResponseDocument.successResponse(modelingFileMetadataService
-                    .getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters, true, false, enableEntityMatch));
+                    .getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters, true, false,
+                            enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace)));
         } else {
             return ResponseDocument.successResponse(modelingFileMetadataService
                     .getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType));
@@ -181,7 +182,8 @@ public class ModelingFileUploadResource {
         if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
-            modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, true, enableEntityMatch);
+            modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, true, enableEntityMatch,
+                    batonService.onlyEntityMatchGAEnabled(customerSpace));
         } else {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, entity, source, feedType);
         }
@@ -258,7 +260,8 @@ public class ModelingFileUploadResource {
                 schemaInterpretation, "", file, false, outsizeFlag);
         try {
             SourceFile resultSourceFile = fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation,
-                    cleanupOperationType, batonService.isEntityMatchEnabled(customerSpace));
+                    cleanupOperationType, batonService.isEntityMatchEnabled(customerSpace),
+                    batonService.onlyEntityMatchGAEnabled(customerSpace));
             return ResponseDocument.successResponse(resultSourceFile);
         }  catch (LedpException ledp) {
             UIAction action = UIActionUtils.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,

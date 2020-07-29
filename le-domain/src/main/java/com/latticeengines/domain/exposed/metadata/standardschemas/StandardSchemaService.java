@@ -10,10 +10,12 @@ public interface StandardSchemaService {
      * @param systemType Import System Type
      * @param feedType FeedType from DataFeedTask should be "AccountData" / "{SystemName}_ContactData" etc..
      * @param enableEntityMatch FeatureFlag for entityMatch
+     * @param onlyGA Only enabled GA
      * @return standard schema table.
      *
      * This interface should have multiple implementations, SchemaRepository is one of them. Will sync with Jonathan
      * to see if we can use spec files.
      */
-    Table getStandardSchema(S3ImportSystem.SystemType systemType, String feedType, boolean enableEntityMatch);
+    Table getStandardSchema(S3ImportSystem.SystemType systemType, String feedType, boolean enableEntityMatch,
+                            boolean onlyGA);
 }

@@ -548,10 +548,11 @@ public class CDLResource {
             Table standardTable;
             if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
                 standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
-                        entityType, enableEntityMatch);
+                        entityType, enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace));
             } else {
                 standardTable = SchemaRepository.instance().getSchema(
-                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch,
+                        batonService.onlyEntityMatchGAEnabled(customerSpace));
             }
             List<TemplateFieldPreview> fieldPreviews = cdlService.getTemplatePreview(customerSpace.toString(),
                     dataFeedTask.getImportTemplate(), standardTable);
@@ -685,10 +686,11 @@ public class CDLResource {
             Table standardTable;
             if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
                 standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
-                        entityType, enableEntityMatch);
+                        entityType, enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace));
             } else {
                 standardTable = SchemaRepository.instance().getSchema(
-                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch,
+                        batonService.onlyEntityMatchGAEnabled(customerSpace));
             }
             String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
             DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");

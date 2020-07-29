@@ -141,7 +141,7 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private Table getTable() {
-        Table table = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true);
+        Table table = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true, false);
         table.setTableType(TableType.DATATABLE);
         Attribute userAttr1 = new Attribute();
         userAttr1.setPhysicalDataType("String");

@@ -54,15 +54,15 @@ public class DataFeedTaskManagerServiceImplUnitTestNG {
         attribute2.setPhysicalDataType("String");
         table2.addAttribute(attribute2);
         Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(null, table1, "RandomType", "Account", false,
-                false));
+                false, false));
         Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(null, table2, "RandomType", "Account", false
-                , false));
+                , false, false));
         table1.getAttribute(InterfaceName.AccountId).setPhysicalDataType("Int");
         Assert.assertFalse(dataFeedTaskManagerServiceImpl.finalSchemaCheck(null, table1, "RandomType", "Account",
-                false, false));
+                false, false, false));
         table2.getAttribute("TestAttr").setPhysicalDataType("Int");
         Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(null, table2, "RandomType", "Account",
-                false, false));
+                false, false, false));
 
     }
 

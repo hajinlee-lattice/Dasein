@@ -128,14 +128,14 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false, false,
-                        false);
+                        false, false);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(true);
             }
         }
-        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument, false, false);
+        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument, false, false, false);
     }
 
     @Test(groups = "deployment")

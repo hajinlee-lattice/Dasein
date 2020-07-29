@@ -842,7 +842,8 @@ public class CDLServiceImpl implements CDLService {
         templateFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 entityType.getDefaultFeedTypeName() + "TemplateFile", inputStream);
         Table templateTable = SchemaRepository.instance().getSchema(websiteSystem.getSystemType(), entityType,
-                batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
+                batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)),
+                batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace)));
         MetadataResolver resolver = new MetadataResolver(templateFile.getPath(), yarnConfiguration, null, true, null);
         FieldMappingDocument document = resolver.getFieldMappingsDocumentBestEffort(templateTable);
         if (document != null && CollectionUtils.isNotEmpty(document.getFieldMappings())) {

@@ -96,6 +96,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private boolean entityMatchEnabled;
 
+    private boolean entityMatchGAOnly;
+
     private boolean emptyRawStore;
 
     @Override
@@ -105,6 +107,10 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         entityMatchEnabled = configuration.isEntityMatchEnabled();
         if (entityMatchEnabled) {
             log.info("Entity match is enabled for transaction merge");
+        }
+        entityMatchGAOnly = configuration.isEntityMatchGAOnly();
+        if (entityMatchGAOnly) {
+            log.info("Only Entity match GA is enabled for transaction merge");
         }
 
         mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
@@ -129,7 +135,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         longFields = new ArrayList<>();
         intFields = new ArrayList<>();
         Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true,
-                entityMatchEnabled);
+                entityMatchEnabled, entityMatchGAOnly);
         getTableFields(rawTemplate, stringFields, longFields, intFields);
 
         List<String> curStringFields = new ArrayList<>();
@@ -461,7 +467,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private Table buildPeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
-        Table table = SchemaRepository.instance().getSchema(schema, true, entityMatchEnabled);
+        Table table = SchemaRepository.instance().getSchema(schema, true, entityMatchEnabled, entityMatchGAOnly);
         String tableName = NamingUtils.timestamp(role.name());
         table.setName(tableName);
         String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();

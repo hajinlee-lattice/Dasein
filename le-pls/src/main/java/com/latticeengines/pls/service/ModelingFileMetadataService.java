@@ -14,13 +14,15 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 public interface ModelingFileMetadataService {
 
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean isModel, boolean withoutId, boolean enableEntityMatch);
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean isModel,
+                                                           boolean withoutId, boolean enableEntityMatch,
+                                                           boolean onlyGA);
 
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
             String entity, String source, String feedType);
 
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, boolean isModel,
-            boolean enableEntityMatch);
+            boolean enableEntityMatch, boolean onlyGA);
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
                          String entity, String source, String feedType);
 

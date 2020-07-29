@@ -151,7 +151,7 @@ public class SchemaRepositoryUnitTestNG {
     public void testGetSchema(SchemaInterpretation schema, boolean enableEntityMatch, List<InterfaceName> expectedAttrs,
             InterfaceName expectedPrimaryKey) {
         SchemaRepository sr = SchemaRepository.instance();
-        Table table = sr.getSchema(schema, false, false, enableEntityMatch);
+        Table table = sr.getSchema(schema, false, false, enableEntityMatch, false);
         String[] attrArray = table.getAttributeNames();
         Arrays.sort(attrArray);
         String[] expectedAttrArray = expectedAttrs.stream().map(Enum::name).sorted().toArray(String[]::new);
@@ -172,7 +172,7 @@ public class SchemaRepositoryUnitTestNG {
                 for (boolean enableEntityMatch : bools) {
                     try {
                         // withoutId will be retired
-                        Table table = sr.getSchema(entity, cdlSchema, false, enableEntityMatch);
+                        Table table = sr.getSchema(entity, cdlSchema, false, enableEntityMatch, false);
                         Assert.assertEquals(Stream.of(table.getAttributeNames()).distinct().count(),
                                 table.getAttributeNames().length);
                     } catch (Exception ex) {
@@ -188,7 +188,7 @@ public class SchemaRepositoryUnitTestNG {
                 for (boolean enableEntityMatch : bools) {
                     try {
                         // withoutId will be retired
-                        Table table = sr.getSchema(schema, includeCdlTimestamps, false, enableEntityMatch);
+                        Table table = sr.getSchema(schema, includeCdlTimestamps, false, enableEntityMatch, false);
                         Assert.assertEquals(Stream.of(table.getAttributeNames()).distinct().count(),
                                 table.getAttributeNames().length);
                     } catch (Exception ex) {
@@ -216,9 +216,9 @@ public class SchemaRepositoryUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "entityTypeProvider")
     public void testGetSchemaByEntityType(S3ImportSystem.SystemType systemType, EntityType entityType,
-                                          boolean enableEntityMatch,
+                                          boolean enableEntityMatch, boolean enableEntityMatchGA,
                                           List<InterfaceName> expectedAttrs) {
-        Table table = SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch);
+        Table table = SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch, enableEntityMatchGA);
         String[] attrArray = table.getAttributeNames();
         Arrays.sort(attrArray);
         String[] expectedAttrArray = expectedAttrs.stream().map(Enum::name).sorted().toArray(String[]::new);
@@ -229,19 +229,20 @@ public class SchemaRepositoryUnitTestNG {
     @DataProvider(name = "entityTypeProvider")
     public Object[][] entityTypeProvider() {
         return new Object[][] {
-                { S3ImportSystem.SystemType.Other, EntityType.Accounts, true, ACCOUNT_ENTITY_MATCH_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.Accounts, false, ACCOUNT_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.Contacts, true, CONTACT_ENTITY_MATCH_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.Contacts, false, CONTACT_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, true, TRANSACTION_ENTITY_MATCH_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, false, TRANSACTION_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.WebVisit, true, WEBVISIT_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.WebVisitPathPattern, true, WEBVISIT_PATHPATTERN_ATTRS }, //
-                { S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, WEBVISIT_SOURCE_MEDIUM }, //
-                { S3ImportSystem.SystemType.Other, EntityType.Opportunity, true, OPPORTUNITY }, //
-                { S3ImportSystem.SystemType.Other, EntityType.OpportunityStageName, true, OPPORTUNITY_STAGE }, //
-                { S3ImportSystem.SystemType.Other, EntityType.MarketingActivity, true, MARKETING_ACTIVITY}, //
-                { S3ImportSystem.SystemType.Other, EntityType.MarketingActivityType, true, MARKETING_ACTIVITY_TYPE}, //
+                { S3ImportSystem.SystemType.Other, EntityType.Accounts, true, false, ACCOUNT_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Accounts, false, false, ACCOUNT_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Contacts, true, false, CONTACT_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Contacts, false, false, CONTACT_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, true, false, TRANSACTION_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, true, true, TRANSACTION_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, false, false, TRANSACTION_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.WebVisit, true, false, WEBVISIT_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.WebVisitPathPattern, true, false, WEBVISIT_PATHPATTERN_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, false, WEBVISIT_SOURCE_MEDIUM }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Opportunity, true, false, OPPORTUNITY }, //
+                { S3ImportSystem.SystemType.Other, EntityType.OpportunityStageName, true, false, OPPORTUNITY_STAGE }, //
+                { S3ImportSystem.SystemType.Other, EntityType.MarketingActivity, true, false, MARKETING_ACTIVITY}, //
+                { S3ImportSystem.SystemType.Other, EntityType.MarketingActivityType, true, false, MARKETING_ACTIVITY_TYPE}, //
         };
     }
 }

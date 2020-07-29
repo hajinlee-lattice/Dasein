@@ -45,7 +45,7 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
 
     @Test(groups = "deployment")
     public void testContactStandardSchema() {
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true, false);
         Attribute customerContactId = standardTable.getAttribute(InterfaceName.CustomerContactId);
         Attribute customerAccountId = standardTable.getAttribute(InterfaceName.CustomerAccountId);
         Attribute city = standardTable.getAttribute(InterfaceName.City);
