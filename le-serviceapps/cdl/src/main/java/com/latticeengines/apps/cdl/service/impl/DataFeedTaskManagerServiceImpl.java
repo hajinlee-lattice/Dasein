@@ -181,7 +181,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         List<AttrConfig> attrConfigs = metadataPair.getRight();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         Table schemaTable = getSchemaTable(customerSpace, feedType, entity, withoutId,
-                batonService.isEntityMatchEnabled(customerSpace));
+                batonService.isEntityMatchEnabled(customerSpace), batonService.onlyEntityMatchGAEnabled(customerSpace));
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
         newMeta.setUpdatedBy(user);
@@ -198,7 +198,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 Table finalTemplate = mergeTable(originMeta, newMeta);
                 finalTemplate.setUpdatedBy(user);
                 if (!finalSchemaCheck(customerSpace, finalTemplate, feedType, entity, withoutId,
-                        batonService.isEntityMatchEnabled(customerSpace))) {
+                        batonService.isEntityMatchEnabled(customerSpace), batonService.onlyEntityMatchGAEnabled(customerSpace))) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
@@ -218,7 +218,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     schemaTable, null);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
             if (!finalSchemaCheck(customerSpace, newMeta, feedType, entity, withoutId,
-                    batonService.isEntityMatchEnabled(customerSpace))) {
+                    batonService.isEntityMatchEnabled(customerSpace), batonService.onlyEntityMatchGAEnabled(customerSpace))) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
             }
             dataFeedTask = new DataFeedTask();
@@ -261,7 +261,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     private Table getSchemaTable(CustomerSpace customerSpace, String feedType, String entity, boolean withoutId,
-                                 boolean enableEntityMatch) {
+                                 boolean enableEntityMatch, boolean onlyGA) {
         Table schemaTable;
         EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
         if (entityType != null) {
@@ -273,10 +273,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace.toString(), systemName);
                 systemType = importSystem == null ? S3ImportSystem.SystemType.Other : importSystem.getSystemType();
             }
-            schemaTable = SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch);
+            schemaTable = SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch, onlyGA);
         } else {
             schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId,
-                    enableEntityMatch);
+                    enableEntityMatch, onlyGA);
         }
         return schemaTable;
     }
@@ -655,7 +655,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @VisibleForTesting
     boolean finalSchemaCheck(CustomerSpace customerSpace, Table finalTemplate, String feedType, String entity,
-                             boolean withoutId, boolean enableEntityMatch) {
+                             boolean withoutId, boolean enableEntityMatch, boolean onlyGA) {
         if (finalTemplate == null) {
             log.error("Template cannot be null!");
             return false;
@@ -665,7 +665,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         Map<String, Attribute> standardAttrs = new HashMap<>();
-        Table standardTable = getSchemaTable(customerSpace, feedType, entity, withoutId, enableEntityMatch);
+        Table standardTable = getSchemaTable(customerSpace, feedType, entity, withoutId, enableEntityMatch, onlyGA);
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));

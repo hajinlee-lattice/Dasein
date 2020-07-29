@@ -82,7 +82,8 @@ public final class DiagnoseTable {
         // 2. with standard schema:
         if (businessEntity != null) {
             boolean entityMatch = batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpaceStr));
-            Table standardTable = SchemaRepository.instance().getSchema(businessEntity, true, false, entityMatch);
+            Table standardTable = SchemaRepository.instance().getSchema(businessEntity, true, false, entityMatch,
+                    batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpaceStr)));
             Map<String, Attribute> standardAttrMap =
                     standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, attr -> attr));
 

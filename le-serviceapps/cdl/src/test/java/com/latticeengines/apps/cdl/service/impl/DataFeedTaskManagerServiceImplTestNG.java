@@ -63,7 +63,7 @@ public class DataFeedTaskManagerServiceImplTestNG extends CDLFunctionalTestNGBas
     }
 
     private Table getTemplateTable() {
-        Table templateTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true);
+        Table templateTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true, false);
         Attribute userAttr1 = new Attribute();
         userAttr1.setPhysicalDataType("String");
         userAttr1.setFundamentalType(FundamentalType.ALPHA);

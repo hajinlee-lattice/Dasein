@@ -197,7 +197,7 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
 
         // set up template
         Table templateTable = SchemaRepository.instance().getSchema(S3ImportSystem.SystemType.Other,
-                EntityType.Accounts, true);
+                EntityType.Accounts, true, false);
         templateTable.getAttributes().forEach(attribute -> {
             if (InterfaceName.CustomerAccountId.equals(attribute.getInterfaceName())) {
                 attribute.setSourceAttrName("Id");
