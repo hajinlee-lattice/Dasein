@@ -75,7 +75,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testCRUD() {
         String userId = "test@dnb.com";
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, userId, "");
+                Project.ProjectType.Type1, userId);
         projectId = details.getProjectId();
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,

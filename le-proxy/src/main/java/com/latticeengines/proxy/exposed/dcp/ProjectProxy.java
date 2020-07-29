@@ -5,6 +5,8 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -20,6 +22,8 @@ import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("projectProxy")
 public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInterface {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadProxy.class);
 
     protected ProjectProxy() {
         super("dcp");
@@ -48,30 +52,36 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
     }
 
     public List<ProjectSummary> getAllDCPProject(String customerSpace, Boolean includeSources, int pageIndex,
-                                                 int pageSize) {
+                                                 int pageSize, , List<String> teamIds) {
         String url = "/customerspaces/{customerSpace}/project/list?includeSources={includeSources}" +
                 "&pageIndex={pageIndex}&pageSize={pageSize}";
         url = constructUrl(url, customerSpace, includeSources.toString(), Integer.toString(pageIndex),
                 Integer.toString(pageSize));
-        List<?> results = get("get all dcp project", url, List.class);
+        List<?> results = post("get all dcp project", url, teamIds, List.class);
         return JsonUtils.convertList(results, ProjectSummary.class);
     }
 
-    public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId, Boolean includeSources) {
+    public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId, Boolean includeSources, List<String> teamIds) {
         String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}?includeSources={includeSources}";
         url = constructUrl(url, customerSpace, projectId, includeSources.toString());
-        return get("get dcp project by projectId", url, ProjectDetails.class);
+        return post("get dcp project by projectId", url, teamIds, ProjectDetails.class);
     }
 
-    public void deleteProject(String customerSpace, String projectId) {
+    public void deleteProject(String customerSpace, String projectId, List<String> teamIds) {
         String url = "/customerspaces/{customerSpace}/project/{projectId}";
         url = constructUrl(url, customerSpace, projectId);
-        delete("delete dcp project by projectId", url);
+        delete("delete dcp project by projectId", url, teamIds);
     }
 
-    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
+    public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId, List<String> teamIds) {
         String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}/dropFolderAccess";
         url = constructUrl(url, customerSpace, projectId);
         return get("get dropFolderAccess by projectId", url, GrantDropBoxAccessResponse.class);
+    }
+
+    public void updateTeamId(String customerSpace, String projectId, String teamId) {
+        String baseUrl = "/customerspaces/{customerSpace}/project/projectId/{projectId}/teamId/{teamId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId, teamId);
+        put("update teamId", url);
     }
 }

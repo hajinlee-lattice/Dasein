@@ -40,7 +40,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         ProjectDetails result = projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest,"test@lattice-engines.com");
         assertNotNull(result);
         assertEquals(result.getProjectId(), "createtest");
-        projectProxy.deleteProject(mainTestTenant.getId(), "createtest");
+        projectProxy.deleteProject(mainTestTenant.getId(), "createtest", null);
     }
 
     @Test(groups = {"deployment"})
@@ -55,6 +55,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
 
         List<ProjectSummary> result = projectProxy.getAllDCPProject(mainTestTenant.getId(), Boolean.FALSE, 0, 20);
+
         assertNotNull(result);
         Set<String> projectIds = new HashSet<>(Arrays.asList("getalltest1", "getalltest2"));
         for (ProjectSummary project: result) {

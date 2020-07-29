@@ -61,7 +61,7 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testSourceCreate() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com", "");
+                Project.ProjectType.Type1, "test@dnb.com");
         String projectId = details.getProjectId();
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);

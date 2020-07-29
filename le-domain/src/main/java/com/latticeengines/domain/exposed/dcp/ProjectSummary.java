@@ -42,9 +42,6 @@ public class ProjectSummary {
     @JsonProperty("createdBy")
     private String createdBy;
 
-    @JsonProperty("teamId")
-    private String teamId;
-
     public String getProjectId() {
         return projectId;
     }
@@ -123,13 +120,5 @@ public class ProjectSummary {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public String getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(String teamId) {
-        this.teamId = teamId;
     }
 }

@@ -31,20 +31,20 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void testCreate() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com", "");
+                Project.ProjectType.Type1, "test@dnb.com");
         Assert.assertNotNull(details);
         Assert.assertNotNull(details.getProjectId());
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, details.getProjectId(),
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", ""));
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
 
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, "project id",
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", ""));
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
 
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, "Project%id",
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", ""));
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
 
         ProjectDetails details2 = projectService.createProject(mainCustomerSpace, "Project_id",
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", "");
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com");
         Assert.assertNotNull(details2);
 
     }
@@ -52,7 +52,7 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void testUpdateRecipient() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com", "");
+                Project.ProjectType.Type1, "test@dnb.com");
         Assert.assertNotNull(details);
         Assert.assertNotNull(details.getProjectId());
         Assert.assertNotNull(details.getRecipientList());
@@ -63,7 +63,7 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
         recipientList.add("test@test.com");
 
         projectService.updateRecipientList(mainCustomerSpace, details.getProjectId(), recipientList);
-        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId(), Boolean.FALSE);
+        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId(), Boolean.FALSE, null);
         Assert.assertNotNull(details.getRecipientList());
         Assert.assertEquals(details.getRecipientList().size(), 2);
 

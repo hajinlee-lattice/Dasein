@@ -12,20 +12,20 @@ import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 public interface ProjectService {
 
     ProjectDetails createProject(String customerSpace, String displayName,
-                                 Project.ProjectType projectType, String user, String teamId);
+                                 Project.ProjectType projectType, String user);
 
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                 Project.ProjectType projectType, String user, String teamId);
+                                 Project.ProjectType projectType, String user);
 
-    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources);
+    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, List<String> teamIds);
 
-    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize);
+    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize,  List<String> teamIds);
 
     Long getProjectsCount(String customerSpace);
 
-    ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources);
+    ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources, List<String> teamIds);
 
-    Boolean deleteProject(String customerSpace, String projectId);
+    Boolean deleteProject(String customerSpace, String projectId, List<String> teamIds);
 
     void updateRecipientList(String customerSpace, String projectId, List<String> recipientList);
 
@@ -36,4 +36,6 @@ public interface ProjectService {
     S3ImportSystem getImportSystemByProjectId(String customerSpace, String projectId);
 
     GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId);
+
+    void updateTeamId(String customerSpace, String projectId, String teamId);
 }
