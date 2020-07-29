@@ -168,10 +168,10 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             AttrConfigSelection categoryOverview = new AttrConfigSelection();
             categoryOverview.setLimit(activationOverview.getLimit());
             categoryOverview.setTotalAttrs(activationOverview.getTotalAttrs());
-            categoryOverview.setSelected(
-                    activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active) != null
-                            ? activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active)
-                            : 0L);
+            Map<AttrState, Long> summary = activationOverview.getPropSummary().get(ColumnMetadataKey.State);
+            long activeAttrs = summary.getOrDefault(AttrState.Active, 0L);
+            long deprecatedAttrs = summary.getOrDefault(AttrState.Deprecated, 0L);
+            categoryOverview.setSelected(activeAttrs + deprecatedAttrs);
             categoryOverview.setDisplayName(category.getName());
             selections.add(categoryOverview);
         }
