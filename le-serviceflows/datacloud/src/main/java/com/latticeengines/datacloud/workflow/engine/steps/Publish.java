@@ -66,8 +66,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                     String.format("Version %s starts to publish", progress.getSourceVersion()), SLACK_BOT,
                     SlackSettings.Color.NORMAL);
             notificationService.sendMsTeams(
-                    String.format("%s [%s]", publication.getPublicationName(),
-                            progress.getApplicationId()),
+                    String.format("%s [%s]", publication.getPublicationName(), progress.getApplicationId()),
                     String.format("Version %s starts to publish", progress.getSourceVersion()),
                     MsTeamsSettings.Color.NORMAL);
 
@@ -89,6 +88,11 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                     String.format("Version %s is published after %s :clap:", progress.getSourceVersion(),
                             DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - startTime)),
                     SLACK_BOT, SlackSettings.Color.GOOD);
+            notificationService.sendMsTeams(
+                    String.format("%s [%s]", publication.getPublicationName(), progress.getApplicationId()),
+                    String.format("Version %s is published after %s :clap:", progress.getSourceVersion(),
+                            DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - startTime)),
+                    MsTeamsSettings.Color.GOOD);
         } catch (Exception e) {
             failByException(e);
         }
