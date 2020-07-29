@@ -333,6 +333,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         UploadJobDetails uploadJobDetails = new UploadJobDetails();
         uploadJobDetails.setUploadId(uploadId);
         UploadDetails uploadDetails = getByUploadId(uploadId, false);
+        uploadJobDetails.setStatus(uploadDetails.getStatus());
         uploadJobDetails.setUploadDiagnostics(uploadDetails.getUploadDiagnostics());
         uploadJobDetails.setStatistics(uploadDetails.getStatistics());
         Job job = workflowJobService.findByApplicationId(uploadDetails.getUploadDiagnostics().getApplicationId());
@@ -345,11 +346,35 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
             uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
             uploadJobSteps.add(uploadJobStep);
         });
-        uploadJobDetails.setUploadJobSteps(uploadJobSteps);
-        uploadJobDetails.setCurrentStep(uploadJobSteps.get(uploadJobSteps.size()-1));
-        Double progressPercentage = ((double) uploadJobSteps.size() / (double) 6) * 100;
+        List<UploadJobStep>mergedJobSteps = mergeDupSteps(uploadJobSteps);
+        uploadJobDetails.setUploadJobSteps(mergedJobSteps);
+        Double progressPercentage = ((double) mergedJobSteps.size() / (double) 3) * 100;
         progressPercentage = BigDecimal.valueOf(progressPercentage).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         uploadJobDetails.setProgressPercentage(progressPercentage);
+        if(progressPercentage < 100){
+            uploadJobDetails.setCurrentStep(mergedJobSteps.get(mergedJobSteps.size()-1));
+        }
         return uploadJobDetails;
+    }
+
+    private List<UploadJobStep> mergeDupSteps(List<UploadJobStep> uploadJobSteps) {
+        UploadJobStep currentStep = null;
+        List<UploadJobStep> mergedSteps = new ArrayList<>();
+        for(UploadJobStep step: uploadJobSteps) {
+            if(currentStep != null && step.getStepName().equalsIgnoreCase(currentStep.getStepName())){
+                if(currentStep.getEndTimestamp() < step.getEndTimestamp()) {
+                    currentStep.setEndTimestamp(step.getEndTimestamp());
+                } else {
+                    currentStep.setStartTimestamp(step.getStartTimestamp());
+                }
+            } else {
+                if(currentStep != null){
+                    mergedSteps.add(currentStep);
+                }
+                currentStep = step;
+            }
+        }
+        mergedSteps.add(currentStep);
+        return mergedSteps;
     }
 }

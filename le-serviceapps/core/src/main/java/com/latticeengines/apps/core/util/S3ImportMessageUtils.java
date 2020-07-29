@@ -1,11 +1,13 @@
 package com.latticeengines.apps.core.util;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 public final class S3ImportMessageUtils {
@@ -21,12 +23,14 @@ public final class S3ImportMessageUtils {
     private static final Pattern ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Templates/(.*)");
     private static final Pattern LEGACY_ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/([a-zA-Z0-9_]+)/Templates/(.*)");
 
+    public static final List<String> validImportFileTypes = Lists.newArrayList(".csv", ".gzip", ".gz", ".tar", ".tar.gz", ".zip");
+
     public static S3ImportMessageType getMessageTypeFromKey(String key) {
         if (StringUtils.isEmpty(key)) {
             return S3ImportMessageType.UNDEFINED;
         }
         String[] parts = key.split("/");
-        if (parts.length < 4 || !key.toLowerCase().endsWith(".csv")) {
+        if (parts.length < 4 || !validImportFileTypes.stream().anyMatch(str -> key.toLowerCase().endsWith(str))) {
             return S3ImportMessageType.UNDEFINED;
         } else {
             if (DCP_PATTERN.matcher(key).find()) {
@@ -100,17 +104,6 @@ public final class S3ImportMessageUtils {
         }
     }
 
-    public static String getFileNameFromKey(String key) {
-        if (StringUtils.isEmpty(key)) {
-            return StringUtils.EMPTY;
-        }
-        String[] parts = key.split("/");
-        if (parts.length < 5) {
-            throw new IllegalArgumentException(String.format("Cannot parse key %s", key));
-        }
-        return parts[parts.length - 1];
-    }
-
     public static String getDropBoxPrefix(String key) {
         if (StringUtils.isEmpty(key)) {
             return StringUtils.EMPTY;
@@ -131,5 +124,4 @@ public final class S3ImportMessageUtils {
     public enum KeyPart {
         PROJECT_ID, SOURCE_ID, FILE_NAME
     }
-
 }

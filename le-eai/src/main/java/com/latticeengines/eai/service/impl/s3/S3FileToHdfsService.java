@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -48,7 +50,7 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
 
     private static final Logger log = LoggerFactory.getLogger(S3FileToHdfsService.class);
 
-    private static final String S3_FILE_SUFFIX = ".csv";
+    private static final List<String> S3_FILE_SUFFIXES = Lists.newArrayList(".csv", ".gzip", ".gz", ".tar", ".tar.gz", ".zip");
 
     @Inject
     private Configuration yarnConfiguration;
@@ -99,12 +101,14 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             String s3nPath = getS3nPath(config.getS3Bucket(), config.getS3FilePath());
             Path hdfsPath = PathBuilder.buildS3FilePath(CamilleEnvironment.getPodId(), config.getCustomerSpace());
             String fileName = config.getS3FileName();
-            if (StringUtils.isNotEmpty(fileName) && fileName.toLowerCase().endsWith(S3_FILE_SUFFIX)) {
-                fileName = fileName.substring(0, fileName.length() - S3_FILE_SUFFIX.length());
-                fileName = fileName.replaceAll("[^A-Za-z0-9_]", "_") + "_fake" + S3_FILE_SUFFIX;
+            Optional<String> s3Suffix = S3_FILE_SUFFIXES.stream().filter(suffix -> config.getS3FileName().toLowerCase().endsWith(suffix)).findFirst();
+            if (StringUtils.isNotEmpty(fileName) && s3Suffix.isPresent()) {
+                String s3SuffixStr = s3Suffix.get();
+                fileName = fileName.substring(0, fileName.length() - s3SuffixStr.length());
+                fileName = fileName.replaceAll("[^A-Za-z0-9_]", "_") + "_fake" + s3SuffixStr;
             } else {
                 log.error("Error when processing file: " + fileName);
-                throw new RuntimeException("Filename from s3 is empty or not a csv file!");
+                throw new RuntimeException("Filename from s3 is empty or not a valid csv file!");
             }
             hdfsFilePath = getHdfsFilePath(hdfsPath, String.valueOf(new Date().getTime()), fileName);
             log.info("hdfsPath: " + hdfsFilePath);

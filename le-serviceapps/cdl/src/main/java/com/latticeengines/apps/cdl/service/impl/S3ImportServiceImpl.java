@@ -115,12 +115,12 @@ public class S3ImportServiceImpl implements S3ImportService {
                 if (!TEMPLATES.equals(parts[2])) {
                     return false;
                 }
-                return parts[4].toLowerCase().endsWith(".csv");
+                return S3ImportMessageUtils.validImportFileTypes.stream().anyMatch(str -> parts[4].toLowerCase().endsWith(str));
             } else if (parts.length == 6) {
                 if (!TEMPLATES.equals(parts[3])) {
                     return false;
                 }
-                return parts[5].toLowerCase().endsWith(".csv");
+                return S3ImportMessageUtils.validImportFileTypes.stream().anyMatch(str -> parts[5].toLowerCase().endsWith(str));
             } else {
                 return false;
             }
@@ -304,4 +304,5 @@ public class S3ImportServiceImpl implements S3ImportService {
         }
 
     }
+
 }

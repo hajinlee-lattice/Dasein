@@ -325,13 +325,13 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                         DataReportRecord.Level.Tenant, rootId);
                 Preconditions.checkNotNull(tenantReport, String.format("no report found for %s", rootId));
                 tenantIdToReport.put(rootId, tenantReport);
-                Set<String> projectIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(), level, rootId);
+                Set<String> projectIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level, rootId);
                 projectIds.forEach(projectId -> {
                     DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
                     Preconditions.checkNotNull(projectReport, String.format("no report found for %s ", projectId));
                     projectIdToReport.put(projectId, projectReport);
-                    Set<String> sourceIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                    Set<String> sourceIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
                     parentIdToChildren.put(projectId, sourceIds);
                     sourceIds.forEach(sourceId -> {
@@ -339,7 +339,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                                 DataReportRecord.Level.Source, sourceId);
                         Preconditions.checkNotNull(sourceReport, String.format("no report found for %s ", sourceId));
                         sourceIdToReport.put(sourceId, sourceReport);
-                        Set<String> uploadIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                        Set<String> uploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                                 DataReportRecord.Level.Source, sourceId);
                         parentIdToChildren.put(sourceId, uploadIds);
                         uploadIds.forEach(uploadId -> {
@@ -352,7 +352,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 });
                 break;
             case Project:
-                Set<String> sourceIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                Set<String> sourceIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                         DataReportRecord.Level.Project, rootId);
                 parentIdToChildren.put(rootId, sourceIds);
                 DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
@@ -364,7 +364,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                             DataReportRecord.Level.Source, sourceId);
                     Preconditions.checkNotNull(sourceReport, String.format("no report found for %s ", sourceId));
                     sourceIdToReport.put(sourceId, sourceReport);
-                    Set<String> uploadIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                    Set<String> uploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                             DataReportRecord.Level.Source, sourceId);
                     parentIdToChildren.put(sourceId, uploadIds);
                     uploadIds.forEach(uploadId -> {
@@ -380,7 +380,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                         DataReportRecord.Level.Source, rootId);
                 Preconditions.checkNotNull(sourceReport, String.format("no report found for %s ", rootId));
                 sourceIdToReport.put(rootId, sourceReport);
-                Set<String> uploadIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                Set<String> uploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                         DataReportRecord.Level.Source, rootId);
                 parentIdToChildren.put(rootId, uploadIds);
                 uploadIds.forEach(uploadId -> {
