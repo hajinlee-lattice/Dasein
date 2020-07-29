@@ -87,12 +87,12 @@ public class PrepareDataReport extends RunSparkJob<RollupDataReportStepConfigura
         Set<String> uploadIds = new HashSet<>();
         switch (level) {
             case Tenant:
-                Set<String> projectIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(), level, rootId);
+                Set<String> projectIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level, rootId);
                 projectIds.forEach(projectId -> {
-                    Set<String> sourceIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                    Set<String> sourceIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
                     sourceIds.forEach(sourceId -> {
-                        Set<String> retrievedUploadIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                        Set<String> retrievedUploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                                 DataReportRecord.Level.Source, sourceId);
                         retrievedUploadIds.forEach(uploadId -> {
                             DunsCountCache cache = dataReportProxy.getDunsCount(customerSpace.toString(),
@@ -105,9 +105,9 @@ public class PrepareDataReport extends RunSparkJob<RollupDataReportStepConfigura
                 });
                 break;
             case Project:
-                Set<String> sourceIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(), level, rootId);
+                Set<String> sourceIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level, rootId);
                 sourceIds.forEach(sourceId -> {
-                    Set<String> retrievedUploadIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(),
+                    Set<String> retrievedUploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                             DataReportRecord.Level.Source, sourceId);
                     retrievedUploadIds.forEach(uploadId -> {
                         DunsCountCache cache = dataReportProxy.getDunsCount(customerSpace.toString(),
@@ -119,7 +119,8 @@ public class PrepareDataReport extends RunSparkJob<RollupDataReportStepConfigura
                 });
                 break;
             case Source:
-                Set<String> retrievedUploadIds = dataReportProxy.getSubOwnerIds(customerSpace.toString(), level, rootId);
+                Set<String> retrievedUploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level,
+                        rootId);
                 retrievedUploadIds.forEach(uploadId -> {
                     DunsCountCache cache = dataReportProxy.getDunsCount(customerSpace.toString(),
                             DataReportRecord.Level.Upload, uploadId);

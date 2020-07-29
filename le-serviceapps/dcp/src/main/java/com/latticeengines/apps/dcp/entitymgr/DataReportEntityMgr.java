@@ -21,7 +21,7 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
     Map<String, DataReport.BasicStats> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel,
                                                                              String parentOwnerId);
 
-    Set<String> getSubOwnerIds(DataReportRecord.Level level, String ownerId);
+    Set<String> getChildrenIds(DataReportRecord.Level level, String ownerId);
 
     List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
 

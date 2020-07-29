@@ -72,7 +72,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNull(cache.getDunsCountTableName());
         Assert.assertNull(cache.getSnapshotTimestamp());
 
-        Set<String> subOwnerIds = dataReportService.getSubOwnerIds(mainCustomerSpace, DataReportRecord.Level.Source,
+        Set<String> subOwnerIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Source,
                 "sourceUID");
         Assert.assertTrue(CollectionUtils.isNotEmpty(subOwnerIds));
 
