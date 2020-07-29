@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.migrate;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,11 @@ public class TransactionTemplateMigrateStep extends BaseImportTemplateMigrateSte
                 throw new IllegalArgumentException("Migrated tenant Transaction template already have CustomerAccountId!");
             }
             templateTable.removeAttribute(InterfaceName.AccountId.name());
-            templateTable.addAttribute(getCustomerAccountId(accountId.getDisplayName()));
+            templateTable.addAttribute(getCustomerAccountId(accountId.getDisplayName(), accountId.getSourceAttrName(), accountId.getNullable()));
+            if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
+                templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), accountId.getDisplayName(),
+                        accountId.getSourceAttrName()));
+            }
         }
         Attribute contactId = templateTable.getAttribute(InterfaceName.ContactId);
         if (contactId != null) {
@@ -54,7 +59,11 @@ public class TransactionTemplateMigrateStep extends BaseImportTemplateMigrateSte
                 throw new IllegalArgumentException("Migrated tenant Transaction template already have CustomerContactId!");
             }
             templateTable.removeAttribute(InterfaceName.ContactId.name());
-            templateTable.addAttribute(getCustomerContactId(contactId.getDisplayName()));
+            templateTable.addAttribute(getCustomerContactId(contactId.getDisplayName(), contactId.getSourceAttrName(), contactId.getNullable()));
+            if (StringUtils.isNotEmpty(s3ImportSystem.getContactSystemId())) {
+                templateTable.addAttribute(getSystemId(s3ImportSystem.getContactSystemId(),
+                        contactId.getDisplayName(), contactId.getSourceAttrName()));
+            }
         }
     }
 
