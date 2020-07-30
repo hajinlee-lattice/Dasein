@@ -106,7 +106,7 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
 
     private JsonNode getJsonView(LedpException e) {
         return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", e.getCode().name(), //
-                "errorMsg", e.getMessage(), "errorParamsMap", e.getParamsMap()));
+                "errorMsg", e.getMessage()));
     }
 
 }

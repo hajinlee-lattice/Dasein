@@ -60,8 +60,7 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
             String message = node.get("errorMsg").asText();
             Map<String, Object> map = null;
             if (errorParamsMap != null) {
-                map = objectMapper.convertValue(errorParamsMap, new TypeReference<Map<String, Object>>() {
-                });
+                map = objectMapper.convertValue(errorParamsMap, new TypeReference<Map<String, Object>>() {});
             }
             exception = new RemoteLedpException(stackTraceString, status, code, message, map);
         } catch (Exception e) {

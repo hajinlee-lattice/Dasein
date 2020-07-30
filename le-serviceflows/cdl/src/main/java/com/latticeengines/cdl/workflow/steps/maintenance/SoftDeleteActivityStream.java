@@ -46,7 +46,6 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
 
     private List<Action> softDeleteActivityActions;
 
-
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
@@ -162,7 +161,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         softDeleteConfig.setIdColumn(idColumn);
         softDeleteConfig.setPartitionKeys(RAWSTREAM_PARTITION_KEYS);
         softDeleteConfig.setNeedPartitionOutput(needPartition());
-        softDeleteConfig.setEventTimeColumn(configuration.getActivityStreamMap().get(streamId).getDateAttribute());
+        softDeleteConfig.setEventTimeColumn(InterfaceName.StreamDateId.name());
         softDeleteConfig.setTimeRangesColumn(InterfaceName.TimeRanges.name());
         softDeleteConfig.setTimeRangesToDelete(extractGlobalTimeRanges(deleteConfigsForStream));
 
