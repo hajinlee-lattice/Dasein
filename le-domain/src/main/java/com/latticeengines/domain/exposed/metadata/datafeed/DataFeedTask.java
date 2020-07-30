@@ -418,7 +418,7 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     }
 
     public void setSpecType(String specType) {
-        specType = specType;
+        this.specType = specType;
     }
 
     public enum IngestionBehavior {
