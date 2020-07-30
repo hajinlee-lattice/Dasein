@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -67,12 +66,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
 
     @Inject
     private S3Service s3Service;
-
-    @javax.annotation.Resource(name = "propDataCollectionJdbcTemplate")
-    protected JdbcTemplate jdbcTemplateCollectionDB;
-
-    @javax.annotation.Resource(name = "propDataCollectionJdbcTemplate")
-    protected JdbcTemplate jdbcTemplateBulkDB;
 
     protected String podId;
 
@@ -407,18 +400,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             actual = actual.toString();
         }
         return actual.equals(expected);
-    }
-
-    @SuppressWarnings("unused")
-    private void dropJdbcTableIfExists(String tableName) {
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
-    }
-
-    @SuppressWarnings("unused")
-    private void truncateJdbcTableIfExists(String tableName) {
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
 
 }
