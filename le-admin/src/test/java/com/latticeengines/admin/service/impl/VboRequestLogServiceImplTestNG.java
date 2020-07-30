@@ -55,7 +55,7 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
             Assert.assertNotNull(requestLog.getVboRequest());
             Assert.assertNull(requestLog.getVboResponse());
             return true;
-            });
+        });
         vboRequestLogService.updateVboResponse(traceId, vboResponse);
         retry.execute(ctx -> {
             requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
@@ -63,7 +63,7 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
             Assert.assertNotNull(requestLog.getVboRequest());
             Assert.assertNotNull(requestLog.getVboResponse());
             return true;
-            });
+        });
 
     }
 
@@ -84,7 +84,7 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
             Assert.assertNotNull(nullLog);
             Assert.assertEquals(nullLog.get().size(), 2);
             return true;
-                });
+        });
 
         nullLog.get().forEach(log -> vboRequestLogEntityMgr.delete(log));
     }
