@@ -1,6 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,12 +40,16 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String flag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> map = new HashMap<>();
+        map.put(flag, Boolean.TRUE);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, map);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void verifyFieldMappingValidations() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
@@ -86,30 +93,58 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
     @Test(groups = "deployment")
     public void verifyStandardFields() {
         // create template
-        SourceFile iniSourceFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
-        startCDLImport(iniSourceFile, ENTITY_ACCOUNT);
-
-        // upload same file, then modify mapping
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
 
         String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT);
-        FieldMappingDocument fieldMappingDocument =
-                modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT,
-                        SOURCE, feedType);
-        boolean longitudeExist = false;
-        boolean latitudeExist = false;
-        boolean accountIdExist = false;
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        boolean idExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
-            // unmap the standard field
-            if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
-                fieldMapping.setUserField(null);
-                accountIdExist = true;
+            //  ID was mapped to mapped field CustomerAccountId, then CustomerAccountId was renamed to
+            //  user_DefaultSystem_tldqc9rx_AccountId before saving in template
+            if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
+                Assert.assertEquals(fieldMapping.getUserField(), "ID");
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMappedToLatticeSystem(false);
+                idExist = true;
+            }
+        }
+        Assert.assertTrue(idExist);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
+                feedType);
+
+        startCDLImport(sourceFile, ENTITY_ACCOUNT);
+
+        // upload same file, then modify mapping
+        sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+
+        fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFile.getName(),
+                ENTITY_ACCOUNT, SOURCE, feedType);
+        boolean longitudeExist = false;
+        boolean latitudeExist = false;
+        idExist = false;
+        boolean websiteExist = false;
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            // unmap the standard field, this will trigger 2 warnings and one error
+            if ("ID".equals(fieldMapping.getUserField())) {
+                fieldMapping.setMappedField(null);
+                idExist = true;
+            }
+            if (InterfaceName.Website.name().equals(fieldMapping.getMappedField())) {
+                fieldMapping.setMappedField(null);
+                websiteExist = true;
             }
             if ("Lattitude".equals(fieldMapping.getUserField())) {
                 fieldMapping.setMappedField(InterfaceName.Longitude.name());
@@ -122,7 +157,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         }
         Assert.assertTrue(longitudeExist);
         Assert.assertTrue(latitudeExist);
-        Assert.assertTrue(accountIdExist);
+        Assert.assertTrue(idExist);
+        Assert.assertTrue(websiteExist);
 
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
@@ -133,13 +169,13 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .filter(validation -> FieldValidation.ValidationStatus.WARNING.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 2);
+        Assert.assertEquals(warningValidations.size(), 4);
 
         // verify error
         List<FieldValidation> errorValidations =
                 validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 1);
+        Assert.assertEquals(errorValidations.size(), 2);
 
         try {
             modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
