@@ -912,6 +912,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         Set<String> standardFields = schemaTable.getAttributes()
                 .stream()
+                .filter(attr -> attr.getDefaultValueStr() == null)
                 .map(Attribute::getName)
                 .collect(Collectors.toSet());
         Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
