@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,14 +56,26 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Upload> findBySourceId(String sourceId) {
-        return getReadOrWriteRepository().findBySourceId(sourceId);
+    public List<Upload> findBySourceId(String sourceId, Pageable pageable) {
+        return getReadOrWriteRepository().findBySourceId(sourceId, pageable);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status) {
-        return getReadOrWriteRepository().findBySourceIdAndStatus(sourceId, status);
+    public Long countBySourceId(String sourceId) {
+        return getReadOrWriteRepository().countBySourceId(sourceId);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status, Pageable pageable) {
+        return getReadOrWriteRepository().findBySourceIdAndStatus(sourceId, status, pageable);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countBySourceIdAndStatus(String sourceId, Upload.Status status) {
+        return getReadOrWriteRepository().countBySourceIdAndStatus(sourceId, status);
     }
 
     @Override

@@ -5,8 +5,8 @@
       {
         "fieldName": "ActivityType",
         "fieldType": "TEXT",
-        "columnName": "ActivityType",
-        "screenName": "ActivityType",
+        "columnName": "Activity Type",
+        "screenName": "Activity Type",
         "matchingColumnNames": [
           "ActivityType",
           "Activity Type",

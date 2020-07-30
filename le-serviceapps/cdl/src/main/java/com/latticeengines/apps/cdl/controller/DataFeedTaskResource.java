@@ -115,9 +115,19 @@ public class DataFeedTaskResource {
     @GetMapping("/systemPid/{systemPid}")
     @ResponseBody
     @ApiOperation(value = "Get Source list by system pid")
-    public List<SourceInfo> getSourcesBySystemPid(@PathVariable String customerSpace, @PathVariable Long systemPid) {
+    public List<SourceInfo> getSourcesBySystemPid(@PathVariable String customerSpace, @PathVariable Long systemPid,
+                                                  @RequestParam(defaultValue = "0") int pageIndex,
+                                                  @RequestParam(defaultValue = "20") int pageSize) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataFeedTaskService.getSourcesBySystemPid(customerSpace, systemPid);
+        return dataFeedTaskService.getSourcesBySystemPid(customerSpace, systemPid, pageIndex, pageSize);
+    }
+
+    @GetMapping("/count/systemPid/{systemPid}")
+    @ResponseBody
+    @ApiOperation(value = "Get total Source count by system pid")
+    public Long countSourcesBySystemPid(@PathVariable String customerSpace, @PathVariable Long systemPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.countSourcesBySystemPid(customerSpace, systemPid);
     }
 
     @GetMapping("/{entity}/list")

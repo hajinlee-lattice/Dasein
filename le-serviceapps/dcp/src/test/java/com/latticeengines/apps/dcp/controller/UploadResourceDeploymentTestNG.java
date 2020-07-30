@@ -112,7 +112,8 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadMatchResultPrefix(resultsPath);
         config.setUploadTSPrefix(uploadTS);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
-        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null, Boolean.TRUE);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
+                Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails retrievedUpload = uploads.get(0);
@@ -123,7 +124,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
         uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED, null);
-        uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED, Boolean.FALSE);
+        uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED, Boolean.FALSE, 0, 20);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         retrievedUpload = uploads.get(0);
@@ -143,7 +144,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
     public void testDownloadAll() throws Exception {
-        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED, Boolean.TRUE);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED, Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails upload = uploads.get(0);
@@ -166,7 +167,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultRejected(), sis4, true);
 
         // drop file to another upload
-        List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW, Boolean.TRUE);
+        List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW, Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
         UploadDetails upload2 = uploads2.get(0);

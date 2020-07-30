@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -508,13 +509,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public List<SourceInfo> getSourcesBySystemPid(Long systemPid) {
-        List<Object[]> result = datafeedTaskRepository.findSourceInfoBySystemPid(systemPid);
+    public List<SourceInfo> getSourcesBySystemPid(Long systemPid, Pageable pageable) {
+        List<Object[]> result = datafeedTaskRepository.findSourceInfoBySystemPid(systemPid, pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {
             return result.stream().map(this::getSource).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public Long countSourcesBySystemPid(Long systemPid) {
+        return datafeedTaskRepository.countSourceInfoBySystemPid(systemPid);
     }
 
     @Override
@@ -566,6 +573,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         summary.setLastUpdated((Date) columns[5]);
         summary.setUniqueId((String) columns[6]);
         summary.setTemplateDisplayName((String) columns[7]);
+        summary.setSpecType((String) columns[8]);
         return summary;
     }
 

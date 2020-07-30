@@ -12,8 +12,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
@@ -44,6 +47,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String SYSTEM_NAME_PATTERN = "ProjectSystem_%s";
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project path}
     private static final int MAX_RETRY = 3;
+    private static final int MAX_PAGE_SIZE = 100;
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
@@ -92,15 +96,26 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources) {
+        return getAllProject(customerSpace, includeSources, 0, MAX_PAGE_SIZE);
+    }
+
+    @Override
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
-            timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
+            PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
+            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+            timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in page.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);
             return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo,
                     basicStatsMap.get(projectInfo.getProjectId()), includeSources)).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public Long getProjectsCount(String customerSpace) {
+        return projectEntityMgr.countAllProjects();
     }
 
     @Override
@@ -186,6 +201,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setDeleted(projectInfo.getDeleted());
         if (includeSources) {
             details.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+            details.setTotalSourceCount(sourceService.getSourceCount(customerSpace, projectInfo.getSystemId()));
         }
         details.setRecipientList(projectInfo.getRecipientList());
         details.setCreated(projectInfo.getCreated().getTime());
@@ -202,6 +218,7 @@ public class ProjectServiceImpl implements ProjectService {
         summary.setArchieved(projectInfo.getDeleted());
         if(includeSources) {
             summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+            summary.setTotalSourceCount(sourceService.getSourceCount(customerSpace, projectInfo.getSystemId()));
         }
         summary.setRecipientList(projectInfo.getRecipientList());
         summary.setBasicStats(basicStats);
@@ -280,6 +297,16 @@ public class ProjectServiceImpl implements ProjectService {
             retry++;
         }
         return project;
+    }
+
+    private PageRequest getPageRequest(int pageIndex, int pageSize) {
+        Preconditions.checkState(pageIndex >= 0);
+        Preconditions.checkState(pageSize > 0);
+        if (pageSize > MAX_PAGE_SIZE) {
+            pageSize = MAX_PAGE_SIZE;
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "updated");
+        return PageRequest.of(pageIndex, pageSize, sort);
     }
 
 }

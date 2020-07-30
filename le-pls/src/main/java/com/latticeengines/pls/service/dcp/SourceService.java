@@ -19,6 +19,8 @@ public interface SourceService {
 
     List<Source> getSourceList(String projectId);
 
+    List<Source> getSourceList(String projectId, int pageIndex, int pageSize);
+
     Boolean deleteSource(String sourceId);
 
     Boolean pauseSource(String sourceId);

@@ -30,9 +30,7 @@ import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
-import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.dcp.SourceService;
-import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,12 +46,6 @@ public class SourceResource {
 
     @Inject
     private SourceService sourceService;
-
-    @Inject
-    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
-
-    @Inject
-    private ModelingFileMetadataService modelingFileMetadataService;
 
     @PostMapping
     @ResponseBody
@@ -107,8 +99,10 @@ public class SourceResource {
     @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation("Get sources by projectId")
-    public List<Source> getSourceUnderProduct(@PathVariable String projectId) {
-        return sourceService.getSourceList(projectId);
+    public List<Source> getSourceUnderProduct(@PathVariable String projectId,
+                                              @RequestParam(required = false, defaultValue = "1") int pageIndex,
+                                              @RequestParam(required = false, defaultValue = "20") int pageSize) {
+        return sourceService.getSourceList(projectId, pageIndex, pageSize);
     }
 
     @PutMapping("/sourceId/{sourceId}/pause")

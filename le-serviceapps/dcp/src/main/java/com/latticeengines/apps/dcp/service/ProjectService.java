@@ -19,6 +19,10 @@ public interface ProjectService {
 
     List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources);
 
+    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize);
+
+    Long getProjectsCount(String customerSpace);
+
     ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources);
 
     Boolean deleteProject(String customerSpace, String projectId);

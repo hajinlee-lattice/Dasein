@@ -5,8 +5,8 @@
         {
           "fieldName": "ActivityDate",
           "fieldType": "DATE",
-          "columnName": "activityDate",
-          "screenName": "activityDate",
+          "columnName": "ActivityDate",
+          "screenName": "ActivityDate",
           "matchingColumnNames": [
             "ActivityDate",
             "Activity_Date",
@@ -73,8 +73,8 @@
       "Custom Fields": [
         {
           "fieldType": "TEXT",
-          "columnName": "activityTypeId",
-          "screenName": "activityTypeId",
+          "columnName": "ActivityTypeId",
+          "screenName": "ActivityTypeId",
           "matchingColumnNames": [
             "ActivityTypeId",
             "activityTypeId"

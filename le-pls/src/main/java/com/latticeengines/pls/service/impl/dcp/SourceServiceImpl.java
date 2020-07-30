@@ -43,6 +43,8 @@ public class SourceServiceImpl implements SourceService {
 
     private static final Logger log = LoggerFactory.getLogger(SourceServiceImpl.class);
 
+    private static final int DEFAULT_PAGE_SIZE = 20;
+
     @Inject
     private SourceProxy sourceProxy;
 
@@ -84,11 +86,18 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Source> getSourceList(String projectId) {
+        return getSourceList(projectId, 1, DEFAULT_PAGE_SIZE);
+    }
+
+    @Override
+    public List<Source> getSourceList(String projectId, int pageIndex, int pageSize) {
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        return sourceProxy.getSourceList(customerSpace.toString(), projectId);
+        return sourceProxy.getSourceList(customerSpace.toString(), projectId, pageIndex - 1, pageSize);
     }
 
     @Override
@@ -110,8 +119,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType,
-                                                           String fileImportId) throws Exception {
+    public FetchFieldDefinitionsResponse getSourceMappings(String sourceId, String entityType, String fileImportId) {
         Preconditions.checkState(!StringUtils.isAllBlank(sourceId, fileImportId),
                 "provide one parameter at least : source Id or import file Id");
 

@@ -30,7 +30,7 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected GlobalAuthFunctionalTestBed testBed;
 
     @Resource(name = "jdbcTemplate")
-    private JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
 
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;

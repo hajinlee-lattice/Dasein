@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.repository.writer;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -29,21 +30,25 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
 
     @Query("SELECT dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
             "FROM DataFeedTask AS dft JOIN dft.importSystem AS s WHERE s.pid = ?1 AND dft.deleted != True")
-    List<Object[]> findSourceInfoBySystemPid(Long systemPid);
+    List<Object[]> findSourceInfoBySystemPid(Long systemPid, Pageable pageable);
+
+    @Query("SELECT count(dft) " +
+            "FROM DataFeedTask AS dft JOIN dft.importSystem AS s WHERE s.pid = ?1 AND dft.deleted != True")
+    Long countSourceInfoBySystemPid(Long systemPid);
 
     @Query("SELECT dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
             "FROM DataFeedTask AS dft WHERE dft.sourceId = ?1 AND dft.dataFeed = ?2")
     List<Object[]> findBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
 
     @Query("SELECT dft.source, dft.entity, dft.feedType, dft.subType, dft.s3ImportStatus,"
-            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName " +
+            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName, dft.specType " +
             "FROM DataFeedTask dft " +
             "INNER JOIN dft.dataFeed df " +
             "INNER JOIN df.tenant t WHERE dft.source = ?1 AND t.id = ?2")
     List<Object[]> findSummaryBySource(String source, String customerSpace);
 
     @Query("SELECT dft.source, dft.entity, dft.feedType, dft.subType, dft.s3ImportStatus,"
-            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName " +
+            + " dft.lastUpdated, dft.uniqueId, dft.templateDisplayName, dft.specType " +
             "FROM DataFeedTask dft " +
             "INNER JOIN dft.dataFeed df " +
             "INNER JOIN df.tenant t WHERE t.id = ?1")
