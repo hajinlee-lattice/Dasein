@@ -208,7 +208,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public Long getSourceCount(String customerSpace, Long systemPid) {
+    public long getSourceCount(String customerSpace, Long systemPid) {
         Long count = dataFeedProxy.countSourcesBySystemPid(customerSpace, systemPid);
         return count == null ? 0L : count;
     }

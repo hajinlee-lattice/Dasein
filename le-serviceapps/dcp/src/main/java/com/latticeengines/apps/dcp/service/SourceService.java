@@ -27,7 +27,7 @@ public interface SourceService {
 
     List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize);
 
-    Long getSourceCount(String customerSpace, Long systemPid);
+    long getSourceCount(String customerSpace, Long systemPid);
 
     Boolean pauseSource(String customerSpace, String sourceId);
 

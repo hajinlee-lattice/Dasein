@@ -25,7 +25,7 @@ public class ProjectSummary {
     private List<Source> sources;
 
     @JsonProperty("totalSourceCount")
-    private Long totalSourceCount;
+    private long totalSourceCount;
 
     @JsonProperty("basicStats")
     private DataReport.BasicStats basicStats;
@@ -74,11 +74,11 @@ public class ProjectSummary {
         this.sources = sources;
     }
 
-    public Long getTotalSourceCount() {
+    public long getTotalSourceCount() {
         return totalSourceCount;
     }
 
-    public void setTotalSourceCount(Long totalSourceCount) {
+    public void setTotalSourceCount(long totalSourceCount) {
         this.totalSourceCount = totalSourceCount;
     }
 
