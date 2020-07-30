@@ -169,7 +169,7 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
 
     @Column(name = "SPEC_TYPE")
     @JsonProperty("spec_type")
-    private String SpecType;
+    private String specType;
 
     @JsonProperty("import_system_name")
     @Transient
@@ -414,11 +414,11 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     }
 
     public String getSpecType() {
-        return SpecType;
+        return specType;
     }
 
     public void setSpecType(String specType) {
-        SpecType = specType;
+        specType = specType;
     }
 
     public enum IngestionBehavior {
