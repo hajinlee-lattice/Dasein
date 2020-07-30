@@ -167,6 +167,10 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @JsonProperty("task_config")
     private DataFeedTaskConfig dataFeedTaskConfig;
 
+    @Column(name = "SPEC_TYPE")
+    @JsonProperty("spec_type")
+    private String specType;
+
     @JsonProperty("import_system_name")
     @Transient
     private String importSystemName;
@@ -407,6 +411,14 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
 
     public void setDataFeedTaskConfig(DataFeedTaskConfig dataFeedTaskConfig) {
         this.dataFeedTaskConfig = dataFeedTaskConfig;
+    }
+
+    public String getSpecType() {
+        return specType;
+    }
+
+    public void setSpecType(String specType) {
+        this.specType = specType;
     }
 
     public enum IngestionBehavior {

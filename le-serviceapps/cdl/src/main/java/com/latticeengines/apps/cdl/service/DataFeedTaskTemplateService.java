@@ -11,18 +11,22 @@ public interface DataFeedTaskTemplateService {
     /**
      * @param customerSpace target tenant
      * @param simpleTemplateMetadata Template description.
+     * @param systemDisplayName s3ImportSystem display name
      * @return true if success.
      */
-    boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
+    boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
+                                 String systemDisplayName);
 
     /**
      * Uses Import Workflow 2.0 to set up the 3 WebVisit import templates from Import Workflow Specs.
      *
      * @param customerSpace target tenant
      * @param simpleTemplateMetadata Template description.
+     * @param systemDisplayName s3ImportSystem display name
      * @return true if success.
      */
-    boolean setupWebVisitProfile2(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
+    boolean setupWebVisitProfile2(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
+                                  String systemDisplayName);
 
     /**
      *
@@ -104,18 +108,21 @@ public interface DataFeedTaskTemplateService {
     /**
      *
      * @param customerSpace target tenant
+     * @param systemDisplayName s3ImportSystem display name
      * @return true if success
      */
-    boolean createDefaultDnbIntentDataTemplate(String customerSpace);
+    boolean createDefaultDnbIntentDataTemplate(String customerSpace, String systemDisplayName);
 
     /**
      *
      * @param customerSpace target tenant
      * @param entityType using to create Template
      * @param simpleTemplateMetadata EntityType.DnbIntentData Template description.
+     * @param systemDisplayName s3ImportSystem display name
      * @return true if success
      */
-    boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType, SimpleTemplateMetadata simpleTemplateMetadata);
+    boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType,
+                                        SimpleTemplateMetadata simpleTemplateMetadata, String systemDisplayName);
 
     /**
      *

@@ -41,6 +41,9 @@ public class DataFeedTaskSummary {
     @JsonProperty("last_updated")
     private Date lastUpdated;
 
+    @JsonProperty("spec_type")
+    private String specType;
+
     public String getSource() {
         return source;
     }
@@ -103,5 +106,13 @@ public class DataFeedTaskSummary {
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public String getSpecType() {
+        return specType;
+    }
+
+    public void setSpecType(String specType) {
+        this.specType = specType;
     }
 }

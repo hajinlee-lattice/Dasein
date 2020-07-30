@@ -165,6 +165,7 @@ public class DataFeedTaskController {
     public ResponseDocument<Boolean> createWebVisitTemplate(
             @PathVariable String customerSpace,
             @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList,
+            @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
             @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
@@ -175,7 +176,7 @@ public class DataFeedTaskController {
                 Boolean result = Boolean.TRUE;
                 for (SimpleTemplateMetadata simpleTemplateMetadata : simpleTemplateMetadataList) {
                     result = result && dataFeedTaskTemplateService.setupWebVisitProfile(customerSpace,
-                            simpleTemplateMetadata);
+                            simpleTemplateMetadata, systemDisplayName);
                 }
                 return ResponseDocument.successResponse(result);
             }
@@ -194,6 +195,7 @@ public class DataFeedTaskController {
     public ResponseDocument<Boolean> createWebVisitTemplate2(
             @PathVariable String customerSpace,
             @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList,
+            @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
             @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
@@ -204,7 +206,7 @@ public class DataFeedTaskController {
                 Boolean result = Boolean.TRUE;
                 for (SimpleTemplateMetadata simpleTemplateMetadata : simpleTemplateMetadataList) {
                     result = result && dataFeedTaskTemplateService.setupWebVisitProfile2(customerSpace,
-                            simpleTemplateMetadata);
+                            simpleTemplateMetadata, systemDisplayName);
                 }
                 return ResponseDocument.successResponse(result);
             }
@@ -383,13 +385,14 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a default DnbIntentData template")
     public ResponseDocument<Boolean> createDefaultDnbIntentDataTemplate(@PathVariable String customerSpace,
+                                                                        @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
                                                                       @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create DnbIntentData template."));
         }
         try {
-            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace);
+            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace, systemDisplayName);
             return ResponseDocument.successResponse(result);
         } catch (Exception e) {
             log.error("Create Default DnbIntentData template failed with error: {}", e.toString());
@@ -404,6 +407,7 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a DnbIntentData template")
     public ResponseDocument<Boolean> createDnbIntentDataTemplate(@PathVariable String customerSpace,
                                                                @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
+                                                                 @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
                                                                @RequestParam(value = "enableGA", required =
                                                                        false, defaultValue = "false") boolean enableGA) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
@@ -413,7 +417,7 @@ public class DataFeedTaskController {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         try {
             return ResponseDocument.successResponse(dataFeedTaskTemplateService.createDnbIntentDataTemplate(customerSpace,
-                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata));
+                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata, systemDisplayName));
         } catch (Exception e) {
             log.error("Create DnbIntentData template failed with error: {}", e.toString());
             String stacktrace = ExceptionUtils.getStackTrace(e);

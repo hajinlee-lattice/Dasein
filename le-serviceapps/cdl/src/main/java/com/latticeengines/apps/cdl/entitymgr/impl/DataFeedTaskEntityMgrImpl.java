@@ -573,6 +573,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         summary.setLastUpdated((Date) columns[5]);
         summary.setUniqueId((String) columns[6]);
         summary.setTemplateDisplayName((String) columns[7]);
+        summary.setSpecType((String) columns[8]);
         return summary;
     }
 
