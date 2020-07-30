@@ -16,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,12 @@ public class EmailServiceImpl implements EmailService {
     private static final String COMMA = ", ";
 
     @Inject
-    private EmailSettings emailsettings;
+    @Qualifier("emailSettings")
+    private EmailSettings smtpEmailSettings;
+
+    @Inject
+    @Qualifier("sendgridEmailSettings")
+    private EmailSettings sendgridEmailSettings;
 
     @Value("${monitor.email.enabled:true}")
     private boolean emailEnabled;
@@ -64,17 +70,30 @@ public class EmailServiceImpl implements EmailService {
         emailEnabled = true;
     }
 
+    /**
+     * This method provides a single place to control which email service provider (ie SendGrid or AWS SES)
+     * to use for each email message.
+     *
+     * It is here for future addition on multi email service provider configurations.
+     *
+     * @return
+     */
+    private EmailSettings getEmailSettings() {
+        // if D&B Connect use sendgrid Settings or use smtp for other such as LatticeEngines
+        return sendgridEmailSettings;
+    }
+
     @Override
     public void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients) {
         if (emailEnabled) {
-            EmailUtils.sendSimpleEmail(subject, content, contentType, recipients, emailsettings);
+            EmailUtils.sendSimpleEmail(subject, content, contentType, recipients, getEmailSettings());
         }
     }
 
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients) {
         if (emailEnabled) {
-            EmailUtils.sendMultiPartEmail(subject, content, recipients, null, emailsettings);
+            EmailUtils.sendMultiPartEmail(subject, content, recipients, null, getEmailSettings());
         }
     }
 
@@ -82,7 +101,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
             Collection<String> bccRecipients) {
         if (emailEnabled) {
-            EmailUtils.sendMultiPartEmail(subject, content, recipients, bccRecipients, emailsettings);
+            EmailUtils.sendMultiPartEmail(subject, content, recipients, bccRecipients, getEmailSettings());
         }
     }
 
