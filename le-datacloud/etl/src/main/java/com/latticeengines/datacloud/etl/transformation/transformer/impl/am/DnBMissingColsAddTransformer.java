@@ -46,7 +46,6 @@ public class DnBMissingColsAddTransformer
                     "Fail to find versions for the source : " + baseSources[0].getSourceName());
         }
         Collections.sort(versions, Collections.reverseOrder());
-        System.out.println("### versions size : " + versions.size()+" versions.get(0) : "+versions.get(0));
         if (versions.size() < 2) {
             throw new RuntimeException(
                     "Fail to find previous version for the source " + baseSources[0].getSourceName()
