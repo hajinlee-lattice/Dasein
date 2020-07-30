@@ -86,16 +86,18 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Source> getSourceList(String projectId) {
-        return getSourceList(projectId, 0, DEFAULT_PAGE_SIZE);
+        return getSourceList(projectId, 1, DEFAULT_PAGE_SIZE);
     }
 
     @Override
     public List<Source> getSourceList(String projectId, int pageIndex, int pageSize) {
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        return sourceProxy.getSourceList(customerSpace.toString(), projectId, pageIndex, pageSize);
+        return sourceProxy.getSourceList(customerSpace.toString(), projectId, pageIndex - 1, pageSize);
     }
 
     @Override

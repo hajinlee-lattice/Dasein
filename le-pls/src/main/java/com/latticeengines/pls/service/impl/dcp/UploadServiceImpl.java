@@ -92,15 +92,17 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig) {
-        return getAllBySourceId(sourceId, status, includeConfig, 0, DEFAULT_PAGE_SIZE);
+        return getAllBySourceId(sourceId, status, includeConfig, 1, DEFAULT_PAGE_SIZE);
     }
 
     @Override
     public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig,
                                                 int pageIndex, int pageSize) {
         Preconditions.checkNotNull(MultiTenantContext.getCustomerSpace());
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return uploadProxy.getUploads(customerSpace, sourceId, status, includeConfig, pageIndex, pageSize);
+        return uploadProxy.getUploads(customerSpace, sourceId, status, includeConfig, pageIndex - 1, pageSize);
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -33,6 +34,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources) {
         return projectProxy.getAllDCPProject(customerSpace, includeSources, 0, DEFAULT_PAGE_SIZE);
+    }
+
+    @Override
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, pageIndex - 1, pageSize);
     }
 
     @Override

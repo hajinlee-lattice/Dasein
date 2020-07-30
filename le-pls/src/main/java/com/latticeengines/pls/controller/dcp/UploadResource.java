@@ -38,8 +38,10 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation("Get uploads by sourceId")
     public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status,
-                                                @RequestParam(required = false, defaultValue = "false") Boolean includeConfig) {
-        return uploadService.getAllBySourceId(sourceId, status, includeConfig);
+                                                @RequestParam(required = false, defaultValue = "false") Boolean includeConfig,
+                                                @RequestParam(required = false, defaultValue = "1") int pageIndex,
+                                                @RequestParam(required = false, defaultValue = "20") int pageSize) {
+        return uploadService.getAllBySourceId(sourceId, status, includeConfig, pageIndex, pageSize);
     }
 
     @GetMapping("/uploadId/{uploadId}")
