@@ -45,7 +45,7 @@ public class SourceProxy extends MicroserviceRestApiProxy implements ProxyInterf
 
     public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize) {
         String baseUrl = "/customerspaces/{customerSpace}/source/projectId/{projectId}" +
-                "?pageIndex={pageIndex}&{pageSize}={pageSize}";
+                "?pageIndex={pageIndex}&pageSize={pageSize}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId, Integer.toString(pageIndex),
                 Integer.toString(pageSize));
         List<?> rawResult = get("get dcp source by sourceId", url, List.class);

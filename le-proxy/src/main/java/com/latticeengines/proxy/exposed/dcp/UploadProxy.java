@@ -42,7 +42,7 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
     public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status,
                                           Boolean includeConfig, int pageIndex, int pageSize) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}?includeConfig={includeConfig}" +
-                "&pageIndex={pageIndex}&{pageSize}={pageSize}";
+                "&pageIndex={pageIndex}&pageSize={pageSize}";
         String url = constructUrl(baseUrl, customerSpace, sourceId, includeConfig.toString(), Integer.toString(pageIndex),
                 Integer.toString(pageSize));
         if (status != null) {

@@ -207,7 +207,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
 
     public List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid, int pageIndex, int pageSize) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/systemPid/{systemPid}" +
-                        "?pageIndex={pageIndex}&{pageSize}={pageSize}",
+                        "?pageIndex={pageIndex}&pageSize={pageSize}",
                 shortenCustomerSpace(customerSpace), systemPid, Integer.toString(pageIndex),
                 Integer.toString(pageSize));
         List<?> rawList = get("getSourcesBySystemPid", url, List.class);

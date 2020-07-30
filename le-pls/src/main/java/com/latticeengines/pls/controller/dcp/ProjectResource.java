@@ -82,7 +82,7 @@ public class ProjectResource {
         }
 
         try {
-            return projectService.getAllProjects(customerSpace.toString(), includeSources);
+            return projectService.getAllProjects(customerSpace.toString(), includeSources, pageIndex, pageSize);
         } catch (LedpException e) {
             log.error("Failed to get all projects: " + e.getMessage());
             UIAction action = UIActionUtils.generateUIAction("", View.Banner,
