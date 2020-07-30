@@ -361,6 +361,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return true;
     }
 
+    /* This method doesn't appear to be called from anywhere. */
     @Override
     public synchronized Boolean forgotLatticeCredentials(String username) {
 

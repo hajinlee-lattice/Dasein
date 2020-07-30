@@ -69,14 +69,14 @@ public final class EmailUtils {
             } else {
                 log.info(String.format("Recipients: %s", Arrays.toString(recipients.toArray())));
             }
-            Transport.send(message);
+            Transport.send(message,emailSettings.getUsername(), emailSettings.getPassword());
             log.info("Send multi part email complete.");
         } catch (MessagingException e) {
             throw new LedpException(LedpCode.LEDP_19000, "Error sending a multipart email", e);
         }
     }
 
-    public static Session applySettings(final EmailSettings emailSettings) throws MessagingException {
+    private static Session applySettings(final EmailSettings emailSettings) throws MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.starttls.enable", emailSettings.isUseSTARTTLS());
         props.put("mail.smtp.host", emailSettings.getServer());
