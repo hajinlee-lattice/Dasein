@@ -92,6 +92,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
 
     @Override
     protected TimeLineJobConfig configureJob(TimeLineSparkStepConfiguration stepConfiguration) {
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        active = inactive.complement();
         if (isShortCutMode()) {
             log.info("Already computed this step, skip processing (short-cut mode)");
             Map<String, String> masterTableNames = getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class,
@@ -106,8 +108,6 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             log.info("timeline list is null.");
             return null;
         }
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        active = inactive.complement();
         dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         if (dcStatus.getTimelineRebuildFlag() == null || Boolean.TRUE.equals(dcStatus.getTimelineRebuildFlag())) {
             needRebuild = true;
