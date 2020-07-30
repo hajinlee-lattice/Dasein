@@ -6,13 +6,10 @@ import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImport
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,19 +177,20 @@ public class SourceImportListener extends LEJobListener {
         if (BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
             String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
             log.info("tenantId=" + tenantId);
-
             String rootId = CustomerSpace.parse(tenantId).toString();
-            List<UploadDetails> details = uploadProxy.getUploads(tenantId);
-            Set<Upload.Status> statuses =
-                    details.stream()
-                            .map(UploadDetails::getStatus)
-                            .collect(Collectors.toSet());
-            log.info("upload status " + statuses);
-            statuses.removeAll(Upload.Status.getTerminalStatuses());
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+            if (job == null) {
+                log.error("Cannot locate workflow job with id {}", jobExecution.getId());
+                throw new IllegalArgumentException("Cannot locate workflow job with id " + jobExecution.getId());
+            }
+            String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
+            Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(tenantId, uploadId);
             DataReport report = reportProxy.getDataReport(tenantId, DataReportRecord.Level.Tenant, rootId);
             long refreshTime = report.getRefreshTimestamp() == null ? 0L : report.getRefreshTimestamp();
             long now = Instant.now().toEpochMilli();
-            if (now - refreshTime > TimeUnit.HOURS.toMillis(4) && CollectionUtils.isEmpty(statuses)) {
+            log.info("last refresh time is {}, current time is {}, has unterminal uploads: {}", refreshTime, now,
+                    hasUnterminalUploads);
+            if (now - refreshTime > TimeUnit.HOURS.toMillis(4) && Boolean.FALSE.equals(hasUnterminalUploads)) {
                 DCPReportRequest request = new DCPReportRequest();
                 request.setMode(DataReportMode.UPDATE);
                 request.setLevel(DataReportRecord.Level.Tenant);

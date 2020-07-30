@@ -2,10 +2,12 @@ package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -55,9 +57,14 @@ public class UploadServiceImpl implements UploadService {
     private SourceFileProxy sourceFileProxy;
 
     @Override
-    public List<UploadDetails> getUploads(String customerSpace) {
+    public boolean hasUnterminalUploads(String customerSpace, String excludeUploadId) {
         List<Upload> uploads = uploadEntityMgr.findAll();
-        return uploads.stream().map(upload -> getUploadDetails(upload, false)).collect(Collectors.toList());
+        Set<Upload.Status> statuses = uploads.stream()
+                .filter(upload -> !upload.getUploadId().equals(excludeUploadId))
+                .map(Upload::getStatus)
+                .collect(Collectors.toSet());
+        statuses.removeAll(Upload.Status.getTerminalStatuses());
+        return CollectionUtils.isNotEmpty(statuses);
     }
 
     @Override

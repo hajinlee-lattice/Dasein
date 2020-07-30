@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 
 public interface UploadService {
 
-    List<UploadDetails> getUploads(String customerSpace);
+    boolean hasUnterminalUploads(String customerSpace, String excludeUploadId);
 
     List<UploadDetails> getUploads(String customerSpace, String sourceId, Boolean includeConfig);
 

@@ -4,6 +4,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +52,13 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return JsonUtils.convertList(get("get uploads", url, List.class), UploadDetails.class);
     }
 
-    public List<UploadDetails> getUploads(String customerSpace) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/";
+    public Boolean hasUnterminalUploads(String customerSpace, String excludeUploadId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/hasunterminal";
         String url = constructUrl(baseUrl, customerSpace);
-        return getList("get uploads in tenant", url, UploadDetails.class);
+        if (StringUtils.isNotBlank(excludeUploadId)) {
+            url = url + "?exclude=" + excludeUploadId;
+        }
+        return get("has unterminal status", url, Boolean.class);
     }
 
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
