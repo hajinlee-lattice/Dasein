@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -68,6 +69,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         testProjectProxy.deleteProject(projectDetail1.getProjectId());
         testProjectProxy.deleteProject(projectDetail2.getProjectId());
+        SleepUtils.sleep(1000L);
 
         projectList = testProjectProxy.getAllProjects();
         Assert.assertEquals(projectList.size(), 4);
