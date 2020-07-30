@@ -138,7 +138,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
-        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 6);
+        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
         Assert.assertEquals(uploadJobDetails.getCurrentStep().getStepName(), "Analysis");
     }
 }
