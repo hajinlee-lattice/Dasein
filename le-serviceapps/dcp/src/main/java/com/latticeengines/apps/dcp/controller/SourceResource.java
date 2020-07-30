@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -93,9 +94,11 @@ public class SourceResource {
     @GetMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get all Sources in Project")
-    public List<Source> getSourceUnderProject(@PathVariable String customerSpace, @PathVariable String projectId) {
+    public List<Source> getSourceUnderProject(@PathVariable String customerSpace, @PathVariable String projectId,
+                                              @RequestParam(defaultValue = "0") int pageIndex,
+                                              @RequestParam(defaultValue = "20") int pageSize) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return sourceService.getSourceList(customerSpace, projectId);
+        return sourceService.getSourceList(customerSpace, projectId, pageIndex, pageSize);
     }
 
     @DeleteMapping("/sourceId/{sourceId}")

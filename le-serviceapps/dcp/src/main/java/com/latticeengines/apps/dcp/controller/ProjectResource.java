@@ -60,8 +60,18 @@ public class ProjectResource {
     @ApiOperation(value = "Get all projects")
     @UseReaderConnection
     public List<ProjectSummary> getAllProject(@PathVariable String customerSpace,
-                                              @RequestParam(defaultValue = "false") Boolean includeSources) {
-        return projectService.getAllProject(customerSpace, includeSources);
+                                              @RequestParam(defaultValue = "false") Boolean includeSources,
+                                              @RequestParam(defaultValue = "0") int pageIndex,
+                                              @RequestParam(defaultValue = "20") int pageSize) {
+        return projectService.getAllProject(customerSpace, includeSources, pageIndex, pageSize);
+    }
+
+    @GetMapping("/count")
+    @ResponseBody
+    @ApiOperation(value = "Get all projects count")
+    @UseReaderConnection
+    public Long getAllProjectCount(@PathVariable String customerSpace) {
+        return projectService.getProjectsCount(customerSpace);
     }
 
     @GetMapping("/projectId/{projectId}")

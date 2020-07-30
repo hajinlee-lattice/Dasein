@@ -3,7 +3,6 @@ package com.latticeengines.apps.dcp.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -28,12 +27,12 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     private ProjectProxy projectProxy;
 
     @BeforeClass(groups = {"deployment"})
-    public void setup() throws Exception {
+    public void setup() {
         setupTestEnvironment();
     }
 
     @Test(groups = {"deployment"})
-    public void testCreateDCPProject() throws IOException {
+    public void testCreateDCPProject() {
         ProjectRequest projectRequest = new ProjectRequest();
         projectRequest.setDisplayName("createtest");
         projectRequest.setProjectId("createtest");
@@ -45,7 +44,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     @Test(groups = {"deployment"})
-    public void testGetAllDCPProject() throws IOException {
+    public void testGetAllDCPProject() {
         ProjectRequest projectRequest = new ProjectRequest();
         projectRequest.setDisplayName("getalltest1");
         projectRequest.setProjectId("getalltest1");
@@ -55,7 +54,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectId("getalltest2");
         projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
 
-        List<ProjectSummary> result = projectProxy.getAllDCPProject(mainTestTenant.getId(), Boolean.FALSE);
+        List<ProjectSummary> result = projectProxy.getAllDCPProject(mainTestTenant.getId(), Boolean.FALSE, 0, 20);
         assertNotNull(result);
         Set<String> projectIds = new HashSet<>(Arrays.asList("getalltest1", "getalltest2"));
         for (ProjectSummary project: result) {

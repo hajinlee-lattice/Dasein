@@ -460,6 +460,11 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public Long countSourcesBySystemPid(String customerSpace, Long systemPid) {
+        return dataFeedTaskEntityMgr.countSourcesBySystemPid(systemPid);
+    }
+
+    @Override
     public SourceInfo getSourceBySourceId(String customerSpace, String sourceId) {
         DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
         if (dataFeed == null) {

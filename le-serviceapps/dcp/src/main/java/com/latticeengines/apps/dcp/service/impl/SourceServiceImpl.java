@@ -55,6 +55,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String TEMPLATE_NAME = "%s_Template";
     private static final String FEED_TYPE_PATTERN = "%s_%s"; // SystemName_SourceId;
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project+source path}
+    private static final int DEFAULT_PAGE_SIZE = 20;
 
     @Inject
     private SourceFileProxy sourceFileProxy;
@@ -185,10 +186,15 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Source> getSourceList(String customerSpace, String projectId) {
+        return getSourceList(customerSpace, projectId, 0, DEFAULT_PAGE_SIZE);
+    }
+
+    @Override
+    public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize) {
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
         if (projectInfo != null) {
             List<SourceInfo> sourceInfoList = dataFeedProxy.getSourcesBySystemPid(customerSpace,
-                    projectInfo.getSystemId());
+                    projectInfo.getSystemId(), pageIndex, pageSize);
             if (CollectionUtils.isEmpty(sourceInfoList)) {
                 return Collections.emptyList();
             }
@@ -199,6 +205,12 @@ public class SourceServiceImpl implements SourceService {
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public Long getSourceCount(String customerSpace, Long systemPid) {
+        Long count = dataFeedProxy.countSourcesBySystemPid(customerSpace, systemPid);
+        return count == null ? 0L : count;
     }
 
     private Source getSourceFromSourceInfo(ProjectInfo projectInfo, SourceInfo sourceInfo,

@@ -20,6 +20,7 @@ import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
+    private static final int DEFAULT_PAGE_SIZE = 20;
 
     @Inject
     private ProjectProxy projectProxy;
@@ -31,7 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources) {
-        return projectProxy.getAllDCPProject(customerSpace, includeSources);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, 0, DEFAULT_PAGE_SIZE);
     }
 
     @Override

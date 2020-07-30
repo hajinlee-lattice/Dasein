@@ -101,22 +101,21 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
-        Preconditions.checkState(pageIndex >= 0);
-        Preconditions.checkState(pageSize > 0);
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            if (pageSize > MAX_PAGE_SIZE) {
-                pageSize = MAX_PAGE_SIZE;
-            }
-            Sort sort = Sort.by(Sort.Direction.DESC, "updated");
-            PageRequest pageRequest = PageRequest.of(pageIndex, pageSize, sort);
+            PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
             List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
-            timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
+            timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in page.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);
             return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo,
                     basicStatsMap.get(projectInfo.getProjectId()), includeSources)).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public Long getProjectsCount(String customerSpace) {
+        return projectEntityMgr.countAllProjects();
     }
 
     @Override
@@ -202,6 +201,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setDeleted(projectInfo.getDeleted());
         if (includeSources) {
             details.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+            details.setTotalSourceCount(sourceService.getSourceCount(customerSpace, projectInfo.getSystemId()));
         }
         details.setRecipientList(projectInfo.getRecipientList());
         details.setCreated(projectInfo.getCreated().getTime());
@@ -218,6 +218,7 @@ public class ProjectServiceImpl implements ProjectService {
         summary.setArchieved(projectInfo.getDeleted());
         if(includeSources) {
             summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+            summary.setTotalSourceCount(sourceService.getSourceCount(customerSpace, projectInfo.getSystemId()));
         }
         summary.setRecipientList(projectInfo.getRecipientList());
         summary.setBasicStats(basicStats);
@@ -296,6 +297,16 @@ public class ProjectServiceImpl implements ProjectService {
             retry++;
         }
         return project;
+    }
+
+    private PageRequest getPageRequest(int pageIndex, int pageSize) {
+        Preconditions.checkState(pageIndex >= 0);
+        Preconditions.checkState(pageSize > 0);
+        if (pageSize > MAX_PAGE_SIZE) {
+            pageSize = MAX_PAGE_SIZE;
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "updated");
+        return PageRequest.of(pageIndex, pageSize, sort);
     }
 
 }
