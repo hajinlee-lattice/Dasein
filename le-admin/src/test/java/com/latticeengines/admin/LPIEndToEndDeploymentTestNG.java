@@ -31,6 +31,7 @@ import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -47,6 +48,8 @@ import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
@@ -66,6 +69,9 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Inject
     private TenantService tenantService;
+
+    @Inject
+    private com.latticeengines.security.exposed.service.TenantService secTenantService;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -139,6 +145,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         verifyZKState();
         verifyPLSTenantExists();
         verifyIDaasUserExists();
+        verifyVboCallback();
 
         testExistingSubNumberViolation(subNumber);
 
@@ -419,6 +426,25 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         } catch (IOException e) {
             log.error("Error when verify the existence of hdfs paths", e);
         }
+    }
+
+    private void verifyVboCallback() throws Exception {
+        boolean verified = false;
+        Tenant tenant = null;
+        for(int i = 0; i < 30; ++i) {
+            log.info(tenantId);
+            tenant = secTenantService.findByTenantName(tenantId);
+            if (tenant != null) {
+                log.info(JsonUtils.serialize(tenant));
+                verified = tenant.getJobNotificationLevels().containsKey("mock@vbo");
+                if (verified)
+                    break;
+            }
+
+            Thread.sleep(60000);
+        }
+        Assert.assertTrue(verified);
+        Assert.assertEquals(tenant.getJobNotificationLevels().get("mock@vbo"), TenantEmailNotificationLevel.NONE);
     }
 
     // ==================================================

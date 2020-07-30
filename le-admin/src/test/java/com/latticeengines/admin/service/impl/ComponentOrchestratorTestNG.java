@@ -172,7 +172,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
 
         ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
         orchestrator.orchestrateForInstall(TestContractId, TestTenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                properties, prodAndExternalAminInfo);
+                properties, prodAndExternalAminInfo, null);
 
         ExecutorService executorService = Executors.newFixedThreadPool(orchestrator.components.size());
         Map<String, Future<BootstrapState>> states = new HashMap<>();

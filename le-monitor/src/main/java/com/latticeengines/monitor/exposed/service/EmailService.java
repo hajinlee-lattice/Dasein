@@ -32,9 +32,9 @@ public interface EmailService {
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
                             Collection<String> bccRecipients, EmailFromAddress fromAddress);
 
-    void sendNewUserEmail(User user, String password, String hostport, boolean bccEmail);
+    boolean sendNewUserEmail(User user, String password, String hostport, boolean bccEmail);
 
-    void sendExistingUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail);
+    boolean sendExistingUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail);
 
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
 

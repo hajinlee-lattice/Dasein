@@ -67,7 +67,7 @@ public class TenantResource {
             @RequestParam(value = "contractId") String contractId, //
             @RequestBody TenantRegistration registration, HttpServletRequest request) {
         String userName = getUserName(request);
-        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName);
+        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName, null);
     }
 
     @PostMapping("/{tenantId}/V2")
@@ -231,10 +231,10 @@ public class TenantResource {
     @PostMapping("/vboadmin")
     @ResponseBody
     @ApiOperation(value = "Create a DCP tenant from VBO request")
-    public VboResponse createTenant(@RequestBody VboRequest vboRequest, HttpServletRequest request) {
+    public VboResponse createTenant(@RequestBody VboRequest vboRequest, @RequestParam(defaultValue = "true") Boolean callback, HttpServletRequest request) {
         try{
             String userName = getUserName(request);
-            return tenantService.createVboTenant(vboRequest, userName);
+            return tenantService.createVboTenant(vboRequest, userName, request.getRequestURL().toString(), callback);
         } catch(Exception e){
             VboResponse vboResponse = new VboResponse();
             vboResponse.setStatus("failed");

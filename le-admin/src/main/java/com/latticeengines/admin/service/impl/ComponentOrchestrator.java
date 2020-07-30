@@ -44,6 +44,8 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.ComponentStatus;
 import com.latticeengines.domain.exposed.component.InstallDocument;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
+import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.util.TenantCleanupUtils;
@@ -146,12 +148,12 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrateForInstall(String contractId, String tenantId, String spaceId,
-            Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
+                                      Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo, VboCallback callback) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
 
-        postInstall(visitor, prodAndExternalAminInfo, tenantId);
+        postInstall(visitor, prodAndExternalAminInfo, tenantId, callback);
     }
 
     public void orchestrateForInstallV2(String contractId, String tenantId, String spaceId,
@@ -191,15 +193,20 @@ public class ComponentOrchestrator {
     }
 
     void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
-            String tenantId) {
+            String tenantId, VboCallback callback) {
         boolean installSuccess = checkComponentsBootStrapStatus(visitor);
-        emailService(installSuccess, prodAndExternalAminInfo, tenantId);
+
+        if (callback != null && installSuccess) {
+            // tenant provisioning successful; still assume user creation failed until later check
+            callback.customerCreation.transactionDetail.status = VboStatus.USER_FAIL;
+        }
+        emailService(installSuccess, prodAndExternalAminInfo, tenantId, callback);
     }
 
     void postInstallV2(OrchestratorVisitorV2 visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
                      String tenantId) {
         boolean installSuccess = visitor.failed.size() == 0;
-        emailService(installSuccess, prodAndExternalAminInfo, tenantId);
+        emailService(installSuccess, prodAndExternalAminInfo, tenantId, null);
     }
 
     private boolean checkComponentsBootStrapStatus(OrchestratorVisitor visitor) {
@@ -210,29 +217,30 @@ public class ComponentOrchestrator {
     }
 
     private void emailService(boolean allComponentsSuccessful, ProductAndExternalAdminInfo prodAndExternalAminInfo,
-            String tenantId) {
+            String tenantId, VboCallback callback) {
         List<String> newEmailList = new ArrayList<String>();
         List<String> existingEmailList = new ArrayList<String>();
         List<LatticeProduct> products = prodAndExternalAminInfo.products;
+
         if (allComponentsSuccessful) {
             if (products.contains(LatticeProduct.PD)
                     || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
                 Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
-                Set<String> externalEmails = externalEmailMap.keySet();
-                for (String externalEmail : externalEmails) {
-                    if (!externalEmailMap.get(externalEmail)) {
-                        newEmailList.add(externalEmail);
+                Set<Map.Entry<String, Boolean>> externalEmailEntries = externalEmailMap.entrySet();
+                for (Map.Entry<String, Boolean> emailEntry : externalEmailEntries) {
+                    if (!emailEntry.getValue()) {
+                        newEmailList.add(emailEntry.getKey());
                     } else {
-                        existingEmailList.add(externalEmail);
+                        existingEmailList.add(emailEntry.getKey());
                     }
                 }
             }
         }
-        sendExistingEmails(existingEmailList, tenantId, products);
-        sendNewEmails(newEmailList, tenantId, products);
+        sendExistingEmails(existingEmailList, tenantId, products, callback);
+        sendNewEmails(newEmailList, tenantId, products, callback);
     }
 
-    private void sendNewEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
+    private void sendNewEmails(List<String> emailList, String tenantId, List<LatticeProduct> products, VboCallback callback) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -254,18 +262,24 @@ public class ComponentOrchestrator {
             ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/temppassword",
                     HttpMethod.PUT, requestEntity, String.class);
 
+            boolean emailSuccess;
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, false);
+                emailSuccess = emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, false);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
+                emailSuccess = emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
                 tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
+                emailSuccess = false;
                 log.info("The user clicked both PD and LPA3");
+            }
+            if (callback != null && emailSuccess && user.getUsername().equals(callback.customerCreation.customerDetail.login)) {
+                callback.customerCreation.customerDetail.emailDate = Long.toString(System.currentTimeMillis());
+                callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
             }
         }
     }
 
-    private void sendExistingEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
+    private void sendExistingEmails(List<String> emailList, String tenantId, List<LatticeProduct> products, VboCallback callback) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -275,13 +289,20 @@ public class ComponentOrchestrator {
             log.info("tenantId is " + tenantId);
             Tenant tenant = new Tenant();
             tenant.setName(tenantId);
+
+            boolean emailSuccess;
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailService.sendExistingUserEmail(tenant, user, appPublicUrl, false);
+                emailSuccess = emailService.sendExistingUserEmail(tenant, user, appPublicUrl, false);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendExistingUserEmail(tenant, user, appPublicUrl, true);
+                emailSuccess = emailService.sendExistingUserEmail(tenant, user, appPublicUrl, true);
                 tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
                 log.info("The user clicked both PD and LPA3");
+                emailSuccess = false;
+            }
+            if (callback != null && emailSuccess && user.getUsername().equals(callback.customerCreation.customerDetail.login)) {
+                callback.customerCreation.customerDetail.emailDate = Long.toString(System.currentTimeMillis());
+                callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
             }
         }
     }

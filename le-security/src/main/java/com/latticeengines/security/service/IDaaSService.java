@@ -23,4 +23,6 @@ public interface IDaaSService {
     IDaaSResponse addRoleToUser(RoleRequest request);
 
     InvitationLinkResponse getUserInvitationLink(String email);
+
+    void callbackWithAuth(String url, Object responseBody);
 }
