@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,13 +78,19 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ProjectInfo> findAllProjectInfo() {
-        List<Object[]> result = getReadOrWriteRepository().findAllProjects();
+    public List<ProjectInfo> findAllProjectInfo(Pageable pageable) {
+        List<Object[]> result = getReadOrWriteRepository().findAllProjects(pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {
             return result.stream().map(this::getProjectInfo).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countAllProjects() {
+        return getReadOrWriteRepository().count();
     }
 
     @Override

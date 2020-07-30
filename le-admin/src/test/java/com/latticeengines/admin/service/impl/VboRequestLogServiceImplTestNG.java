@@ -1,10 +1,13 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -14,7 +17,7 @@ import com.latticeengines.admin.entitymgr.VboRequestLogEntityMgr;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.VboRequestLogService;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
@@ -44,17 +47,24 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         vboResponse.setMessage("Test");
         vboResponse.setAckReferenceId(traceId);
         vboRequestLogService.createVboRequestLog(traceId, "TenantId", vboRequest, null);
-        SleepUtils.sleep(500);
-        requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
-        Assert.assertNotNull(requestLog);
-        Assert.assertNotNull(requestLog.getVboRequest());
-        Assert.assertNull(requestLog.getVboResponse());
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5,
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
+            Assert.assertNotNull(requestLog);
+            Assert.assertNotNull(requestLog.getVboRequest());
+            Assert.assertNull(requestLog.getVboResponse());
+            return true;
+        });
         vboRequestLogService.updateVboResponse(traceId, vboResponse);
-        SleepUtils.sleep(500);
-        requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
-        Assert.assertNotNull(requestLog);
-        Assert.assertNotNull(requestLog.getVboRequest());
-        Assert.assertNotNull(requestLog.getVboResponse());
+        retry.execute(ctx -> {
+            requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
+            Assert.assertNotNull(requestLog);
+            Assert.assertNotNull(requestLog.getVboRequest());
+            Assert.assertNotNull(requestLog.getVboResponse());
+            return true;
+        });
+
     }
 
     @Test(groups = "functional")
@@ -66,11 +76,17 @@ public class VboRequestLogServiceImplTestNG extends AdminFunctionalTestNGBase {
         vboResponse.setMessage("Test");
         vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
         vboRequestLogService.createVboRequestLog(null, tenantId, vboRequest, vboResponse);
-        SleepUtils.sleep(500);
-        List<VboRequestLog> nullLog = vboRequestLogService.getVboRequestLogByTenantId(tenantId);
-        Assert.assertNotNull(nullLog);
-        Assert.assertEquals(nullLog.size(), 2);
-        nullLog.forEach(log -> vboRequestLogEntityMgr.delete(log));
+        AtomicReference<List<VboRequestLog>> nullLog = new AtomicReference<>();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5,
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            nullLog.set(vboRequestLogService.getVboRequestLogByTenantId(tenantId));
+            Assert.assertNotNull(nullLog);
+            Assert.assertEquals(nullLog.get().size(), 2);
+            return true;
+        });
+
+        nullLog.get().forEach(log -> vboRequestLogEntityMgr.delete(log));
     }
 
     private VboRequest generateVBORequest() {

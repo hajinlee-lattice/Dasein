@@ -3,15 +3,18 @@ package com.latticeengines.pls.controller.dcp;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -69,8 +72,13 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         testProjectProxy.deleteProject(projectDetail1.getProjectId());
         testProjectProxy.deleteProject(projectDetail2.getProjectId());
 
-        projectList = testProjectProxy.getAllProjects();
-        Assert.assertEquals(projectList.size(), 4);
-        projectList.forEach(project -> Assert.assertEquals(project.getArchieved(), Boolean.TRUE));
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5,
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            List<ProjectSummary> allProjects = testProjectProxy.getAllProjects();
+            Assert.assertEquals(allProjects.size(), 4);
+            allProjects.forEach(project -> Assert.assertEquals(project.getArchieved(), Boolean.TRUE));
+            return true;
+        });
     }
 }

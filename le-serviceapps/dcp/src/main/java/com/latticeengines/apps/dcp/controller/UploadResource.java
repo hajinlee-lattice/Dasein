@@ -64,13 +64,15 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "get upload list")
     public List<UploadDetails> getUploads(@PathVariable String customerSpace, @PathVariable String sourceId,
-                                  @RequestParam(value = "status", required = false) Upload.Status status,
-                                          @RequestParam(defaultValue = "true") Boolean includeConfig) {
+                                          @RequestParam(value = "status", required = false) Upload.Status status,
+                                          @RequestParam(defaultValue = "true") Boolean includeConfig,
+                                          @RequestParam(defaultValue = "0") int pageIndex,
+                                          @RequestParam(defaultValue = "20") int pageSize) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (status != null) {
-            return uploadService.getUploads(customerSpace, sourceId, status, includeConfig);
+            return uploadService.getUploads(customerSpace, sourceId, status, includeConfig, pageIndex, pageSize);
         } else {
-            return uploadService.getUploads(customerSpace, sourceId, includeConfig);
+            return uploadService.getUploads(customerSpace, sourceId, includeConfig, pageIndex, pageSize);
         }
     }
 

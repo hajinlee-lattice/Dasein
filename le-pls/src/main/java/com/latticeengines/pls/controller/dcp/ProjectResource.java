@@ -73,14 +73,16 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation("Get all projects")
     @PreAuthorize("hasRole('View_DCP_Projects')")
-    List<ProjectSummary> getAllProjects(@RequestParam(required = false, defaultValue = "false") Boolean includeSources) {
+    List<ProjectSummary> getAllProjects(@RequestParam(required = false, defaultValue = "false") Boolean includeSources,
+                                        @RequestParam(required = false, defaultValue = "1") int pageIndex,
+                                        @RequestParam(required = false, defaultValue = "20") int pageSize) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
 
         try {
-            return projectService.getAllProjects(customerSpace.toString(), includeSources);
+            return projectService.getAllProjects(customerSpace.toString(), includeSources, pageIndex, pageSize);
         } catch (LedpException e) {
             log.error("Failed to get all projects: " + e.getMessage());
             UIAction action = UIActionUtils.generateUIAction("", View.Banner,

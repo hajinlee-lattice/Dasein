@@ -30,6 +30,9 @@ public class ProjectDetails {
     @JsonProperty("sources")
     private List<Source> sources;
 
+    @JsonProperty("totalSourceCount")
+    private long totalSourceCount;
+
     @JsonProperty("recipientList")
     private List<String> recipientList;
 
@@ -88,6 +91,14 @@ public class ProjectDetails {
 
     public void setSources(List<Source> sources) {
         this.sources = sources;
+    }
+
+    public long getTotalSourceCount() {
+        return totalSourceCount;
+    }
+
+    public void setTotalSourceCount(long totalSourceCount) {
+        this.totalSourceCount = totalSourceCount;
     }
 
     public List<String> getRecipientList() {

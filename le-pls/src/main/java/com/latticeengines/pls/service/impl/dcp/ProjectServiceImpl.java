@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -20,6 +21,7 @@ import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
+    private static final int DEFAULT_PAGE_SIZE = 20;
 
     @Inject
     private ProjectProxy projectProxy;
@@ -31,7 +33,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources) {
-        return projectProxy.getAllDCPProject(customerSpace, includeSources);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, 0, DEFAULT_PAGE_SIZE);
+    }
+
+    @Override
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, pageIndex - 1, pageSize);
     }
 
     @Override

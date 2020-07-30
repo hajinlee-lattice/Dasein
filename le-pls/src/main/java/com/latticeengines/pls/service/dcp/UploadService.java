@@ -15,6 +15,9 @@ public interface UploadService {
 
     List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig);
 
+    List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig, int pageIndex,
+                                         int pageSize);
+
     UploadDetails getByUploadId(String uploadId, Boolean includeConfig);
 
     String generateToken(String uploadId, List<UploadFileDownloadConfig.FileType> files);

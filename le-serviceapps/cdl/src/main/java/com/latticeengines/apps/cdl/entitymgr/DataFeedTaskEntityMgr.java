@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.entitymgr;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -66,7 +68,9 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     void setS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status);
 
-    List<SourceInfo> getSourcesBySystemPid(Long systemPid);
+    List<SourceInfo> getSourcesBySystemPid(Long systemPid, Pageable pageable);
+
+    Long countSourcesBySystemPid(Long systemPid);
 
     SourceInfo getSourceBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
 

@@ -59,6 +59,8 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
 
+    private static final int DEFAULT_PAGE_SIZE = 20;
+
     @Inject
     private FileDownloadService fileDownloadService;
 
@@ -90,12 +92,22 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig) {
+        return getAllBySourceId(sourceId, status, includeConfig, 1, DEFAULT_PAGE_SIZE);
+    }
+
+    @Override
+    public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status, Boolean includeConfig,
+                                                int pageIndex, int pageSize) {
+        Preconditions.checkNotNull(MultiTenantContext.getCustomerSpace());
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return uploadProxy.getUploads(customerSpace, sourceId, status, includeConfig);
+        return uploadProxy.getUploads(customerSpace, sourceId, status, includeConfig, pageIndex - 1, pageSize);
     }
 
     @Override
     public UploadDetails getByUploadId(String uploadId, Boolean includeConfig) {
+        Preconditions.checkNotNull(MultiTenantContext.getCustomerSpace());
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         return uploadProxy.getUploadByUploadId(customerSpace, uploadId, includeConfig);
     }
@@ -313,6 +325,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Override
     public UploadDetails startImport(DCPImportRequest importRequest) {
+        Preconditions.checkNotNull(MultiTenantContext.getCustomerSpace());
         ApplicationId appId = submitImportRequest(importRequest);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Job job = workflowJobService.findByApplicationId(appId.toString());
