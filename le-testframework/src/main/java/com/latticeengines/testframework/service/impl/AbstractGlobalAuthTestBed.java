@@ -181,6 +181,21 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     @Override
+    public void cleanupSession(Tenant tenant, AccessLevel level) {
+        String key = getCacheKey(level, tenant);
+        UserDocument userDoc = userTenantSessions.get(key);
+        if (userDoc != null) {
+            log.info("Logging out token for " + key);
+            try {
+                logout(userDoc);
+                userTenantSessions.remove(key);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
     public void cleanupS3() {
         for (Tenant tenant : testTenants) {
             if (excludedCleanupTenantIds.contains(tenant.getId())) {

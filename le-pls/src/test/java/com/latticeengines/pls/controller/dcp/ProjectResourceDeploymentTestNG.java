@@ -15,13 +15,17 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.google.common.collect.Sets;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -80,5 +84,35 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             allProjects.forEach(project -> Assert.assertEquals(project.getArchieved(), Boolean.TRUE));
             return true;
         });
+    }
+
+    @Test(groups = "deployment")
+    public void testGetAllDCPProjectWithTeamRestriction() {
+        List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
+        Assert.assertEquals(projectList.size(), 4);
+        switchToExternalAdmin();
+        String url = getRestAPIHostPort() + "pls/projects/list";
+        projectList = restTemplate.getForObject(url, List.class);
+        Assert.assertEquals(projectList.size(), 0);
+
+        switchToSuperAdmin();
+        projectList = testProjectProxy.getAllProjects();
+        Assert.assertEquals(projectList.size(), 4);
+
+        ProjectDetails project = testProjectProxy.getProjectByProjectId(projectList.get(0).getProjectId());
+        GlobalTeamData teamData = new GlobalTeamData();
+        teamData.setTeamName(project.getProjectDisplayName());
+        String externalAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        String superAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
+        teamData.setTeamMembers(Sets.newHashSet(externalAdminUser, superAdminUser));
+        url = getRestAPIHostPort() + "pls/teams/teamId/" + project.getTeamId();
+        restTemplate.put(url, teamData);
+
+        cleanupSession(AccessLevel.EXTERNAL_ADMIN);
+        switchToExternalAdmin();
+        url = getRestAPIHostPort() + "pls/projects/list";
+        projectList = restTemplate.getForObject(url, List.class);
+        Assert.assertEquals(projectList.size(), 1);
     }
 }
