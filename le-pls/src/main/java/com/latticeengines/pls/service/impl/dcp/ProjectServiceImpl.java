@@ -58,6 +58,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+        Preconditions.checkArgument(pageIndex > 0);
+        Preconditions.checkArgument(pageSize > 0);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, pageIndex - 1, pageSize, getTeamIds());
+    }
+
+    @Override
     public ProjectDetails getProjectByProjectId(String customerSpace, String projectId, Boolean includeSources) {
         return projectProxy.getDCPProjectByProjectId(customerSpace, projectId, includeSources, getTeamIds());
     }

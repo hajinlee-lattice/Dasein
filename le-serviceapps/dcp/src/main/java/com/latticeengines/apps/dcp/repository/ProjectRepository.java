@@ -33,7 +33,7 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
             " from Project as p join p.importSystem as s where p.teamId in (?1) or p.teamId is null")
-    List<Object[]> findProjectsInTeamIds(List<String> teamIds);
+    List<Object[]> findProjectsInTeamIds(List<String> teamIds, Pageable pageable);
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
             " from Project as p join p.importSystem as s where p.projectId = ?1 and (p.teamId in (?2) or p.teamId is null)")

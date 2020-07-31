@@ -23,7 +23,7 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     S3ImportSystem findImportSystemByProjectId(String projectId);
 
-    List<ProjectInfo> findAllProjectInfoInTeamIds(List<String> teamIds);
+    List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds);
 
     ProjectInfo findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds);
 }
