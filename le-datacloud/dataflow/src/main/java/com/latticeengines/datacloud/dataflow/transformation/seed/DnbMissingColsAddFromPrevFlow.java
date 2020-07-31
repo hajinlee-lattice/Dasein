@@ -1,7 +1,9 @@
 package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -43,7 +45,7 @@ public class DnbMissingColsAddFromPrevFlow extends ConfigurableFlowBase<DnBAddMi
         Node newDnbSeed = addSource(parameters.getBaseTables().get(1));
         List<FieldMetadata> newSchema = newDnbSeed.getSchema();
         List<FieldMetadata> oldSchema = prevDnbSeed.getSchema();
-        List<String> newSchemaFields = new ArrayList<>();
+        Set<String> newSchemaFields = new HashSet<>();
         for (FieldMetadata field : newSchema) {
             newSchemaFields.add(field.getFieldName());
         }

@@ -91,6 +91,7 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
             { 7, null, null, 0L, "5", "YYY", 1, 6789L }, //
             { 8, null, "9101", 0L, "1", "JJJ", 2, 0L }, //
             { 9, "ste.com", "1413", 1L, "1", "GFG", 3, 7890L }, //
+            { 10, "kkk.com", "555", 0L, "2", "YGH", 4, 9990L }, //
     };
 
     // ID, LE_DOMAIN, DUNS_NUMBER, SALES_VOLUME_US_DOLLARS,
