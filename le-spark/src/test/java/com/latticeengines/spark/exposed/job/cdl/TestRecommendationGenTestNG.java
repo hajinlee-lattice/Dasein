@@ -51,6 +51,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     private static final String ratingId = RatingEngine.generateIdStr();
     private static final String destinationAccountId = "D41000001Q3z4EAC";
+    private static final String destinationContactId = "D41000001Contact";
     private static final int contactPerAccount = 10;
     private String accountData;
     private String contactData;
@@ -202,6 +203,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.AccountId.name(), String.class), //
                 Pair.of(InterfaceName.ContactId.name(), String.class), //
                 Pair.of(InterfaceName.CustomerContactId.name(), String.class), //
+                Pair.of(PlaymakerConstants.SfdcContactID, String.class), //
                 Pair.of(InterfaceName.CompanyName.name(), String.class), //
                 Pair.of(InterfaceName.Email.name(), String.class), //
                 Pair.of(InterfaceName.ContactName.name(), String.class), //
@@ -225,18 +227,21 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 contacts[contactPerAccount * i + j][0] = String.valueOf(i) + "L";
                 contacts[contactPerAccount * i + j][1] = String.valueOf(contactPerAccount * i + j);
                 contacts[contactPerAccount * i + j][2] = String.valueOf(accounts.length * i + j) + "L";
-                contacts[contactPerAccount * i + j][3] = "Kind Inc.";
-                contacts[contactPerAccount * i + j][4] = "michael@kind.com";
-                contacts[contactPerAccount * i + j][5] = "Michael Jackson";
-                contacts[contactPerAccount * i + j][6] = "SMO";
-                contacts[contactPerAccount * i + j][7] = "CA";
-                contacts[contactPerAccount * i + j][8] = "US";
-                contacts[contactPerAccount * i + j][9] = "94404";
-                contacts[contactPerAccount * i + j][10] = "650-898-3928";
-                contacts[contactPerAccount * i + j][11] = "CEO";
-                contacts[contactPerAccount * i + j][12] = "Michael";
-                contacts[contactPerAccount * i + j][13] = "Jackson";
-                contacts[contactPerAccount * i + j][14] = "08/08/2019";
+                contacts[contactPerAccount * i + j][3] = "SFDC Contact ID";
+                contacts[contactPerAccount * i + j][4] = "Kind Inc.";
+                contacts[contactPerAccount * i + j][5] = "michael@kind.com";
+                contacts[contactPerAccount * i + j][6] = "Michael Jackson";
+                contacts[contactPerAccount * i + j][7] = "SMO";
+                contacts[contactPerAccount * i + j][8] = "CA";
+                contacts[contactPerAccount * i + j][9] = "US";
+                contacts[contactPerAccount * i + j][10] = "94404";
+                contacts[contactPerAccount * i + j][11] = "650-898-3928";
+                contacts[contactPerAccount * i + j][12] = "CEO";
+                contacts[contactPerAccount * i + j][13] = "Michael";
+                contacts[contactPerAccount * i + j][14] = "Jackson";
+                contacts[contactPerAccount * i + j][15] = "true";
+                contacts[contactPerAccount * i + j][16] = "true";
+                contacts[contactPerAccount * i + j][17] = "08/08/2019";
             }
         }
 
@@ -445,6 +450,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         playLaunch.setCreated(new Date());
         playLaunch.setId(PlayLaunch.generateLaunchId());
         playLaunch.setDestinationAccountId(destinationAccountId);
+        playLaunch.setDestinationContactId(destinationContactId);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         MetadataSegment segment = new MetadataSegment();
         Play play = new Play();
