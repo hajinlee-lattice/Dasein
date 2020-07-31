@@ -2,23 +2,20 @@ package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.transformation.TblDrivenFlowBase;
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TblDrivenFuncConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.DnBAddMissingColsConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(DnbMissingColsAddFromPrevFlow.DATAFLOW_BEAN_NAME)
-public class DnbMissingColsAddFromPrevFlow
-        extends TblDrivenFlowBase<DnBAddMissingColsConfig, DnBAddMissingColsConfig.MapFunc> {
+public class DnbMissingColsAddFromPrevFlow extends ConfigurableFlowBase<DnBAddMissingColsConfig> {
     public static final String DATAFLOW_BEAN_NAME = "DnbMissingColsAppendFromPrevFlow";
 
     public static final String TRANSFORMER_NAME = "DnBMissingColsAddTransformer";
@@ -42,17 +39,7 @@ public class DnbMissingColsAddFromPrevFlow
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        DnBAddMissingColsConfig config = getTransformerConfig(parameters);
-        Map<String, Node> sourceMap = initiateSourceMap(parameters, config);
-        String seedName = config.getSeed();
-        if (sourceMap == null) {
-            throw new RuntimeException("Invalid configuration");
-        }
-        Node prevDnbSeed = null;
-        prevDnbSeed = sourceMap.get(seedName);
-        if (prevDnbSeed == null) {
-            throw new RuntimeException("Failed to prepare seed " + seedName);
-        }
+        Node prevDnbSeed = addSource(parameters.getBaseTables().get(0));
         Node newDnbSeed = addSource(parameters.getBaseTables().get(1));
         List<FieldMetadata> newSchema = newDnbSeed.getSchema();
         List<FieldMetadata> oldSchema = prevDnbSeed.getSchema();
@@ -62,6 +49,7 @@ public class DnbMissingColsAddFromPrevFlow
         }
         List<String> missingCols = new ArrayList<String>();
         List<FieldMetadata> missFieldMetaInfo = new ArrayList<>();
+        DnBAddMissingColsConfig config = getTransformerConfig(parameters);
         // Find missing columns in current file compared to previous
         for (FieldMetadata column : oldSchema) {
             if (!newSchemaFields.contains(column.getFieldName())) {
@@ -80,7 +68,6 @@ public class DnbMissingColsAddFromPrevFlow
         Node addNullRecords = newDnbSeed //
                 .filter(String.format("%s == null && %s == null", config.getDomain(),
                         config.getDuns()), new FieldList(config.getDomain(), config.getDuns()));
-        newDnbSeed = newDnbSeed.renamePipe("NewDnBCacheSeed");
         newDnbSeed = newDnbSeed //
                 .filter(String.format("%s != null || %s != null", config.getDomain(),
                         config.getDuns()), new FieldList(config.getDomain(), config.getDuns()))
@@ -93,12 +80,9 @@ public class DnbMissingColsAddFromPrevFlow
             addNullRecords = addNullRecords.addColumnWithFixedValue(fieldMeta.getFieldName(), null,
                     fieldMeta.getJavaType());
         }
-        return newDnbSeed.merge(addNullRecords);
-    }
-
-    @Override
-    public Class<? extends TblDrivenFuncConfig> getTblDrivenFuncConfigClass() {
-        return DnBAddMissingColsConfig.MapFunc.class;
+        newDnbSeed = newDnbSeed //
+                .merge(addNullRecords);
+        return newDnbSeed;
     }
 
 }

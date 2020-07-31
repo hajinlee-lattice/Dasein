@@ -10,6 +10,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -25,10 +26,8 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DnbAddMissingColsTestNG.class);
 
     private GeneralSource source = new GeneralSource("DnbSeedWithAddedCols");
-    private GeneralSource baseSource1 = new GeneralSource("DnBCacheSeed");
-    private GeneralSource baseSource2 = new GeneralSource("DnBCacheSeed");
-    private static final String VERSION1 = "2020-06-19_00-13-32_UTC";
-    private static final String VERSION2 = "2020-07-22_00-13-32_UTC";
+    private GeneralSource baseSource1 = new GeneralSource("PrevDnBCacheSeed");
+    private GeneralSource baseSource2 = new GeneralSource("NewDnBCacheSeed");
 
     @Test(groups = "functional")
     public void testTransformation() {
@@ -59,7 +58,7 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         step1.setBaseSources(baseSources);
         step1.setTransformer(DnbMissingColsAddFromPrevFlow.TRANSFORMER_NAME);
         step1.setTargetSource(source.getSourceName());
-        String confParamStr1 = getDnbAddMissingColsConfig(baseSources);
+        String confParamStr1 = getDnbAddMissingColsConfig();
         step1.setConfiguration(confParamStr1);
 
         // -----------
@@ -72,12 +71,10 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         return configuration;
     }
 
-    private String getDnbAddMissingColsConfig(List<String> templates) {
+    private String getDnbAddMissingColsConfig() {
         DnBAddMissingColsConfig conf = new DnBAddMissingColsConfig();
         conf.setDomain("LE_DOMAIN");
         conf.setDuns("DUNS_NUMBER");
-        conf.setSeed(templates.get(0));
-        conf.setTemplates(templates);
         return JsonUtils.serialize(conf);
     }
 
@@ -122,7 +119,7 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         columns.add(Pair.of("LE_INDUSTRY", String.class));
         columns.add(Pair.of("LE_NUMBER_OF_LOCATIONS", Integer.class));
         columns.add(Pair.of("LE_Last_Upload_Date", Long.class));
-        uploadBaseSourceData(baseSource1.getSourceName(), VERSION1, columns, data1);
+        uploadBaseSourceData(baseSource1.getSourceName(), baseSourceVersion, columns, data1);
     }
 
     private void prepareNewDnBCacheSeed() {
@@ -136,7 +133,7 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         columns.add(Pair.of("EMPLOYEES_TOTAL_RELIABILITY_CODE", String.class));
         columns.add(Pair.of("EMPLOYEES_HERE", Integer.class));
         columns.add(Pair.of("EMPLOYEES_HERE_RELIABILITY_CODE", String.class));
-        uploadBaseSourceData(baseSource2.getSourceName(), VERSION2, columns, data2);
+        uploadBaseSourceData(baseSource2.getSourceName(), baseSourceVersion, columns, data2);
     }
 
     // ID, LE_DOMAIN, DUNS_NUMBER, SALES_VOLUME_US_DOLLARS,
@@ -167,7 +164,6 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            /*
             Object[] expectedResult = expectedMap.get(record.get("ID"));
             Assert.assertTrue(isObjEquals(record.get("LE_DOMAIN"), expectedResult[1]));
             Assert.assertTrue(isObjEquals(record.get("DUNS_NUMBER"), expectedResult[2]));
@@ -180,10 +176,9 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(isObjEquals(record.get("LE_INDUSTRY"), expectedResult[9]));
             Assert.assertTrue(isObjEquals(record.get("LE_NUMBER_OF_LOCATIONS"), expectedResult[10]));
             Assert.assertTrue(isObjEquals(record.get("LE_Last_Upload_Date"), expectedResult[11]));
-            */
             rowNum++;
         }
-        // Assert.assertEquals(rowNum, expectedMap.size());
+        Assert.assertEquals(rowNum, expectedMap.size());
     }
 
 }
