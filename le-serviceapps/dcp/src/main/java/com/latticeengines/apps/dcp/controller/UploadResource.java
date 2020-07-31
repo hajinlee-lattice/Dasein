@@ -80,7 +80,7 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "has unterminal upload")
     public Boolean hasUnterminalUploads(@PathVariable String customerSpace,
-                                       @RequestParam(value = "exclude", required = false)  String excludeUploadId) {
+                                       @RequestParam(value = "exclude")  String excludeUploadId) {
         return uploadService.hasUnterminalUploads(customerSpace, excludeUploadId);
     }
 

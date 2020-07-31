@@ -140,7 +140,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config2.setUploadRawFilePath(rawPath2);
         uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), uploadRequest2);
 
-        Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(mainCustomerSpace, null);
+        Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(mainCustomerSpace, upload.getUploadId());
         Assert.assertTrue(hasUnterminalUploads);
     }
 

@@ -58,11 +58,8 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public boolean hasUnterminalUploads(String customerSpace, String excludeUploadId) {
-        List<Upload> uploads = uploadEntityMgr.findAll();
-        Set<Upload.Status> statuses = uploads.stream()
-                .filter(upload -> !upload.getUploadId().equals(excludeUploadId))
-                .map(Upload::getStatus)
-                .collect(Collectors.toSet());
+        Set<Upload.Status> statuses = uploadEntityMgr.findAllStatusesExcludeOne(excludeUploadId);
+        log.info("upload statuses : " + statuses);
         statuses.removeAll(Upload.Status.getTerminalStatuses());
         return CollectionUtils.isNotEmpty(statuses);
     }

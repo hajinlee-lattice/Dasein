@@ -55,6 +55,8 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCreateGetUpdate() {
+        boolean hasUnterminal = uploadService.hasUnterminalUploads(mainCustomerSpace, "");
+        Assert.assertFalse(hasUnterminal);
         List<UploadDetails> uploads = createUploads();
         UploadDetails upload1 = uploads.get(0);
         UploadDetails uploadx = uploadService.getUploadByUploadId(mainCustomerSpace, upload1.getUploadId(), Boolean.FALSE);
@@ -63,6 +65,8 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         updateUploadStats(upload1);
         updateMatchResultTable(upload1);
+        hasUnterminal = uploadService.hasUnterminalUploads(mainCustomerSpace, "");
+        Assert.assertTrue(hasUnterminal);
     }
 
     private List<UploadDetails> createUploads() {

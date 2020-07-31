@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -62,8 +63,8 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Upload> findAll() {
-        return getReadOrWriteRepository().findAll();
+    public Set<Upload.Status> findAllStatusesExcludeOne(String excludeUploadId) {
+        return getReadOrWriteRepository().findAllStatusesExcludeOne(excludeUploadId);
     }
 
     @Override
