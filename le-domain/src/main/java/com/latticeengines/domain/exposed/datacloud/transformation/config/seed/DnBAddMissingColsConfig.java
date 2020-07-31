@@ -5,10 +5,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 public class DnBAddMissingColsConfig extends TransformerConfig {
 
-    @JsonProperty("LE_Domain")
+    @JsonProperty("DomainField")
     private String domain;
 
-    @JsonProperty("DUNS_NUMBER")
+    @JsonProperty("DunsField")
     private String duns;
 
     public String getDomain() {
