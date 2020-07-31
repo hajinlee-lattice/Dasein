@@ -241,7 +241,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val contactNums = new Array[Long](2)
     if (createRecommendationDataFrame) {
       val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext,
-        addAccountTable, completeContactTable, CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName))
+        addAccountTable, completeContactTable, CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName))
       val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
       contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
       val recommendationDf = recommendationDfWithContactNum.drop("CONTACT_NUM").checkpoint(eager = true)
@@ -467,12 +467,10 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
       count(lit(1)).as("CONTACT_NUM") //
     )
-    val formatContact = udf((str: String) => {
+    val reformatContact = udf((str: String) => {
       val contacts = JsonUtils.deserialize(str, new TypeReference[util.List[Object]] {})
       if (CollectionUtils.isNotEmpty(contacts)) {
-        contacts.add(contacts.get(0))
-        contacts.add(contacts.get(0))
-        JsonUtils.serialize(contacts.subList(0, 2))
+        JsonUtils.serialize(contacts.subList(0, 1))
       } else {
         str
       }
@@ -480,7 +478,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit(""))
       .otherwise(
         if (onlyPopulateOneContact) {
-          formatContact(col("CONTACTS"))
+          reformatContact(col("CONTACTS"))
         }
         else {
           col("CONTACTS")
