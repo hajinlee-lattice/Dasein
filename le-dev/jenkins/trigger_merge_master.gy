@@ -1,0 +1,16 @@
+pipeline {
+  agent {
+    node {
+      label "cd"
+    }
+  }
+  stages {
+    stage('build') {
+      steps {
+        script {
+          build job: '../cd_merge_master'
+        }
+      }
+    }
+  }
+}
