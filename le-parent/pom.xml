@@ -220,11 +220,40 @@
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
     <repositories>
+<!--        <repository>-->
+<!--            <id>mvn-central</id>-->
+<!--            <name>Maven Central</name>-->
+<!--            <url>https://repo1.maven.org/maven2/</url>-->
+<!--            <releases>-->
+<!--                <enabled>true</enabled>-->
+<!--                <updatePolicy>always</updatePolicy>-->
+<!--                <checksumPolicy>warn</checksumPolicy>-->
+<!--            </releases>-->
+<!--            <snapshots>-->
+<!--                <enabled>false</enabled>-->
+<!--                <updatePolicy>never</updatePolicy>-->
+<!--                <checksumPolicy>fail</checksumPolicy>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
         <repository>
-            <id>central</id>
-            <name>LE Maven REPOSITORY</name>
-            <layout>default</layout>
-            <url>http://10.141.1.107:8081/repository/maven-public/</url>
+            <id>lattice-local</id>
+            <name>Lattice local</name>
+            <url>https://artifactory.devops.dnb.net/artifactory/lattice-maven-local</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>dnb-artifactory</id>
+            <name>dnb-artifactory</name>
+            <url>https://artifactory.devops.dnb.net/artifactory/libs-release/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -240,10 +269,22 @@
 
     <!-- set up to use LE local Nexus Repository for maven plugins -->
     <pluginRepositories>
+<!--        <pluginRepository>-->
+<!--            <id>mvn-central</id>-->
+<!--            <name>Maven Central</name>-->
+<!--            <url>https://repo1.maven.org/maven2/</url>-->
+<!--            <layout>default</layout>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--            <releases>-->
+<!--                <updatePolicy>never</updatePolicy>-->
+<!--            </releases>-->
+<!--        </pluginRepository>-->
         <pluginRepository>
-            <id>central</id>
-            <name>LE Maven Plugin Repository</name>
-            <url>http://10.141.1.107:8081/repository/maven-public/</url>
+            <id>dnb-artifactory</id>
+            <name>DnB Central Repository</name>
+            <url>https://artifactory.devops.dnb.net/artifactory/libs-release/</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>true</enabled>
