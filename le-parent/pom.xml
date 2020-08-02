@@ -2474,7 +2474,7 @@
                 <groupId>org.apache.tez</groupId>
                 <artifactId>tez-api</artifactId>
                 <version>${tez.version}</version>
-                <classifier>ledp</classifier>
+                <!-- <classifier>ledp</classifier> -->
             </dependency>
 
             <!-- Web Applications -->
