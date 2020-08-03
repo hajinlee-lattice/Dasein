@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.apps.cdl.service.ActiveStackInfoService;
@@ -18,6 +21,8 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 
 @Component("activeStackInfoService")
 public class ActiveStackInfoServiceImpl implements ActiveStackInfoService {
+
+    private static final Logger log = LoggerFactory.getLogger(ActiveStackInfoServiceImpl.class);
 
     // TODO move to a common place
     private static final String CURRENT_STACK_KEY = "CurrentStack";
@@ -49,9 +54,15 @@ public class ActiveStackInfoServiceImpl implements ActiveStackInfoService {
     public Map<String, String> getActiveStackInfo() {
         String url = appPublicUrl + STACK_INFO_PATH;
         return retryTemplate.execute(ctx -> {
-            ResponseEntity<Map<String, String>> res = restTemplate.exchange(url, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<Map<String, String>>() {});
-            return res.getBody();
+            try {
+                ResponseEntity<Map<String, String>> res = restTemplate.exchange(url, HttpMethod.GET, null,
+                        new ParameterizedTypeReference<Map<String, String>>() {
+                        });
+                return res.getBody();
+            } catch (HttpServerErrorException.ServiceUnavailable e) {
+                log.warn("Service unavailable at active app url: {}", e.getMessage());
+                return null;
+            }
         });
     }
 
