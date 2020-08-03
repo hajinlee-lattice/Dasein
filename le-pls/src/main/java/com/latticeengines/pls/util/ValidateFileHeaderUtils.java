@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.avro.SchemaParseException;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
