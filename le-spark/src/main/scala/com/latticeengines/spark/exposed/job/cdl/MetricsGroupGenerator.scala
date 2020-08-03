@@ -125,7 +125,11 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       case FALSE => DeriveAttrsUtils.fillFalse(missingEntitiesAppended, group.getJavaClass)
       case _ => throw new UnsupportedOperationException("Unknown null imputation method")
     }
-    replaceNull
+    if (Option(group.getCategorizeValConfig).isDefined) {
+      DeriveAttrsUtils.categorizeValues(replaceNull, group.getCategorizeValConfig, entityIdColName)
+    } else {
+      replaceNull
+    }
   }
 
   // return: (dataframe, TimeRange string used for attribute name template)
@@ -179,10 +183,11 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
         pivotedDF
       }
     }
-    getRequiredAttrs(group, dimensionMetadataMap, timeRangeName)
+    val requiredAttrs: Seq[String] = getRequiredAttrs(group, dimensionMetadataMap, timeRangeName)
+    requiredAttrs
       .filter(!attrRenamed.columns.contains(_))
       .foreach(attrName => attrRenamed = DeriveAttrsUtils.appendNullColumn(attrRenamed, attrName, group.getJavaClass))
-    attrRenamed
+    attrRenamed.select(entityIdColName, requiredAttrs: _*)
   }
 
   def getRequiredAttrs(group: ActivityMetricsGroup, streamMetadata: util.Map[String, DimensionMetadata], timeRange: String): Seq[String] = {

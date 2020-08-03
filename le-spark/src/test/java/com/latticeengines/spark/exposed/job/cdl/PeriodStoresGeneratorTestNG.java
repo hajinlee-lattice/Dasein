@@ -20,9 +20,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -56,8 +54,8 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private static List<String> OUTPUT_FIELDS_NO_REDUCER;
     private static List<String> OUTPUT_FIELDS_WITH_REDUCER;
-    private static List<String> PERIODS = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
-    private static List<String> SINGLE_PERIOD = Collections.singletonList(PeriodStrategy.Template.Week.name());
+    private static final List<String> PERIODS = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
+    private static final List<String> SINGLE_PERIOD = Collections.singletonList(PeriodStrategy.Template.Week.name());
     private static AtlasStream INCREMENTAL_STREAM;
     private static final String STREAM_ID = "abc123";
 
@@ -71,17 +69,26 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String STAGE_OLD_ID = "4";
 
     private static final String MODEL_1_ID = "1";
+    private static final String MODEL_1 = "m1";
     private static final String MODEL_2_ID = "2";
+    private static final String MODEL_2 = "m2";
 
     private static final String EVAL_DATE = "2019-10-28";
 
     private static final long OLD_VERSION = 10L;
     private static final long NEW_VERSION = 99L;
 
-    // TODO - followings should move to use interface name
-    private static final String modelName = "modelName";
-    private static final String modelNameId = "modelNameId";
-    private static final String hasIntent = "hasIntent";
+    private static final long DAY_1_EPOCH = 1561964400000L;
+    private static final long DAY_1_EPOCH_LATE = 1561964500000L;
+    private static final long DAY_2_EPOCH = 1562050900000L;
+    private static final long DAY_2_EPOCH_EARLY = 1562050800000L;
+    private static final long DAY_3_EPOCH = 1562137200000L;
+    private static final long DAY_9_EPOCH = 1562737007000L;
+
+    private static final String modelName = InterfaceName.ModelName.name();
+    private static final String modelNameId = InterfaceName.ModelNameId.name();
+    private static final String hasIntent = InterfaceName.HasIntent.name();
+    private static final String buyingScore = "buyingScore";
 
     @Test(groups = "functional")
     public void test() {
@@ -204,6 +211,41 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
     }
 
+    @Test(groups = "functional")
+    public void testBuyingScore() {
+        List<String> inputs = Collections.singletonList(setupIntentActivityData());
+        DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
+        config.evaluationDate = EVAL_DATE;
+        config.streams = Collections.singletonList(setupBuyingScoreStream());
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> detailsMap = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(SINGLE_PERIOD);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
+    }
+
+    @Test(groups = "functional")
+    public void testBuyingScoreIncr() {
+        List<String> inputs = Arrays.asList(setupBuyingScoreBatchStore(), setupBuyingScoreDelta());
+        DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
+        config.evaluationDate = EVAL_DATE;
+        config.streams = Collections.singletonList(setupBuyingScoreStream());
+        config.incrementalStreams.add(STREAM_ID);
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> detailsMap = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(SINGLE_PERIOD);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
+    }
+
     private String setupIncrReducerBatchStore() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of(AccountId, String.class), //
@@ -252,16 +294,15 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(AccountId, String.class),
                 Pair.of(modelNameId, String.class),
                 Pair.of(PeriodId, Integer.class),
-                Pair.of(hasIntent, Boolean.class),
                 Pair.of(Count, Integer.class),
                 Pair.of(LastActivityDate, Long.class),
                 Pair.of(VERSION_COL, Long.class),
                 Pair.of(PeriodIdForPartition, Integer.class)
         );
         Object[][] data = new Object[][]{
-                {"acc1", MODEL_1_ID, 1031, true, 10, 0L, OLD_VERSION, 1031},
-                {"acc2", MODEL_1_ID, 1031, true, 10, 0L, OLD_VERSION, 1031},
-                {"acc1", MODEL_1_ID, 1032, true, 10, 0L, OLD_VERSION, 1032}
+                {"acc1", MODEL_1_ID, 1031, 10, 0L, OLD_VERSION, 1031},
+                {"acc2", MODEL_1_ID, 1031, 10, 0L, OLD_VERSION, 1031},
+                {"acc1", MODEL_1_ID, 1032, 10, 0L, OLD_VERSION, 1032}
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -280,6 +321,53 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc3", MODEL_1_ID, "2019-10-01", 49825, 2, 0L, NEW_VERSION},
                 {"acc1", MODEL_1_ID, "2019-10-02", 49826, 2, 0L, NEW_VERSION},
                 {"acc1", MODEL_1_ID, "2019-10-01", 49825, 2, 0L, OLD_VERSION} // attached to dailyStoreDelta while doing dailyStore incremental update
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupBuyingScoreBatchStore() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(AccountId, String.class),
+                Pair.of(modelName, String.class),
+                Pair.of(modelNameId, String.class),
+                Pair.of(PeriodId, Integer.class),
+                Pair.of(PeriodIdForPartition, Integer.class),
+                Pair.of(StreamDate, String.class),
+                Pair.of(StreamDateId, Integer.class),
+                Pair.of(DATE_ATTR, Long.class),
+                Pair.of(Count, Integer.class),
+                Pair.of(LastActivityDate, Long.class),
+                Pair.of(VERSION_COL, Long.class),
+                Pair.of(buyingScore, Double.class)
+        );
+        Object[][] data = {
+                {"acc1", MODEL_1, MODEL_1_ID, 1031, 1031, "2019-10-01", 49825, DAY_1_EPOCH, 1, 0L, OLD_VERSION, 0.1},
+                {"acc1", MODEL_2, MODEL_2_ID, 1031, 1031, "2019-10-01", 49825, DAY_1_EPOCH, 1, 0L, OLD_VERSION, 0.7},
+                {"acc1", MODEL_1, MODEL_1_ID, 1032, 1032, "2019-10-08", 49832, DAY_9_EPOCH, 1, 0L, OLD_VERSION, 0.5}, // not affected
+                {"acc2", MODEL_1, MODEL_1_ID, 1031, 1031, "2019-10-01", 49825, DAY_1_EPOCH_LATE, 1, 0L, OLD_VERSION, 0.2}, // not affected
+                {"acc2", MODEL_2, MODEL_2_ID, 1031, 1031, "2019-10-01", 49825, DAY_1_EPOCH, 1, 0L, OLD_VERSION, 0.6}, // not affected
+                {"acc3", MODEL_1, MODEL_1_ID, 1032, 1032, "2019-10-08", 49832, DAY_9_EPOCH, 1, 0L, OLD_VERSION, 0.8} // not affected
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupBuyingScoreDelta() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(AccountId, String.class),
+                Pair.of(modelName, String.class),
+                Pair.of(modelNameId, String.class),
+                Pair.of(StreamDate, String.class),
+                Pair.of(StreamDateId, Integer.class),
+                Pair.of(DATE_ATTR, Long.class),
+                Pair.of(Count, Integer.class),
+                Pair.of(LastActivityDate, Long.class),
+                Pair.of(VERSION_COL, Long.class),
+                Pair.of(buyingScore, Double.class)
+        );
+        Object[][] data = {
+                {"acc1", MODEL_1, MODEL_1_ID, "2019-10-01", 49825, DAY_1_EPOCH_LATE, 1, 0L, NEW_VERSION, 0.9}, // same day later
+                {"acc1", MODEL_2, MODEL_2_ID, "2019-10-02", 49826, DAY_2_EPOCH, 1, 0L, NEW_VERSION, 0.3}, // second day
+                {"acc2", MODEL_1, MODEL_1_ID, "2019-10-01", 49825, DAY_1_EPOCH, 1, 0L, NEW_VERSION, 0.8} // same day earlier
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -384,19 +472,21 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         List<Pair<String, Class<?>>> fields = Arrays.asList(
                 Pair.of(AccountId, String.class),
                 Pair.of(modelNameId, String.class),
+                Pair.of(modelName, String.class),
                 Pair.of(StreamDate, String.class),
                 Pair.of(StreamDateId, Integer.class),
                 Pair.of(Count, Integer.class),
+                Pair.of(DATE_ATTR, Long.class),
                 Pair.of(LastActivityDate, Long.class),
                 Pair.of(VERSION_COL, Long.class),
-                Pair.of(hasIntent, Boolean.class)
+                Pair.of(buyingScore, Double.class)
         );
         Object[][] data = new Object[][]{
-                {"a1", MODEL_1_ID, "2019-10-01", 49825, 1, 0L, 10L, true},
-                {"a1", MODEL_1_ID, "2019-10-02", 49826, 1, 0L, 10L, true},
-                {"a1", MODEL_2_ID, "2019-10-01", 49825, 1, 0L, 10L, true},
-                {"a2", MODEL_1_ID, "2019-10-01", 49825, 1, 0L, 10L, true},
-                {"a2", MODEL_1_ID, "2019-10-08", 49832, 1, 0L, 10L, true}
+                {"a1", MODEL_1_ID, MODEL_1, "2019-10-01", 49825, 1, DAY_1_EPOCH, 0L, 10L, 0.9}, // 2019-10-01 -> 1031
+                {"a1", MODEL_1_ID, MODEL_1, "2019-10-02", 49826, 1, DAY_2_EPOCH, 0L, 10L, 0.8},
+                {"a1", MODEL_2_ID, MODEL_2, "2019-10-01", 49825, 1, DAY_1_EPOCH, 0L, 10L, 0.7},
+                {"a2", MODEL_1_ID, MODEL_1, "2019-10-01", 49825, 1, DAY_1_EPOCH, 0L, 10L, 0.6},
+                {"a2", MODEL_1_ID, MODEL_1, "2019-10-08", 49832, 1, DAY_9_EPOCH, 0L, 10L, 0.5} // 2019-10-08 -> 1032
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -417,7 +507,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         stream.setPeriods(SINGLE_PERIOD);
         stream.setDimensions(Arrays.asList(prepareDimension(OpportunityId), prepareDimension(StageName)));
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
-        stream.setReducer(prepareReducer());
+        stream.setReducer(prepareOppIdReducer());
         stream.setRetentionDays(30);
 
         return stream;
@@ -439,15 +529,28 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         stream.setPeriods(SINGLE_PERIOD);
         stream.setDimensions(Collections.singletonList(prepareDimension(modelNameId)));
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
-        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
-        deriver.setCalculation(StreamAttributeDeriver.Calculation.TRUE);
-        deriver.setTargetAttribute(hasIntent);
-        deriver.setTargetFundamentalType(FundamentalType.BOOLEAN);
-        stream.setAttributeDerivers(Collections.singletonList(deriver));
         return stream;
     }
 
-    private ActivityRowReducer prepareReducer() {
+    private AtlasStream setupBuyingScoreStream() {
+        AtlasStream stream = new AtlasStream();
+        stream.setStreamId(STREAM_ID);
+        stream.setPeriods(SINGLE_PERIOD);
+        stream.setDimensions(Collections.singletonList(prepareDimension(modelNameId)));
+        stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
+        stream.setReducer(prepareBuyingScoreReducer());
+        return stream;
+    }
+
+    private ActivityRowReducer prepareBuyingScoreReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(AccountId, modelName));
+        reducer.setArguments(Collections.singletonList(DATE_ATTR));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
+    }
+
+    private ActivityRowReducer prepareOppIdReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
         reducer.setGroupByFields(Collections.singletonList(OpportunityId));
         reducer.setArguments(Collections.singletonList(DATE_ATTR));

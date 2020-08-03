@@ -239,6 +239,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_FORMAT = "METRICS_GROUP_%s"; // groupId
     // set of merged activity metrics groups' serving entities
     protected static final String ACTIVITY_MERGED_METRICS_SERVING_ENTITIES = "MERGED_METRICS_SERVING_ENTITIES";
+    protected static final String ACTIVITY_METRICS_CATEGORICAL_ATTR = "ACTIVITY_METRICS_CATEGORICAL_ATTR";
+    protected static final String ACTIVITY_METRICS_CATEGORIES = "ACTIVITY_METRICS_CATEGORIES";
     protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
     // streamId, period
     protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s";
@@ -450,7 +452,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             NEW_RECORD_CUT_OFF_TIME, //
             CONSOLIDATE_INPUT_TEMPLATES, //
             PROCESS_ACCOUNT_STATS_MERGE, //
-            ACTIVITY_STREAMS_RELINK //
+            ACTIVITY_STREAMS_RELINK, //
+            ACTIVITY_METRICS_CATEGORICAL_ATTR, //
+            ACTIVITY_METRICS_CATEGORIES //
     );
 
     @Autowired

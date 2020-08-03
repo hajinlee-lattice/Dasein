@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,11 +9,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -26,7 +31,7 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
 
     private static final Logger log = LoggerFactory.getLogger(ProfileActivityMetricsStepBase.class);
 
-    private Map<String, String> profiledTableNames = new HashMap<>();
+    private final Map<String, String> profiledTableNames = new HashMap<>();
 
     protected abstract BusinessEntity getEntityLevel(); // Account/Contact. For constructing ActivityMetrics table name only
 
@@ -63,6 +68,8 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
             return null;
         }
         Set<BusinessEntity> servingEntities = servingEntityNames.stream().map(BusinessEntity::getByName).collect(Collectors.toSet());
+        Map<BusinessEntity, List<String>> servingEntityCategoricalAttrs = getServingEntityCategoricalAttrs();
+        Map<BusinessEntity, List<String>> servingEntityCategories = getServingEntityCategories();
         log.info("Found metrics serving entities from context: {}", servingEntities);
         if (CollectionUtils.isEmpty(servingEntities)) {
             return null;
@@ -80,7 +87,7 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
                 continue;
             }
             profiledTableNames.put(servingEntity.name(), tableName);
-            steps.add(profile(tableName));
+            steps.add(getProfileStep(tableName, servingEntityCategoricalAttrs.get(servingEntity), servingEntityCategories.get(servingEntity)));
             steps.add(calcStats(profileStep, tableName, getStatsTablePrefix(servingEntity.name())));
             profileStep += 2;
         }
@@ -91,6 +98,47 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         }
         request.setSteps(steps);
         return request;
+    }
+
+    protected TransformationStepConfig getProfileStep(String tableName, List<String> categoricalAttrNames, List<String> bkt) {
+        if (CollectionUtils.isEmpty(categoricalAttrNames)) {
+            return profile(tableName);
+        }
+        return profile(tableName, getDeclaredAttrs(categoricalAttrNames, bkt));
+    }
+
+    protected List<ProfileParameters.Attribute> getDeclaredAttrs(List<String> attrNames, List<String> bkt) {
+        CategoricalBucket categoriesBkt = new CategoricalBucket();
+        categoriesBkt.setCategories(new ArrayList<>(CollectionUtils.emptyIfNull(bkt)));
+        return attrNames.stream()
+                .map(attrName -> new ProfileParameters.Attribute(attrName, null, null, categoriesBkt))
+                .collect(Collectors.toList());
+    }
+
+    protected Map<BusinessEntity, List<String>> getServingEntityCategoricalAttrs() {
+        if (!hasKeyInContext(ACTIVITY_METRICS_CATEGORICAL_ATTR)) {
+            return Collections.emptyMap();
+        }
+        TypeReference<Map<BusinessEntity, List<String>>> typeReference = new TypeReference<Map<BusinessEntity, List<String>>>(){};
+        Map<BusinessEntity, List<String>> map = getTypedObjectFromContext(ACTIVITY_METRICS_CATEGORICAL_ATTR, typeReference);
+        if (MapUtils.isEmpty(map)) {
+            return Collections.emptyMap();
+        }
+        log.info("Categorical attributes by serving entity: {}", map);
+        return map;
+    }
+
+    protected Map<BusinessEntity, List<String>> getServingEntityCategories() {
+        if (!hasKeyInContext(ACTIVITY_METRICS_CATEGORICAL_ATTR)) {
+            return Collections.emptyMap();
+        }
+        TypeReference<Map<BusinessEntity, List<String>>> typeReference = new TypeReference<Map<BusinessEntity, List<String>>>(){};
+        Map<BusinessEntity, List<String>> map = getTypedObjectFromContext(ACTIVITY_METRICS_CATEGORIES, typeReference);
+        if (MapUtils.isEmpty(map)) {
+            return Collections.emptyMap();
+        }
+        log.info("Categories by serving entity: {}", map);
+        return map;
     }
 
     private boolean noNeedToProfile(String tableCtxName, String tableName) {

@@ -386,13 +386,14 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a default DnbIntentData template")
     public ResponseDocument<Boolean> createDefaultDnbIntentDataTemplate(@PathVariable String customerSpace,
                                                                         @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
-                                                                      @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+                                                                        @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA,
+                                                                        @RequestParam(value = "processBuyingScore", required = false, defaultValue = "true") boolean processBuyingScore) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create DnbIntentData template."));
         }
         try {
-            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace, systemDisplayName);
+            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace, systemDisplayName, processBuyingScore);
             return ResponseDocument.successResponse(result);
         } catch (Exception e) {
             log.error("Create Default DnbIntentData template failed with error: {}", e.toString());
@@ -406,10 +407,10 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a DnbIntentData template")
     public ResponseDocument<Boolean> createDnbIntentDataTemplate(@PathVariable String customerSpace,
-                                                               @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
+                                                                 @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
                                                                  @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
-                                                               @RequestParam(value = "enableGA", required =
-                                                                       false, defaultValue = "false") boolean enableGA) {
+                                                                 @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA,
+                                                                 @RequestParam(value = "processBuyingScore", required = false, defaultValue = "true") boolean processBuyingScore) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create DnbIntentData template."));
@@ -417,7 +418,7 @@ public class DataFeedTaskController {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         try {
             return ResponseDocument.successResponse(dataFeedTaskTemplateService.createDnbIntentDataTemplate(customerSpace,
-                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata, systemDisplayName));
+                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata, systemDisplayName, processBuyingScore));
         } catch (Exception e) {
             log.error("Create DnbIntentData template failed with error: {}", e.toString());
             String stacktrace = ExceptionUtils.getStackTrace(e);
