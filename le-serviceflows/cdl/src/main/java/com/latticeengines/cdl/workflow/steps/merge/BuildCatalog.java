@@ -182,6 +182,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
                 .stream() //
                 .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        putObjectInContext(CATALOG_NEW_IMPORT, finalCatalogTables.keySet());
         // add tables without imports
         configuration.getCatalogTables().forEach(finalCatalogTables::putIfAbsent);
         log.info("Building catalog tables, tables={}, pipelineVersion={}", finalCatalogTables, pipelineVersion);

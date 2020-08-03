@@ -291,6 +291,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
     protected static final String PERIOD_TRXN_TABLE_NAME = "PERIOD_TRXN_TABLE_NAME";
     protected static final String CATALOG_TABLE_NAME = "CATALOG_TABLE_NAME";
+    protected static final String CATALOG_NEW_IMPORT = "CATALOG_NEW_IMPORT";
     protected static final String ENTITY_MATCH_STREAM_TARGETTABLE = "ENTITY_MATCH_STREAM_TARGETTABLE";
     public static final String ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE";
     public static final String ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE = "ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE";
