@@ -1,25 +1,8 @@
 package com.latticeengines.domain.exposed.util;
 
-import static com.latticeengines.domain.exposed.util.ActivityStoreUtils.DEFAULT_TIME_RANGE;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
-import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
-import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
-import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
-import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.cdl.activity.*;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -27,6 +10,16 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static com.latticeengines.domain.exposed.util.ActivityStoreUtils.DEFAULT_TIME_RANGE;
 
 /*-
  * Helper for WebVisit activity store related features.
@@ -66,16 +59,18 @@ public final class WebVisitUtils {
         dim.addUsages(StreamDimension.Usage.Pivot);
         dim.setCatalog(srcMediumCatalog);
 
-        // hash source medium
+        // standardize and hash sourceMedium for dimension
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(InterfaceName.SourceMedium.name());
+        generator.setAttribute(InterfaceName.Name.name());
         generator.setFromCatalog(true);
         generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
         dim.setGenerator(generator);
-
-        DimensionCalculator calculator = new DimensionCalculator();
+        // use url attr in stream to determine whether it matches catalog pattern
+        DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
         calculator.setName(InterfaceName.SourceMedium.name());
         calculator.setAttribute(InterfaceName.SourceMedium.name());
+        calculator.setPatternAttribute(InterfaceName.SourceMedium.name());
+        calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
         return dim;
     }
