@@ -46,6 +46,7 @@ public class Job implements HasId<Long>, HasName {
     private String tenantId;
     private String errorCategory;
     private SchedulingInfo schedulingInfo;
+    private Boolean isJobRetried;
 
     @JsonProperty
     public Long getPid() {
@@ -315,6 +316,18 @@ public class Job implements HasId<Long>, HasName {
         this.schedulingInfo = schedulingInfo;
     }
 
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean getJobRetried() {
+        return isJobRetried;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public void setJobRetried(Boolean jobRetried) {
+        isJobRetried = jobRetried;
+    }
+
     public Job shallowClone() {
         Job job = new Job();
         job.pid = this.pid;
@@ -341,6 +354,7 @@ public class Job implements HasId<Long>, HasName {
         job.tenantId = this.tenantId;
         job.errorCategory = this.errorCategory;
         job.schedulingInfo = this.schedulingInfo;
+        job.isJobRetried = this.isJobRetried;
         return job;
     }
 
