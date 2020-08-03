@@ -406,7 +406,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
-        compareStandardFields(templateTable, fieldMappingDocument, standardAttrNames, validations, customerSpace, enableEntityMatch);
+        compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, customerSpace,
+                enableEntityMatch);
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
@@ -499,7 +500,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private void compareStandardFields(Table templateTable,
                                        FieldMappingDocument fieldMappingDocument,
-                                       Set<String> standardAttrNames,
+                                       Table standardTable,
                                        List<FieldValidation> validations,
                                        CustomerSpace customerSpace,
                                        boolean entityMatchEnabled) {
@@ -509,6 +510,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (!entityMatchEnabled) {
             return ;
         }
+        Set<String> standardAttrNames =
+                standardTable.getAttributes()
+                        .stream()
+                        .filter(attr -> attr.getDefaultValueStr() == null)
+                        .map(Attribute::getName)
+                        .collect(Collectors.toSet());
         Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (CollectionUtils.isNotEmpty(allImportSystemIds)) {
             standardAttrNames.addAll(allImportSystemIds);
@@ -912,6 +919,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         Set<String> standardFields = schemaTable.getAttributes()
                 .stream()
+                .filter(attr -> attr.getDefaultValueStr() == null)
                 .map(Attribute::getName)
                 .collect(Collectors.toSet());
         Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
