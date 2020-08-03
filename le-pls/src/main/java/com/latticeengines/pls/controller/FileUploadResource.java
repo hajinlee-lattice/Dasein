@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.pls.service.FileUploadService;
 
@@ -63,7 +64,11 @@ public class FileUploadResource {
     public SourceFileInfo uploadFile(
             @PathVariable String fileName,
             @RequestParam("file") MultipartFile file) {
-        return fileUploadService.uploadFile("file_" + Instant.now().toEpochMilli() + ".csv", fileName, false, null, file);
+        try {
+            return fileUploadService.uploadFile("file_" + Instant.now().toEpochMilli() + ".csv", fileName, false, null, file);
+        } catch (Exception e) {
+            throw UIActionUtils.handleException(e);
+        }
     }
 
 }

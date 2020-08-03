@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.avro.SchemaParseException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -283,11 +284,14 @@ public class ValidateFileHeaderUtils {
      */
     public static void checkForDuplicatedHeaders(Set<String> headers) {
         Set<String> headersWithLowerCase = new HashSet<>();
+        Set<String> duplicates = new HashSet<>();
         for (String header : headers) {
             if (!headersWithLowerCase.add(header.toLowerCase())) {
-                throw new LedpException(LedpCode.LEDP_40055);
+                duplicates.add(header);
             }
         }
-
+        if (CollectionUtils.isNotEmpty(duplicates)) {
+            throw new LedpException(LedpCode.LEDP_40055, new String[] {StringUtils.join(duplicates, ",")});
+        }
     }
 }

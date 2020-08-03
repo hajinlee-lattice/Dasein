@@ -148,10 +148,14 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
                         new String[] { String.valueOf(CSVConstants.MAX_HEADER_LENGTH), sb.toString() });
             }
             Map<String, String> headerCaseMapping = new HashMap<>();
+            Set<String> duplicates = new HashSet<>();
             for (String field : headerFields) {
                 if (headerCaseMapping.put(field.toLowerCase(), field) != null) {
-                    throw new LedpException(LedpCode.LEDP_40055);
+                    duplicates.add(field);
                 }
+            }
+            if (CollectionUtils.isNotEmpty(duplicates)) {
+                throw new LedpException(LedpCode.LEDP_40055, new String[] { StringUtils.join(duplicates) });
             }
             Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
                     .collect(groupingBy(attr -> attr.getSourceAttrName() == null ?
