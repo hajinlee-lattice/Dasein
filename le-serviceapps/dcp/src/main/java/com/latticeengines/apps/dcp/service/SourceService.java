@@ -25,7 +25,7 @@ public interface SourceService {
 
     List<Source> getSourceList(String customerSpace, String projectId);
 
-    List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize);
+    List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize, List<String> teamIds);
 
     long getSourceCount(String customerSpace, Long systemPid);
 

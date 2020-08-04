@@ -43,12 +43,12 @@ public class SourceProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return get("get dcp source by sourceId", url, Source.class);
     }
 
-    public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize) {
+    public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize, List<String> teamIds) {
         String baseUrl = "/customerspaces/{customerSpace}/source/projectId/{projectId}" +
                 "?pageIndex={pageIndex}&pageSize={pageSize}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId, Integer.toString(pageIndex),
                 Integer.toString(pageSize));
-        List<?> rawResult = get("get dcp source by sourceId", url, List.class);
+        List<?> rawResult = post("get dcp source by sourceId", url, teamIds, List.class);
         return JsonUtils.convertList(rawResult, Source.class);
     }
 

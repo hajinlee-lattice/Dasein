@@ -1,5 +1,7 @@
 package com.latticeengines.auth.exposed.util;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -26,6 +28,9 @@ public final class TeamUtils {
     public static final String GLOBAL_TEAM = "Global Team";
 
     public static final String GLOBAL_TEAM_ID = "Global_Team";
+
+    private static final List<String> TEAM_REGARDLESS_ROLES_DCP = Arrays.asList( //
+            "SUPER_ADMIN", "INTERNAL_ADMIN");
 
     public static boolean isGlobalTeam(String teamId) {
         return StringUtils.isEmpty(teamId) || teamId.equals(GLOBAL_TEAM_ID);
@@ -102,6 +107,19 @@ public final class TeamUtils {
             return session.getEmailAddress();
         } else {
             return null;
+        }
+    }
+
+    public static  List<String> getTeamIds() {
+        if(TEAM_REGARDLESS_ROLES_DCP.contains(MultiTenantContext.getSession().getAccessLevel())){
+            return null;
+        } else {
+            Session session = MultiTenantContext.getSession();
+            if (session != null) {
+                return session.getTeamIds();
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 }
