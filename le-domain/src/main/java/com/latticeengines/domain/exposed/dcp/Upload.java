@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -26,6 +27,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -218,7 +220,11 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         MATCH_STARTED,
         MATCH_FINISHED,
         FINISHED,
-        ERROR
+        ERROR;
+
+        public static Set<Status> getTerminalStatuses() {
+            return ImmutableSet.of(FINISHED, ERROR);
+        }
     }
 
 

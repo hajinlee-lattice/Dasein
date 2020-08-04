@@ -4,7 +4,9 @@ import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImport
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.INGESTION_PERCENTAGE;
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.MATCH_PERCENTAGE;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,6 +19,11 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
+import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportMode;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -28,6 +35,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
@@ -55,6 +63,9 @@ public class SourceImportListener extends LEJobListener {
     @Inject
     private SourceProxy sourceProxy;
 
+    @Inject
+    private DataReportProxy reportProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
 
@@ -63,6 +74,7 @@ public class SourceImportListener extends LEJobListener {
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         log.info("Finish Source Import!");
+        triggerReportWorkflow(jobExecution);
         sendEmail(jobExecution);
     }
 
@@ -159,5 +171,32 @@ public class SourceImportListener extends LEJobListener {
             }
         }
         return lastStepExecution.getStepName();
+    }
+
+    private void triggerReportWorkflow(JobExecution jobExecution) {
+        if (BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
+            String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
+            log.info("tenantId=" + tenantId);
+            String rootId = CustomerSpace.parse(tenantId).toString();
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+            if (job == null) {
+                log.error("Cannot locate workflow job with id {}", jobExecution.getId());
+                throw new IllegalArgumentException("Cannot locate workflow job with id " + jobExecution.getId());
+            }
+            String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
+            Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(tenantId, uploadId);
+            DataReport report = reportProxy.getDataReport(tenantId, DataReportRecord.Level.Tenant, rootId);
+            long refreshTime = report.getRefreshTimestamp() == null ? 0L : report.getRefreshTimestamp();
+            long now = Instant.now().toEpochMilli();
+            log.info("last refresh time is {}, current time is {}, has unterminal uploads: {}", refreshTime, now,
+                    hasUnterminalUploads);
+            if (now - refreshTime > TimeUnit.HOURS.toMillis(4) && Boolean.FALSE.equals(hasUnterminalUploads)) {
+                DCPReportRequest request = new DCPReportRequest();
+                request.setMode(DataReportMode.UPDATE);
+                request.setLevel(DataReportRecord.Level.Tenant);
+                request.setRootId(rootId);
+                reportProxy.rollupDataReport(tenantId, request);
+            }
+        }
     }
 }
