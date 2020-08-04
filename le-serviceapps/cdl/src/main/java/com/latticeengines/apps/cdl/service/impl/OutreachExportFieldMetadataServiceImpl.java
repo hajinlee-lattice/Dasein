@@ -57,28 +57,28 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
         log.info("Outreach account owner " + prospectOwner);
         if (StringUtils.isBlank(prospectOwner)) {
-            throw new LedpException(LedpCode.LEDP_18233, new String[] { "Prospect Owner" });
-        }
-        if (!accountAttributesMap.containsKey(prospectOwner)) {
+            // Allow prospectOwner to be unmapped
+        } else if (!accountAttributesMap.containsKey(prospectOwner)) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "Outreach Prospect Owner:" + prospectOwner + " mapped is not export enabled" });
+        } else {
+            ColumnMetadata prospectOwnerColumnMetadata = accountAttributesMap.get(prospectOwner);
+            prospectOwnerColumnMetadata.setDisplayName(TRAY_PROSPECT_OWNER_COLUMN_NAME);
+            exportColumnMetadataList.add(prospectOwnerColumnMetadata);
         }
-        ColumnMetadata prospectOwnerColumnMetadata = accountAttributesMap.get(prospectOwner);
-        prospectOwnerColumnMetadata.setDisplayName(TRAY_PROSPECT_OWNER_COLUMN_NAME);
-        exportColumnMetadataList.add(prospectOwnerColumnMetadata);
 
         String lookupId = channel.getLookupIdMap().getAccountId();
         log.info("Outreach account owner " + lookupId);
         if (StringUtils.isBlank(lookupId)) {
-            throw new LedpException(LedpCode.LEDP_18233, new String[] { "Account Id" });
-        }
-        if (!accountAttributesMap.containsKey(lookupId)) {
+            // Allow lookupId to be unmapped
+        } else if (!accountAttributesMap.containsKey(lookupId)) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "Outreach AccountId:" + lookupId + " mapped is not export enabled" });
+        } else {
+            ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
+            lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
+            exportColumnMetadataList.add(lookupIdColumnMetadata);
         }
-        ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
-        lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
-        exportColumnMetadataList.add(lookupIdColumnMetadata);
 
         return exportColumnMetadataList;
     }
