@@ -137,6 +137,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
         UploadDetails uploadDetail = testUploadProxy.startImport( request);
+        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetail.getUploadId());
+        Assert.assertNotNull(uploadJobDetails);
         JobStatus completedStatus = waitForWorkflowStatus(uploadDetail.getUploadDiagnostics().getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         List<UploadDetails> uploadDetails = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
@@ -149,7 +151,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
 
-        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
+        uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
         Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
         Assert.assertNull(uploadJobDetails.getCurrentStep());
