@@ -8,7 +8,7 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
-
+import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
 
 class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
@@ -84,8 +84,14 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
   }
 
   def joinSourceTable(matchResult: DataFrame, sourceTable: DataFrame, joinKey: String): DataFrame = {
-    val retainAttrs = joinKey::matchResult.columns.diff(sourceTable.columns).toList
-    val dropAttrs = matchResult.columns.diff(retainAttrs)
+    val dropAttrs = ListBuffer[String]()
+    val srcColumnsUpper = sourceTable.columns.map(_.toUpperCase).toSet
+    matchResult.columns.foreach(c =>
+      if (srcColumnsUpper.contains(c.toUpperCase)) {
+        dropAttrs += c 
+      }
+    )
+    dropAttrs -= joinKey
     val reducedResult = matchResult.drop(dropAttrs:_*)
     sourceTable.join(reducedResult, Seq(joinKey))
   }
