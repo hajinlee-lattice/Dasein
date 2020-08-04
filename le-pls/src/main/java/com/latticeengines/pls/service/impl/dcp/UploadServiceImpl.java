@@ -333,6 +333,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(customerSpace, uploadId, Boolean.TRUE);
 
         uploadDetails.getUploadDiagnostics().setApplicationId(appId.toString());
+        uploadProxy.updateUploadStatus(customerSpace, uploadId, uploadDetails.getStatus(), uploadDetails.getUploadDiagnostics());
         return uploadDetails;
     }
 
