@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.CSVConstants;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -155,7 +156,8 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
                 }
             }
             if (CollectionUtils.isNotEmpty(duplicates)) {
-                throw new LedpException(LedpCode.LEDP_40055, new String[] { StringUtils.join(duplicates) });
+                Map<String, Object> paramsMap = ImmutableMap.of("columns", StringUtils.join(duplicates));
+                throw new LedpException(LedpCode.LEDP_40055,  paramsMap);
             }
             Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
                     .collect(groupingBy(attr -> attr.getSourceAttrName() == null ?

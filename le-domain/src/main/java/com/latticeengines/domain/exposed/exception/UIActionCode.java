@@ -48,7 +48,7 @@ public enum UIActionCode {
 
     // file upload
     FILE_UPLOAD_001(Level.User, LedpCode.LEDP_18109, "Problem reading csv file header: ${message}"),
-    FiLE_UPLOAD_001(Level.User, LedpCode.LEDP_40055, "<p>Your file contains duplicate column headers. </p> <p>Please " +
+    FiLE_UPLOAD_002(Level.User, LedpCode.LEDP_40055, "<p>Your file contains duplicate column headers. </p> <p>Please " +
             "resolve these duplicates in your file then upload again. </p><p><b>Duplicate columns</b> : " +
             "${columns}</p>"),
 

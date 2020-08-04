@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
@@ -73,7 +74,8 @@ public class ValidateFileHeaderUtils {
             return headerFields;
 
         } catch (IllegalArgumentException e) {
-            throw new LedpException(LedpCode.LEDP_18109, new String[] { e.getMessage() });
+            Map<String, Object> paramsMap = ImmutableMap.of("message", e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18109, paramsMap);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -291,7 +293,8 @@ public class ValidateFileHeaderUtils {
             }
         }
         if (CollectionUtils.isNotEmpty(duplicates)) {
-            throw new LedpException(LedpCode.LEDP_40055, new String[] {StringUtils.join(duplicates, ",")});
+            Map<String, Object> paramsMap = ImmutableMap.of("columns", StringUtils.join(duplicates, ","));
+            throw new LedpException(LedpCode.LEDP_40055, paramsMap);
         }
     }
 }
