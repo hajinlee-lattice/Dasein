@@ -51,6 +51,12 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return JsonUtils.convertList(get("get uploads", url, List.class), UploadDetails.class);
     }
 
+    public Boolean hasUnterminalUploads(String customerSpace, String excludeUploadId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/hasunterminal?exclude={exclude}";
+        String url = constructUrl(baseUrl, customerSpace, excludeUploadId);
+        return get("has unterminal status", url, Boolean.class);
+    }
+
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}?includeConfig={includeConfig}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, includeConfig.toString());
