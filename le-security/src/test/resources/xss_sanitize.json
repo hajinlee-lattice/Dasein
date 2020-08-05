@@ -1,0 +1,14 @@
+[
+  {"input": "Test<script>alert('attack!!!')</script>", "expect": "Test"},
+  {"input": "Test", "expect": "Test"},
+  {"input": "1234", "expect": "1234"},
+  {"input": "SRC='http://xss.rocks/xss.js'", "expect": ""},
+  {"input": "Test", "expect": "Test"},
+  {"input": "", "expect": ""},
+  {"input": "", "expect": ""},
+  {"input": "", "expect": ""},
+  {"input": "", "expect": ""},
+  {"input": "", "expect": ""},
+  {"input": "", "expect": ""},
+  {"input": "", "expect": ""}
+]
