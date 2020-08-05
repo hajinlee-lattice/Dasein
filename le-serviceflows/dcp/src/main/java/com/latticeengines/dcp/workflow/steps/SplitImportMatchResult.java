@@ -152,7 +152,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
         Source source = sourceProxy.getSource(customerSpace.toString(), configuration.getSourceId());
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
-                configuration.getProjectId(), Boolean.FALSE);
+                configuration.getProjectId(), Boolean.FALSE, null);
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
 
         // create match result folder

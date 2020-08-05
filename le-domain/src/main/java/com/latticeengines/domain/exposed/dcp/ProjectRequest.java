@@ -40,5 +40,4 @@ public class ProjectRequest {
     public Project.ProjectType getProjectType() { return projectType; }
 
     public void setProjectType(Project.ProjectType projectType) { this.projectType = projectType; }
-
 }

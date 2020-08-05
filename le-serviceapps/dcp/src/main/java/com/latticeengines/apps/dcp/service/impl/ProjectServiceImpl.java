@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -95,16 +96,24 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources) {
-        return getAllProject(customerSpace, includeSources, 0, MAX_PAGE_SIZE);
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, List<String> teamIds) {
+        return getAllProject(customerSpace, includeSources, 0, MAX_PAGE_SIZE, teamIds);
     }
 
     @Override
-    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize, List<String> teamIds) {
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
             PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
-            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+            List<ProjectInfo> projectInfoList = new ArrayList<>();
+            if (teamIds == null){
+                projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+            } else {
+                if (teamIds.isEmpty()) {
+                    teamIds.add("");
+                }
+                projectInfoList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, teamIds);
+            }
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in page.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);
@@ -119,8 +128,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources) {
-        ProjectInfo projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
+    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources, List<String> teamIds) {
+        ProjectInfo projectInfo = null;
+        if (teamIds == null){
+            projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
+        } else {
+            if (teamIds.isEmpty()) {
+                teamIds.add("");
+            }
+            projectInfo = projectEntityMgr.findProjectInfoByProjectIdInTeamIds(projectId, teamIds);
+        }
         if (projectInfo == null) {
             log.warn("No project found with id: " + projectId);
             return null;
@@ -129,9 +146,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Boolean deleteProject(String customerSpace, String projectId) {
+    public Boolean deleteProject(String customerSpace, String projectId, List<String> teamIds) {
         Project project = projectEntityMgr.findByProjectId(projectId);
-        if (project == null) {
+        if (project == null || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
             return false;
         }
         project.setDeleted(Boolean.TRUE);
@@ -167,6 +184,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
         return getDropBoxAccess();
+    }
+
+    @Override
+    public void updateTeamId(String customerSpace, String projectId, String teamId) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        if (project == null) {
+            return;
+        }
+        project.setTeamId(teamId);
+        projectEntityMgr.update(project);
     }
 
     private void validateProjectId(String projectId) {
@@ -207,6 +234,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setCreated(projectInfo.getCreated().getTime());
         details.setUpdated(projectInfo.getUpdated().getTime());
         details.setCreatedBy(projectInfo.getCreatedBy());
+        details.setTeamId(projectInfo.getTeamId());
         return details;
     }
 

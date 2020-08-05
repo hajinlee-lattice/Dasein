@@ -481,6 +481,15 @@ public abstract class BaseRestApiProxy {
         });
     }
 
+    protected <B> void delete(final String method, final String url, final B body) {
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.DELETE, url, false, body);
+        retry.execute((RetryCallback<Void, RuntimeException>) context -> {
+            logInvocation(method, url, HttpMethod.DELETE, context.getRetryCount() + 1);
+            restTemplate.delete(url);
+            return null;
+        });
+    }
+
     <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
             boolean kryoContent, boolean kryoResponse) {
         // trace request by default

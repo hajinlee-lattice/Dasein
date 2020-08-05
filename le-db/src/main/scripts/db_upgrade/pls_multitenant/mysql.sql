@@ -60,6 +60,8 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`DATAFEED_TASK`
       ADD COLUMN `SPEC_TYPE` VARCHAR(255) NULL AFTER `SUBTYPE`;
 
+      ALTER TABLE `DCP_PROJECT` ADD COLUMN `TEAM_ID` VARCHAR(255);
+
   END //
 -- ##############################################################
 

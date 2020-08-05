@@ -46,6 +46,10 @@ public enum UIActionCode {
     ATTR_MANAGEMENT_005(Level.User, LedpCode.LEDP_40094, "This attribute group is used with \"${campaignNames}\" always-on campaign. " +
             "Please make the change to the campaign first and then try to delete the attribute campaign."),
 
+    // file upload
+    FILE_UPLOAD_001(Level.User, LedpCode.LEDP_18109, "Problem reading csv file header: ${message}"),
+    FILE_UPLOAD_002(Level.User, LedpCode.LEDP_40055),
+
     // UIActionUnitTestNG
     TEST_00(Level.User, LedpCode.LEDP_00009), //
     TEST_01(Level.User, LedpCode.LEDP_00010, "<p>Welcome ${user}!</p>"), //

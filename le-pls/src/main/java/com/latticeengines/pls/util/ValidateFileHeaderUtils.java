@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.avro.SchemaParseException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
@@ -72,7 +74,8 @@ public class ValidateFileHeaderUtils {
             return headerFields;
 
         } catch (IllegalArgumentException e) {
-            throw new LedpException(LedpCode.LEDP_18109, new String[] { e.getMessage() });
+            Map<String, Object> paramsMap = ImmutableMap.of("message", e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18109, paramsMap);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -283,11 +286,15 @@ public class ValidateFileHeaderUtils {
      */
     public static void checkForDuplicatedHeaders(Set<String> headers) {
         Set<String> headersWithLowerCase = new HashSet<>();
+        Set<String> duplicates = new HashSet<>();
         for (String header : headers) {
             if (!headersWithLowerCase.add(header.toLowerCase())) {
-                throw new LedpException(LedpCode.LEDP_40055);
+                duplicates.add(header);
             }
         }
-
+        if (CollectionUtils.isNotEmpty(duplicates)) {
+            Map<String, Object> paramsMap = ImmutableMap.of("columns", StringUtils.join(duplicates, ","));
+            throw new LedpException(LedpCode.LEDP_40055, paramsMap);
+        }
     }
 }

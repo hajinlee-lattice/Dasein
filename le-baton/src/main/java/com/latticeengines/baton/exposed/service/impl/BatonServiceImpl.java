@@ -9,7 +9,9 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -619,6 +621,11 @@ public class BatonServiceImpl implements BatonService {
     @Override
     @SuppressWarnings("deprecation")
     public boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
+        Collection<LatticeProduct> dcp = Collections.singleton(LatticeProduct.DCP);
+        if (hasAtLeastOneProduct(customerSpace, new HashSet<LatticeProduct>(dcp)) &&
+                flag.getName().equalsIgnoreCase(LatticeFeatureFlag.TEAM_FEATURE.getName())) {
+            return true;
+        }
         return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());
     }
 
