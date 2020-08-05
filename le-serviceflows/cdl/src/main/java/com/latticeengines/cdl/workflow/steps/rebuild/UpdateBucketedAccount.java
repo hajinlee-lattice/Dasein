@@ -197,19 +197,21 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
 
     private void enrichTableSchema(Table servingTable) {
         String dataCloudVersion = configuration.getDataCloudVersion();
-        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
-                dataCloudVersion);
-        Map<String, ColumnMetadata> amColMap = new HashMap<>();
-        amCols.forEach(cm -> amColMap.put(cm.getAttrName(), cm));
         ColumnMetadata latticeIdCm = columnMetadataProxy
                 .columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
         Map<String, Attribute> masterAttrs = new HashMap<>();
         customerAccountTbl.getAttributes().forEach(attr -> {
             masterAttrs.put(attr.getName(), attr);
         });
-        latticeAccountTbl.getAttributes().forEach(attr -> {
-            masterAttrs.put(attr.getName(), attr);
-        });
+        Map<String, ColumnMetadata> amColMap = new HashMap<>();
+        if (latticeAccountTbl != null) {
+            latticeAccountTbl.getAttributes().forEach(attr -> {
+                masterAttrs.put(attr.getName(), attr);
+            });
+            List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
+                    dataCloudVersion);
+            amCols.forEach(cm -> amColMap.put(cm.getAttrName(), cm));
+        }
 
         List<Attribute> attrs = new ArrayList<>();
         final AtomicLong dcCount = new AtomicLong(0);
