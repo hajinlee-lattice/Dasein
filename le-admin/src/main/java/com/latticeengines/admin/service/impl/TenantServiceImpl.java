@@ -688,6 +688,9 @@ public class TenantServiceImpl implements TenantService {
                     for (LatticeProduct product : flagDef.getAvailableProducts()) {
                         if (productList.contains(product)) {
                             boolean defaultVal = flagDef.getDefaultValue();
+                            if(flagId.equalsIgnoreCase(LatticeFeatureFlag.TEAM_FEATURE.getName())){
+                                defaultVal = true;
+                            }
                             defaultValueMap.put(flagId, defaultVal);
                             break;
                         }

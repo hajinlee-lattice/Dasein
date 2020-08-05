@@ -15,15 +15,15 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     Project findByImportSystem(S3ImportSystem importSystem);
 
-    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
             " from Project as p join p.importSystem as s where p.projectId = ?1")
     List<Object[]> findProjectInfoByProjectId(String projectId);
 
-    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
             " from Project as p join p.importSystem as s")
     List<Object[]> findAllProjects(Pageable pageable);
 
-    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
             " from Project as p join p.importSystem as s join DataFeedTask as dft on s.pid = dft.importSystem" +
             " where dft.sourceId = ?1")
     List<Object[]> findProjectInfoBySourceId(String sourceId);
@@ -31,4 +31,11 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     @Query("select s from Project as p join p.importSystem as s where p.projectId = ?1")
     S3ImportSystem findImportSystemByProjectId(String projectId);
 
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
+            " from Project as p join p.importSystem as s where p.teamId in (?1) or p.teamId is null")
+    List<Object[]> findProjectsInTeamIds(List<String> teamIds, Pageable pageable);
+
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid, p.teamId" +
+            " from Project as p join p.importSystem as s where p.projectId = ?1 and (p.teamId in (?2) or p.teamId is null)")
+    List<Object[]> findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds);
 }

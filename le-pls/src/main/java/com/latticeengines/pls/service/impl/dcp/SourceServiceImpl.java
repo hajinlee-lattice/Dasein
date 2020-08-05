@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -97,7 +98,7 @@ public class SourceServiceImpl implements SourceService {
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        return sourceProxy.getSourceList(customerSpace.toString(), projectId, pageIndex - 1, pageSize);
+        return sourceProxy.getSourceList(customerSpace.toString(), projectId, pageIndex - 1, pageSize, TeamUtils.getTeamIds());
     }
 
     @Override

@@ -91,14 +91,15 @@ public class SourceResource {
         return sourceService.getSource(customerSpace, sourceId);
     }
 
-    @GetMapping("/projectId/{projectId}")
+    @PostMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get all Sources in Project")
     public List<Source> getSourceUnderProject(@PathVariable String customerSpace, @PathVariable String projectId,
                                               @RequestParam(defaultValue = "0") int pageIndex,
-                                              @RequestParam(defaultValue = "20") int pageSize) {
+                                              @RequestParam(defaultValue = "20") int pageSize,
+                                              @RequestBody(required = false) List<String> teamIds) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return sourceService.getSourceList(customerSpace, projectId, pageIndex, pageSize);
+        return sourceService.getSourceList(customerSpace, projectId, pageIndex, pageSize, teamIds);
     }
 
     @DeleteMapping("/sourceId/{sourceId}")
