@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.CDLDependencyChecker;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -126,7 +127,9 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public List<MetadataSegment> getSegments() {
         String collectionName = dataCollectionEntityMgr.findDefaultCollection().getName();
-        return segmentEntityMgr.findAllInCollection(collectionName);
+        List<MetadataSegment> result = segmentEntityMgr.findAllInCollection(collectionName);
+        result.stream().forEach(segment -> TeamUtils.fillTeamId(segment));
+        return result;
     }
 
     @Override
@@ -142,6 +145,7 @@ public class SegmentServiceImpl implements SegmentService {
                 log.warn("Failed to update segment counts.", e);
             }
         }
+        TeamUtils.fillTeamId(segment);
         return segment;
     }
 

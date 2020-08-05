@@ -39,23 +39,22 @@ public final class TeamUtils {
     private static final Logger log = LoggerFactory.getLogger(TeamUtils.class);
 
     public static boolean isMyTeam(String teamId) {
-        if (!isGlobalTeam(teamId)) {
-            Session session = MultiTenantContext.getSession();
-            if (session != null) {
-                List<String> teamIds = session.getTeamIds();
-                log.info("Check team rights with teamId {} and teamIds in session context are {}.", teamId, teamIds);
-                if (CollectionUtils.isEmpty(teamIds) || !teamIds.stream().collect(Collectors.toSet()).contains(teamId)) {
-                    return false;
-                } else {
-                    return true;
-                }
+        if (StringUtils.isEmpty(teamId)) {
+            log.info("Team id is null, users can't pass team rights check.");
+            return false;
+        }
+        Session session = MultiTenantContext.getSession();
+        if (session != null) {
+            List<String> teamIds = session.getTeamIds();
+            log.info("Check team rights with teamId {} and teamIds in session context are {}.", teamId, teamIds);
+            if (CollectionUtils.isEmpty(teamIds) || !teamIds.stream().collect(Collectors.toSet()).contains(teamId)) {
+                return false;
             } else {
-                log.warn("Session doesn't exist in MultiTenantContext.");
                 return true;
             }
         } else {
-            log.info("Pass team rights check since teamId is empty.");
-            return true;
+            log.warn("Session doesn't exist in MultiTenantContext.");
+            return false;
         }
     }
 
@@ -65,7 +64,7 @@ public final class TeamUtils {
         }
         hasTeamInfo.setTeam(globalTeam);
         String teamId = hasTeamInfo.getTeamId();
-        if (!TeamUtils.isGlobalTeam(teamId) && !teamIds.contains(teamId)) {
+        if (!teamIds.contains(teamId)) {
             hasTeamInfo.setViewOnly(true);
         }
     }

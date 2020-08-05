@@ -387,7 +387,7 @@ public class RatingEngineEntityMgrImpl //
             ratingEngineNote.setId(UUID.randomUUID().toString());
             ratingEngine.addRatingEngineNote(ratingEngineNote);
         }
-        ratingEngine.setTeamId(ratingEngine.getTeamId());
+        ratingEngine.setTeamId(TeamUtils.isGlobalTeam(ratingEngine.getTeamId()) ? TeamUtils.GLOBAL_TEAM_ID : ratingEngine.getTeamId());
         AdvancedModelingConfig advancedModelingConfig = null;
         AdvancedRatingConfig advancedRatingConfig = ratingEngine.getAdvancedRatingConfig();
         switch (type) {

@@ -25,6 +25,7 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -157,7 +158,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         if (segment.getContacts() == null) {
             segment.setContacts(0L);
         }
-        segment.setTeamId(segment.getTeamId());
+        segment.setTeamId(TeamUtils.isGlobalTeam(segment.getTeamId()) ? TeamUtils.GLOBAL_TEAM_ID : segment.getTeamId());
     }
 
     private void preprocessBeforeCreateOrUpdate(MetadataSegment segment) {

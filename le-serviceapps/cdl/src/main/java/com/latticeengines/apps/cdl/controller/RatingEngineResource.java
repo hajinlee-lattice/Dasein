@@ -133,6 +133,13 @@ public class RatingEngineResource {
         return ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
     }
 
+    @GetMapping("/summary/{ratingEngineId}")
+    @ResponseBody
+    @ApiOperation(value = "Get a Rating Engine Summary given its id")
+    public RatingEngineSummary getRatingEngineSummary(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+        return ratingEngineService.getRatingEngineSummaryById(ratingEngineId);
+    }
+
     @PostMapping("")
     @ResponseBody
     @Action

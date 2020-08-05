@@ -90,28 +90,23 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
                 if (teamFeatureEnabled) {
                     if (filter) {
-                        globalTeamMap = teamService.getMyTeams(false, true)
+                        globalTeamMap = teamService.getMyTeams(false)
                                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-                        return backendSegments.stream().filter(segment -> {
-                            TeamUtils.fillTeamId(segment);
-                            return globalTeamMap.containsKey(segment.getTeamId());
-                        }).map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
+                        return backendSegments.stream().filter(segment -> globalTeamMap.containsKey(segment.getTeamId()))
+                                .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
                                 .sorted((seg1, seg2) -> Boolean.compare( //
                                         Boolean.TRUE.equals(seg1.getMasterSegment()), //
                                         Boolean.TRUE.equals(seg2.getMasterSegment()) //
                                 )).collect(Collectors.toList());
                     } else {
-                        globalTeamMap = teamService.getTeamsInContext(true, true)
+                        globalTeamMap = teamService.getTeamsInContext(true)
                                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
                     }
                 } else {
                     globalTeamMap = new HashMap<>();
                 }
                 return backendSegments.stream() //
-                        .map(segment -> {
-                            TeamUtils.fillTeamId(segment);
-                            return translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds);
-                        })
+                        .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
                         .sorted((seg1, seg2) -> Boolean.compare( //
                                 Boolean.TRUE.equals(seg1.getMasterSegment()), //
                                 Boolean.TRUE.equals(seg2.getMasterSegment()) //
@@ -137,7 +132,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
             if (shouldTranslateForFrontend && segment != null) {
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-                TeamUtils.fillTeamId(segment);
                 segment = translateForFrontend(segment, teamFeatureEnabled ?
                         teamService.getTeamInContext(segment.getTeamId()) : null, teamService.getMyTeamIds());
             }

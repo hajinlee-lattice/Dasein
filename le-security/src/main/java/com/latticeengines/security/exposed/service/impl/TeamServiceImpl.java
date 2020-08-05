@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.auth.exposed.service.impl.GlobalAuthDependencyChecker;
-import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -85,7 +84,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<GlobalTeam> getMyTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
+    public List<GlobalTeam> getMyTeams(boolean withTeamMember) {
         try (PerformanceTimer timer = new PerformanceTimer("Get teams in session context.")) {
             List<GlobalTeam> globalTeams = new ArrayList<>();
             Session session = MultiTenantContext.getSession();
@@ -93,7 +92,7 @@ public class TeamServiceImpl implements TeamService {
                 List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(session.getTeamIds(), withTeamMember);
                 globalTeams = getGlobalTeams(globalAuthTeams, withTeamMember, MultiTenantContext.getUser());
             }
-            return appendDefaultGlobalTeam(appendDefaultGlobalTeam, globalTeams);
+            return globalTeams;
         }
     }
 
@@ -128,17 +127,6 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public GlobalTeam getTeamByTeamId(String teamId, User loginUser) {
         return getTeamByTeamId(teamId, loginUser, true);
-    }
-
-
-    // generate a Global Team with teamId null, display for UI
-    @Override
-    public GlobalTeam getDefaultGlobalTeam() {
-        GlobalTeam globalTeam = new GlobalTeam();
-        globalTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
-        globalTeam.setTeamName(TeamUtils.GLOBAL_TEAM);
-        globalTeam.setTeamMembers(new ArrayList<>());
-        return globalTeam;
     }
 
     private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
@@ -258,31 +246,15 @@ public class TeamServiceImpl implements TeamService {
         }
     }
 
-    private List<GlobalTeam> appendDefaultGlobalTeam(boolean appendDefaultGlobalTeam, List<GlobalTeam> globalTeams) {
-        if (appendDefaultGlobalTeam) {
-            List<GlobalTeam> globalTeams2 = new ArrayList<>();
-            globalTeams2.add(getDefaultGlobalTeam());
-            globalTeams2.addAll(globalTeams);
-            return globalTeams2;
-        } else {
-            return globalTeams;
-        }
-    }
-
     @Override
-    public List<GlobalTeam> getTeamsInContext(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
+    public List<GlobalTeam> getTeamsInContext(boolean withTeamMember) {
         User loginUser = MultiTenantContext.getUser();
-        List<GlobalTeam> globalTeams = getTeams(loginUser, withTeamMember);
-        return appendDefaultGlobalTeam(appendDefaultGlobalTeam, globalTeams);
+        return getTeams(loginUser, withTeamMember);
     }
 
     @Override
     public GlobalTeam getTeamInContext(String teamId) {
-        if (!TeamUtils.isGlobalTeam(teamId)) {
-            return getTeamByTeamId(teamId, MultiTenantContext.getUser());
-        } else {
-            return getDefaultGlobalTeam();
-        }
+        return getTeamByTeamId(teamId, MultiTenantContext.getUser());
     }
 
     @Override
