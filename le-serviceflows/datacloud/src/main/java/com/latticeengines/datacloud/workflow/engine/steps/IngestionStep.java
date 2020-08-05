@@ -33,9 +33,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Resource(name = "ingestionAPIProviderService")
     private IngestionProviderService ingestionAPIProviderService;
 
-    @Resource(name = "ingestionSQLProviderService")
-    private IngestionProviderService ingestionSQLProviderService;
-
     @Resource(name = "ingestionS3Provider")
     private IngestionProviderService ingestionS3Provider;
 
