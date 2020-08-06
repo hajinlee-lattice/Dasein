@@ -73,4 +73,6 @@ public interface UserService {
 
     List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam);
 
+    void createDCPIDaaSUser(String email);
+
 }
