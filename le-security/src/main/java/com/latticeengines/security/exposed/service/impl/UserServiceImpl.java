@@ -424,7 +424,7 @@ public class UserServiceImpl implements UserService {
                 request.setEmailAddress(email);
                 iDaaSService.addProductAccessToUser(request);
             }
-            if (existingUser.getApiUserStatus().contains(IDaaSServiceImpl.DCP_ROLE)) {
+            if (!existingUser.getApiUserStatus().contains(IDaaSServiceImpl.DCP_ROLE)) {
                 RoleRequest request = new RoleRequest();
                 request.setEmailAddress(email);
                 request.setRoles(Collections.singletonList(IDaaSServiceImpl.DCP_ROLE));
