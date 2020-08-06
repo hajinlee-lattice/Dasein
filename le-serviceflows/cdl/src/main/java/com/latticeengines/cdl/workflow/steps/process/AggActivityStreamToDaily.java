@@ -167,6 +167,9 @@ public class AggActivityStreamToDaily
             ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
             Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
             rawStreamTableNames.forEach((streamId, table) -> {
+                if (streamsToRelink.contains(streamId)) {
+                    return;
+                }
                 Preconditions.checkArgument(CollectionUtils.size(table.getExtracts()) == 1,
                         String.format("Table %s should only have one extract, got %d", table.getName(),
                                 CollectionUtils.size(table.getExtracts())));
