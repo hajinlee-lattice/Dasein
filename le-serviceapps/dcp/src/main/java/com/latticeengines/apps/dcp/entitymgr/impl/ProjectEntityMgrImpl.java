@@ -78,8 +78,8 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ProjectInfo> findAllProjectInfo(Pageable pageable) {
-        List<Object[]> result = getReadOrWriteRepository().findAllProjects(pageable);
+    public List<ProjectInfo> findAllProjectInfo(Boolean isDeleted, Pageable pageable) {
+        List<Object[]> result = getReadOrWriteRepository().findAllProjects(isDeleted, pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {

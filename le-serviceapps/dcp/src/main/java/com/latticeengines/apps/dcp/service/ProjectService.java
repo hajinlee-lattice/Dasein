@@ -17,9 +17,10 @@ public interface ProjectService {
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
                                  Project.ProjectType projectType, String user);
 
-    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources);
+    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, Boolean includeArchived);
 
-    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize);
+    List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, Boolean includeArchived,
+                                       int pageIndex, int pageSize);
 
     Long getProjectsCount(String customerSpace);
 

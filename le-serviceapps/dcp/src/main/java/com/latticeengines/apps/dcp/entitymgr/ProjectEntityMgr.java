@@ -15,7 +15,7 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     ProjectInfo findProjectInfoByProjectId(String projectId);
 
-    List<ProjectInfo> findAllProjectInfo(Pageable pageable);
+    List<ProjectInfo> findAllProjectInfo(Boolean isDeleted, Pageable pageable);
 
     Long countAllProjects();
 

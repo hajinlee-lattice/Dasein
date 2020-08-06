@@ -95,16 +95,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources) {
-        return getAllProject(customerSpace, includeSources, 0, MAX_PAGE_SIZE);
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, Boolean includeArchived) {
+        return getAllProject(customerSpace, includeSources, includeArchived, 0, MAX_PAGE_SIZE);
     }
 
     @Override
-    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, Boolean includeArchived,
+                                              int pageIndex, int pageSize) {
         log.info("Invoke findAll Project!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
             PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
-            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo(includeArchived, pageRequest);
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in page.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);

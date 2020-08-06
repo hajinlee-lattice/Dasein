@@ -32,15 +32,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources) {
-        return projectProxy.getAllDCPProject(customerSpace, includeSources, 0, DEFAULT_PAGE_SIZE);
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, Boolean includeArchived) {
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, includeArchived, 0, DEFAULT_PAGE_SIZE);
     }
 
     @Override
-    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, Boolean includeArchived,
+                                               int pageIndex, int pageSize) {
         Preconditions.checkArgument(pageIndex > 0);
         Preconditions.checkArgument(pageSize > 0);
-        return projectProxy.getAllDCPProject(customerSpace, includeSources, pageIndex - 1, pageSize);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, includeArchived, pageIndex - 1, pageSize);
     }
 
     @Override

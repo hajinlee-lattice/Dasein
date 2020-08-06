@@ -61,9 +61,10 @@ public class ProjectResource {
     @UseReaderConnection
     public List<ProjectSummary> getAllProject(@PathVariable String customerSpace,
                                               @RequestParam(defaultValue = "false") Boolean includeSources,
+                                              @RequestParam(defaultValue = "false") Boolean includeArchived,
                                               @RequestParam(defaultValue = "0") int pageIndex,
                                               @RequestParam(defaultValue = "20") int pageSize) {
-        return projectService.getAllProject(customerSpace, includeSources, pageIndex, pageSize);
+        return projectService.getAllProject(customerSpace, includeSources, includeArchived, pageIndex, pageSize);
     }
 
     @GetMapping("/count")
