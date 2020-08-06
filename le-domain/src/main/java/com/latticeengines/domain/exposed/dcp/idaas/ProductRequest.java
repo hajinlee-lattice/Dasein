@@ -19,6 +19,9 @@ public class ProductRequest {
     @JsonProperty("requestor")
     private String requestor;
 
+    @JsonProperty("product_subscription")
+    private ProductSubscription productSubscription;
+
     public String getEmailAddress() {
         return emailAddress;
     }
@@ -41,5 +44,13 @@ public class ProductRequest {
 
     public void setRequestor(String requestor) {
         this.requestor = requestor;
+    }
+
+    public ProductSubscription getProductSubscription() {
+        return productSubscription;
+    }
+
+    public void setProductSubscription(ProductSubscription productSubscription) {
+        this.productSubscription = productSubscription;
     }
 }
