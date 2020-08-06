@@ -92,9 +92,9 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
     val mapper = new ObjectMapper() with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
     val writer: StringWriter = new StringWriter()
-    val result: IndexedSeq[Map[String, String]] = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
+    var result: IndexedSeq[Map[String, String]] = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     if (result.length > 1 && populateOneContact) {
-      result.take(1)
+      result = result.take(1)
     }
     mapper.writeValue(writer, result)
     writer.toString()
