@@ -22,9 +22,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -67,6 +70,9 @@ public class UserResource {
 
     @Inject
     private TenantService tenantService;
+
+    @Inject
+    private BatonService batonService;
 
     @GetMapping("")
     @ResponseBody
@@ -156,6 +162,9 @@ public class UserResource {
         } else {
             emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
         }
+        if (batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            userService.createDCPIDaaSUser(user.getEmail());
+        }
         response.setSuccess(true);
         return response;
     }
@@ -236,6 +245,9 @@ public class UserResource {
         if (!userService.inTenant(tenantId, username)) {
             return SimpleBooleanResponse
                     .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
+        }
+        if (batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            userService.createDCPIDaaSUser(username);
         }
         return SimpleBooleanResponse.successResponse();
     }

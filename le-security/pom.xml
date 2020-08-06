@@ -195,5 +195,10 @@
 			<artifactId>spring-webmvc</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

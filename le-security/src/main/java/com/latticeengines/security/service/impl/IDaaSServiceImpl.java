@@ -52,7 +52,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
 
     public static final String DCP_PRODUCT = "DnB Connect";
-    private static final String DCP_ROLE = "DNB_CONNECT_ACCESS";
+    public static final String DCP_ROLE = "DNB_CONNECT_ACCESS";
 
     private final RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
