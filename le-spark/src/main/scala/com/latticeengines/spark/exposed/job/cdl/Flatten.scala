@@ -96,7 +96,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
     if (result.length > 1 && populateOneContact) {
       result.take(1)
     }
-    mapper.writeValue(writer, buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]])
+    mapper.writeValue(writer, result)
     writer.toString()
   }
  }
