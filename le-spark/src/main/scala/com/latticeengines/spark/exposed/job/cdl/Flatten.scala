@@ -12,7 +12,8 @@ import org.apache.spark.sql.types._
 
 import scala.collection.mutable.Map;
 
-class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String) extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String, onlyPopulateOneContact: Boolean)
+  extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = schema
@@ -29,12 +30,14 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
   var cols: Seq[String] = Seq.empty[String]
   var useConfiguredCols: Boolean = false
   var sfdcContactIdEmpty: Boolean = sfdcContactId == null
+  var populateOneContact: Boolean = false
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = IndexedSeq[Map[String, String]]()
     cols = configuredColumns
     useConfiguredCols = if (cols.isEmpty) false else true
+    populateOneContact = onlyPopulateOneContact
   }
 
   // This is how to update your buffer schema given an input.
@@ -64,9 +67,9 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
       			  PlaymakerConstants.CreatedDate -> getInputValue(input, InterfaceName.CreatedDate.name()), //
       			  PlaymakerConstants.LastModifiedDate -> getInputValue(input, InterfaceName.LastModifiedDate.name()))
 
-    } 
+    }
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
-    buffer(0) = cur :+ ele  
+    buffer(0) = cur :+ ele
   }
   
   private def getInputValue(input: Row, key: String): String = {
@@ -89,6 +92,10 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
     val mapper = new ObjectMapper() with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
     val writer: StringWriter = new StringWriter()
+    val result: IndexedSeq[Map[String, String]] = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
+    if (result.length > 1 && populateOneContact) {
+      result.take(1)
+    }
     mapper.writeValue(writer, buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]])
     writer.toString()
   }

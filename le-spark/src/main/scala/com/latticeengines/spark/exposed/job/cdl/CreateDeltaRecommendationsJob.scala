@@ -461,28 +461,12 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String, onlyPopulateOneContact: Boolean): DataFrame = {
     val contactWithoutJoinKey = contactTable.drop(joinKey)
-    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)
+    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, onlyPopulateOneContact)
     val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
       flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
       count(lit(1)).as("CONTACT_NUM") //
     )
-    val reformatContact = udf((str: String) => {
-      val contacts = JsonUtils.deserialize(str, new TypeReference[util.List[Object]] {})
-      if (CollectionUtils.isNotEmpty(contacts)) {
-        JsonUtils.serialize(contacts.subList(0, 1))
-      } else {
-        str
-      }
-    })
-    val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit(""))
-      .otherwise(
-        if (onlyPopulateOneContact) {
-          reformatContact(col("CONTACTS"))
-        }
-        else {
-          col("CONTACTS")
-        }
-      ))
+    val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("")).otherwise(col("CONTACTS")))
     //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
     logSpark("----- BEGIN SCRIPT OUTPUT -----")
     processedAggrContacts.printSchema
