@@ -3,7 +3,6 @@ package com.latticeengines.pls.service.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -87,6 +86,7 @@ import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.pls.download.TemplateFileHttpDownloader;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
@@ -1096,9 +1096,16 @@ public class CDLServiceImpl implements CDLService {
         log.info("mimeType is {}, fileName is {}, customerSpace is {}, systemName is {}, entityType is {}, ",
                 mimeType, fileName, customerSpace, systemName, entityType);
         List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, systemName, entityType);
-        DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
-        builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromValues(metadataValues)).setBatonService(batonService);
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
+        DataFeedTask datafeedTask = dataFeedProxy.getDataFeedTask(customerSpace, "File",
+                S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName()));
+        if (datafeedTask == null) {
+            throw new RuntimeException(String.format("Cannot find template for entityType %s, tenant %s.",
+                    entityType.name(), customerSpace));
+        }
+
+        TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder builder = new TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder();
+        builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromValues(datafeedTask.getImportTemplate(), metadataValues)).setBatonService(batonService);
+        TemplateFileHttpDownloader downloader = new TemplateFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }
 
@@ -1114,9 +1121,17 @@ public class CDLServiceImpl implements CDLService {
                 streamType = EntityType.WebVisit;
                 dimensionName = InterfaceName.SourceMediumId.name();
                 break;
-                    default:
-                        throw new IllegalArgumentException(String.format("this method cannot support this " +
-                            "entityType. entityType is %s.", entityType.name()));
+            case OpportunityStageName:
+                streamType = EntityType.Opportunity;
+                dimensionName = InterfaceName.StageNameId.name();
+                break;
+            case MarketingActivityType:
+                streamType = EntityType.MarketingActivity;
+                dimensionName = InterfaceName.ActivityTypeId.name();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("this method cannot support this " +
+                    "entityType. entityType is %s.", entityType.name()));
         }
 
         Map<String, List<Map<String, Object>>> getAllDimensionMetadataValues =
@@ -1144,39 +1159,36 @@ public class CDLServiceImpl implements CDLService {
         return metadataValue;
     }
 
-    private String getCSVFromValues(List<Map<String, Object>> metadataValues) {
-        if (CollectionUtils.isEmpty(metadataValues)) {
-            return "";
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        Map<String, Object> firstMetadataValue = metadataValues.get(0);
-        Set<String> keySet = firstMetadataValue.keySet();
-        int count = 0;
-        for (String header : keySet) {
-            if (count == keySet.size() - 1) {
-                stringBuilder.append(modifyStringForCSV(header));
-            } else {
-                stringBuilder.append(modifyStringForCSV(header)).append(",");
+    private String getCSVFromValues(Table templateTable, List<Map<String, Object>> metadataValues) {
+        StringBuffer fileContent = new StringBuffer();
+        Map<String, Attribute> templateAttrNameMap = templateTable.getNameAttributeMap();
+        if (MapUtils.isNotEmpty(templateAttrNameMap)) {
+            for (Attribute attribute : templateAttrNameMap.values()) {
+                String displayName = attribute.getSourceAttrName() == null? attribute.getDisplayName() :
+                        attribute.getSourceAttrName();
+                appendTemplateMapptingValue(fileContent, displayName);
             }
-            count++;
         }
-        stringBuilder.append("\r\n");
+        fileContent.deleteCharAt(fileContent.length() - 1);
+        fileContent.append("\n");
+
+        if (CollectionUtils.isEmpty(metadataValues)) {
+            return fileContent.toString();
+        }
 
         for (Map<String, Object> metadataValue : metadataValues) {
-            Collection<Object> valueSet = metadataValue.values();
-            int num = 0;
-            for (Object object : valueSet) {
-                if (num == keySet.size() - 1) {
-                    stringBuilder.append(modifyStringForCSV(String.valueOf(object)));
+            for (String attrName : templateAttrNameMap.keySet()) {
+                if (metadataValue.containsKey(attrName)) {
+                    appendTemplateMapptingValue(fileContent, metadataValue.get(attrName).toString());
                 } else {
-                    stringBuilder.append(modifyStringForCSV(String.valueOf(object))).append(",");
+                    appendTemplateMapptingValue(fileContent, " ");
                 }
-                num++;
             }
-            stringBuilder.append("\r\n");
+            fileContent.deleteCharAt(fileContent.length() - 1);
+            fileContent.append("\n");
         }
-
-        return stringBuilder.toString();
+        fileContent.deleteCharAt(fileContent.length() - 1);
+        return fileContent.toString();
     }
     private String modifyStringForCSV(String value) {
         if (value == null) {
