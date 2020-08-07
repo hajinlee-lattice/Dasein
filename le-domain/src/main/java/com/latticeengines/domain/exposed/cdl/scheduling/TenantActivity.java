@@ -1,7 +1,11 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.time.ZoneId;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.security.TenantType;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public class TenantActivity {
 
@@ -43,6 +47,12 @@ public class TenantActivity {
 
     @JsonProperty("is_auto_schedule")
     private boolean isAutoSchedule;
+
+    @JsonProperty("timezone")
+    private ZoneId timezone;
+
+    @JsonProperty("recently_completed_pas")
+    private List<WorkflowJob> recentlyCompletedPAs;
 
     public String getTenantId() {
         return tenantId;
@@ -148,6 +158,22 @@ public class TenantActivity {
         isLargeTransaction = largeTransaction;
     }
 
+    public ZoneId getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(ZoneId timezone) {
+        this.timezone = timezone;
+    }
+
+    public List<WorkflowJob> getRecentlyCompletedPAs() {
+        return recentlyCompletedPAs;
+    }
+
+    public void setRecentlyCompletedPAs(List<WorkflowJob> recentlyCompletedPAs) {
+        this.recentlyCompletedPAs = recentlyCompletedPAs;
+    }
+
     public static final class Builder {
         private TenantActivity tenantActivity;
 
@@ -196,6 +222,16 @@ public class TenantActivity {
 
         public Builder withLastFinishTime(Long lastFinishTime) {
             tenantActivity.setLastFinishTime(lastFinishTime);
+            return this;
+        }
+
+        public Builder withRecentlyCompletedPAs(List<WorkflowJob> workflowJobs) {
+            tenantActivity.setRecentlyCompletedPAs(workflowJobs);
+            return this;
+        }
+
+        public Builder withTimezone(ZoneId timezone) {
+            tenantActivity.setTimezone(timezone);
             return this;
         }
 

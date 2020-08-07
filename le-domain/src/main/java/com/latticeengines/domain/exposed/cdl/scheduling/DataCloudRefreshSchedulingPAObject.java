@@ -50,6 +50,13 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
+    public String getConsumedPAQuotaName() {
+        // TODO decide whether datacloud refresh PA should consume auto schedule quota
+        // or not
+        return SchedulerConstants.QUOTA_AUTO_SCHEDULE;
+    }
+
+    @Override
     public int compareTo(SchedulingPAObject o) {
         return super.compareTo(o);
     }

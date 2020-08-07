@@ -43,11 +43,13 @@ public class SchedulingResult {
         private final String scheduledQueue;
         private final long waitTime;
         private final TenantActivity tenantActivity;
+        private final String consumedQuotaName;
 
-        public Detail(String scheduledQueue, long waitTime, TenantActivity tenantActivity) {
+        public Detail(String scheduledQueue, long waitTime, TenantActivity tenantActivity, String consumedQuotaName) {
             this.scheduledQueue = scheduledQueue;
             this.waitTime = waitTime;
             this.tenantActivity = tenantActivity;
+            this.consumedQuotaName = consumedQuotaName;
         }
 
         public String getScheduledQueue() {
@@ -62,10 +64,14 @@ public class SchedulingResult {
             return tenantActivity;
         }
 
+        public String getConsumedQuotaName() {
+            return consumedQuotaName;
+        }
+
         @Override
         public String toString() {
             return "Detail{" + "scheduledQueue='" + scheduledQueue + '\'' + ", waitTime=" + waitTime
-                    + ", tenantActivity=" + tenantActivity + '}';
+                    + ", tenantActivity=" + tenantActivity + ", quotaName='" + consumedQuotaName + '\'' + '}';
         }
     }
 

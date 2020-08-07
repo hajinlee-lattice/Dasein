@@ -76,7 +76,7 @@ public class GreedyScheduler implements Scheduler {
             }
 
             SchedulingResult.Detail detail = new SchedulingResult.Detail(queueName,
-                    clock.getCurrentTime() - firstActivityTime, activity);
+                    clock.getCurrentTime() - firstActivityTime, activity, obj.getConsumedPAQuotaName());
             return Pair.of(detail.getTenantActivity().getTenantId(), detail);
         }).filter(Objects::nonNull).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
     }

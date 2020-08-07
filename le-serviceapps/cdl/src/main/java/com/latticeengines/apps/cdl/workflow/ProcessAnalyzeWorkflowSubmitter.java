@@ -782,6 +782,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .internalResourceHostPort(internalResourceHostPort) //
+                .tags(request.getTags()) //
                 .initialDataFeedStatus(status) //
                 .actionIds(actionIds) //
                 .ownerId(workflowPid) //

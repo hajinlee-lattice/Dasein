@@ -35,6 +35,11 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
+    public String getConsumedPAQuotaName() {
+        return SchedulerConstants.QUOTA_AUTO_SCHEDULE;
+    }
+
+    @Override
     public int compareTo(SchedulingPAObject o) {
         return compare(o.getTenantActivity());
     }

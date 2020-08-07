@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -74,6 +75,7 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
@@ -343,7 +345,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         } else {
             List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types,
-                    jobStatuses);
+                    jobStatuses, null);
             for (WorkflowJob job : runningPAJobs) {
                 appIdMap.remove(job.getApplicationId());
             }
@@ -395,6 +397,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         long cycle = schedulingCycle.incrementAndGet();
         SchedulingResult result = schedulingPAService.getSchedulingResult(schedulerName, cycle);
+        Map<String, String> consumedPAQuotaMap = getConsumedPAQuotaMap(result);
         log.info(
                 "Scheduled new PAs for tenants = {}, retry PAs for tenants = {}. schedulerName={}, dryRun={}, totalSize={}",
                 result.getNewPATenants(), result.getRetryPATenants(), schedulerName, dryRun,
@@ -433,7 +436,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String tenantId : canRunJobSet) {
                 if (!dryRun) {
-                    ApplicationId appId = submitProcessAnalyzeJob(tenantId);
+                    String consumedQuotaName = consumedPAQuotaMap.get(CustomerSpace.shortenCustomerSpace(tenantId));
+                    ApplicationId appId = submitProcessAnalyzeJob(tenantId, consumedQuotaName);
                     logScheduledPA(schedulerName, tenantId, appId, false, result);
                     if (appId != null) {
                         removeFromSet(appId, MAIN_TRACKING_SET, tenantId);
@@ -443,6 +447,20 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
+    }
+
+    // short tenant id -> quota name
+    private Map<String, String> getConsumedPAQuotaMap(SchedulingResult result) {
+        if (result == null) {
+            return Collections.emptyMap();
+        }
+
+        return MapUtils.emptyIfNull(result.getDetails()) //
+                .entrySet() //
+                .stream() //
+                .filter(e -> e.getValue() != null && StringUtils.isNotBlank(e.getValue().getConsumedQuotaName())) //
+                .map(e -> Pair.of(CustomerSpace.shortenCustomerSpace(e.getKey()), e.getValue().getConsumedQuotaName()))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     private void logScheduledPA(@NotNull String schedulerName, String tenantId, ApplicationId appId, boolean isRetry,
@@ -591,7 +609,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         return true;
     }
 
-    private ApplicationId submitProcessAnalyzeJob(String tenantId) {
+    private ApplicationId submitProcessAnalyzeJob(String tenantId, String consumedQuotaName) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getShortTenantId());
@@ -604,8 +622,13 @@ public class CDLJobServiceImpl implements CDLJobService {
                 request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
             }
+            if (StringUtils.isNotBlank(consumedQuotaName)) {
+                request.setTags(
+                        Collections.singletonMap(WorkflowContextConstants.Tags.CONSUMED_QUOTA_NAME, consumedQuotaName));
+            }
             applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
-            log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
+            log.info("Submit PA job with appId = {} for tenant = {} successfully, consumed quota name = {}",
+                    applicationId, tenantId, consumedQuotaName);
         } catch (Exception e) {
             log.error("Failed to submit job for tenant = {}", tenantId, e);
             setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
@@ -775,7 +798,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         jobStatus.add(JobStatus.COMPLETED.getName());
         if (StringUtils.isNotEmpty(clusterId)) {
             List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, exportTypes,
-                    jobStatus);
+                    jobStatus, null);
             if (CollectionUtils.isNotEmpty(workflowJobs)) {
                 for (WorkflowJob workflowJob : workflowJobs) {
                     if (workflowJob.getStatus() == JobStatus.COMPLETED.getName()

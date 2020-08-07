@@ -35,6 +35,11 @@ public class ScheduleNowSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
+    public String getConsumedPAQuotaName() {
+        return SchedulerConstants.QUOTA_SCHEDULE_NOW;
+    }
+
+    @Override
     public int compareTo(SchedulingPAObject o) {
         int superResult = super.compareTo(o);
         if (superResult != 0) {

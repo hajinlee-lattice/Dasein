@@ -24,6 +24,13 @@ public abstract class SchedulingPAObject implements Comparable<SchedulingPAObjec
 
     abstract List<Constraint> getPopConstraints();
 
+    /*
+     * quota name that will be consumed for tenants scheduled through this queue
+     */
+    public String getConsumedPAQuotaName() {
+        return null;
+    }
+
     public SchedulingPAObject(TenantActivity tenantActivity) {
         this.tenantActivity = tenantActivity;
     }

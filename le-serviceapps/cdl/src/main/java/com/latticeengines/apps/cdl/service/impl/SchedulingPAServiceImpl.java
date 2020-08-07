@@ -1,5 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static java.util.Collections.singletonList;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -14,6 +18,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,6 +29,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.kitesdk.data.spi.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +56,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -79,6 +86,7 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -94,6 +102,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
     private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
     private static final String USER_ERROR_CATEGORY = "User Error";
+    private static final long RECENT_PA_LOOK_BACK_DAYS = 2L;
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -202,33 +211,38 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> largeTenantExemptionList = getLargeTenantExemptionSet();
         Map<String, Long> paFailedMap = getPASubmitFailedRedisMap();
         Set<Long> migrationTenantPids = getMigrationTenantPids();
+        Map<String, List<WorkflowJob>> recentlyCompletedPAs = getRecentlyCompletedPAs();
 
         Set<String> skippedTestTenants = new HashSet<>();
         Set<String> skippedMigrationTenants = new HashSet<>();
+        Set<String> handHoldPATenants = new HashSet<>();
         log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
         log.debug("Action stats = {}, large tenant exemption list = {}", actionStats, largeTenantExemptionList);
 
 
         for (DataFeed simpleDataFeed : allDataFeeds) {
-            if (simpleDataFeed.getTenant() == null) {
+            if (simpleDataFeed.getTenant() == null || simpleDataFeed.getTenant().getId() == null) {
                 // check just in case
                 continue;
             }
+            String tenantId = simpleDataFeed.getTenant().getId();
             if (isTestTenant(simpleDataFeed)) {
                 // not scheduling for test tenants
-                skippedTestTenants.add(simpleDataFeed.getTenant().getId());
+                skippedTestTenants.add(tenantId);
                 continue;
-            }
-            if (isMigrationTenant(simpleDataFeed.getTenant(), migrationTenantPids)) {
+            } else if (isMigrationTenant(simpleDataFeed.getTenant(), migrationTenantPids)) {
                 // skip entity match migration tenants
-                skippedMigrationTenants.add(simpleDataFeed.getTenant().getId());
+                skippedMigrationTenants.add(tenantId);
+                continue;
+            } else if (isHandHoldPATenant(tenantId)) {
+                handHoldPATenants.add(tenantId);
                 continue;
             }
+
 
             // configure the context
             Tenant tenant = simpleDataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
-            String tenantId = tenant.getId();
 
             // retrieve data collection status
             DataCollectionStatus dcStatus = null;
@@ -280,6 +294,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
                 tenantActivity.setScheduleTime(
                         tenantActivity.isScheduledNow() ? simpleDataFeed.getScheduleTime().getTime() : null);
+                tenantActivity.setRecentlyCompletedPAs(
+                        recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)));
 
                 // auto scheduling
                 if (actionStats.containsKey(tenant.getPid())) {
@@ -311,9 +327,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
 
         log.debug("Skipped test tenants = {}", skippedTestTenants);
-        // print all for migration tenants, shouldn't be too many at the same time
-        log.info("Number of skipped test tenants = {}. Skipped migration tenants = {}", skippedTestTenants.size(),
-                skippedMigrationTenants);
+        // print all for migration/hand-hold PA tenants, shouldn't be too many at the
+        // same time
+        log.info(
+                "Number of skipped test tenants = {}. Skipped migration tenants = {}. Skipped hand-hold PA tenants = {}",
+                skippedTestTenants.size(), skippedMigrationTenants, handHoldPATenants);
 
         if (CollectionUtils.isNotEmpty(jobQueryTime)) {
             long totalQueryTime = jobQueryTime.stream().mapToLong(Long::longValue).sum();
@@ -430,6 +448,48 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 retryValidation(execution, customerSpace));
     }
 
+    // short tenant ID -> list of completed PAs
+    private Map<String, List<WorkflowJob>> getRecentlyCompletedPAs() {
+        try {
+            long earliestStartTime = Instant.now().minus(RECENT_PA_LOOK_BACK_DAYS, ChronoUnit.DAYS).toEpochMilli();
+            List<WorkflowJob> jobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(null, singletonList(PA_JOB_TYPE),
+                    singletonList(JobStatus.COMPLETED.getName()), earliestStartTime);
+            log.info("There are {} completed PAs in last {} days", CollectionUtils.size(jobs),
+                    RECENT_PA_LOOK_BACK_DAYS);
+
+            Map<String, List<WorkflowJob>> tenantRecentCompletedPAs = CollectionUtils.emptyIfNull(jobs) //
+                    .stream() //
+                    .filter(Objects::nonNull) //
+                    .filter(job -> job.getStartTimeInMillis() != null) //
+                    .filter(job -> job.getTenant() != null && StringUtils.isNotBlank(job.getTenant().getId())) //
+                    .collect(Collectors.groupingBy(job -> CustomerSpace.shortenCustomerSpace(job.getTenant().getId()), //
+                            Collectors.mapping(Function.identity(), Collectors.toList())));
+            logTenantRecentFinishedPAs(tenantRecentCompletedPAs);
+            return tenantRecentCompletedPAs;
+        } catch (Exception e) {
+            log.error("Failed to query recent finished PAs for all tenants", e);
+            return Collections.emptyMap();
+        }
+    }
+
+    private void logTenantRecentFinishedPAs(Map<String, List<WorkflowJob>> tenantRecentCompletedPAs) {
+        if (MapUtils.isEmpty(tenantRecentCompletedPAs) || !log.isDebugEnabled()) {
+            return;
+        }
+
+        tenantRecentCompletedPAs.forEach((tenantId, jobs) -> {
+            if (CollectionUtils.isEmpty(jobs)) {
+                return;
+            }
+
+            String jobSummaries = jobs.stream() //
+                    .map(job -> Pair.of(job.getApplicationId(), job.getStartTimeInMillis())) //
+                    .map(Pair::toString) //
+                    .collect(Collectors.joining(","));
+            log.debug("Recent completed PAs for tenant {} = {}", tenantId, jobSummaries);
+        });
+    }
+
     private void logRunningTenantIdsIfChanged(@NotNull ConcurrentMap<String, Set<String>> cache, Set<String> currList,
             @NotNull String schedulerName, @NotNull String msg) {
         if (CollectionUtils.isEmpty(currList)) {
@@ -467,6 +527,16 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         } catch (Exception e) {
             // just in case
             log.error("Failed to log queue snapshot", e);
+        }
+    }
+
+    private boolean isHandHoldPATenant(@NotNull String tenantId) {
+        try {
+            return batonService.hasModule(CustomerSpace.parse(tenantId), LatticeModule.HandHoldPA);
+        } catch (Exception e) {
+            log.error("Failed to verify whether {} is a hand-hold PA tenant. error = {}", tenantId, e);
+            // fail open to allow scheduler schedule PA when zk has issue
+            return false;
         }
     }
 
@@ -727,7 +797,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private String getSchedulingGroup(String schedulerName) {
         try {
             Camille c = CamilleEnvironment.getCamille();
-            String content = c.get(PathBuilder.buildSchedulingGroupPath(CamilleEnvironment.getPodId())).getData();
+            Path path = PathBuilder.buildSchedulingGroupPath(CamilleEnvironment.getPodId());
+            if (!c.exists(path)) {
+                return DEFAULT_SCHEDULING_GROUP;
+            }
+            String content = c.get(path).getData();
             log.debug("Retrieving scheduling group for scheduler {}", schedulerName);
             Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
                     String.class);
