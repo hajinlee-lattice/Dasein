@@ -24,12 +24,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -43,6 +45,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -73,6 +76,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     private String signature;
     private boolean shortCutMode = false;
     private final Map<String, String> relinkedGroupsTables = new HashMap<>();
+
 
     @Override
     protected Class<? extends AbstractSparkJob<DeriveActivityMetricGroupJobConfig>> getJobClz() {
@@ -120,12 +124,12 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         inputMetadata.setMetadata(detailsMap);
         List<DataUnit> inputs = new ArrayList<>();
         Map<String, Table> periodStoreTableMap = getTablesFromMapCtxKey(customerSpace.toString(), PERIOD_STORE_TABLE_NAME);
-        inputMetadata.getMetadata().forEach((streamId, details) -> {
+        inputMetadata.getMetadata().forEach((streamId, details) ->
             details.getLabels().forEach(period -> {
                 String ctxKey = String.format(PERIOD_STORE_TABLE_FORMAT, streamId, period);
                 inputs.add(periodStoreTableMap.get(ctxKey).partitionedToHdfsDataUnit(null, Collections.singletonList(InterfaceName.PeriodId.name())));
-            });
-        });
+            })
+        );
         if (CollectionUtils.isEmpty(inputs)) {
             log.warn("No period store tables found. Skip metrics generation.");
             return null;
@@ -199,6 +203,9 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         log.info("Generated {} output metrics tables", result.getTargets().size());
         Map<String, Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<String, Table> signatureTables = new HashMap<>();
+        Set<String> entityIds = ImmutableSet.of(InterfaceName.AccountId.name(), InterfaceName.ContactId.name());
+        Map<BusinessEntity, List<String>> servingEntityCategoricalAttrs = new HashMap<>();
+        Map<BusinessEntity, List<String>> servingEntityCategories = new HashMap<>();
         outputMetadata.forEach((groupId, details) -> {
             HdfsDataUnit metricsGroupDU = result.getTargets().get(details.getStartIdx());
             String ctxKey = String.format(METRICS_GROUP_TABLE_FORMAT, groupId);
@@ -206,7 +213,18 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             Table metricsGroupTable = toTable(tableName, metricsGroupDU);
             metadataProxy.createTable(customerSpace.toString(), tableName, metricsGroupTable);
             signatureTables.put(groupId, metricsGroupTable); // use groupId as signature
+            ActivityMetricsGroup group = configuration.getActivityMetricsGroupMap().get(groupId);
+            if (String.class.getSimpleName().equalsIgnoreCase(group.getJavaClass())) {
+                BusinessEntity servingEntity = CategoryUtils.getEntity(group.getCategory()).get(0);
+                servingEntityCategoricalAttrs.putIfAbsent(servingEntity,
+                        metricsGroupTable.getAttributes().stream().map(Attribute::getName)
+                                .filter(attrName -> !entityIds.contains(attrName)).collect(Collectors.toList()));
+                servingEntityCategories.putIfAbsent(servingEntity,
+                        new ArrayList<>(group.getCategorizeValConfig().getCategoryNames()));
+            }
         });
+        putObjectInContext(ACTIVITY_METRICS_CATEGORICAL_ATTR, servingEntityCategoricalAttrs);
+        putObjectInContext(ACTIVITY_METRICS_CATEGORIES, servingEntityCategories);
         signatureTables.putAll(relinkedGroupsTables.entrySet().stream().map(entry -> {
             String groupId = entry.getKey();
             String tableName = entry.getValue();

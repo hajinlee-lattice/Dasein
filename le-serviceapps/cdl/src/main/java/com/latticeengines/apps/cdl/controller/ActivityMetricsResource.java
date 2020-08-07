@@ -76,8 +76,31 @@ public class ActivityMetricsResource {
         ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(customerSpace,
                 streamName);
         if (defaultGroup == null) {
-            throw new IllegalStateException(String.format("Failed to setup default Opportunity metric groups for " +
-                            "tenant %s",
+            throw new IllegalStateException(String.format("Failed to setup default Opportunity metric groups for tenant %s",
+                    customerSpace));
+        }
+        return true;
+    }
+
+    @PostMapping("/setupDefaultMarketingProfile")
+    @ApiOperation(value = "Setup default marketing metric groups")
+    public Boolean setupDefaultMarketingProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultMarketingProfile(customerSpace,
+                streamName);
+        if (defaultGroups == null || defaultGroups.size() != 2) {
+            throw new IllegalStateException(String.format("Failed to setup default marketing metric groups for tenant %s",
+                    customerSpace));
+        }
+        return true;
+    }
+
+    @PostMapping("/setupDefaultIntentProfile")
+    @ApiOperation(value = "Setup default intent metric groups")
+    public Boolean setupDefaultIntentProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultBuyingScoreGroups(customerSpace,
+                streamName);
+        if (defaultGroups == null || defaultGroups.size() != 2) {
+            throw new IllegalStateException(String.format("Failed to setup default Opportunity metric groups for tenant %s",
                     customerSpace));
         }
         return true;

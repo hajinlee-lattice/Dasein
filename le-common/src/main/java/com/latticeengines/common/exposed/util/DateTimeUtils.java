@@ -91,11 +91,13 @@ public final class DateTimeUtils {
     }
 
     public static String toDateOnlyFromMillis(String time) {
+        return toDateOnlyFromMillis(Long.parseLong(time));
+    }
+
+    public static String toDateOnlyFromMillis(long time) {
         SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
         dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-        Long timeLong = Long.valueOf(time);
-        String result = dateOnlyFormat.format(new Date(timeLong));
-        return result;
+        return dateOnlyFormat.format(new Date(time));
     }
 
     public static String currentTimeAsString(Date date) {
