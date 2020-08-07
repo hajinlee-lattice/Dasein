@@ -50,10 +50,12 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
      *            target list of workflow types
      * @param statuses
      *            target list of workflow statuses
+     * @param earliestStartTime
+     *            epoch timestamp that PA should started after
      * @return non-null list of all jobs satisfying all criteria
      */
     List<WorkflowJob> findByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
-            List<String> statuses);
+            List<String> statuses, Long earliestStartTime);
 
     void updateStatus(WorkflowJob workflowJob);
 

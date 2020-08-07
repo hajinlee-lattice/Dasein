@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -108,11 +109,19 @@ public class WorkflowResource {
         workflowConfig.setRestart(true);
         workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        workflowConfig.setTags(MapUtils.emptyIfNull(job.getTags()));
         // set restart workflow job id
         if (job.getInputs() == null) {
             job.setInputs(new HashMap<>());
         }
         job.getInputs().put(WorkflowContextConstants.Inputs.RESTART_JOB_ID, String.valueOf(wfId));
+        // only set if this is first retry
+        workflowConfig.getTags().putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_PID, job.getPid().toString());
+        workflowConfig.getTags().putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_START_TIME,
+                String.valueOf(job.getStartTimestamp().getTime()));
+        // parent link
+        workflowConfig.getTags().putIfAbsent(WorkflowContextConstants.Tags.PARENT_WORKFLOW_PID,
+                job.getPid().toString());
 
         workflowConfig.setInputProperties(job.getInputs());
         if (Boolean.TRUE.equals(autoRetry)) {
@@ -355,8 +364,10 @@ public class WorkflowResource {
     @ApiOperation(value = "Get list of workflow jobs by given clusterId or list of job types or job statuses.")
     public List<WorkflowJob> jobsByCluster(@RequestParam(required = false) String clusterId,
             @RequestParam(value = "type", required = false) List<String> workflowTypes,
-            @RequestParam(value = "status", required = false) List<String> statuses) {
-        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+            @RequestParam(value = "status", required = false) List<String> statuses,
+            @RequestParam(value = "earliestStartTime", required = false) Long earliestStartTime) {
+        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses,
+                earliestStartTime);
     }
 
     @GetMapping("/jobs/{customerSpace}/{workflowPid}")

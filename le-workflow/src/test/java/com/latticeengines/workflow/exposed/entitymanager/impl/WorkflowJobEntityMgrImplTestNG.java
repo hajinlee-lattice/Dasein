@@ -467,7 +467,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         String clusterId = query.clusterId;
         List<String> types = query.types;
         List<String> statuses = query.statuses;
-        List<WorkflowJob> jobs = workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, types, statuses);
+        List<WorkflowJob> jobs = workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, types, statuses,
+                null);
         Assert.assertNotNull(jobs);
         jobs.forEach(job -> {
             if (StringUtils.isNotBlank(clusterId)) {

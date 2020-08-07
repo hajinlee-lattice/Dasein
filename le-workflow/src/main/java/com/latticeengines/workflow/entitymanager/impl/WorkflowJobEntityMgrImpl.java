@@ -144,13 +144,13 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
-            List<String> statuses) {
+            List<String> statuses, Long earliestStartTime) {
         if (StringUtils.isBlank(clusterId) && CollectionUtils.isEmpty(workflowTypes)
                 && CollectionUtils.isEmpty(statuses)) {
             // just in case
             return workflowJobDao.findAll();
         }
-        return workflowJobDao.findByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+        return workflowJobDao.findByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses, earliestStartTime);
     }
 
     @Override
@@ -260,13 +260,13 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         if (CollectionUtils.isEmpty(statuses)) {
             return workflowJobDao.findAll();
         }
-        return workflowJobDao.findByClusterIDAndTypesAndStatuses(null, null, statuses);
+        return workflowJobDao.findByClusterIDAndTypesAndStatuses(null, null, statuses, null);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByStatusesAndClusterId(String clusterId, List<String> statuses) {
-        return workflowJobDao.findByClusterIDAndTypesAndStatuses(clusterId, null, statuses);
+        return workflowJobDao.findByClusterIDAndTypesAndStatuses(clusterId, null, statuses, null);
     }
 
     @Override
