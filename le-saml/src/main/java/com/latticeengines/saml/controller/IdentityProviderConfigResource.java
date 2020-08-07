@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
 import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.saml.MetadataSynchronizer;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -50,6 +53,9 @@ public class IdentityProviderConfigResource {
     public List<IdentityProvider> findAll(@PathVariable("tenantId") String tenantId) {
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info("Retrieving all identity providers");
+        LogManager.getLogger("org.opensaml.saml2").setLevel(Level.DEBUG);
+        LogManager.getLogger("org.springframework.security").setLevel(Level.DEBUG);
+        LogManager.getLogger(MetadataSynchronizer.class).setLevel(Level.DEBUG);
         return identityProviderService.findAll();
     }
 
