@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.ActiveStackInfoService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.PAQuotaService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -28,7 +29,7 @@ import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "priorityQueue", description = "Rest resource for get priority queue")
+@Api(value = "paScheduler")
 @RestController
 @RequestMapping("/schedulingPAQueue")
 public class SchedulingPAQueueResource {
@@ -41,6 +42,9 @@ public class SchedulingPAQueueResource {
 
     @Inject
     private CDLJobService cdlJobService;
+
+    @Inject
+    private PAQuotaService paQuotaService;
 
     @GetMapping("/getQueueInfo")
     @ResponseBody
@@ -101,5 +105,14 @@ public class SchedulingPAQueueResource {
         boolean isActive = activeStackInfoService.isCurrentStackActive();
         return schedulingPAService.getSchedulingStatus(customerSpace,
                 isActive ? ACTIVE_STACK_SCHEDULER_NAME : INACTIVE_STACK_SCHEDULER_NAME);
+    }
+
+    // TODO add consumed quota for each quota
+    @GetMapping("/quota/{customerSpace}")
+    @ResponseBody
+    @ApiOperation("Retrieve PA quota for specific tenant")
+    public Map<String, Long> getPAQuota(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return paQuotaService.getTenantPaQuota(customerSpace);
     }
 }
