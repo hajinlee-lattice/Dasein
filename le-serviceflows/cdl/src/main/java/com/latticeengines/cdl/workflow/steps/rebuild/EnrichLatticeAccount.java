@@ -170,10 +170,12 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         accountChangeList = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_CHANGELIST_TABLE_NAME);
         boolean missAccountChangeList = isChanged(ConsolidatedAccount) && (accountChangeList == null);
         boolean missLatticeAccountTable = (oldLatticeAccountTable == null);
-        boolean shouldFetchAll = hasDataCloudMajorChange || missAccountChangeList || missLatticeAccountTable;
-        log.info("hasDataCloudMajorChange={}, missAccountChangeList={}, missLatticeAccountTable={}: " + //
+        boolean enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
+        boolean shouldFetchAll = //
+                hasDataCloudMajorChange || missAccountChangeList || enforceRebuild || missLatticeAccountTable;
+        log.info("hasDataCloudMajorChange={}, missAccountChangeList={}, enforceRebuild={}, missLatticeAccountTable={}: " + //
                         "shouldFetchAll={}", //
-                hasDataCloudMajorChange, missAccountChangeList, missLatticeAccountTable, shouldFetchAll);
+                hasDataCloudMajorChange, missAccountChangeList, enforceRebuild, missLatticeAccountTable, shouldFetchAll);
         return shouldFetchAll;
     }
 
