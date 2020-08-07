@@ -320,6 +320,8 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
                 emailService.sendUploadFailedEmail(uploadEmailInfo);
                 break;
             default:
+                log.warn("Upload email info job status of " + uploadEmailInfo.getJobStatus() + " is an " +
+                        "unknown type and not supported.  No upload status email sent!");
         }
     }
 
