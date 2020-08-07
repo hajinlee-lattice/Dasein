@@ -4,9 +4,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +28,7 @@ import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
 import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.saml.MetadataSynchronizer;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -50,6 +55,9 @@ public class IdentityProviderConfigResource {
     public List<IdentityProvider> findAll(@PathVariable("tenantId") String tenantId) {
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info("Retrieving all identity providers");
+        LogManager.getLogger("org.opensaml.saml2").setLevel(Level.DEBUG);
+        LogManager.getLogger("org.springframework.security").setLevel(Level.DEBUG);
+        LogManager.getLogger(MetadataSynchronizer.class).setLevel(Level.DEBUG);
         return identityProviderService.findAll();
     }
 
@@ -57,6 +65,7 @@ public class IdentityProviderConfigResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve all identity providers")
     public SamlConfigMetadata getSamlConfigMetadata(@PathVariable("tenantId") String tenantId) {
+        LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         log.info("Retrieving Config Metadata");
         return identityProviderService.getConfigMetadata(tenant);
