@@ -37,6 +37,7 @@ public class Job implements HasId<Long>, HasName {
     private List<Report> reports;
     private Map<String, String> inputs;
     private Map<String, String> outputs;
+    private Map<String, String> tags;
     private LedpCode errorCode;
     private String errorMsg;
     private Integer numDisplayedSteps;
@@ -190,6 +191,18 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setOutputs(Map<String, String> outputs) {
         this.outputs = outputs;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 
     @JsonProperty

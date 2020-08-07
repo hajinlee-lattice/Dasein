@@ -59,4 +59,11 @@ public final class WorkflowContextConstants {
         // Workflow ID that current job is restarting with
         public static final String RESTART_JOB_ID = "RESTART_JOB_ID";
     }
+
+    public static final class Tags {
+        public static final String ROOT_WORKFLOW_PID = "ROOT_WORKFLOW_PID";
+        public static final String PARENT_WORKFLOW_PID = "PARENT_WORKFLOW_PID";
+        public static final String ROOT_WORKFLOW_START_TIME = "ROOT_WORKFLOW_START_TIME";
+        public static final String CONSUMED_QUOTA_NAME = "CONSUMED_QUOTA_NAME";
+    }
 }

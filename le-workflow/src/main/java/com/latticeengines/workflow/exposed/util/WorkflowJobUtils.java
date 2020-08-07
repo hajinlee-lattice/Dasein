@@ -88,6 +88,7 @@ public final class WorkflowJobUtils {
         job.setParentId(workflowJob.getParentJobId());
         job.setInputs(workflowJob.getInputContext());
         job.setOutputs(getOutputs(workflowJob));
+        job.setTags(getTags(workflowJob));
         job.setReports(getReports(reportService, workflowJob));
         job.setUser(workflowJob.getUserId());
         job.setErrorCategory(workflowJob.getErrorCategory());
@@ -232,6 +233,14 @@ public final class WorkflowJobUtils {
             }
         }
         return reports;
+    }
+
+    private static Map<String, String> getTags(WorkflowJob workflowJob) {
+        if (workflowJob == null || workflowJob.getWorkflowConfiguration() == null) {
+            return null;
+        }
+
+        return workflowJob.getWorkflowConfiguration().getTags();
     }
 
     private static Map<String, String> getOutputs(WorkflowJob workflowJob) {
