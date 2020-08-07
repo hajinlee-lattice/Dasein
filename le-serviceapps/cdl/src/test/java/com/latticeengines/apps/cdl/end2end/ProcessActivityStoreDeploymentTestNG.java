@@ -49,6 +49,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     private static final String SKIP_OPPORTUNITY = "SKIP_OPPORTUNITY";
     private static final String SKIP_MARKETING = "SKIP_MARKETING";
     private static final String SKIP_INTENT = "SKIP_INTENT";
+    private static final String SKIP_BUYINGSCORE = "SKIP_BUYINGSCORE";
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
     private static final String INTENT_SYSTEM = "Default_DnbIntent_System";
@@ -97,9 +98,14 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
             log.info("Skip marketing setup. {}={}", SKIP_MARKETING, System.getenv(SKIP_MARKETING));
         }
         if (!Boolean.parseBoolean(System.getenv(SKIP_INTENT))) {
-            setupIntentTemplates();
+            // setupIntentTemplates();
         } else {
             log.info("Skip intent setup. {}={}", SKIP_INTENT, System.getenv(SKIP_INTENT));
+        }
+        if (!Boolean.parseBoolean(System.getenv(SKIP_BUYINGSCORE))) {
+            setupBuyingScoreTemplates();
+        } else {
+            log.info("Skip buying score setup. {}={}", SKIP_BUYINGSCORE, System.getenv(SKIP_BUYINGSCORE));
         }
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
 //        setupTimeline();
@@ -195,11 +201,21 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     }
 
     private void setupIntentTemplates() throws Exception {
-        Thread.sleep(2000L);
         Assert.assertTrue(cdlProxy.createDefaultDnbIntentDataTemplate(mainCustomerSpace),
                 String.format("Failed to create intent template in system %s", INTENT_SYSTEM));
+        Thread.sleep(2000L);
 
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 5,
+                generateFullFeedType(INTENT_SYSTEM, EntityType.CustomIntent));
+        Thread.sleep(2000);
+    }
+
+    private void setupBuyingScoreTemplates() throws Exception {
+        Assert.assertTrue(cdlProxy.createDefaultBuyingScoreDataTemplate(mainCustomerSpace),
+                String.format("Failed to create intent template in system %s", INTENT_SYSTEM));
+        Thread.sleep(2000L);
+
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 6,
                 generateFullFeedType(INTENT_SYSTEM, EntityType.CustomIntent));
         Thread.sleep(2000);
     }
