@@ -1,7 +1,11 @@
-package com.latticeengines.domain.exposed.cdl.scheduling;
+package com.latticeengines.domain.exposed.cdl.scheduling.constraint;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class TenantGroupQuota implements Constraint {
     @Override
