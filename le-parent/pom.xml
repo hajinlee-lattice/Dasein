@@ -161,9 +161,6 @@
         <camel.version>2.23.0</camel.version>
         <jetty.version>9.4.14.v20181114</jetty.version> <!-- camel-salesforce 2.19.1 -->
 
-        <!-- security -->
-        <esapi.version>2.2.1.0</esapi.version>
-
         <!-- DB Drivers -->
         <c3p0.version>0.9.5.5</c3p0.version>
         <influxdb.version>2.8</influxdb.version>

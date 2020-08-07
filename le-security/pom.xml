@@ -184,13 +184,6 @@
 			<version>2.5.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.owasp.esapi/esapi -->
-		<dependency>
-			<groupId>org.owasp.esapi</groupId>
-			<artifactId>esapi</artifactId>
-			<version>${esapi.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
