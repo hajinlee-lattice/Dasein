@@ -6,13 +6,13 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class LastActionTimePending implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (target.getLastActionTime() == null || target.getLastActionTime() == 0L) {
-            return true;
+            return ConstraintValidationResult.VALID;
         }
         long currentTime = timeClock.getCurrentTime();
-        long lastMinute = (currentTime - target.getLastActionTime()) / 60000;
-        return lastMinute < 10;
+        long minSinceLastAction = (currentTime - target.getLastActionTime()) / 60000;
+        return new ConstraintValidationResult(minSinceLastAction < 10, "there are recent activities in this tenant");
     }
 
     @Override

@@ -6,13 +6,13 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class LastFinishTimePending implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (target.getLastFinishTime() == null) {
-            return true;
+            return new ConstraintValidationResult(true, null);
         }
-        Long currentTime = timeClock.getCurrentTime();
+        long currentTime = timeClock.getCurrentTime();
         currentTime = (currentTime - target.getLastFinishTime()) / 60000;
-        return target.getLastFinishTime() == 0L || currentTime < 15;
+        return new ConstraintValidationResult(target.getLastFinishTime() == 0L || currentTime < 15, null);
     }
 
     @Override

@@ -7,11 +7,11 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 public class TenantDuplicate implements Constraint {
 
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (currentState.getScheduleTenants() == null) {
-            return true;
+            return ConstraintValidationResult.VALID;
         }
-        return currentState.getScheduleTenants().contains(target.getTenantId());
+        return new ConstraintValidationResult(currentState.getScheduleTenants().contains(target.getTenantId()), null);
     }
 
     @Override

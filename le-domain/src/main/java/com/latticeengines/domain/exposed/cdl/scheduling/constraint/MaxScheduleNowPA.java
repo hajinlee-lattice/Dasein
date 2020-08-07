@@ -6,8 +6,10 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class MaxScheduleNowPA implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
-        return currentState.getCanRunScheduleNowJobCount() < 1 && target.isScheduledNow();
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+        return new ConstraintValidationResult(
+                currentState.getCanRunScheduleNowJobCount() < 1 && target.isScheduledNow(),
+                "too many schedule now PAs are running right now");
     }
 
     @Override

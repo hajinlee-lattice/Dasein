@@ -6,8 +6,8 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class ScheduleNowExist implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
-        return !target.isScheduledNow();
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+        return new ConstraintValidationResult(!target.isScheduledNow(), null);
     }
 
     @Override

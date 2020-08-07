@@ -575,9 +575,9 @@ public class SchedulingPAServiceImplUnitTestNG {
         tenantActivity6.setTenantId("Tenant6");
         tenantActivity6.setLarge(true);
         tenantActivity6.setAutoSchedule(true);
-        tenantActivity2.setInvokeTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T00:05:00+0000").getTime());
-        tenantActivity2.setFirstActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-01T00:00:00+0000").getTime());
-        tenantActivity2.setLastActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-02T00:00:00+0000").getTime());
+        tenantActivity6.setInvokeTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T00:05:00+0000").getTime());
+        tenantActivity6.setFirstActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-01T00:00:00+0000").getTime());
+        tenantActivity6.setLastActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-02T00:00:00+0000").getTime());
         tenantActivity6.setScheduleTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T00:02:30+0000").getTime());
         tenantActivityList.add(tenantActivity6);
 
@@ -750,9 +750,9 @@ public class SchedulingPAServiceImplUnitTestNG {
         tenantActivity6.setTenantId("Tenant6");
         tenantActivity6.setLarge(true);
         tenantActivity6.setAutoSchedule(true);
-        tenantActivity2.setInvokeTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T00:05:00+0000").getTime());
-        tenantActivity2.setFirstActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-01T00:00:00+0000").getTime());
-        tenantActivity2.setLastActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-02T00:00:00+0000").getTime());
+        tenantActivity6.setInvokeTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T00:05:00+0000").getTime());
+        tenantActivity6.setFirstActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-01T00:00:00+0000").getTime());
+        tenantActivity6.setLastActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-03-02T00:00:00+0000").getTime());
         tenantActivity6.setScheduleTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T00:02:30+0000").getTime());
         tenantActivityList.add(tenantActivity6);
 
@@ -899,7 +899,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity19 = new TenantActivity();
         tenantActivity19.setRetry(true);
-        tenantActivity17.setLastFinishTime(MOCK_CURRENT_TIME - 9000000);
+        // null last finished time
         tenantActivity19.setDataCloudRefresh(false);
         tenantActivity19.setScheduledNow(false);
         tenantActivity19.setTenantType(TenantType.QA);

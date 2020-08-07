@@ -9,12 +9,12 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class TenantGroupQuota implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (MapUtils.isEmpty(currentState.getTenantGroups()) || StringUtils.isEmpty(target.getTenantId())) {
-            return false;
+            return ConstraintValidationResult.VALID;
         }
-        return currentState.getTenantGroups().values().stream() //
-                .anyMatch(group -> group.reachQuotaLimit(target.getTenantId()));
+        return new ConstraintValidationResult(currentState.getTenantGroups().values().stream() //
+                .anyMatch(group -> group.reachQuotaLimit(target.getTenantId())), null);
     }
 
     @Override

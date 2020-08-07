@@ -5,7 +5,7 @@ import java.time.ZoneId;
 /**
  * Constants related to PA scheduler functionality
  */
-public class SchedulerConstants {
+public final class SchedulerConstants {
     /*-
      * quota names
      */
@@ -13,4 +13,8 @@ public class SchedulerConstants {
     public static final String QUOTA_AUTO_SCHEDULE = "AutoSchedule";
 
     public static final ZoneId DEFAULT_TIMEZONE = ZoneId.of("UTC");
+
+    protected SchedulerConstants() {
+        throw new UnsupportedOperationException();
+    }
 }

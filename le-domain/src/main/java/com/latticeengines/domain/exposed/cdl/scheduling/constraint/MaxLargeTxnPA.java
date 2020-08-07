@@ -7,8 +7,10 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 public class MaxLargeTxnPA implements Constraint {
 
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
-        return currentState.getCanRunLargeTxnJobCount() < 1 && target.isLargeTransaction();
+    public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
+        return new ConstraintValidationResult(
+                currentState.getCanRunLargeTxnJobCount() < 1 && target.isLargeTransaction(),
+                "too many large transaction PAs are running right now");
     }
 
     @Override

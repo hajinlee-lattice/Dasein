@@ -66,7 +66,8 @@ public class CDLJobServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dataProvider = "timeTrackingProvider", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testTrackingSetup(String tenantId, boolean shouldForceStarved) {
         // test detectStarvation method add tenant->tenantFirstWaitTime
-        SchedulingResult result = new SchedulingResult(null, null, null, new HashSet<>(Collections.singletonList(tenantId)));
+        SchedulingResult result = new SchedulingResult(null, null, null,
+                new HashSet<>(Collections.singletonList(tenantId)), null);
         cdlJobService.detectStarvation(result);
         Double waitTime = sider.opsForZSet().score(MAIN_TRACKING_SET, tenantId);
         Assert.assertNotNull(waitTime);
@@ -78,7 +79,7 @@ public class CDLJobServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dataProvider = "timeTrackingProvider", dependsOnMethods = {"testTrackingSetup"}, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testDetectStarvationWithStarved(String tenantId, boolean tenantShoudStarved) {
-        SchedulingResult result = new SchedulingResult(null, null, null, Collections.emptySet());
+        SchedulingResult result = new SchedulingResult(null, null, null, Collections.emptySet(), null);
         Set<?> starvedTenants = cdlJobService.detectStarvation(result);
         if (tenantShoudStarved) {
             Assert.assertTrue(starvedTenants.contains(tenantId));
