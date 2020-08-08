@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import static java.util.Collections.singletonList;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +47,7 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.ActionStatService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.PAQuotaService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -63,6 +65,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.PASchedulerConfig;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
@@ -137,6 +140,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private PAQuotaService paQuotaService;
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
@@ -294,8 +300,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
                 tenantActivity.setScheduleTime(
                         tenantActivity.isScheduledNow() ? simpleDataFeed.getScheduleTime().getTime() : null);
-                tenantActivity.setRecentlyCompletedPAs(
-                        recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)));
+                // TODO get tenant specific timezone
+                tenantActivity.setNotExceededQuotaNames(
+                        getNotExceededQuotaNames(recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)),
+                                tenantId, SchedulerConstants.DEFAULT_TIMEZONE));
 
                 // auto scheduling
                 if (actionStats.containsKey(tenant.getPid())) {
@@ -312,6 +320,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         }
                         if (stat.getLastActionTime() != null) {
                             tenantActivity.setLastActionTime(stat.getLastActionTime().getTime());
+                        }
+                        if (stat.getFirstIngestActionTime() != null) {
+                            tenantActivity.setFirstIngestActionTime(stat.getFirstIngestActionTime().getTime());
                         }
                         tenantActivity.setAutoSchedule(isNewActionAdded(tenantId, stat.getLastActionTime())
                                 || !reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
@@ -469,6 +480,24 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         } catch (Exception e) {
             log.error("Failed to query recent finished PAs for all tenants", e);
             return Collections.emptyMap();
+        }
+    }
+
+    private Set<String> getNotExceededQuotaNames(List<WorkflowJob> workflowJobs, String tenantId, ZoneId timezone) {
+        try {
+            Map<String, Long> quotaMap = paQuotaService.getTenantPaQuota(tenantId);
+            if (MapUtils.isEmpty(quotaMap)) {
+                return Collections.emptySet();
+            }
+
+            Instant now = Instant.now();
+            return quotaMap.keySet().stream() //
+                    .filter(aLong -> paQuotaService.hasQuota(tenantId, aLong, workflowJobs, now, timezone)) //
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Failed to retrieve and evaluate PA quota for tenant {}, timezone = {}, error = {}", tenantId,
+                    timezone, e);
+            return Collections.emptySet();
         }
     }
 
@@ -660,21 +689,30 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
      * Retrieve all action related stats for scheduling
      */
     private Map<Long, ActionStat> getActionStats() {
-        List<ActionStat> ingestActions = actionStatService.getNoOwnerCompletedIngestActionStats();
-        List<ActionStat> nonIngestActions = actionStatService.getNoOwnerActionStatsByTypes(getNonIngestAndReplaceActionType());
+        Set<ActionStat> ingestActions = new HashSet<>(actionStatService.getNoOwnerCompletedIngestActionStats());
+        Set<ActionStat> nonIngestActions = new HashSet<>(
+                actionStatService.getNoOwnerActionStatsByTypes(getNonIngestAndReplaceActionType()));
 
         return Stream.concat(ingestActions.stream(), nonIngestActions.stream())
                 .collect(Collectors.toMap(ActionStat::getTenantPid, stat -> stat, (s1, s2) -> {
                     // merge two stats (compare first/last action time)
                     Date first = s1.getFirstActionTime();
+                    Date firstImport = null;
                     if (first == null || (s2.getFirstActionTime() != null && s2.getFirstActionTime().before(first))) {
                         first = s2.getFirstActionTime();
+                    }
+                    if (ingestActions.contains(s1) && (s1.getFirstActionTime() != null)) {
+                        firstImport = s1.getFirstActionTime();
+                    }
+                    if (ingestActions.contains(s2) && s2.getFirstActionTime() != null
+                            && (firstImport == null || s2.getFirstActionTime().before(firstImport))) {
+                        firstImport = s2.getFirstActionTime();
                     }
                     Date last = s1.getLastActionTime();
                     if (last == null || (s2.getLastActionTime() != null && s2.getLastActionTime().after(last))) {
                         last = s2.getLastActionTime();
                     }
-                    return new ActionStat(s1.getTenantPid(), first, last);
+                    return new ActionStat(s1.getTenantPid(), first, last, firstImport);
                 }));
     }
 

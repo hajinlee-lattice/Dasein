@@ -11,5 +11,7 @@ public interface Constraint {
      */
     ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock);
 
-    String getName();
+    default String getName() {
+        return getClass().getSimpleName();
+    }
 }

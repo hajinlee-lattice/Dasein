@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.HasPAQuota;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargePA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargeTxnPA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxPA;
@@ -76,6 +77,7 @@ public class ScheduleNowSchedulingPAObject extends SchedulingPAObject {
         popConstraintList.add(new MaxLargeTxnPA());
         popConstraintList.add(new TenantDuplicate());
         popConstraintList.add(new TenantGroupQuota());
+        popConstraintList.add(new HasPAQuota(SchedulerConstants.QUOTA_SCHEDULE_NOW, "schedule now"));
     }
 
 }

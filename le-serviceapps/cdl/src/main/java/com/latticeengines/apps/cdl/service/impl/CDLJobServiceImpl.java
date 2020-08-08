@@ -396,6 +396,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
 
         long cycle = schedulingCycle.incrementAndGet();
+        // TODO save constraint violation reasons
         SchedulingResult result = schedulingPAService.getSchedulingResult(schedulerName, cycle);
         Map<String, String> consumedPAQuotaMap = getConsumedPAQuotaMap(result);
         log.info(

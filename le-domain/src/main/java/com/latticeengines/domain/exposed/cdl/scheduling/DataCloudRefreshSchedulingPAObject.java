@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.DataCloudRefreshExist;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.HasPAQuota;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargePA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargeTxnPA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxPA;
@@ -46,6 +47,7 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
         popConstraintList.add(new MaxLargeTxnPA());
         popConstraintList.add(new TenantDuplicate());
         popConstraintList.add(new TenantGroupQuota());
+        popConstraintList.add(new HasPAQuota(SchedulerConstants.QUOTA_AUTO_SCHEDULE, "auto schedule"));
     }
 
     @Override

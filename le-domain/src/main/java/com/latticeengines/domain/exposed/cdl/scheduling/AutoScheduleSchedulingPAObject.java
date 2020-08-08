@@ -6,10 +6,12 @@ import java.util.List;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.AutoScheduleExist;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.FirstActionTimePending;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.HasPAQuota;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.LastActionTimePending;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargePA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargeTxnPA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxPA;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.NotInPeacePeriod;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.RetryNotExist;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantDuplicate;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantGroupQuota;
@@ -79,5 +81,7 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
         popConstraintList.add(new MaxLargeTxnPA());
         popConstraintList.add(new TenantDuplicate());
         popConstraintList.add(new TenantGroupQuota());
+        popConstraintList.add(new HasPAQuota(SchedulerConstants.QUOTA_AUTO_SCHEDULE, "auto schedule"));
+        popConstraintList.add(new NotInPeacePeriod());
     }
 }
