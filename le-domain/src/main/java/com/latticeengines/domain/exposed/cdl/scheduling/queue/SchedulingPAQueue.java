@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl.scheduling;
+package com.latticeengines.domain.exposed.cdl.scheduling.queue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.ConstraintValidationResult;
 

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.RECENT_PA_LOOK_BACK_DAYS;
 import static java.util.Collections.singletonList;
 
 import java.time.Instant;
@@ -66,7 +67,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.PASchedulerConfig;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
@@ -75,6 +75,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantGroup;
 import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
@@ -105,7 +106,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
     private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
     private static final String USER_ERROR_CATEGORY = "User Error";
-    private static final long RECENT_PA_LOOK_BACK_DAYS = 2L;
 
     private static ObjectMapper om = new ObjectMapper();
 

@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 
 public class GreedyScheduler implements Scheduler {
 

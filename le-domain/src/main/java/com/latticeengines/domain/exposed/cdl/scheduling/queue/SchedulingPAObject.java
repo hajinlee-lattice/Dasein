@@ -1,9 +1,10 @@
-package com.latticeengines.domain.exposed.cdl.scheduling;
+package com.latticeengines.domain.exposed.cdl.scheduling.queue;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
 import com.latticeengines.domain.exposed.security.TenantType;
 
