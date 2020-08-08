@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -104,7 +105,8 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     @Override
     public List<GlobalAuthTeam> getTeams(boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        return globalAuthTeamEntityMgr.findByTenantId(tenantData.getPid(), withTeamMember);
+        return globalAuthTeamEntityMgr.findByTenantId(tenantData.getPid(), withTeamMember).stream()
+                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getName())).collect(Collectors.toList());
     }
 
     @Override
