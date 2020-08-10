@@ -782,7 +782,7 @@ public class CDLServiceImpl implements CDLService {
             }
             appendTemplateMapptingValue(fileContent, attribute.getSourceAttrName() == null ?
                     attribute.getDisplayName() : attribute.getSourceAttrName());
-            appendTemplateMapptingValue(fileContent, attribute.getName());
+            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
             appendFieldType(fileContent, attribute);
             fileContent.append("\n");
         }
@@ -791,7 +791,7 @@ public class CDLServiceImpl implements CDLService {
             Attribute attribute = entry.getValue();
             appendTemplateMapptingValue(fileContent, STANDARD);
             appendTemplateMapptingValue(fileContent, UNMAPPED);
-            appendTemplateMapptingValue(fileContent, attribute.getName());
+            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
             appendFieldType(fileContent, attribute);
             fileContent.append("\n");
         }
