@@ -173,7 +173,9 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                     : RAWSTREAM_TABLE_PREFIX_FORMAT;
             if (configuration.isShouldRebuild() || Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))
                     || StringUtils.isNotBlank(matchedImportTable) || needRefresh(refreshDateMap, streamId)
-                    || deletePerformed()) {
+                    || deletePerformed()
+                    || hasCatalogImport(stream, catalogsWithImports)
+            ) {
                 // has import, over 30 days not refreshed, or performed soft delete
                 appendRawStream(steps, stream, evalTimeEpoch, matchedImportTable, activeTable, targetTablePrefixFormat)
                         .ifPresent(pair -> {
@@ -202,6 +204,11 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     private boolean noCatalogHasImport(AtlasStream stream, Set<String> catalogsWithImports) {
         return stream.getDimensions().stream().filter(dim -> dim.getCatalog() != null)
                 .noneMatch(dim -> catalogsWithImports.contains(dim.getCatalog().getCatalogId()));
+    }
+
+    private boolean hasCatalogImport(AtlasStream stream, Set<String> catalogsWithImports) {
+        return stream.getDimensions().stream().filter(dim -> dim.getCatalog() != null)
+                .anyMatch(dim -> catalogsWithImports.contains(dim.getCatalog().getCatalogId()));
     }
 
     private boolean needRefresh(Map<String, Integer> refreshDateMap, String streamId) {
