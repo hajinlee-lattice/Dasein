@@ -114,31 +114,38 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         dcpImportRequest.setSourceId(source.getSourceId());
         dcpImportRequest.setFileImportId(sourceFileInfo.getFileImportId());
         UploadDetails uploadDetails = testUploadProxy.startImport(dcpImportRequest);
+        Assert.assertNotNull(uploadDetails);
+
+        System.out.println("Before Job Complete - UploadDetails:\n" + JsonUtils.serialize(uploadDetails));
+        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
+        Assert.assertNotNull(uploadJobDetails);
+        System.out.println("Before Job Complete:\n" + JsonUtils.serialize(uploadJobDetails));
 
         JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadDiagnostics().getApplicationId(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
         List<UploadDetails> uploadDetailsList = testUploadProxy.getAllBySourceId(source.getSourceId(),
                 Upload.Status.FINISHED);
-
         Assert.assertTrue(CollectionUtils.isNotEmpty(uploadDetailsList));
 
-        Assert.assertNotNull(uploadDetails);
+        uploadDetailsList = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
+        assertEquals(uploadDetailsList.size(), 1);
+        Assert.assertNotNull(uploadDetailsList.get(0));
+        assertEquals(uploadDetailsList.get(0).getUploadId(), uploadDetails.getUploadId());
 
-        List<UploadDetails> uploadDetailList = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
-        Assert.assertEquals(uploadDetailList.size(), 1);
-        Assert.assertEquals(uploadDetailList.get(0).getUploadId(), uploadDetails.getUploadId());
+        System.out.println("After Job Complete - UploadDetails:\n" + JsonUtils.serialize(uploadDetailsList.get(0)));
 
         UploadDetails uploadDetailsCheck = testUploadProxy.getUpload(uploadDetails.getUploadId());
         Assert.assertNotNull(uploadDetailsCheck);
-        Assert.assertEquals(uploadDetailsCheck.getUploadId(), uploadDetails.getUploadId());
+        assertEquals(uploadDetailsCheck.getUploadId(), uploadDetails.getUploadId());
 
         String token = testUploadProxy.getToken(uploadDetails.getUploadId());
         Assert.assertNotNull(token);
 
-        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
+        uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
-        Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
+        System.out.println("After Job Complete:\n" + JsonUtils.serialize(uploadJobDetails));
+        assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
         Assert.assertNull(uploadJobDetails.getCurrentStep());
     }
 }

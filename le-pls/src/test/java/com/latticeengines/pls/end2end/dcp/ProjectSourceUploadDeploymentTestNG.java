@@ -136,27 +136,62 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         request.setProjectId(details.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
-        UploadDetails uploadDetail = testUploadProxy.startImport( request);
-        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetail.getUploadId());
+        UploadDetails uploadDetails = testUploadProxy.startImport(request);
+
+        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
-        JobStatus completedStatus = waitForWorkflowStatus(uploadDetail.getUploadDiagnostics().getApplicationId(), false);
+        System.out.println("Before Job Complete:\n" + JsonUtils.serialize(uploadJobDetails));
+
+        JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadDiagnostics().getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        List<UploadDetails> uploadDetails = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
-        Assert.assertNotNull(uploadDetails);
-        Assert.assertEquals(uploadDetails.size(), 1);
-        uploadDetail = uploadDetails.get(0);
-        UploadDetails retrievedDetail = testUploadProxy.getUpload(uploadDetail.getUploadId());
-        Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
+        List<UploadDetails> uploadDetailsList = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
+        Assert.assertNotNull(uploadDetailsList);
+        Assert.assertEquals(uploadDetailsList.size(), 1);
+        uploadDetails = uploadDetailsList.get(0);
+        System.out.println("After Job Complete - UploadDetails:\n" + JsonUtils.serialize(uploadDetails));
+
+        UploadDetails retrievedDetail = testUploadProxy.getUpload(uploadDetails.getUploadId());
+        Assert.assertEquals(JsonUtils.serialize(uploadDetails), JsonUtils.serialize(retrievedDetail));
         Assert.assertEquals(retrievedDetail.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
         String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
 
         uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
+        System.out.println("After Job Complete:\n" + JsonUtils.serialize(uploadJobDetails));
+        // DEBUG
+        Assert.assertNotNull(uploadJobDetails.getDisplayName());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getDisplayName()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getDisplayName());
+        Assert.assertNotNull(uploadJobDetails.getSourceDisplayName());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getSourceDisplayName()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getSourceDisplayName());
+        Assert.assertNotNull(uploadJobDetails.getStatus());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getStatus()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getStatus());
+        Assert.assertNotNull(uploadJobDetails.getStatistics());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getStatistics()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getStatistics());
+        Assert.assertNotNull(uploadJobDetails.getUploadDiagnostics());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadDiagnostics()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getUploadDiagnostics());
+        Assert.assertNotNull(uploadJobDetails.getUploadJobSteps());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadJobSteps()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getUploadJobSteps());
         Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
-        Assert.assertNull(uploadJobDetails.getCurrentStep());
+        Assert.assertNotNull(uploadJobDetails.getDropFileTime());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getDropFileTime()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getDropFileTime());
+        Assert.assertNotNull(uploadJobDetails.getUploadCreatedTime());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadCreatedTime()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getUploadCreatedTime());
+        Assert.assertNotNull(uploadJobDetails.getCurrentStep());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getCurrentStep()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getCurrentStep());
+        Assert.assertNotNull(uploadJobDetails.getProgressPercentage());
+        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getProgressPercentage()));
+        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getProgressPercentage());
         Assert.assertEquals(uploadJobDetails.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
-        System.out.println(JsonUtils.serialize(uploadJobDetails));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
@@ -194,7 +229,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         testProjectProxy.deleteProject(PROJECT_ID);
         SleepUtils.sleep(1000);
         projects = testProjectProxy.getAllProjects();
-      
+
         Assert.assertFalse(CollectionUtils.isEmpty(projects));
         details = testProjectProxy.getProjectByProjectId(PROJECT_ID);
         Assert.assertNotNull(details);
