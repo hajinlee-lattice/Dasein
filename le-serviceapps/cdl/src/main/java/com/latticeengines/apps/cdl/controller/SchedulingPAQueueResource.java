@@ -130,7 +130,7 @@ public class SchedulingPAQueueResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         String shortTenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
 
-        // TODO only query jobs from specific tenant
+        // TODO only query jobs from specific tenant (or cache result)
         // TODO get tenant specific timezone
         long earliestStartTime = Instant.now().minus(RECENT_PA_LOOK_BACK_DAYS, ChronoUnit.DAYS).toEpochMilli();
         List<WorkflowJob> completedPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(null,

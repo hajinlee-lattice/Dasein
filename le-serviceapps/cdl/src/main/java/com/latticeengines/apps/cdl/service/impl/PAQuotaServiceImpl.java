@@ -84,7 +84,7 @@ public class PAQuotaServiceImpl implements PAQuotaService {
                 .count();
         log.debug("No. consumed {} quota for tenant {} is {} (out of {}). now = {}, timezone = {}", quotaName, consumed,
                 tenantId, allowed, now, timezone);
-        return allowed >= consumed;
+        return allowed > consumed;
     }
 
     @Override
@@ -194,6 +194,7 @@ public class PAQuotaServiceImpl implements PAQuotaService {
         return resetTime;
     }
 
+    // [startTime, endTime)
     private Predicate<WorkflowJob> filterJobStartedInCurrentInterval(Instant quotaStartTime, Instant quotaEndTime) {
         return job -> {
             // completed within current quota period
@@ -202,7 +203,7 @@ public class PAQuotaServiceImpl implements PAQuotaService {
                 return false;
             }
             Instant startMoment = Instant.ofEpochMilli(startTime);
-            return startMoment.isAfter(quotaStartTime) && startMoment.isBefore(quotaEndTime);
+            return !startMoment.isBefore(quotaStartTime) && startMoment.isBefore(quotaEndTime);
         };
     }
 

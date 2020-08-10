@@ -1,7 +1,10 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.QUOTA_AUTO_SCHEDULE;
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.QUOTA_SCHEDULE_NOW;
 import static org.mockito.Mockito.doReturn;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
@@ -43,7 +47,14 @@ public class SchedulingPAServiceImplUnitTestNG {
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String TEST_SCHEDULER_NAME = "Default";
-    private static final long MOCK_CURRENT_TIME = System.currentTimeMillis();
+    // make sure this is outside of peace period, otherwise it's hard to test auto
+    // scheduled PAs
+    private static final long MOCK_CURRENT_TIME = LocalDateTime //
+            .of(2020, 8, 10, 19, 0) //
+            .atZone(SchedulerConstants.DEFAULT_TIMEZONE) //
+            .toInstant().toEpochMilli();
+
+    // TODO add quota & peace period specific test cases
 
     @BeforeClass(groups = "unit")
     public void setup() {
@@ -677,6 +688,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         tenantActivity14.setLarge(false);
         tenantActivity14.setAutoSchedule(false);
         tenantActivityList.add(tenantActivity14);
+        addQuota(tenantActivityList);
 
         return tenantActivityList;
     }
@@ -910,8 +922,14 @@ public class SchedulingPAServiceImplUnitTestNG {
         tenantActivity19.setFirstActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-01T01:00:00+0000").getTime());
         tenantActivity19.setLastActionTime(DateTimeUtils.convertToDateUTCISO8601("2019-04-02T01:00:00+0000").getTime());
         tenantActivityList.add(tenantActivity19);
+        addQuota(tenantActivityList);
 
         return tenantActivityList;
+    }
+
+    private void addQuota(List<TenantActivity> tenants) {
+        tenants.forEach(
+                tenant -> tenant.setNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)));
     }
 
     private SystemStatus newStatus(int totalLimit, int scheduleNowLimit, int largeLimit, int largeTxnLimit) {
@@ -928,6 +946,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withTenantType(TenantType.CUSTOMER) //
                 .withLastFinishTime(1L) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .retry() //
                 .build();
     }
@@ -937,6 +956,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withTenantType(TenantType.CUSTOMER) //
                 .withLastFinishTime(1L) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .large() //
                 .retry() //
                 .build();
@@ -947,6 +967,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withTenantType(TenantType.CUSTOMER) //
                 .withLastFinishTime(1L) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .large() //
                 .largeTxn() //
                 .retry() //
@@ -960,6 +981,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
                 .withTenantType(TenantType.CUSTOMER) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .build();
     }
 
@@ -968,6 +990,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .large() //
                 .withTenantType(TenantType.CUSTOMER) //
                 .build();
@@ -978,6 +1001,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withTenantId(CustomerSpace.parse(tenantId).toString()) //
                 .withScheduledNow(true) //
                 .withScheduleTime(MOCK_CURRENT_TIME) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .largeTxn() //
                 .withTenantType(TenantType.CUSTOMER) //
                 .build();
@@ -990,6 +1014,7 @@ public class SchedulingPAServiceImplUnitTestNG {
                 .withInvokeTime(MOCK_CURRENT_TIME) //
                 .withFirstActionTime(firstActionTime) //
                 .withLastActionTime(MOCK_CURRENT_TIME - 86400 * 1000) //
+                .withNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW)) //
                 .largeTxn() //
                 .withTenantType(TenantType.CUSTOMER) //
                 .build();
