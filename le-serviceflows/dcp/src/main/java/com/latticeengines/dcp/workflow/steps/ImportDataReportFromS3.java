@@ -87,11 +87,7 @@ public class ImportDataReportFromS3  extends BaseImportExportS3<DCPReportImportC
                     Set<String> retrievedUploadIds = dataReportProxy.getChildrenIds(customerSpace,
                             DataReportRecord.Level.Source, sourceId);
                     retrievedUploadIds.forEach(uploadId -> {
-                        DunsCountCache cache = dataReportProxy.getDunsCount(customerSpace,
-                                DataReportRecord.Level.Upload, uploadId);
-                        if (cache.getSnapshotTimestamp() == null) {
                             addTableToList(customerSpace, uploadId, DataReportRecord.Level.Upload, tables);
-                        }
                     });
                 });
                 break;
@@ -99,11 +95,7 @@ public class ImportDataReportFromS3  extends BaseImportExportS3<DCPReportImportC
                 Set<String> retrievedUploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level,
                         rootId);
                 retrievedUploadIds.forEach(uploadId -> {
-                    DunsCountCache cache = dataReportProxy.getDunsCount(customerSpace,
-                            DataReportRecord.Level.Upload, uploadId);
-                    if (cache.getSnapshotTimestamp() == null) {
                         addTableToList(customerSpace, uploadId, DataReportRecord.Level.Upload, tables);
-                    }
                 });
                 break;
             default:
