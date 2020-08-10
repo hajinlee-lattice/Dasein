@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ public class IdentityProviderConfigResource {
     public List<IdentityProvider> findAll(@PathVariable("tenantId") String tenantId) {
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info("Retrieving all identity providers");
+        ((ConsoleAppender)LogManager.getLogger(MetadataSynchronizer.class).getAppender("ConsoleWarn")).setThreshold(Level.DEBUG);
         LogManager.getLogger("org.opensaml.saml2").setLevel(Level.DEBUG);
         LogManager.getLogger("org.springframework.security").setLevel(Level.DEBUG);
         LogManager.getLogger(MetadataSynchronizer.class).setLevel(Level.DEBUG);
