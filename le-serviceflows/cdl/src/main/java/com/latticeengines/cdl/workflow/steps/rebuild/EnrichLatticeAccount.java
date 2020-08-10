@@ -417,16 +417,21 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
 
         FilterByJoinConfig config = new FilterByJoinConfig();
         List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(oldLatticeAccountDU);
+        HdfsDataUnit accountTable = accountBatchStore.toHdfsDataUnit("AccountBatchStore");
+        // Take current account batch store as base
+        inputs.add(accountTable);
         if ((changed != null) && (changed.getCount() > 0)) {
             inputs.add(changed);
         }
         config.setInput(inputs);
         config.setKey(InterfaceName.AccountId.name());
         config.setJoinType("left_anti");
+        config.setSelectColumns(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name()));
         // Set output format as avro as the match step afterwards only take avro input
         config.setSpecialTarget(0, DataUnit.DataFormat.AVRO);
+        setPartitionMultiplier(4);
         SparkJobResult result = runSparkJob(FilterByJoinJob.class, config);
+        setPartitionMultiplier(1);
         return result.getTargets().get(0);
     }
 
@@ -486,7 +491,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 upsertConfig.setJoinKey(InterfaceName.AccountId.name());
                 upsertConfig.setInput(Arrays.asList(oldLatticeAccountDU, inputData));
                 upsertConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+                setPartitionMultiplier(4);
                 result = runSparkJob(UpsertJob.class, upsertConfig);
+                setPartitionMultiplier(1);
                 output = result.getTargets().get(0);
                 break;
             default:
@@ -539,7 +546,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 joinKey, //
                 InterfaceName.LatticeAccountId.name() //
         ));
-        setPartitionMultiplier(4);
+        setPartitionMultiplier(6);
         SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
         setPartitionMultiplier(1);
         changeLists.add(result.getTargets().get(0));
