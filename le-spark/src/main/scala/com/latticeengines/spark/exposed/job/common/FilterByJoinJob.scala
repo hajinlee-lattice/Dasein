@@ -28,7 +28,7 @@ class FilterByJoinJob extends AbstractSparkJob[FilterByJoinConfig] {
           renamed = renamed.withColumnRenamed(column, inputPrefix + column)
         }
       })
-      output = source.select(columns map col: _*).join(renamed, Seq(key), joinType)
+      output = source.select(columns map col: _*).join(renamed, Seq(key), joinType).select(columns map col: _*)
     } else {
       output = source.select(columns map col: _*)
     }
