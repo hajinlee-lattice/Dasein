@@ -51,11 +51,13 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
+import com.latticeengines.domain.exposed.pls.frontend.ExternalSystemMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.pls.service.ExternalSystemService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
@@ -84,6 +86,9 @@ public class ModelingFileUploadResource {
 
     @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
+
+    @Inject
+    private ExternalSystemService externalSystemService;
 
     @Inject
     private BatonService batonService;
@@ -295,6 +300,17 @@ public class ModelingFileUploadResource {
             result.put(CDLExternalSystemType.OTHER.name(), externalSystem.getOtherIdList());
         }
         return ResponseDocument.successResponse(result);
+    }
+
+    @GetMapping("/externalsystemmappings")
+    @ResponseBody
+    @ApiOperation(value = "Return external system id mappings")
+    public List<ExternalSystemMapping> getExternalSystemMappings (
+            @RequestParam(value = "entity") String entity,
+            @RequestParam(value = "source") String source,
+            @RequestParam(value = "feedType") String feedType,
+            @RequestParam(value = "includeAll", required = false, defaultValue = "false") Boolean includeAll) {
+        return externalSystemService.getExternalSystemMappings(entity, source, feedType, includeAll);
     }
 
     @PostMapping("/importFile")
