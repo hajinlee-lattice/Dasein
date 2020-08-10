@@ -54,7 +54,6 @@ public class IdentityProviderConfigResource {
     public List<IdentityProvider> findAll(@PathVariable("tenantId") String tenantId) {
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info("Retrieving all identity providers");
-        ((ConsoleAppender)LogManager.getLogger(MetadataSynchronizer.class).getAppender("ConsoleWarn")).setThreshold(Level.DEBUG);
         LogManager.getLogger("org.opensaml.saml2").setLevel(Level.DEBUG);
         LogManager.getLogger("org.springframework.security").setLevel(Level.DEBUG);
         LogManager.getLogger(MetadataSynchronizer.class).setLevel(Level.DEBUG);
