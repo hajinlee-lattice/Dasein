@@ -79,6 +79,7 @@ public class MapAttributeJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 4, "4", null, "domain2", "street14", "state14", "country14" }, //
                 { 5, "5", null, null, "street15", "state15", "country15" }, //
                 { 6, "6", "duns_nomatch", "domain6", "street16", "state16", "country16" }, //
+                { 7, "7", "duns_same", "domain_same", "street17", "state17", "country17" }, //
         };
     }
 
@@ -90,6 +91,7 @@ public class MapAttributeJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 4, null, "domain2", "street24", "state24", "country24" }, //
                 { 5, null, null, "street25", "state25", "country25" }, //
                 { 6, "duns_nomatch2", "domain6", "street26", "state26", "countr26" }, //
+                { 7, "duns_same", "domain_same", "street17", "state17", "countr27" }, //
         };
     }
 
@@ -215,11 +217,22 @@ public class MapAttributeJobTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(country, "country16", record.toString());
 
                 break;
+            case "7":
+                Assert.assertEquals(latticeID, "7", record.toString());
+                Assert.assertEquals(duns, "duns_same", record.toString());
+                Assert.assertEquals(domain, "domain_same", record.toString());
+                // no changed records, whose replaced columns are null, need to
+                // be filtered out in next step.
+                Assert.assertNull(street, record.toString());
+                Assert.assertNull(state, record.toString());
+                Assert.assertEquals(country, "country17", record.toString());
+
+                break;
             default:
             }
             rows++;
         }
-        Assert.assertEquals(rows, 6);
+        Assert.assertEquals(rows, 7);
         return true;
     }
 
