@@ -146,7 +146,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
             List<String> statuses, Long earliestStartTime) {
         if (StringUtils.isBlank(clusterId) && CollectionUtils.isEmpty(workflowTypes)
-                && CollectionUtils.isEmpty(statuses)) {
+                && CollectionUtils.isEmpty(statuses) && earliestStartTime == null) {
             // just in case
             return workflowJobDao.findAll();
         }

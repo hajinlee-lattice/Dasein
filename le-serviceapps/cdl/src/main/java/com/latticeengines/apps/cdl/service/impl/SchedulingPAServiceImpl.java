@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.PA_JOB_TYPE;
 import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.RECENT_PA_LOOK_BACK_DAYS;
 import static java.util.Collections.singletonList;
 
@@ -104,7 +105,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
-    private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
     private static final String USER_ERROR_CATEGORY = "User Error";
 
     private static ObjectMapper om = new ObjectMapper();

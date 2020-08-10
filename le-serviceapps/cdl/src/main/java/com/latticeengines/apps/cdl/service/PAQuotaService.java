@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.scheduling.PAQuotaSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
@@ -42,4 +43,16 @@ public interface PAQuotaService {
      * @return map of quota name -> no. allowed PA
      */
     Map<String, Long> getTenantPaQuota(@NotNull String tenantId);
+
+    /**
+     * TODO comments
+     *
+     * @param tenantId
+     * @param completedPAJobs
+     * @param now
+     * @param timezone
+     * @return
+     */
+    PAQuotaSummary getPAQuotaSummary(@NotNull String tenantId, List<WorkflowJob> completedPAJobs, Instant now,
+            ZoneId timezone);
 }
