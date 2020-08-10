@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -402,6 +403,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 List.class), DataReport.DuplicationReport.class);
         List<HdfsDataUnit> units = result.getTargets();
         int index = 0;
+        Set<String> dunsCountTables = new HashSet<>();
         for (String ownerId : updatedOwnerIds) {
             Pair<DataReportRecord.Level, Date> pair = updatedOwnerIdToLevelAndDate.get(ownerId);
             DataReportRecord.Level level = pair.getLeft();
@@ -411,7 +413,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId));
             Table dunsCount = toTable(dunsCountTableName, null, unit);
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
-            registerTable(dunsCountTableName);
+            dunsCountTables.add(dunsCountTableName);
 
             DunsCountCache cache = new DunsCountCache();
             cache.setDunsCountTableName(dunsCountTableName);
@@ -424,5 +426,6 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             dataReportProxy.updateDataReport(customerSpace.toString(), level, ownerId, dupReport);
             index++;
         }
+        putObjectInContext(DUNS_COUNT_TABLE_NAMES, dunsCountTables);
     }
 }
