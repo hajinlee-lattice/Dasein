@@ -9,7 +9,7 @@ public class FirstActionTimePending implements Constraint {
     @Override
     public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (target.getFirstActionTime() == null || target.getFirstActionTime() == 0L) {
-            return ConstraintValidationResult.VALID;
+            return new ConstraintValidationResult(true, null);
         }
         long currentTime = timeClock.getCurrentTime();
         long hrSinceFirstAction = (currentTime - target.getFirstActionTime()) / 3600000;

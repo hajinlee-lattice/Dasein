@@ -8,7 +8,7 @@ public class LastActionTimePending implements Constraint {
     @Override
     public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (target.getLastActionTime() == null || target.getLastActionTime() == 0L) {
-            return ConstraintValidationResult.VALID;
+            return new ConstraintValidationResult(true, null);
         }
         long currentTime = timeClock.getCurrentTime();
         long minSinceLastAction = (currentTime - target.getLastActionTime()) / 60000;

@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.QUOTA_AUTO_SCHEDULE;
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.QUOTA_SCHEDULE_NOW;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.apps.cdl.util.Simulation;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTenant;
@@ -110,6 +114,7 @@ public class SimulationUnitTestNG {
             }
             tenantActivity.setAutoSchedule(true);
             tenantActivity.setInvokeTime(clock.getCurrentTime());
+            tenantActivity.setNotExceededQuotaNames(ImmutableSet.of(QUOTA_AUTO_SCHEDULE, QUOTA_SCHEDULE_NOW));
             simulationTenantMap.put(tenant, new SimulationTenant(tenantActivity));
             index++;
         }

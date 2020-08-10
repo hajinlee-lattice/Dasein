@@ -45,13 +45,19 @@ public interface PAQuotaService {
     Map<String, Long> getTenantPaQuota(@NotNull String tenantId);
 
     /**
-     * TODO comments
+     * Retrieve/calculate PA quota related info for specific tenant, including
+     * remaining quota, quota reset time and others.
      *
      * @param tenantId
+     *            target tenant
      * @param completedPAJobs
+     *            recently completed {@link ProcessAnalyzeWorkflowConfiguration} job
      * @param now
+     *            current time, use current system time if not provided
      * @param timezone
-     * @return
+     *            configured timezone for this tenant, use <code>UTC</code> if not
+     *            provided
+     * @return summary of specified tenant
      */
     PAQuotaSummary getPAQuotaSummary(@NotNull String tenantId, List<WorkflowJob> completedPAJobs, Instant now,
             ZoneId timezone);
