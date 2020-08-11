@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

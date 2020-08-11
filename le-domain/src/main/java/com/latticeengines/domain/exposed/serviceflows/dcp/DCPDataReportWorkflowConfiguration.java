@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.dcp;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
-import com.latticeengines.domain.exposed.serviceflows.dcp.steps.DCPReportImportExportConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.dcp.steps.DCPReportImportConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.RollupDataReportStepConfiguration;
 
 public class DCPDataReportWorkflowConfiguration extends BaseDCPWorkflowConfiguration {
@@ -18,7 +18,7 @@ public class DCPDataReportWorkflowConfiguration extends BaseDCPWorkflowConfigura
 
         private RollupDataReportStepConfiguration generateReport = new RollupDataReportStepConfiguration();
 
-        private DCPReportImportExportConfiguration importExport = new DCPReportImportExportConfiguration();
+        private DCPReportImportConfiguration importExport = new DCPReportImportConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
