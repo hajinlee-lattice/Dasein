@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.Analytical;
 import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.Domain;
 import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.MasterData;
 
@@ -21,9 +22,8 @@ public class AppendConfigServiceImplUnitTestNG {
         DataBlockEntitlementContainer container = AppendConfigServiceImpl.getDefaultEntitlement();
         Assert.assertNotNull(container);
         Assert.assertEquals(container.getDomains().size(), 1);
-        Assert.assertEquals(container.getDomains().get(0).getRecordTypes().size(), 2);
+        Assert.assertEquals(container.getDomains().get(0).getRecordTypes().size(), 1);
         Assert.assertEquals(container.getDomains().get(0).getRecordTypes().get(Domain).size(), 3);
-        Assert.assertEquals(container.getDomains().get(0).getRecordTypes().get(MasterData).size(), 3);
     }
 
     @Test(groups = "unit")
@@ -32,9 +32,31 @@ public class AppendConfigServiceImplUnitTestNG {
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
         DataBlockEntitlementContainer container = AppendConfigServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
-        Assert.assertEquals(container.getDomains().size(), 1);
-        Assert.assertEquals(container.getDomains().get(0).getRecordTypes().size(), 1);
-        Assert.assertEquals(container.getDomains().get(0).getRecordTypes().get(Domain).size(), 10);
+        Assert.assertEquals(container.getDomains().size(), 3);
+        for (DataBlockEntitlementContainer.Domain domain: container.getDomains()) {
+            switch (domain.getDomain()) {
+                case SalesMarketing:
+                    Assert.assertEquals(domain.getRecordTypes().size(), 2);
+                    Assert.assertTrue(domain.getRecordTypes().containsKey(Domain));
+                    Assert.assertTrue(domain.getRecordTypes().containsKey(MasterData));
+                    Assert.assertEquals(domain.getRecordTypes().get(Domain).size(), 9);
+                    Assert.assertEquals(domain.getRecordTypes().get(MasterData).size(), 5);
+                    break;
+                case Finance:
+                    Assert.assertEquals(domain.getRecordTypes().size(), 1);
+                    Assert.assertTrue(domain.getRecordTypes().containsKey(Analytical));
+                    Assert.assertEquals(domain.getRecordTypes().get(Analytical).size(), 11);
+                    break;
+                case Supply:
+                    Assert.assertEquals(domain.getRecordTypes().size(), 1);
+                    Assert.assertTrue(domain.getRecordTypes().containsKey(MasterData));
+                    Assert.assertEquals(domain.getRecordTypes().get(MasterData).size(), 5);
+                    break;
+                default:
+                    Assert.fail("Should not see domain " + domain.getDomain());
+            }
+        }
+
     }
 
 }

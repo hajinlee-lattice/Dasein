@@ -21,6 +21,7 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
         val inputData: List[DataFrame] = lattice.input
         val sourceMap: MMap[String, DataFrame] = initiateSourceMap(config, inputData)
         val attributes = config.getSrcAttrs.asScala.toList
+        val isFilterChange = config.getIsFilterChange
         val attributeFuncs: List[MapAttributeTxfmrConfig.MapFunc] = 
             if (config.getMapFuncs == null) List() else config.getMapFuncs.asScala.toList
         if (attributeFuncs.size == 0 || sourceMap.size == 0) {
@@ -31,12 +32,15 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
         val seedName: String = config.getSeed
         var seed: DataFrame = 
           if (config.getStage.contains(REFRESH_STAGE)) {
-            val sourceAttributes: List[SourceAttribute] = attributes
             val newSeed = sourceMap(seedName)
             if (newSeed == null) {
                 throw new RuntimeException("Failed to prepare seed " + seedName)
             }
-            discardExistingAttrs(newSeed, sourceAttributes, config)
+            if (!isFilterChange) {
+              discardExistingAttrs(newSeed, attributes, config)
+            } else {
+              newSeed
+            }
           } else {
               prepareSource(sourceMap(seedName), sourceFuncMap(seedName), null, null,
                       config.getIsDedupe)
@@ -59,7 +63,7 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
                         config.getIsDedupe)
                 sources = sources :+ source
             }
-            joined = convergeSources(joined, seed, sources.toList, seedId, seedJoinKeys)
+            joined = convergeSources(joined, seed, sources.toList, seedId, seedJoinKeys, isFilterChange, attributes)
         }
         if (StringUtils.isNotBlank(config.getTimestampField)) {
           val stamped: DataFrame = joined.withColumn(config.getTimestampField, lit(System.currentTimeMillis))
@@ -128,9 +132,17 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
         return sourceAttributes
     }
 
-    def convergeSources(joined: DataFrame, seed: DataFrame, dfs: List[DataFrame], seedId: String, seedJoinKeys: List[String]): DataFrame = {
+    def convergeSources(origJoined: DataFrame, seed: DataFrame, origDfs: List[DataFrame], seedId: String, seedJoinKeys: List[String], 
+        isFilterChange: Boolean, srcAttrs: List[SourceAttribute]): DataFrame = {
+        var dfs = origDfs
+        var joined = origJoined
         if (dfs.size == 0) {
             throw new RuntimeException("There's no source specified!")
+        }
+        if (isFilterChange) {
+          val (newJoined, newDfs) = filterChange(joined, dfs, seedId, seedJoinKeys, srcAttrs)
+          joined = newJoined
+          dfs = newDfs
         }
         val seedOutputAttrs: ListBuffer[String] = ListBuffer()
         seedOutputAttrs += seedId
@@ -152,6 +164,35 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
         
         joined.join(filtered, Seq(seedId), "left")
     }
+    
+    def filterChange(origJoined: DataFrame, origDfs: List[DataFrame], seedId: String, seedJoinKeys: List[String], 
+        srcAttrs: List[SourceAttribute]): (DataFrame, List[DataFrame]) = {
+        val dfs = ListBuffer[DataFrame]()
+        val existAttrs: Set[String] = origJoined.columns.toSet
+        var tgtAttrs: List[String] = srcAttrs.filter(e => existAttrs.contains(e.getAttribute)).map(_.getAttribute)
+        var retainFields = ListBuffer[String]()
+        retainFields ++= seedJoinKeys
+        retainFields ++= tgtAttrs
+        val retainedJoined = origJoined.select(retainFields map col: _*)
+        
+        origDfs.foreach( df => {
+          val mappedColumns = df.columns.diff(seedJoinKeys)
+          val selectedJoined = retainedJoined.select(df.columns map col: _*)
+          var newJoined = selectedJoined.transform(nullSafeJoin(df, seedJoinKeys, "inner"))
+
+          val colExpr: Column = selectedJoined(mappedColumns.head) =!= df(mappedColumns.head)
+          val fullExpr = mappedColumns.tail.foldLeft(colExpr) { 
+            (colExpr, p) => colExpr || selectedJoined(p) =!= df(p) 
+          }
+          var filtered = newJoined.filter(fullExpr)
+          filtered = filtered.select(df.columns.map(c => df(c)): _*)
+          dfs += filtered
+        })
+        
+        val joined = origJoined.drop(tgtAttrs: _*)
+        
+        (joined, dfs.toList)
+    }
 
     def initiateSourceMap(config: MapAttributeTxfmrConfig, inputData: List[DataFrame]): MMap[String, DataFrame] = {
         val tableNames: List[String] = if (config.getBaseTables == null) List() else config.getBaseTables.asScala.toList
@@ -168,6 +209,7 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
     }
     
     def nullSafeJoin(rightDF: DataFrame, columns: Seq[String], joinType: String)(leftDF: DataFrame): DataFrame = {
+        
         val colExpr: Column = leftDF(columns.head) <=> rightDF(columns.head)
         val fullExpr = columns.tail.foldLeft(colExpr) { 
           (colExpr, p) => colExpr && leftDF(p) <=> rightDF(p) 
