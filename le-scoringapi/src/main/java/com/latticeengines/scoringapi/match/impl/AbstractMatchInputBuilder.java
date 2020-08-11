@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
@@ -36,6 +37,9 @@ import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractMatchInputBuilder.class);
+
+    @Value("${scoringapi.use.direct.plus}")
+    private boolean useDirectPlus;
 
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //
@@ -118,6 +122,10 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
         } else {
             matchInput.setRequestSource(MatchRequestSource.SCORING);
+        }
+
+        if (useDirectPlus) {
+            matchInput.setUseDirectPlus(true);
         }
 
         return matchInput;
