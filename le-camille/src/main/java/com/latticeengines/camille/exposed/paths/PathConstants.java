@@ -63,6 +63,8 @@ public final class PathConstants {
 
     public static final String SCHEDULING_TENANT_GROUP = "paSchedulerTenantGroupConfig";
 
+    public static final String TENANT_PA_QUOTA = "PAQuota";
+
     public static final String WORKFLOW_THROTTLING_CONFIG_FILE = "workflowThrottlingConfig";
 
     public static final String WORKFLOW_THROTTLING_FLAG = "workflowThrottlingFlag";

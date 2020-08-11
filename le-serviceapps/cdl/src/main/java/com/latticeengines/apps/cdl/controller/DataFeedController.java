@@ -1,10 +1,13 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -40,8 +43,10 @@ import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -104,6 +109,12 @@ public class DataFeedController {
         }
         try {
             if (runNow) {
+                Map<String, String> tags = ObjectUtils.defaultIfNull(request.getTags(), new HashMap<>());
+                // run now PA will consume schedule now quota if no other quota consumed (e.g.,
+                // triggered manually)
+                tags.putIfAbsent(WorkflowContextConstants.Tags.CONSUMED_QUOTA_NAME,
+                        SchedulerConstants.QUOTA_SCHEDULE_NOW);
+                request.setTags(tags);
                 ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request,
                         new WorkflowPidWrapper(-1L));
                 return ResponseDocument.successResponse(appId.toString());

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,11 +11,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 
 public class GreedyScheduler implements Scheduler {
 
@@ -27,6 +31,7 @@ public class GreedyScheduler implements Scheduler {
         // queueName -> list(scheduling object)
         Map<String, SchedulingResult.Detail> details = new HashMap<>();
         Set<String> allTenantsInQ = new HashSet<>();
+        Map<String, List<SchedulingResult.ConstraintViolationReason>> reasons = new HashMap<>();
         for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
             if (schedulingPAQueue.size() > 0) {
                 allTenantsInQ.addAll(schedulingPAQueue.getAll());
@@ -42,10 +47,21 @@ public class GreedyScheduler implements Scheduler {
                 } else {
                     canRunJobTenantSet.addAll(tenantIds);
                 }
+
+                // save violation reasons for each tenant
+                Map<String, String> queueReasons = schedulingPAQueue.getConstraintViolationReasons();
+                if (MapUtils.isNotEmpty(queueReasons)) {
+                    String queueName = schedulingPAQueue.getQueueName();
+                    queueReasons.forEach((tenantId, reason) -> {
+                        reasons.putIfAbsent(tenantId, new ArrayList<>());
+                        reasons.get(tenantId).add(new SchedulingResult.ConstraintViolationReason(queueName, reason));
+                    });
+                }
             }
         }
         canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
-        SchedulingResult result = new SchedulingResult(canRunJobTenantSet, canRunRetryJobTenantSet, details, allTenantsInQ);
+        SchedulingResult result = new SchedulingResult(canRunJobTenantSet, canRunRetryJobTenantSet, details,
+                allTenantsInQ, reasons);
         if (log.isDebugEnabled()) {
             log.debug("SchedulingResult = {}", JsonUtils.serialize(result));
         }
@@ -76,7 +92,7 @@ public class GreedyScheduler implements Scheduler {
             }
 
             SchedulingResult.Detail detail = new SchedulingResult.Detail(queueName,
-                    clock.getCurrentTime() - firstActivityTime, activity);
+                    clock.getCurrentTime() - firstActivityTime, activity, obj.getConsumedPAQuotaName());
             return Pair.of(detail.getTenantActivity().getTenantId(), detail);
         }).filter(Objects::nonNull).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
     }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflo
         @Type(value = BaseModelingWorkflowConfiguration.class, name = "BaseModelingWorkflowConfiguration"),
         @Type(value = BaseScoringWorkflowConfiguration.class, name = "BaseScoringWorkflowConfiguration") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class WorkflowConfiguration extends BasePayloadConfiguration {
 

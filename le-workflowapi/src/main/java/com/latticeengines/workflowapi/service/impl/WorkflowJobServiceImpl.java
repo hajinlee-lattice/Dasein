@@ -424,7 +424,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public int getNonTerminalJobCount(String customerSpace, List<String> types) {
         String clusterId = workflowContainerService.getCurrentClusterId();
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, types,
-                NON_TERMINAL_JOB_STATUSES);
+                NON_TERMINAL_JOB_STATUSES, null);
 
         List<Long> pids = workflowJobs.stream() //
                 .filter(Objects::nonNull) //
@@ -438,8 +438,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId,
-                                                                 List<String> workflowTypes, List<String> statuses) {
-        return workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+            List<String> workflowTypes, List<String> statuses, Long earliestStartTime) {
+        return workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses,
+                earliestStartTime);
     }
 
     @WithCustomerSpace
