@@ -41,6 +41,9 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
     // tenant ID -> reason
     private final Map<String, String> constraintViolationReasons;
 
+    // tenant ID -> important events that require attention from valid constraint
+    private final Map<String, List<String>> constraintNotifications;
+
     public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, String queueName) {
         this(systemStatus, clz, timeClock, false, queueName);
     }
@@ -54,6 +57,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         this.queueName = queueName;
         priorityQueue = new PriorityQueue<>();
         constraintViolationReasons = new HashMap<>();
+        constraintNotifications = new HashMap<>();
     }
 
     public List<String> getAll() {
@@ -74,6 +78,10 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     public Map<String, String> getConstraintViolationReasons() {
         return constraintViolationReasons;
+    }
+
+    public Map<String, List<String>> getConstraintNotifications() {
+        return constraintNotifications;
     }
 
     /**
@@ -210,17 +218,23 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * queue(pop from queue) or not.
      */
     private boolean checkConstraint(SystemStatus systemStatus, TenantActivity tenantActivity,
-            List<Constraint> constraintList, boolean recordViolationReason) {
+            List<Constraint> constraintList, boolean recordMessages) {
         boolean violated = false;
+        List<String> notifications = new ArrayList<>();
         for (Constraint constraint : constraintList) {
             ConstraintValidationResult result = constraint.validate(systemStatus, tenantActivity, timeClock);
             if (result.isViolated()) {
                 violated = true;
-                if (recordViolationReason && StringUtils.isNotBlank(result.getReason())) {
+                if (recordMessages && StringUtils.isNotBlank(result.getReason())) {
                     constraintViolationReasons.put(tenantActivity.getTenantId(), result.getReason());
                 }
                 break;
+            } else if (recordMessages && StringUtils.isNotBlank(result.getReason())) {
+                notifications.add(result.getReason());
             }
+        }
+        if (!violated && !notifications.isEmpty()) {
+            constraintNotifications.put(tenantActivity.getTenantId(), notifications);
         }
         return !violated;
     }
