@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -109,19 +110,21 @@ public class WorkflowResource {
         workflowConfig.setRestart(true);
         workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
-        workflowConfig.setTags(MapUtils.emptyIfNull(job.getTags()));
         // set restart workflow job id
         if (job.getInputs() == null) {
             job.setInputs(new HashMap<>());
         }
         job.getInputs().put(WorkflowContextConstants.Inputs.RESTART_JOB_ID, String.valueOf(wfId));
+
+        Map<String, String> tags = new HashMap<>(MapUtils.emptyIfNull(job.getTags()));
         // only set if this is first retry
-        workflowConfig.getTags().putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_PID, job.getPid().toString());
-        workflowConfig.getTags().putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_START_TIME,
+        tags.putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_PID, job.getPid().toString());
+        tags.putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_START_TIME,
                 String.valueOf(job.getStartTimestamp().getTime()));
         // parent link
-        workflowConfig.getTags().putIfAbsent(WorkflowContextConstants.Tags.PARENT_WORKFLOW_PID,
+        tags.putIfAbsent(WorkflowContextConstants.Tags.PARENT_WORKFLOW_PID,
                 job.getPid().toString());
+        job.setTags(tags);
 
         workflowConfig.setInputProperties(job.getInputs());
         if (Boolean.TRUE.equals(autoRetry)) {

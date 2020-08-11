@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.workflow;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,6 @@ public class Job implements HasId<Long>, HasName {
     private List<Report> reports;
     private Map<String, String> inputs;
     private Map<String, String> outputs;
-    private Map<String, String> tags;
     private LedpCode errorCode;
     private String errorMsg;
     private Integer numDisplayedSteps;
@@ -193,16 +193,27 @@ public class Job implements HasId<Long>, HasName {
         this.outputs = outputs;
     }
 
-    @JsonProperty
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     public Map<String, String> getTags() {
-        return tags;
+        if (inputs == null || !inputs.containsKey(WorkflowContextConstants.Inputs.TAGS)) {
+            return null;
+        }
+
+        String tagStr = inputs.get(WorkflowContextConstants.Inputs.TAGS);
+        Map<?, ?> rawMap = JsonUtils.deserialize(tagStr, Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, String.class);
     }
 
-    @JsonProperty
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     public void setTags(Map<String, String> tags) {
-        this.tags = tags;
+        if (tags == null) {
+            return;
+        }
+
+        if (inputs == null) {
+            inputs = new HashMap<>();
+        }
+        inputs.put(WorkflowContextConstants.Inputs.TAGS, JsonUtils.serialize(tags));
     }
 
     @JsonProperty
@@ -335,8 +346,7 @@ public class Job implements HasId<Long>, HasName {
         return isJobRetried;
     }
 
-    @JsonProperty
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     public void setJobRetried(Boolean jobRetried) {
         isJobRetried = jobRetried;
     }

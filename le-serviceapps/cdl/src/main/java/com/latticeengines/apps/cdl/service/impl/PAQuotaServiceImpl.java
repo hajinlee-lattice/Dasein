@@ -135,9 +135,11 @@ public class PAQuotaServiceImpl implements PAQuotaService {
                 quota.put(quotaName, Math.max(quota.getOrDefault(quotaName, 0L) - 1, 0L));
             }
         });
+        summary.setRemainingPaQuota(quota);
 
         if (hasNonZeroQuota(summary.getRemainingPaQuota())) {
-            String msg = String.format("This tenant is able to run %d schedule now PA and %d auto schedule PA today", //
+            String msg = String.format(
+                    "This tenant is still able to run %d schedule now PA and %d auto schedule PA today", //
                     summary.getRemainingPaQuota().get(QUOTA_SCHEDULE_NOW), //
                     summary.getRemainingPaQuota().get(QUOTA_AUTO_SCHEDULE));
             summary.setMessage(msg);
@@ -189,7 +191,7 @@ public class PAQuotaServiceImpl implements PAQuotaService {
 
         Duration timeUntilReset = Duration.between(now, quotaEndTime);
         long minutes = timeUntilReset.toMinutes();
-        String hm = String.format("%02dh%02dm", minutes / 60, minutes);
+        String hm = String.format("%02dh%02dm", minutes / 60, (minutes % 60));
         resetTime.setRemainingDuration(hm);
         return resetTime;
     }
@@ -215,10 +217,10 @@ public class PAQuotaServiceImpl implements PAQuotaService {
     }
 
     private Long getRootWorkflowStartTime(WorkflowJob job) {
-        if (job == null || job.getWorkflowConfiguration() == null) {
+        if (job == null) {
             return null;
         }
-        if (!job.getWorkflowConfiguration().isRestart()) {
+        if (!isRestartJob(job)) {
             return job.getStartTimeInMillis();
         }
 
@@ -233,11 +235,21 @@ public class PAQuotaServiceImpl implements PAQuotaService {
         }
     }
 
+    private boolean isRestartJob(@NotNull WorkflowJob job) {
+        return StringUtils.isNotBlank(
+                MapUtils.emptyIfNull(job.getInputContext()).get(WorkflowContextConstants.Inputs.RESTART_JOB_ID));
+    }
+
     private String getTagValue(WorkflowJob job, @NotNull String tag) {
         Preconditions.checkNotNull(tag);
-        if (job == null || job.getWorkflowConfiguration() == null) {
+        if (job == null
+                || !MapUtils.emptyIfNull(job.getInputContext()).containsKey(WorkflowContextConstants.Inputs.TAGS)) {
             return null;
         }
-        return MapUtils.emptyIfNull(job.getWorkflowConfiguration().getTags()).get(tag);
+
+        String tagStr = job.getInputContext().get(WorkflowContextConstants.Inputs.TAGS);
+        Map<?, ?> rawMap = JsonUtils.deserialize(tagStr, Map.class);
+        Map<String, String> tags = JsonUtils.convertMap(rawMap, String.class, String.class);
+        return MapUtils.emptyIfNull(tags).get(tag);
     }
 }

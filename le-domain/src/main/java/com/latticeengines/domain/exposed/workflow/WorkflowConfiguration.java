@@ -80,9 +80,6 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     private Map<String, String> tracingContext;
 
     @JsonProperty
-    private Map<String, String> tags;
-
-    @JsonProperty
     private Map<String, String> inputProperties = new HashMap<>();
 
     @JsonProperty("falingStep")
@@ -177,14 +174,6 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setTracingContext(Map<String, String> tracingContext) {
         this.tracingContext = tracingContext;
-    }
-
-    public Map<String, String> getTags() {
-        return tags;
-    }
-
-    public void setTags(Map<String, String> tags) {
-        this.tags = tags;
     }
 
     public Map<String, String> getInputProperties() {

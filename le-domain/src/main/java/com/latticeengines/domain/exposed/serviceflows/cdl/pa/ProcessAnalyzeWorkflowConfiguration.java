@@ -146,11 +146,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder tags(Map<String, String> tags) {
-            configuration.setTags(tags);
-            return this;
-        }
-
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             processStepConfiguration.setInputProperties(inputProperties);

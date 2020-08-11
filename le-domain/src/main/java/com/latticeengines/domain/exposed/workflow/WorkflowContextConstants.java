@@ -58,6 +58,7 @@ public final class WorkflowContextConstants {
         public static final String PA_TIMESTAMP = "PA_TIMESTAMP";
         // Workflow ID that current job is restarting with
         public static final String RESTART_JOB_ID = "RESTART_JOB_ID";
+        public static final String TAGS = "TAGS";
     }
 
     public static final class Tags {

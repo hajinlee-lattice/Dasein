@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -23,6 +23,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -178,7 +179,7 @@ public class PAQuotaServiceImplUnitTestNG {
         if (job.getWorkflowConfiguration() == null) {
             job.setWorkflowConfiguration(new WorkflowConfiguration());
         }
-        job.getWorkflowConfiguration().setRestart(true);
+        job.setInputContextValue(WorkflowContextConstants.Inputs.RESTART_JOB_ID, "fake_restart_id");
 
         setConsumedQuota(job, consumedQuota);
         setRootPAStartTime(job, originalStartTime.toEpochMilli());
@@ -198,13 +199,23 @@ public class PAQuotaServiceImplUnitTestNG {
     }
 
     private void addTag(@NotNull WorkflowJob job, @NotNull String key, @NotNull String value) {
-        if (job.getWorkflowConfiguration() == null) {
-            job.setWorkflowConfiguration(new WorkflowConfiguration());
+        if (job.getInputContext() == null) {
+            job.setInputContext(new HashMap<>());
         }
 
-        HashMap<String, String> tags = new HashMap<>(MapUtils.emptyIfNull(job.getWorkflowConfiguration().getTags()));
+        String tagStr = job.getInputContext().get(WorkflowContextConstants.Inputs.TAGS);
+        Map<String, String> tags = new HashMap<>(getTags(tagStr));
         tags.put(key, value);
-        job.getWorkflowConfiguration().setTags(tags);
+        job.setInputContextValue(WorkflowContextConstants.Inputs.TAGS, JsonUtils.serialize(tags));
+    }
+
+    private Map<String, String> getTags(String tagStr) {
+        if (StringUtils.isBlank(tagStr)) {
+            return Collections.emptyMap();
+        }
+
+        Map<?, ?> rawMap = JsonUtils.deserialize(tagStr, Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, String.class);
     }
 
     private static class TestData {

@@ -35,7 +35,7 @@ public class NotInPeacePeriod implements Constraint {
 
         Duration timeUntilPeacePeriodEnd = Duration.between(now, sixPM);
         long minutes = timeUntilPeacePeriodEnd.toMinutes();
-        String hm = String.format("%02dh%02dm", minutes / 60, minutes);
+        String hm = String.format("%02dh%02dm", minutes / 60, (minutes % 60));
         String msg = String.format("currently in peace period (which ends in %s)", hm);
         return new ConstraintValidationResult(true, msg);
     }
