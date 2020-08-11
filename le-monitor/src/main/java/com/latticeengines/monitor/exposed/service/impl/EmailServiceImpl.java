@@ -53,6 +53,16 @@ public class EmailServiceImpl implements EmailService {
     @Qualifier("sendgridEmailSettings")
     private EmailSettings sendgridEmailSettings;
 
+    @Inject
+    @Qualifier("dnbEmailSettings")
+    private EmailSettings dnbEmailSettings;
+
+    @Value("${monitor.use.sendgrid}")
+    private boolean useSendGrid;
+
+    @Value("${monitor.use.dnb}")
+    private boolean useDnb;
+
     @Value("${monitor.email.enabled:true}")
     private boolean emailEnabled;
 
@@ -78,7 +88,11 @@ public class EmailServiceImpl implements EmailService {
      * @return - EmailSettings object containing the return address and the email service configuration.
      */
     private EmailSettings getEmailSettings(EmailFromAddress fromAddress) {
-        return fromAddress == EmailFromAddress.DNB_CONNECT ? sendgridEmailSettings : smtpEmailSettings;
+        if (fromAddress == EmailFromAddress.DNB_CONNECT) {
+            return useSendGrid ? sendgridEmailSettings : dnbEmailSettings;
+        } else {
+            return useDnb ? dnbEmailSettings : smtpEmailSettings;
+        }
     }
 
     /**
@@ -209,7 +223,7 @@ public class EmailServiceImpl implements EmailService {
                     Collections.singleton(user.getEmail()));
             log.info("Sending forget password email " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send forget password email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send forget password email to " + user.getEmail(), e);
         }
     }
 
@@ -227,7 +241,7 @@ public class EmailServiceImpl implements EmailService {
                     Collections.singleton(user.getEmail()));
             log.info("Sending forget password email " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send forget password email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send forget password email to " + user.getEmail(), e);
         }
     }
 
@@ -253,8 +267,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending PLS create model (" + modelName + ") complete email to " + user.getEmail()
                     + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS create model (" + modelName + ") complete email to " + user.getEmail() + " "
-                    + e.getMessage());
+            log.error("Failed to send PLS create model (" + modelName + ") complete email to " + user.getEmail(), e);
         }
     }
 
@@ -277,8 +290,7 @@ public class EmailServiceImpl implements EmailService {
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS create model (" + modelName + ") error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS create model (" + modelName + ") error email to " + user.getEmail() + " "
-                    + e.getMessage());
+            log.error("Failed to send PLS create model (" + modelName + ") error email to " + user.getEmail(), e);
         }
     }
 
@@ -304,8 +316,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending PLS create scoring (" + modelName + ") complete email to " + user.getEmail()
                     + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS scoring (" + modelName + ") complete email to " + user.getEmail() + " "
-                    + e.getMessage());
+            log.error("Failed to send PLS scoring (" + modelName + ") complete email to " + user.getEmail(), e);
         }
     }
 
@@ -329,8 +340,7 @@ public class EmailServiceImpl implements EmailService {
             log.info(
                     "Sending PLS create scoring (" + modelName + ") error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS scoring (" + modelName + ") error email to " + user.getEmail() + " "
-                    + e.getMessage());
+            log.error("Failed to send PLS scoring (" + modelName + ") error email to " + user.getEmail(), e);
         }
     }
 
@@ -352,7 +362,7 @@ public class EmailServiceImpl implements EmailService {
                     user.getEmail(), tenantId));
         } catch (Exception e) {
             log.error(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s failed",
-                    user.getEmail(), tenantId));
+                    user.getEmail(), tenantId), e);
         }
     }
 
@@ -393,7 +403,7 @@ public class EmailServiceImpl implements EmailService {
                     + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS enrich internal attribute (" + modelName + ") complete email to "
-                    + user.getEmail() + " " + e.getMessage());
+                    + user.getEmail(), e);
         }
     }
 
@@ -410,7 +420,7 @@ public class EmailServiceImpl implements EmailService {
                     + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS enrich internal attribute (" + modelName + ") error email to "
-                    + user.getEmail() + " " + e.getMessage());
+                    + user.getEmail(), e);
         }
     }
 
@@ -452,7 +462,7 @@ public class EmailServiceImpl implements EmailService {
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS export segment error email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS export segment error email to " + user.getEmail(), e);
         }
     }
 
@@ -469,7 +479,7 @@ public class EmailServiceImpl implements EmailService {
             log.info(String.format("Sending PLS export segment in-progress email to %s succeeded.", user.getEmail()));
         } catch (Exception e) {
             log.error(String.format("Failed to send PLS export segment in-progress email to %s. Exception message=%s",
-                    user.getEmail(), e.getMessage()));
+                    user.getEmail(), e.getMessage()), e);
         }
     }
 
@@ -502,7 +512,7 @@ public class EmailServiceImpl implements EmailService {
 
         } catch (Exception e) {
             log.error(String.format("Failed to send PLS export segment in-progress email to %s. Exception message=%s",
-                    creator.getEmail(), e.getMessage()));
+                    creator.getEmail(), e.getMessage()), e);
         }
     }
 
@@ -519,7 +529,7 @@ public class EmailServiceImpl implements EmailService {
             log.info(String.format("Sending %s export in-progress email to %s succeeded.", type, user.getEmail()));
         } catch (Exception e) {
             log.error(String.format("Failed to send %s export in-progress email to %s. Exception message=%s", type,
-                    user.getEmail(), e.getMessage()));
+                    user.getEmail(), e.getMessage()), e);
         }
     }
 
@@ -606,7 +616,7 @@ public class EmailServiceImpl implements EmailService {
                     + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send CDL processanalyze complete email to " + user.getEmail() + " on "
-                    + tenant.getName() + " " + e.getMessage());
+                    + tenant.getName(), e);
         }
     }
 
@@ -628,8 +638,8 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending CDL processanalyze error email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send CDL processanalyze error email to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send CDL processanalyze error email to " + user.getEmail() //
+                    + " on " + tenant.getName(), e);
         }
     }
 
@@ -710,8 +720,7 @@ public class EmailServiceImpl implements EmailService {
             sendMultiPartEmail(EmailSettings.S3_CREDENTIALS_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
             log.info("Sending s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " "
-                    + e.getMessage());
+            log.error("Failed to send s3 credentials email to " + user.getEmail() + " on " + tenant.getName(), e);
         }
     }
 
@@ -754,8 +763,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending cdl ingestion status " + status + " email to " + user.getEmail() + " on "
                     + tenant.getName() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName(), e);
         }
     }
 
@@ -779,8 +787,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending s3 template create notification to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send s3 template create notification to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send s3 template create notification to " + user.getEmail() + " on " + tenant.getName(), e);
         }
     }
 
@@ -804,8 +811,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending s3 template update notification to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send s3 template update notification to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send s3 template update notification to " + user.getEmail() + " on " + tenant.getName(), e);
         }
     }
 
@@ -830,7 +836,7 @@ public class EmailServiceImpl implements EmailService {
                 log.info("Sending PLS action cancel success email to " + user.getEmail() + " succeeded.");
             }
         } catch (Exception e) {
-            log.error("Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS action cancel success email to " + user.getEmail(), e);
         }
     }
 
@@ -853,7 +859,7 @@ public class EmailServiceImpl implements EmailService {
                 log.info("Sending upload completed email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
             }
         } catch (Exception e) {
-            log.error("Failed to send upload completed email to " + uploadEmailInfo.getRecipientList().toString() + " " + e.getMessage());
+            log.error("Failed to send upload completed email to " + uploadEmailInfo.getRecipientList().toString(), e);
         }
     }
 
@@ -876,7 +882,7 @@ public class EmailServiceImpl implements EmailService {
                 log.info("Sending upload failed email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
             }
         } catch (Exception e) {
-            log.error("Failed to send upload failed email to " + uploadEmailInfo.getRecipientList().toString() + " " + e.getMessage());
+            log.error("Failed to send upload failed email to " + uploadEmailInfo.getRecipientList().toString(), e);
         }
     }
 }
