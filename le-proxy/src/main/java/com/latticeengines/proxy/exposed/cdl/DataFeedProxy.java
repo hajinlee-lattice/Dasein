@@ -214,10 +214,25 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(rawList, SourceInfo.class);
     }
 
+    public List<SourceInfo> getSourcesByProjectId(String customerSpace, String projectId, int pageIndex, int pageSize) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/projectId/{projectId}" +
+                        "?pageIndex={pageIndex}&pageSize={pageSize}",
+                shortenCustomerSpace(customerSpace), projectId, Integer.toString(pageIndex),
+                Integer.toString(pageSize));
+        List<?> rawList = get("getSourcesByProjectId", url, List.class);
+        return JsonUtils.convertList(rawList, SourceInfo.class);
+    }
+
     public Long countSourcesBySystemPid(String customerSpace, Long systemPid) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/count/systemPid/{systemPid}",
                 shortenCustomerSpace(customerSpace), systemPid);
         return get("countSourcesBySystemPid", url, Long.class);
+    }
+
+    public Long countSourcesByProjectId(String customerSpace, String projectId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/count/projectId/{projectId}",
+                shortenCustomerSpace(customerSpace), projectId);
+        return get("countSourcesByProjectId", url, Long.class);
     }
 
     public S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskId) {
