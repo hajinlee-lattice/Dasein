@@ -112,6 +112,7 @@ public class UploadServiceImpl implements UploadService {
         upload.setTenant(MultiTenantContext.getTenant());
         upload.setStatus(Upload.Status.NEW);
         upload.setUploadConfig(uploadConfig);
+        upload.setProgressPercentage(0.0);
         uploadEntityMgr.create(upload);
 
         return getUploadDetails(upload, Boolean.TRUE);
