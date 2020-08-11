@@ -15,8 +15,9 @@ public class XSSSanitizer {
         try {
             policy = Policy.getInstance(antiSamyProfile);
             antiSamy = new AntiSamy();
+            log.info(String.format("Succeeded to initialize AntiSamy. Policy file: {%s}", antiSamyProfile));
         } catch (PolicyException e) {
-            log.warn(String.format("Failed to initialize AntiSamy Policy from file: {%s}.", antiSamyProfile), e);
+            log.warn(String.format("Failed to initialize AntiSamy. Policy file: {%s}.", antiSamyProfile), e);
         }
     }
 
@@ -29,8 +30,10 @@ public class XSSSanitizer {
             value = value.replaceAll("\0", "");
 
             // Use AntiSamy for filtering
-            CleanResults cr = antiSamy.scan(value, policy);
-            value = cr.getCleanHTML();
+            if (antiSamy != null) {
+                CleanResults cr = antiSamy.scan(value, policy);
+                value = cr.getCleanHTML();
+            }
         } catch(ScanException e) {
             log.warn(String.format("AntiSamey failed to scan the user input value: {%s}.", value), e);
         } catch(Exception e) {
