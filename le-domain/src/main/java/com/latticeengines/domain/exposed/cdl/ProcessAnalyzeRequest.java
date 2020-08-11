@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -87,6 +88,10 @@ public class ProcessAnalyzeRequest {
 
     @JsonProperty("CurrentPATimestamp")
     private Long currentPATimestamp;
+
+    // workflow tags
+    @JsonProperty("Tags")
+    private Map<String, String> tags;
 
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
@@ -214,5 +219,13 @@ public class ProcessAnalyzeRequest {
 
     public void setCurrentPATimestamp(Long currentPATimestamp) {
         this.currentPATimestamp = currentPATimestamp;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 }

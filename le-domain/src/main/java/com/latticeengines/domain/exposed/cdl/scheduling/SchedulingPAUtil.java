@@ -9,6 +9,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.AutoScheduleSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.DataCloudRefreshSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.RetrySchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.ScheduleNowSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public final class SchedulingPAUtil {

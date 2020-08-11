@@ -13,16 +13,16 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.scheduling.AutoScheduleSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.DataCloudRefreshSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.RetrySchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATestTimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.AutoScheduleSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.DataCloudRefreshSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.RetrySchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.ScheduleNowSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAQueueUnitTestNG {

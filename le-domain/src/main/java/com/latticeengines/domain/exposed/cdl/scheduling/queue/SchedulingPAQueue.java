@@ -1,16 +1,25 @@
-package com.latticeengines.domain.exposed.cdl.scheduling;
+package com.latticeengines.domain.exposed.cdl.scheduling.queue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.ConstraintValidationResult;
 
 
 public class SchedulingPAQueue<T extends SchedulingPAObject> {
@@ -29,6 +38,9 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     private final String queueName;
 
+    // tenant ID -> reason
+    private final Map<String, String> constraintViolationReasons;
+
     public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, String queueName) {
         this(systemStatus, clz, timeClock, false, queueName);
     }
@@ -41,6 +53,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         this.isRetryQueue = isRetryQueue;
         this.queueName = queueName;
         priorityQueue = new PriorityQueue<>();
+        constraintViolationReasons = new HashMap<>();
     }
 
     public List<String> getAll() {
@@ -57,6 +70,10 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     public TimeClock getTimeClock() {
         return timeClock;
+    }
+
+    public Map<String, String> getConstraintViolationReasons() {
+        return constraintViolationReasons;
     }
 
     /**
@@ -84,7 +101,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      */
     public void add(T priorityObject) {
         if (checkConstraint(systemStatus, priorityObject.getTenantActivity(),
-                priorityObject.getPushConstraints())) {
+                priorityObject.getPushConstraints(), false)) {
             priorityQueue.add(priorityObject);
         }
     }
@@ -163,7 +180,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
     private T peekFromPriorityQueue(PriorityQueue<T> priorityQueue) {
         T priorityObject = priorityQueue.peek();
         while (priorityObject != null && !checkConstraint(systemStatus,
-                priorityObject.getTenantActivity(), priorityObject.getPopConstraints())) {
+                priorityObject.getTenantActivity(), priorityObject.getPopConstraints(), false)) {
             priorityQueue.poll();
             priorityObject = priorityQueue.peek();
         }
@@ -177,10 +194,8 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      */
     private T pollFromPriorityQueue(PriorityQueue<T> priorityQueue) {
         T priorityObject = priorityQueue.poll();
-        while (priorityObject != null && !checkConstraint(systemStatus,
-                priorityObject.getTenantActivity(),
-                priorityObject.getPopConstraints()
-                )) {
+        while (priorityObject != null && !checkConstraint(systemStatus, priorityObject.getTenantActivity(),
+                priorityObject.getPopConstraints(), true)) {
             priorityObject = priorityQueue.poll();
         }
         if (priorityObject == null) {
@@ -194,13 +209,16 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * this method is used when schedulingPAObject push into queue (pop from queue). check if this object can push into
      * queue(pop from queue) or not.
      */
-    private boolean checkConstraint(SystemStatus systemStatus,
-                                    TenantActivity tenantActivity,
-                              List<Constraint> constraintList) {
+    private boolean checkConstraint(SystemStatus systemStatus, TenantActivity tenantActivity,
+            List<Constraint> constraintList, boolean recordViolationReason) {
         boolean violated = false;
         for (Constraint constraint : constraintList) {
-            if (constraint.checkViolated(systemStatus, tenantActivity, timeClock)) {
+            ConstraintValidationResult result = constraint.validate(systemStatus, tenantActivity, timeClock);
+            if (result.isViolated()) {
                 violated = true;
+                if (recordViolationReason && StringUtils.isNotBlank(result.getReason())) {
+                    constraintViolationReasons.put(tenantActivity.getTenantId(), result.getReason());
+                }
                 break;
             }
         }
