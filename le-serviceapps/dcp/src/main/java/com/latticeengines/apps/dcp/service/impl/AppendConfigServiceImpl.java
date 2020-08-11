@@ -207,8 +207,17 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     }
 
     private static DataDomain parseDataDomain(String productName) {
-        if (productName.contains("Sales") && productName.contains("Marketing")) {
+        String productNameLower = productName.toLowerCase();
+        if (productNameLower.contains("sales") && productNameLower.contains("marketing")) {
             return DataDomain.SalesMarketing;
+        } else if (productNameLower.contains("finance")) {
+            return DataDomain.Finance;
+        } else if (productNameLower.contains("supply")) {
+            return DataDomain.Supply;
+        } else if (productNameLower.contains("compliance")) {
+            return DataDomain.Compliance;
+        } else if (productNameLower.contains("master")) {
+            return DataDomain.EnterpriseMasterData;
         } else {
             log.warn("Unknown product name [{}]", productName);
             return null;
@@ -216,12 +225,12 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     }
 
     private static DataRecordType parseDataRecordType(String packageName) {
-        if (packageName.toLowerCase().contains("domain")) {
-            return DataRecordType.Domain;
-        } else if (packageName.toLowerCase().contains("master")) {
+        if (packageName.toLowerCase().contains("master")) {
             return DataRecordType.MasterData;
         } else if (packageName.toLowerCase().contains("analytical")) {
             return DataRecordType.Analytical;
+        } else if (packageName.toLowerCase().contains("domain")) {
+            return DataRecordType.Domain;
         } else {
             log.warn("Unknown package name [{}]", packageName);
             return null;
