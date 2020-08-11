@@ -106,7 +106,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     public List<GlobalAuthTeam> getTeams(boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         return globalAuthTeamEntityMgr.findByTenantId(tenantData.getPid(), withTeamMember).stream()
-                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getName())).collect(Collectors.toList());
+                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getTeamId())).collect(Collectors.toList());
     }
 
     @Override
@@ -118,7 +118,8 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     @Override
     public List<GlobalAuthTeam> getTeamsByUserName(String username, boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        return globalAuthTeamEntityMgr.findByUsernameAndTenantId(tenantData.getPid(), username, withTeamMember);
+        return globalAuthTeamEntityMgr.findByUsernameAndTenantId(tenantData.getPid(), username, withTeamMember).stream()
+                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getTeamId())).collect(Collectors.toList());
     }
 
     @Override
