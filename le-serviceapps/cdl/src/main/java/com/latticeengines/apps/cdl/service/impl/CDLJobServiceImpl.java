@@ -344,7 +344,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 sb.append(String.format("Tenant %s is running PA job. ", dataFeed.getTenant().getId()));
             }
         } else {
-            List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types,
+            List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, null, types,
                     jobStatuses, null);
             for (WorkflowJob job : runningPAJobs) {
                 appIdMap.remove(job.getApplicationId());
@@ -798,8 +798,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         jobStatus.add(JobStatus.CANCELLED.getName());
         jobStatus.add(JobStatus.COMPLETED.getName());
         if (StringUtils.isNotEmpty(clusterId)) {
-            List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, exportTypes,
-                    jobStatus, null);
+            List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, null,
+                    exportTypes, jobStatus, null);
             if (CollectionUtils.isNotEmpty(workflowJobs)) {
                 for (WorkflowJob workflowJob : workflowJobs) {
                     if (workflowJob.getStatus() == JobStatus.COMPLETED.getName()

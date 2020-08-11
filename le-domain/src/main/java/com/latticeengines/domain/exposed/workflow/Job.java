@@ -387,14 +387,16 @@ public class Job implements HasId<Long>, HasName {
     public static class SchedulingInfo {
         private boolean schedulerEnabled;
         private boolean scheduled;
+        private boolean hasScheduleNowQuota;
         private String message;
 
         public SchedulingInfo() {
         }
 
-        public SchedulingInfo(boolean schedulerEnabled, boolean scheduled) {
+        public SchedulingInfo(boolean schedulerEnabled, boolean scheduled, boolean hasScheduleNowQuota) {
             this.schedulerEnabled = schedulerEnabled;
             this.scheduled = scheduled;
+            this.hasScheduleNowQuota = hasScheduleNowQuota;
         }
 
         public void setSchedulerEnabled(boolean schedulerEnabled) {
@@ -411,6 +413,14 @@ public class Job implements HasId<Long>, HasName {
 
         public boolean isScheduled() {
             return scheduled;
+        }
+
+        public boolean isHasScheduleNowQuota() {
+            return hasScheduleNowQuota;
+        }
+
+        public void setHasScheduleNowQuota(boolean hasScheduleNowQuota) {
+            this.hasScheduleNowQuota = hasScheduleNowQuota;
         }
 
         public String getMessage() {

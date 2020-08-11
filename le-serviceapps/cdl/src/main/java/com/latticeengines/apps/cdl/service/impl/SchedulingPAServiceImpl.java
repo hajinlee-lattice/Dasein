@@ -463,8 +463,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private Map<String, List<WorkflowJob>> getRecentlyCompletedPAs() {
         try {
             long earliestStartTime = Instant.now().minus(RECENT_PA_LOOK_BACK_DAYS, ChronoUnit.DAYS).toEpochMilli();
-            List<WorkflowJob> jobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(null, singletonList(PA_JOB_TYPE),
-                    singletonList(JobStatus.COMPLETED.getName()), earliestStartTime);
+            List<WorkflowJob> jobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(null, null,
+                    singletonList(PA_JOB_TYPE), singletonList(JobStatus.COMPLETED.getName()), earliestStartTime);
             log.info("There are {} completed PAs in last {} days", CollectionUtils.size(jobs),
                     RECENT_PA_LOOK_BACK_DAYS);
 
