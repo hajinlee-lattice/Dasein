@@ -6,7 +6,9 @@ import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstant
 import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.RECENT_PA_LOOK_BACK_DAYS;
 import static java.util.Collections.singletonList;
 
+import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +36,7 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.PAQuotaService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.PAQuotaSummary;
@@ -59,6 +63,9 @@ public class SchedulingPAQueueResource {
 
     @Inject
     private ActiveStackInfoService activeStackInfoService;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private CDLJobService cdlJobService;
@@ -155,13 +162,14 @@ public class SchedulingPAQueueResource {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
         Preconditions.checkArgument(tenant != null && tenant.getPid() != null,
                 String.format("cannot find tenant with ID [%s]", customerSpace));
-        // TODO get tenant specific timezone
+        Pair<ZoneId, Boolean> result = getTenantTimezone(customerSpace);
+        ZoneId timezone = result.getKey();
         long earliestStartTime = Instant.now().minus(RECENT_PA_LOOK_BACK_DAYS, ChronoUnit.DAYS).toEpochMilli();
         List<WorkflowJob> completedPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(null,
                 tenant.getPid(), singletonList(PA_JOB_TYPE), singletonList(JobStatus.COMPLETED.getName()),
                 earliestStartTime);
-        log.info("Retrieving PA quota info for tenant {}, no. completed PAs in last {} days = {}", customerSpace,
-                RECENT_PA_LOOK_BACK_DAYS, CollectionUtils.size(completedPAJobs));
+        log.info("Retrieving PA quota info for tenant {} (timezone = {}), no. completed PAs in last {} days = {}",
+                customerSpace, timezone, RECENT_PA_LOOK_BACK_DAYS, CollectionUtils.size(completedPAJobs));
         List<WorkflowJob> completedJobs = CollectionUtils.emptyIfNull(completedPAJobs).stream() //
                 .filter(Objects::nonNull) //
                 .filter(job -> job.getTenant() != null && StringUtils.isNotBlank(job.getTenant().getId())) //
@@ -170,6 +178,24 @@ public class SchedulingPAQueueResource {
                     return shortTenantId.equals(tenantId);
                 }) //
                 .collect(Collectors.toList());
-        return paQuotaService.getPAQuotaSummary(customerSpace, completedJobs, null, null);
+        PAQuotaSummary summary = paQuotaService.getPAQuotaSummary(customerSpace, completedJobs, null, timezone);
+        if (timezone != null) {
+            summary.setTimezone(timezone.toString());
+        } else if (result.getRight()) {
+            // TODO return invalid timezone value
+            summary.setTimezone("Timezone configured for this tenant does not have the correct format");
+        }
+        return summary;
+    }
+
+    // timezone, flag to indicate parsing error
+    private Pair<ZoneId, Boolean> getTenantTimezone(String customerSpace) {
+        try {
+            ZoneId timezone = batonService.getTenantTimezone(CustomerSpace.parse(customerSpace));
+            return Pair.of(timezone, false);
+        } catch (DateTimeException e) {
+            log.error("timezone configured for tenant {} is not valid", customerSpace);
+            return Pair.of(null, true);
+        }
     }
 }

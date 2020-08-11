@@ -67,7 +67,6 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.PASchedulerConfig;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
@@ -300,10 +299,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
                 tenantActivity.setScheduleTime(
                         tenantActivity.isScheduledNow() ? simpleDataFeed.getScheduleTime().getTime() : null);
-                // TODO get tenant specific timezone
+
+                ZoneId timezone = batonService.getTenantTimezone(CustomerSpace.parse(tenantId));
                 tenantActivity.setNotExceededQuotaNames(
                         getNotExceededQuotaNames(recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)),
-                                tenantId, SchedulerConstants.DEFAULT_TIMEZONE));
+                                tenantId, timezone));
 
                 // auto scheduling
                 if (actionStats.containsKey(tenant.getPid())) {
