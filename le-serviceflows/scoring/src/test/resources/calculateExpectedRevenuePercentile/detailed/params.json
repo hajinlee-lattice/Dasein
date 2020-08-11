@@ -1,6 +1,5 @@
 {
   "calculateExpectedRevenuePercentileParameters": {
-    "no_flink": false,
     "input_table_name": "InputTable",
     "percentile_field_name": "ExpectedRevenuePercentile",
     "original_score_field_map": {
@@ -1551,7 +1550,7 @@
           "buckets": null
         }
       }
-    
+
    },
     "model_guid_field": "Model_GUID",
     "percentile_lower_bound": 5,
