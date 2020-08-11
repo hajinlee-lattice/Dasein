@@ -80,9 +80,10 @@ public class AggActivityStreamToDaily
 
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
-    private Set<String> streamsIncrUpdated = new HashSet<>();
+    private final Set<String> streamsIncrUpdated = new HashSet<>();
     private Set<String> streamsPerformedDelete = new HashSet<>();
-    private Map<String, String> relinkedDailyStores = new HashMap<>();
+    private final Map<String, String> relinkedDailyStores = new HashMap<>();
+    private Set<String> catalogsWithImports;
 
     @Override
     protected AggDailyActivityConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
@@ -90,6 +91,7 @@ public class AggActivityStreamToDaily
             return null;
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        catalogsWithImports = getCatalogsWithNewImports();
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
@@ -106,7 +108,7 @@ public class AggActivityStreamToDaily
                 .collect(Collectors.toSet());
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         config.incrementalStreams = notSkippedStream.stream()
-                .filter(stream -> shouldIncrUpdate(stream.getStreamId()) && rawStreamDeltaTables.get(stream.getStreamId()) != null)
+                .filter(stream -> shouldIncrUpdate(stream) && rawStreamDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId)
                 .collect(Collectors.toSet());
         streamsIncrUpdated.addAll(config.incrementalStreams);
@@ -200,6 +202,12 @@ public class AggActivityStreamToDaily
         }
     }
 
+    private Set<String> getCatalogsWithNewImports() {
+        Set<String> catalogs = hasKeyInContext(CATALOG_NEW_IMPORT) ? getSetObjectFromContext(CATALOG_NEW_IMPORT, String.class) : Collections.emptySet();
+        log.info("Catalogs with new imports: {}", catalogs);
+        return catalogs;
+    }
+
     private void relinkStreams(Set<String> streamsToRelink) {
         if (CollectionUtils.isNotEmpty(streamsToRelink)) {
             log.info("Streams to relink to inactive version: {}", streamsToRelink);
@@ -234,8 +242,14 @@ public class AggActivityStreamToDaily
         return allTablesExist(dailyTableNames);
     }
 
-    private boolean shouldIncrUpdate(String streamId) {
-        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(streamId);
+    private boolean shouldIncrUpdate(AtlasStream stream) {
+        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(stream.getStreamId())
+                && noCatalogHasImport(stream);
+    }
+
+    private boolean noCatalogHasImport(AtlasStream stream) {
+        return stream.getDimensions().stream().filter(dim -> dim.getCatalog() != null)
+                .noneMatch(dim -> catalogsWithImports.contains(dim.getCatalog().getCatalogId()));
     }
 
     @Override

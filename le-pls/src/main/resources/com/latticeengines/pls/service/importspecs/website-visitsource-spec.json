@@ -4,6 +4,21 @@
     "fieldDefinitionsRecordsMap": {
         "General": [
             {
+                "fieldName": "Name",
+                "fieldType": "TEXT",
+                "screenName": "Name",
+                "columnName": "Name",
+                "matchingColumnNames": [
+                    "NAME"
+                ],
+                "required": true,
+                "nullable": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
                 "fieldName": "SourceMedium",
                 "fieldType": "TEXT",
                 "screenName": "Referral Source",

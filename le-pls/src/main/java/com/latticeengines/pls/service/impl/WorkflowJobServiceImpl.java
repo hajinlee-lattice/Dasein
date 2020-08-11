@@ -322,6 +322,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         // make it as if old job is still running
                         job.setJobStatus(JobStatus.RUNNING);
                     }
+                    // when job failed and no further retry will be performed, not set the flag
+                    // since UI will display a different tooltip
+                    if (job.getJobStatus() != JobStatus.FAILED) {
+                        job.setJobRetried(true);
+                    }
 
                     if (CollectionUtils.isNotEmpty(retriedJob.getSteps())) {
                         // merge steps, use restarted job's step first
@@ -384,6 +389,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 .forEach(job -> {
                     if (hideRetriedPA && pendingRetryPAId != null && pendingRetryPAId.equals(job.getId())) {
                         job.setJobStatus(JobStatus.RUNNING);
+                        // set the flag when job can but not yet retried
+                        job.setJobRetried(true);
                         if (CollectionUtils.isNotEmpty(job.getSteps())) {
                             List<JobStep> steps = job.getSteps();
                             JobStep lastStep = steps.get(steps.size() - 1);

@@ -66,6 +66,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
 
     private final Map<String, Table> periodStoreTables = new HashMap<>();
 
+    private Set<String> catalogsWithImports;
+
 
     @Override
     protected Class<? extends AbstractSparkJob<DailyStoreToPeriodStoresJobConfig>> getJobClz() {
@@ -75,6 +77,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     @Override
     protected DailyStoreToPeriodStoresJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        catalogsWithImports = getCatalogsWithNewImports();
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Set<String> skippedStreamIds = getSkippedStreamIds();
@@ -95,7 +98,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
         Map<String, Table> dailyDeltaTables = getTablesFromMapCtxKey(customerSpace.toString(), DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME);
         config.incrementalStreams = config.streams.stream()
-                .filter(stream -> shouldIncrUpdate(stream.getStreamId()) && dailyDeltaTables.get(stream.getStreamId()) != null)
+                .filter(stream -> shouldIncrUpdate(stream) && dailyDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId).collect(Collectors.toSet());
 
         log.info("Generating period stores. tenant: {}; evaluation date: {}", customerSpace, config.evaluationDate);
@@ -236,7 +239,19 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         return streams;
     }
 
-    private boolean shouldIncrUpdate(String streamId) {
-        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(streamId);
+    private Set<String> getCatalogsWithNewImports() {
+        Set<String> catalogs = hasKeyInContext(CATALOG_NEW_IMPORT) ? getSetObjectFromContext(CATALOG_NEW_IMPORT, String.class) : Collections.emptySet();
+        log.info("Catalogs with new imports: {}", catalogs);
+        return catalogs;
+    }
+
+    private boolean shouldIncrUpdate(AtlasStream stream) {
+        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(stream.getStreamId())
+                && noCatalogHasImport(stream);
+    }
+
+    private boolean noCatalogHasImport(AtlasStream stream) {
+        return stream.getDimensions().stream().filter(dim -> dim.getCatalog() != null)
+                .noneMatch(dim -> catalogsWithImports.contains(dim.getCatalog().getCatalogId()));
     }
 }

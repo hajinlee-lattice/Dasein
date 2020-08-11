@@ -76,6 +76,14 @@ public class UploadResource {
         }
     }
 
+    @GetMapping("/hasunterminal")
+    @ResponseBody
+    @ApiOperation(value = "has unterminal upload")
+    public Boolean hasUnterminalUploads(@PathVariable String customerSpace,
+                                       @RequestParam(value = "exclude")  String excludeUploadId) {
+        return uploadService.hasUnterminalUploads(customerSpace, excludeUploadId);
+    }
+
     @GetMapping("/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by uploadId")

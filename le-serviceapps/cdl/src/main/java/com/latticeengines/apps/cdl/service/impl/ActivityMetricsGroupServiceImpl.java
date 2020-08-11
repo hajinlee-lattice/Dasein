@@ -157,7 +157,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
         sourceMedium.setCategory(Category.WEB_VISIT_PROFILE);
         sourceMedium.setSubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY));
-        sourceMedium.setDisplayNameTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME));
+        sourceMedium.setDisplayNameTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUMNAME_DISPLAYNAME));
         sourceMedium.setDescriptionTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION));
         sourceMedium.setNullImputation(NullMetricsImputation.ZERO);
         sourceMedium.setSecondarySubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SECONDARY_SUBCATEGORY));
