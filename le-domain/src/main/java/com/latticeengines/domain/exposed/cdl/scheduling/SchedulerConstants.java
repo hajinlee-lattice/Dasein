@@ -13,7 +13,7 @@ public final class SchedulerConstants {
     public static final String QUOTA_AUTO_SCHEDULE = "AutoSchedule";
 
     public static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
-    public static final ZoneId DEFAULT_TIMEZONE = ZoneId.of("UTC");
+    public static final ZoneId DEFAULT_TIMEZONE = ZoneId.of("America/Los_Angeles");
     public static final long RECENT_PA_LOOK_BACK_DAYS = 2L;
 
     protected SchedulerConstants() {
