@@ -25,6 +25,7 @@ public class AccessLevelUnitTestNG {
                 AccessLevel.INTERNAL_ANALYST, //
                 AccessLevel.INTERNAL_USER, //
                 AccessLevel.EXTERNAL_ADMIN, //
+                AccessLevel.BUSINESS_ANALYST,
                 AccessLevel.EXTERNAL_USER, //
                 AccessLevel.THIRD_PARTY_USER //
         };
