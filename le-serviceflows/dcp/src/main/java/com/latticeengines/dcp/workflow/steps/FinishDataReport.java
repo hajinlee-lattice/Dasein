@@ -17,10 +17,12 @@ public class FinishDataReport  extends BaseSparkStep<RollupDataReportStepConfigu
 
     @Override
     public void execute() {
+        customerSpace = configuration.getCustomerSpace();
+        String customerSpaceStr = customerSpace.toString();
         Set<String> names = getSetObjectFromContext(DUNS_COUNT_TABLE_NAMES, String.class);
         names.forEach(tableName -> {
             registerTable(tableName);
-            Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(), tableName);
+            Table table = metadataProxy.getTable(customerSpaceStr, tableName);
             exportToS3(table);
         });
     }
