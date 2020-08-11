@@ -1326,6 +1326,13 @@
                 <artifactId>jaxws-ri</artifactId>
                 <version>${javax.ws.version}</version>
                 <type>pom</type>
+                <exclusions>
+                    <exclusion> <!-- The jaxws-ri dependency has a dependency that has a dependency of
+                                    an outdated version of java mail.  This exclusion is needed to handle that. -->
+                        <groupId>javax.mail</groupId>
+                        <artifactId>mail</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>javax.xml.bind</groupId>
