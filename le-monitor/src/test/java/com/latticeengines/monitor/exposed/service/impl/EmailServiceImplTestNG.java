@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -299,6 +301,36 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending s3 template update notification"));
+    }
+
+    /**
+     * Test the email sent when an upload is complete.
+     */
+    @Test(groups = "functional")
+    public void sendUploadCompleteEmail() {
+        UploadEmailInfo uploadEmailInfo = new UploadEmailInfo();
+        List<String> recipientList = Arrays.asList(user.getEmail());
+        uploadEmailInfo.setRecipientList(recipientList);
+        uploadEmailInfo.setUploadDisplayName("Successful upload functional test");
+        uploadEmailInfo.setSourceDisplayName("Source Display Name");
+        uploadEmailInfo.setProjectDisplayName("Project Display Name");
+
+        emailService.sendUploadCompletedEmail(uploadEmailInfo);
+    }
+
+    /**
+     * Test the email send when an upload fails.
+     */
+    @Test(groups = "functional")
+    public void sendUploadFailedEmail() {
+        UploadEmailInfo uploadEmailInfo = new UploadEmailInfo();
+
+        uploadEmailInfo.setRecipientList(Arrays.asList(user.getEmail()));
+        uploadEmailInfo.setUploadDisplayName("Successful upload functional test");
+        uploadEmailInfo.setSourceDisplayName("Source Display Name");
+        uploadEmailInfo.setProjectDisplayName("Project Display Name");
+
+        emailService.sendUploadFailedEmail(uploadEmailInfo);
     }
 
 }
