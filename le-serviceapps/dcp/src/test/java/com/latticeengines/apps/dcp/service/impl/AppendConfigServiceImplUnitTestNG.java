@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementCo
 
 public class AppendConfigServiceImplUnitTestNG {
 
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit")
     public void testDefaultEntitlement() {
         DataBlockEntitlementContainer container = AppendConfigServiceImpl.getDefaultEntitlement();
         Assert.assertNotNull(container);
@@ -26,7 +26,7 @@ public class AppendConfigServiceImplUnitTestNG {
         Assert.assertEquals(container.getDomains().get(0).getRecordTypes().get(MasterData).size(), 3);
     }
 
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit")
     public void parseIDaaSEntitlement() throws IOException {
         InputStream is = new ClassPathResource("append-config/idaas-entitlement.json").getInputStream();
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());

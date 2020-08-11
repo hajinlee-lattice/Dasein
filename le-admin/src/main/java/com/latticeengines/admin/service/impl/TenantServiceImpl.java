@@ -797,6 +797,7 @@ public class TenantServiceImpl implements TenantService {
         iDaasuser.setLanguage(subscriber.getLanguage());
         iDaasuser.setSubscriberNumber(subscriber.getSubscriberNumber());
         iDaasuser.setCountryCode(user.getPrimaryAddress().getCountryISOAlpha2Code());
+        iDaasuser.setCompanyName(subscriber.getName());
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
                 "Last name is required");
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
