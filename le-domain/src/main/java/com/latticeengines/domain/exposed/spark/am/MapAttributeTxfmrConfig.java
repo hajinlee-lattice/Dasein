@@ -29,6 +29,9 @@ public class MapAttributeTxfmrConfig extends TblDrivenTxfmrConfig implements Ser
     @JsonProperty("IsDedupe")
     private Boolean isDedupe = Boolean.TRUE;
 
+    @JsonProperty("IsFilterChange")
+    private Boolean isFilterChange = Boolean.TRUE;
+
     @JsonProperty("TimestampField")
     private String timestampField;
 
@@ -83,6 +86,14 @@ public class MapAttributeTxfmrConfig extends TblDrivenTxfmrConfig implements Ser
 
     public void setIsDedupe(Boolean isDedupe) {
         this.isDedupe = isDedupe;
+    }
+
+    public Boolean getIsFilterChange() {
+        return isFilterChange;
+    }
+
+    public void setIsFilterChange(Boolean isFilterChange) {
+        this.isFilterChange = isFilterChange;
     }
 
     public List<JoinConfig> getJoinConfigs() {
