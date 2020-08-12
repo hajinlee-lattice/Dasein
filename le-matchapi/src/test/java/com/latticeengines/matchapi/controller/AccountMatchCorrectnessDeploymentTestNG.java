@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -153,6 +154,7 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         input.setInputBuffer(prepareBulkData(inputFile));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
         return input;
     }
 

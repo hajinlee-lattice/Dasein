@@ -4,6 +4,8 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENT
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Domain;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.SystemId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLTemplateName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
@@ -13,8 +15,6 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerC
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Email;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -500,6 +501,7 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         input.setInputBuffer(buffer);
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
         return input;
     }
 

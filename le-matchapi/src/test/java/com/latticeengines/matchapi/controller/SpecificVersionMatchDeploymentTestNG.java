@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -112,6 +113,7 @@ public class SpecificVersionMatchDeploymentTestNG extends AdvancedMatchDeploymen
         input.setInputBuffer(testDataBuffer);
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
         return input;
     }
 
