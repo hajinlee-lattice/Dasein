@@ -18,24 +18,37 @@ public class UploadJobDetails {
     @JsonProperty("uploadId")
     private String uploadId;
 
+    @JsonProperty("displayName")
+    private String displayName;
+
+    @JsonProperty("sourceDisplayName")
+    private String sourceDisplayName;
+
     @JsonProperty("status")
     @Enumerated(EnumType.STRING)
     private Upload.Status status;
-
-    @JsonProperty("currentStep")
-    private UploadJobStep currentStep;
-
-    @JsonProperty("uploadJobSteps")
-    private List<UploadJobStep> uploadJobSteps;
-
-    @JsonProperty("progressPercentage")
-    private Double progressPercentage;
 
     @JsonProperty("uploadStats")
     public UploadStats statistics;
 
     @JsonProperty("uploadDiagnostics")
     public UploadDiagnostics uploadDiagnostics;
+
+    @JsonProperty("uploadJobSteps")
+    private List<UploadJobStep> uploadJobSteps;
+
+    @JsonProperty("dropFileTime")
+    private Long dropFileTime;
+
+    @JsonProperty("uploadCreatedTime")
+    private Long uploadCreatedTime;
+
+    @JsonProperty("currentStep")
+    private UploadJobStep currentStep;
+
+    @JsonProperty("progressPercentage")
+    private Double progressPercentage;
+
 
     public String getUploadId() {
         return uploadId;
@@ -45,28 +58,27 @@ public class UploadJobDetails {
         this.uploadId = uploadId;
     }
 
-    public UploadJobStep getCurrentStep() {
-        return currentStep;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setCurrentStep(UploadJobStep currentStep) {
-        this.currentStep = currentStep;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    public List<UploadJobStep> getUploadJobSteps() {
-        return uploadJobSteps;
+    public String getSourceDisplayName() {
+        return sourceDisplayName;
     }
 
-    public void setUploadJobSteps(List<UploadJobStep> uploadJobSteps) {
-        this.uploadJobSteps = uploadJobSteps;
+    public void setSourceDisplayName(String sourceDisplayName) {
+        this.sourceDisplayName = sourceDisplayName;
     }
 
-    public Double getProgressPercentage() {
-        return progressPercentage;
+    public Upload.Status getStatus() {
+        return status;
     }
-
-    public void setProgressPercentage(Double progressPercentage) {
-        this.progressPercentage = progressPercentage;
+    public void setStatus(Upload.Status status) {
+        this.status = status;
     }
 
     public UploadStats getStatistics() {
@@ -85,11 +97,43 @@ public class UploadJobDetails {
         this.uploadDiagnostics = uploadDiagnostics;
     }
 
-    public Upload.Status getStatus() {
-        return status;
+    public List<UploadJobStep> getUploadJobSteps() {
+        return uploadJobSteps;
     }
 
-    public void setStatus(Upload.Status status) {
-        this.status = status;
+    public void setUploadJobSteps(List<UploadJobStep> uploadJobSteps) {
+        this.uploadJobSteps = uploadJobSteps;
+    }
+
+    public Long getDropFileTime() {
+        return dropFileTime;
+    }
+
+    public void setDropFileTime(Long dropFileTime) {
+        this.dropFileTime = dropFileTime;
+    }
+
+    public Long getUploadCreatedTime() {
+        return uploadCreatedTime;
+    }
+
+    public void setUploadCreatedTime(Long uploadCreatedTime) {
+        this.uploadCreatedTime = uploadCreatedTime;
+    }
+
+    public void setCurrentStep(UploadJobStep currentStep) {
+        this.currentStep = currentStep;
+    }
+
+    public UploadJobStep getCurrentStep() {
+        return currentStep;
+    }
+
+    public Double getProgressPercentage() {
+        return progressPercentage;
+    }
+
+    public void setProgressPercentage(Double progressPercentage) {
+        this.progressPercentage = progressPercentage;
     }
 }
