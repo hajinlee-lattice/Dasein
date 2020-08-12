@@ -19,10 +19,10 @@ import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
-@Component("locationBasedMicroEngineActor")
+@Component("urlToDunsMicroEngineActor")
 @Scope("prototype")
-public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
-    private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
+public class UrlToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
+    private static final Logger log = LoggerFactory.getLogger(UrlToDunsMicroEngineActor.class);
 
     @PostConstruct
     public void postConstruct() {
@@ -38,9 +38,8 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
 
-        // If already tried to get DUNS from LocationToCachedDunsActor or
-        // LocationToDunsActor
-        if (triedDunsFromLocation(traveler)) {
+        // If already tried to get DUNS from this actor
+        if (triedThisActorBefore(traveler)) {
             return false;
         }
 
@@ -49,24 +48,21 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
             return false;
         }
 
-        boolean hasName = StringUtils.isNotBlank(matchKeyTuple.getName());
-        boolean hasRegNumber = StringUtils.isNotBlank(matchKeyTuple.getRegistrationNumber());
-        return hasName || hasRegNumber;
+        return StringUtils.isNotBlank(matchKeyTuple.getDomain());
     }
 
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
-        traveler.setDunsMatchMode(MatchTraveler.LOCATION_TO_DUNS);
-        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.LOCATION_DUNS, traveler.getMatchKeyTuple()));
+        traveler.setDunsMatchMode(MatchTraveler.URL_TO_DUNS);
+        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.DUNS_DUNS, traveler.getMatchKeyTuple()));
     }
 
-    private boolean triedDunsFromLocation(MatchTraveler traveler) {
+    private boolean triedThisActorBefore(MatchTraveler traveler) {
         Map<String, String> dunsOriginMap = traveler.getDunsOriginMap();
         if (MapUtils.isEmpty(dunsOriginMap)) {
             return false;
         }
-        return dunsOriginMap.containsKey(this.getClass().getName())
-                || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName());
+        return dunsOriginMap.containsKey(this.getClass().getName());
     }
 
     @Override
