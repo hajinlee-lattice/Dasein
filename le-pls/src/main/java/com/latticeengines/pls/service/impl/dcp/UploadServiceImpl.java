@@ -38,6 +38,7 @@ import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
@@ -51,6 +52,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.dcp.UploadService;
+import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
 @Service
@@ -77,6 +79,9 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
 
     @Inject
     private WorkflowJobService workflowJobService;
+
+    @Inject
+    private SourceProxy sourceProxy;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -346,9 +351,13 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         UploadJobDetails uploadJobDetails = new UploadJobDetails();
         uploadJobDetails.setUploadId(uploadId);
         UploadDetails uploadDetails = getByUploadId(uploadId, false);
+        uploadJobDetails.setDisplayName(uploadDetails.getDisplayName());
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        Source source = sourceProxy.getSource(customerSpace, uploadDetails.getSourceId());
+        uploadJobDetails.setSourceDisplayName(source.getSourceDisplayName());
         uploadJobDetails.setStatus(uploadDetails.getStatus());
-        uploadJobDetails.setUploadDiagnostics(uploadDetails.getUploadDiagnostics());
         uploadJobDetails.setStatistics(uploadDetails.getStatistics());
+        uploadJobDetails.setUploadDiagnostics(uploadDetails.getUploadDiagnostics());
         Job job = workflowJobService.findByApplicationId(uploadDetails.getUploadDiagnostics().getApplicationId());
         List<UploadJobStep> uploadJobSteps = new ArrayList<>();
         if (job != null && job.getSteps() != null && !job.getSteps().isEmpty()) {
@@ -363,8 +372,10 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         }
         List<UploadJobStep>mergedJobSteps = mergeDupSteps(uploadJobSteps);
         uploadJobDetails.setUploadJobSteps(mergedJobSteps);
+        uploadJobDetails.setDropFileTime(uploadDetails.getDropFileTime());
+        uploadJobDetails.setUploadCreatedTime(uploadDetails.getUploadCreatedTime());
         uploadJobDetails.setProgressPercentage(uploadDetails.getProgressPercentage());
-        if(uploadDetails.getProgressPercentage() < 100){
+        if(uploadJobDetails.getProgressPercentage() < 100){
             uploadJobDetails.setCurrentStep(mergedJobSteps.get(mergedJobSteps.size()-1));
         }
         return uploadJobDetails;

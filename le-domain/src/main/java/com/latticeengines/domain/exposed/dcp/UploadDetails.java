@@ -38,6 +38,9 @@ public class UploadDetails {
     @JsonProperty("uploadDiagnostics")
     public UploadDiagnostics uploadDiagnostics;
 
+    @JsonProperty("dropFileTime")
+    private Long dropFileTime;
+
     @JsonProperty("uploadCreatedTime")
     private Long uploadCreatedTime;
 
@@ -106,6 +109,14 @@ public class UploadDetails {
 
     public void setUploadDiagnostics(UploadDiagnostics uploadDiagnostics) {
         this.uploadDiagnostics = uploadDiagnostics;
+    }
+
+    public Long getDropFileTime() {
+        return dropFileTime;
+    }
+
+    public void setDropFileTime(Long dropFileTime) {
+        this.dropFileTime = dropFileTime;
     }
 
     public Long getUploadCreatedTime() {

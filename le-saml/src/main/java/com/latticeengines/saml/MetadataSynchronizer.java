@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -67,6 +69,8 @@ public class MetadataSynchronizer {
 
     private Timer timer;
 
+    private Map<IdentityProviderKey, Long> cachedIdentityProviderMap = new HashMap<>();
+
     @PostConstruct
     private void postConstruct() {
         this.timer = new Timer("Metadata-refresh", true);
@@ -92,13 +96,25 @@ public class MetadataSynchronizer {
             try {
                 List<Tenant> tenants = getTenants();
                 List<MetadataProvider> providers = new ArrayList<>();
-
+                Map<IdentityProviderKey, Long> identityProviderMap = new HashMap<>();
                 for (Tenant tenant : tenants) {
                     providers.add(tenant.serviceProvider);
+                    identityProviderMap.putAll(tenant.identityProviders.stream().collect(Collectors.toMap(
+                            identityProvider -> {
+                                IdentityProvider provider = ((IdentityProviderMetadataAdaptor) identityProvider).getIdentityProvider();
+                                return new IdentityProviderKey(provider.getGlobalAuthTenant().getId(),
+                                        provider.getEntityId());
+                            }, identityProvider -> {
+                                IdentityProvider provider = ((IdentityProviderMetadataAdaptor) identityProvider).getIdentityProvider();
+                                return provider.getUpdated().getTime();
+                            })));
                     providers.addAll(tenant.identityProviders);
                 }
-                metadataManager.setProviders(providers);
-                metadataManager.refreshMetadata();
+                if (!cachedIdentityProviderMap.equals(identityProviderMap)) {
+                    log.info("Need to refresh providers in metadataManager.");
+                    cachedIdentityProviderMap = identityProviderMap;
+                    metadataManager.setProviders(providers);
+                }
             } catch (Exception e) {
                 log.error("Exception encountered in MetadataSynchronizer refresh task", e);
             }
@@ -112,7 +128,7 @@ public class MetadataSynchronizer {
             String tenantId = identityProvider.getGlobalAuthTenant().getId();
             List<IdentityProvider> list;
             if (!grouped.containsKey(tenantId)) {
-                grouped.put(tenantId, new ArrayList<IdentityProvider>());
+                grouped.put(tenantId, new ArrayList<>());
             }
             list = grouped.get(tenantId);
             list.add(identityProvider);
@@ -198,5 +214,55 @@ public class MetadataSynchronizer {
     private class Tenant {
         public List<MetadataProvider> identityProviders = new ArrayList<>();
         public MetadataProvider serviceProvider;
+    }
+
+    private class IdentityProviderKey {
+
+        private String tenantId;
+
+        private String entityId;
+
+        private IdentityProviderKey(String tenantId, String entityId) {
+            this.tenantId = tenantId;
+            this.entityId = entityId;
+        }
+
+        public String getTenantId() {
+            return tenantId;
+        }
+
+        public void setTenantId(String tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        public String getEntityId() {
+            return entityId;
+        }
+
+        public void setEntityId(String entityId) {
+            this.entityId = entityId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            IdentityProviderKey that = (IdentityProviderKey) obj;
+            return Objects.equals(getTenantId(), that.getTenantId()) &&
+                    Objects.equals(getEntityId(), that.getEntityId());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getTenantId(), getEntityId());
+        }
+
     }
 }
