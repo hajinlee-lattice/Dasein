@@ -15,10 +15,13 @@ import com.latticeengines.domain.exposed.saml.IdentityProvider;
 
 public class IdentityProviderMetadataAdaptor extends ExtendedMetadataDelegate {
 
+    private IdentityProvider identityProvider;
+
     public IdentityProviderMetadataAdaptor(ParserPool parserPool, IdentityProvider underlying,
-            ExtendedMetadata baseIdentityProviderMetadata) {
+                                           ExtendedMetadata baseIdentityProviderMetadata) {
         super(getMetadataProvider(parserPool, underlying),
                 getExtendedMetadata(underlying, baseIdentityProviderMetadata));
+        this.identityProvider = underlying;
     }
 
     private static MetadataProvider getMetadataProvider(final ParserPool pool, final IdentityProvider underlying) {
@@ -36,10 +39,13 @@ public class IdentityProviderMetadataAdaptor extends ExtendedMetadataDelegate {
     }
 
     private static ExtendedMetadata getExtendedMetadata(IdentityProvider underlying,
-            ExtendedMetadata baseIdentityProviderMetadata) {
+                                                        ExtendedMetadata baseIdentityProviderMetadata) {
         ExtendedMetadata extendedMetadata = baseIdentityProviderMetadata.clone();
         extendedMetadata.setAlias(underlying.getGlobalAuthTenant().getId());
         return extendedMetadata;
     }
 
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
 }
