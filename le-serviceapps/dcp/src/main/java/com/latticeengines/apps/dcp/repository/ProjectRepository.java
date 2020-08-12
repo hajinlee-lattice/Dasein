@@ -21,7 +21,9 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     List<Object[]> findAllProjects(Pageable pageable);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, p.teamId" +
-            " FROM Project AS p JOIN ProjectSystemLink AS ps ON p.pid = ps.project JOIN DataFeedTask AS dft ON ps.pid = dft.importSystem" +
+            " FROM Project AS p" +
+            " JOIN ProjectSystemLink AS ps ON p.pid = ps.project" +
+            " JOIN DataFeedTask AS dft ON ps.importSystem = dft.importSystem" +
             " WHERE dft.sourceId = ?1")
     List<Object[]> findProjectInfoBySourceId(String sourceId);
 
