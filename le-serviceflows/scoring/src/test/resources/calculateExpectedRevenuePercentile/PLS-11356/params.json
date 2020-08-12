@@ -1,6 +1,5 @@
 {
   "calculateExpectedRevenuePercentileParameters": {
-    "no_flink": false,
     "input_table_name": "InputTable",
     "percentile_field_name": "ExpectedRevenuePercentile",
     "original_score_field_map": {
