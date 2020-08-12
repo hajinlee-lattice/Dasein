@@ -14,6 +14,7 @@ public class ProjectInfo {
     private String createdBy;
     private List<String> recipientList;
     private Long systemId;
+    private String teamId;
 
     public String getProjectId() {
         return projectId;
@@ -85,5 +86,13 @@ public class ProjectInfo {
 
     public void setSystemId(Long systemId) {
         this.systemId = systemId;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 }

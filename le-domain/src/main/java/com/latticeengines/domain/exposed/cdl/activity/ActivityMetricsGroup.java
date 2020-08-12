@@ -132,6 +132,11 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     // if true, will filter out all past versions from period stores before aggregation
     private Boolean useLatestVersion;
 
+    @JsonProperty("categorizeValConfig")
+    @Type(type = "json")
+    @Column(name = "CATEGORIZATION", columnDefinition = "'JSON'")
+    private CategorizeValConfig categorizeValConfig;
+
     @Override
     public Long getPid() {
         return pid;
@@ -278,5 +283,13 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
 
     public void setUseLatestVersion(Boolean useLatestVersion) {
         this.useLatestVersion = useLatestVersion;
+    }
+
+    public CategorizeValConfig getCategorizeValConfig() {
+        return categorizeValConfig;
+    }
+
+    public void setCategorizeValConfig(CategorizeValConfig categorizeValConfig) {
+        this.categorizeValConfig = categorizeValConfig;
     }
 }

@@ -18,7 +18,7 @@ public class RestApiClientTestNG extends AbstractTestNGSpringContextTests {
      * FIXME add deployment test for proxy project
      */
     private static final String PUBLIC_URL = "https://testapp.lattice-engines.com";
-    private static final String PRIVATE_URL = "https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com";
+    private static final String PRIVATE_URL = "https://internal-stack-a-web-2020160116.us-east-1.elb.amazonaws.com";
 
     @Inject
     private ApplicationContext applicationContext;

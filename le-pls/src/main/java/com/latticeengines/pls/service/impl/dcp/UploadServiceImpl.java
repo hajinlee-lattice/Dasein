@@ -2,7 +2,6 @@ package com.latticeengines.pls.service.impl.dcp;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -354,20 +353,20 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         uploadJobDetails.setStatistics(uploadDetails.getStatistics());
         Job job = workflowJobService.findByApplicationId(uploadDetails.getUploadDiagnostics().getApplicationId());
         List<UploadJobStep> uploadJobSteps = new ArrayList<>();
-        job.getSteps().stream().forEach(jobStep -> {
-            UploadJobStep uploadJobStep = new UploadJobStep();
-            uploadJobStep.setStepName(jobStep.getName());
-            uploadJobStep.setStepDescription(jobStep.getDescription());
-            uploadJobStep.setStartTimestamp(jobStep.getStartTimestamp().getTime());
-            uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
-            uploadJobSteps.add(uploadJobStep);
-        });
+        if (job != null && job.getSteps() != null && !job.getSteps().isEmpty()) {
+            job.getSteps().stream().forEach(jobStep -> {
+                UploadJobStep uploadJobStep = new UploadJobStep();
+                uploadJobStep.setStepName(jobStep.getName());
+                uploadJobStep.setStepDescription(jobStep.getDescription());
+                uploadJobStep.setStartTimestamp(jobStep.getStartTimestamp().getTime());
+                uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
+                uploadJobSteps.add(uploadJobStep);
+            });
+        }
         List<UploadJobStep>mergedJobSteps = mergeDupSteps(uploadJobSteps);
         uploadJobDetails.setUploadJobSteps(mergedJobSteps);
-        Double progressPercentage = ((double) mergedJobSteps.size() / (double) 3) * 100;
-        progressPercentage = BigDecimal.valueOf(progressPercentage).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        uploadJobDetails.setProgressPercentage(progressPercentage);
-        if(progressPercentage < 100){
+        uploadJobDetails.setProgressPercentage(uploadDetails.getProgressPercentage());
+        if(uploadDetails.getProgressPercentage() < 100){
             uploadJobDetails.setCurrentStep(mergedJobSteps.get(mergedJobSteps.size()-1));
         }
         return uploadJobDetails;

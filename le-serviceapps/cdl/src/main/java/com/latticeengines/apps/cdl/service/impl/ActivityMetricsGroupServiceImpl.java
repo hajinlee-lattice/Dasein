@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.CategorizeDoubleConfig;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -47,13 +48,14 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     private static final String MARKETING_TYPE_CONTACT_GROUPNAME = "Marketing By ActivityType And ContactID";
     private static final String INTENTDATA_INTENT_GROUPAME = "IntentData by Intent";
     private static final String INTENTDATA_MODEL_GROUPNAME = "IntentData by ModelName";
+    private static final String BUYING_SCORE_GROUPNAME = "Buying Stage by Model";
     private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
     private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
     private static final String DIM_NAME_STAGE = InterfaceName.StageNameId.name();
     private static final String DIM_NAME_ACTIVITYTYPE = InterfaceName.ActivityTypeId.name();
     private static final String DIM_NAME_DNBINTENT = InterfaceName.ModelNameId.name();
 
-    private static Map<String, StringTemplate> templateCache = new HashMap<>();
+    private static final Map<String, StringTemplate> templateCache = new HashMap<>();
 
     @Inject
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
@@ -115,11 +117,24 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     public List<ActivityMetricsGroup> setupDefaultDnbIntentDataProfile(String customerSpace, String streamName) {
         Tenant tenant = MultiTenantContext.getTenant();
         AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
-        ActivityMetricsGroup intentGroup = setDnbIntentDataIntentGroup(tenant, stream);
-        ActivityMetricsGroup modelGroup = setDnbIntentDataModelGroup(tenant, stream);
-        activityMetricsGroupEntityMgr.create(intentGroup);
-        activityMetricsGroupEntityMgr.create(modelGroup);
-        return Arrays.asList(intentGroup, modelGroup);
+        ActivityMetricsGroup hasIntentGroup = setupHasIntentGroup(tenant, stream);
+        ActivityMetricsGroup intentByTimeRangeGroup = setupHasIntentByTimeRangeGroup(tenant, stream);
+        activityMetricsGroupEntityMgr.create(hasIntentGroup);
+        activityMetricsGroupEntityMgr.create(intentByTimeRangeGroup);
+        return Arrays.asList(hasIntentGroup, intentByTimeRangeGroup);
+    }
+
+    @Override
+    public List<ActivityMetricsGroup> setupDefaultBuyingScoreGroups(String customerSpace, String streamName) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
+        ActivityMetricsGroup hasIntentGroup = setupHasIntentGroup(tenant, stream);
+        ActivityMetricsGroup intentByTimeRangeGroup = setupHasIntentByTimeRangeGroup(tenant, stream);
+        ActivityMetricsGroup buyingScoreGroup = setupBuyingScoreGroup(tenant, stream);
+        activityMetricsGroupEntityMgr.create(hasIntentGroup);
+        activityMetricsGroupEntityMgr.create(intentByTimeRangeGroup);
+        activityMetricsGroupEntityMgr.create(buyingScoreGroup);
+        return Arrays.asList(hasIntentGroup, intentByTimeRangeGroup, buyingScoreGroup);
     }
 
     private ActivityMetricsGroup setupDefaultTotalVisitGroup(Tenant tenant, AtlasStream stream) {
@@ -209,7 +224,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         return marketingType;
     }
 
-    private ActivityMetricsGroup setDnbIntentDataIntentGroup(Tenant tenant, AtlasStream atlasStream) {
+    private ActivityMetricsGroup setupHasIntentGroup(Tenant tenant, AtlasStream atlasStream) {
         ActivityMetricsGroup intentGroup = new ActivityMetricsGroup();
         intentGroup.setTenant(tenant);
         intentGroup.setStream(atlasStream);
@@ -220,7 +235,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         intentGroup.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER,
                 Collections.singleton(PeriodStrategy.Template.Week.name()), null));
         intentGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
-        intentGroup.setAggregation(createAttributeDeriver(Collections.EMPTY_LIST, InterfaceName.HasIntent.name(),
+        intentGroup.setAggregation(createAttributeDeriver(Collections.emptyList(), InterfaceName.HasIntent.name(),
                 StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
         intentGroup.setCategory(Category.DNBINTENTDATA_PROFILE);
         intentGroup.setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_INTENT_DISPLAYNAME));
@@ -231,7 +246,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         return intentGroup;
     }
 
-    private ActivityMetricsGroup setDnbIntentDataModelGroup(Tenant tenant, AtlasStream atlasStream) {
+    private ActivityMetricsGroup setupHasIntentByTimeRangeGroup(Tenant tenant, AtlasStream atlasStream) {
         ActivityMetricsGroup modelGroup = new ActivityMetricsGroup();
         modelGroup.setTenant(tenant);
         modelGroup.setStream(atlasStream);
@@ -248,7 +263,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         modelGroup.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
                 Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
         modelGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
-        modelGroup.setAggregation(createAttributeDeriver(Collections.EMPTY_LIST, InterfaceName.HasIntent.name(),
+        modelGroup.setAggregation(createAttributeDeriver(Collections.emptyList(), InterfaceName.HasIntent.name(),
                 StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
         modelGroup.setCategory(Category.DNBINTENTDATA_PROFILE);
         modelGroup.setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DISPLAYNAME));
@@ -259,9 +274,47 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         return modelGroup;
     }
 
+    private ActivityMetricsGroup setupBuyingScoreGroup(Tenant tenant, AtlasStream atlasStream) {
+        ActivityMetricsGroup group = new ActivityMetricsGroup();
+        group.setTenant(tenant);
+        group.setStream(atlasStream);
+        group.setGroupId(getGroupId(BUYING_SCORE_GROUPNAME));
+        group.setGroupName(BUYING_SCORE_GROUPNAME);
+        group.setJavaClass(String.class.getSimpleName());
+        group.setEntity(BusinessEntity.Account);
+        group.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER,
+                Collections.singleton(PeriodStrategy.Template.Week.name()), null));
+        group.setRollupDimensions(DIM_NAME_DNBINTENT);
+        group.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.BuyingScore.name()), InterfaceName.BuyingScore.name(), StreamAttributeDeriver.Calculation.MAX));
+        group.setCategory(Category.DNBINTENTDATA_PROFILE);
+        group.setDisplayNameTmpl(getTemplate(StringTemplateConstants.BUYINGSCORE_METRICS_GROUP_DISPLAYNAME));
+        group.setDescriptionTmpl(getTemplate(StringTemplateConstants.BUYINGSCORE_METRICS_GROUP_DESCRIPTION));
+        group.setSubCategoryTmpl(getTemplate(StringTemplateConstants.BUYINGSCORE_METRICS_GROUP_SUBCATEGORY));
+        group.setNullImputation(NullMetricsImputation.NULL);
+        group.setUseLatestVersion(true);
+        group.setCategorizeValConfig(constructCategorizeDoubleConfig());
+        group.setReducer(prepareBuyingScoreGroupReducer());
+        return group;
+    }
+
+    private CategorizeDoubleConfig constructCategorizeDoubleConfig() {
+        CategorizeDoubleConfig config = new CategorizeDoubleConfig();
+        config.getCategories().put("Buying", Collections.singletonMap(CategorizeDoubleConfig.Comparator.GE, 0.5));
+        config.getCategories().put("Researching", Collections.singletonMap(CategorizeDoubleConfig.Comparator.LT, 0.5));
+        return config;
+    }
+
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
         reducer.setGroupByFields(Collections.singletonList(InterfaceName.OpportunityId.name()));
+        reducer.setArguments(Collections.singletonList(InterfaceName.PeriodId.name()));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
+    }
+
+    private ActivityRowReducer prepareBuyingScoreGroupReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ModelNameId.name()));
         reducer.setArguments(Collections.singletonList(InterfaceName.PeriodId.name()));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;

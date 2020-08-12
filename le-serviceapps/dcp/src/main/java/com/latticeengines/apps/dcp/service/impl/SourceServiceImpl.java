@@ -186,13 +186,13 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Source> getSourceList(String customerSpace, String projectId) {
-        return getSourceList(customerSpace, projectId, 0, DEFAULT_PAGE_SIZE);
+        return getSourceList(customerSpace, projectId, 0, DEFAULT_PAGE_SIZE, null);
     }
 
     @Override
-    public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize) {
+    public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize, List<String> teamIds) {
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
-        if (projectInfo != null) {
+        if (projectInfo != null && (projectInfo.getTeamId() == null || (teamIds == null || teamIds.contains(projectInfo.getTeamId())))) {
             List<SourceInfo> sourceInfoList = dataFeedProxy.getSourcesBySystemPid(customerSpace,
                     projectInfo.getSystemId(), pageIndex, pageSize);
             if (CollectionUtils.isEmpty(sourceInfoList)) {

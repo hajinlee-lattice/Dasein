@@ -1,9 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -42,6 +45,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("fileUploadService")
@@ -360,7 +364,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public SourceFileInfo uploadFile(String name, String displayName, boolean compressed, EntityType entityType, MultipartFile file) {
-
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             log.info(String.format("Uploading file %s (displayName=%s, compressed=%s)", name, displayName, compressed));
 
@@ -374,9 +378,22 @@ public class FileUploadServiceImpl implements FileUploadService {
             if (compressed) {
                 stream = GzipUtils.decompressStream(stream);
             }
-            // should we validate file header??
-            // validateStream()
 
+            if (!stream.markSupported()) {
+                stream = new BufferedInputStream(stream);
+            }
+
+            stream.mark(1024 * 500);
+
+            Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+            try {
+                stream.reset();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                throw new LedpException(LedpCode.LEDP_00002, e);
+            }
+
+            ValidateFileHeaderUtils.checkForDuplicatedHeaders(headerFields);
             // save file
             SourceFile sourceFile = uploadFile(name, displayName, entityType, stream);
             return getSourceFileInfo(sourceFile);

@@ -164,7 +164,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         Map<String, Integer> refreshDateMap = getRefreshDateMap(status);
         List<String> streamsNeedReLink = new ArrayList<>();
-
+        Set<String> catalogsWithImports = getCatalogsWithNewImports();
         configuration.getActivityStreamMap().forEach((streamId, stream) -> {
             String matchedImportTable = matchedStreamImportTables.get(streamId);
             // ignore active table in rematch
@@ -173,7 +173,9 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                     : RAWSTREAM_TABLE_PREFIX_FORMAT;
             if (configuration.isShouldRebuild() || Boolean.TRUE.equals(getObjectFromContext(ACTIVITY_PARTITION_MIGRATION_PERFORMED, Boolean.class))
                     || StringUtils.isNotBlank(matchedImportTable) || needRefresh(refreshDateMap, streamId)
-                    || deletePerformed()) {
+                    || deletePerformed()
+                    || hasCatalogImport(stream, catalogsWithImports)
+            ) {
                 // has import, over 30 days not refreshed, or performed soft delete
                 appendRawStream(steps, stream, evalTimeEpoch, matchedImportTable, activeTable, targetTablePrefixFormat)
                         .ifPresent(pair -> {
@@ -181,7 +183,8 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
                             refreshDateMap.put(stream.getStreamId(),
                                     DateTimeUtils.fromEpochMilliToDateId(evalTimeEpoch));
                         });
-            } else if (StringUtils.isNotBlank(activeTable)) {
+            } else if (StringUtils.isNotBlank(activeTable) && noCatalogHasImport(stream, catalogsWithImports)) {
+                log.info("Stream {} has active store, but no activity or catalog imports. Will be relinked to inactive version.", streamId);
                 streamsNeedReLink.add(streamId);
             }
         });
@@ -190,6 +193,22 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         relinkStreams(streamsNeedReLink);
         putObjectInContext(ACTIVITY_STREAMS_RELINK, new HashSet<>(streamsNeedReLink));
         return steps;
+    }
+
+    private Set<String> getCatalogsWithNewImports() {
+        Set<String> catalogs = hasKeyInContext(CATALOG_NEW_IMPORT) ? getSetObjectFromContext(CATALOG_NEW_IMPORT, String.class) : Collections.emptySet();
+        log.info("Catalogs with new imports: {}", catalogs);
+        return catalogs;
+    }
+
+    private boolean noCatalogHasImport(AtlasStream stream, Set<String> catalogsWithImports) {
+        return stream.getDimensions().stream().filter(dim -> dim.getCatalog() != null)
+                .noneMatch(dim -> catalogsWithImports.contains(dim.getCatalog().getCatalogId()));
+    }
+
+    private boolean hasCatalogImport(AtlasStream stream, Set<String> catalogsWithImports) {
+        return stream.getDimensions().stream().filter(dim -> dim.getCatalog() != null)
+                .anyMatch(dim -> catalogsWithImports.contains(dim.getCatalog().getCatalogId()));
     }
 
     private boolean needRefresh(Map<String, Integer> refreshDateMap, String streamId) {

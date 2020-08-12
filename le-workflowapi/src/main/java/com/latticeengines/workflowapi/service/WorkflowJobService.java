@@ -146,7 +146,8 @@ public interface WorkflowJobService {
      */
     int getNonTerminalJobCount(String customerSpace, List<String> types);
 
-    List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes, List<String> statuses);
+    List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
+            List<String> statuses, Long earliestStartTime);
 
     /**
      * Clear all job cache entries.

@@ -108,4 +108,12 @@ public class TeamResource {
         log.info(String.format("get all dependencies for teamId=%s", teamId));
         return teamWrapperService.getDependencies(teamId);
     }
+
+    @GetMapping("/teamId/{teamId}")
+    @ResponseBody
+    @ApiOperation(value = "get team by teamId")
+    public GlobalTeam getTeamByTeamId(@PathVariable String teamId) {
+        log.info(String.format("get team for teamId=%s", teamId));
+        return teamWrapperService.getTeamInContext(teamId);
+    }
 }

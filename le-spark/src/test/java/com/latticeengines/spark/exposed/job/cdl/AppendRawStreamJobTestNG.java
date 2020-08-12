@@ -4,6 +4,8 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.InternalId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
@@ -49,6 +51,9 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String DATE_ATTR = InterfaceName.WebVisitDate.name();
     private static final String OPP_ID = "OpportunityId";
     private static final String Stage = "Stage";
+    private static final String modelName = InterfaceName.ModelName.name();
+    private static final String date = "date";
+    private static final String buyingScore = "buyingScore";
     private static final List<Pair<String, Class<?>>> WEB_ACTIVITY_FIELDS = Arrays.asList( //
             Pair.of(InternalId.name(), Long.class), //
             Pair.of(EntityId.name(), String.class), //
@@ -65,9 +70,19 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final String ID_DAY_1 = "2";
     private static final String ID_DAY_2 = "3";
+    private static final String MODEL_1 = "m1";
+    private static final String MODEL_2 = "m2";
     private static final int RETENTION_DAYS = 7;
     private static final long now = LocalDate.of(2019, 11, 23) //
             .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    private static final long DAY_1_EPOCH = 1574230472000L;
+    private static final long DAY_1_EPOCH_LATE = 1574273672000L;
+    private static final int DAY_1_ID = DateTimeUtils.fromEpochMilliToDateId(DAY_1_EPOCH);
+    private static final String DAY_1 = DateTimeUtils.toDateOnlyFromMillis(DAY_1_EPOCH);
+    private static final long DAY_2_EPOCH = 1574316872000L;
+    private static final int DAY_2_ID = DateTimeUtils.fromEpochMilliToDateId(DAY_2_EPOCH);
+    private static final String DAY_2 = DateTimeUtils.toDateOnlyFromMillis(DAY_2_EPOCH);
+
 
     @Test(groups = "functional")
     private void test() {
@@ -85,6 +100,13 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         SparkJobResult result = runSparkJob(AppendRawStreamJob.class, testData.getLeft(), testData.getRight(),
                 getWorkspace());
         verify(result, Collections.singletonList(this::verifyDedupOutput));
+    }
+
+    @Test(groups = "functional")
+    private void testBuyingScoreReducer() {
+        Pair<AppendRawStreamConfig, List<String>> testData = prepareBuyingScoreData();
+        SparkJobResult result = runSparkJob(AppendRawStreamJob.class, testData.getLeft(), testData.getRight(),
+                getWorkspace());
     }
 
     private Pair<AppendRawStreamConfig, List<String>> prepareTestData() {
@@ -115,6 +137,56 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         config.masterInputIdx = 1;
         config.dateAttr = DATE_ATTR;
         return Pair.of(config, inputs);
+    }
+
+    private Pair<AppendRawStreamConfig, List<String>> prepareBuyingScoreData() {
+        List<Pair<String, Class<?>>> matchedFields = Arrays.asList(
+                Pair.of(AccountId.name(), String.class),
+                Pair.of(modelName, String.class),
+                Pair.of(date, Long.class),
+                Pair.of(LastActivityDate.name(), Long.class),
+                Pair.of(buyingScore, Double.class)
+        );
+        Object[][] matched = new Object[][]{
+                {"acc1", MODEL_1, DAY_1_EPOCH, 0L, 0.1},
+                {"acc1", MODEL_2, DAY_1_EPOCH_LATE, 0L, 0.2},
+                {"acc2", MODEL_1, DAY_2_EPOCH, 0L, 0.7}
+        };
+        List<Pair<String, Class<?>>> masterFields = Arrays.asList(
+                Pair.of(AccountId.name(), String.class),
+                Pair.of(modelName, String.class),
+                Pair.of(date, Long.class),
+                Pair.of(LastActivityDate.name(), Long.class),
+                Pair.of(buyingScore, Double.class),
+                Pair.of(StreamDateId.name(), Integer.class),
+                Pair.of(__StreamDate.name(), String.class)
+        );
+        Object[][] master = new Object[][]{
+                {"acc1", MODEL_1, DAY_1_EPOCH_LATE, 0L, 0.9, DAY_1_ID, DAY_1},
+                {"acc1", MODEL_2, DAY_1_EPOCH, 0L, 0.8, DAY_1_ID, DAY_1},
+                {"acc2", MODEL_1, DAY_1_EPOCH, 0L, 0.3, DAY_1_ID, DAY_1},
+                {"acc3", MODEL_1, DAY_2_EPOCH, 0L, 0.4, DAY_2_ID, DAY_2}
+        };
+        List<String> inputs = Arrays.asList(uploadHdfsDataUnit(matched, matchedFields),
+                uploadHdfsDataUnit(master, masterFields));
+
+        AppendRawStreamConfig config = new AppendRawStreamConfig();
+        config.currentEpochMilli = now;
+        config.streamName = AtlasStream.StreamType.DnbIntentData.name();
+        config.retentionDays = RETENTION_DAYS;
+        config.matchedRawStreamInputIdx = 0;
+        config.masterInputIdx = 1;
+        config.dateAttr = date;
+        config.reducer = prepareBuyingScoreReducer();
+        return Pair.of(config, inputs);
+    }
+
+    private ActivityRowReducer prepareBuyingScoreReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(AccountId.name(), ModelName.name()));
+        reducer.setArguments(Collections.singletonList(date));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
     }
 
     private Pair<AppendRawStreamConfig, List<String>> prepareTestDataWithDedup() {

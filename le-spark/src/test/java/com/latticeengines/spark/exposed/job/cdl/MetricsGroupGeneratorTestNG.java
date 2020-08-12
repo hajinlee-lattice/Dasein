@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.CategorizeDoubleConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -49,6 +50,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String MARKETING_GROUPID = "mas";
     private static final String INTENT_GROUPID = "hix";
     private static final String INTENT_TIMERANGE_GROUPID = "ibt";
+    private static final String BUYING_SCORE_GROUPID = "bsbm";
+    private static final String BUYING_SCORE_GROUPNAME = "buying stage by model";
     private static final Set<List<Integer>> TIMEFILTER_PARAMS = new HashSet<>(Arrays.asList(
             Collections.singletonList(1),
             Collections.singletonList(2)
@@ -79,6 +82,9 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String ActivityType = InterfaceName.ActivityType.name();
     private static final String LastActivityDate = InterfaceName.LastActivityDate.name();
     private static final String versionStamp = "versionStamp";
+    private static final String modelNameId = InterfaceName.ModelNameId.name();
+    private static final String hasIntent = InterfaceName.HasIntent.name();
+    private static final String buyingScore = InterfaceName.BuyingScore.name();
 
     private static AtlasStream WEB_VISIT_STREAM;
     private static AtlasStream OPPORTUNITY_STREAM;
@@ -88,18 +94,11 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String OPPORTUNITY_STREAM_ID = "opportunity";
     private static final String MARKETING_STREAM_ID = "marketing";
     private static final String INTENT_STREAM_ID = "intent";
-    private static final String MODEL_1 = "m1";
-    private static final String MODEL_2 = "m2";
-    private static final String MODEL_3 = "m3";
     private static final String MODEL_1_ID = "1";
     private static final String MODEL_2_ID = "2";
     private static final String MODEL_3_ID = "3";
-
-    // TODO - followings should move to use interface name
-    // TODO - move to column names section
-    private static final String modelName = "modelName";
-    private static final String modelNameId = "modelNameId";
-    private static final String hasIntent = "hasIntent";
+    private static final String BUYING = "Buying";
+    private static final String RESEARCHING = "Researching";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -184,8 +183,20 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.streamMetadataMap = constructIntentMetadata();
         config.currentVersionStamp = CURRENT_VERSION;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, inputs, getWorkspace());
-        System.out.println(result.getOutput());
-        // TODO - automate verification
+        verify(result, Arrays.asList(this::verifyHasIntentGroup, this::verifyHasIntentByTimeRangeGroup));
+    }
+
+    @Test(groups = "functional")
+    public void testDoubleMapping() {
+        List<String> inputs = Arrays.asList(appendBuyingScoreInput(), appendAccountBatchStore());
+        DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
+        config.activityMetricsGroups = Collections.singletonList(setupBuyingScoreGroup());
+        config.inputMetadata = constructInputMetadata(INTENT_STREAM, Collections.singletonList(BusinessEntity.Account));
+        config.evaluationDate = EVAL_DATE;
+        config.streamMetadataMap = constructIntentMetadata();
+        config.currentVersionStamp = CURRENT_VERSION;
+        SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, inputs, getWorkspace());
+        verify(result, Collections.singletonList(this::verifyBuyingStageMetrics));
     }
 
     private Long calculateWebActivityAttrsCount(Map<String, Map<String, DimensionMetadata>> streamMetadata, ActivityMetricsGroup group) {
@@ -354,19 +365,50 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(modelNameId, String.class), //
                 Pair.of(hasIntent, Boolean.class), //
                 Pair.of(LastActivityDate, Long.class), //
-                Pair.of(versionStamp, Long.class)
+                Pair.of(versionStamp, Long.class), //
+                Pair.of(buyingScore, Double.class) // should not have effects with old setup (without buying score)
         );
         Object[][] data = new Object[][]{
-                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION},
-                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_2_ID, true, 0L, CURRENT_VERSION},
-                {"acc2", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION},
-                {"acc2", ONE_WEEK_AGO, ONE_WEEK_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION}
+                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION, 0.2},
+                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_2_ID, true, 0L, CURRENT_VERSION, 0.3},
+                {"acc2", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION, 0.4},
+                {"acc2", ONE_WEEK_AGO, ONE_WEEK_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION, 0.5}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String appendBuyingScoreInput() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId, String.class), //
+                Pair.of(PeriodId, Integer.class), //
+                Pair.of(PeriodIdPartition, Integer.class), //
+                Pair.of(__Row_Count__, Integer.class), //
+                Pair.of(modelNameId, String.class), //
+                Pair.of(LastActivityDate, Long.class), //
+                Pair.of(versionStamp, Long.class), //
+                Pair.of(buyingScore, Double.class) //
+        );
+        Object[][] data = new Object[][]{
+                // pick latest buying score
+                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, 0L, CURRENT_VERSION, 0.2},
+                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, 0L, CURRENT_VERSION, 0.7},
+                {"acc1", ONE_WEEK_AGO, ONE_WEEK_AGO, 22, MODEL_1_ID, 0L, CURRENT_VERSION, 0.9},
+
+                {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_1_ID, 0L, CURRENT_VERSION, 0.9},
+                {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_2_ID, 0L, CURRENT_VERSION, 0.5},
+                {"acc2", ONE_WEEK_AGO, ONE_WEEK_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.2},
+                {"acc2", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.9},
+
+                // empty buying stage as no new data in latest refresh
+                {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_1_ID, 0L, OLD_VERSION, 0.1},
+                {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_2_ID, 0L, OLD_VERSION, 0.2},
+                {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_3_ID, 0L, OLD_VERSION, 0.9}
         };
         return uploadHdfsDataUnit(data, fields);
     }
 
     private String appendAccountBatchStore() {
-        List<Pair<String, Class<?>>> accountBatchStoreField = Arrays.asList( //
+        List<Pair<String, Class<?>>> accountBatchStoreField = Collections.singletonList( //
                 Pair.of(AccountId, String.class)
         );
 
@@ -468,9 +510,41 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return group;
     }
 
+    private ActivityMetricsGroup setupBuyingScoreGroup() {
+        ActivityMetricsGroup group = new ActivityMetricsGroup();
+        group.setStream(INTENT_STREAM);
+        group.setGroupId(BUYING_SCORE_GROUPID);
+        group.setGroupName(BUYING_SCORE_GROUPNAME);
+        group.setJavaClass(Boolean.class.getSimpleName());
+        group.setEntity(BusinessEntity.Account);
+        group.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, TIMEFILTER_PERIODS, null));
+        group.setRollupDimensions(modelNameId);
+        group.setAggregation(createAttributeDeriver(Collections.singletonList(buyingScore), buyingScore, StreamAttributeDeriver.Calculation.MAX));
+        group.setNullImputation(NullMetricsImputation.NULL);
+        group.setUseLatestVersion(true);
+        group.setCategorizeValConfig(constructCategorizeDoubleConfig());
+        group.setReducer(prepareBuyingScoreGroupReducer());
+        return group;
+    }
+
+    private CategorizeDoubleConfig constructCategorizeDoubleConfig() {
+        CategorizeDoubleConfig config = new CategorizeDoubleConfig();
+        config.getCategories().put(BUYING, Collections.singletonMap(CategorizeDoubleConfig.Comparator.GE, 0.5));
+        config.getCategories().put(RESEARCHING, Collections.singletonMap(CategorizeDoubleConfig.Comparator.LT, 0.5));
+        return config;
+    }
+
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
         reducer.setGroupByFields(Collections.singletonList(OpportunityId));
+        reducer.setArguments(Collections.singletonList(PeriodId));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
+    }
+
+    private ActivityRowReducer prepareBuyingScoreGroupReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(AccountId, modelNameId));
         reducer.setArguments(Collections.singletonList(PeriodId));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
@@ -499,7 +573,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 // 4 for each week (1, 2), + 1 entityId
                 // w_1_w all zeros
                 {"acc1", 0, 0, 0, 0, 0, 5, 0, 0, 0, 0},
-                {"acc2", 0, 0, 0, 0, 0, 2, 6, 0, 0, 0},
+                {"acc2", 0, 0, 0, 0, 0, 2, 0, 6, 0, 0},
                 {"acc999", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {"missingAccount", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
@@ -518,10 +592,10 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyOpportunityMetrics(HdfsDataUnit metrics) {
         Object[][] expectedResult = new Object[][]{
-                // 4 for each stage (close, lost, started, won), + 1 entityId
-                {"acc1", 1, 0, 0, 0},
-                {"acc2", 1, 1, 1, 0},
-                {"acc999", 0, 1, 0, 0},
+                // 4 for each stage (won, started, close, lost), + 1 entityId
+                {"acc1", 0, 0, 1, 0},
+                {"acc2", 0, 1, 1, 1},
+                {"acc999", 0, 0, 0, 1},
                 {"missingAccount", 0, 0, 0, 0}
         };
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
@@ -535,11 +609,12 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private Boolean verifyMarketingMetrics(HdfsDataUnit metrics) {
+        // sendEmail, ClickLink
         Object[][] expectedResult = new Object[][]{
-                {"c1", 0, 10},
-                {"c2", 0, 50},
+                {"c1", 10, 0},
+                {"c2", 50, 0},
                 {"c3", 0, 0},
-                {"c4", 40, 0}
+                {"c4", 0, 40}
         };
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
@@ -551,11 +626,62 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return false;
     }
 
+    private Boolean verifyHasIntentGroup(HdfsDataUnit metrics) {
+        // model 1, 2, 3
+        Object[][] expectedResult = new Object[][]{
+                {"acc1", false, true, false},
+                {"acc2", false, false, false},
+                {"acc999", false, false, false},
+                {"missingAccount", false, false, false}
+        };
+        Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
+                .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
+        Iterator<GenericRecord> iterator = verifyAndReadTarget(metrics);
+        for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
+            verifyTargetData(expectedMap, record, AccountId);
+        }
+        return true;
+    }
+
+    private Boolean verifyHasIntentByTimeRangeGroup(HdfsDataUnit metrics) {
+        // model 1, 2, 3 of last 1, 2 weeks
+        Object[][] expectedResult = new Object[][]{
+                {"acc1", false, false, false, true, true, false},
+                {"acc2", true, false, false, true, false, false},
+                {"acc999", false, false, false, false, false, false},
+                {"missingAccount", false, false, false, false, false, false}
+        };
+        Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
+                .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
+        Iterator<GenericRecord> iterator = verifyAndReadTarget(metrics);
+        for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
+            verifyTargetData(expectedMap, record, AccountId);
+        }
+        return true;
+    }
+
+    private Boolean verifyBuyingStageMetrics(HdfsDataUnit metrics) {
+        // model 1, 2, 3
+        Object[][] expectedResult = new Object[][]{
+                {"acc1", BUYING, null, null},
+                {"acc2", BUYING, BUYING, RESEARCHING},
+                {"acc999", null, null, null},
+                {"missingAccount", null, null, null}
+        };
+        Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
+                .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
+        Iterator<GenericRecord> iterator = verifyAndReadTarget(metrics);
+        for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
+            verifyTargetData(expectedMap, record, AccountId);
+        }
+        return true;
+    }
+
     private void verifyTargetData(Map<Object, List<Object>> expectedMap, GenericRecord record, String entityIdCol) {
         Assert.assertNotNull(record);
         String entityId = record.get(entityIdCol).toString();
         Assert.assertNotNull(expectedMap.get(entityId));
-        List<Object> actual = record.getSchema().getFields().stream().map(field -> record.get(field.name()).toString()).collect(Collectors.toList());
-        Assert.assertEquals(actual, expectedMap.get(entityId).stream().map(Object::toString).collect(Collectors.toList()));
+        List<Object> actual = record.getSchema().getFields().stream().map(field -> record.get(field.name()) != null ? record.get(field.name()).toString() : null).collect(Collectors.toList());
+        Assert.assertEquals(actual, expectedMap.get(entityId).stream().map(obj -> obj != null ? obj.toString() : null).collect(Collectors.toList()));
     }
 }

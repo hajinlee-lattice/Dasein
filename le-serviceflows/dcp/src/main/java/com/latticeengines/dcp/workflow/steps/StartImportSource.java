@@ -80,7 +80,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         // Build upload dir
         Source source = sourceProxy.getSource(customerSpace.toString(), configuration.getSourceId());
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
-                configuration.getProjectId(), Boolean.FALSE);
+                configuration.getProjectId(), Boolean.FALSE, null);
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
         String uploadDir = UploadS3PathBuilderUtils.getUploadRoot(projectDetails.getProjectId(), source.getSourceId());

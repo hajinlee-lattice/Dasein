@@ -105,6 +105,10 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @JsonProperty("recipient_list")
     private List<String> recipientList;
 
+    @Column(name = "TEAM_ID")
+    @JsonProperty("teamId")
+    private String teamId;
+
     @Override
     public Long getPid() {
         return pid;
@@ -217,6 +221,14 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
 
     public void setRecipientList(List<String> recipientList) {
         this.recipientList = recipientList;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     //TODO: define project type

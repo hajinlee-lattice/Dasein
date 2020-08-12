@@ -78,8 +78,8 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ProjectInfo> findAllProjectInfo(Boolean isDeleted, Pageable pageable) {
-        List<Object[]> result = getReadOrWriteRepository().findAllProjects(isDeleted, pageable);
+    public List<ProjectInfo> findAllProjectInfo(Pageable pageable, Boolean includeArchived) {
+        List<Object[]> result = getReadOrWriteRepository().findAllProjects(pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {
@@ -110,6 +110,28 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         return getReadOrWriteRepository().findImportSystemByProjectId(projectId);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds, Boolean includeArchived) {
+        List<Object[]> result = getReadOrWriteRepository().findProjectsInTeamIds(teamIds, includeArchived, pageable);
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyList();
+        } else {
+            return result.stream().map(this::getProjectInfo).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ProjectInfo findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds) {
+        List<Object[]> result = getReadOrWriteRepository().findProjectInfoByProjectIdInTeamIds(projectId, teamIds);
+        if (CollectionUtils.isEmpty(result)) {
+            return null;
+        } else {
+            return getProjectInfo(result.get(0));
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private ProjectInfo getProjectInfo(Object[] columns) {
         ProjectInfo info = new ProjectInfo();
@@ -122,6 +144,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setCreatedBy((String) columns[6]);
         info.setRecipientList((List<String>) columns[7]);
         info.setSystemId((Long) columns[8]);
+        info.setTeamId((String) columns[9]);
         return info;
     }
 }

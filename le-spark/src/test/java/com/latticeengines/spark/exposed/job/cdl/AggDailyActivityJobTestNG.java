@@ -3,6 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OpportunityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
@@ -11,12 +12,12 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMed
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMediumId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__Row_Count__;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,8 +44,6 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -125,11 +124,13 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final String VERSION_COL = DeriveAttrsUtils.VERSION_COL();
 
-    // TODO - followings should move to use interface name
-    private static final String modelName = "modelName";
-    private static final String modelNameId = "modelNameId";
+    private static final String modelName = InterfaceName.ModelName.name();
+    private static final String modelNameId = InterfaceName.ModelNameId.name();
     private static final String Date = "Date";
-    private static final String hasIntent = "hasIntent";
+    private static final String hasIntent = InterfaceName.HasIntent.name();
+    private static final String BuyingScore = "buyingScore";
+    private static final String BUYING = "buying";
+    private static final String RESEARCHING = "researching";
 
     static {
         WEBVISIT_DIMENSION_HASH_ID_MAP.put(ALL_CTN_PAGE_PTN_HASH, ALL_CTN_PAGE_PTN_ID);
@@ -211,6 +212,22 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         log.info("Output metadata: {}", result.getOutput());
     }
 
+    @Test(groups = "functional")
+    private void testBuyingScore() {
+        List<String> inputs = Collections.singletonList(setupIntentActivityRawStreamData());
+        AggDailyActivityConfig config = buyingScoreConfig();
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+    }
+
+    @Test(groups = "functional")
+    private void testBuyingScoreIncr() {
+        List<String> inputs = Arrays.asList(setupBuyingScoreDeltaImport(), setupBuyingScoreBatchStore());
+        AggDailyActivityConfig config = buyingScoreIncrConfig();
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+    }
+
     private AggDailyActivityConfig incrConfig(boolean withBatch) {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
@@ -272,7 +289,6 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(modelNameId));
         config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
         config.dimensionValueIdMap.putAll(INTENT_DIMENSION_HASH_ID_MAP);
-        config.attrDeriverMap.put(STREAM_ID, Collections.singletonList(prepareHasIntentDeriver()));
         config.currentEpochMilli = DAY_0_EPOCH;
         return config;
     }
@@ -293,7 +309,47 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
         config.dimensionValueIdMap.putAll(INTENT_DIMENSION_HASH_ID_MAP);
         config.incrementalStreams.add(STREAM_ID);
-        config.attrDeriverMap.put(STREAM_ID, Collections.singletonList(prepareHasIntentDeriver()));
+        config.currentEpochMilli = DAY_0_EPOCH;
+        return config;
+    }
+
+    private AggDailyActivityConfig buyingScoreConfig() {
+        AggDailyActivityConfig config = new AggDailyActivityConfig();
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        details.setStartIdx(0);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        config.streamDateAttrs.put(STREAM_ID, Date);
+        config.dimensionMetadataMap.put(STREAM_ID, intentMetadata());
+        config.dimensionCalculatorMap.put(STREAM_ID, intentDimensionCalculators());
+        config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(modelNameId));
+        config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
+        config.dimensionValueIdMap.putAll(INTENT_DIMENSION_HASH_ID_MAP);
+        config.currentEpochMilli = DAY_0_EPOCH;
+        config.streamReducerMap.put(STREAM_ID, prepareBuyingScoreReducer());
+        return config;
+    }
+
+    private AggDailyActivityConfig buyingScoreIncrConfig() {
+        AggDailyActivityConfig config = new AggDailyActivityConfig();
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        details.setStartIdx(0);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        config.streamDateAttrs.put(STREAM_ID, Date);
+        config.dimensionMetadataMap.put(STREAM_ID, intentMetadata());
+        config.dimensionCalculatorMap.put(STREAM_ID, intentDimensionCalculators());
+        config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(modelNameId));
+        config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
+        config.dimensionValueIdMap.putAll(INTENT_DIMENSION_HASH_ID_MAP);
+        config.incrementalStreams.add(STREAM_ID);
+        config.streamReducerMap.put(STREAM_ID, prepareBuyingScoreReducer());
         config.currentEpochMilli = DAY_0_EPOCH;
         return config;
     }
@@ -306,12 +362,12 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         return reducer;
     }
 
-    private StreamAttributeDeriver prepareHasIntentDeriver() {
-        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
-        deriver.setCalculation(StreamAttributeDeriver.Calculation.TRUE);
-        deriver.setTargetAttribute(hasIntent);
-        deriver.setTargetFundamentalType(FundamentalType.BOOLEAN);
-        return deriver;
+    private ActivityRowReducer prepareBuyingScoreReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(AccountId.name(), ModelName.name()));
+        reducer.setArguments(Collections.singletonList(Date));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
     }
 
     private String setupDailyBatchStore() {
@@ -406,14 +462,51 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(StreamDateId.name(), Integer.class),
                 Pair.of(__Row_Count__.name(), Integer.class),
                 Pair.of(LastActivityDate.name(), Long.class),
-                Pair.of(VERSION_COL, Long.class),
-                Pair.of(hasIntent, Boolean.class)
+                Pair.of(VERSION_COL, Long.class)
         );
         Object[][] data = new Object[][]{
-                {"acc1", MODEL_1_ID, DAY_1, DAY_PERIOD_1, 12, 0L, OLD_VERSION, true}, // replaced with new version stamp
-                {"acc2", MODEL_1_ID, DAY_1, DAY_PERIOD_1, 12, 0L, OLD_VERSION, true}, // replaced with new version stamp
-                {"acc3", MODEL_1_ID, DAY_1, DAY_PERIOD_1, 12, 0L, OLD_VERSION, true}, // not changed
-                {"acc2", MODEL_2_ID, DAY_2, DAY_PERIOD_2, 12, 0L, OLD_VERSION, true} // not changed
+                {"acc1", MODEL_1_ID, DAY_1, DAY_PERIOD_1, 12, 0L, OLD_VERSION}, // replaced with new version stamp
+                {"acc2", MODEL_1_ID, DAY_1, DAY_PERIOD_1, 12, 0L, OLD_VERSION}, // replaced with new version stamp
+                {"acc3", MODEL_1_ID, DAY_1, DAY_PERIOD_1, 12, 0L, OLD_VERSION}, // not changed
+                {"acc2", MODEL_2_ID, DAY_2, DAY_PERIOD_2, 12, 0L, OLD_VERSION} // not changed
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupBuyingScoreDeltaImport() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(AccountId.name(), String.class),
+                Pair.of(modelName, String.class),
+                Pair.of(Date, Long.class),
+                Pair.of(LastActivityDate.name(), Long.class),
+                Pair.of(BuyingScore, Double.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", MODEL_1, DAY_1_EPOCH, DAY_1_EPOCH, 0.3}, // acc1 model1 changed from researching to buying
+                {"acc1", MODEL_1, DAY_1_EPOCH_LATE, DAY_1_EPOCH_LATE, 0.9}, // acc1 model1 changed from researching to buying
+                {"acc2", MODEL_2, DAY_1_EPOCH, DAY_1_EPOCH, 0.1}, // new record for acc2 model 2
+                {"acc3", MODEL_2, DAY_2_EPOCH, DAY_2_EPOCH, 0.2} // new record for acc3 model2 day 2
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupBuyingScoreBatchStore() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(AccountId.name(), String.class),
+                Pair.of(modelNameId, String.class),
+                Pair.of(modelName, String.class),
+                Pair.of(Date, Long.class),
+                Pair.of(__StreamDate.name(), String.class),
+                Pair.of(StreamDateId.name(), Integer.class),
+                Pair.of(__Row_Count__.name(), Integer.class),
+                Pair.of(LastActivityDate.name(), Long.class),
+                Pair.of(VERSION_COL, Long.class),
+                Pair.of(BuyingScore, Double.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", MODEL_1_ID, MODEL_1, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 1, DAY_1_EPOCH, OLD_VERSION, 0.1},
+                {"acc2", MODEL_1_ID, MODEL_1, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 1, DAY_1_EPOCH, OLD_VERSION, 0.4},
+                {"acc999", MODEL_1_ID, MODEL_1, DAY_9_EPOCH, DAY_9, DAY_PERIOD_9, 1, DAY_9_EPOCH, OLD_VERSION, 0.6} // not affected day range
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -424,14 +517,15 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(modelName, String.class),
                 Pair.of(Date, Long.class),
                 Pair.of(__StreamDate.name(), String.class),
-                Pair.of(StreamDateId.name(), Integer.class)
+                Pair.of(StreamDateId.name(), Integer.class),
+                Pair.of(BuyingScore, Double.class)
         );
         Object[][] data = new Object[][]{
-                {"acc1", MODEL_1, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1},
-                {"acc1", MODEL_2, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1},
-                {"acc1", MODEL_1, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2},
-                {"acc2", MODEL_1, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2},
-                {"acc2", MODEL_2, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2}
+                {"acc1", MODEL_1, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 0.9},
+                {"acc1", MODEL_2, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 0.1},
+                {"acc1", MODEL_1, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.1},
+                {"acc2", MODEL_1, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.2},
+                {"acc2", MODEL_2, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.2}
         };
         return uploadHdfsDataUnit(data, fields);
     }

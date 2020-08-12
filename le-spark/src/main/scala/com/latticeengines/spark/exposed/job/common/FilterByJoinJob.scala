@@ -28,9 +28,9 @@ class FilterByJoinJob extends AbstractSparkJob[FilterByJoinConfig] {
           renamed = renamed.withColumnRenamed(column, inputPrefix + column)
         }
       })
-      output = source.join(renamed, Seq(key), joinType).select(columns map col: _*).distinct()
+      output = source.select(columns map col: _*).join(renamed, Seq(key), joinType).select(columns map col: _*)
     } else {
-      output = source.select(columns map col: _*).distinct()
+      output = source.select(columns map col: _*)
     }
 
     lattice.output = output :: Nil

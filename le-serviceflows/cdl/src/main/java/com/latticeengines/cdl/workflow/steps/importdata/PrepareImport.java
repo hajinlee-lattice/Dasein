@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.CSVConstants;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -148,10 +149,15 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
                         new String[] { String.valueOf(CSVConstants.MAX_HEADER_LENGTH), sb.toString() });
             }
             Map<String, String> headerCaseMapping = new HashMap<>();
+            Set<String> duplicates = new HashSet<>();
             for (String field : headerFields) {
                 if (headerCaseMapping.put(field.toLowerCase(), field) != null) {
-                    throw new LedpException(LedpCode.LEDP_40055);
+                    duplicates.add(field);
                 }
+            }
+            if (CollectionUtils.isNotEmpty(duplicates)) {
+                Map<String, Object> paramsMap = ImmutableMap.of("columns", StringUtils.join(duplicates));
+                throw new LedpException(LedpCode.LEDP_40055,  paramsMap);
             }
             Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
                     .collect(groupingBy(attr -> attr.getSourceAttrName() == null ?

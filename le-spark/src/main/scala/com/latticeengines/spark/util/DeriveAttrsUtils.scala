@@ -3,13 +3,14 @@ package com.latticeengines.spark.util
 import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer.Operator
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
-import com.latticeengines.domain.exposed.cdl.activity.{ActivityRowReducer, AtlasStream, StreamAttributeDeriver}
+import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import org.apache.avro.Schema.Type
 import org.apache.commons.collections4.CollectionUtils
+import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{BooleanType, LongType}
+import org.apache.spark.sql.types.{BooleanType, DoubleType, LongType, StringType}
 import org.apache.spark.sql.{Column, DataFrame}
 
 import scala.collection.JavaConversions._
@@ -39,7 +40,23 @@ private[spark] object DeriveAttrsUtils {
     } else {
       throw new UnsupportedOperationException(s"${reducer.getOperator} is not implemented")
     }
+  }
 
+  def categorizeValues(df: DataFrame, config: CategorizeValConfig, entityIdCol: String): DataFrame = {
+    config match {
+      case doubleValuesConfig: CategorizeDoubleConfig => categorizeDoubleValues(df, doubleValuesConfig, entityIdCol)
+      case _ => throw new UnsupportedOperationException("config type not supported")
+    }
+  }
+
+  def categorizeDoubleValues(df: DataFrame, config: CategorizeDoubleConfig, entityIdCol: String): DataFrame = {
+    val mappingUdf = UserDefinedFunction((value: Double) => config.findCategory(value), StringType, Some(Seq(DoubleType)))
+    var cloned = df.as("cloned")
+    df.columns.foreach(colName => {
+      if (!colName.equals(entityIdCol))
+        cloned = cloned.withColumn(colName, mappingUdf(df(colName)))
+    })
+    cloned
   }
 
   def checkSingleSource(deriver: StreamAttributeDeriver): Unit = {

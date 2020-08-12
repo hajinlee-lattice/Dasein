@@ -185,7 +185,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
 
     // always generate row count agg
     val aggDf: DataFrame = {
-      if (streamReducerMap.get(streamId).isDefined) {
+      if (streamReducerMap.contains(streamId)) {
         // if stream has reducer, just append 1 as dedup already done for daily level
         addLastActivityDateColIfNotExist(df, dateAttr).withColumn(__Row_Count__.name, lit(1).cast(LongType))
       } else {

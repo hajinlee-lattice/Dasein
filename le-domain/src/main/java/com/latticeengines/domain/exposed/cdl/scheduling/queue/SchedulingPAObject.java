@@ -1,9 +1,11 @@
-package com.latticeengines.domain.exposed.cdl.scheduling;
+package com.latticeengines.domain.exposed.cdl.scheduling.queue;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.Constraint;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
@@ -23,6 +25,13 @@ public abstract class SchedulingPAObject implements Comparable<SchedulingPAObjec
     abstract List<Constraint> getPushConstraints();
 
     abstract List<Constraint> getPopConstraints();
+
+    /*
+     * quota name that will be consumed for tenants scheduled through this queue
+     */
+    public String getConsumedPAQuotaName() {
+        return null;
+    }
 
     public SchedulingPAObject(TenantActivity tenantActivity) {
         this.tenantActivity = tenantActivity;

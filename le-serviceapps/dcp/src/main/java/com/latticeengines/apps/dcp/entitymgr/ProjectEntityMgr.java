@@ -15,11 +15,15 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     ProjectInfo findProjectInfoByProjectId(String projectId);
 
-    List<ProjectInfo> findAllProjectInfo(Boolean isDeleted, Pageable pageable);
+    List<ProjectInfo> findAllProjectInfo(Pageable pageable, Boolean includeArchived);
 
     Long countAllProjects();
 
     ProjectInfo findProjectInfoBySourceId(String sourceId);
 
     S3ImportSystem findImportSystemByProjectId(String projectId);
+
+    List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds, Boolean includeArchived);
+
+    ProjectInfo findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds);
 }

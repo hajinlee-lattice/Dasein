@@ -244,7 +244,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @Override
     public List<WorkflowJob> findByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
-            List<String> statuses) {
+            List<String> statuses, Long earliestStartTime) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         StringBuilder sb = new StringBuilder().append(String.format("from %s workflowjob", entityClz.getSimpleName()));
@@ -262,6 +262,10 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
             appendWhereClause(sb, hasClause, " workflowjob.status in :statuses");
             hasClause = true;
         }
+        if (earliestStartTime != null) {
+            appendWhereClause(sb, hasClause, " workflowjob.startTimeInMillis >= :startTime");
+            hasClause = true;
+        }
 
         Query<WorkflowJob> query = session.createQuery(sb.toString(), entityClz);
         // set parameter values
@@ -273,6 +277,9 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         }
         if (CollectionUtils.isNotEmpty(statuses)) {
             query.setParameter("statuses", statuses);
+        }
+        if (earliestStartTime != null) {
+            query.setParameter("startTime", earliestStartTime);
         }
 
         return query.list();

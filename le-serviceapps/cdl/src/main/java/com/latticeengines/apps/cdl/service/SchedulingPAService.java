@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 
 public interface SchedulingPAService {
 

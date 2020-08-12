@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 
 public interface GlobalAuthTestBed {
@@ -88,4 +89,6 @@ public interface GlobalAuthTestBed {
     void excludeTestTenantsForCleanup(List<Tenant> tenants);
 
     void loginAD();
+
+    void cleanupSession(Tenant tenant, AccessLevel level);
 }

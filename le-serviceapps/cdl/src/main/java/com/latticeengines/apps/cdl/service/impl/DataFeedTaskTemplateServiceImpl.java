@@ -1,8 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityTypeId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelNameId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +61,6 @@ import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -226,7 +228,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     private DataFeedTask setupDataFeedTask(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
-                                           EntityType entityType, S3ImportSystem websiteSystem, Table standardTable,
+                                           EntityType entityType, S3ImportSystem importSystem, Table standardTable,
                                            String systemType) {
         Table templateTable = generateTemplate(standardTable, simpleTemplateMetadata);
         templateTable.setName(templateTable.getName() + System.currentTimeMillis());
@@ -236,7 +238,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTask.setImportTemplate(templateTable);
         dataFeedTask.setStatus(DataFeedTask.Status.Active);
         dataFeedTask.setEntity(entityType.getEntity().name());
-        dataFeedTask.setFeedType(EntityTypeUtils.generateFullFeedType(websiteSystem.getName(), entityType));
+        dataFeedTask.setFeedType(EntityTypeUtils.generateFullFeedType(importSystem.getName(), entityType));
         dataFeedTask.setSource("File");
         dataFeedTask.setActiveJob("Not specified");
         dataFeedTask.setSourceConfig("Not specified");
@@ -473,7 +475,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public boolean createDefaultDnbIntentDataTemplate(String customerSpace, String systemDisplayName) {
+    public boolean createDefaultDnbIntentDataTemplate(String customerSpace, String systemDisplayName, boolean processBuyingScore) {
         EntityType entityType = EntityType.CustomIntent;
         S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.DnbIntent,
                 S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName(), systemDisplayName);
@@ -483,14 +485,19 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 entityType, null);
         log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
         String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
-        createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
+        if (processBuyingScore) {
+            createDnbIntentDataMetadataWithBuyingScore(customerSpace, streamName, intentDataTask);
+        } else {
+            createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
+        }
         return true;
     }
 
     @Override
     public boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType,
                                                SimpleTemplateMetadata simpleTemplateMetadata,
-                                               String systemDisplayName) {
+                                               String systemDisplayName,
+                                               boolean processBuyingScore) {
         if (!EntityType.CustomIntent.equals(entityType)) {
             throw new IllegalArgumentException(String.format("createDnbIntentDataTemplate cannot support entityType " +
                     "%s.", entityType));
@@ -502,7 +509,11 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 entityType, simpleTemplateMetadata);
         log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
         String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
-        createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
+        if (processBuyingScore) {
+            createDnbIntentDataMetadataWithBuyingScore(customerSpace, streamName, intentDataTask);
+        } else {
+            createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
+        }
         return true;
     }
 
@@ -943,7 +954,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(task).withStreamType(AtlasStream.StreamType.DnbIntentData)
                         .withName(streamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
                         .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
-                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).withAttributeDerivers(Collections.singletonList(createDnbIntentDeriver())).build();
+                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
         stream.setStreamId(AtlasStream.generateId());
         streamEntityMgr.create(stream);
         log.info("DbIntentData AtlasStream is {}.", JsonUtils.serialize(stream));
@@ -958,12 +969,22 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
     }
 
-    private StreamAttributeDeriver createDnbIntentDeriver() {
-        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
-        deriver.setTargetAttribute(InterfaceName.HasIntent.name());
-        deriver.setCalculation(StreamAttributeDeriver.Calculation.TRUE);
-        deriver.setTargetFundamentalType(FundamentalType.BOOLEAN);
-        return deriver;
+    private void createDnbIntentDataMetadataWithBuyingScore(String customerSpace, String streamName, DataFeedTask intentDataTask) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        AtlasStream stream = new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(intentDataTask).withStreamType(AtlasStream.StreamType.DnbIntentData)
+                .withName(streamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
+                .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
+                .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withReducer(prepareBuyingScoreReducer()).withRetentionDays(365).build();
+        stream.setStreamId(AtlasStream.generateId());
+        streamEntityMgr.create(stream);
+        log.info("BuyingScore stream config: {}.", JsonUtils.serialize(stream));
+        StreamDimension modelDimension = createDnbIntentDataModelDimension(stream);
+        dimensionEntityMgr.create(modelDimension);
+        log.info("DnbIntentData ModelDimension is {}.", JsonUtils.serialize(modelDimension));
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultBuyingScoreGroups(customerSpace, stream.getName());
+        if (CollectionUtils.isEmpty(defaultGroups)) {
+            throw new IllegalStateException(String.format("Failed to setup buying score metrics for tenant %s", customerSpace));
+        }
     }
 
     private void createDropFolder(String customerSpace, String systemName, EntityType entityType) {
@@ -1157,6 +1178,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         ActivityRowReducer reducer = new ActivityRowReducer();
         reducer.setGroupByFields(Collections.singletonList(InterfaceName.OpportunityId.name()));
         reducer.setArguments(Collections.singletonList(InterfaceName.LastModifiedDate.name()));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
+    }
+
+    private ActivityRowReducer prepareBuyingScoreReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(AccountId.name(), ModelName.name()));
+        reducer.setArguments(Collections.singletonList(LastModifiedDate.name()));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
     }

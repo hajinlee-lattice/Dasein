@@ -9,10 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.pls.GlobalTeamData;
+import com.latticeengines.pls.service.TeamWrapperService;
 import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 
@@ -26,37 +30,49 @@ public class ProjectServiceImpl implements ProjectService {
     @Inject
     private ProjectProxy projectProxy;
 
+    @Inject
+    private TeamWrapperService teamWrapperService;
+
     @Override
     public ProjectDetails createProject(String customerSpace, ProjectRequest projectRequest, String user) {
-        return projectProxy.createDCPProject(customerSpace, projectRequest, user);
+        ProjectDetails project = projectProxy.createDCPProject(customerSpace, projectRequest, user);
+        if(project != null){
+            GlobalTeamData globalTeamData = new GlobalTeamData();
+            globalTeamData.setTeamName(projectRequest.getDisplayName());
+            globalTeamData.setTeamMembers(Sets.newHashSet(user));
+            String teamId = teamWrapperService.createTeam(user, globalTeamData);
+            projectProxy.updateTeamId(customerSpace, project.getProjectId(), teamId);
+        }
+        return project;
     }
 
     @Override
-    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, Boolean includeArchived) {
-        return projectProxy.getAllDCPProject(customerSpace, includeSources, includeArchived, 0, DEFAULT_PAGE_SIZE);
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources) {
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, 0, DEFAULT_PAGE_SIZE, TeamUtils.getTeamIds());
     }
 
     @Override
-    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, Boolean includeArchived,
-                                               int pageIndex, int pageSize) {
+    public List<ProjectSummary> getAllProjects(String customerSpace, Boolean includeSources, int pageIndex, int pageSize) {
         Preconditions.checkArgument(pageIndex > 0);
         Preconditions.checkArgument(pageSize > 0);
-        return projectProxy.getAllDCPProject(customerSpace, includeSources, includeArchived, pageIndex - 1, pageSize);
+        return projectProxy.getAllDCPProject(customerSpace, includeSources, pageIndex - 1, pageSize, TeamUtils.getTeamIds());
     }
 
     @Override
     public ProjectDetails getProjectByProjectId(String customerSpace, String projectId, Boolean includeSources) {
-        return projectProxy.getDCPProjectByProjectId(customerSpace, projectId, includeSources);
+        return projectProxy.getDCPProjectByProjectId(customerSpace, projectId, includeSources, TeamUtils.getTeamIds());
     }
 
     @Override
     public void deleteProject(String customerSpace, String projectId) {
-        projectProxy.deleteProject(customerSpace, projectId);
+        projectProxy.deleteProject(customerSpace, projectId, TeamUtils.getTeamIds());
     }
 
     @Override
     public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
-        return projectProxy.getDropFolderAccessByProjectId(customerSpace, projectId);
+        return projectProxy.getDropFolderAccessByProjectId(customerSpace, projectId, TeamUtils.getTeamIds());
     }
+
+
 
 }

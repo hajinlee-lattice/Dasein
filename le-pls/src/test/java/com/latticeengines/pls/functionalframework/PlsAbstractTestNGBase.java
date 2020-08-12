@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -141,6 +142,9 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     }
     protected void switchToThirdPartyUser(Tenant tenant) {
         testBed.switchToThirdPartyUser();
+    }
+    protected void cleanupSession(AccessLevel level) {
+        testBed.cleanupSession(mainTestTenant, level);
     }
 
     protected void setupSecurityContext(Tenant t) {

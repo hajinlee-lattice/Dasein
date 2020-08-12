@@ -62,6 +62,10 @@
     {
       "Node": "activityUploadQuota",
       "Data": "{}"
+    },
+    {
+      "Node": "PAQuota",
+      "Data": "{}"
     }
   ]
 }

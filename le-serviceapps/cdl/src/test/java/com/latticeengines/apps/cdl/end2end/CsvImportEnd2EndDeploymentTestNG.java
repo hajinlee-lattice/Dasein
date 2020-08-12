@@ -164,10 +164,10 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         collectAvroFilesForEntity(BusinessEntity.Catalog);
     }
 
-    @Test(groups = "manual")
+    @Test(groups = "manual", enabled = false)
     private void importIntentActivityData() throws Exception {
         ensureEmptyDirs();
-        String systemName = S3ImportSystem.SystemType.Other.getDefaultSystemName();
+        String systemName = S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName();
         S3ImportSystem system = new S3ImportSystem();
         system.setTenant(mainTestTenant);
         system.setName(systemName);
@@ -184,6 +184,30 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, "File", templateFeedType);
 
         importOnlyDataFromS3(BusinessEntity.ActivityStream, "intent_activity_data.csv", dataFeedTask);
+        downloadData();
+        collectAvroFilesForEntity(BusinessEntity.ActivityStream);
+    }
+
+    @Test(groups = "manual")
+    private void importBuyingScoreData() throws Exception {
+        ensureEmptyDirs();
+        String systemName = S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName();
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(mainTestTenant);
+        system.setName(systemName);
+        system.setDisplayName(systemName);
+        system.setSystemType(S3ImportSystem.SystemType.Other);
+        system.setPriority(2);
+        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, systemName, null, null);
+
+        cdlProxy.createDefaultBuyingScoreDataTemplate(mainCustomerSpace);
+        log.info("Finished creating buying score template.");
+
+        String templateFeedType = EntityTypeUtils.generateFullFeedType(systemName, EntityType.CustomIntent);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, "File", templateFeedType);
+
+        importOnlyDataFromS3(BusinessEntity.ActivityStream, "buying_score_data.csv", dataFeedTask);
         downloadData();
         collectAvroFilesForEntity(BusinessEntity.ActivityStream);
     }
