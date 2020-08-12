@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -24,7 +25,8 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "PROJECT_SYSTEM_LINK")
+@Table(name = "PROJECT_SYSTEM_LINK",
+        uniqueConstraints = { @UniqueConstraint(name = "UX_PROJECT_SYSTEM", columnNames = { "FK_IMPORT_SYSTEM_ID", "FK_PROJECT_ID" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class ProjectSystemLink implements HasPid, HasTenant {
 
