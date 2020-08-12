@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -41,8 +43,11 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
+import com.latticeengines.domain.exposed.dcp.UploadJobStep;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
@@ -137,18 +142,19 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
         UploadDetails uploadDetails = testUploadProxy.startImport(request);
-
-        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(uploadDetails.getUploadId());
-        Assert.assertNotNull(uploadJobDetails);
-        System.out.println("Before Job Complete:\n" + JsonUtils.serialize(uploadJobDetails));
+        Assert.assertNotNull(uploadDetails);
+        System.out.println("Before Job Complete - UploadDetails:\n" + JsonUtils.pprint(uploadDetails));
 
         JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadDiagnostics().getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+
         List<UploadDetails> uploadDetailsList = testUploadProxy.getAllBySourceId(source.getSourceId(), null);
         Assert.assertNotNull(uploadDetailsList);
         Assert.assertEquals(uploadDetailsList.size(), 1);
+        Assert.assertNotNull(uploadDetailsList.get(0));
+        Assert.assertEquals(uploadDetailsList.get(0).getUploadId(), uploadDetails.getUploadId());
         uploadDetails = uploadDetailsList.get(0);
-        System.out.println("After Job Complete - UploadDetails:\n" + JsonUtils.serialize(uploadDetails));
+        System.out.println("After Job Complete - UploadDetails:\n" + JsonUtils.pprint(uploadDetails));
 
         UploadDetails retrievedDetail = testUploadProxy.getUpload(uploadDetails.getUploadId());
         Assert.assertEquals(JsonUtils.serialize(uploadDetails), JsonUtils.serialize(retrievedDetail));
@@ -156,41 +162,57 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         String token = testUploadProxy.getToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
 
-        uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
+        // Validate data provided by Upload Job Details API.
+        UploadJobDetails uploadJobDetails = testUploadProxy.getJobDetailsByUploadId(retrievedDetail.getUploadId());
         Assert.assertNotNull(uploadJobDetails);
-        System.out.println("After Job Complete:\n" + JsonUtils.serialize(uploadJobDetails));
-        // DEBUG
-        Assert.assertNotNull(uploadJobDetails.getDisplayName());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getDisplayName()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getDisplayName());
-        Assert.assertNotNull(uploadJobDetails.getSourceDisplayName());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getSourceDisplayName()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getSourceDisplayName());
+        System.out.println("After Job Complete - UploadJobDetails:\n" + JsonUtils.pprint(uploadJobDetails));
+
+        // Validate UploadJobDetails fields.
+        Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getDisplayName()));
+        Assert.assertEquals(uploadJobDetails.getDisplayName(), TEST_ACCOUNT_DATA_FILE);
+
+        Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getSourceDisplayName()));
+        Assert.assertEquals(uploadJobDetails.getSourceDisplayName(), SOURCE_NAME);
+
         Assert.assertNotNull(uploadJobDetails.getStatus());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getStatus()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getStatus());
+        Assert.assertEquals(uploadJobDetails.getStatus(), Upload.Status.FINISHED);
+
         Assert.assertNotNull(uploadJobDetails.getStatistics());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getStatistics()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getStatistics());
+        Assert.assertNotNull(uploadJobDetails.getStatistics().getImportStats());
+        UploadStats.ImportStats importStats = uploadJobDetails.getStatistics().getImportStats();
+        Assert.assertEquals(importStats.getSubmitted().longValue(), 20L);
+        Assert.assertEquals(importStats.getSuccessfullyIngested().longValue(), 20L);
+        Assert.assertEquals(importStats.getFailedIngested().longValue(), 0L);
+
+        Assert.assertNotNull(uploadJobDetails.getStatistics().getMatchStats());
+        UploadStats.MatchStats matchStats = uploadJobDetails.getStatistics().getMatchStats();
+        Assert.assertEquals(matchStats.getMatched().longValue(), 17L);
+        Assert.assertEquals(matchStats.getUnmatched().longValue(), 3L);
+        Assert.assertEquals(matchStats.getPendingReviewCnt().longValue(), 0L);
+
         Assert.assertNotNull(uploadJobDetails.getUploadDiagnostics());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadDiagnostics()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getUploadDiagnostics());
+        Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadDiagnostics().getApplicationId()));
+        Assert.assertTrue(uploadJobDetails.getUploadDiagnostics().getApplicationId().startsWith("application_"));
+
         Assert.assertNotNull(uploadJobDetails.getUploadJobSteps());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadJobSteps()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getUploadJobSteps());
         Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
+        Set<String> setNameSet = uploadJobDetails.getUploadJobSteps().stream()
+                .map(UploadJobStep::getStepName).collect(Collectors.toSet());
+        // TODO: Find a way to avoid hard coding the step names.
+        Assert.assertTrue(setNameSet.contains("Ingestion"));
+        Assert.assertTrue(setNameSet.contains("Match_Append"));
+        Assert.assertTrue(setNameSet.contains("Analysis"));
+
         Assert.assertNotNull(uploadJobDetails.getDropFileTime());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getDropFileTime()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getDropFileTime());
+        // Assert the time greater than May 20, 2020, a valid Epoch time in milliseconds.
+        Assert.assertTrue(uploadJobDetails.getDropFileTime() > 1590000000000L);
+
         Assert.assertNotNull(uploadJobDetails.getUploadCreatedTime());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getUploadCreatedTime()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getUploadCreatedTime());
-        Assert.assertNotNull(uploadJobDetails.getCurrentStep());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getCurrentStep()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getCurrentStep());
+        // Assert the time greater than May 20, 2020, a valid Epoch time in milliseconds.
+        Assert.assertTrue(uploadJobDetails.getUploadCreatedTime() > 1590000000000L);
+
+        Assert.assertNull(uploadJobDetails.getCurrentStep());
         Assert.assertNotNull(uploadJobDetails.getProgressPercentage());
-        //Assert.assertTrue(StringUtils.isNotBlank(uploadJobDetails.getProgressPercentage()));
-        log.error("UploadJobDetails DisplayName: " + uploadJobDetails.getProgressPercentage());
         Assert.assertEquals(uploadJobDetails.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
     }
 
