@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
 
@@ -92,6 +93,9 @@ public class ProcessAnalyzeRequest {
     // workflow tags
     @JsonProperty("Tags")
     private Map<String, String> tags;
+
+    @JsonProperty("EntityMatchConfiguration")
+    private EntityMatchConfiguration entityMatchConfiguration;
 
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
@@ -227,5 +231,13 @@ public class ProcessAnalyzeRequest {
 
     public void setTags(Map<String, String> tags) {
         this.tags = tags;
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration() {
+        return entityMatchConfiguration;
+    }
+
+    public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
+        this.entityMatchConfiguration = entityMatchConfiguration;
     }
 }

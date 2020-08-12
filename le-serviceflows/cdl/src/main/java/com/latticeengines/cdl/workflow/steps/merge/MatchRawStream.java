@@ -235,6 +235,11 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
             // set stream type to source entity to get higher concurrency
             baseMatchInput.setSourceEntity(stream.getStreamType().name());
         }
+        if (configuration.getEntityMatchConfiguration() != null) {
+            int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
+            log.info("set number of staging shards for match to {}", numStagingShards);
+            baseMatchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
+        }
 
         String uid = UUID.randomUUID().toString();
         matchRootOperationUids.put(stream.getStreamId(), uid);

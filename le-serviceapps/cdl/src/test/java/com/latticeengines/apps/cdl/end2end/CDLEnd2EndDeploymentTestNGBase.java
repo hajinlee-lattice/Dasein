@@ -85,6 +85,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -186,6 +187,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
+
+    // number of shards in staging environment for entity match
+    // set to a static value so that we don't need to regenerate checkpoint
+    private static final int TEST_NUM_STAGING_SHARDS = 5;
 
     /* Expected account result */
 
@@ -661,6 +666,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void processAnalyze(ProcessAnalyzeRequest request, JobStatus expectedResult) {
         log.info("Start processing and analyzing ...");
+        if (request.getEntityMatchConfiguration() == null) {
+            request.setEntityMatchConfiguration(new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS));
+        }
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
         processAnalyzeAppId = appId.toString();
         log.info("processAnalyzeAppId=" + processAnalyzeAppId);

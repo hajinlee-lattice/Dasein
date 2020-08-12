@@ -158,6 +158,11 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 });
                 setRematchVersions(matchInput);
             }
+            if (configuration.getEntityMatchConfiguration() != null) {
+                int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
+                log.info("set number of staging shards for match to {}", numStagingShards);
+                matchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
+            }
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
                     getSystemIds(BusinessEntity.Account), null, hasConvertedRematchTables, null);
         } else {
