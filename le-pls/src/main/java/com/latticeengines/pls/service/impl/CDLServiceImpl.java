@@ -50,12 +50,16 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.Status;
 import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -173,6 +177,18 @@ public class CDLServiceImpl implements CDLService {
         boolean isActivityBasedPA = cdlProxy.isActivityBasedPA();
         log.info("Submitting PA request for tenant = {}, isActivityBasedPA = {}", customerSpace, isActivityBasedPA);
         if (isActivityBasedPA) {
+            SchedulingStatus status = cdlProxy.getSchedulingStatus(customerSpace);
+            if (status != null) {
+                boolean hasScheduleNowQuota = MapUtils.emptyIfNull(status.getRemainingPaQuota())
+                        .getOrDefault(SchedulerConstants.QUOTA_SCHEDULE_NOW, 0L) > 0;
+                if (!hasScheduleNowQuota) {
+                    log.info("No scheduling quota left for tenant {}, quota = {}", customerSpace,
+                            status.getRemainingPaQuota());
+                    UIAction action = UIActionUtils.generateUIError("Schedule Now Quota Exhausted", View.Banner,
+                            UIActionCode.PA_SCHEDULER_001);
+                    throw UIActionException.fromAction(action);
+                }
+            }
             return cdlProxy.scheduleProcessAnalyze(customerSpace, false, request);
         } else {
             checkPALimit(customerSpace, request);
