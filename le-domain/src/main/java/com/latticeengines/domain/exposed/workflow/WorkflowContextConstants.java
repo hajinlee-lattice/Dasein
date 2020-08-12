@@ -66,5 +66,6 @@ public final class WorkflowContextConstants {
         public static final String PARENT_WORKFLOW_PID = "PARENT_WORKFLOW_PID";
         public static final String ROOT_WORKFLOW_START_TIME = "ROOT_WORKFLOW_START_TIME";
         public static final String CONSUMED_QUOTA_NAME = "CONSUMED_QUOTA_NAME";
+        public static final String SCHEDULED_QUEUE_NAME = "SCHEDULED_QUEUE_NAME";
     }
 }

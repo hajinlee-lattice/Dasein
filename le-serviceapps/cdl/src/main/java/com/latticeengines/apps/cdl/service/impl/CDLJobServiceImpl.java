@@ -437,8 +437,10 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String tenantId : canRunJobSet) {
                 if (!dryRun) {
+                    SchedulingResult.Detail detail = MapUtils.emptyIfNull(result.getDetails()).get(tenantId);
                     String consumedQuotaName = consumedPAQuotaMap.get(CustomerSpace.shortenCustomerSpace(tenantId));
-                    ApplicationId appId = submitProcessAnalyzeJob(tenantId, consumedQuotaName);
+                    ApplicationId appId = submitProcessAnalyzeJob(tenantId, consumedQuotaName,
+                            detail == null ? null : detail.getScheduledQueue());
                     logScheduledPA(schedulerName, tenantId, appId, false, result);
                     if (appId != null) {
                         removeFromSet(appId, MAIN_TRACKING_SET, tenantId);
@@ -610,7 +612,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         return true;
     }
 
-    private ApplicationId submitProcessAnalyzeJob(String tenantId, String consumedQuotaName) {
+    private ApplicationId submitProcessAnalyzeJob(String tenantId, String consumedQuotaName,
+            String scheduledQueueName) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getShortTenantId());
@@ -623,13 +626,20 @@ public class CDLJobServiceImpl implements CDLJobService {
                 request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
             }
+            Map<String, String> tags = new HashMap<>();
             if (StringUtils.isNotBlank(consumedQuotaName)) {
-                request.setTags(
-                        Collections.singletonMap(WorkflowContextConstants.Tags.CONSUMED_QUOTA_NAME, consumedQuotaName));
+                tags.put(WorkflowContextConstants.Tags.CONSUMED_QUOTA_NAME, consumedQuotaName);
+            }
+            if (StringUtils.isNotBlank(scheduledQueueName)) {
+                tags.put(WorkflowContextConstants.Tags.SCHEDULED_QUEUE_NAME, scheduledQueueName);
+            }
+            if (!tags.isEmpty()) {
+                request.setTags(tags);
             }
             applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
-            log.info("Submit PA job with appId = {} for tenant = {} successfully, consumed quota name = {}",
-                    applicationId, tenantId, consumedQuotaName);
+            log.info(
+                    "Submit PA job with appId = {} for tenant = {} successfully, consumed quota name = {}, scheduled by queue {}",
+                    applicationId, tenantId, consumedQuotaName, scheduledQueueName);
         } catch (Exception e) {
             log.error("Failed to submit job for tenant = {}", tenantId, e);
             setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);

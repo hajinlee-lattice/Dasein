@@ -96,6 +96,9 @@ public class PAQuotaSummary {
         @JsonProperty("consumed_quota_name")
         private String consumedQuotaName;
 
+        @JsonProperty("scheduled_queue_name")
+        private String scheduledQueueName;
+
         public Instant getRootJobStartedAt() {
             return rootJobStartedAt;
         }
@@ -126,6 +129,14 @@ public class PAQuotaSummary {
 
         public void setConsumedQuotaName(String consumedQuotaName) {
             this.consumedQuotaName = consumedQuotaName;
+        }
+
+        public String getScheduledQueueName() {
+            return scheduledQueueName;
+        }
+
+        public void setScheduledQueueName(String scheduledQueueName) {
+            this.scheduledQueueName = scheduledQueueName;
         }
     }
 
