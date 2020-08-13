@@ -885,6 +885,40 @@ public class EmailServiceImpl implements EmailService {
             log.error("Failed to send upload failed email to " + uploadEmailInfo.getRecipientList().toString(), e);
         }
     }
-}
 
+    @Override
+    public void sendDCPWelcomeEmail(User user, String tenantName, String url) {
+        try {
+            log.info("Sending welcome email to " + user.getEmail().toString() + "started.");
+
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.DCP_WELCOME_NEW_USER);
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{url}}", url);
+            Multipart multipart = builder.buildMultipart();
+
+            sendMultiPartEmail(EmailSettings.DNB_CONNECT_WELCOME_NEW_USER_SUBJECT, multipart, Collections.singleton(user.getEmail()), EmailFromAddress.DNB_CONNECT);
+            log.info("Sending welcome email to " + user.getEmail().toString() + "succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to " + user.getEmail().toString() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendNewDCPTenantEmail(User user, String tenantName, String url) {
+        try {
+            log.info("Sending new tenant email to " + user.getEmail().toString() + "started.");
+
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.DCP_WELCOME_NEW_TENANT);
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{tenantname}}", tenantName);
+            builder.replaceToken("{{url}}", url);
+            Multipart multipart = builder.buildMultipart();
+
+            sendMultiPartEmail(EmailSettings.DNB_CONNECT_WELCOME_NEW_TENANT_SUBJECT, multipart, Collections.singleton(user.getEmail()), EmailFromAddress.DNB_CONNECT);
+            log.info("Sending welcome email to " + user.getEmail().toString() + "succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to " + user.getEmail().toString() + " " + e.getMessage());
+        }
+    }
+}
 

@@ -97,6 +97,10 @@ public interface EmailService {
 
     void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo);
 
+    void sendDCPWelcomeEmail(User user, String tenantName, String url);
+
+    void sendNewDCPTenantEmail(User user, String tenantName, String url);
+
     enum EmailFromAddress {
         DNB_CONNECT, LATTICE_ENGINES
     }

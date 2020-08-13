@@ -124,7 +124,9 @@ public class EmailTemplateBuilder {
         S3_TEMPLATE_UPDATE("s3_template_update.html"), //
         S3_TEMPLATE_CREATE("s3_template_create.html"), //
         DCP_UPLOAD_COMPLETED("dcp_upload_completed.html"), //
-        DCP_UPLOAD_FAILED("dcp_upload_failed.html"); //
+        DCP_UPLOAD_FAILED("dcp_upload_failed.html"),
+        DCP_WELCOME_NEW_USER("dcp_welcome_new_user.html"),
+        DCP_WELCOME_NEW_TENANT("dcp_welcome_new_tenant.html"); //
 
         private static final String templateRoot = "com/latticeengines/monitor/";
         private final String templateFile;
