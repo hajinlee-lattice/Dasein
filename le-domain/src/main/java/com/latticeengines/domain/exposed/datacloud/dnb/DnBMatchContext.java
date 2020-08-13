@@ -35,6 +35,9 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     @JsonProperty("inputEmail")
     private String inputEmail;
 
+    @JsonProperty("inputUrl")
+    private String inputUrl;
+
     // send to Direct+
     @JsonProperty("inputDuns")
     private String inputDuns;
@@ -144,6 +147,7 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     public void copyMatchInput(DnBMatchContext context) {
         inputNameLocation = context.getInputNameLocation();
         inputEmail = context.getInputEmail();
+        inputUrl = context.getInputUrl();
         hitWhiteCache = context.getHitWhiteCache();
         hitBlackCache = context.getHitBlackCache();
         cacheId = context.getCacheId();
@@ -247,6 +251,15 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     public void setInputEmail(String inputEmail) {
         this.inputEmail = inputEmail;
+    }
+
+    @MetricField(name = "Url")
+    public String getInputUrl() {
+        return inputUrl;
+    }
+
+    public void setInputUrl(String inputUrl) {
+        this.inputUrl = inputUrl;
     }
 
     public String getInputDuns() {

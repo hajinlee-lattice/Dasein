@@ -46,7 +46,7 @@ public class IDaaSServiceImpl implements IDaaSService  {
     private volatile String tokenInUse;
     private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
             .maximumSize(1000) //
-            .expireAfterWrite(1, TimeUnit.HOURS) //
+            .expireAfterWrite(3, TimeUnit.HOURS) //
             .build(this::refreshOAuthTokens);
 
     @Override

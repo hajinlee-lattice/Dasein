@@ -256,10 +256,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
-        boolean isDunsToDuns = Boolean.TRUE.equals(request.getMatchTravelerContext().getUseDunsMatchDuns());
+        boolean isDunsToDuns = MatchTraveler.DUNS_TO_DUNS.equals(request.getMatchTravelerContext().getDunsMatchMode());
+        boolean isUrlToDuns = MatchTraveler.URL_TO_DUNS.equals(request.getMatchTravelerContext().getDunsMatchMode());
         if (isDunsToDuns && StringUtils.isNotBlank(matchKeyTuple.getDuns())) {
             // duns to duns mode
             context.setInputDuns(matchKeyTuple.getDuns());
+        } else if (isUrlToDuns && StringUtils.isNotBlank(matchKeyTuple.getDomain())) {
+            context.setInputUrl(matchKeyTuple.getDomain());
+            context.setInputNameLocation(matchKeyTuple);
         } else {
             context.setInputNameLocation(matchKeyTuple);
             nameLocationService.setDefaultCountry(context.getInputNameLocation());
@@ -272,7 +276,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             readyToReturn = true;
         }
         // Check country code
-        if (!readyToReturn && !isDunsToDuns && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+        if (!readyToReturn && !isDunsToDuns && !isUrlToDuns //
+                && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
             context.setDnbCode(DnBReturnCode.UNMATCH);
             readyToReturn = true;
         }
@@ -302,10 +307,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
-        boolean isDunsToDuns = Boolean.TRUE.equals(request.getMatchTravelerContext().getUseDunsMatchDuns());
+        boolean isDunsToDuns = MatchTraveler.DUNS_TO_DUNS.equals(request.getMatchTravelerContext().getDunsMatchMode());
+        boolean isUrlToDuns = MatchTraveler.URL_TO_DUNS.equals(request.getMatchTravelerContext().getDunsMatchMode());
         if (isDunsToDuns && StringUtils.isNotBlank(matchKeyTuple.getDuns())) {
             // duns to duns mode
             context.setInputDuns(matchKeyTuple.getDuns());
+        } else if (isUrlToDuns && StringUtils.isNotBlank(matchKeyTuple.getDomain())) {
+            context.setInputUrl(matchKeyTuple.getDomain());
+            context.setInputNameLocation(matchKeyTuple);
         } else {
             context.setInputNameLocation(matchKeyTuple);
             nameLocationService.setDefaultCountry(context.getInputNameLocation());
@@ -318,7 +327,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             readyToReturn = true;
         }
         // Check country code
-        if (!readyToReturn && !isDunsToDuns && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+        if (!readyToReturn && !isDunsToDuns && !isUrlToDuns //
+                && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
             context.setDnbCode(DnBReturnCode.UNMATCH);
             readyToReturn = true;
         }
@@ -708,8 +718,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             DnBRealTimeLookupService lookupService;
             if (Boolean.TRUE.equals(context.getUseDirectPlus())) {
                 lookupService = directPlusRealTimeLookupService;
+                log.info("Using direct+ realtime"); // to be removed
             } else {
                 lookupService = dnbRealTimeLookupService;
+                log.info("Using direct 2.0 realtime"); // to be removed
             }
             try {
                 returnedContext = lookupService.realtimeEntityLookup(context);

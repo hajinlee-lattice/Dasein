@@ -2,7 +2,10 @@ package com.latticeengines.dcp.workflow.steps;
 
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.MATCH_PERCENTAGE;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -21,9 +24,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
@@ -93,6 +98,24 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         String uploadId = configuration.getUploadId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, MATCH_PERCENTAGE);
+    }
+
+    @Override
+    protected Map<MatchKey, List<String>> getKeyMap(Set<String> inputFields) {
+        Map<MatchKey, List<String>> keyMap = super.getKeyMap(inputFields);
+        List<String> potentialUrlFields = new ArrayList<>();
+        if (inputFields.contains(InterfaceName.Website.name())) {
+            potentialUrlFields.add(InterfaceName.Website.name());
+        }
+        if (inputFields.contains(InterfaceName.Email.name())) {
+            potentialUrlFields.add(InterfaceName.Email.name());
+        }
+        if (potentialUrlFields.isEmpty()) {
+            keyMap.remove(MatchKey.Domain);
+        } else {
+            keyMap.put(MatchKey.Domain, potentialUrlFields);
+        }
+        return keyMap;
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 public class JobRequest {
 
     private Map<String, String> parameters;
-    private String jobQueue = "AWS-Python-Workflow-Job-Queue-DnB";
+    private String jobQueue = "AWS-Python-Workflow-Job-Queue";
     private String jobName;
     private String jobDefinition = "Python-App";
     private Integer cpus;
