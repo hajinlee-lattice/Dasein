@@ -908,6 +908,7 @@ public enum LedpCode {
     LEDP_40094("This attribute group is used with \"{0}\" always-on campaign. " +
             "Please make the change to the campaign first and then try to delete the attribute campaign."), //
     LEDP_40095("Your schedule now quota has been exhausted today. Please contact support for further assistance."), //
+    LEDP_40096("Error while deleting connection for lookupmap: {0}, {1}."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
