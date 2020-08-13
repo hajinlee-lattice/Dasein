@@ -65,6 +65,7 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
       ADD COLUMN `CATEGORIZATION` JSON NULL DEFAULT NULL;
 
+<<<<<<< HEAD
       CREATE TABLE `PROJECT_SYSTEM_LINK`
         (
            `PID`                 BIGINT NOT NULL auto_increment,
@@ -99,6 +100,13 @@ CREATE PROCEDURE `UpdateSchema`()
         CHANGE COLUMN `FK_IMPORT_SYSTEM_ID` `FK_IMPORT_SYSTEM_ID` BIGINT(20) NULL,
         DROP INDEX `FK_DCPPROJECT_FKIMPORTSYSTEMID_ATLASS3IMPORTSYSTEM`;
 
+||||||| merged common ancestors
+=======
+
+     Alter table `PLS_MultiTenant`.`DCP_DATA_REPORT` 
+     Add column `READY_FOR_ROLLUP` bit;
+
+>>>>>>> DCP-1312 fix test
   END //
 -- ##############################################################
 
