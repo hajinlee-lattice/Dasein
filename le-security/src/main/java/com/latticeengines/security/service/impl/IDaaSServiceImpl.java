@@ -57,7 +57,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     private final RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
             .maximumSize(1000) //
-            .expireAfterWrite(1, TimeUnit.HOURS) //
+            .expireAfterWrite(3, TimeUnit.HOURS) //
             .build(this::refreshOAuthTokens);
     private volatile String tokenInUse;
 
