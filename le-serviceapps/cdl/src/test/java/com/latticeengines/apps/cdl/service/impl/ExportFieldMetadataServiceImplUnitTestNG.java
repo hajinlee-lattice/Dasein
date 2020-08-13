@@ -31,6 +31,12 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
     private List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
     private List<ExportFieldMetadataDefaults> defaultGoogleAdsExportFields;
+    private List<ExportFieldMetadataDefaults> defaultAdobeAudienceMgrExportFields;
+    private List<ExportFieldMetadataDefaults> defaultAppNexusExportFields;
+    private List<ExportFieldMetadataDefaults> defaultGoogleDisplayNVideo360ExportFields;
+    private List<ExportFieldMetadataDefaults> defaultMediaMathExportFields;
+    private List<ExportFieldMetadataDefaults> defaultTradeDeskExportFields;
+    private List<ExportFieldMetadataDefaults> defaultVerizonMediaExportFields;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -45,6 +51,19 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultOutreachExportFields = getDefaultExportFields(CDLExternalSystemName.Outreach);
 
         defaultGoogleAdsExportFields = getDefaultExportFields(CDLExternalSystemName.GoogleAds);
+        
+        defaultAdobeAudienceMgrExportFields = getDefaultExportFields(CDLExternalSystemName.Adobe_Audience_Mgr);
+        
+        defaultAppNexusExportFields = getDefaultExportFields(CDLExternalSystemName.AppNexus);
+        
+        defaultGoogleDisplayNVideo360ExportFields = getDefaultExportFields(
+                CDLExternalSystemName.Google_Display_N_Video_360);
+        
+        defaultMediaMathExportFields = getDefaultExportFields(CDLExternalSystemName.MediaMath);
+        
+        defaultTradeDeskExportFields = getDefaultExportFields(CDLExternalSystemName.TradeDesk);
+        
+        defaultVerizonMediaExportFields = getDefaultExportFields(CDLExternalSystemName.Verizon_Media);
 
     }
 
@@ -170,7 +189,69 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 27);
 
     }
-    
+
+    @Test(groups = "functional")
+    public void testAdobeAudienceMgr() {
+        defaultAdobeAudienceMgrExportFields = exportService.getAllAttributes(CDLExternalSystemName.Adobe_Audience_Mgr);
+
+        assertEquals(defaultAdobeAudienceMgrExportFields.size(), 1);
+        assertEquals(defaultAdobeAudienceMgrExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled)
+                .count(),
+                1);
+
+    }
+
+    @Test(groups = "functional")
+    public void testAppNexus() {
+        defaultAppNexusExportFields = exportService.getAllAttributes(CDLExternalSystemName.AppNexus);
+
+        assertEquals(defaultAppNexusExportFields.size(), 1);
+        assertEquals(defaultAppNexusExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
+                1);
+
+    }
+
+    @Test(groups = "functional")
+    public void testGoogleDisplayNVideo360() {
+        defaultGoogleDisplayNVideo360ExportFields = exportService
+                .getAllAttributes(CDLExternalSystemName.Google_Display_N_Video_360);
+
+        assertEquals(defaultGoogleDisplayNVideo360ExportFields.size(), 1);
+        assertEquals(defaultGoogleDisplayNVideo360ExportFields.stream()
+                .filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 1);
+
+    }
+
+    @Test(groups = "functional")
+    public void testMediaMath() {
+        defaultMediaMathExportFields = exportService.getAllAttributes(CDLExternalSystemName.MediaMath);
+
+        assertEquals(defaultMediaMathExportFields.size(), 1);
+        assertEquals(
+                defaultMediaMathExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 1);
+
+    }
+
+    @Test(groups = "functional")
+    public void testTradeDesk() {
+        defaultTradeDeskExportFields = exportService.getAllAttributes(CDLExternalSystemName.TradeDesk);
+
+        assertEquals(defaultTradeDeskExportFields.size(), 1);
+        assertEquals(
+                defaultTradeDeskExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 1);
+
+    }
+
+    @Test(groups = "functional")
+    public void testVerizonMedia() {
+        defaultVerizonMediaExportFields = exportService.getAllAttributes(CDLExternalSystemName.Verizon_Media);
+
+        assertEquals(defaultVerizonMediaExportFields.size(), 1);
+        assertEquals(defaultVerizonMediaExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
+                1);
+
+    }
+
     private List<ExportFieldMetadataDefaults> getDefaultExportFields(CDLExternalSystemName systemName) {
         List<ExportFieldMetadataDefaults> defaultExportFields = exportService.getAllAttributes(systemName);
 
