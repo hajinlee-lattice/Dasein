@@ -69,6 +69,13 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     @Value("${datacloud.match.entity.txn.associate.enabled}")
     private boolean useTransactAssociateByDefault;
 
+    // fail when one seed having too many lookup entries
+    @Value("${datacloud.match.entity.cfg.failIfTooManyLookups:true}")
+    private boolean failIfTooManyLookups;
+
+    @Value("${datacloud.match.entity.cfg.num.lookups.max:250}")
+    private int maxNumLookupsPerSeed;
+
     /**
      * Hook to decide whether this actor should process current request. If this method is invoked, all
      * fields required by entity match are guaranteed to exist.
@@ -222,6 +229,16 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
 
             if (CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors())) {
                 traveler.setEntityMatchErrors(associationResponse.getAssociationErrors());
+            }
+
+            EntityRawSeed mergedSeed = associationResponse.getSeedAfterAssociation();
+            if (failIfTooManyLookups && traveler.getMatchInput().isAllocateId() && mergedSeed != null
+                    && CollectionUtils.size(mergedSeed.getLookupEntries()) > maxNumLookupsPerSeed) {
+                // guard against outliers (generally bad data if there are this many lookups)
+                String msg = String.format("%s (ID=%s) have too many (%d) match field values, exceeding limit %d",
+                        mergedSeed.getEntity(), mergedSeed.getId(), CollectionUtils.size(mergedSeed.getLookupEntries()),
+                        maxNumLookupsPerSeed);
+                traveler.addCriticalEntityMatchError(msg);
             }
 
             // clear all system IDs that have conflict
