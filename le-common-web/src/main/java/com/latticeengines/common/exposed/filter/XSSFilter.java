@@ -1,11 +1,12 @@
 package com.latticeengines.common.exposed.filter;
 
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
+import org.springframework.stereotype.Component;
 
 @Component("xssSanitizeFilter")
 public class XSSFilter implements Filter {

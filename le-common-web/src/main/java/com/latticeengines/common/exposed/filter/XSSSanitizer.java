@@ -1,7 +1,11 @@
 package com.latticeengines.common.exposed.filter;
 
 import org.owasp.esapi.ESAPI;
-import org.owasp.validator.html.*;
+import org.owasp.validator.html.AntiSamy;
+import org.owasp.validator.html.Policy;
+import org.owasp.validator.html.CleanResults;
+import org.owasp.validator.html.PolicyException;
+import org.owasp.validator.html.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
