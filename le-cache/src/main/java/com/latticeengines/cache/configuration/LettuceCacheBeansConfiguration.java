@@ -111,7 +111,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         // =========================
 
         // =========================
-        // BEGIN: idaas entitlement
+        // BEGIN: idaas
         // =========================
         RedisCacheConfiguration idaasEntitlementCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(1)) //
@@ -119,8 +119,15 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.IDaaSEntitlementCacheName));
+
+        RedisCacheConfiguration idaasTokenCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofHours(3)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.IDaaSTokenCacheName));
         // =========================
-        // END: idaas entitlement
+        // END: idaas
         // =========================
 
         // =========================
@@ -211,6 +218,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DnBRealTimeLookup, dnbRealTimeLookupCacheConfig);
         cacheConfigs.put(CacheName.Constants.PrimeMetadataCacheName, primeMetadataCacheConfig);
         cacheConfigs.put(CacheName.Constants.IDaaSEntitlementCacheName, idaasEntitlementCacheConfig);
+        cacheConfigs.put(CacheName.Constants.IDaaSTokenCacheName, idaasTokenCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);
