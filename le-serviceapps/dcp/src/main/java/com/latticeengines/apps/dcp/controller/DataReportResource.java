@@ -61,6 +61,17 @@ public class DataReportResource {
         return dataReportService.getDataReportBasicStats(customerSpace, level, ownerId);
     }
 
+
+    @PutMapping("/readyforrollup")
+    @ResponseBody
+    @ApiOperation(value = "Update data report")
+    public void updateDataReport(@PathVariable String customerSpace, @RequestParam DataReportRecord.Level level,
+                                 @RequestParam String ownerId,
+                                 @RequestParam boolean readyForRollup) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataReportService.updateDataReport(customerSpace, level, ownerId, readyForRollup);
+    }
+
     @PostMapping
     @ResponseBody
     @ApiOperation(value = "Update DataReport")
@@ -87,7 +98,8 @@ public class DataReportResource {
     @ApiOperation(value = "Get sub owner ids")
     public Set<String> getChildrenIds(@PathVariable String customerSpace,
                                       @RequestParam DataReportRecord.Level level,
-                                      @RequestParam(required = false) String ownerId) {
+                                      @RequestParam(required = false) String ownerId,
+                                      @RequestParam(required = false, defaultValue = "false") Boolean readyForRollup) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataReportService.getChildrenIds(customerSpace, level, ownerId);
     }

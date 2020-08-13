@@ -74,6 +74,11 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         Set<String> subOwnerIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Source,
                 "sourceUID");
+        Assert.assertTrue(CollectionUtils.isEmpty(subOwnerIds));
+
+        dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", Boolean.TRUE);
+        subOwnerIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Source,
+                "sourceUID");
         Assert.assertTrue(CollectionUtils.isNotEmpty(subOwnerIds));
 
         // verify upload node has no brothers

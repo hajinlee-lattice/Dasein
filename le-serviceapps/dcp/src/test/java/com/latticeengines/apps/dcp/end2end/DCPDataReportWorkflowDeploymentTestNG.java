@@ -249,26 +249,39 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source.getSourceId(),
                 cache);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source1.getSourceId(),
                 cache);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
+                true);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
+                true);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails2.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails2.getUploadId(),
+                true);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails3.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails3.getUploadId(),
+                true);
     }
 
     private String setupTables() throws IOException {

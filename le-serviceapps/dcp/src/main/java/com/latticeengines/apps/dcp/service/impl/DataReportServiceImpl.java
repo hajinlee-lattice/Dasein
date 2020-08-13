@@ -170,7 +170,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        Set<String> subOwnerIds = dataReportEntityMgr.getChildrenIds(level, ownerId);
+        Set<String> subOwnerIds = dataReportEntityMgr.getChildrenIds(level, ownerId, Boolean.TRUE);
         if (subOwnerIds == null) {
             return new HashSet<>();
         } else {
@@ -216,6 +216,24 @@ public class DataReportServiceImpl implements DataReportService {
         copy.setOnlyChild(siblings == 1);
         copy.setParentOwnerId(parentOwnerId);
         return copy;
+    }
+
+    @Override
+    public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,
+                                 boolean readyForRollup) {
+
+        Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+        Preconditions.checkNotNull(pid);
+        log.info("update ready for rollup {} for {}", readyForRollup, pid);
+        dataReportEntityMgr.updateDataReportRecord(pid, readyForRollup);
+
+        // update readyForRollup for parental data report if it's not ready
+        Long parentId = dataReportEntityMgr.findParentId(pid);
+        while (parentId != null) {
+            dataReportEntityMgr.updateDataReportRecordIfNotReady(parentId, readyForRollup);
+            parentId = dataReportEntityMgr.findParentId(parentId);
+        }
+
     }
 
     @Override
