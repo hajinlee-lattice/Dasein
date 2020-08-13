@@ -50,12 +50,13 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
     public Flux<ColumnMetadata> getMetadata(Namespace2<String, BusinessEntity> namespace) {
         Flux<ColumnMetadata> flux = Flux.empty();
         // only account has external system ids now
-        if (BusinessEntity.Account.equals(namespace.getCoord2())) {
+        if (BusinessEntity.Account.equals(namespace.getCoord2())
+                || BusinessEntity.Contact.equals(namespace.getCoord2())) {
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
             CustomerSpace customerSpace = CustomerSpace.parse(namespace.getCoord1());
             isEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             isEntityMatchGAOnly = batonService.onlyEntityMatchGAEnabled(customerSpace);
-            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(BusinessEntity.Account);
+            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(namespace.getCoord2());
 
             if (externalSystem != null) {
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
@@ -78,6 +79,7 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         }
         return flux;
     }
+
 
     private ColumnMetadata toColumnMetadata(String attrName, String type, String displayName) {
         ColumnMetadata cm = new ColumnMetadata();
