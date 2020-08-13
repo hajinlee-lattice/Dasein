@@ -40,4 +40,19 @@ public class AtlasSchedulingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     }
 
+    @Test(groups = "functional")
+    public void testAtlasSchedulingByType() {
+        AtlasScheduling scheduling = atlasSchedulingService.findSchedulingByType(mainCustomerSpace, AtlasScheduling.ScheduleType.PA);
+        Assert.assertNull(scheduling);
+        atlasSchedulingService.createOrUpdateSchedulingByType(mainCustomerSpace, "error cron", AtlasScheduling.ScheduleType.PA);
+        scheduling = atlasSchedulingService.findSchedulingByType(mainCustomerSpace, AtlasScheduling.ScheduleType.PA);
+        Assert.assertNotNull(scheduling);
+        Assert.assertEquals(scheduling.getCronExpression(), DEFAULT_CRON);
+        atlasSchedulingService.createOrUpdateSchedulingByType(mainCustomerSpace, "0/30 * * * * ?", AtlasScheduling.ScheduleType.PA);
+        scheduling = atlasSchedulingService.findSchedulingByType(mainCustomerSpace, AtlasScheduling.ScheduleType.PA);
+        Assert.assertNotNull(scheduling);
+        Assert.assertEquals(scheduling.getCronExpression(), "0/30 * * * * ?");
+
+    }
+
 }

@@ -8,6 +8,8 @@ public interface AtlasSchedulingService {
 
     void createOrUpdateExportScheduling(String customerSpace, String cronExpression);
 
+    void createOrUpdateSchedulingByType(String customerSpace, String cronExpression, AtlasScheduling.ScheduleType type);
+
     AtlasScheduling findSchedulingByType(String customerSpace, AtlasScheduling.ScheduleType type);
 
     List<AtlasScheduling> findAllByType(AtlasScheduling.ScheduleType type);

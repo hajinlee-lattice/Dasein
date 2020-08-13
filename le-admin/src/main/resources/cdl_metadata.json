@@ -35,6 +35,13 @@
       }
     },
     {
+      "Node": "PAScheduleNowCronExpression",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
       "Node": "Diagnostics",
       "Children": [
         {

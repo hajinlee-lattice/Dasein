@@ -249,6 +249,13 @@ public class CDLJobServiceImpl implements CDLJobService {
                 log.error("schedule CDLJobType.SCHEDULINGPA failed", e);
                 throw e;
             }
+        } else if (cdlJobType == CDLJobType.SCHEDULINGNOWPA) {
+            try {
+                scheduleNowPAJob();
+            } catch (Exception e) {
+                log.error("schedule CDLJobType.SCHEDULINGNOWPA failed" + e.getMessage());
+                throw e;
+            }
         }
         return true;
     }
@@ -462,6 +469,56 @@ public class CDLJobServiceImpl implements CDLJobService {
                 .filter(e -> e.getValue() != null && StringUtils.isNotBlank(e.getValue().getConsumedQuotaName())) //
                 .map(e -> Pair.of(CustomerSpace.shortenCustomerSpace(e.getKey()), e.getValue().getConsumedQuotaName()))
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    }
+
+    private void scheduleNowPAJob() {
+        List<AtlasScheduling> atlasSchedulingList = atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.PA);
+        if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
+            log.info(String.format("Need pa schedule now entity tenant count: %d.", atlasSchedulingList.size()));
+            for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
+                Tenant tenant = atlasScheduling.getTenant();
+                String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
+                Long nextFireTime = CronUtils.getNextFireTime(atlasScheduling.getCronExpression()).getMillis() / 1000;
+                boolean changed = true;
+                if (atlasScheduling.getNextFireTime() == null) {
+                    atlasScheduling.setNextFireTime(nextFireTime);
+                } else {
+                    Long currentSecond = (new Date().getTime()) / 1000;
+                    if (atlasScheduling.getNextFireTime() <= currentSecond) {
+                        atlasScheduling.setPrevFireTime(atlasScheduling.getNextFireTime());
+                        atlasScheduling.setNextFireTime(nextFireTime);
+                        log.info(String.format("ScheduleNowPA job submitted invoke time: %s, tenant name: %s .", atlasScheduling.getPrevFireTime(), tenant.getName()));
+                        submitScheduleNowJob(customerSpace, tenant);
+                    } else {
+                        if (nextFireTime - atlasScheduling.getNextFireTime() != 0) {
+                            atlasScheduling.setNextFireTime(nextFireTime);
+                        } else {
+                            changed = false;
+                        }
+                    }
+                }
+                if (changed) {
+                    atlasSchedulingService.updateExportScheduling(atlasScheduling);
+                }
+            }
+        }
+    }
+
+    private void submitScheduleNowJob(String customerSpace, Tenant tenant) {
+        if (tenant == null) {
+            setMultiTenantContext(customerSpace);
+        } else {
+            MultiTenantContext.setTenant(tenant);
+        }
+        try {
+            ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+            request.setUserId(USERID);
+            request.setAutoSchedule(true);
+            ApplicationId applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), false, request);
+            log.info(String.format("Succeed to submit entity schedulenow job for tenant name: %s，applicationId is %s.", customerSpace, applicationId.toString()));
+        } catch (Exception e) {
+            log.info(String.format("Failed to submit entity schedulenow job for tenant name: %s，message is %s", customerSpace, e.getMessage()));
+        }
     }
 
     private void logScheduledPA(@NotNull String schedulerName, String tenantId, ApplicationId appId, boolean isRetry,

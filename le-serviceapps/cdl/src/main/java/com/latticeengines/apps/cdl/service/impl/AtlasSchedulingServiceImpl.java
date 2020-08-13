@@ -49,6 +49,28 @@ public class AtlasSchedulingServiceImpl implements AtlasSchedulingService {
     }
 
     @Override
+    public void createOrUpdateSchedulingByType(String customerSpace, String cronExpression, AtlasScheduling.ScheduleType type) {
+        if (StringUtils.isEmpty(cronExpression)) {
+            log.warn("Cron expression is empty, using default cron: " + DEFAULT_CRON);
+            cronExpression = DEFAULT_CRON;
+        } else if (!CronUtils.isValidExpression(cronExpression)) {
+            log.error(String.format("Invalid cron expression: %s, Using default cron: %s", cronExpression, DEFAULT_CRON));
+            cronExpression = DEFAULT_CRON;
+        }
+        AtlasScheduling schedulingObj = findSchedulingByType(customerSpace, type);
+        if (schedulingObj == null) {
+            schedulingObj = new AtlasScheduling();
+            schedulingObj.setTenant(MultiTenantContext.getTenant());
+            schedulingObj.setType(type);
+            schedulingObj.setCronExpression(cronExpression);
+            atlasSchedulingEntityMgr.createSchedulingObj(schedulingObj);
+        } else {
+            schedulingObj.setCronExpression(cronExpression);
+            atlasSchedulingEntityMgr.updateSchedulingObj(schedulingObj);
+        }
+    }
+
+    @Override
     public AtlasScheduling findSchedulingByType(String customerSpace, AtlasScheduling.ScheduleType type) {
         return atlasSchedulingEntityMgr.findAtlasSchedulingByType(type);
     }
