@@ -19,7 +19,6 @@ import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.repository.ProjectRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
-import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 
@@ -100,14 +99,9 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         if (CollectionUtils.isEmpty(result)) {
             return null;
         } else {
+            // FIXME: Currently we assume each source only has one parent. This is not true after the schema change.
             return getProjectInfo(result.get(0));
         }
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public S3ImportSystem findImportSystemByProjectId(String projectId) {
-        return getReadOrWriteRepository().findImportSystemByProjectId(projectId);
     }
 
     @Override
@@ -143,8 +137,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setUpdated((Date) columns[5]);
         info.setCreatedBy((String) columns[6]);
         info.setRecipientList((List<String>) columns[7]);
-        info.setSystemId((Long) columns[8]);
-        info.setTeamId((String) columns[9]);
+        info.setTeamId((String) columns[8]);
         return info;
     }
 }

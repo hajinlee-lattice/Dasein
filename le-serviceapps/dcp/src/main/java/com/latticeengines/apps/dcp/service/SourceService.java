@@ -29,6 +29,8 @@ public interface SourceService {
 
     long getSourceCount(String customerSpace, Long systemPid);
 
+    long getSourceCount(String customerSpace, String projectId);
+
     Boolean pauseSource(String customerSpace, String sourceId);
 
     Boolean reactivateSource(String customerSpace, String sourceId);
