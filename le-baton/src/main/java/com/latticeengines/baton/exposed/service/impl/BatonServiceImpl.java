@@ -1,10 +1,12 @@
 package com.latticeengines.baton.exposed.service.impl;
 
-
 import java.io.File;
 import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +68,9 @@ public class BatonServiceImpl implements BatonService {
     private static final Logger log = LoggerFactory.getLogger(BatonServiceImpl.class);
 
     private static final int MAX_RETRY_TIMES = 3;
+    // TODO move to shared constant, default is configurable in zk so put this as
+    // class constant first
+    private static final ZoneId DEFAULT_TIMEZONE = ZoneId.of("America/Los_Angeles");
 
     private static TreeCache cache = null;
 
@@ -670,6 +675,50 @@ public class BatonServiceImpl implements BatonService {
             }
         });
         return valueMap;
+    }
+
+    @Override
+    public ZonedDateTime getTenantCurrentTime(CustomerSpace customerSpace) {
+        return Instant.now().atZone(getTenantTimezone(customerSpace));
+    }
+
+    @Override
+    public ZoneId getTenantTimezone(CustomerSpace customerSpace) {
+        String timezoneStr = getTimezone(customerSpace);
+        if (StringUtils.isBlank(timezoneStr)) {
+            // use default timezone
+            return DEFAULT_TIMEZONE;
+        }
+
+        try {
+            return ZoneId.of(timezoneStr);
+        } catch (DateTimeException e) {
+            log.error("Failed to parse timezone string {}, error = {}", timezoneStr, e);
+            throw e;
+        }
+    }
+
+    private String getTimezone(CustomerSpace customerSpace) {
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            Path tenantPath = PathBuilder.buildTenantTimezonePath(CamilleEnvironment.getPodId(), customerSpace);
+            if (camille.exists(tenantPath)) {
+                String timezoneStr = camille.get(tenantPath).getData();
+                if (StringUtils.isNotBlank(timezoneStr)) {
+                    return timezoneStr;
+                }
+            }
+
+            Path defaultPath = PathBuilder.buildTenantDefaultTimezonePath(CamilleEnvironment.getPodId());
+            if (camille.exists(defaultPath)) {
+                return camille.get(defaultPath).getData();
+            }
+
+            return null;
+        } catch (Exception e) {
+            log.error("Failed to retrieve timezone for tenant {}", customerSpace);
+            throw new RuntimeException(e);
+        }
     }
 
     private boolean canHaveFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag) {

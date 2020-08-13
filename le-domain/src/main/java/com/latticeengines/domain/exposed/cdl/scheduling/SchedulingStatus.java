@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.util.Map;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -14,6 +16,8 @@ public class SchedulingStatus {
     private DataFeed dataFeed;
     private DataFeedExecution latestExecution;
     private boolean pendingRetry; // whether scheduling is waiting to retry PA for this tenant
+    private Map<String, Long> remainingPaQuota;
+    private boolean isHandHoldPATenant;
 
     public SchedulingStatus() {
     }
@@ -68,10 +72,26 @@ public class SchedulingStatus {
         this.pendingRetry = pendingRetry;
     }
 
+    public Map<String, Long> getRemainingPaQuota() {
+        return remainingPaQuota;
+    }
+
+    public void setRemainingPaQuota(Map<String, Long> remainingPaQuota) {
+        this.remainingPaQuota = remainingPaQuota;
+    }
+
+    public boolean isHandHoldPATenant() {
+        return isHandHoldPATenant;
+    }
+
+    public void setHandHoldPATenant(boolean handHoldPATenant) {
+        isHandHoldPATenant = handHoldPATenant;
+    }
+
     @Override
     public String toString() {
         return "SchedulingStatus{" + "customerSpace='" + customerSpace + '\'' + ", schedulerEnabled=" + schedulerEnabled
                 + ", dataFeed=" + dataFeed + ", latestExecution=" + latestExecution + ", pendingRetry=" + pendingRetry
-                + '}';
+                + ", remainingPaQuota=" + remainingPaQuota + ", isHandHoldPATenant=" + isHandHoldPATenant + '}';
     }
 }

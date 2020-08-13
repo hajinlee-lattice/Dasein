@@ -108,7 +108,7 @@ public class CDLJobServiceImplUnitTestNG {
 
         Exception e = null;
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(new ArrayList<>());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
@@ -117,7 +117,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(geTesttWorkflowJobs1());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
@@ -126,7 +126,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(geTesttWorkflowJobs2());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
@@ -135,7 +135,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(geTesttWorkflowJobs3());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
@@ -144,7 +144,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(geTesttWorkflowJobs4());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
@@ -153,7 +153,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(geTesttWorkflowJobs5());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
@@ -162,7 +162,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList(), any()))
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), any(), anyList(), anyList(), any()))
                 .thenReturn(geTesttWorkflowJobs6());
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);

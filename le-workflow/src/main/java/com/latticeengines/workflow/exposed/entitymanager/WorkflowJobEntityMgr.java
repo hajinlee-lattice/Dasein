@@ -69,7 +69,7 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
      * TODO maybe move these method to another entity manager if there are more of
      * these
      */
-    List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
+    List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, Long tenantPid, List<String> workflowTypes,
             List<String> statuses, Long earliestStartTime);
 
     List<WorkflowJob> findByStatuses(List<String> statuses);

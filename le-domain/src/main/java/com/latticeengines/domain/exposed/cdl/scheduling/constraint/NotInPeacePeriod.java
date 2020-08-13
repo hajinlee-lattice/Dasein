@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 
 public class NotInPeacePeriod implements Constraint {
+    private static final long OLD_IMPORT_THRESHOLD_IN_HR = 12L;
+
     @Override
     public ConstraintValidationResult validate(SystemStatus currentState, TenantActivity target,
             TimeClock timeClock) {
@@ -23,14 +25,16 @@ public class NotInPeacePeriod implements Constraint {
         Instant midnight = now.atZone(timezone).truncatedTo(ChronoUnit.DAYS).toInstant();
         Instant sixAM = midnight.plus(6L, ChronoUnit.HOURS);
         Instant sixPM = sixAM.plus(12L, ChronoUnit.HOURS);
-        Instant oldImportThreshold = now.minus(12L, ChronoUnit.HOURS);
+        Instant oldImportThreshold = now.minus(OLD_IMPORT_THRESHOLD_IN_HR, ChronoUnit.HOURS);
         // TODO maybe shorten peace period if quota is more than 1
         if (now.isBefore(sixAM) || now.isAfter(sixPM)) {
             // not in peace period
             return ConstraintValidationResult.VALID;
-        } else if (firstAction != null && !firstAction.isBefore(oldImportThreshold)) {
-            // no left over import action from last quota period
-            return ConstraintValidationResult.VALID;
+        } else if (firstAction != null && firstAction.isBefore(oldImportThreshold)) {
+            // have old import action, should allow scheduling PA
+            String msg = String.format("tenant is in peace period, but contains import older than %d hours",
+                    OLD_IMPORT_THRESHOLD_IN_HR);
+            return new ConstraintValidationResult(false, msg);
         }
 
         Duration timeUntilPeacePeriodEnd = Duration.between(now, sixPM);

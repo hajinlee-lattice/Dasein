@@ -178,6 +178,7 @@ public class PAQuotaServiceImpl implements PAQuotaService {
                     }
                     // TODO set end time
                     summary.setConsumedQuotaName(getTagValue(job, WorkflowContextConstants.Tags.CONSUMED_QUOTA_NAME));
+                    summary.setScheduledQueueName(getTagValue(job, WorkflowContextConstants.Tags.SCHEDULED_QUEUE_NAME));
                     return summary;
                 }) //
                 .sorted(Comparator
