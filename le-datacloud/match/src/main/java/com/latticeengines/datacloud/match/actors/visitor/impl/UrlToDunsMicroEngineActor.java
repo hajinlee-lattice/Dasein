@@ -54,7 +54,7 @@ public class UrlToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<Dnb
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
         traveler.setDunsMatchMode(MatchTraveler.URL_TO_DUNS);
-        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.DUNS_DUNS, traveler.getMatchKeyTuple()));
+        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.URL_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedThisActorBefore(MatchTraveler traveler) {
