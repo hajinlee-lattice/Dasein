@@ -201,11 +201,7 @@ WHERE DecodeStrategy = '' OR DecodeStrategy = 'NULL';
 UPDATE AccountMasterColumn
 SET DisplayDiscretizationStrategy = NULL
 WHERE DisplayDiscretizationStrategy = '' OR DisplayDiscretizationStrategy = 'NULL';
-
-UPDATE SourceColumn
-SET Arguments = REPLACE(Arguments, 'Â', '')
-WHERE SourceName = 'DnBCacheSeedRaw';
-
+    
 UPDATE AccountMasterColumn
 SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
 WHERE Groups LIKE '%Segment%'
@@ -251,5 +247,72 @@ SET
   `EnrichmentStatsVersion`   = '2020-06-18_17-34-39_UTC',
   `DynamoTableSignature`     = '20200617'
 WHERE `Version` = '2.0.23';
+
+UPDATE SourceColumn
+SET Arguments = REPLACE(Arguments, 'Â', '')
+WHERE SourceName = 'DnBCacheSeedRaw';
+
+UPDATE SourceColumn
+	SET Arguments = null WHERE Arguments = 'NULL';
+
+UPDATE SourceColumn
+	SET BaseSource = null WHERE BaseSource = 'NULL';
+
+UPDATE SourceColumn
+	SET Categories = null WHERE Categories = 'NULL';
+
+UPDATE SourceColumn
+	SET ColumnType = null WHERE ColumnType = 'NULL';
+
+UPDATE SourceColumn
+	SET GroupBy = null WHERE GroupBy = 'NULL';
+
+UPDATE SourceColumn
+	SET JoinBy = null WHERE JoinBy = 'NULL';
+
+UPDATE SourceColumn
+	SET Preparation = null WHERE Preparation = 'NULL';
+
+UPDATE SourceAttribute
+	SET Arguments = null WHERE Arguments = 'NULL';
+
+UPDATE SourceAttribute
+	SET DataCloudVersion = null WHERE DataCloudVersion = 'NULL';
+
+UPDATE CustomerSourceAttribute
+	SET Arguments = null WHERE Arguments = 'NULL';
+
+UPDATE CustomerSourceAttribute
+	SET DataCloudVersion = null WHERE DataCloudVersion = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET ApprovedUsage = null WHERE ApprovedUsage = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET DataLicense = null WHERE DataLicense = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET DecodeStrategy = null WHERE DecodeStrategy = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET Description = null WHERE Description = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET DisplayDiscretizationStrategy = null WHERE DisplayDiscretizationStrategy = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET EOLVersion = null WHERE EOLVersion = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET FundamentalType = null WHERE FundamentalType = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET RefreshFrequency = null WHERE RefreshFrequency = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET StatisticalType = null WHERE StatisticalType = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET Subcategory = null WHERE Subcategory = 'NULL';
 
 SET SQL_SAFE_UPDATES = 1;
