@@ -127,7 +127,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients) {
-        sendMultiPartEmail(subject, content, recipients, EmailFromAddress.DNB_CONNECT);
+        sendMultiPartEmail(subject, content, recipients, EmailFromAddress.LATTICE_ENGINES);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
                                    Collection<String> bccRecipients) {
-        sendMultiPartEmail(subject, content, recipients, bccRecipients, EmailFromAddress.DNB_CONNECT);
+        sendMultiPartEmail(subject, content, recipients, bccRecipients, EmailFromAddress.LATTICE_ENGINES);
     }
 
     @Override
