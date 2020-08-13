@@ -267,7 +267,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         input.setPredefinedSelection(null);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
-        // System.out.println(JsonUtils.pprint(output));
+        System.out.println(JsonUtils.pprint(output));
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         if (StringUtils.isNotBlank(expectedDuns)) {
@@ -293,8 +293,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { "bp.com", null, null, null, "210042669", true }, //
                 { null, "a@bp.com", null, null, "210042669", true }, //
                 { null, "hello@gmail.com", null, null, null, false }, //
-                { "bp.com", "a@bp.com", "BP", "UK", "210042669", false }, //
+                { "apple.com", "a@bp.com", null, null, "060704780", true }, //
+                { "apple.com", "a@bp.com", "BP", "UK", "210042669", false }, //
                 { null, "hello@gmail.com", "BP", "UK", "210042669", false }, //
+                { "apple.com", null, "BP", null, "039596507", false }, //
                 { "apple.com", null, "BP", "UK", "210042669", false }, //
 
                 { "bp.com", null, null, "US", "039596507", true }, //
