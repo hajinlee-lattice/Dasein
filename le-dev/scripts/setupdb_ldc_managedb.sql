@@ -144,26 +144,8 @@ VALUES
   ('JellyBean', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, have DUNS redirect', NULL, 'LatticeAccount', NULL),
   ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Will retire after M28', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
   ('Cupcake', 'AccountMatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDomainCountryBased,EntityNameCountryBased,EntityDunsBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
-  ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7,8', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3);
-
-
-INSERT INTO `DecisionGraph`
-(
-    `Description`,
-    `Edges`,
-    `Entity`,
-    `GraphName`,
-    `StartingVertices`,
-    `Vertices`)
-VALUES
-(
-    'Match multiple candidates from PRIME',
-    '0:1',
-    'PrimeAccount',
-    'WestWind',
-    0,
-    'DunsToDuns,LocationToDuns'
-);
+  ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7,8', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3),
+  ('WestWind', 'DunsToDuns,LocationToDuns,UrlToDuns', '0', '0:1|1:2', 'Default for DCP match', NULL, 'PrimeAccount', 3);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`
 CHARACTER SET UTF8

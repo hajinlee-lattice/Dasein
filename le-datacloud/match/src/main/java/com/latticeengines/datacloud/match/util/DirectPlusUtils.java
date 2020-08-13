@@ -46,6 +46,12 @@ public final class DirectPlusUtils {
             case REALTIME_ENTITY:
                 if (StringUtils.isNotBlank(context.getInputDuns())) {
                     parts.add(String.format("duns=%s", context.getInputDuns()));
+                } else if (StringUtils.isNotBlank(context.getInputUrl())) {
+                    parts.add(String.format("url=%s", context.getInputUrl()));
+                    NameLocation nl = context.getInputNameLocation();
+                    if (nl != null && StringUtils.isNotBlank(nl.getCountryCode())) {
+                        parts.add(String.format("countryISOAlpha2Code=%s", nl.getCountryCode()));
+                    }
                 } else {
                     parts.addAll(getLocationParams(context.getInputNameLocation()));
                 }

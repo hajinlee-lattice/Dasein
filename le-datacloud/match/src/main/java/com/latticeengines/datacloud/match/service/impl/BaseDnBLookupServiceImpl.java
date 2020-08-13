@@ -70,12 +70,15 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         try {
             String url = constructUrl(context, apiType);
             String token = dnbAuthenticationService.requestToken(keyType, null);
+            log.info("Get token {}", token); // to be removed
             updateTokenInContext(context, token);
             HttpEntity<String> entity = constructEntity(context, token);
             if (keyType == DnBKeyType.BATCH) {
                 log.info("Submitting request {} with token {}", url, token);
             }
+            log.info("Sending request to {}", url);
             String response = sendRequest(url, entity, apiType);
+            log.info("Get response from {}", url);
             parseResponse(response, context, apiType);
         } catch (Exception ex) {
             parseError(ex, context);
