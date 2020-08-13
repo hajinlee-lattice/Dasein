@@ -665,10 +665,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void processAnalyze(ProcessAnalyzeRequest request, JobStatus expectedResult) {
-        log.info("Start processing and analyzing ...");
+        if (request == null) {
+            request = new ProcessAnalyzeRequest();
+        }
         if (request.getEntityMatchConfiguration() == null) {
             request.setEntityMatchConfiguration(new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS));
         }
+        log.info("Start processing and analyzing ... request = {}", JsonUtils.serialize(request));
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
         processAnalyzeAppId = appId.toString();
         log.info("processAnalyzeAppId=" + processAnalyzeAppId);

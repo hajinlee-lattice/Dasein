@@ -20,6 +20,7 @@ public class EntityMatchConfiguration {
         this.numStagingShards = numStagingShards;
     }
 
+    @JsonProperty("NumStagingShards")
     public int getNumStagingShards() {
         return numStagingShards;
     }
