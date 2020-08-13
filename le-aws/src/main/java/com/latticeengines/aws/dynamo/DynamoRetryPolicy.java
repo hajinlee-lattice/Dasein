@@ -33,6 +33,7 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
 
     private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
     private static final Set<String> THROTTLING_ERROR_CODES = new HashSet<>();
+    private static final Set<String> TXN_CONFLICT_ERROR_CODES = new HashSet<>();
     private static final Map<String, Boolean> RETRY_ERROR_CODES = new HashMap<>();
 
     private static final RetryPolicy NEVER_RETRY = new NeverRetryPolicy();
@@ -62,6 +63,10 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
         THROTTLING_ERROR_CODES.add("ProvisionedThroughputExceeded"); // the one in their comment
         THROTTLING_ERROR_CODES.add("ProvisionedThroughputExceededException"); // real one
         THROTTLING_ERROR_CODES.forEach(code -> RETRY_ERROR_CODES.put(code, true));
+
+        // multiple txn working on the same item
+        TXN_CONFLICT_ERROR_CODES.add("TransactionConflict");
+        TXN_CONFLICT_ERROR_CODES.forEach(code -> RETRY_ERROR_CODES.put(code, true));
     }
 
     private final RetryPolicy policy;

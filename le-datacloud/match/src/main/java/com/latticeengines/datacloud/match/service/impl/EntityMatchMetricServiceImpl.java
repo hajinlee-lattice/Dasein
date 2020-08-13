@@ -9,6 +9,7 @@ import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.M
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_RETRY_DIST;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_THROTTLE_DIST;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_THROTTLE;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_TXN_CANCEL_REASON;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_HAVE_RETRY_NUM_TRIES;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_HISTORY;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_LOOKUP_CACHE;
@@ -126,6 +127,21 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
         } catch (Exception e) {
             log.error("Failed to record null entity ID count", e);
         }
+    }
+
+    @Override
+    public void recordDynamoTxnCancelReason(Tenant tenant, String entity, String code) {
+        if (tenant == null || StringUtils.isBlank(tenant.getId()) || StringUtils.isBlank(entity)
+                || StringUtils.isBlank(code)) {
+            return;
+        }
+
+        String tenantId = EntityMatchUtils.newStandardizedTenant(tenant).getId();
+        Counter.builder(METRIC_DYNAMO_TXN_CANCEL_REASON) //
+                .tag(TAG_TENANT, tenantId) //
+                .tag(TAG_ENTITY, entity) //
+                .register(registryFactory.getServiceLevelRegistry()) //
+                .increment();
     }
 
     @Override

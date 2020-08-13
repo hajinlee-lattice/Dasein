@@ -67,6 +67,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -102,6 +103,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     private final EntityMatchConfigurationService entityMatchConfigurationService;
 
     private static final Scheduler scheduler = Schedulers.newParallel("entity-rawseed");
+
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
 
     @Inject
     public EntityRawSeedServiceImpl(
@@ -280,7 +284,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             log.debug("Txn conflict updating seed = {}, entries = {}, reasons = {}", seed, entries, reasons);
             Preconditions.checkArgument(reasons.size() == 1 + entries.size(), String.format(
                     "Cancellation reason list size should be 1 + %d, got %d instead", entries.size(), reasons.size()));
-            return parseConflictResponse(entries, reasons);
+            return parseConflictResponse(entries, reasons, tenant, seed.getEntity());
         }
 
         return new EntityTransactUpdateResult(true, seed, null);
@@ -327,7 +331,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
      * other seed)
      */
     private EntityTransactUpdateResult parseConflictResponse(@NotNull List<EntityLookupEntry> entries,
-            @NotNull List<CancellationReason> reasons) {
+            @NotNull List<CancellationReason> reasons, Tenant tenant, String entity) {
         EntityRawSeed seedBeforeTxn = null;
         Map<EntityLookupEntry, String> conflictEntries = new HashMap<>();
         for (int i = 0; i < reasons.size(); i++) {
@@ -337,6 +341,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 continue;
             }
 
+            entityMatchMetricService.recordDynamoTxnCancelReason(tenant, entity, reason.getCode());
             if (i == 0) {
                 /*-
                  * seed conflict
