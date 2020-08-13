@@ -22,6 +22,7 @@ public final class TestFrameworkUtils {
     protected TestFrameworkUtils() {
         throw new UnsupportedOperationException();
     }
+
     public static final String GENERAL_PASSWORD = "admin";
     public static final String GENERAL_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
@@ -32,10 +33,11 @@ public final class TestFrameworkUtils {
     public static final String TESTING_USER_FIRST_NAME = "Lattice";
     public static final String TESTING_USER_LAST_NAME = "Tester";
     public static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@lattice-engines.com";
-    public static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@lattice-engines.com";
-    public static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@lattice-engines.com";
-    public static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@lattice-engines.com";
-    public static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@lattice-engines.com";
+    public static final String INTERNAL_ADMIN_USERNAME =   "pls-internal-admin-tester@lattice-engines.com";
+    public static final String INTERNAL_USER_USERNAME =    "pls-internal-user-tester@lattice-engines.com";
+    public static final String INTERNAL_ANALYST_USERNAME = "pls-internal-analyst-tester@lattice-engines.com";
+    public static final String EXTERNAL_ADMIN_USERNAME =  "pls-external-admin-tester@lattice-engines.com";
+    public static final String EXTERNAL_USER_USERNAME =   "pls-external-user-tester@lattice-engines.com";
     public static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@lattice-engines.com";
     public static final String THIRD_PARTY_USER_USERNAME = "pls-third-party-user-tester@lattice-engines.com";
 
@@ -46,28 +48,40 @@ public final class TestFrameworkUtils {
     public static final String LP3_TENANT_REG_PREFIX = "lp3";
 
     public static final String TENANTID_PREFIX = "LETest";
-    public static final Set<String> TENANTID_PREFIXES = new HashSet<>(Arrays.asList("LETest", "letest",
-            "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG", "CDLComponentDeploymentTestNG"));
+    public static final Set<String> TENANTID_PREFIXES = new HashSet<>(
+            Arrays.asList("LETest", "letest", "ScoringServiceImplDeploymentTestNG",
+                    "RTSBulkScoreWorkflowDeploymentTestNG", "CDLComponentDeploymentTestNG"));
     public static final String MODEL_PREFIX = "LETestModel";
 
     public static String usernameForAccessLevel(AccessLevel accessLevel) {
+        String result;
         switch (accessLevel) {
         case SUPER_ADMIN:
-            return TestFrameworkUtils.SUPER_ADMIN_USERNAME;
+            result = TestFrameworkUtils.SUPER_ADMIN_USERNAME;
+            break;
         case INTERNAL_ADMIN:
-            return TestFrameworkUtils.INTERNAL_ADMIN_USERNAME;
+            result = TestFrameworkUtils.INTERNAL_ADMIN_USERNAME;
+            break;
         case INTERNAL_USER:
-            return TestFrameworkUtils.INTERNAL_USER_USERNAME;
+            result = TestFrameworkUtils.INTERNAL_USER_USERNAME;
+            break;
+        case INTERNAL_ANALYST:
+            result = TestFrameworkUtils.INTERNAL_ANALYST_USERNAME;
+            break;
         case EXTERNAL_ADMIN:
-            return TestFrameworkUtils.EXTERNAL_ADMIN_USERNAME;
+            result = TestFrameworkUtils.EXTERNAL_ADMIN_USERNAME;
+            break;
         case EXTERNAL_USER:
         case BUSINESS_ANALYST:
-            return TestFrameworkUtils.EXTERNAL_USER_USERNAME;
+            result = TestFrameworkUtils.EXTERNAL_USER_USERNAME;
+            break;
         case THIRD_PARTY_USER:
-            return TestFrameworkUtils.THIRD_PARTY_USER_USERNAME;
+            result = TestFrameworkUtils.THIRD_PARTY_USER_USERNAME;
+            break;
         default:
             throw new IllegalArgumentException("Unknown access level!");
         }
+        return result;
     }
 
     public static UserRegistration createUserRegistration(AccessLevel accessLevel) {
@@ -98,10 +112,10 @@ public final class TestFrameworkUtils {
     public static Boolean isTestTenant(String tenantId) {
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
         boolean findMatch = false;
-        for (String prefix: TENANTID_PREFIXES) {
-            Pattern pattern = Pattern.compile(prefix + "\\d+" +
-                    "|" + prefix + "_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_UTC" +
-                    "|" + prefix + "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        for (String prefix : TENANTID_PREFIXES) {
+            Pattern pattern = Pattern
+                    .compile(prefix + "\\d+" + "|" + prefix + "_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_UTC" + "|"
+                            + prefix + "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
             Matcher matcher = pattern.matcher(tenantId);
             if (matcher.find()) {
                 findMatch = true;
@@ -113,7 +127,7 @@ public final class TestFrameworkUtils {
     }
 
     public static long getTestTimestamp(String tenantId) {
-        for (String prefix: TENANTID_PREFIXES) {
+        for (String prefix : TENANTID_PREFIXES) {
             Pattern pattern = Pattern.compile(prefix + "\\d+$");
             Matcher matcher = pattern.matcher(tenantId);
             if (matcher.find()) {
