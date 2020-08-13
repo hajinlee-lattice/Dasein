@@ -260,7 +260,6 @@ public class UserResource {
         if (batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
             IDaaSUser idaasUser = userService.createIDaaSUser(user);
             String welcomeUrl = dcpPublicUrl;
-            emailService.sendNewDCPTenantEmail(user,tenant.getName(), welcomeUrl);
             if (idaasUser.getInvitationLink() != null) {
                 welcomeUrl = idaasUser.getInvitationLink();
             }

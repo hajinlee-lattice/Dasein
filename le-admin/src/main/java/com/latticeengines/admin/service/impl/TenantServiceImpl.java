@@ -255,10 +255,6 @@ public class TenantServiceImpl implements TenantService {
                     tenantId, response.getVersions());
         }
 
-        if (batonService.hasProduct(customerSpace, LatticeProduct.DCP)){
-            User adminUser = userService.findByUsername(userName);
-            emailService.sendNewDCPTenantEmail(adminUser, tenantId, dcpPublicUrl);
-        }
         return true;
     }
 

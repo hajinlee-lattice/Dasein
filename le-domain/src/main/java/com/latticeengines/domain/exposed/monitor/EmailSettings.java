@@ -39,7 +39,6 @@ public class EmailSettings {
     public static final String DCP_UPLOAD_COMPLETED_SUBJECT = "DCP Upload Completed";
     public static final String DCP_UPLOAD_FAILED_SUBJECT = "DCP Upload Failed";
     public static final String DNB_CONNECT_WELCOME_NEW_USER_SUBJECT = "Welcome to D&B Connect!";
-    public static final String DNB_CONNECT_WELCOME_NEW_TENANT_SUBJECT = "New account notification";
 
     private String from;
     private String password;
