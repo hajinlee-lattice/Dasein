@@ -173,6 +173,8 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
     public static final String TRANSFORMER_ATTRIBUTES_DERIVER = "purchaseAttributesDeriver";
     public static final String TRANSFORMER_EXTRACT_EMBEDDED_ENTITY = "ExtractEmbeddedEntityTable";
+    public static final String TRANSFORMER_CREATE_CMTPSSOURCE = "CMTpsSourceCreationTxfmr";
+    public static final String TRANSFORMER_CREATE_CMTPSLOOKUP = "CMTpsLookupCreationTxfmr";
     public static final String PERIOD_DATA_CLEANER = "periodDataCleaner";
     public static final String PERIOD_DATA_FILTER = "periodDatafilter";
     public static final String PERIOD_DATA_AGGREGATER = "periodDataAggregater";
