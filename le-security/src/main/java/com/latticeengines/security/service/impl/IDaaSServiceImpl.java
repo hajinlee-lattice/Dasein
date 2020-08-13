@@ -263,6 +263,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     public IDaaSResponse addProductAccessToUser(ProductRequest request) {
         request.setRequestor(DCP_PRODUCT);
         request.setProducts(Collections.singletonList(DCP_PRODUCT));
+        request.getProductSubscription().setProductName(DCP_PRODUCT);
         if (enabled) {
             refreshToken();
             IDaaSResponse response = null;
