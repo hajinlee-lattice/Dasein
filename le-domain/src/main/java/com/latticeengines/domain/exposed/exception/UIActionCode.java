@@ -50,6 +50,9 @@ public enum UIActionCode {
     FILE_UPLOAD_001(Level.User, LedpCode.LEDP_18109, "Problem reading csv file header: ${message}"),
     FILE_UPLOAD_002(Level.User, LedpCode.LEDP_40055),
 
+    // PA scheduler
+    PA_SCHEDULER_001(Level.User, LedpCode.LEDP_40095),
+
     // UIActionUnitTestNG
     TEST_00(Level.User, LedpCode.LEDP_00009), //
     TEST_01(Level.User, LedpCode.LEDP_00010, "<p>Welcome ${user}!</p>"), //

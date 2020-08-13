@@ -73,6 +73,13 @@
         "Type": "string",
         "Required": false
       }
+    },
+    {
+      "Node": "Timezone",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
     }
   ]
 }

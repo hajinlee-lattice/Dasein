@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 
@@ -50,13 +51,21 @@ public class GreedyScheduler implements Scheduler {
 
                 // save violation reasons for each tenant
                 Map<String, String> queueReasons = schedulingPAQueue.getConstraintViolationReasons();
+                String queueName = schedulingPAQueue.getQueueName();
                 if (MapUtils.isNotEmpty(queueReasons)) {
-                    String queueName = schedulingPAQueue.getQueueName();
                     queueReasons.forEach((tenantId, reason) -> {
                         reasons.putIfAbsent(tenantId, new ArrayList<>());
                         reasons.get(tenantId).add(new SchedulingResult.ConstraintViolationReason(queueName, reason));
                     });
                 }
+
+                // log notification for now. TODO expose this info and raise alert in other ways
+                Map<String, List<String>> notifications = schedulingPAQueue.getConstraintNotifications();
+                MapUtils.emptyIfNull(notifications).forEach((tenantId, messages) -> {
+                    String shortId = CustomerSpace.shortenCustomerSpace(tenantId);
+                    messages.forEach(msg -> log.info("scheduler notification from queue {} for tenant {}: {}",
+                            queueName, shortId, msg));
+                });
             }
         }
         canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
