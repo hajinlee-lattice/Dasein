@@ -349,10 +349,10 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return get("get log links", url, WorkflowLogLinks.class);
     }
 
-    public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> types,
+    public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, Long tenantPid, List<String> types,
             List<String> statuses, Long earliestStartTime) {
         String baseUrl = "/jobsbycluster";
-        String url = generateGetWorkflowUrls(baseUrl, clusterId, types, statuses, earliestStartTime);
+        String url = generateGetWorkflowUrls(baseUrl, clusterId, tenantPid, types, statuses, earliestStartTime);
         return JsonUtils.convertList(get("jobsByCluster", url, List.class), WorkflowJob.class);
     }
 
@@ -467,8 +467,8 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
     }
 
     @VisibleForTesting
-    String generateGetWorkflowUrls(String baseUrl, String clusterId, List<String> types, List<String> statuses,
-            Long earliestStartTime) {
+    String generateGetWorkflowUrls(String baseUrl, String clusterId, Long tenantPid, List<String> types,
+            List<String> statuses, Long earliestStartTime) {
         StringBuilder urlStr = new StringBuilder();
         urlStr.append(baseUrl);
         urlStr.append("?");
@@ -481,6 +481,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
         if (CollectionUtils.isNotEmpty(statuses)) {
             urlStr.append(buildQueryString("status", statuses)).append("&");
+        }
+        if (tenantPid != null) {
+            urlStr.append("tenantPid=").append(tenantPid).append("&");
         }
         if (earliestStartTime != null) {
             urlStr.append("earliestStartTime=").append(earliestStartTime).append("&");

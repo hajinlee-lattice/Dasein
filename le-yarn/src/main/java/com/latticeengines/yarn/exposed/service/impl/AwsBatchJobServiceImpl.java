@@ -55,6 +55,9 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
 
+    @Value("${hadoop.batch.queue.python}")
+    private String jobQueue;
+
     @Value("${dataplatform.model.aws.batch.local.enabled}")
     private boolean batchLocal;
 
@@ -122,6 +125,10 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
         jobName = jobName.substring(0, Math.min(128, jobName.length()));
         log.info("Job name=" + jobName);
         jobRequest.setJobName(jobName);
+
+        log.info("Job queue=" + jobQueue);
+        jobRequest.setJobQueue(jobQueue);
+
         jobRequest.setMemory(getResourceConfig(containerProperties, ContainerProperty.MEMORY.name()));
         jobRequest.setCpus(getResourceConfig(containerProperties, ContainerProperty.VIRTUALCORES.name()));
         Map<String, String> envs = getAwsBatchRuntimeEnvs(job, appMasterProperties, containerProperties, null);

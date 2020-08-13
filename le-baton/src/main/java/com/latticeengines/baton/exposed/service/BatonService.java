@@ -1,5 +1,8 @@
 package com.latticeengines.baton.exposed.service;
 
+import java.time.DateTimeException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -24,8 +27,8 @@ public interface BatonService {
 
     boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo);
 
-    boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
-                         ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo);
+    boolean createTenant(String contractId, String tenantId, String defaultSpaceId, ContractInfo contractInfo,
+            TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo);
 
     TenantDocument getTenant(String contractId, String tenantId);
 
@@ -53,7 +56,8 @@ public interface BatonService {
     BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId, String serviceName,
             TreeCache cache);
 
-    BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String spaceId, String serviceName);
+    BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String spaceId,
+            String serviceName);
 
     BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId, String spaceId,
             String serviceName, TreeCache cache);
@@ -62,8 +66,7 @@ public interface BatonService {
 
     DocumentDirectory getConfigurationSchema(String serviceName);
 
-    boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
-                                    SpaceConfiguration spaceConfig);
+    boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId, SpaceConfiguration spaceConfig);
 
     boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag);
 
@@ -79,13 +82,36 @@ public interface BatonService {
 
     FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace);
 
-    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
+    /**
+     * Get current time in target tenant's configured timezone
+     *
+     * @param customerSpace
+     *            target tenant
+     * @throws DateTimeException
+     *             if timezone configured in this tenant is in an invalid format
+     * @return non {@code null} reference to tenant's current time
+     */
+    ZonedDateTime getTenantCurrentTime(CustomerSpace customerSpace);
+
+    /**
+     * Get configured timezone for target tenant
+     *
+     * @param customerSpace
+     *            target tenant
+     * @throws DateTimeException
+     *             if timezone configured in this tenant is in an invalid format
+     * @return non {@code null} reference to configured timezone of target tenant
+     */
+    ZoneId getTenantTimezone(CustomerSpace customerSpace);
+
+    // FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
     boolean shouldExcludeDataCloudAttrs(String tenantId);
 
-    //FIXME: a hotfix for M36. ATT crisis
+    // FIXME: a hotfix for M36. ATT crisis
     boolean shouldSkipFuzzyMatchInPA(String tenantId);
 
-    //FIXME: a hotfix for M37. Citrix has high demand on date attribute formatting in TP
+    // FIXME: a hotfix for M37. Citrix has high demand on date attribute formatting
+    // in TP
     boolean shouldWaitDataAttrs(String tenantId);
 
 }

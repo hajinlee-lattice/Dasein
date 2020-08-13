@@ -57,6 +57,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDu
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchJunctionActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.UrlToDunsMicroEngineActor;
 import com.latticeengines.domain.exposed.actors.ActorType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
@@ -181,6 +182,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 DunsBasedMicroEngineActor.class, //
                 DunsToDunsMicroEngineActor.class, //
                 LocationToDunsMicroEngineActor.class, //
+                UrlToDunsMicroEngineActor.class, //
                 LocationToCachedDunsMicroEngineActor.class, //
                 DunsValidateMicroEngineActor.class, //
                 CachedDunsValidateMicroEngineActor.class, //

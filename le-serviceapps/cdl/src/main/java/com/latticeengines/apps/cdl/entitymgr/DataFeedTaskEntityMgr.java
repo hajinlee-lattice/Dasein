@@ -70,7 +70,11 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     List<SourceInfo> getSourcesBySystemPid(Long systemPid, Pageable pageable);
 
+    List<SourceInfo> getSourcesByProjectId(String projectId, String customerSpace, Pageable pageable);
+
     Long countSourcesBySystemPid(Long systemPid);
+
+    Long countSourcesByProjectId(String projectId, String customerSpace);
 
     SourceInfo getSourceBySourceIdAndDataFeed(String sourceId, DataFeed dataFeed);
 

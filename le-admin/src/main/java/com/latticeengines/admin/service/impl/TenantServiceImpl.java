@@ -731,7 +731,7 @@ public class TenantServiceImpl implements TenantService {
             // generate email list to be added and IDaaS user list
             List<IDaaSUser> users = new ArrayList<>();
             for (VboRequest.User user : vboRequest.getProduct().getUsers()) {
-                users.add(constructIDaaSUser(user, vboRequest.getSubscriber().getLanguage()));
+                users.add(constructIDaaSUser(user, vboRequest.getSubscriber()));
             }
 
             for (String component : services) {
@@ -802,14 +802,17 @@ public class TenantServiceImpl implements TenantService {
         return tracer.activateSpan(span);
     }
 
-    private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
+    private IDaaSUser constructIDaaSUser(VboRequest.User user, VboRequest.Subscriber subscriber) {
         IDaaSUser iDaasuser = new IDaaSUser();
         iDaasuser.setFirstName(user.getName().getFirstName());
         iDaasuser.setEmailAddress(user.getEmailAddress());
         iDaasuser.setLastName(user.getName().getLastName());
         iDaasuser.setUserName(user.getUserId());
         iDaasuser.setPhoneNumber(user.getTelephoneNumber());
-        iDaasuser.setLanguage(language);
+        iDaasuser.setLanguage(subscriber.getLanguage());
+        iDaasuser.setSubscriberNumber(subscriber.getSubscriberNumber());
+        iDaasuser.setCountryCode(user.getPrimaryAddress().getCountryISOAlpha2Code());
+        iDaasuser.setCompanyName(subscriber.getName());
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
                 "Last name is required");
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),

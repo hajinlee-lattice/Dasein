@@ -36,6 +36,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class MatchTraveler extends Traveler implements Fact, Dimension {
     private static final Logger log = LoggerFactory.getLogger(MatchTraveler.class);
 
+    public static final String LOCATION_TO_DUNS = "LocationToDuns";
+    public static final String DUNS_TO_DUNS = "DunsToDuns";
+    public static final String URL_TO_DUNS = "UrlToDuns";
+
     /*************************
      * Bound to whole travel
      **************************/
@@ -52,10 +56,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Real time or bulk match.
     private Boolean isBatchMode = false;
 
-    // Use DUNS to match DUNS
-    // if the given DUNS is bad, even other inputs are correct, still cannot match
-    // therefore try to use a special attempt for DUNS -> DUNS
-    private Boolean useDunsMatchDuns = false;
+    // DUNS to DUNS or LOCATION to DUNS
+    private String dunsMatchMode = LOCATION_TO_DUNS;
 
     private OperationalMode operationalMode;
 
@@ -255,12 +257,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         }
     }
 
-    public Boolean getUseDunsMatchDuns() {
-        return useDunsMatchDuns;
+    public String getDunsMatchMode() {
+        return dunsMatchMode;
     }
 
-    public void setUseDunsMatchDuns(Boolean useDunsMatchDuns) {
-        this.useDunsMatchDuns = useDunsMatchDuns;
+    public void setDunsMatchMode(String dunsMatchMode) {
+        this.dunsMatchMode = dunsMatchMode;
     }
 
     public List<Object> getInputDataRecord() {

@@ -56,7 +56,7 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
 
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
-        traveler.setUseDunsMatchDuns(false);
+        traveler.setDunsMatchMode(MatchTraveler.LOCATION_TO_DUNS);
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.LOCATION_DUNS, traveler.getMatchKeyTuple()));
     }
 

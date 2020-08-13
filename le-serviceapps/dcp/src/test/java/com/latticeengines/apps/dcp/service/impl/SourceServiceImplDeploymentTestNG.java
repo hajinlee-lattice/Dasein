@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
@@ -109,6 +110,15 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.objectExist(dropBoxSummary.getBucket(),
                 dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "Uploads/");
 
+        // check the source <-> system <==> projects relations
+        List<Source> allSources = sourceService.getSourceList(mainCustomerSpace, projectId);
+        Assert.assertEquals(CollectionUtils.size(allSources), 2);
+        allSystems = cdlProxy.getS3ImportSystemList(mainCustomerSpace);
+        Assert.assertEquals(CollectionUtils.size(allSystems), CollectionUtils.size(allSources));
+        for (Source s : allSources) {
+            ProjectInfo projectInfo = projectService.getProjectBySourceId(mainCustomerSpace, s.getSourceId());
+            Assert.assertEquals(projectInfo.getProjectId(), projectId);
+        }
     }
 
 }

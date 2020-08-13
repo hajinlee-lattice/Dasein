@@ -366,10 +366,11 @@ public class WorkflowResource {
     @GetMapping("/jobsbycluster")
     @ApiOperation(value = "Get list of workflow jobs by given clusterId or list of job types or job statuses.")
     public List<WorkflowJob> jobsByCluster(@RequestParam(required = false) String clusterId,
+            @RequestParam(value = "tenantPid", required = false) Long tenantPid,
             @RequestParam(value = "type", required = false) List<String> workflowTypes,
             @RequestParam(value = "status", required = false) List<String> statuses,
             @RequestParam(value = "earliestStartTime", required = false) Long earliestStartTime) {
-        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses,
+        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, tenantPid, workflowTypes, statuses,
                 earliestStartTime);
     }
 

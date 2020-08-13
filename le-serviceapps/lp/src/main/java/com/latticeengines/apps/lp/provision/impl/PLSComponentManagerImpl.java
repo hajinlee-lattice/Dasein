@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -470,6 +471,11 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 log.info("user exist in IDaaS, add product access to user {}", email);
                 ProductRequest request = new ProductRequest();
                 request.setEmailAddress(email);
+                ProductSubscription productSubscription = new ProductSubscription();
+                productSubscription.setSubscriberNumber(user.getSubscriberNumber());
+                productSubscription.setIso2CountryCode(user.getCountryCode());
+                productSubscription.setCompanyName(user.getCompanyName());
+                request.setProductSubscription(productSubscription);
                 iDaaSService.addProductAccessToUser(request);
             } else {
                 log.info("IDaaS user existed for {} and has product access", email);

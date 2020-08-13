@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.Classification;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchType;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Accepted;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Rejected;
@@ -10,6 +11,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Address
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.City;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.DUNS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Domain;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.RegNumber;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
@@ -235,6 +237,70 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         String matchGrade = getCandidateField(output.getResult().get(0), MatchGrade).toString();
         Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
         Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
+    }
+
+    @Test(groups = "functional", dataProvider = "urlToDunsTestCases")
+    public void testEmailAndUrl(String website, String email, String companyName, String country, //
+                                String expectedDuns, boolean expectMatchByUrl) {
+        // Schema: ID, CompanyName, State, Country, ZipCode, Address
+        Object[][] data = new Object[][] { { website, email, companyName, country } };
+        // ColumnSelection is RTS
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data, //
+                new String[]{ "Website", "Email", "CompanyName", "Country" });
+        input.setUseDirectPlus(true);
+        DplusMatchRule baseRule = new DplusMatchRule(6, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+        input.setDplusMatchConfig(new DplusMatchConfig(baseRule));
+        input.setTargetEntity(BusinessEntity.PrimeAccount.name());
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
+                .put(Domain, Arrays.asList("Website", "Email"))
+                .put(Name, Collections.singletonList("CompanyName"))
+                .put(Country, Collections.singletonList("Country"))
+                .build());
+        input.setSkipKeyResolution(true);
+        List<Column> columns = Stream.of(
+                "duns_number",
+                "primaryname"
+        ).map(c -> new Column(c, c)).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        System.out.println(JsonUtils.pprint(output));
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        if (StringUtils.isNotBlank(expectedDuns)) {
+            Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+            Assert.assertTrue(output.getResult().get(0).isMatched());
+            OutputRecord outputRecord = output.getResult().get(0);
+            Assert.assertEquals(outputRecord.getOutput().get(0), expectedDuns);
+            if (expectMatchByUrl) {
+                Assert.assertEquals(getCandidateField(outputRecord, MatchType), "Domain Lookup");
+            } else {
+                Assert.assertEquals(getCandidateField(outputRecord, MatchType), "Name and Address Lookup");
+            }
+        } else {
+            Assert.assertEquals((int) output.getStatistics().getRowsMatched(), 0);
+            Assert.assertFalse(output.getResult().get(0).isMatched());
+        }
+    }
+
+    @DataProvider(name = "urlToDunsTestCases")
+    public Object[][] provideUrlToDunsTestCases() {
+        return new Object[][]{
+                // website, email, companyName, country, expectedDUNS, matchedByUrl
+                { "bp.com", null, null, null, "210042669", true }, //
+                { null, "a@bp.com", null, null, "210042669", true }, //
+                { null, "hello@gmail.com", null, null, null, false }, //
+                { "apple.com", "a@bp.com", null, null, "060704780", true }, //
+                { "apple.com", "a@bp.com", "BP", "UK", "210042669", false }, //
+                { null, "hello@gmail.com", "BP", "UK", "210042669", false }, //
+                { "apple.com", null, "BP", null, "039596507", false }, //
+                { "apple.com", null, "BP", "UK", "210042669", false }, //
+
+                { "bp.com", null, null, "US", "039596507", true }, //
+        };
     }
 
     @Test(groups = "functional", dataProvider = "registrationNumberTestCases")

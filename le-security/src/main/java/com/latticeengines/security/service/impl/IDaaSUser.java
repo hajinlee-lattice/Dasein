@@ -64,8 +64,15 @@ public class IDaaSUser {
 
     @JsonProperty("invitation_link")
     private String invitationLink;
+  
+    @JsonProperty("subscriber_number")
+    private String subscriberNumber;
 
+    @JsonProperty("company_name")
+    private String companyName;
 
+    @JsonProperty("country_code")
+    private String countryCode;
 
     public String getUserName() {
         return userName;
@@ -182,4 +189,28 @@ public class IDaaSUser {
     public String getInvitationLink() { return invitationLink; }
 
     public void setInvitationLink(String invitationLink) { this.invitationLink = invitationLink; }
+
+    public String getSubscriberNumber() {
+        return subscriberNumber;
+    }
+
+    public void setSubscriberNumber(String subscriberNumber) {
+        this.subscriberNumber = subscriberNumber;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
 }

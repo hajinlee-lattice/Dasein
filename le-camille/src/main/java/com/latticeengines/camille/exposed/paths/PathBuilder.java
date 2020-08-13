@@ -261,6 +261,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_TENANT_GROUP);
     }
 
+    public static Path buildTenantDefaultTimezonePath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.DEFAULT_TIMEZONE);
+    }
+
     public static Path buildWorkflowThrottlingMasterConfigPath() { // for test only
         return new Path(PathConstants.PODS, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }
@@ -293,6 +297,12 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(),
                 PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(),
                 PathConstants.SERVICES, PathConstants.CDL, PathConstants.TENANT_PA_QUOTA);
+    }
+
+    public static Path buildTenantTimezonePath(String podId, CustomerSpace customerSpace) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(),
+                PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(),
+                PathConstants.SERVICES, PathConstants.CDL, PathConstants.TIMEZONE);
     }
 
     public static Path buildCatalogQuotaLimitPath(String podId) {

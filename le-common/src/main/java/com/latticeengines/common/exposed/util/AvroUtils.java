@@ -1087,7 +1087,7 @@ public final class AvroUtils {
         if (avroToCsvTransformer == null) {
             throw new IllegalArgumentException("Cannot convert AVRO CSV. Provide CSV Transformer");
         }
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile))) {
+        try (CSVWriter csvWriter = createNewCSVWriter(new FileWriter(csvFile))) {
             List<String> fieldNames = avroToCsvTransformer.getFieldNames();
             System.out.println(fieldNames);
             csvWriter.writeNext(fieldNames.toArray(new String[0]));
@@ -1110,7 +1110,7 @@ public final class AvroUtils {
         if (avroToCsvTransformer == null) {
             throw new IllegalArgumentException("Cannot convert AVRO CSV. Provide CSV Transformer");
         }
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile))) {
+        try (CSVWriter csvWriter = createNewCSVWriter(new FileWriter(csvFile))) {
             List<String> fieldNames = avroToCsvTransformer.getFieldNames();
             System.out.println(fieldNames);
             csvWriter.writeNext(fieldNames.toArray(new String[0]));
@@ -1126,6 +1126,15 @@ public final class AvroUtils {
                 }
             }
         }
+    }
+
+    private static CSVWriter createNewCSVWriter(FileWriter writer) throws IOException {
+        char separator = ',';
+        char quotechar = '"';
+        char escapechar = '\\';
+        String lineEnd = "\n";
+
+        return new CSVWriter(writer, separator, quotechar, escapechar, lineEnd);
     }
 
     public static long countLocalDir(String dir) {

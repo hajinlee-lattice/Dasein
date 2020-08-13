@@ -13,7 +13,6 @@ public class ProjectInfo {
     private Date updated;
     private String createdBy;
     private List<String> recipientList;
-    private Long systemId;
     private String teamId;
 
     public String getProjectId() {
@@ -78,14 +77,6 @@ public class ProjectInfo {
 
     public void setRecipientList(List<String> recipientList) {
         this.recipientList = recipientList;
-    }
-
-    public Long getSystemId() {
-        return systemId;
-    }
-
-    public void setSystemId(Long systemId) {
-        this.systemId = systemId;
     }
 
     public String getTeamId() {

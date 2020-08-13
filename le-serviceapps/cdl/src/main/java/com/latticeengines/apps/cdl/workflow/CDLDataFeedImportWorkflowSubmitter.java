@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +63,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private BatonService batonService;
+
+    @Value("${cdl.catalog.hardquota.limit}")
+    private Long catalogHardQuota;
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -159,6 +163,11 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
             emailInfoStr = JsonUtils.serialize(emailInfo);
         }
         BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
+        Long catalogLimit = getCatalogRecordsLimit(dataFeedTask);
+        if (catalogLimit > catalogHardQuota) {
+            throw new IllegalArgumentException(String.format("Invalid parameter: catalog quota limit %s over than the " +
+                    "hard limit %s", catalogLimit, catalogHardQuota));
+        }
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
                 .internalResourceHostPort(internalResourceHostPort) //
@@ -170,7 +179,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .prepareImportConfig(prepareImportConfig)
                 .importFromS3(entity) //
                 .validateUsingSpark(entity) //
-                .catalogRecordsLimit(getCatalogRecordsLimit(dataFeedTask)) //
+                .catalogRecordsLimit(catalogLimit) //
                 .inputProperties(ImmutableMap.<String, String>builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, csvImportFileInfo.getReportFileName()) //
