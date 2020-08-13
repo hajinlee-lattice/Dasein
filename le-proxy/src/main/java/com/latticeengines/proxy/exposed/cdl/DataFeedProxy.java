@@ -210,8 +210,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                         "?pageIndex={pageIndex}&pageSize={pageSize}",
                 shortenCustomerSpace(customerSpace), systemPid, Integer.toString(pageIndex),
                 Integer.toString(pageSize));
-        List<?> rawList = get("getSourcesBySystemPid", url, List.class);
-        return JsonUtils.convertList(rawList, SourceInfo.class);
+        return getList("getSourcesBySystemPid", url, SourceInfo.class);
     }
 
     public List<SourceInfo> getSourcesByProjectId(String customerSpace, String projectId, int pageIndex, int pageSize) {
@@ -219,8 +218,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                         "?pageIndex={pageIndex}&pageSize={pageSize}",
                 shortenCustomerSpace(customerSpace), projectId, Integer.toString(pageIndex),
                 Integer.toString(pageSize));
-        List<?> rawList = get("getSourcesByProjectId", url, List.class);
-        return JsonUtils.convertList(rawList, SourceInfo.class);
+        return getList("getSourcesByProjectId", url, SourceInfo.class);
     }
 
     public Long countSourcesBySystemPid(String customerSpace, Long systemPid) {

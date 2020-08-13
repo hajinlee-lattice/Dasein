@@ -12,6 +12,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -21,6 +22,7 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.ProjectSystemLinkService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
@@ -110,7 +112,7 @@ public class SourceServiceImpl implements SourceService {
                                String fileImportId, FieldDefinitionsRecord fieldDefinitionsRecord) {
         S3ImportSystem importSystem = createSourceSystem(customerSpace, displayName, sourceId);
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
-        if (importSystem == null || projectInfo == null) {
+        if (projectInfo == null) {
             throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
         }
         if (StringUtils.isBlank(sourceId)) {
@@ -358,17 +360,15 @@ public class SourceServiceImpl implements SourceService {
         system.setDisplayName(displayName);
         system.setSystemType(S3ImportSystem.SystemType.DCP);
         cdlProxy.createS3ImportSystem(customerSpace, system);
-        system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
-        int retry = 0;
-        while (system == null && retry < MAX_RETRY) {
-            try {
-                Thread.sleep(1000L + retry * 1000L);
-            } catch (InterruptedException e) {
-                return null;
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRY,
+                Collections.singleton(IllegalArgumentException.class), null);
+        system = retryTemplate.execute(context -> {
+            S3ImportSystem createdSystem = cdlProxy.getS3ImportSystem(customerSpace, systemName);
+            if (createdSystem == null) {
+                throw new IllegalArgumentException("Cannot get importSystem: " + systemName);
             }
-            system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
-            retry++;
-        }
+            return createdSystem;
+        });
         if (system == null) {
             throw new RuntimeException("Cannot create DCP Project due to ImportSystem creation error!");
         }
