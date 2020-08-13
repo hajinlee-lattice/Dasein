@@ -285,6 +285,26 @@ public class AvroUtilsUnitTestNG {
         }
     }
 
+    @Test(groups = "unit", dependsOnMethods = { "convertRecommendationsAvroToCSV" })
+    public void validateCSVFormat() throws IOException {
+        URL avroUrl = ClassLoader
+                .getSystemResource(
+                        "com/latticeengines/common/exposed/util/avroUtilsData/account_with_escape_chars.avro");
+        File csvFile = File.createTempFile("RecommendationsTest2_", ".csv");
+
+        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
+                new RecommendationAvroToCsvTransformer(
+                        readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv"), false));
+
+        log.info("Created CSV File at: " + csvFile.getAbsolutePath());
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
+            assertEquals(csvRows.size(), 16);
+        }
+    }
+
     @Test(groups = "unit", dataProvider = "columnProvider")
     public void testIsValidColumn(String column, boolean isValid) {
         Assert.assertEquals(AvroUtils.isValidColumn(column), isValid);
