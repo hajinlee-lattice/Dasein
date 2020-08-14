@@ -32,9 +32,9 @@ public interface EmailService {
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
                             Collection<String> bccRecipients, EmailFromAddress fromAddress);
 
-    boolean sendNewUserEmail(User user, String password, String hostport, boolean bccEmail);
+    void sendNewUserEmail(User user, String password, String hostport, boolean bccEmail);
 
-    boolean sendExistingUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail);
+    void sendExistingUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail);
 
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
 
@@ -98,7 +98,7 @@ public interface EmailService {
 
     void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo);
 
-    boolean sendDCPWelcomeEmail(User user, String tenantName, String url);
+    Long sendDCPWelcomeEmail(User user, String tenantName, String url);
 
     boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url);
 

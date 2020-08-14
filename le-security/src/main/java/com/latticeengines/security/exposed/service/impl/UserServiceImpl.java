@@ -724,4 +724,31 @@ public class UserServiceImpl implements UserService {
 
         return idaasUser;
     }
+
+    // IDaaSUser objects contain product subscription information that User objects do not
+    @Override
+    public IDaaSUser createIDaaSUser(IDaaSUser userInfo) {
+        String email = userInfo.getEmailAddress();
+        IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
+        if (idaasUser == null) {
+            LOGGER.info("begin creating IDaaS user for {}", email);
+            idaasUser = iDaaSService.createIDaaSUser(userInfo);
+        } else if (!idaasUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
+            // add product access and default role to user when user already exists in IDaaS
+            LOGGER.info("user exist in IDaaS, add product access to user {}", email);
+            ProductRequest request = new ProductRequest();
+            request.setEmailAddress(email);
+            ProductSubscription productSubscription = new ProductSubscription();
+            productSubscription.setSubscriberNumber(userInfo.getSubscriberNumber());
+            productSubscription.setIso2CountryCode(userInfo.getCountryCode());
+            productSubscription.setCompanyName(userInfo.getCompanyName());
+            productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
+            request.setProductSubscription(Collections.singletonList(productSubscription));
+            iDaaSService.addProductAccessToUser(request);
+        } else {
+            LOGGER.info("IDaaS user existed for {} and has product access", email);
+        }
+
+        return idaasUser;
+    }
 }

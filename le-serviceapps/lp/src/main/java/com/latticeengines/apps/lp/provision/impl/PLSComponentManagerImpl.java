@@ -466,43 +466,12 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
                                    List<String> externalAdminEmails, String tenantName) {
         log.info("Operating IDaaS users");
-        List<IDaaSUser> retrievedUsers = new ArrayList<>();
-        for (IDaaSUser idaasUser : iDaaSUsers) {
-            String email = idaasUser.getEmailAddress();
-            IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
-            if (retrievedUser == null) {
-                log.info("begin creating IDaaS user for {}", email);
-                retrievedUser = iDaaSService.createIDaaSUser(idaasUser);
-            } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
-                // add product access and default role to user when user already exists in IDaaS
-                log.info("user exist in IDaaS, add product access to user {}", email);
-                ProductRequest request = new ProductRequest();
-                request.setEmailAddress(email);
-                ProductSubscription productSubscription = new ProductSubscription();
-                productSubscription.setSubscriberNumber(idaasUser.getSubscriberNumber());
-                productSubscription.setIso2CountryCode(idaasUser.getCountryCode());
-                productSubscription.setCompanyName(idaasUser.getCompanyName());
-                productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
-                List<ProductSubscription>productSubscriptions = new ArrayList<>();
-                productSubscriptions.add(productSubscription);
-                request.setProductSubscription(productSubscriptions);
-                iDaaSService.addProductAccessToUser(request);
-            } else {
-                log.info("IDaaS user existed for {} and has product access", email);
-            }
-            String welcomeUrl = dcpPublicUrl;
-            if (retrievedUser.getInvitationLink() != null) {
-                welcomeUrl = retrievedUser.getInvitationLink();
-            }
-            emailService.sendDCPWelcomeEmail(idaasUser, tenantName, welcomeUrl);
-            if (EmailUtils.isInternalUser(email)) {
-                superAdminEmails.add(email.toLowerCase());
-            } else {
-                externalAdminEmails.add(email.toLowerCase());
-            }
-            retrievedUsers.add(retrievedUser);
+        List<IDaaSUser> createdUsers = new ArrayList<>();
+        for (IDaaSUser user : iDaaSUsers) {
+            IDaaSUser createdUser = userService.createIDaaSUser(user);
+            createdUsers.add(createdUser == null ? user : createdUser);
         }
-        return retrievedUsers;
+        return createdUsers;
     }
 
 }

@@ -158,7 +158,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean sendNewUserEmail(User user, String password, String hostport, boolean bccEmail) {
+    public void sendNewUserEmail(User user, String password, String hostport, boolean bccEmail) {
         try {
             log.info("Sending new user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -179,15 +179,13 @@ public class EmailServiceImpl implements EmailService {
                 sendMultiPartEmail(EmailSettings.NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
             }
             log.info("Sending new user email to " + user.getEmail() + " succeeded.");
-            return true;
         } catch (Exception e) {
             log.error("Failed to send new email to " + user.getEmail() + " " + e.getMessage());
-            return false;
         }
     }
 
     @Override
-    public boolean sendExistingUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail) {
+    public void sendExistingUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail) {
         try {
             log.info("Sending existing user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -207,10 +205,8 @@ public class EmailServiceImpl implements EmailService {
                         Collections.singleton(user.getEmail()));
             }
             log.info("Sending existing user email to " + user.getEmail() + " succeeded.");
-            return true;
         } catch (Exception e) {
             log.error("Failed to send existing user email to " + user.getEmail() + " " + e.getMessage());
-            return false;
         }
     }
 
@@ -909,8 +905,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean sendDCPWelcomeEmail(User user, String tenantName, String url) {
-        boolean success = false;
+    public Long sendDCPWelcomeEmail(User user, String tenantName, String url) {
+        Long success = null;
         try {
             log.info("Sending welcome email to " + user.getEmail().toString() + " started.");
 
@@ -925,8 +921,8 @@ public class EmailServiceImpl implements EmailService {
                     "image/png", "avatar");
 
             sendMultiPartEmail(EmailSettings.DNB_CONNECT_WELCOME_NEW_USER_SUBJECT, multipart, Collections.singleton(user.getEmail()), EmailFromAddress.DNB_CONNECT);
-            log.info("Sending welcome email to " + user.getEmail().toString() + " succeeded.");
-            success = true;
+            log.info("Sending welcome email to " + user.getEmail().toString() + "succeeded.");
+            success = System.currentTimeMillis();
         } catch (Exception e) {
             log.error("Failed to send welcome email to " + user.getEmail().toString(), e);
         }

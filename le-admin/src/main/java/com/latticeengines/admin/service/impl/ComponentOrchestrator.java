@@ -55,6 +55,8 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 @Component
 public class ComponentOrchestrator {
@@ -74,11 +76,17 @@ public class ComponentOrchestrator {
     @Inject
     private Configuration yarnConfiguration;
 
+    @Inject
+    private IDaaSService iDaaSService;
+
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
 
     @Value("${common.pls.url}")
     private String plsEndHost;
+
+    @Value("${security.dcp.public.url}")
+    private String dcpPublicUrl;
 
     private static Map<String, LatticeComponent> componentMap;
     private static BatonService batonService = new BatonServiceImpl();
@@ -148,12 +156,17 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrateForInstall(String contractId, String tenantId, String spaceId,
-                                      Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo, VboCallback callback) {
+                                      Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
+        orchestrateForInstall(contractId, tenantId, spaceId, properties, prodAndExternalAminInfo, false, null);
+    }
+    public void orchestrateForInstall(String contractId, String tenantId, String spaceId,
+                                      Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo, boolean isDnBConnect,
+                                      VboCallback callback) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
 
-        postInstall(visitor, prodAndExternalAminInfo, tenantId, callback);
+        postInstall(visitor, prodAndExternalAminInfo, tenantId, isDnBConnect, callback);
     }
 
     public void orchestrateForInstallV2(String contractId, String tenantId, String spaceId,
@@ -193,20 +206,24 @@ public class ComponentOrchestrator {
     }
 
     void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
-            String tenantId, VboCallback callback) {
+                     String tenantId, boolean isDnBConnect, VboCallback callback) {
         boolean installSuccess = checkComponentsBootStrapStatus(visitor);
 
         if (callback != null && installSuccess) {
             // tenant provisioning successful; still assume user creation failed until later check
             callback.customerCreation.transactionDetail.status = VboStatus.USER_FAIL;
         }
-        emailService(installSuccess, prodAndExternalAminInfo, tenantId, callback);
+
+        if (isDnBConnect && installSuccess)
+            finalizeDnBConnect(prodAndExternalAminInfo, tenantId, callback);
+        else
+            emailService(installSuccess, prodAndExternalAminInfo, tenantId);
     }
 
     void postInstallV2(OrchestratorVisitorV2 visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
                      String tenantId) {
         boolean installSuccess = visitor.failed.size() == 0;
-        emailService(installSuccess, prodAndExternalAminInfo, tenantId, null);
+        emailService(installSuccess, prodAndExternalAminInfo, tenantId);
     }
 
     private boolean checkComponentsBootStrapStatus(OrchestratorVisitor visitor) {
@@ -217,7 +234,7 @@ public class ComponentOrchestrator {
     }
 
     private void emailService(boolean allComponentsSuccessful, ProductAndExternalAdminInfo prodAndExternalAminInfo,
-            String tenantId, VboCallback callback) {
+            String tenantId) {
         List<String> newEmailList = new ArrayList<String>();
         List<String> existingEmailList = new ArrayList<String>();
         List<LatticeProduct> products = prodAndExternalAminInfo.products;
@@ -236,11 +253,45 @@ public class ComponentOrchestrator {
                 }
             }
         }
-        sendExistingEmails(existingEmailList, tenantId, products, callback);
-        sendNewEmails(newEmailList, tenantId, products, callback);
+        sendExistingEmails(existingEmailList, tenantId, products);
+        sendNewEmails(newEmailList, tenantId, products);
     }
 
-    private void sendNewEmails(List<String> emailList, String tenantId, List<LatticeProduct> products, VboCallback callback) {
+    private void finalizeDnBConnect(ProductAndExternalAdminInfo prodAndExternalAdminInfo, String tenantId, VboCallback callback) {
+        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(tenantId).toString());
+        if (callback != null)
+            callback.customerCreation.customerDetail.subscriberNumber = tenant.getSubscriberNumber();
+
+        for (IDaaSUser user : prodAndExternalAdminInfo.getUsersDnBConnect()) {
+            String email = user.getEmailAddress();
+            IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
+            if (retrievedUser != null && tenant != null) {
+                String welcomeUrl = retrievedUser.getInvitationLink() == null ? dcpPublicUrl : retrievedUser.getInvitationLink();
+                User generatedUser = new User();
+                generatedUser.setEmail(email);
+                generatedUser.setFirstName(retrievedUser.getFirstName());
+                Long emailSendTime = emailService.sendDCPWelcomeEmail(generatedUser, tenant.getName(), welcomeUrl);
+
+                if (callback != null && retrievedUser.getEmailAddress().equals(callback.customerCreation.customerDetail.login)) {
+                    if (emailSendTime != null) {
+                        callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
+                        callback.customerCreation.customerDetail.emailDate = emailSendTime.toString();
+                    }
+
+                    if (VboStatus.ALL_FAIL.equals(callback.customerCreation.transactionDetail.status)) {
+                        callback.customerCreation.transactionDetail.status = VboStatus.PROVISION_FAIL;
+                    } else {
+                        callback.customerCreation.transactionDetail.status = VboStatus.SUCCESS;
+                    }
+
+                    callback.customerCreation.customerDetail.firstName = retrievedUser.getFirstName();
+                    callback.customerCreation.customerDetail.lastName = retrievedUser.getLastName();
+                }
+            }
+        }
+    }
+
+    private void sendNewEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -262,24 +313,18 @@ public class ComponentOrchestrator {
             ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/temppassword",
                     HttpMethod.PUT, requestEntity, String.class);
 
-            boolean emailSuccess;
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailSuccess = emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, false);
+                emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, false);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailSuccess = emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
+                emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
                 tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
-                emailSuccess = false;
                 log.info("The user clicked both PD and LPA3");
-            }
-            if (callback != null && emailSuccess && user.getUsername().equals(callback.customerCreation.customerDetail.login)) {
-                callback.customerCreation.customerDetail.emailDate = Long.toString(System.currentTimeMillis());
-                callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
             }
         }
     }
 
-    private void sendExistingEmails(List<String> emailList, String tenantId, List<LatticeProduct> products, VboCallback callback) {
+    private void sendExistingEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -290,19 +335,13 @@ public class ComponentOrchestrator {
             Tenant tenant = new Tenant();
             tenant.setName(tenantId);
 
-            boolean emailSuccess;
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailSuccess = emailService.sendExistingUserEmail(tenant, user, appPublicUrl, false);
+                emailService.sendExistingUserEmail(tenant, user, appPublicUrl, false);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailSuccess = emailService.sendExistingUserEmail(tenant, user, appPublicUrl, true);
+                emailService.sendExistingUserEmail(tenant, user, appPublicUrl, true);
                 tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
                 log.info("The user clicked both PD and LPA3");
-                emailSuccess = false;
-            }
-            if (callback != null && emailSuccess && user.getUsername().equals(callback.customerCreation.customerDetail.login)) {
-                callback.customerCreation.customerDetail.emailDate = Long.toString(System.currentTimeMillis());
-                callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
             }
         }
     }

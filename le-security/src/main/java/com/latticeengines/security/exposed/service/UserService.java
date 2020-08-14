@@ -76,4 +76,5 @@ public interface UserService {
 
     IDaaSUser createIDaaSUser(User user, String subscriberNumber);
 
+    IDaaSUser createIDaaSUser(IDaaSUser user);
 }

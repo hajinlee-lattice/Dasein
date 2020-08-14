@@ -94,7 +94,6 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
@@ -102,8 +101,8 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -246,6 +245,7 @@ public class TenantServiceImpl implements TenantService {
         // retrieve mappings from Camille
         final Map<String, Map<String, String>> orchestratorProps = props;
         executorService.submit(() -> {
+            boolean isDnBConnectRequest = batonService.hasProduct(customerSpace, LatticeProduct.DCP);
             CallbackTimeoutThread timeoutThread = null;
             Semaphore timeoutSemaphore = new Semaphore(1); // only to be used when updating timeout status
             if (callback != null) {
@@ -254,36 +254,18 @@ public class TenantServiceImpl implements TenantService {
             }
 
             orchestrator.orchestrateForInstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                    orchestratorProps, prodAndExternalAminInfo, callback);
+                    orchestratorProps, prodAndExternalAminInfo, isDnBConnectRequest, callback);
 
             // record tenant status after being created
             TenantDocument tenantDoc = getTenant(contractId, tenantId);
-            boolean tenantSuccess = (tenantDoc != null);
-            if (tenantSuccess) {
+            if (tenantDoc != null) {
                 if (!BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state)) {
                     tenantInfo.properties.status = TenantStatus.INACTIVE.name();
                 }
-                tenantSuccess = updateTenantInfo(contractId, tenantId, tenantInfo);
+                updateTenantInfo(contractId, tenantId, tenantInfo);
             }
 
             if (callback != null) {
-                if (tenantSuccess) {
-                    Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(tenantId).toString());
-                    callback.customerCreation.customerDetail.subscriberNumber = tenant.getSubscriberNumber();
-                }
-
-                IDaaSUser admin = iDaaSService.getIDaaSUser(callback.customerCreation.customerDetail.login);
-                if (admin != null) {
-                    if (VboStatus.ALL_FAIL.equals(callback.customerCreation.transactionDetail.status)) {
-                        callback.customerCreation.transactionDetail.status = VboStatus.PROVISION_FAIL;
-                    } else {
-                        callback.customerCreation.transactionDetail.status = VboStatus.SUCCESS;
-                    }
-
-                    callback.customerCreation.customerDetail.firstName = admin.getFirstName();
-                    callback.customerCreation.customerDetail.lastName = admin.getLastName();
-                }
-
                 try {
                     timeoutSemaphore.acquire();
                     if (!callback.timeout) {
@@ -422,6 +404,7 @@ public class TenantServiceImpl implements TenantService {
         ProductAndExternalAdminInfo prodAndExternalEmail = new ProductAndExternalAdminInfo();
         List<LatticeProduct> selectedProducts = spaceConfig.getProducts();
         List<String> externalEmailList = null;
+        List<IDaaSUser> usersDnBConnect = null;
         log.info(StringUtils.join(", ", selectedProducts));
         for (SerializableDocumentDirectory configDirectory : configDirectories) {
             if (configDirectory.getRootPath().equals("/PLS")) {
@@ -431,6 +414,10 @@ public class TenantServiceImpl implements TenantService {
                         String externalAminEmailsString = node.getData();
                         log.info(externalAminEmailsString);
                         externalEmailList = EmailUtils.parseEmails(externalAminEmailsString);
+                    } else if (node.getNode().equals("IDaaSUsers")) {
+                        String userListString = node.getData();
+                        log.info(userListString);
+                        usersDnBConnect = Arrays.asList(JsonUtils.deserialize(userListString, IDaaSUser[].class));
                     }
                 }
             }
@@ -445,6 +432,7 @@ public class TenantServiceImpl implements TenantService {
         }
         prodAndExternalEmail.setProducts(selectedProducts);
         prodAndExternalEmail.setExternalEmailMap(externalEmailMap);
+        prodAndExternalEmail.setUsersDnBConnect(usersDnBConnect);
 
         return prodAndExternalEmail;
     }
@@ -848,7 +836,7 @@ public class TenantServiceImpl implements TenantService {
                 vboCallback.customerCreation.transactionDetail.ackRefId = traceId;
                 vboCallback.customerCreation.customerDetail.workspaceCountry = vboRequest.getSubscriber().getCountryCode();
                 vboCallback.customerCreation.customerDetail.subscriberNumber = vboRequest.getSubscriber().getSubscriberNumber();
-                vboCallback.customerCreation.customerDetail.login = userName;
+                vboCallback.customerCreation.customerDetail.login = vboRequest.getProduct().getUsers().stream().findFirst().get().getEmailAddress();
 
                 // callback needs current status if timeout triggered: assume failed unless proven otherwise
                 vboCallback.customerCreation.transactionDetail.status = VboStatus.ALL_FAIL;
@@ -1004,6 +992,7 @@ public class TenantServiceImpl implements TenantService {
     public static class ProductAndExternalAdminInfo {
         public List<LatticeProduct> products;
         public Map<String, Boolean> externalEmailMap;
+        public List<IDaaSUser> usersDnBConnect;
 
         public ProductAndExternalAdminInfo() {
         }
@@ -1022,6 +1011,14 @@ public class TenantServiceImpl implements TenantService {
 
         public void setExternalEmailMap(Map<String, Boolean> externalEmailMap) {
             this.externalEmailMap = externalEmailMap;
+        }
+
+        public List<IDaaSUser> getUsersDnBConnect() {
+            return usersDnBConnect;
+        }
+
+        public void setUsersDnBConnect(List<IDaaSUser> usersDnBConnect) {
+            this.usersDnBConnect = usersDnBConnect;
         }
     }
 
