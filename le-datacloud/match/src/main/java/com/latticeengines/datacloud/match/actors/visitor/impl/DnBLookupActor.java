@@ -13,8 +13,8 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorT
 
 @Component("dnbLookupActor")
 @Scope("prototype")
-public class DnbLookupActor extends DataSourceWrapperActorTemplate {
-    private static final Logger log = LoggerFactory.getLogger(DnbLookupActor.class);
+public class DnBLookupActor extends DataSourceWrapperActorTemplate {
+    private static final Logger log = LoggerFactory.getLogger(DnBLookupActor.class);
 
     @PostConstruct
     public void postConstruct() {

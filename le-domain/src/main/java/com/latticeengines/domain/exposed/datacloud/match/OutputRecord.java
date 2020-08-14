@@ -62,10 +62,10 @@ public class OutputRecord {
     private String domainSource;
 
     @JsonProperty("Output")
-    private List<Object> output;
+    private List<Object> output; // single-result output
 
     @JsonProperty("Candidates")
-    private List<List<Object>> candidateOutput;
+    private List<List<Object>> candidateOutput; // also use as multi-result output
 
     @JsonProperty("MatchLogs")
     private List<String> matchLogs;

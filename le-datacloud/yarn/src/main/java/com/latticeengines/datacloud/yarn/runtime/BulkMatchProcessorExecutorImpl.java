@@ -91,7 +91,11 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             if (context != null) {
                 if (numCols == 0) {
                     try {
-                        numCols = context.getOutput().getResult().get(0).getOutput().size();
+                        if (processorContext.isMultiResultMatch()) {
+                            numCols = context.getOutput().getResult().get(0).getCandidateOutput().size();
+                        } else {
+                            numCols = context.getOutput().getResult().get(0).getOutput().size();
+                        }
                         log.info("Determined number of output columns is " + numCols);
                     } catch (Exception e) {
                         log.warn("Error counting the output size.", e);

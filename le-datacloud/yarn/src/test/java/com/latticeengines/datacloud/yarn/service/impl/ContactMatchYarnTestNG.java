@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.yarn.service.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -29,27 +26,21 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
-import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
+public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PrimeMatchYarnTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ContactMatchYarnTestNG.class);
 
     private static final String avroDir = "/tmp/PrimeMatchYarnTestNG";
     private static final String podId = "PrimeMatchYarnTestNG";
@@ -57,11 +48,8 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     @Inject
     private DataCloudYarnService dataCloudYarnService;
 
-    @Inject
-    private DataCloudVersionEntityMgr versionEntityMgr;
-
-    @Value("${datacloud.match.default.decision.graph.prime}")
-    private String primeMatchDG;
+    @Value("${datacloud.match.default.decision.graph.tps}")
+    private String tpsMatchDG;
 
     @BeforeClass(groups = {"functional", "manual"})
     public void setup() throws Exception {
@@ -72,8 +60,8 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testPrimeMatch() {
-        String fileName = "BulkMatchInput.avro";
+    public void testTpsMatch() {
+        String fileName = "TpsMatchInput.avro";
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
         String avroPath = avroDir + "/" + fileName;
@@ -92,7 +80,10 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         long count = 0L;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Assert.assertNotNull(record.get(InterfaceName.InternalId.name()));
+            System.out.println(record);
+            String recordId = record.get(ContactMasterConstants.TPS_ATTR_RECORD_ID).toString();
+            Assert.assertNotNull(recordId);
+            //FIXME [M39-LiveRamp]: for true data, add more assertion
             count++;
         }
         Assert.assertTrue(count > 0);
@@ -104,36 +95,20 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         return hdfsPathBuilder.constructMatchBlockDir(rootUid, blockUid).toString();
     }
 
-    private String getBlockCandidateOutputDir(DataCloudJobConfiguration jobConfiguration) {
-        String rootUid = jobConfiguration.getRootOperationUid();
-        String blockUid = jobConfiguration.getBlockOperationUid();
-        return hdfsPathBuilder.constructMatchBlockCandidateDir(rootUid, blockUid).toString();
-    }
-
     private DataCloudJobConfiguration jobConfiguration(String avroPath) {
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
-        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
 
         MatchInput matchInput = new MatchInput();
 
         matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
-        matchInput.setCustomSelection(getColumnSelection());
-        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
+        matchInput.setOperationalMode(OperationalMode.CONTACT_MATCH);
+        matchInput.setTargetEntity(ContactMasterConstants.MATCH_ENTITY_TPS);
+
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("SiteDuns"));
         matchInput.setKeyMap(keyMap);
-        matchInput.setSplitsPerBlock(8);
-        matchInput.setDecisionGraph(primeMatchDG);
-        matchInput.setUseDnBCache(false);
-        matchInput.setUseRemoteDnB(true);
-        matchInput.setAllocateId(false);
-        matchInput.setEntityKeyMaps(prepareEntityKeyMap());
-        matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
-        matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
-        DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}.*"))
-                .exclude(OutOfBusiness) //
-                .review(4, 6, Collections.singleton("A.*"));
-        DplusMatchConfig dplusMatchConfig = new DplusMatchConfig(baseRule);
-        matchInput.setDplusMatchConfig(dplusMatchConfig);
-        matchInput.setUseDirectPlus(true);
+        matchInput.setSkipKeyResolution(true);
 
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
@@ -148,39 +123,6 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         jobConfiguration.setMatchInput(matchInput);
 
         return jobConfiguration;
-    }
-
-    private Map<String, MatchInput.EntityKeyMap> prepareEntityKeyMap() {
-        Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
-        // Both Account & Contact match needs Account key map
-        MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
-        keyMap.put(MatchKey.State, Collections.singletonList("State"));
-        keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
-        entityKeyMap.setKeyMap(keyMap);
-        entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
-        return entityKeyMaps;
-    }
-
-    private ColumnSelection getColumnSelection() {
-        List<Column> columns = Stream.of( //
-                "duns_number", //
-                "primaryname", //
-                "tradestylenames_name", //
-                "primaryaddr_street_line1", //
-                "primaryaddr_street_line2", //
-                "primaryaddr_addrlocality_name", //
-                "primaryaddr_addrregion_name", //
-                "primaryaddr_postalcode", //
-                "primaryaddr_country_name", //
-                "telephone_telephonenumber", //
-                "primaryindcode_ussicv4" //
-        ).map(Column::new).collect(Collectors.toList());
-        ColumnSelection cs = new ColumnSelection();
-        cs.setColumns(columns);
-        return cs;
     }
 
 }
