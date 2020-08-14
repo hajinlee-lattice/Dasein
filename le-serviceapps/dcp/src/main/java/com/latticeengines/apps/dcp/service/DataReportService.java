@@ -24,7 +24,7 @@ public interface DataReportService {
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport dataReport);
 
-    void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, boolean readyForRollup);
+    void updateReadyForRollup(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
                       DunsCountCache cache);

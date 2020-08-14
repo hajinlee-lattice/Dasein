@@ -66,10 +66,9 @@ public class DataReportResource {
     @ResponseBody
     @ApiOperation(value = "Update data report")
     public void updateDataReport(@PathVariable String customerSpace, @RequestParam DataReportRecord.Level level,
-                                 @RequestParam String ownerId,
-                                 @RequestParam boolean readyForRollup) {
+                                 @RequestParam String ownerId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataReportService.updateDataReport(customerSpace, level, ownerId, readyForRollup);
+        dataReportService.updateReadyForRollup(customerSpace, level, ownerId);
     }
 
     @PostMapping

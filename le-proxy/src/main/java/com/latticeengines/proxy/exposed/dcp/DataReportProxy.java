@@ -58,11 +58,9 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         return get("Get Data Report", url, DataReport.BasicStats.class);
     }
 
-    public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,
-                                 boolean readyForRollup) {
+    public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
         String baseUrl = "/customerspaces/{customerSpace}/datareport/readyforrollup?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
-        url += "&readyForRollup=" + readyForRollup;
         put("Update Data Report", url);
     }
 

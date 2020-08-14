@@ -76,7 +76,8 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
                 "sourceUID");
         Assert.assertTrue(CollectionUtils.isEmpty(subOwnerIds));
 
-        dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID", Boolean.TRUE);
+        // modify the readyForRollup
+        dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID");
         subOwnerIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Source,
                 "sourceUID");
         Assert.assertTrue(CollectionUtils.isNotEmpty(subOwnerIds));

@@ -185,7 +185,7 @@ public class SourceImportListener extends LEJobListener {
             }
             String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
             // update the report to be ready for rollup
-            reportProxy.updateDataReport(tenantId, DataReportRecord.Level.Upload, uploadId, true);
+            reportProxy.updateDataReport(tenantId, DataReportRecord.Level.Upload, uploadId);
             Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(tenantId, uploadId);
             DataReport report = reportProxy.getDataReport(tenantId, DataReportRecord.Level.Tenant, rootId);
             long refreshTime = report.getRefreshTimestamp() == null ? 0L : report.getRefreshTimestamp();

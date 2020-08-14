@@ -118,7 +118,7 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Set<String> getChildrenIds(DataReportRecord.Level level, String ownerId, Boolean readyForRollup) {
+    public Set<String> findChildrenIds(DataReportRecord.Level level, String ownerId, boolean readyForRollup) {
         return getReadOrWriteRepository().findChildrenIdsByParentLevelAndOwnerId(level, ownerId, readyForRollup);
     }
 
@@ -136,14 +136,14 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
-    public void updateDataReportRecord(Long pid, boolean readyForRollup) {
-        dataReportWriterRepository.updateDataReport(pid, new Date(), readyForRollup);
+    public void updateReadyForRollup(Long pid) {
+        dataReportWriterRepository.updateReadyForRollup(pid, new Date());
     }
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
-    public void updateDataReportRecordIfNotReady(Long pid, boolean readyForRollup) {
-        dataReportWriterRepository.updateDataReportIfNotReady(pid, new Date(), readyForRollup);
+    public void updateReadyForRollupIfNotReady(Long pid) {
+        dataReportWriterRepository.updateReadyForRollupIfNotReady(pid, new Date());
     }
 
     @Override
