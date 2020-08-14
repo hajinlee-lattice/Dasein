@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -370,6 +371,13 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.setRematchMode(fullRematch);
             convertBatchStoreToDataTableWorkflowBuilder.setRematchMode(fullRematch);
             matchEntityWorkflowBuilder.setRematchMode(fullRematch);
+            return this;
+        }
+
+        public Builder entityMatchConfiguration(EntityMatchConfiguration configuration) {
+            processStepConfiguration.setEntityMatchConfiguration(configuration);
+            processActivityStreamWorkflowBuilder.entityMatchConfiguration(configuration);
+            matchEntityWorkflowBuilder.entityMatchConfiguration(configuration);
             return this;
         }
 
