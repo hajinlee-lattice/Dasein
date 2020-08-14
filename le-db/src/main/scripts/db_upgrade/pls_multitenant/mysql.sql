@@ -99,6 +99,10 @@ CREATE PROCEDURE `UpdateSchema`()
         CHANGE COLUMN `FK_IMPORT_SYSTEM_ID` `FK_IMPORT_SYSTEM_ID` BIGINT(20) NULL,
         DROP INDEX `FK_DCPPROJECT_FKIMPORTSYSTEMID_ATLASS3IMPORTSYSTEM`;
 
+
+     Alter table `PLS_MultiTenant`.`DCP_DATA_REPORT` 
+     Add column `READY_FOR_ROLLUP` bit;
+
   END //
 -- ##############################################################
 
