@@ -109,12 +109,12 @@ public class ProjectServiceImpl implements ProjectService {
             PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
             List<ProjectInfo> projectInfoList = new ArrayList<>();
             if (teamIds == null){
-                projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+                projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest, includeArchived);
             } else {
                 if (teamIds.isEmpty()) {
                     teamIds.add("");
                 }
-                projectInfoList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, teamIds);
+                projectInfoList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, teamIds, includeArchived);
             }
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in page.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
