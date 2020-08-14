@@ -122,12 +122,30 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getSourcesBySystemPid(customerSpace, systemPid, pageIndex, pageSize);
     }
 
+    @GetMapping("/projectId/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "Get Source list by projectId")
+    public List<SourceInfo> getSourcesByProjectId(@PathVariable String customerSpace, @PathVariable String projectId,
+                                                  @RequestParam(defaultValue = "0") int pageIndex,
+                                                  @RequestParam(defaultValue = "20") int pageSize) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getSourcesByProjectId(customerSpace, projectId, pageIndex, pageSize);
+    }
+
     @GetMapping("/count/systemPid/{systemPid}")
     @ResponseBody
     @ApiOperation(value = "Get total Source count by system pid")
     public Long countSourcesBySystemPid(@PathVariable String customerSpace, @PathVariable Long systemPid) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.countSourcesBySystemPid(customerSpace, systemPid);
+    }
+
+    @GetMapping("/count/projectId/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "Get total Source count by projectId")
+    public Long countSourcesByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.countSourcesByProjectId(customerSpace, projectId);
     }
 
     @GetMapping("/{entity}/list")

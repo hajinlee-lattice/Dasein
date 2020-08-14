@@ -16,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,7 +27,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.pls.SoftDeletable;
@@ -54,12 +52,6 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tenant")
     private Tenant tenant;
-
-    @JsonProperty("import_system")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "`FK_IMPORT_SYSTEM_ID`", nullable = false)
-    private S3ImportSystem importSystem;
 
     @Column(name = "PROJECT_ID", nullable = false)
     @JsonProperty("project_id")
@@ -127,14 +119,6 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-    }
-
-    public S3ImportSystem getS3ImportSystem() {
-        return importSystem;
-    }
-
-    public void setS3ImportSystem(S3ImportSystem importSystem) {
-        this.importSystem = importSystem;
     }
 
     public String getProjectId() {
