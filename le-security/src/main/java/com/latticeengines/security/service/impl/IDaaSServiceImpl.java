@@ -39,6 +39,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -49,7 +50,6 @@ import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.util.LoginUtils;
-import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 
 @Service("iDaasService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
