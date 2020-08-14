@@ -1,0 +1,13 @@
+[
+   {
+      "attrName":"DUNS",
+      "displayName":"Duns number",
+      "entity":"Account",
+      "javaClass":"Long",
+      "externalSystemName":"MediaMath",
+      "standardField":true,
+      "exportEnabled":true,
+      "historyEnabled":true,
+      "audienceType": ["ACCOUNTS"]
+   }
+]
