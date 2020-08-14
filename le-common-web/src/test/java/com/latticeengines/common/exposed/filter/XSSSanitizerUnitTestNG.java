@@ -32,4 +32,13 @@ public class XSSSanitizerUnitTestNG {
         String result = sanitizer.Sanitize("Test<script>alert('attack!!!')</script>");
         Assert.assertEquals(result, "Test");
     }
+
+    @Test(groups = "unit")
+    public void testSanitize2() throws Exception {
+        String antiSamyPath = XSSSanitizerUnitTestNG.class.getClassLoader()
+                .getResource( "antisamy-policy.xml").getFile();
+        XSSSanitizer sanitizer = new XSSSanitizer(antiSamyPath);
+        String result = sanitizer.Sanitize("Test<javascript>alert('attack!!!')</javascript>");
+        Assert.assertEquals(result, "Testalert('attack!!!')");
+    }
 }
