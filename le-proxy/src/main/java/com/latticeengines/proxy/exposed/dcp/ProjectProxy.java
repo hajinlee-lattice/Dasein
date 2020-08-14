@@ -51,12 +51,12 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         return responseDoc.getResult();
     }
 
-    public List<ProjectSummary> getAllDCPProject(String customerSpace, Boolean includeSources, int pageIndex,
+    public List<ProjectSummary> getAllDCPProject(String customerSpace, Boolean includeSources, Boolean includeArchived, int pageIndex,
                                                  int pageSize, List<String> teamIds) {
         String url = "/customerspaces/{customerSpace}/project/list?includeSources={includeSources}" +
-                "&pageIndex={pageIndex}&pageSize={pageSize}";
+                "&pageIndex={pageIndex}&pageSize={pageSize}&includeArchived={includeArchived}";
         url = constructUrl(url, customerSpace, includeSources.toString(), Integer.toString(pageIndex),
-                Integer.toString(pageSize));
+                Integer.toString(pageSize), includeArchived.toString());
         List<?> results = post("get all dcp project", url, teamIds, List.class);
         return JsonUtils.convertList(results, ProjectSummary.class);
     }

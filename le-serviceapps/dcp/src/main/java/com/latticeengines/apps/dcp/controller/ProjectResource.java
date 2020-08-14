@@ -65,8 +65,9 @@ public class ProjectResource {
                                               @RequestParam(defaultValue = "false") Boolean includeSources,
                                               @RequestParam(defaultValue = "0") int pageIndex,
                                               @RequestParam(defaultValue = "20") int pageSize,
+                                              @RequestParam(defaultValue = "false") Boolean includeArchived,
                                               @RequestBody(required = false) List<String> teamIds) {
-        return projectService.getAllProject(customerSpace, includeSources, pageIndex, pageSize, teamIds);
+        return projectService.getAllProject(customerSpace, includeSources, includeArchived, pageIndex, pageSize, teamIds);
     }
 
     @GetMapping("/count")

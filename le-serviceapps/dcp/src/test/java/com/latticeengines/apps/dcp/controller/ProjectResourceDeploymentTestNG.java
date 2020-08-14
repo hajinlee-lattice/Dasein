@@ -54,7 +54,10 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectId("getalltest2");
         projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
 
-        List<ProjectSummary> result = projectProxy.getAllDCPProject(mainTestTenant.getId(), Boolean.FALSE, 0, 20, null);
+        final Boolean includeSources = Boolean.FALSE;
+        final Boolean includeArchived = Boolean.FALSE;
+        List<ProjectSummary> result = projectProxy.getAllDCPProject(mainTestTenant.getId(), includeSources,
+                includeArchived, 0, 20, null);
 
         assertNotNull(result);
         Set<String> projectIds = new HashSet<>(Arrays.asList("getalltest1", "getalltest2"));

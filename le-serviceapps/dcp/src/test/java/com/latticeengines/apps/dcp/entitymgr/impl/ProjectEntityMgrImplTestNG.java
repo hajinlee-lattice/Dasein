@@ -48,7 +48,7 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         do {
             Sort sort = Sort.by(Sort.Direction.DESC, "updated");
             PageRequest pageRequest = PageRequest.of(pageIndex, pageSize, sort);
-            projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+            projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest, Boolean.FALSE);
             if (pageIndex < 6) {
                 Assert.assertEquals(projectInfoList.size(), pageSize);
             } else {
@@ -60,7 +60,7 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "pid");
         PageRequest pageRequest = PageRequest.of(pageIndex, pageSize, sort);
-        projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest);
+        projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest, Boolean.FALSE);
         Assert.assertEquals(CollectionUtils.size(projectInfoList), 0);
 
         long allProjectsCount = projectEntityMgr.countAllProjects();
