@@ -2,9 +2,12 @@ package com.latticeengines.aws.dynamo;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.classify.Classifier;
 import org.springframework.retry.RetryPolicy;
@@ -12,6 +15,7 @@ import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
 
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
+import com.amazonaws.services.dynamodbv2.model.CancellationReason;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.InternalServerErrorException;
 import com.amazonaws.services.dynamodbv2.model.ItemCollectionSizeLimitExceededException;
@@ -33,6 +37,7 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
 
     private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
     private static final Set<String> THROTTLING_ERROR_CODES = new HashSet<>();
+    private static final Set<String> TXN_CONFLICT_ERROR_CODES = new HashSet<>();
     private static final Map<String, Boolean> RETRY_ERROR_CODES = new HashMap<>();
 
     private static final RetryPolicy NEVER_RETRY = new NeverRetryPolicy();
@@ -62,6 +67,10 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
         THROTTLING_ERROR_CODES.add("ProvisionedThroughputExceeded"); // the one in their comment
         THROTTLING_ERROR_CODES.add("ProvisionedThroughputExceededException"); // real one
         THROTTLING_ERROR_CODES.forEach(code -> RETRY_ERROR_CODES.put(code, true));
+
+        // multiple txn working on the same item
+        TXN_CONFLICT_ERROR_CODES.add("TransactionConflict");
+        TXN_CONFLICT_ERROR_CODES.add("Transaction Conflict");
     }
 
     private final RetryPolicy policy;
@@ -71,6 +80,20 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
         Preconditions.checkNotNull(policy);
         this.policy = policy;
         classifier = (exception) -> {
+            if (exception instanceof TransactionCanceledException) {
+                TransactionCanceledException canceledException = (TransactionCanceledException) exception;
+                List<CancellationReason> reasons = canceledException.getCancellationReasons();
+                if (CollectionUtils.isNotEmpty(reasons)) {
+                    // every canceled reason is txn conflict, shouldn't retry if there's
+                    boolean allConflictError = reasons.stream() //
+                            .filter(r -> r != null && !"None".equalsIgnoreCase(r.getCode())
+                                    && StringUtils.isNotBlank(r.getCode())) //
+                            .map(CancellationReason::getCode) //
+                            .allMatch(TXN_CONFLICT_ERROR_CODES::contains);
+                    return allConflictError ? policy : NEVER_RETRY;
+                }
+            }
+
             // try exception class first
             RetryPolicy resultPolicy = checkRetryExceptionMap(exception);
             if (resultPolicy != null) {

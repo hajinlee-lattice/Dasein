@@ -34,7 +34,14 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
             CDLExternalSystemName.AWS_S3,
             CDLExternalSystemName.LinkedIn,
             CDLExternalSystemName.Facebook,
-            CDLExternalSystemName.Outreach, CDLExternalSystemName.GoogleAds);
+            CDLExternalSystemName.Outreach, 
+            CDLExternalSystemName.GoogleAds, 
+            CDLExternalSystemName.Adobe_Audience_Mgr,
+            CDLExternalSystemName.AppNexus, 
+            CDLExternalSystemName.Google_Display_N_Video_360,
+            CDLExternalSystemName.MediaMath, 
+            CDLExternalSystemName.TradeDesk, 
+            CDLExternalSystemName.Verizon_Media);
 
     private Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFieldsFromJsonMap;
 

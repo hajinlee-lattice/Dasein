@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -60,6 +61,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     private boolean skipPublishToS3;
 
     private boolean targetScoreDerivationEnabled;
+
+    @JsonProperty("entity_match_configuration")
+    private EntityMatchConfiguration entityMatchConfiguration;
 
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
@@ -198,5 +202,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setSkipPublishToS3(boolean skipPublishToS3) {
         this.skipPublishToS3 = skipPublishToS3;
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration() {
+        return entityMatchConfiguration;
+    }
+
+    public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
+        this.entityMatchConfiguration = entityMatchConfiguration;
     }
 }

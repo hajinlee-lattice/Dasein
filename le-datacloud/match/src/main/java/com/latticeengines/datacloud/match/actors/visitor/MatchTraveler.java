@@ -97,6 +97,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Entity -> (Entity Match Lookup Type -> List of MatchKeyTuples)
     private Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityExistingLookupEntryMap = new HashMap<>();
 
+    private List<String> criticalEntityMatchErrors;
+
     private Set<String> fieldsToClear = new HashSet<>();
 
     // multiple DnB match candidates, only used in PRIME_MATCH mode for now
@@ -494,4 +496,18 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         logTravelErrors(entityMatchErrors);
     }
 
+    public List<String> getCriticalEntityMatchErrors() {
+        return criticalEntityMatchErrors;
+    }
+
+    public void setCriticalEntityMatchErrors(List<String> criticalEntityMatchErrors) {
+        this.criticalEntityMatchErrors = criticalEntityMatchErrors;
+    }
+
+    public void addCriticalEntityMatchError(String errorMsg) {
+        if (criticalEntityMatchErrors == null) {
+            criticalEntityMatchErrors = new ArrayList<>();
+        }
+        criticalEntityMatchErrors.add(errorMsg);
+    }
 }

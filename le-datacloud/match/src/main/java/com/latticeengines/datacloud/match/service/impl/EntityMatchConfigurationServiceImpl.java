@@ -37,22 +37,22 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private static final long DEFAULT_MAX_WAIT_TIME = 30000L; // 30s
 
     @Value("${datacloud.match.entity.staging.shards:5}")
-    private int numStagingShards;
+    private volatile int numStagingShards;
     @Value("${datacloud.match.entity.staging.table}")
-    private String stagingTableName;
+    private volatile String stagingTableName;
     @Value("${datacloud.match.entity.serving.table}")
-    private String servingTableName;
+    private volatile String servingTableName;
     @Value("${datacloud.match.entity.staging.ttl:2629746}")
-    private long stagingTTLInSeconds; // expire 1 month
+    private volatile long stagingTTLInSeconds; // expire 1 month
     /*
      * TODO tune these for staging/serving environment separately
      */
     @Value("${proxy.retry.initialwaitmsec:500}")
-    private long initialWaitMsec;
+    private volatile long initialWaitMsec;
     @Value("${proxy.retry.multiplier:2}")
-    private double multiplier;
+    private volatile double multiplier;
     @Value("${proxy.retry.maxattempts:5}")
-    private int maxAttempts;
+    private volatile int maxAttempts;
     private volatile RetryTemplate retryTemplate;
     private volatile boolean isAllocateMode = false;
 
@@ -78,6 +78,12 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
         Preconditions.checkArgument(EntityMatchEnvironment.STAGING.equals(environment));
         // currently only staging environment needs sharding
         return numStagingShards;
+    }
+
+    @Override
+    public void setNumShards(@NotNull EntityMatchEnvironment environment, int numShards) {
+        Preconditions.checkArgument(EntityMatchEnvironment.STAGING.equals(environment));
+        numStagingShards = numShards;
     }
 
     @Override
@@ -143,11 +149,6 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     @Override
     public boolean isAllocateMode() {
         return isAllocateMode;
-    }
-
-    @VisibleForTesting
-    public void setNumStagingShards(int numStagingShards) {
-        this.numStagingShards = numStagingShards;
     }
 
     @VisibleForTesting

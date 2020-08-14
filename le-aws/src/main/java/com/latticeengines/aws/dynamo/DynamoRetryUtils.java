@@ -2,6 +2,7 @@ package com.latticeengines.aws.dynamo;
 
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -21,7 +22,7 @@ public final class DynamoRetryUtils {
     public static RetryTemplate getExponentialBackOffTemplate(int maxAttempts, long initialWaitMsec, long maxWaitMSec,
             double multiplier) {
         RetryTemplate template = getSimpleRetryTemplate(maxAttempts);
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        ExponentialBackOffPolicy backOffPolicy = new ExponentialRandomBackOffPolicy();
         // set backoff parameters
         backOffPolicy.setInitialInterval(initialWaitMsec);
         backOffPolicy.setMultiplier(multiplier);

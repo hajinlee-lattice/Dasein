@@ -89,16 +89,15 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.service.impl.IDaaSUser;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;

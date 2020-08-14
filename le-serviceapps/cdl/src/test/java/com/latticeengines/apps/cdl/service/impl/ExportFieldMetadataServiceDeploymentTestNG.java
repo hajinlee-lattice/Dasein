@@ -187,7 +187,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 3);
+        assertEquals(columnMetadata.size(), 4);
 
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFieldsCount, 0);
@@ -239,7 +239,8 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
     public void testS3WithExportAttributes() {
-        registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_3");
+        registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_3", null, null,
+                InterfaceName.ContactId.name());
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
         channelConfig.setIncludeExportAttributes(true);
@@ -339,7 +340,8 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     @Test(groups = "deployment-app", dependsOnMethods = "testFacebookLaunch")
     public void testEloquaLaunch() {
-        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Eloqua, "Eloqua");
+        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Eloqua, "Eloqua", null, null,
+                InterfaceName.ContactId.name());
 
         createPlayLaunchChannel(new EloquaChannelConfig(), lookupIdMap);
 
@@ -401,6 +403,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
         lookupIdMap.setOrgId(org1);
         lookupIdMap.setOrgName("org1name");
+        lookupIdMap.setContactId(InterfaceName.ContactId.name());
 
         ExportFieldMetadataMapping fieldMapping_1 = new ExportFieldMetadataMapping();
         fieldMapping_1.setSourceField(InterfaceName.CompanyName.name());
@@ -453,7 +456,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     }
 
     private void registerLookupIdMap(CDLExternalSystemType systemType, CDLExternalSystemName systemName, String orgName,
-            String accountId, String prospectOwner) {
+            String accountId, String prospectOwner, String contactId) {
         lookupIdMap = new LookupIdMap();
         lookupIdMap.setTenant(mainTestTenant);
         lookupIdMap.setExternalSystemType(systemType);
@@ -462,6 +465,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setOrgName(orgName);
         lookupIdMap.setAccountId(accountId);
         lookupIdMap.setProspectOwner(prospectOwner);
+        lookupIdMap.setContactId(contactId);
 
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
     }

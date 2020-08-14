@@ -166,6 +166,13 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
                 dumpEntityMatchErrors(matchRecord, traveler);
+
+                if (CollectionUtils.isNotEmpty(traveler.getCriticalEntityMatchErrors())) {
+                    log.error("Found critical errors = {}, failing match block",
+                            StringUtils.join(traveler.getCriticalEntityMatchErrors()));
+                    // only throw with the first one
+                    throw new IllegalStateException(traveler.getCriticalEntityMatchErrors().get(0));
+                }
             }
         }
 

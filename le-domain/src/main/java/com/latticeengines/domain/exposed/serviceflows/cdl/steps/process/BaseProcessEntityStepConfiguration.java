@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 
@@ -42,6 +43,9 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     @JsonProperty("default_system_ids")
     private Map<String, String> defaultSystemIdMap; // entity -> ID that mapped to lattice ID
+
+    @JsonProperty("entity_match_configuration")
+    private EntityMatchConfiguration entityMatchConfiguration;
 
     public abstract BusinessEntity getMainEntity();
 
@@ -83,5 +87,13 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration() {
+        return entityMatchConfiguration;
+    }
+
+    public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
+        this.entityMatchConfiguration = entityMatchConfiguration;
     }
 }
