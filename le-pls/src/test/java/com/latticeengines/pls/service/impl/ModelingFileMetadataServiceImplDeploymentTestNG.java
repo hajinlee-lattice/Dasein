@@ -175,7 +175,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         List<FieldValidation> errorValidations =
                 validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 2);
+        Assert.assertEquals(errorValidations.size(), 0);
 
         try {
             modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
