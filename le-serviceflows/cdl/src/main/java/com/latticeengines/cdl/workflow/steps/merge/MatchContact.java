@@ -179,6 +179,11 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
             setRematchVersions(matchInput);
         }
+        if (configuration.getEntityMatchConfiguration() != null) {
+            int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
+            log.info("set number of staging shards for match to {}", numStagingShards);
+            matchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
+        }
         log.info("Ignore domain match keys for account in contact = {}", ignoreDomainMatchKeyInContact);
         if (configuration.isEntityMatchGAOnly()) {
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput, columnNames,

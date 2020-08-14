@@ -37,7 +37,7 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
     public Set<String> getChildrenIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
         String baseUrl = "/customerspaces/{customerSpace}/datareport/childrenids?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
-        return getSet("Get sub owner ids", url, String.class);
+        return getSet("Get children's owner ids", url, String.class);
     }
 
     public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {
@@ -56,6 +56,12 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         String baseUrl = "/customerspaces/{customerSpace}/datareport/basicstats?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
         return get("Get Data Report", url, DataReport.BasicStats.class);
+    }
+
+    public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/readyforrollup?level={level}";
+        String url = getUrl(customerSpace, level, ownerId, baseUrl);
+        put("Update Data Report", url);
     }
 
     public void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId,

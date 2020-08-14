@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 public interface UserService {
 
@@ -73,6 +74,6 @@ public interface UserService {
 
     List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam);
 
-    void createDCPIDaaSUser(String email);
+    IDaaSUser createIDaaSUser(User user);
 
 }

@@ -24,11 +24,23 @@ public interface EntityMatchConfigurationService {
     /**
      * Retrieve the number of shards for a given environment
      *
-     * @param environment target environment
-     * @return number of shrads for given environment, will be a positive number
-     * @throws UnsupportedOperationException if sharding is not supported for this environment
+     * @param environment
+     *            target environment
+     * @return number of shards for given environment, will be a positive number
+     * @throws UnsupportedOperationException
+     *             if sharding is not supported for this environment
      */
     int getNumShards(@NotNull EntityMatchEnvironment environment);
+
+    /**
+     * Overwrite number of shards for given environment
+     *
+     * @param environment
+     *            target environment
+     * @param numShards
+     *            value to overwrite
+     */
+    void setNumShards(@NotNull EntityMatchEnvironment environment, int numShards);
 
     /**
      * Get the expired timestamp, starting from current time.

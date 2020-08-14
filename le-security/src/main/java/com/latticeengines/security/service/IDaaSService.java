@@ -1,6 +1,7 @@
 package com.latticeengines.security.service;
 
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -21,4 +22,5 @@ public interface IDaaSService {
 
     IDaaSResponse addRoleToUser(RoleRequest request);
 
+    InvitationLinkResponse getUserInvitationLink(String email);
 }

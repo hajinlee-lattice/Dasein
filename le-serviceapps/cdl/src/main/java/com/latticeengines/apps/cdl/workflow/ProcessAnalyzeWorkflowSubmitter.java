@@ -820,6 +820,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .entityMatchGAOnly(entityMatchGAOnly) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
+                .entityMatchConfiguration(request.getEntityMatchConfiguration()) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
                 .fullProfile(Boolean.TRUE.equals(request.getFullProfile())) //
                 .skipEntities(request.getSkipEntities()) //

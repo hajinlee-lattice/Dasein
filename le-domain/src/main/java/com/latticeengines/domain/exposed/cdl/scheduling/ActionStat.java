@@ -18,6 +18,10 @@ public class ActionStat {
 
     private final Date firstIngestActionTime;
 
+    public ActionStat(Long tenantPid, Date firstActionTime, Date lastActionTime) {
+        this(tenantPid, firstActionTime, lastActionTime, null);
+    }
+
     public ActionStat(Long tenantPid, Date firstActionTime, Date lastActionTime, Date firstIngestActionTime) {
         this.tenantPid = tenantPid;
         this.firstActionTime = firstActionTime;

@@ -39,6 +39,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -262,6 +263,11 @@ public class IDaaSServiceImpl implements IDaaSService {
             } catch (Exception e) {
                 log.warn("Failed to create user detail in IDaaS for {}", email, e);
             }
+            // get invitation link for user if new user was created successfully
+            if (returnedUser != null) {
+                InvitationLinkResponse invitationLinkResponse = getUserInvitationLink(returnedUser.getEmailAddress());
+                returnedUser.setInvitationLink(invitationLinkResponse.getInviteLink());
+            }
             return returnedUser;
         } else {
             return user;
@@ -336,6 +342,32 @@ public class IDaaSServiceImpl implements IDaaSService {
         }
     }
 
+    @Override
+    public InvitationLinkResponse getUserInvitationLink(String email) {
+        if (enabled) {
+            InvitationLinkResponse response = null;
+            try {
+                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+                response = retryTemplate.execute(ctx -> {
+                    try (PerformanceTimer timer = new PerformanceTimer("get user invitation link")) {
+                        URI invitationLinkURI = createInvitationLink(email, DCP_PRODUCT);
+                        ResponseEntity<InvitationLinkResponse> responseEntity = restTemplate.exchange(invitationLinkURI,
+                                HttpMethod.GET, null, InvitationLinkResponse.class);
+                        return responseEntity.getBody();
+                    } catch (Exception e) {
+                        log.warn("Failed to execute invitation link api", e);
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                log.warn("Failed to get invitation link", e);
+            }
+            return response;
+        } else {
+            return new InvitationLinkResponse();
+        }
+    }
+
     private boolean hasAccessToApp(IDaaSUser user) {
         return user.getApplications().contains(DCP_PRODUCT) || user.getRoles().contains(DCP_ROLE);
     }
@@ -406,6 +438,10 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private URI addRoleUri(String email) {
         return URI.create(apiUrl + String.format("/user/%s/role", email));
+    }
+
+    private URI createInvitationLink(String email, String source) {
+        return URI.create(apiUrl + "/user/" + email + "/" + source + "/invitation");
     }
 
 }

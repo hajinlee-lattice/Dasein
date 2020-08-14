@@ -21,7 +21,7 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
     Map<String, DataReport.BasicStats> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel,
                                                                              String parentOwnerId);
 
-    Set<String> getChildrenIds(DataReportRecord.Level level, String ownerId);
+    Set<String> findChildrenIds(DataReportRecord.Level level, String ownerId, boolean readyForRollup);
 
     List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
 
@@ -32,6 +32,10 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
     Long findDataReportPid(DataReportRecord.Level level, String ownerId);
 
     Long findParentId(Long pid);
+
+    void updateReadyForRollup(Long pid);
+
+    void updateReadyForRollupIfNotReady(Long pid);
 
     void uploadDataReportRecord(Long pid, Table dunsCountTable, Date snapshotTime);
 

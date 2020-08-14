@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
@@ -105,6 +106,15 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
 
         public Builder setRematchMode(boolean isRematchMode) {
             processActivityStreamStepConfiguration.setRematchMode(isRematchMode);
+            return this;
+        }
+
+        public Builder entityMatchConfiguration(EntityMatchConfiguration configuration) {
+            processStepConfiguration.setEntityMatchConfiguration(configuration);
+            processActivityStreamStepConfiguration.setEntityMatchConfiguration(configuration);
+            processAccountStepConfiguration.setEntityMatchConfiguration(configuration);
+            processContactStepConfiguration.setEntityMatchConfiguration(configuration);
+            processTxnStepConfiguration.setEntityMatchConfiguration(configuration);
             return this;
         }
 
