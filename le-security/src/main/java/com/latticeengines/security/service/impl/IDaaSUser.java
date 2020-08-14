@@ -62,6 +62,9 @@ public class IDaaSUser {
     @JsonProperty("phone_number")
     private String phoneNumber;
 
+    @JsonProperty("invitation_link")
+    private String invitationLink;
+  
     @JsonProperty("subscriber_number")
     private String subscriberNumber;
 
@@ -182,6 +185,10 @@ public class IDaaSUser {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    public String getInvitationLink() { return invitationLink; }
+
+    public void setInvitationLink(String invitationLink) { this.invitationLink = invitationLink; }
 
     public String getSubscriberNumber() {
         return subscriberNumber;

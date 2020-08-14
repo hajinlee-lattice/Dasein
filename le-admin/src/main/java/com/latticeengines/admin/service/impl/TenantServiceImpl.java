@@ -96,6 +96,9 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.monitor.exposed.service.EmailService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -143,8 +146,17 @@ public class TenantServiceImpl implements TenantService {
     @Inject
     private FeatureFlagService featureFlagService;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private EmailService emailService;
+
     @Value("${common.pls.url}")
     private String plsEndHost;
+
+    @Value("${security.dcp.public.url}")
+    private String dcpPublicUrl;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
