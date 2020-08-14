@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,6 +53,9 @@ public class TenantActivity {
 
     @JsonProperty("timezone")
     private ZoneId timezone;
+
+    @JsonProperty("total_pa_quota")
+    private Map<String, Long> totalPaQuota;
 
     @JsonProperty("not_exceeded_quota_names")
     private Set<String> notExceededQuotaNames;
@@ -184,6 +188,14 @@ public class TenantActivity {
         this.notExceededQuotaNames = notExceededQuotaNames;
     }
 
+    public Map<String, Long> getTotalPaQuota() {
+        return totalPaQuota;
+    }
+
+    public void setTotalPaQuota(Map<String, Long> totalPaQuota) {
+        this.totalPaQuota = totalPaQuota;
+    }
+
     public static final class Builder {
         private TenantActivity tenantActivity;
 
@@ -237,6 +249,11 @@ public class TenantActivity {
 
         public Builder withNotExceededQuotaNames(Set<String> notExceededQuotaNames) {
             tenantActivity.setNotExceededQuotaNames(notExceededQuotaNames);
+            return this;
+        }
+
+        public Builder withTotalPaQuota(Map<String, Long> totalPaQuota) {
+            tenantActivity.setTotalPaQuota(totalPaQuota);
             return this;
         }
 

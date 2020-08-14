@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.AutoScheduleSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.DataCloudRefreshSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.RetrySchedulingPAObject;
@@ -17,9 +22,9 @@ import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.security.TenantType;
 
-public final class SchedulingPAUtil {
+public final class SchedulingPAUtils {
 
-    protected SchedulingPAUtil() {
+    protected SchedulingPAUtils() {
         throw new UnsupportedOperationException();
     }
 
@@ -42,9 +47,58 @@ public final class SchedulingPAUtil {
         }
 
         return objs.stream() //
-                .map(SchedulingPAUtil::getTenantId) //
+                .map(SchedulingPAUtils::getTenantId) //
                 .filter(Objects::nonNull) //
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Calculate peace period that will stop auto scheduling PAs.
+     *
+     * @param now
+     *            current time
+     * @param timezone
+     *            current timezone
+     * @param autoScheduleQuota
+     *            total quota for auto schedule PA
+     * @return [ start time, end time ] of peace period, {@code null} if no such
+     *         period
+     */
+    public static Pair<Instant, Instant> calculatePeacePeriod(@NotNull Instant now, @NotNull ZoneId timezone,
+            long autoScheduleQuota) {
+        Instant midnight = now.atZone(timezone).truncatedTo(ChronoUnit.DAYS).toInstant();
+        // peace period always start at 6AM
+        Instant startTime = midnight.plus(6L, ChronoUnit.HOURS);
+        // max 12, decrease by 4 for extra quota more than 1
+        long peacePeriodDurationInHr = 12L - Math.max(0, (autoScheduleQuota - 1)) * 4;
+        if (peacePeriodDurationInHr <= 0) {
+            return null;
+        }
+        Instant endTime = startTime.plus(peacePeriodDurationInHr, ChronoUnit.HOURS);
+        return Pair.of(startTime, endTime);
+    }
+
+    /**
+     * Determine whether current time is in peace period (stop auto schedule PA)
+     * right now
+     *
+     * @param now
+     *            current time
+     * @param timezone
+     *            current timezone
+     * @param autoScheduleQuota
+     *            total quota for auto schedule PA
+     * @return true if in peace period
+     */
+    public static boolean isInPeacePeriod(@NotNull Instant now, @NotNull ZoneId timezone, long autoScheduleQuota) {
+        Pair<Instant, Instant> peacePeriod = calculatePeacePeriod(now, timezone, autoScheduleQuota);
+        if (peacePeriod == null) {
+            // no peace period
+            return false;
+        }
+
+        // [period start time, period end time]: both end inclusive
+        return !(now.isBefore(peacePeriod.getLeft()) || now.isAfter(peacePeriod.getRight()));
     }
 
     public static List<SchedulingPAQueue> initQueue(SimulationContext simulationContext) {

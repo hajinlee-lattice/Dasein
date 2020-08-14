@@ -28,6 +28,9 @@ public class PAQuotaSummary {
     @JsonProperty("quota_reset_time")
     private QuotaResetTime quotaResetTime;
 
+    @JsonProperty("peace_period")
+    private PeacePeriodSummary peacePeriodSummary;
+
     @JsonProperty("recently_completed_pas")
     private List<PASummary> recentlyCompletedPAs;
 
@@ -70,6 +73,14 @@ public class PAQuotaSummary {
 
     public void setQuotaResetTime(QuotaResetTime quotaResetTime) {
         this.quotaResetTime = quotaResetTime;
+    }
+
+    public PeacePeriodSummary getPeacePeriodSummary() {
+        return peacePeriodSummary;
+    }
+
+    public void setPeacePeriodSummary(PeacePeriodSummary peacePeriodSummary) {
+        this.peacePeriodSummary = peacePeriodSummary;
     }
 
     public List<PASummary> getRecentlyCompletedPAs() {
@@ -167,6 +178,59 @@ public class PAQuotaSummary {
 
         public void setResetAt(Instant resetAt) {
             this.resetAt = resetAt;
+        }
+    }
+
+    /*-
+     * info about auto schedule PA's peace period
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class PeacePeriodSummary {
+
+        @JsonProperty("in_peace_period")
+        private boolean isInPeacePeriod;
+
+        @JsonProperty("remaining_duration")
+        private String remainingDuration;
+
+        @JsonProperty("start_at")
+        private Instant startAt;
+
+        @JsonProperty("end_at")
+        private Instant endAt;
+
+        @JsonIgnore
+        public boolean isInPeacePeriod() {
+            return isInPeacePeriod;
+        }
+
+        public void setInPeacePeriod(boolean inPeacePeriod) {
+            isInPeacePeriod = inPeacePeriod;
+        }
+
+        public String getRemainingDuration() {
+            return remainingDuration;
+        }
+
+        public void setRemainingDuration(String remainingDuration) {
+            this.remainingDuration = remainingDuration;
+        }
+
+        public Instant getStartAt() {
+            return startAt;
+        }
+
+        public void setStartAt(Instant startAt) {
+            this.startAt = startAt;
+        }
+
+        public Instant getEndAt() {
+            return endAt;
+        }
+
+        public void setEndAt(Instant endAt) {
+            this.endAt = endAt;
         }
     }
 

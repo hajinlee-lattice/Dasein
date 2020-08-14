@@ -68,7 +68,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.PASchedulerConfig;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
@@ -304,6 +304,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setNotExceededQuotaNames(
                         getNotExceededQuotaNames(recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)),
                                 tenantId, timezone));
+                tenantActivity.setTotalPaQuota(paQuotaService.getTenantPaQuota(tenantId));
 
                 // auto scheduling
                 if (actionStats.containsKey(tenant.getPid())) {
@@ -396,7 +397,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private List<SchedulingPAQueue> initQueue(SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
-        return SchedulingPAUtil.initQueue(schedulingPATimeClock, systemStatus, tenantActivityList);
+        return SchedulingPAUtils.initQueue(schedulingPATimeClock, systemStatus, tenantActivityList);
     }
 
     @Override
