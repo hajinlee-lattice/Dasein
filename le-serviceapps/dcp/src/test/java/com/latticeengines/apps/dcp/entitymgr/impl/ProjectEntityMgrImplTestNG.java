@@ -48,7 +48,7 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         do {
             Sort sort = Sort.by(Sort.Direction.DESC, "updated");
             PageRequest pageRequest = PageRequest.of(pageIndex, pageSize, sort);
-            projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest, Boolean.FALSE);
+            projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest, Boolean.FALSE /* false == include archived */);
             if (pageIndex < 6) {
                 Assert.assertEquals(projectInfoList.size(), pageSize);
             } else {
