@@ -23,9 +23,7 @@ public class CategorizeDoubleConfig extends CategorizeValConfig {
     @Override
     @JsonIgnore
     public Set<String> getCategoryNames() {
-        Set<String> categoryNames = new HashSet<>(categories.keySet());
-        categoryNames.add(CATEGORY_UNDEFINED);
-        return categoryNames;
+        return new HashSet<>(categories.keySet());
     }
 
     public Map<String, Map<Comparator, Double>> getCategories() {
