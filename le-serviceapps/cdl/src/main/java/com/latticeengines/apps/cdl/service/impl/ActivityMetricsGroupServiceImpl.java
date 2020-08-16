@@ -351,12 +351,13 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     }
 
     private StringTemplate getTemplate(String name) {
-        if (!templateCache.containsKey(name)) {
-            templateCache.put(name, stringTemplateReaderRepository.findByName(name));
-        }
         StringTemplate tmpl = templateCache.get(name);
         if (tmpl == null) {
-            throw new IllegalStateException(String.format("Default template %s is not added to database", name));
+            tmpl = stringTemplateReaderRepository.findByName(name);
+            if (tmpl == null) {
+                throw new IllegalStateException(String.format("Default template %s is not added to database", name));
+            }
+            templateCache.put(name, tmpl);
         }
         return tmpl;
     }
