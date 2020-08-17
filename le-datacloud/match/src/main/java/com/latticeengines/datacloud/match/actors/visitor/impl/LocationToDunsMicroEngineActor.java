@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
-public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
+public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnBLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
 
     @PostConstruct
@@ -30,8 +30,8 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
     }
 
     @Override
-    protected Class<DnbLookupActor> getDataSourceActorClz() {
-        return DnbLookupActor.class;
+    protected Class<DnBLookupActor> getDataSourceActorClz() {
+        return DnBLookupActor.class;
     }
 
     @Override

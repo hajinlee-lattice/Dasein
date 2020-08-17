@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -136,6 +137,9 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("RealTimeThreadPoolSize")
     private Integer realTimeThreadPoolSize;
+
+    @JsonProperty("TpsMatchConfig")
+    private TpsMatchConfig tpsMatchConfig;
 
     // ====================
     // BEGIN FLAGS
@@ -382,6 +386,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDecisionGraph(String decisionGraph) {
         this.decisionGraph = decisionGraph;
+    }
+
+    public TpsMatchConfig getTpsMatchConfig() {
+        return tpsMatchConfig;
+    }
+
+    public void setTpsMatchConfig(TpsMatchConfig tpsMatchConfig) {
+        this.tpsMatchConfig = tpsMatchConfig;
     }
 
     @JsonIgnore

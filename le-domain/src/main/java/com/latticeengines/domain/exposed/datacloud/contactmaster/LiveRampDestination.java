@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.tps;
+package com.latticeengines.domain.exposed.datacloud.contactmaster;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

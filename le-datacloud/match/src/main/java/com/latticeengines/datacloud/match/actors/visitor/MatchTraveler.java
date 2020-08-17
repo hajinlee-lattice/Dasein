@@ -146,7 +146,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     @Override
     public void setResult(Object result) {
         super.setResult(result);
-        entityIds.put(entity, (String) result);
+        if (result == null || result instanceof String) {
+            entityIds.put(entity, (String) result);
+        }
     }
 
     @Override

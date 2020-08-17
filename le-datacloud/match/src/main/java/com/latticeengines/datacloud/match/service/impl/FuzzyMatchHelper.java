@@ -24,11 +24,13 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.domain.GenericFetchResult;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
@@ -38,7 +40,9 @@ import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
+import com.latticeengines.datacloud.match.service.TpsFetchService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
@@ -47,6 +51,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
+import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
@@ -87,6 +92,9 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Inject
     private EntityMatchInternalService entityMatchInternalService;
+
+    @Inject
+    private TpsFetchService tpsFetchService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -214,7 +222,9 @@ public class FuzzyMatchHelper implements DbHelper {
     @MatchStep
     @Override
     public void fetchMatchResult(MatchContext context) {
-        if (!context.isSeekingIdOnly()) {
+        if (ContactMasterConstants.MATCH_ENTITY_TPS.equals(context.getInput().getTargetEntity())) {
+            fetchTpsRecords(context);
+        } else if (!context.isSeekingIdOnly()) {
             if (OperationalMode.ENTITY_MATCH.equals(context.getInput().getOperationalMode())) {
                 fetchEntitySeed(context);
             } else {
@@ -293,6 +303,40 @@ public class FuzzyMatchHelper implements DbHelper {
                 context.getInternalResults().size(), unmatch, System.currentTimeMillis() - startTime);
     }
 
+    private void fetchTpsRecords(MatchContext context) {
+        Set<String> recordIds = new HashSet<>();
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            List<String> fetchIds = record.getFetchIds();
+            if (fetchIds != null) {
+                recordIds.addAll(fetchIds);
+            }
+        }
+
+        List<GenericFetchResult> fetchResults;
+        try (PerformanceTimer timer = //
+                     new PerformanceTimer("Fetch " + recordIds.size() + " tps records.")) {
+            TpsMatchConfig matchConfig = context.getInput().getTpsMatchConfig();
+            if (matchConfig != null) {
+                log.info("TpsMatchConfig={}", JsonUtils.serialize(matchConfig));
+            }
+            fetchResults = tpsFetchService.fetchAndFilter(recordIds, matchConfig);
+        }
+
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            List<String> fetchIds = record.getFetchIds();
+            List<GenericFetchResult> resultsForRecord = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(fetchIds)) {
+                Set<String> fetchIdSet = new HashSet<>(fetchIds);
+                for (GenericFetchResult result: fetchResults) {
+                    if (fetchIdSet.contains(result.getRecordId())) {
+                        resultsForRecord.add(result.getDeepCopy());
+                    }
+                }
+                record.setMultiFetchResults(resultsForRecord);
+            }
+        }
+    }
+
     private void fetchPrimeAccount(MatchContext context) {
         Set<String> ids = new HashSet<>();
         for (InternalOutputRecord record : context.getInternalResults()) {
@@ -303,8 +347,8 @@ public class FuzzyMatchHelper implements DbHelper {
         }
 
         List<String> elementIds = context.getColumnSelection().getColumnIds();
-        if (!elementIds.contains(PrimeAccount.DunsNumber)) {
-            elementIds.add(PrimeAccount.DunsNumber);
+        if (!elementIds.contains(PrimeMetadataService.DunsNumber)) {
+            elementIds.add(PrimeMetadataService.DunsNumber);
         }
         RetryTemplate retry = RetryUtils.getRetryTemplate(5);
         List<PrimeColumn> reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
@@ -333,7 +377,12 @@ public class FuzzyMatchHelper implements DbHelper {
             if (record.isMatched() && StringUtils.isNotBlank(duns)) {
                 PrimeAccount primeAccount = dunsAccountMap.get(duns);
                 if (primeAccount != null) {
-                    record.setPrimeAccount(primeAccount.getDeepCopy());
+                    PrimeAccount copy = primeAccount.getDeepCopy();
+                    record.setPrimeAccount(copy);
+                    GenericFetchResult fetchResult = new GenericFetchResult();
+                    fetchResult.setResult(copy.getResult());
+                    fetchResult.setRecordId(copy.getId());
+                    record.setFetchResult(fetchResult);
                 }
             }
         }
@@ -392,16 +441,20 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        if (!context.isSeekingIdOnly()
+        if (OperationalMode.CONTACT_MATCH.equals(context.getInput().getOperationalMode())) {
+            for (InternalOutputRecord record : context.getInternalResults()) {
+                updateInternalRecordByMultiFetchResults(record, context.getColumnSelection());
+            }
+        } else if (!context.isSeekingIdOnly()
                 && !OperationalMode.ENTITY_MATCH.equals(context.getInput().getOperationalMode())) {
-            // FOR LDC match: Use record.latticeAccount to update
-            // record.queryResult
-            // For entity match: record.queryResult is already prepared in
-            // fetchEntityMatchResult(), so skip this part
             for (InternalOutputRecord record : context.getInternalResults()) {
                 if (BusinessEntity.PrimeAccount.name().equals(context.getInput().getTargetEntity())) {
-                    updateInternalRecordByPrimeAccount(record, context.getColumnSelection());
+                    updateInternalRecordByFetchResult(record, context.getColumnSelection());
                 } else {
+                    // FOR LDC match: Use record.latticeAccount to update
+                    // record.queryResult
+                    // For entity match: record.queryResult is already prepared in
+                    // fetchEntityMatchResult(), so skip this part
                     updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
                             context.getInput().getDataCloudVersion());
                 }
@@ -444,13 +497,21 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
-    private void updateInternalRecordByPrimeAccount(InternalOutputRecord record, ColumnSelection columnSelection) {
+    private void updateInternalRecordByMultiFetchResults(InternalOutputRecord record, ColumnSelection columnSelection) {
+        List<Map<String, Object>> parsedResults = parseMultiFetchResult(record.getMultiFetchResults(), columnSelection);
+        if (record.isMatched() && CollectionUtils.isEmpty(parsedResults)) {
+            record.setMatched(false);
+        }
+        record.setMultiQueryResult(parsedResults);
+    }
+
+    private void updateInternalRecordByFetchResult(InternalOutputRecord record, ColumnSelection columnSelection) {
         Map<String, Object> queryResult = new HashMap<>();
-        Map<String, Object> primeAccount = parsePrimeAccount(record.getPrimeAccount(), columnSelection);
+        Map<String, Object> primeAccount = parseFetchResult(record.getFetchResult(), columnSelection);
         if (MapUtils.isNotEmpty(primeAccount)) {
             queryResult.putAll(primeAccount);
         }
-        if (record.isMatched() && record.getPrimeAccount() == null) {
+        if (record.isMatched() && record.getFetchResult() == null) {
             record.setMatched(false);
         }
         record.setQueryResult(queryResult);
@@ -473,11 +534,33 @@ public class FuzzyMatchHelper implements DbHelper {
         record.setQueryResult(queryResult);
     }
 
-    private Map<String, Object> parsePrimeAccount(PrimeAccount primeAccount, ColumnSelection columnSelection) {
-        if (primeAccount == null) {
+    private List<Map<String, Object>> parseMultiFetchResult(List<GenericFetchResult> fetchResults, //
+                                                            ColumnSelection columnSelection) {
+        if (CollectionUtils.isEmpty(fetchResults)) {
+            return Collections.emptyList();
+        } else {
+            List<Map<String, Object>> parsedList = new ArrayList<>();
+            for (GenericFetchResult fetchResult: fetchResults) {
+                Map<String, Object> parsed = parseFetchResult(fetchResult, columnSelection);
+                if (MapUtils.isNotEmpty(parsed)) {
+                    parsedList.add(parsed);
+                }
+            }
+            return parsedList;
+        }
+    }
+
+    private Map<String, Object> parseFetchResult(GenericFetchResult fetchResult, ColumnSelection columnSelection) {
+        if (fetchResult == null) {
             return Collections.emptyMap();
         } else {
-            return primeAccount.getResult();
+            Map<String, Object> result = fetchResult.getResult();
+            Set<String> attrsToRemove = new HashSet<>(result.keySet());
+            attrsToRemove.removeAll(columnSelection.getColumnIds());
+            for (String attr: attrsToRemove) {
+                result.remove(attr);
+            }
+            return result;
         }
     }
 
