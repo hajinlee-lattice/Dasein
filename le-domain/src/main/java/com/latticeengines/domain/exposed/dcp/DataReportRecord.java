@@ -107,7 +107,7 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
 
     // this is used to indicate the data report
     // is ready for roll up
-    @Column(name = "READY_FOR_ROLLUP")
+    @Column(name = "READY_FOR_ROLLUP", nullable = false)
     private boolean readyForRollup;
 
     @Override
