@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("urlToDunsMicroEngineActor")
 @Scope("prototype")
-public class UrlToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnbLookupActor> {
+public class UrlToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<DnBLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(UrlToDunsMicroEngineActor.class);
 
     @PostConstruct
@@ -30,8 +30,8 @@ public class UrlToDunsMicroEngineActor extends DataSourceMicroEngineTemplate<Dnb
     }
 
     @Override
-    protected Class<DnbLookupActor> getDataSourceActorClz() {
-        return DnbLookupActor.class;
+    protected Class<DnBLookupActor> getDataSourceActorClz() {
+        return DnBLookupActor.class;
     }
 
     @Override

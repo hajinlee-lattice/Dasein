@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.KryoUtils;
+import com.latticeengines.datacloud.match.domain.GenericFetchResult;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
@@ -41,6 +45,7 @@ public class InternalOutputRecord extends OutputRecord {
 
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
+    private List<Map<String, Object>> multiQueryResult;
     private List<Boolean> columnMatched;
     private Boolean failed = false;
     private String travelerId;
@@ -53,6 +58,8 @@ public class InternalOutputRecord extends OutputRecord {
     private LatticeAccount latticeAccount;
     private PrimeAccount primeAccount;
     private Map<String, Object> customAccount;
+    private GenericFetchResult fetchResult;
+    private List<GenericFetchResult> multiFetchResults;
     private String originalContextId;
 
     private List<String> debugValues;
@@ -66,6 +73,9 @@ public class InternalOutputRecord extends OutputRecord {
 
     // for prime match
     private List<DnBMatchCandidate> candidates;
+
+    // for multi-fetch match, e.g. tps
+    private List<String> fetchIds;
 
     // For Entity Match, the InternalOutputRecord must contain the map between the MatchKeys and the position of the
     // corresponding fields in the input record, for each Entity.  This is then passed on to the MatchTraveler and
@@ -191,6 +201,14 @@ public class InternalOutputRecord extends OutputRecord {
         this.queryResult = queryResult;
     }
 
+    public List<Map<String, Object>> getMultiQueryResult() {
+        return multiQueryResult;
+    }
+
+    public void setMultiQueryResult(List<Map<String, Object>> multiQueryResult) {
+        this.multiQueryResult = multiQueryResult;
+    }
+
     public List<Boolean> getColumnMatched() {
         return columnMatched;
     }
@@ -277,6 +295,22 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setCustomAccount(Map<String, Object> customAccount) {
         this.customAccount = customAccount;
+    }
+
+    public GenericFetchResult getFetchResult() {
+        return fetchResult;
+    }
+
+    public void setFetchResult(GenericFetchResult fetchResult) {
+        this.fetchResult = fetchResult;
+    }
+
+    public List<GenericFetchResult> getMultiFetchResults() {
+        return multiFetchResults;
+    }
+
+    public void setMultiFetchResults(List<GenericFetchResult> multiFetchResults) {
+        this.multiFetchResults = multiFetchResults;
     }
 
     public String getOriginalContextId() {
@@ -399,5 +433,28 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setCandidates(List<DnBMatchCandidate> candidates) {
         this.candidates = candidates;
+    }
+
+    // ====================
+    // BEGIN: multi-fetch
+    // ====================
+
+    public List<String> getFetchIds() {
+        return fetchIds;
+    }
+
+    public void setFetchIds(List<String> fetchIds) {
+        this.fetchIds = fetchIds;
+    }
+
+    // ====================
+    // END: multi-fetch
+    // ====================
+
+    public InternalOutputRecord deepCopy() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        KryoUtils.write(bos, this);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return KryoUtils.read(bis, InternalOutputRecord.class);
     }
 }

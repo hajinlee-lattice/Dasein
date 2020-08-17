@@ -49,14 +49,15 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
+import com.latticeengines.datacloud.match.service.GenericMetadataService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -97,6 +98,9 @@ public class ProcessorContext {
     @Inject
     private PrimeMetadataService primeMetadataService;
 
+    @Inject
+    private GenericMetadataService genericMetadataService;
+
     @Resource(name = "bulkMatchPlanner")
     private MatchPlanner matchPlanner;
 
@@ -111,6 +115,9 @@ public class ProcessorContext {
 
     @Value("${datacloud.match.default.decision.graph.prime}")
     private String primeGraph;
+
+    @Value("${datacloud.match.default.decision.graph.tps}")
+    private String tpsGraph;
 
     @Value("${datacloud.yarn.actors.num.threads}")
     private int actorsThreadPool;
@@ -159,6 +166,7 @@ public class ProcessorContext {
     private Integer numThreads;
 
     private boolean partialMatch;
+    private boolean multiResultMatch;
 
     private AtomicInteger rowsProcessed = new AtomicInteger(0);
 
@@ -314,6 +322,10 @@ public class ProcessorContext {
         return recordTimeOut;
     }
 
+    public boolean isMultiResultMatch() {
+        return multiResultMatch;
+    }
+
     public boolean isUseRemoteDnB() {
         return useRemoteDnB;
     }
@@ -432,9 +444,12 @@ public class ProcessorContext {
         log.info("Match target entity: " + originalInput.getTargetEntity());
         decisionGraph = originalInput.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
-            decisionGraph = defaultGraph;
             if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(originalInput.getTargetEntity())) {
                 decisionGraph = primeGraph;
+            } else if (ContactMasterConstants.MATCH_ENTITY_TPS.equalsIgnoreCase(originalInput.getTargetEntity())) {
+                decisionGraph = tpsGraph;
+            } else {
+                decisionGraph = defaultGraph;
             }
             log.info("Decision graph is not provided, use default " + decisionGraph);
         } else {
@@ -481,6 +496,8 @@ public class ProcessorContext {
                 numThreads = sqlThreadPool;
             }
         }
+
+        multiResultMatch = OperationalMode.CONTACT_MATCH.equals(originalInput.getOperationalMode());
 
         avroPath = jobConfiguration.getAvroPath();
         divider = new BlockDivider(avroPath, yarnConfiguration, groupSize);
@@ -644,57 +661,50 @@ public class ProcessorContext {
     @MatchStep
     private Schema constructOutputSchema(String recordName, MatchInput input) {
         Schema outputSchema;
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
-        if (datacloudOnly) {
-            if (columnSelection == null) {
-                log.info("Generating output schema using predefined selection " + predefinedSelection);
-                outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
-            } else {
-                log.info("Generating output schema using custom/union selection with "
-                        + columnSelection.getColumns().size() + " columns");
-                if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
-                    List<PrimeColumn> primeColumns = //
-                            primeMetadataService.getPrimeColumns(columnSelection.getColumnIds());
-                    List<Pair<String, Class<?>>> pairs = new ArrayList<>();
-                    primeColumns.forEach(pc -> {
-                        try {
-                            pairs.add(Pair.of(pc.getAttrName(), //
-                                    Class.forName("java.lang." + pc.getJavaClass())));
-                        } catch (ClassNotFoundException e) {
-                            throw new RuntimeException("Cannt parse java class " + pc.getJavaClass(), e);
-                        }
-                    });
-                    outputSchema = AvroUtils.constructSchema("PrimeAccount", pairs);
-                } else {
-                    metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
-                    outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
-                            dataCloudVersion);
-                    metadataFields = parseMetadataFields();
-                }
-            }
-            log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
-        } else if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
-            // TODO: Feeling match planning for bulk match is not
-            // well-organized. Some of them happen in BulkMatchPlanner, some of
-            // them happen here
-            if (metadatas == null) {
-                if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
-                    metadatas = ((MatchPlannerBase) matchPlanner).parseCDLMetadata(input);
-                } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
-                    metadatas = ((MatchPlannerBase) matchPlanner).parseEntityMetadata(input);
-                } else {
-                    String msg = String.format("Entity match operational mode %s is not supported",
-                            input.getOperationalMode() == null ? null : input.getOperationalMode().name());
-                    throw new UnsupportedOperationException(msg);
-                }
-            }
-            metadataFields = parseMetadataFields();
-            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
-                    dataCloudVersion);
-            log.info("Output schema has {} fields for entity match. OperationalMode={}",
-                    outputSchema.getFields().size(), input.getOperationalMode());
+        if (OperationalMode.CONTACT_MATCH.equals(input.getOperationalMode())) {
+            outputSchema = genericMetadataService.getOutputAvroSchema(input, columnSelection);
         } else {
-            throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
+            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+            if (datacloudOnly) {
+                if (columnSelection == null) {
+                    log.info("Generating output schema using predefined selection " + predefinedSelection);
+                    outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
+                } else {
+                    log.info("Generating output schema using custom/union selection with "
+                            + columnSelection.getColumns().size() + " columns");
+                    if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
+                        outputSchema = genericMetadataService.getOutputAvroSchema(input, columnSelection);
+                    } else {
+                        metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
+                        outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
+                                dataCloudVersion);
+                        metadataFields = parseMetadataFields();
+                    }
+                }
+                log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
+            } else if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
+                // TODO: Feeling match planning for bulk match is not
+                // well-organized. Some of them happen in BulkMatchPlanner, some of
+                // them happen here
+                if (metadatas == null) {
+                    if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
+                        metadatas = ((MatchPlannerBase) matchPlanner).parseCDLMetadata(input);
+                    } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+                        metadatas = ((MatchPlannerBase) matchPlanner).parseEntityMetadata(input);
+                    } else {
+                        String msg = String.format("Entity match operational mode %s is not supported",
+                                input.getOperationalMode() == null ? null : input.getOperationalMode().name());
+                        throw new UnsupportedOperationException(msg);
+                    }
+                }
+                metadataFields = parseMetadataFields();
+                outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
+                        dataCloudVersion);
+                log.info("Output schema has {} fields for entity match. OperationalMode={}",
+                        outputSchema.getFields().size(), input.getOperationalMode());
+            } else {
+                throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
+            }
         }
 
         if (inputSchema == null) {

@@ -29,7 +29,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideVal
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.ContactMatchPlannerMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnBCacheLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DnBLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryStateBasedMicroEngineActor;
@@ -39,6 +39,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMic
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsToDunsMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsToTpsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityAssociateActor;
@@ -57,6 +58,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDu
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchJunctionActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.TpsLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.UrlToDunsMicroEngineActor;
 import com.latticeengines.domain.exposed.actors.ActorType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -97,6 +99,9 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     @Value("${datacloud.match.entityAssociateActor.actor.cardinality:2}")
     private int entityAssociateActorCardinality;
+
+    @Value("${datacloud.match.tpsLookupActor.actor.cardinality:2}")
+    private int tpsLookupActorCardinality;
 
     @Value("${datacloud.match.metricActor.actor.cardinality:4}")
     private int metricActorCardinality;
@@ -202,6 +207,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 EntityNamePhoneAIDBasedMicroEngineActor.class, //
                 EntityEmailBasedMicroEngineActor.class, //
                 EntityNamePhoneBasedMicroEngineActor.class, //
+                DunsToTpsMicroEngineActor.class, //
         };
         for (Class<? extends ActorTemplate> clz : microEngineClz) {
             initNamedActor(clz);
@@ -223,11 +229,12 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     private void initDataSourceActors() {
         initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
-        initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
+        initNamedActor(DnBLookupActor.class, true, dnbLookupActorCardinality);
         initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
         initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
         initNamedActor(EntityLookupActor.class, true, entityLookupActorCardinality);
         initNamedActor(EntityAssociateActor.class, true, entityAssociateActorCardinality);
+        initNamedActor(TpsLookupActor.class, true, tpsLookupActorCardinality);
     }
 
     @Override

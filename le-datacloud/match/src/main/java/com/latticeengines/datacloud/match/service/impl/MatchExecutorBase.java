@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,7 +38,6 @@ import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -162,7 +162,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
                 if (matchInput.isFetchOnly() && //
-                        (record.getLatticeAccount() != null || record.getPrimeAccount() != null)) {
+                        (record.getLatticeAccount() != null || record.getFetchResult() != null)) {
                     matchHistory.setMatched(true);
                     matchHistory.setLdcMatched(true);
                 }
@@ -209,13 +209,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @MatchStep
     MatchContext mergeResults(MatchContext matchContext) {
         List<InternalOutputRecord> records = matchContext.getInternalResults();
-        List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         List<String> inputFields = matchContext.getInput().getFields();
-        int templateFieldIdx = inputFields.indexOf(MatchConstants.ENTITY_TEMPLATE_FIELD);
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
-        boolean isAllocateMode = matchContext.getInput().isAllocateId();
         boolean isPrimeMatch = BusinessEntity.PrimeAccount.name().equals(matchContext.getInput().getTargetEntity());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
@@ -250,161 +247,69 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 continue;
             }
 
-            internalRecord.setColumnMatched(new ArrayList<>());
-            List<Object> output = new ArrayList<>();
 
-            Map<String, Object> results = internalRecord.getQueryResult();
-            if (isAllocateMode) {
-                boolean hasNullId = checkNullEntityIds(internalRecord, matchContext.getInput().getTargetEntity(),
-                        nullEntityIdCount);
-                if (hasNullId) {
-                    log.error("Got null entity IDs ({}) when matching record {}", internalRecord.getEntityIds(),
-                            internalRecord.getInput());
-                }
+            List<Map<String, Object>> queryResults = new LinkedList<>();
+            List<List<Object>> outputList = new LinkedList<>();
+            if (isMultiResultMatch(matchContext)) {
+                queryResults = internalRecord.getMultiQueryResult();
+            } else {
+                queryResults.add(internalRecord.getQueryResult());
             }
 
-            for (int i = 0; i < columns.size(); i++) {
-                Column column = columns.get(i);
+            boolean firstRead = true;
+            for (Map<String, Object> results: queryResults) {
+                 InternalOutputRecord copy;
+                 if (firstRead) {
+                     copy = internalRecord;
+                     firstRead = false;
+                 } else {
+                     copy = internalRecord.deepCopy();
+                 }
 
-                String field = column.getExternalColumnId() == null ? column.getColumnName()
-                        : column.getExternalColumnId();
+                List<Object> output = populateOutputData(copy, results, //
+                        matchContext, columnMatchCount, nullEntityIdCount);
+                outputList.add(output);
+                internalRecord.setOutput(output);
 
-                Object value = null;
-
-                if (InterfaceName.EntityId.name().equalsIgnoreCase(field)) {
-                    // retrieve entity ID (for entity match)
-                    value = internalRecord.getEntityId();
-                } else if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)) {
-                    if (StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
-                        value = StringStandardizationUtils
-                                .getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
+                if (CollectionUtils.isNotEmpty(internalRecord.getFieldsToClear())) {
+                    // clear out specific fields in input (copy new row for now to avoid affecting
+                    // input object)
+                    List<Object> clearedInput = new ArrayList<>();
+                    for (int i = 0; i < inputFields.size(); i++) {
+                        if (internalRecord.getFieldsToClear().contains(inputFields.get(i))) {
+                            clearedInput.add(null);
+                        } else {
+                            clearedInput.add(internalRecord.getInput().get(i));
+                        }
                     }
-                    if (value == null && isEntityMatch) {
-                        // try to retrieve lattice account ID from entityId map next
-                        value = StringStandardizationUtils.getStandardizedOutputLatticeID(
-                                getEntityId(internalRecord, BusinessEntity.LatticeAccount.name()));
+                    internalRecord.setInput(clearedInput);
+                }
+                // count newly allocated entities
+                if (MapUtils.isNotEmpty(copy.getNewEntityIds())) {
+                    for (Map.Entry<String, String> entry : copy.getNewEntityIds().entrySet()) {
+                        String entity = entry.getKey();
+                        String entityId = entry.getValue();
+                        if (StringUtils.isNotBlank(entityId)) {
+                            newEntityCnt.put(entity, newEntityCnt.getOrDefault(entity, 0L) + 1);
+                        }
                     }
-                } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
-                        && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
-                        && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
-                    value = true;
-                } else if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)
-                        && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
-                        && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
-                    value = true;
-                } else if (InterfaceName.IsMatched.name().equalsIgnoreCase(field)) {
-                    value = internalRecord.isMatched();
-                } else if (ColumnSelection.Predefined.LeadToAcct
-                        .equals(matchContext.getInput().getPredefinedSelection())
-                        && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
-                    // For Lead-to-Account match, if cannot find matched AccountId or customer's
-                    // AccountId doesn't match with AccountId from matcher, return anonymous
-                    // AccountId to help ProfileContact step which requires existence of AccountId.
-                    // Anonymous AccountId is some predefined string which should have very low
-                    // chance to be conflict with real AccountId. And these contacts become orphan.
-                    value = results.get(field);
-                    String customerAccountId = internalRecord.getParsedSystemIds() == null ? null
-                            : internalRecord.getParsedSystemIds().get(InterfaceName.AccountId.name());
-                    // Record match result in enumeration for aggregation into match report.
-                    if (value == null) {
-                        orphanedNoMatchCount++;
-                    } else if (customerAccountId == null) {
-                        matchedByMatchKeyCount++;
-                    } else if (value.equals(customerAccountId)) {
-                        matchedByAccountIdCount++;
-                    } else {
-                        orphanedUnmatchedAccountIdCount++;
-                    }
-                    if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
-                        value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
-                    }
-                } else if (InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
-                    // retrieve Account EntityId (for entity match)
-                    value = getEntityId(internalRecord, Account.name());
-                } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
-                    // retrieve Contact EntityId (for entity match)
-                    value = getEntityId(internalRecord, Contact.name());
-                } else if (InterfaceName.CDLCreatedTemplate.name().equalsIgnoreCase(field)) {
-                    String newEntityId = MapUtils.emptyIfNull(internalRecord.getNewEntityIds())
-                            .get(matchContext.getInput().getTargetEntity());
-                    boolean isNewEntity = StringUtils.isNotBlank(newEntityId);
-                    if (templateFieldIdx >= 0 && isNewEntity) {
-                        // only set created template field for new entity
-                        value = internalRecord.getInput().get(templateFieldIdx);
-                    }
-                } else if (results.containsKey(field)) {
-                    Object objInResult = results.get(field);
-                    value = (objInResult == null ? value : objInResult);
                 }
 
-                try {
-                    value = MatchOutputStandardizer.cleanNewlineCharacters(value);
-                } catch (Exception exc) {
-                    log.error("Failed to clean up new line characters. Exception: " + exc);
-                }
+                // For LDC and Entity match, IsMatched flag is marked in
+                // FuzzyMatchServiceImpl.fetchIdResult
+                if (copy.isMatched()) {
+                    totalMatched++;
 
-                output.add(value);
-                columnMatchCount[i] += (value == null ? 0 : 1);
-                internalRecord.getColumnMatched().add(value != null);
+                }
+                copy.setResultsInPartition(null);
             }
-
-            // make *_IsMatched columns not null
-            for (int i = 0; i < columnNames.size(); i++) {
-                String field = columnNames.get(i);
-                Object value = output.get(i);
-                if (field.toLowerCase().contains("ismatched") && value == null) {
-                    output.set(i, false);
-                }
-                if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
-                    output.set(i, publicDomainService.isPublicDomain(internalRecord.getParsedDomain()));
-                }
-                if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)) {
-                    output.set(i, disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain()));
-                }
-                if (MatchConstants.PREMATCH_DOMAIN.equalsIgnoreCase(field)) {
-                    output.set(i, internalRecord.getParsedDomain());
-                }
-            }
-
-            if (CollectionUtils.isNotEmpty(internalRecord.getFieldsToClear())) {
-                // clear out specific fields in input (copy new row for now to avoid affecting
-                // input object)
-                List<Object> clearedInput = new ArrayList<>();
-                for (int i = 0; i < inputFields.size(); i++) {
-                    if (internalRecord.getFieldsToClear().contains(inputFields.get(i))) {
-                        clearedInput.add(null);
-                    } else {
-                        clearedInput.add(internalRecord.getInput().get(i));
-                    }
-                }
-                internalRecord.setInput(clearedInput);
-            }
-            internalRecord.setOutput(output);
-
-            // count newly allocated entities
-            if (MapUtils.isNotEmpty(internalRecord.getNewEntityIds())) {
-                for (Map.Entry<String, String> entry : internalRecord.getNewEntityIds().entrySet()) {
-                    String entity = entry.getKey();
-                    String entityId = entry.getValue();
-                    if (StringUtils.isNotBlank(entityId)) {
-                        newEntityCnt.put(entity, newEntityCnt.getOrDefault(entity, 0L) + 1);
-                    }
-                }
-            }
-
-            // For LDC and Entity match, IsMatched flag is marked in
-            // FuzzyMatchServiceImpl.fetchIdResult
-            if (internalRecord.isMatched()) {
-                totalMatched++;
-
-            }
-            internalRecord.setResultsInPartition(null);
-
             OutputRecord outputRecord = new OutputRecord();
             if (returnUnmatched || internalRecord.isMatched()) {
                 if (excludeUnmatchedPublicDomain && internalRecord.isPublicDomain()) {
                     log.warn("Excluding the record, because it is using the public domain: "
                             + internalRecord.getParsedDomain());
+                } else if (isMultiResultMatch(matchContext)) {
+                    outputRecord.setCandidateOutput(outputList);
                 } else {
                     outputRecord.setOutput(internalRecord.getOutput());
                 }
@@ -475,6 +380,118 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         return matchContext;
+    }
+
+    private List<Object> populateOutputData(InternalOutputRecord internalRecord, Map<String, Object> results,
+                                    MatchContext matchContext,
+                                    Integer[] columnMatchCount,
+                                    Map<String, Long> nullEntityIdCount) {
+        List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
+        List<Column> columns = matchContext.getColumnSelection().getColumns();
+        List<String> inputFields = matchContext.getInput().getFields();
+        String targetEntity = matchContext.getInput().getTargetEntity();
+
+        int templateFieldIdx = inputFields.indexOf(MatchConstants.ENTITY_TEMPLATE_FIELD);
+        boolean isAllocateMode = matchContext.getInput().isAllocateId();
+        boolean isEntityMatch = OperationalMode.isEntityMatch(matchContext.getInput().getOperationalMode());
+
+        if (isAllocateMode) {
+            boolean hasNullId = checkNullEntityIds(internalRecord, targetEntity,
+                    nullEntityIdCount);
+            if (hasNullId) {
+                log.error("Got null entity IDs ({}) when matching record {}", internalRecord.getEntityIds(),
+                        internalRecord.getInput());
+            }
+        }
+        internalRecord.setColumnMatched(new ArrayList<>());
+        List<Object> output = new ArrayList<>();
+
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+
+            String field = column.getExternalColumnId() == null ? column.getColumnName()
+                    : column.getExternalColumnId();
+
+            Object value = null;
+
+            if (InterfaceName.EntityId.name().equalsIgnoreCase(field)) {
+                // retrieve entity ID (for entity match)
+                value = internalRecord.getEntityId();
+            } else if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)) {
+                if (StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
+                    value = StringStandardizationUtils
+                            .getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
+                }
+                if (value == null && isEntityMatch) {
+                    // try to retrieve lattice account ID from entityId map next
+                    value = StringStandardizationUtils.getStandardizedOutputLatticeID(
+                            getEntityId(internalRecord, BusinessEntity.LatticeAccount.name()));
+                }
+            } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
+                    && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
+                    && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
+                value = true;
+            } else if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)
+                    && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
+                    && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
+                value = true;
+            } else if (InterfaceName.IsMatched.name().equalsIgnoreCase(field)) {
+                value = internalRecord.isMatched();
+            } else if (ColumnSelection.Predefined.LeadToAcct
+                    .equals(matchContext.getInput().getPredefinedSelection())
+                    && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
+                throw new UnsupportedOperationException("Should not be using LeadToAcct match any more.");
+            }else if (InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
+                // retrieve Account EntityId (for entity match)
+                value = getEntityId(internalRecord, Account.name());
+            } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
+                // retrieve Contact EntityId (for entity match)
+                value = getEntityId(internalRecord, Contact.name());
+            } else if (InterfaceName.CDLCreatedTemplate.name().equalsIgnoreCase(field)) {
+                String newEntityId = MapUtils.emptyIfNull(internalRecord.getNewEntityIds()).get(targetEntity);
+                boolean isNewEntity = StringUtils.isNotBlank(newEntityId);
+                if (templateFieldIdx >= 0 && isNewEntity) {
+                    // only set created template field for new entity
+                    value = internalRecord.getInput().get(templateFieldIdx);
+                }
+            } else if (results.containsKey(field)) {
+                Object objInResult = results.get(field);
+                value = (objInResult == null ? value : objInResult);
+            }
+
+            try {
+                value = MatchOutputStandardizer.cleanNewlineCharacters(value);
+            } catch (Exception exc) {
+                log.error("Failed to clean up new line characters. Exception: " + exc);
+            }
+
+            output.add(value);
+            columnMatchCount[i] += (value == null ? 0 : 1);
+            internalRecord.getColumnMatched().add(value != null);
+        }
+
+        // make *_IsMatched columns not null
+        for (int i = 0; i < columnNames.size(); i++) {
+            String field = columnNames.get(i);
+            Object value = output.get(i);
+            if (field.toLowerCase().contains("ismatched") && value == null) {
+                output.set(i, false);
+            }
+            if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
+                output.set(i, publicDomainService.isPublicDomain(internalRecord.getParsedDomain()));
+            }
+            if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)) {
+                output.set(i, disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain()));
+            }
+            if (MatchConstants.PREMATCH_DOMAIN.equalsIgnoreCase(field)) {
+                output.set(i, internalRecord.getParsedDomain());
+            }
+        }
+        return output;
+    }
+
+    private boolean isMultiResultMatch(MatchContext matchContext) {
+        return OperationalMode.CONTACT_MATCH.equals(matchContext.getInput().getOperationalMode());
     }
 
     // return whether there are null entity ids in this record
