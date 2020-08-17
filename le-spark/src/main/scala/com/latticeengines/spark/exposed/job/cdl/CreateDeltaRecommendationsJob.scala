@@ -1,7 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import java.io.ByteArrayOutputStream
-import java.util
 import java.util.UUID
 
 import com.latticeengines.common.exposed.util.{CipherUtils, JsonUtils, KryoUtils}
