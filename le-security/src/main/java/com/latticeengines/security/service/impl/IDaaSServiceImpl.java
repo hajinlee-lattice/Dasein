@@ -266,7 +266,9 @@ public class IDaaSServiceImpl implements IDaaSService {
             // get invitation link for user if new user was created successfully
             if (returnedUser != null) {
                 InvitationLinkResponse invitationLinkResponse = getUserInvitationLink(returnedUser.getEmailAddress());
-                returnedUser.setInvitationLink(invitationLinkResponse.getInviteLink());
+                if (invitationLinkResponse != null) {
+                    returnedUser.setInvitationLink(invitationLinkResponse.getInviteLink());
+                }
             }
             return returnedUser;
         } else {
