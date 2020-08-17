@@ -327,6 +327,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 Preconditions.checkNotNull(tenantReport, String.format("no report found for %s", rootId));
                 tenantIdToReport.put(rootId, tenantReport);
                 Set<String> projectIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level, rootId);
+                parentIdToChildren.put(rootId, projectIds);
                 projectIds.forEach(projectId -> {
                     DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
