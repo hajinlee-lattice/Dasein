@@ -18,6 +18,8 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     Long countAllProjects();
 
+    Long countAllActiveProjects();
+
     ProjectInfo findProjectInfoBySourceId(String sourceId);
 
     List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds);

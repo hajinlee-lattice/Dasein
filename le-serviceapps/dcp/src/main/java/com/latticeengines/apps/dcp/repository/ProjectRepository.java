@@ -17,7 +17,7 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     List<Object[]> findProjectInfoByProjectId(String projectId);
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, p.teamId" +
-            " from Project as p where p.deleted <> true")
+            " from Project as p where p.deleted = false")
     List<Object[]> findAllProjects(Pageable pageable);
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, p.teamId" +
@@ -47,4 +47,6 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
             " FROM Project AS p WHERE p.projectId = ?1 AND (p.teamId IN (?2) OR p.teamId IS null) and p.deleted <> true")
     List<Object[]> findProjectInfoByProjectIdInTeamIdsNotIncludingArchived(String projectId, List<String> teamIds);
 
+    @Query("SELECT count(p) from Project AS p where p.deleted = false")
+    Long countActiveProjects();
 }

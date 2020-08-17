@@ -93,6 +93,13 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         return getReadOrWriteRepository().count();
     }
 
+    /* Get count of projects with delted = false */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countAllActiveProjects() {
+        return getReadOrWriteRepository().countActiveProjects();
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ProjectInfo findProjectInfoBySourceId(String sourceId) {
