@@ -6,8 +6,6 @@ import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 
 public interface AtlasSchedulingService {
 
-    void createOrUpdateExportScheduling(String customerSpace, String cronExpression);
-
     void createOrUpdateSchedulingByType(String customerSpace, String cronExpression, AtlasScheduling.ScheduleType type);
 
     AtlasScheduling findSchedulingByType(String customerSpace, AtlasScheduling.ScheduleType type);

@@ -118,7 +118,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
                 if (configDir.get("/ExportCronExpression") != null) {
                     String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
                     log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
-                    atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+                    atlasSchedulingService.createOrUpdateSchedulingByType(customerSpace, exportCron, AtlasScheduling.ScheduleType.Export);
                 }
                 if (configDir.get("/PAScheduleNowCronExpression") != null) {
                     String paCron = configDir.get("/PAScheduleNowCronExpression").getDocument().getData();

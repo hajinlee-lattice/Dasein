@@ -474,7 +474,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     private void scheduleNowPAJob() {
         List<AtlasScheduling> atlasSchedulingList = atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.PA);
         if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
-            log.info(String.format("Need pa schedule now entity tenant count: %d.", atlasSchedulingList.size()));
+            log.info(String.format("The count of tenant that needs to do schedule now is: %d.", atlasSchedulingList.size()));
             for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
                 Tenant tenant = atlasScheduling.getTenant();
                 String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
@@ -505,11 +505,6 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void submitScheduleNowJob(String customerSpace, Tenant tenant) {
-        if (tenant == null) {
-            setMultiTenantContext(customerSpace);
-        } else {
-            MultiTenantContext.setTenant(tenant);
-        }
         try {
             ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
             request.setUserId(USERID);
