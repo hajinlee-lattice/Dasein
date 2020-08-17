@@ -165,7 +165,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
         Assert.assertNull(upload.getUploadDiagnostics().getLastErrorMessage());
 
-        Assert.assertNotNull(upload.getUploadConfig().getDropFileTime());
+        Assert.assertNotNull(upload.getDropFileTime());
+        Assert.assertTrue(upload.getDropFileTime() > 1590000000000L);
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
         // Only verify the Error File if there are errors during ingestion and thus the file exists.

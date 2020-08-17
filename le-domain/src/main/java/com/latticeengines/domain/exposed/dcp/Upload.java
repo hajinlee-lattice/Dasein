@@ -90,6 +90,10 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Type(type = "json")
     private UploadDiagnostics uploadDiagnostics;
 
+    @Column(name = "DROP_FILE_TIME")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dropFileTime;
+
     @Column(name = "PROGRESS_PERCENTAGE")
     private Double progressPercentage;
 
@@ -205,6 +209,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         this.uploadDiagnostics = uploadDiagnostics;
     }
 
+    public Date getDropFileTime() {
+        return dropFileTime;
+    }
+
+    public void setDropFileTime(Date dropFileTime) {
+        this.dropFileTime = dropFileTime;
+    }
+
     public Double getProgressPercentage() {
         return progressPercentage;
     }
@@ -226,6 +238,4 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
             return ImmutableSet.of(FINISHED, ERROR);
         }
     }
-
-
 }

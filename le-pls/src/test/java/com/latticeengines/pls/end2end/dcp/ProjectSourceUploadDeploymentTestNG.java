@@ -186,8 +186,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         Assert.assertNotNull(uploadJobDetails.getStatistics().getMatchStats());
         UploadStats.MatchStats matchStats = uploadJobDetails.getStatistics().getMatchStats();
-        Assert.assertEquals(matchStats.getMatched().longValue(), 17L);
-        Assert.assertEquals(matchStats.getUnmatched().longValue(), 3L);
+        Assert.assertEquals(matchStats.getMatched().longValue(), 19L);
+        Assert.assertEquals(matchStats.getUnmatched().longValue(), 1L);
         Assert.assertEquals(matchStats.getPendingReviewCnt().longValue(), 0L);
 
         Assert.assertNotNull(uploadJobDetails.getUploadDiagnostics());

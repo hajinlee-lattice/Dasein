@@ -136,7 +136,7 @@ public class UploadResource {
 
     @PutMapping("/{uploadId}/stats/{statsId}")
     @ResponseBody
-    @ApiOperation(value = "Get upload record by pid")
+    @ApiOperation(value = "Update stats for Upload")
     public void updateStatsContent(@PathVariable String customerSpace, @PathVariable String uploadId,
                                     @PathVariable Long statsId, @RequestBody UploadStats uploadStats) {
         uploadService.updateStatistics(uploadId, statsId, uploadStats);
@@ -144,7 +144,7 @@ public class UploadResource {
 
     @PutMapping("/{uploadId}/latest-stats/{statsId}")
     @ResponseBody
-    @ApiOperation(value = "Get upload record by pid")
+    @ApiOperation(value = "Update latest stats for Upload")
     public UploadDetails setLatestStats(@PathVariable String customerSpace, @PathVariable String uploadId, @PathVariable Long statsId) {
         return uploadService.setLatestStatistics(uploadId, statsId);
     }
@@ -158,9 +158,19 @@ public class UploadResource {
         return appId.toString();
     }
 
+    @PutMapping("/update/{uploadId}/dropFileTime/{dropFileTime}")
+    @ResponseBody
+    @ApiOperation(value = "Update Upload dropFileTime")
+    public void updateDropFileTime(@PathVariable String customerSpace,
+                                   @PathVariable String uploadId,
+                                   @PathVariable long dropFileTime) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        uploadService.updateDropFileTime(customerSpace, uploadId, dropFileTime);
+    }
+
     @PutMapping("/update/{uploadId}/progressPercentage/{progressPercentage}")
     @ResponseBody
-    @ApiOperation(value = "update the upload status")
+    @ApiOperation(value = "Update Upload progressPrecentage")
     public void updateProgressPercentage(@PathVariable String customerSpace,
                              @PathVariable String uploadId,
                              @PathVariable String progressPercentage) {
