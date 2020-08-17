@@ -13,12 +13,10 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,6 +36,8 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
+
+// use dcdpl to deploy code to hdfs
 public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ContactMatchYarnTestNG.class);
@@ -47,9 +47,6 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
 
     @Inject
     private DataCloudYarnService dataCloudYarnService;
-
-    @Value("${datacloud.match.default.decision.graph.tps}")
-    private String tpsMatchDG;
 
     @BeforeClass(groups = {"functional", "manual"})
     public void setup() throws Exception {
@@ -96,8 +93,6 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     }
 
     private DataCloudJobConfiguration jobConfiguration(String avroPath) {
-        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
-
         MatchInput matchInput = new MatchInput();
 
         matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));

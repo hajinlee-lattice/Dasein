@@ -62,6 +62,7 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
         throw new UnsupportedOperationException();
     }
 
+    // return TpsLookupResult
     @Override
     protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();

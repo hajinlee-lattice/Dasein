@@ -89,7 +89,7 @@ public class TpsLookupActorTestNG extends SingleActorTestNGBase {
     }
 
 
-    // FIXME: change to true verification
+    // FIXME [M39-LiveRamp]: change to true verification
     private void verifyOkResult(TpsLookupResult data) {
         if (Ok.equals(data.getReturnCode())) {
             Assert.assertFalse(data.getRecordIds().isEmpty());

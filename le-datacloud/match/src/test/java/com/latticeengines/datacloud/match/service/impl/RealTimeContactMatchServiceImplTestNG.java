@@ -43,14 +43,16 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
 
     @Test(groups = "functional")
     public void testSimpleTpsMatch() {
-        Object[][] data = new Object[][] {
-                { 1, "039596507" },
+        Object[][] data = new Object[][] { //
+                { 1, "039596507" }, //
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         input.setFields(Arrays.asList("ID", "SiteDuns"));
         input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
                 .put(DUNS, Collections.singletonList("SiteDuns"))
                 .build());
+        input.setSkipKeyResolution(true);
+
         input.setTargetEntity(ContactMasterConstants.MATCH_ENTITY_TPS);
         input.setOperationalMode(OperationalMode.CONTACT_MATCH);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
@@ -68,6 +70,7 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
 
         OutputRecord output1 = output.getResult().get(0);
         Assert.assertTrue(CollectionUtils.isNotEmpty(output1.getCandidateOutput()));
+        // FIXME [M39-LiveRamp]: change to true assertions of candidates
     }
 
 }
