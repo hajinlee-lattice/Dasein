@@ -10,6 +10,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessP
 @Lazy
 @Component("validateProductBatchStore")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ValidateProductBatchStore extends BaseValidateBatchStore<ProcessProductStepConfiguration> {
+public class ValidateProductBatchStore extends BaseValidateReportBatchStore<ProcessProductStepConfiguration> {
 
 }

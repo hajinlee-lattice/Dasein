@@ -31,10 +31,13 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -144,8 +147,10 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
 
     protected boolean isChanged(TableRoleInCollection tableRole) {
         String inactiveName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
+        log.info("inactiveName=" + inactiveName + " tableRole=" + tableRole.name());
         if (StringUtils.isNotBlank(inactiveName)) {
             String activeName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, active);
+            log.info("activeName=" + activeName + " tableRole=" + tableRole.name());
             return !inactiveName.equals(activeName);
         } else {
             // consider no change if no inactive version, no matter whether active version exists
@@ -159,10 +164,14 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         if (StringUtils.isNotBlank(inactiveName)) {
             String activeName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, active);
             changed = !inactiveName.equals(activeName);
+            log.info("tableRole=" + tableRole + " activeName=" + activeName + " inactiveName=" + inactiveName
+                    + " entitty="
+                    + configuration.getMainEntity());
         } else {
             // consider no change if no inactive version, no matter whether active version exists
             changed = false;
         }
+        log.info("tableRole=" + tableRole.name() + " changeListCtxKey=" + changeListCtxKey + " changed=" + changed);
         if (changed && StringUtils.isNotBlank(changeListCtxKey)) {
             String tableName = getStringValueFromContext(changeListCtxKey);
             if (StringUtils.isNotBlank(tableName)) {
@@ -291,5 +300,10 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
                 .filter(Objects::nonNull) //
                 .filter(sys -> StringUtils.isNotBlank(sys.getName())) //
                 .collect(Collectors.toMap(S3ImportSystem::getName, sys -> sys));
+    }
+
+    protected void addShortRetentionToTable(String tableName) {
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.DAY);
+        metadataProxy.updateDataTablePolicy(customerSpace.toString(), tableName, retentionPolicy);
     }
 }

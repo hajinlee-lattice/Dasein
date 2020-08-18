@@ -84,11 +84,8 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         List<TransformationStepConfig> steps = new ArrayList<>();
         int upsertMasterStep;
         int diffStep;
-        int changeListStep;
         TransformationStepConfig upsert;
         TransformationStepConfig diff;
-        TransformationStepConfig changeList;
-        TransformationStepConfig reportChangeList;
         TransformationStepConfig report;
         if (configuration.isEntityMatchEnabled()) {
             List<TransformationStepConfig> extracts = new ArrayList<>();
@@ -130,7 +127,6 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 upsert = upsertMaster(true, dedupStep, true);
             }
             diffStep = upsertMasterStep + 1;
-            changeListStep = upsertMasterStep + 2;
             Preconditions.checkNotNull(mergedImportStep, "Must have merged contact import when reaching here");
             diff = diff(mergedImportStep, upsertMasterStep);
             if (upsertSystem != null) {
@@ -140,21 +136,12 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         } else {
             upsertMasterStep = 0;
             diffStep = 1;
-            changeListStep = 2;
             upsert = upsertMaster(false, matchedTable);
             diff = diff(matchedTable, upsertMasterStep);
             steps.add(upsert);
         }
-        // in migration mode, need to use ContactId because legacy batch store won't
-        // have EntityId column
-        String joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name()
-                : InterfaceName.ContactId.name();
-        changeList = createChangeList(upsertMasterStep, joinKey);
-        reportChangeList = reportChangeList(changeListStep);
         report = reportDiff(diffStep);
         steps.add(diff);
-        steps.add(changeList);
-        steps.add(reportChangeList);
         steps.add(report);
         request.setSteps(steps);
         return request;
@@ -219,9 +206,6 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToDynamo(batchStoreTableName, TableRoleInCollection.ConsolidatedContact.getPartitionKey(),
                 TableRoleInCollection.ConsolidatedContact.getRangeKey());
-        if (StringUtils.isNotBlank(changeListTableName)) {
-            exportToS3AndAddToContext(changeListTableName, CONTACT_CHANGELIST_TABLE_NAME);
-        }
     }
 
     private void addNewContactExtractStepsForActivityStream(@NotNull List<TransformationStepConfig> extracts,
