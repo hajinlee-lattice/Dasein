@@ -6,6 +6,9 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 @Component("xssSanitizeFilter")
@@ -15,16 +18,26 @@ public class XSSFilter implements Filter {
          * Policy file
          * Note that the policy files to be used need to be placed under the project resource file path
          * */
-        private static String antiSamyPath = XssRequestWrapper.class.getClassLoader()
-                .getResource( "antisamy-policy.xml").getFile();
+        private static boolean intialized = false;
+        private static String policyFile = "antisamy-policy.xml";
         private static XSSSanitizer sanitizer = null;
+        private static final Logger log = LoggerFactory.getLogger(XSSFilter.XssRequestWrapper.class);
 
         private String Sanitize(String value) {
             if (value != null) {
-                if (null == sanitizer) {
-                    sanitizer = new XSSSanitizer(antiSamyPath);
+                if (!intialized) {
+                    try {
+                        String antiSamyPath = new ClassPathResource(policyFile).getFile().getPath();
+                        sanitizer = new XSSSanitizer(antiSamyPath);
+                    } catch (IOException e) {
+                        log.warn(String.format("Filed to open AntiSamy policy file: {%s}", policyFile), e);
+                    }
+                    intialized = true;
                 }
-                value = sanitizer.Sanitize(value);
+
+                if (sanitizer != null) {
+                    value = sanitizer.Sanitize(value);
+                }
             }
             return value;
         }

@@ -1,18 +1,10 @@
 package com.latticeengines.common.exposed.filter;
 
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class XSSSanitizerUnitTestNG {
 
@@ -26,8 +18,7 @@ public class XSSSanitizerUnitTestNG {
 
     @Test(groups = "unit")
     public void testSanitize() throws Exception {
-        String antiSamyPath = XSSSanitizerUnitTestNG.class.getClassLoader()
-                .getResource( "antisamy-policy.xml").getFile();
+        String antiSamyPath = new ClassPathResource("antisamy-policy.xml").getFile().getPath();
         XSSSanitizer sanitizer = new XSSSanitizer(antiSamyPath);
         String result = sanitizer.Sanitize("Test<script>alert('attack!!!')</script>");
         Assert.assertEquals(result, "Test");
@@ -35,8 +26,7 @@ public class XSSSanitizerUnitTestNG {
 
     @Test(groups = "unit")
     public void testSanitize2() throws Exception {
-        String antiSamyPath = XSSSanitizerUnitTestNG.class.getClassLoader()
-                .getResource( "antisamy-policy.xml").getFile();
+        String antiSamyPath = new ClassPathResource("antisamy-policy.xml").getFile().getPath();
         XSSSanitizer sanitizer = new XSSSanitizer(antiSamyPath);
         String result = sanitizer.Sanitize("Test<javascript>alert('attack!!!')</javascript>");
         Assert.assertEquals(result, "Testalert('attack!!!')");
