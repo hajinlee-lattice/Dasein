@@ -21,8 +21,8 @@ public class ContactMetadataProxy extends BaseRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> getTpsTitles() {
-        String url = constructUrl("/tps-titles");
-        return get("getTpsTitles", url, List.class);
+    public List<String> getTpsJobLevels() {
+        String url = constructUrl("/tps-job-levels");
+        return get("getTpsJobLevels", url, List.class);
     }
 }
