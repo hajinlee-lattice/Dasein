@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.Scheduler;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 
@@ -32,7 +32,7 @@ public class SchedulingEvent extends Event {
         // init scheduler
         Scheduler scheduler = new GreedyScheduler();
         // schedule PA jobs
-        SchedulingResult result = scheduler.schedule(SchedulingPAUtil.initQueue(simulationContext));
+        SchedulingResult result = scheduler.schedule(SchedulingPAUtils.initQueue(simulationContext));
         Set<String> tenantSet = new HashSet<>();
         tenantSet.addAll(result.getRetryPATenants());
         tenantSet.addAll(result.getNewPATenants());

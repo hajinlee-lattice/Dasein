@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATestTimeClock;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.queue.AutoScheduleSchedulingPAObject;
@@ -45,7 +45,7 @@ public class SchedulingPAQueueUnitTestNG {
         Assert.assertEquals(queue.size(), expectedSizeAfterPush, String
                 .format("Queue(%s) size after adding %s does not match the expected one", queue.getQueueName(), input));
 
-        Set<String> tenants = SchedulingPAUtil.getTenantIds(queue.fillAllCanRunJobs());
+        Set<String> tenants = SchedulingPAUtils.getTenantIds(queue.fillAllCanRunJobs());
         Assert.assertEquals(tenants, expectedTenants, "Resulting can run PA tenants does not match the expected ones");
     }
 
