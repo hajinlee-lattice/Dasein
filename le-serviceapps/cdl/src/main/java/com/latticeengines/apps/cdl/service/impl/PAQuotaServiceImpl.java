@@ -20,6 +20,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.scheduling.PAQuotaSummary;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
@@ -107,6 +109,28 @@ public class PAQuotaServiceImpl implements PAQuotaService {
         } catch (Exception e) {
             log.error("Failed to retrieve tenant level PA quota for tenant {}, error = {}", tenantId, e);
             return DEFAULT_QUOTA;
+        }
+    }
+
+    @Override
+    public Map<String, Long> setTenantPaQuota(@NotNull String tenantId, @NotNull Map<String, Long> paQuota) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(tenantId), "tenant id should not be blank");
+        Preconditions.checkArgument(MapUtils.isNotEmpty(paQuota), "input pa quota map should not be empty");
+        try {
+            Map<String, Long> existingQuota = new HashMap<>(getTenantPaQuota(tenantId));
+            existingQuota.putAll(paQuota);
+
+            // upsert since path might not exist
+            Camille c = CamilleEnvironment.getCamille();
+            Path path = PathBuilder.buildTenantPaQuotaPath(CamilleEnvironment.getPodId(),
+                    CustomerSpace.parse(tenantId));
+            Document doc = new Document(JsonUtils.serialize(existingQuota));
+            c.upsert(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+            return existingQuota;
+        } catch (Exception e) {
+            log.error("Failed to set pa quota {} for tenant {}", paQuota, tenantId);
+            throw new RuntimeException(e);
         }
     }
 
