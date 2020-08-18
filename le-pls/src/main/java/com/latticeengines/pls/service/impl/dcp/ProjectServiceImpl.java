@@ -38,7 +38,8 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectDetails project = projectProxy.createDCPProject(customerSpace, projectRequest, user);
         if(project != null){
             GlobalTeamData globalTeamData = new GlobalTeamData();
-            globalTeamData.setTeamName(projectRequest.getDisplayName());
+            String timeStamp = String.valueOf(System.currentTimeMillis()/1000);
+            globalTeamData.setTeamName(projectRequest.getDisplayName() + "_" + timeStamp);
             globalTeamData.setTeamMembers(Sets.newHashSet(user));
             String teamId = teamWrapperService.createTeam(user, globalTeamData);
             projectProxy.updateTeamId(customerSpace, project.getProjectId(), teamId);
