@@ -41,13 +41,13 @@ public class IDaaSServiceImpl implements IDaaSService  {
     @Inject
     private IDaaSServiceImpl _self;
 
-    @Value("${security.idaas.api.url}")
+    @Value("${remote.idaas.api.url}")
     private String apiUrl;
 
-    @Value("${security.idaas.client.id}")
+    @Value("${remote.idaas.client.id}")
     private String clientId;
 
-    @Value("${security.idaas.client.secret.encrypted}")
+    @Value("${remote.idaas.client.secret.encrypted}")
     private String clientSecret;
 
     private volatile RestApiClient client;

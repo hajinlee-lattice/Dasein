@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 public interface PrimeMetadataService {
 
+    String DunsNumber = "duns_number";
+
     DataBlockMetadataContainer getDataBlockMetadata();
 
     List<DataBlock> getDataBlocks();

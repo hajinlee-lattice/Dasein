@@ -33,18 +33,18 @@ import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
-import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
+import com.latticeengines.datacloud.match.service.GenericMetadataService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
-import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
@@ -52,12 +52,10 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -89,6 +87,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Inject
     private PrimeMetadataService primeMetadataService;
 
+    @Inject
+    private GenericMetadataService genericMetadataService;
+
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
@@ -100,6 +101,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Value("${datacloud.match.default.decision.graph.prime}")
     private String defaultPrimeGraph;
+
+    @Value("${datacloud.match.default.decision.graph.tps}")
+    private String defaultTpsGraph;
 
     /**
      * Default DataCloud version is latest approved version with major version as
@@ -121,6 +125,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (StringUtils.isEmpty(decisionGraph)) {
             if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(input.getTargetEntity())) {
                 decisionGraph = defaultPrimeGraph;
+            } else if (ContactMasterConstants.MATCH_ENTITY_TPS.equals(input.getTargetEntity())) {
+                decisionGraph = defaultTpsGraph;
             } else {
                 decisionGraph = defaultGraph;
             }
@@ -165,22 +171,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (isAttrLookup(input)) {
             throw new UnsupportedOperationException("Should not call parseColumnSelection for cdl match.");
         } else {
-            if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
-                //FIXME: should merge to column selection service after ingesting DataBlock metadata
-                return input.getCustomSelection();
-            } else {
-                ColumnSelectionService columnSelectionService = beanDispatcher
-                        .getColumnSelectionService(input.getDataCloudVersion());
-                String dataCloudVersion = input.getDataCloudVersion();
-                if (input.getUnionSelection() != null) {
-                    return combineSelections(columnSelectionService, input.getUnionSelection(), dataCloudVersion);
-                } else if (input.getPredefinedSelection() != null) {
-                    return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(),
-                            dataCloudVersion);
-                } else {
-                    return input.getCustomSelection();
-                }
-            }
+            return genericMetadataService.parseColumnSelection(input);
         }
     }
 
@@ -256,20 +247,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
 
         }
-    }
-
-    @MatchStep(threshold = 100L)
-    public ColumnSelection combineSelections(ColumnSelectionService columnSelectionService,
-            UnionSelection unionSelection, String dataCloudVersion) {
-        List<ColumnSelection> selections = new ArrayList<>();
-        for (Map.Entry<Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
-            Predefined predefined = entry.getKey();
-            selections.add(columnSelectionService.parsePredefinedColumnSelection(predefined, dataCloudVersion));
-        }
-        if (unionSelection.getCustomSelection() != null && !unionSelection.getCustomSelection().isEmpty()) {
-            selections.add(unionSelection.getCustomSelection());
-        }
-        return ColumnSelection.combine(selections);
     }
 
     // this is a dispatcher method
@@ -395,22 +372,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
         if (CollectionUtils.isNotEmpty(metadatas)) {
-            output = appendMetadata(output, metadatas);
+            appendMetadata(output, metadatas);
         } else {
             if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
                 throw new UnsupportedOperationException("Column metadatas should already be set for Entity Match");
             }
-            if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
-                Set<String> requestedCols = new HashSet<>(columnSelection.getColumnIds());
-                List<PrimeColumn> columns = primeMetadataService.getPrimeColumns(requestedCols);
-                List<ColumnMetadata> cms = columns.stream() //
-                        .map(PrimeColumn::toColumnMetadata).collect(Collectors.toList());
-                output.setMetadata(cms);
-            } else {
-                output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
-            }
+            List<ColumnMetadata> cms = genericMetadataService.getOutputSchema(input, columnSelection);
+            output.setMetadata(cms);
         }
-        output = parseOutputFields(output, input.getMetadataFields());
+        parseOutputFields(output, input.getMetadataFields());
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
         return output;

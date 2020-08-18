@@ -1,10 +1,8 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import java.io.ByteArrayOutputStream
-import java.util
 import java.util.UUID
 
-import com.fasterxml.jackson.core.`type`.TypeReference
 import com.latticeengines.common.exposed.util.{CipherUtils, JsonUtils, KryoUtils}
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName
 import com.latticeengines.domain.exposed.metadata.InterfaceName
@@ -13,7 +11,6 @@ import com.latticeengines.domain.exposed.playmakercore.{NonStandardRecColumnName
 import com.latticeengines.domain.exposed.pls.{DeltaCampaignLaunchSparkContext, RatingBucketName}
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
 import org.apache.spark.sql.functions.{col, count, from_unixtime, lit, sum, to_timestamp, udf, when}
 import org.apache.spark.sql.types.StringType

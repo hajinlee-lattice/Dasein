@@ -145,7 +145,8 @@ VALUES
   ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Will retire after M28', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
   ('Cupcake', 'AccountMatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDomainCountryBased,EntityNameCountryBased,EntityDunsBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
   ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7,8', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3),
-  ('WestWind', 'DunsToDuns,LocationToDuns,UrlToDuns', '0', '0:1|1:2', 'Default for DCP match', NULL, 'PrimeAccount', 3);
+  ('WestWind', 'DunsToDuns,LocationToDuns,UrlToDuns', '0', '0:1|1:2', 'Default for DCP match', NULL, 'PrimeAccount', NULL),
+  ('Heidegger', 'DunsToTps', '0', '', 'Default for TriPeopleSegment', NULL, 'TriPeopleSegment', NULL);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`
 CHARACTER SET UTF8
@@ -183,7 +184,7 @@ WHERE DecodeStrategy = '' OR DecodeStrategy = 'NULL';
 UPDATE AccountMasterColumn
 SET DisplayDiscretizationStrategy = NULL
 WHERE DisplayDiscretizationStrategy = '' OR DisplayDiscretizationStrategy = 'NULL';
-    
+
 UPDATE AccountMasterColumn
 SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
 WHERE Groups LIKE '%Segment%'

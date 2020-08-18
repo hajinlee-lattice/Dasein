@@ -101,7 +101,7 @@ CREATE PROCEDURE `UpdateSchema`()
 
 
      Alter table `PLS_MultiTenant`.`DCP_DATA_REPORT` 
-     Add column `READY_FOR_ROLLUP` bit;
+     Add column `READY_FOR_ROLLUP` bit not null;
 
   END //
 -- ##############################################################
