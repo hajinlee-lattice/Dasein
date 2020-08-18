@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,9 +34,11 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.scheduling.PAQuotaSummary;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
@@ -109,6 +113,28 @@ public class PAQuotaServiceImpl implements PAQuotaService {
     }
 
     @Override
+    public Map<String, Long> setTenantPaQuota(@NotNull String tenantId, @NotNull Map<String, Long> paQuota) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(tenantId), "tenant id should not be blank");
+        Preconditions.checkArgument(MapUtils.isNotEmpty(paQuota), "input pa quota map should not be empty");
+        try {
+            Map<String, Long> existingQuota = new HashMap<>(getTenantPaQuota(tenantId));
+            existingQuota.putAll(paQuota);
+
+            // upsert since path might not exist
+            Camille c = CamilleEnvironment.getCamille();
+            Path path = PathBuilder.buildTenantPaQuotaPath(CamilleEnvironment.getPodId(),
+                    CustomerSpace.parse(tenantId));
+            Document doc = new Document(JsonUtils.serialize(existingQuota));
+            c.upsert(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+            return existingQuota;
+        } catch (Exception e) {
+            log.error("Failed to set pa quota {} for tenant {}", paQuota, tenantId);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public PAQuotaSummary getPAQuotaSummary(@NotNull String tenantId, List<WorkflowJob> completedPAJobs, Instant now,
             ZoneId timezone) {
         if (now == null) {
@@ -122,10 +148,12 @@ public class PAQuotaServiceImpl implements PAQuotaService {
         Instant[] quotaInterval = getCurrentQuotaInterval(timezone, now);
         Instant quotaStartTime = quotaInterval[0];
         Instant quotaEndTime = quotaInterval[1];
+        long autoScheduleQuota = quota.getOrDefault(SchedulerConstants.QUOTA_AUTO_SCHEDULE, 0L);
 
         PAQuotaSummary summary = new PAQuotaSummary();
         summary.setQuotaResetTime(calculateResetTime(quotaEndTime, now));
         summary.setRecentlyCompletedPAs(getPAInQuotaInterval(completedPAJobs, quotaStartTime, quotaEndTime));
+        summary.setPeacePeriodSummary(getPeacePeriodSummary(timezone, now, autoScheduleQuota));
 
         // calculate remaining quota (can be negative due to manually started PAs but
         // set to 0 for display purposes)
@@ -149,6 +177,28 @@ public class PAQuotaServiceImpl implements PAQuotaService {
             summary.setMessage(msg);
         }
 
+        return summary;
+    }
+
+    private PAQuotaSummary.PeacePeriodSummary getPeacePeriodSummary(@NotNull ZoneId timezone, Instant now,
+            long autoScheduleQuota) {
+        PAQuotaSummary.PeacePeriodSummary summary = new PAQuotaSummary.PeacePeriodSummary();
+        Pair<Instant, Instant> period = SchedulingPAUtils.calculatePeacePeriod(now, timezone, autoScheduleQuota);
+        if (period == null) {
+            summary.setInPeacePeriod(false);
+            return summary;
+        }
+
+        summary.setInPeacePeriod(SchedulingPAUtils.isInPeacePeriod(now, timezone, autoScheduleQuota));
+        summary.setStartAt(period.getLeft());
+        summary.setEndAt(period.getRight());
+        if (summary.isInPeacePeriod()) {
+            Instant endTime = summary.getEndAt();
+            Duration timeUntilPeriodEnd = Duration.between(now, endTime);
+            long minutes = timeUntilPeriodEnd.toMinutes();
+            String hm = String.format("%02dh%02dm", minutes / 60, (minutes % 60));
+            summary.setRemainingDuration(hm);
+        }
         return summary;
     }
 

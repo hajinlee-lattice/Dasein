@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
@@ -127,7 +127,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         Set<String> canRunJobTenants = new HashSet<>();
         do {
             SchedulingPAObject obj = poll();
-            tenantId = SchedulingPAUtil.getTenantId(obj);
+            tenantId = SchedulingPAUtils.getTenantId(obj);
             if (tenantId != null) {
                 canRunJobSetInQueue.add(obj);
                 canRunJobTenants.add(tenantId);

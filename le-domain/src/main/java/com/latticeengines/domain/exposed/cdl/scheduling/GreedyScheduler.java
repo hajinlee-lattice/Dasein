@@ -42,7 +42,7 @@ public class GreedyScheduler implements Scheduler {
                 }
                 List<SchedulingPAObject> objs = schedulingPAQueue.fillAllCanRunJobs();
                 details.putAll(getDetails(schedulingPAQueue.getQueueName(), objs, schedulingPAQueue.getTimeClock()));
-                Set<String> tenantIds = SchedulingPAUtil.getTenantIds(objs);
+                Set<String> tenantIds = SchedulingPAUtils.getTenantIds(objs);
                 if (schedulingPAQueue.isRetryQueue()) {
                     canRunRetryJobTenantSet.addAll(tenantIds);
                 } else {

@@ -20,11 +20,14 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,8 +40,13 @@ import com.latticeengines.apps.cdl.service.PAQuotaService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.scheduling.PAQuotaSummary;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
@@ -150,6 +158,40 @@ public class SchedulingPAQueueResource {
             }
         }
         return status;
+    }
+
+    // TODO maybe merge/remove both API, currently only for convenience/testing
+
+    @PostMapping("/timezone/{customerSpace}")
+    @ResponseBody
+    @ApiOperation("Set timezone for specific tenant")
+    public Boolean setTimezone(@PathVariable String customerSpace, @RequestBody String timezone) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(timezone), "timezone string should not be blank");
+
+        try {
+            ZoneId zoneId = ZoneId.of(timezone);
+            Camille camille = CamilleEnvironment.getCamille();
+            Path tenantPath = PathBuilder.buildTenantTimezonePath(CamilleEnvironment.getPodId(),
+                    CustomerSpace.parse(customerSpace));
+            Document doc = new Document(zoneId.getId());
+            camille.upsert(tenantPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            log.info("setting timezone to {} for tenant {}", zoneId.getId(), customerSpace);
+            return true;
+        } catch (DateTimeException e) {
+            String msg = String.format("input timezone string (%s) is not valid", timezone);
+            log.error("Input timezone string ({}) is not valid. error = {}", timezone, e);
+            throw new IllegalArgumentException(msg, e);
+        } catch (Exception e) {
+            log.error("Failed to set timezone ({}) for tenant {}", timezone, customerSpace);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("/quota/{customerSpace}")
+    @ResponseBody
+    @ApiOperation("Update (merge) PA quota for specific tenant")
+    public Map<String, Long> setPAQuota(@PathVariable String customerSpace, @RequestBody Map<String, Long> paQuota) {
+        return paQuotaService.setTenantPaQuota(customerSpace, paQuota);
     }
 
     @GetMapping("/quota/{customerSpace}")
