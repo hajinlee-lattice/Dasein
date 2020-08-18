@@ -64,8 +64,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     protected String inputMasterTableName;
     protected String diffTableName;
-    protected String changeListTableName;
-    protected String reportChangeListTableName;
     protected Table masterTable;
     protected Table systemBatchTable;
     protected String systemBatchTableName;
@@ -88,17 +86,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         generateDiffReport();
 
         diffTableName = getDiffTableName();
-        changeListTableName = getChangeListTableName();
-        reportChangeListTableName = getReportChangeListTableName();
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
-        // FIXME - put 3d retention to change list table mainly for debugging purpose to
-        // update dynamoDB accountLookup.
-        // can add back to TEMPORARY_CDL_TABLES if stable enough
-        addShortRetentionToTable(changeListTableName);
-        updateEntityValueMapInContext(ENTITY_REPORT_CHANGELIST_TABLES, reportChangeListTableName, String.class);
-        addToListInContext(TEMPORARY_CDL_TABLES, reportChangeListTableName, String.class);
-
         if (hasSchemaChange()) {
             List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE,
                     BusinessEntity.class);
@@ -494,6 +483,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
      *            target entity
      * @return non-null list of system IDs
      */
+    @Override
     protected List<String> getSystemIds(BusinessEntity entity) {
         Map<String, List<String>> systemIdMap = configuration.getSystemIdMap();
         if (MapUtils.isEmpty(systemIdMap)) {
@@ -552,14 +542,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     protected String getDiffTableName() {
         return TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
-    }
-
-    protected String getChangeListTableName() {
-        return TableUtils.getFullTableName(changeListTablePrefix, pipelineVersion);
-    }
-
-    protected String getReportChangeListTableName() {
-        return TableUtils.getFullTableName(reportChangeListTablePrefix, pipelineVersion);
     }
 
     protected boolean shouldPublishDynamo() {

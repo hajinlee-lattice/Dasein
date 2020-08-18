@@ -328,6 +328,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
     public static final String NEW_RECORDS = "NEW_RECORDS";
     public static final String DELETED_RECORDS = "DELETED_RECORDS";
+    public static final String TOTAL_RECORDS = "TOTAL_RECORDS";
     public static final String FINAL_RECORDS = "FINAL_RECORDS";
     public static final String MERGED_PRODUCT_ID = "MERGED_PRODUCT_ID";
     public static final String MERGED_PRODUCT_BUNDLE = "MERGED_PRODUCT_BUNDLE";
