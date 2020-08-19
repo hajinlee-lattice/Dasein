@@ -1,10 +1,12 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.CountryCodeUtils
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{Row, SparkSession}
 
@@ -13,6 +15,12 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
   override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateLaunchArtifactsJobConfig]): Unit = {
     val config: GenerateLaunchArtifactsJobConfig = lattice.config
     val mainEntity = config.getMainEntity
+    val externalSystemName = config.getExternalSystemName
+    val url = config.getManageDbUrl
+    val user = config.getUser
+    val password = config.getPassword
+    val key = config.getEncryptionKey
+    val salt = config.getSaltHint
     val accountId = InterfaceName.AccountId.name()
     val contactId = InterfaceName.ContactId.name()
 
@@ -29,15 +37,24 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
       distinctNegativeAccountsDf = negativeDeltaDf.select(negativeDeltaDf(accountId)).distinct()
     }
 
-    val addedAccountsData = accountsDf.join(distinctPositiveAccountsDf, Seq(accountId))
+    var addedAccountsData = accountsDf.join(distinctPositiveAccountsDf, Seq(accountId))
     val removedAccountsData = accountsDf.join(distinctNegativeAccountsDf, Seq(accountId), "right")
-    val fullContactsData = targetSegmentsContactsDF.join(distinctPositiveAccountsDf, Seq(accountId), if (mainEntity == BusinessEntity.Contact && config.isIncludeAccountsWithoutContacts) "right" else "inner")
+    var fullContactsData = targetSegmentsContactsDF.join(distinctPositiveAccountsDf, Seq(accountId), if (mainEntity == BusinessEntity.Contact && config.isIncludeAccountsWithoutContacts) "right" else "inner")
 
+    if (mainEntity == BusinessEntity.Account && externalSystemName == CDLExternalSystemName.LinkedIn) {
+      addedAccountsData = CountryCodeUtils.convert(addedAccountsData, "Country", "Country", url, user, password, key, salt)
+    }
     lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData)
 
     if (mainEntity == BusinessEntity.Contact) {
-      val addedContactsData = contactsDf.drop(accountId).join(positiveDeltaDf, Seq(contactId), if (config.isIncludeAccountsWithoutContacts) "right" else "inner")
-      val removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
+      var addedContactsData = contactsDf.drop(accountId).join(positiveDeltaDf, Seq(contactId), if (config.isIncludeAccountsWithoutContacts) "right" else "inner")
+      var removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
+      val adPlatforms = List(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook)
+
+      if (adPlatforms.contains(externalSystemName)) {
+        addedContactsData = CountryCodeUtils.convert(addedContactsData, "ContactCountry", "ContactCountry", url, user, password, key, salt)
+        fullContactsData = CountryCodeUtils.convert(fullContactsData, "ContactCountry", "ContactCountry", url, user, password, key, salt)
+      }
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
   }

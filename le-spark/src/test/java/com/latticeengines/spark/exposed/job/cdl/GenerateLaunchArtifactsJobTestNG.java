@@ -11,19 +11,27 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StreamUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -48,6 +56,22 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     private DataUnit accountData;
     private DataUnit contactData;
 
+    private HdfsFileFilter avroFileFilter = new HdfsFileFilter() {
+        @Override
+        public boolean accept(FileStatus file) {
+            return file.getPath().getName().endsWith("avro");
+        }
+    };
+
+    @Value("${datacloud.manage.url}")
+    private String url;
+
+    @Value("${datacloud.manage.user}")
+    private String user;
+
+    @Value("${datacloud.manage.password.encrypted}")
+    private String password;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
@@ -66,6 +90,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
                 .name("engine_qkkfxxvgtbc9jkaymn80cq")
                 .type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion()).noDefault() //
                 .name("CompanyName").type().stringType().noDefault()//
+                .name("Country").type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion()).noDefault() //
                 .name("user_TimeZone_Test2").type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion())
                 .noDefault() //
                 .name("AnnualRevenueCurrency").type().stringType().noDefault()//
@@ -78,6 +103,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         Schema contactSchema = SchemaBuilder.record("Contact").fields() //
                 .name("ContactId").type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion()).noDefault() //
                 .name("AccountId").type().stringType().noDefault() //
+                .name("ContactCountry").type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion()).noDefault() //
                 .name("Email").type().stringType().noDefault() //
                 .name("FirstName").type().stringType().noDefault() //
                 .name("Title").type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion()).noDefault() //
@@ -308,6 +334,52 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         Assert.assertEquals(result.getTargets().get(4).getCount().intValue(), 0);
     }
 
+    @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsJobForContactCountyConversion() throws Exception {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        config.setAccountsData(accountData);
+        config.setContactsData(contactData);
+        config.setTargetSegmentsContactsData(contactData);
+        config.setPositiveDelta(positiveContacts);
+        config.setMainEntity(BusinessEntity.Contact);
+        config.setWorkspace("testGenerateLaunchArtifactsJobForContactCountyConversion");
+        config.setExternalSystemName(CDLExternalSystemName.GoogleAds);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("TestGenerateLaunchArtifactsJobForContactCountyConversion Results: " + JsonUtils.serialize(result));
+        // result.getTargets should have [addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData]
+        // only fullContactsData and addedContactsData shuould be converted
+        testCountryConversion(yarnConfiguration, result.getTargets().get(2).getPath(), avroFileFilter, "ContactCountry");
+        testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter, "ContactCountry");
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsJobForAccountCountyConversion() throws Exception {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        config.setAccountsData(accountData);
+        config.setContactsData(contactData);
+        config.setPositiveDelta(positiveAccounts);
+        config.setMainEntity(BusinessEntity.Account);
+        config.setWorkspace("testGenerateLaunchArtifactsJobForAccountCountyConversion");
+        config.setExternalSystemName(CDLExternalSystemName.LinkedIn);
+
+        String encryptionKey = CipherUtils.generateKey();
+        String saltHint = CipherUtils.generateKey();
+        config.setManageDbUrl(url);
+        config.setUser(user);
+        config.setEncryptionKey(encryptionKey);
+        config.setSaltHint(saltHint);
+        config.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("TestGenerateLaunchArtifactsJobForAccountCountyConversion Results: " + JsonUtils.serialize(result));
+        // result.getTargets should have [addedAccountsData, removedAccountsData, fullContactsData]
+        // only addedAccountsData should be converted
+        testCountryConversion(yarnConfiguration, result.getTargets().get(0).getPath(), avroFileFilter, "Country");
+    }
+
     interface AvroExportable {
         GenericRecord getAsRecord(Schema schema);
     }
@@ -356,6 +428,14 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
 
         public void setCompanyName(String companyName) {
             this.companyName = companyName;
+        }
+
+        public String getCountry() {
+            return Country;
+        }
+
+        public void setCountry(String country) {
+            Country = country;
         }
 
         public String getUser_TimeZone_Test2() {
@@ -407,6 +487,9 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         @JsonProperty(value = "CompanyName")
         private String companyName;
 
+        @JsonProperty(value = "Country")
+        private String Country;
+
         @JsonProperty(value = "user_TimeZone_Test2")
         private String user_TimeZone_Test2;
 
@@ -428,6 +511,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
             builder.set("AccountId", this.getAccountId());
             builder.set("engine_qkkfxxvgtbc9jkaymn80cq", this.getEngine_qkkfxxvgtbc9jkaymn80cq());
             builder.set("CompanyName", this.getCompanyName());
+            builder.set("Country", this.getCountry());
             builder.set("user_TimeZone_Test2", this.getUser_TimeZone_Test2());
             builder.set("AnnualRevenueCurrency", this.getAnnualRevenueCurrency());
             builder.set("Website", this.getWebsite());
@@ -454,6 +538,14 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
 
         public void setContactId(String contactId) {
             ContactId = contactId;
+        }
+
+        public String getContactCountry() {
+            return ContactCountry;
+        }
+
+        public void setContactCountry(String contactCountry) {
+            ContactCountry = contactCountry;
         }
 
         public String getEmail() {
@@ -502,6 +594,9 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         @JsonProperty(value = "ContactId")
         private String ContactId;
 
+        @JsonProperty(value = "ContactCountry")
+        private String ContactCountry;
+
         @JsonProperty(value = "Email")
         private String Email;
 
@@ -522,6 +617,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             builder.set("AccountId", this.getAccountId());
             builder.set("ContactId", this.getContactId());
+            builder.set("ContactCountry", this.getContactCountry());
             builder.set("Email", this.getEmail());
             builder.set("FirstName", this.getFirstName());
             builder.set("user_Email_Opt_In", this.getUser_Email_Opt_In());
@@ -597,5 +693,33 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
             return;
         }
         log.info(tag + ", " + dataUnit.toString());
+    }
+
+    private static String getString(GenericRecord record, String field) throws Exception {
+        String value;
+        try {
+            value = record.get(field).toString();
+        } catch (Exception e) {
+            value = "";
+        }
+        return value;
+    }
+
+    private void testCountryConversion(Configuration yarnConfiguration, String hdfsDir, HdfsFileFilter avroFileFilter, String fieldName) throws Exception {
+        List avroFilePaths = HdfsUtils.onlyGetFilesForDir(yarnConfiguration, hdfsDir, avroFileFilter);
+        for (Object filePath : avroFilePaths) {
+            String filePathStr = filePath.toString();
+            log.info("File path is: " + filePathStr);
+
+            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(filePathStr))) {
+                for (GenericRecord record : reader) {
+                    String country = getString(record, fieldName);
+                    if (!country.isEmpty()) {
+                        log.info(fieldName + ": " + country);
+                        Assert.assertTrue(country.length() == 2);
+                    }
+                }
+            }
+        }
     }
 }
