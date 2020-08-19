@@ -225,6 +225,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
                 overview.setLimit(trends);
                 break;
+            case COVID_19:
+                long covid19s = DEFAULT_LIMIT;
+                overview.setLimit(covid19s);
+                break;    
             default:
                 log.warn("Unsupported" + category);
                 break;
