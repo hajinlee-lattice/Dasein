@@ -31,7 +31,7 @@ public class VboCallbackResource {
     @Inject
     TenantService tenantService;
 
-    @Value("${admin.vbo.callback.usemock}")
+    @Value("${admin.vbo.callback.canmock}")
     boolean enabled;
 
     @PostMapping("")

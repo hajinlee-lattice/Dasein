@@ -184,7 +184,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void provisionEndToEndVboTestTenants(String subNumber) {
-        String url = getRestHostPort() + "/admin/tenants/vboadmin";
+        String url = getRestHostPort() + "/admin/tenants/vboadmin?useMock=true";
         VboRequest req = generateVBORequest(subNumber);
 
         VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);

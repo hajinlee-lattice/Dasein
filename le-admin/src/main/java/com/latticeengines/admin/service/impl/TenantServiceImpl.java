@@ -168,8 +168,8 @@ public class TenantServiceImpl implements TenantService {
     @Value("${admin.vbo.callback.url}")
     private String callbackUrl;
 
-    @Value("${admin.vbo.callback.usemock}")
-    private boolean useMock;
+    @Value("${admin.vbo.callback.canmock}")
+    private boolean canMock;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -702,7 +702,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback) {
+    public VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback, Boolean useMock) {
         String subNumber  = vboRequest.getSubscriber().getSubscriberNumber();
         Tenant existingTenant = tenantService.findBySubscriberNumber(subNumber);
         if (existingTenant != null) {
@@ -843,7 +843,7 @@ public class TenantServiceImpl implements TenantService {
                 vboCallback.customerCreation.customerDetail.emailSent = Boolean.toString(false);
 
                 vboCallback.timeout = Boolean.FALSE;
-                vboCallback.targetUrl = useMock ? (requestUrl.substring(0, requestUrl.indexOf("/tenants")) + "/vbomock") : callbackUrl;
+                vboCallback.targetUrl = (canMock && useMock) ? (requestUrl.substring(0, requestUrl.indexOf("/tenants")) + "/vbomock") : callbackUrl;
             }
 
             boolean result = createTenant(tenantName, tenantName, registration, userName, vboCallback);

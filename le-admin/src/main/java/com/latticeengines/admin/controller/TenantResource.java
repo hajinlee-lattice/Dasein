@@ -231,10 +231,11 @@ public class TenantResource {
     @PostMapping("/vboadmin")
     @ResponseBody
     @ApiOperation(value = "Create a DCP tenant from VBO request")
-    public VboResponse createTenant(@RequestBody VboRequest vboRequest, @RequestParam(defaultValue = "true") Boolean callback, HttpServletRequest request) {
+    public VboResponse createTenant(@RequestBody VboRequest vboRequest, @RequestParam(defaultValue = "true") Boolean callback,
+                                    @RequestParam(defaultValue = "false") Boolean useMock, HttpServletRequest request) {
         try{
             String userName = getUserName(request);
-            return tenantService.createVboTenant(vboRequest, userName, request.getRequestURL().toString(), callback);
+            return tenantService.createVboTenant(vboRequest, userName, request.getRequestURL().toString(), callback, useMock);
         } catch(Exception e){
             VboResponse vboResponse = new VboResponse();
             vboResponse.setStatus("failed");

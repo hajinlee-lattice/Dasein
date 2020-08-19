@@ -52,5 +52,5 @@ public interface TenantService {
 
     List<LatticeModule> updateModules(String contractId, String tenantId, Collection<LatticeModule> modules);
 
-    VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback);
+    VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback, Boolean useMock);
 }
