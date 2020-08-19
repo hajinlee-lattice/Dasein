@@ -110,7 +110,6 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
                                String fileImportId, FieldDefinitionsRecord fieldDefinitionsRecord) {
-        S3ImportSystem importSystem = createSourceSystem(customerSpace, displayName, sourceId);
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
         if (projectInfo == null) {
             throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
@@ -119,6 +118,7 @@ public class SourceServiceImpl implements SourceService {
             sourceId = generateRandomSourceId(customerSpace);
         }
         validateSourceId(customerSpace, sourceId);
+        S3ImportSystem importSystem = createSourceSystem(customerSpace, displayName, sourceId);
         String relativePath = generateRelativePath(sourceId);
 
         Table templateTable = getTableFromRecord(fileImportId, customerSpace, sourceId, fieldDefinitionsRecord);
