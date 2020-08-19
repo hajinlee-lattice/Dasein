@@ -9,20 +9,17 @@ import org.owasp.validator.html.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+
 public class XSSSanitizer {
     private Policy policy;
     private AntiSamy antiSamy;
 
-    private static final Logger log = LoggerFactory.getLogger(XSSFilter.XssRequestWrapper.class);
+    private static final Logger log = LoggerFactory.getLogger(XSSSanitizer.class);
 
-    public XSSSanitizer(String antiSamyProfile) {
-        try {
-            policy = Policy.getInstance(antiSamyProfile);
-            antiSamy = new AntiSamy();
-            log.info(String.format("Succeeded to initialize AntiSamy. Policy file: {%s}", antiSamyProfile));
-        } catch (PolicyException e) {
-            log.warn(String.format("Failed to initialize AntiSamy. Policy file: {%s}.", antiSamyProfile), e);
-        }
+    public XSSSanitizer(InputStream profile) throws PolicyException {
+        policy = Policy.getInstance(profile);
+        antiSamy = new AntiSamy();
     }
 
     public String Sanitize(String value) {

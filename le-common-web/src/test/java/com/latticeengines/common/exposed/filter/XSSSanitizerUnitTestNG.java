@@ -6,6 +6,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.InputStream;
+
 public class XSSSanitizerUnitTestNG {
 
     @BeforeClass(groups = { "unit", "functional" })
@@ -18,16 +20,16 @@ public class XSSSanitizerUnitTestNG {
 
     @Test(groups = "unit")
     public void testSanitize() throws Exception {
-        String antiSamyPath = new ClassPathResource("antisamy-policy.xml").getFile().getPath();
-        XSSSanitizer sanitizer = new XSSSanitizer(antiSamyPath);
+        InputStream policy = new ClassPathResource("antisamy-policy.xml").getInputStream();
+        XSSSanitizer sanitizer = new XSSSanitizer(policy);
         String result = sanitizer.Sanitize("Test<script>alert('attack!!!')</script>");
         Assert.assertEquals(result, "Test");
     }
 
     @Test(groups = "unit")
     public void testSanitize2() throws Exception {
-        String antiSamyPath = new ClassPathResource("antisamy-policy.xml").getFile().getPath();
-        XSSSanitizer sanitizer = new XSSSanitizer(antiSamyPath);
+        InputStream policy = new ClassPathResource("antisamy-policy.xml").getInputStream();
+        XSSSanitizer sanitizer = new XSSSanitizer(policy);
         String result = sanitizer.Sanitize("Test<javascript>alert('attack!!!')</javascript>");
         Assert.assertEquals(result, "Testalert('attack!!!')");
     }
