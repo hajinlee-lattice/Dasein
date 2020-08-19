@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -117,7 +118,12 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
                 if (configDir.get("/ExportCronExpression") != null) {
                     String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
                     log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
-                    atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+                    atlasSchedulingService.createOrUpdateSchedulingByType(customerSpace, exportCron, AtlasScheduling.ScheduleType.Export);
+                }
+                if (configDir.get("/PAScheduleNowCronExpression") != null) {
+                    String paCron = configDir.get("/PAScheduleNowCronExpression").getDocument().getData();
+                    log.info(String.format("PA schedule now Cron for tenant %s is: %s", customerSpace, paCron));
+                    atlasSchedulingService.createOrUpdateSchedulingByType(customerSpace, paCron, AtlasScheduling.ScheduleType.PA);
                 }
             }
         } finally {

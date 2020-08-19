@@ -411,7 +411,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             Date snapshotTime = pair.getRight();
             HdfsDataUnit unit = units.get(index);
             // register duns count cache
-            String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId));
+            String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId.replace(".", "_")));
             Table dunsCount = toTable(dunsCountTableName, null, unit);
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
             dunsCountTables.add(dunsCountTableName);
@@ -427,6 +427,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             dataReportProxy.updateDataReport(customerSpace.toString(), level, ownerId, dupReport);
             index++;
         }
+        log.info("the new tables generated at rollup step: " + dunsCountTables);
         putObjectInContext(DUNS_COUNT_TABLE_NAMES, dunsCountTables);
     }
 }
