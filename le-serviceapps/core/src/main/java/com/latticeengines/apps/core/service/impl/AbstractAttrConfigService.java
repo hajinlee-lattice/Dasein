@@ -225,6 +225,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
                 overview.setLimit(trends);
                 break;
+            case COVID_19:
+                long covid19s = DEFAULT_LIMIT;
+                try {
+                    covid19s = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                            MultiTenantContext.getShortTenantId(), DataLicense.GROWTHTRENDS.getDataLicense());
+                } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
+                }
+                overview.setLimit(covid19s);
+                break;    
             default:
                 log.warn("Unsupported" + category);
                 break;
