@@ -35,7 +35,8 @@ public interface UploadService {
 
     void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig);
 
-    void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status, UploadDiagnostics uploadDiagnostics);
+    void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status,
+                            UploadDiagnostics uploadDiagnostics);
 
     UploadStatsContainer appendStatistics(String uploadId, UploadStatsContainer container);
 
@@ -46,6 +47,8 @@ public interface UploadService {
     UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 
     String getMatchResultTableName(String customerSpace, String uploadId);
+
+    void updateDropFileTime(String customerSpace, String uploadId, long dropFileTime);
 
     void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage);
 }

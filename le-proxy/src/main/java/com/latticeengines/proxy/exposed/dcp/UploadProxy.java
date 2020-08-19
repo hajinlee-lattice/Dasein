@@ -91,20 +91,19 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         } else {
             put("update Upload status", url);
         }
-
     }
 
-    public void updateStatsContent(String customerSpace, String uploadId, long statsPid, UploadStats uploadStats) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/{uploadId}/stats/{statsPid}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, statsPid);
+    public void updateStatsContent(String customerSpace, String uploadId, long statsId, UploadStats uploadStats) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{uploadId}/stats/{statsId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, statsId);
         log.info("Update stats for Upload " + uploadId + " to " + JsonUtils.serialize(uploadStats));
-        put("update Upload status", url, uploadStats);
+        put("Update stats for Upload", url, uploadStats);
     }
 
-    public void setLatestStats(String customerSpace, String uploadId, long statsPid) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/{uploadId}/latest-stats/{statsPid}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, statsPid);
-        log.info("Update latest stats for Upload " + uploadId + " to " + statsPid);
+    public void setLatestStats(String customerSpace, String uploadId, long statsId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{uploadId}/latest-stats/{statsId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, statsId);
+        log.info("Update latest stats for Upload " + uploadId + " to " + statsId);
         put("set Upload latest statistics", url);
     }
 
@@ -115,10 +114,17 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return ApplicationId.fromString(appIdStr);
     }
 
+    public void updateDropFileTime(String customerSpace, String uploadId, long dropFileTime) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/dropFileTime/{dropFileTime}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, dropFileTime);
+        log.info("Update dropFileTime for Upload " + uploadId + " to " + dropFileTime);
+        put("Update Upload dropFileTime", url);
+    }
+
     public void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/progressPercentage/{progressPercentage}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, progressPercentage);
         log.info("Update progressPercentage for Upload " + uploadId + " to " + progressPercentage);
-        put("update Upload progressPercentage", url);
+        put("Update Upload progressPercentage", url);
     }
 }
