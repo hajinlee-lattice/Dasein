@@ -230,7 +230,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         columnMetadata.setDisplayName(accountId);
         columnMetadata.setEntity(businessEntity);
         metadataList.get(Category.ACCOUNT_ATTRIBUTES.getOrder()).add(columnMetadata);
-        List<ColumnMetadata> cms = schemaMap.getOrDefault(businessEntity, Collections.emptyList());
+        List<ColumnMetadata> cms = schemaMap.getOrDefault(businessEntity, new ArrayList<>());
         cms.add(columnMetadata);
         schemaMap.put(businessEntity, cms);
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
@@ -244,7 +244,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         columnMetadata.setDisplayName(contactId);
         columnMetadata.setEntity(businessEntity);
         metadataList.get(Category.CONTACT_ATTRIBUTES.getOrder()).add(columnMetadata);
-        List<ColumnMetadata> cms = schemaMap.getOrDefault(businessEntity, Collections.emptyList());
+        List<ColumnMetadata> cms = schemaMap.getOrDefault(businessEntity, new ArrayList<>());
         cms.add(columnMetadata);
         schemaMap.put(businessEntity, cms);
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
