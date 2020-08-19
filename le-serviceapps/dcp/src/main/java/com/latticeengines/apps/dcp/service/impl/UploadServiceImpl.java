@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -157,7 +158,8 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status, UploadDiagnostics uploadDiagnostics) {
+    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status,
+                                   UploadDiagnostics uploadDiagnostics) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
@@ -226,15 +228,29 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
+    public void updateDropFileTime(String customerSpace, String uploadId, long dropFileTime) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
+        if (upload == null) {
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
+        }
+        if (dropFileTime < 0) {
+            throw new RuntimeException("Invalid dropFileTime provided: " + dropFileTime);
+        }
+        upload.setDropFileTime(new Date(dropFileTime));
+        uploadEntityMgr.update(upload);
+    }
+
+    @Override
     public void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
             throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
-        if(progressPercentage != null) {
-            upload.setProgressPercentage(Double.valueOf(progressPercentage));
-            uploadEntityMgr.update(upload);
+        if (StringUtils.isBlank(progressPercentage)) {
+            throw new RuntimeException("progressPercentage provided was null or empty: " + progressPercentage);
         }
+        upload.setProgressPercentage(Double.valueOf(progressPercentage));
+        uploadEntityMgr.update(upload);
     }
 
     private UploadStatsContainer findStats(String uploadId, Long statsId) {
@@ -287,11 +303,11 @@ public class UploadServiceImpl implements UploadService {
             details.setUploadConfig(upload.getUploadConfig());
         }
         details.setSourceId(upload.getSourceId());
-        if (upload.getUploadConfig() != null) {
-            details.setDropFileTime(upload.getUploadConfig().getDropFileTime());
-        }
         details.setUploadCreatedTime(upload.getCreated().getTime());
         details.setCreatedBy(upload.getCreatedBy());
+        if (upload.getDropFileTime() != null) {
+            details.setDropFileTime(upload.getDropFileTime().getTime());
+        }
         details.setProgressPercentage(upload.getProgressPercentage());
         return details;
     }
