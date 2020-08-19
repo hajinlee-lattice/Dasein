@@ -47,7 +47,7 @@ public class EntityIdAssociateMicroEngineActor extends EntityMicroEngineActorBas
     @Inject
     private EntityMatchInternalService entityMatchInternalService;
 
-    @Value("${datacloud.match.entity.cfg.onlyAddDummyIfNotMapped:true}")
+    @Value("${datacloud.match.entity.cfg.onlyAddDummyIfNotMapped:false}")
     private boolean onlyAddDummyIfNotMapped;
 
     @Override
