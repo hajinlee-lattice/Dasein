@@ -61,6 +61,10 @@ public final class AttrConfigServiceImplTestUtils {
     public static final Long inactiveForGrowthTrends = 0L;
     public static final Long totalGrowthTrendsAttrs = 16L;
 
+    public static final Long covid19Limit = 16L;
+    public static final Long activeForCovid19 = 5L;
+    public static final Long inactiveForCovid19 = 0L;
+    public static final Long totalCovid19Attrs = 5L;
 
     public static AttrConfig getAttr1(Category category, boolean enableThisAttr) {
         return getAttr1(category, enableThisAttr, false);
@@ -773,6 +777,19 @@ public final class AttrConfigServiceImplTestUtils {
             Map<Boolean, Long> propDetails6 = new HashMap<>();
             propSummary6.put(propertyName, propDetails6);
         }
+
+        AttrConfigCategoryOverview<Boolean> attrConfig7 = new AttrConfigCategoryOverview<>();
+        result.put(Category.COVID_19.getName(), attrConfig7);
+        attrConfig7.setLimit(500L);
+        attrConfig7.setTotalAttrs(5L);
+        Map<String, Map<Boolean, Long>> propSummary7 = new HashMap<>();
+        attrConfig7.setPropSummary(propSummary7);
+        for (String propertyName : propertyNames) {
+            Map<Boolean, Long> propDetails7 = new HashMap<>();
+            propDetails7.put(Boolean.FALSE, 9L);
+            propSummary7.put(propertyName, propDetails7);
+        }
+
         return result;
     }
 
@@ -844,6 +861,17 @@ public final class AttrConfigServiceImplTestUtils {
         valueCountMap = new HashMap<>();
         valueCountMap.put(AttrState.Active, activeForGrowthTrends);
         valueCountMap.put(AttrState.Inactive, inactiveForGrowthTrends);
+        propSummary.put(ColumnMetadataKey.State, valueCountMap);
+
+        AttrConfigCategoryOverview<AttrState> covid19CategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
+        map.put(Category.COVID_19.getName(), covid19CategoryAttrConfigOverview);
+        covid19CategoryAttrConfigOverview.setLimit(covid19Limit);
+        covid19CategoryAttrConfigOverview.setTotalAttrs(totalCovid19Attrs);
+        propSummary = new HashMap<>();
+        covid19CategoryAttrConfigOverview.setPropSummary(propSummary);
+        valueCountMap = new HashMap<>();
+        valueCountMap.put(AttrState.Active, activeForCovid19);
+        valueCountMap.put(AttrState.Inactive, inactiveForCovid19);
         propSummary.put(ColumnMetadataKey.State, valueCountMap);
 
         log.info("map is " + map);

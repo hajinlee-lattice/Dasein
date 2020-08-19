@@ -17,6 +17,7 @@ public final class DataCollectionStatusUtils {
         Map<String, Long> dateMap = new HashMap<>();
         dateMap.put(Category.FIRMOGRAPHICS.getName(), timestamp);
         dateMap.put(Category.GROWTH_TRENDS.getName(), timestamp);
+        dateMap.put(Category.COVID_19.getName(), timestamp);
         dateMap.put(Category.INTENT.getName(), timestamp);
         dateMap.put(Category.ONLINE_PRESENCE.getName(), timestamp);
         dateMap.put(Category.TECHNOLOGY_PROFILE.getName(), timestamp);
@@ -40,6 +41,7 @@ public final class DataCollectionStatusUtils {
         }
         dateMap.put(Category.FIRMOGRAPHICS.getName(), timestamp);
         dateMap.put(Category.GROWTH_TRENDS.getName(), timestamp);
+        dateMap.put(Category.COVID_19.getName(), timestamp);
         dateMap.put(Category.INTENT.getName(), timestamp);
         dateMap.put(Category.ONLINE_PRESENCE.getName(), timestamp);
         dateMap.put(Category.TECHNOLOGY_PROFILE.getName(), timestamp);
