@@ -84,7 +84,6 @@ public class XSSFilter implements Filter {
         @Override
         public String getParameter(String parameter) {
             String value = super.getParameter(parameter);
-
             return Sanitize(value);
         }
 

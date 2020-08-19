@@ -1,12 +1,12 @@
 package com.latticeengines.common.exposed.filter;
 
+import java.io.InputStream;
+
 import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.io.InputStream;
 
 public class XSSSanitizerUnitTestNG {
 

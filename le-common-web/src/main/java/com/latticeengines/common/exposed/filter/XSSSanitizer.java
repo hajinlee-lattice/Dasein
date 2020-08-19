@@ -1,5 +1,7 @@
 package com.latticeengines.common.exposed.filter;
 
+import java.io.InputStream;
+
 import org.owasp.esapi.ESAPI;
 import org.owasp.validator.html.AntiSamy;
 import org.owasp.validator.html.Policy;
@@ -8,8 +10,6 @@ import org.owasp.validator.html.PolicyException;
 import org.owasp.validator.html.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.InputStream;
 
 public class XSSSanitizer {
     private Policy policy;
