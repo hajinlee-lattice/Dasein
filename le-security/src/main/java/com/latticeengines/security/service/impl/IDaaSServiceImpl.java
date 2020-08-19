@@ -401,7 +401,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     private URI createInvitationLink(String email, String source) {
-        return URI.create(apiUrl + "/user/" + email + "/" + source + "/invitation");
+        return URI.create(apiUrl + "/user/" + email + "/" + source.replaceAll(" ", "%20") + "/invitation");
     }
 
 }
