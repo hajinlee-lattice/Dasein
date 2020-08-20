@@ -368,7 +368,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         List<UploadJobStep>mergedJobSteps = mergeDupSteps(uploadJobSteps);
         uploadJobDetails.setUploadJobSteps(mergedJobSteps);
         uploadJobDetails.setProgressPercentage(uploadDetails.getProgressPercentage());
-        if(uploadDetails.getProgressPercentage() < 100){
+        if(uploadDetails.getProgressPercentage() < 100 && mergedJobSteps.size() > 0){
             uploadJobDetails.setCurrentStep(mergedJobSteps.get(mergedJobSteps.size()-1));
         }
         return uploadJobDetails;
