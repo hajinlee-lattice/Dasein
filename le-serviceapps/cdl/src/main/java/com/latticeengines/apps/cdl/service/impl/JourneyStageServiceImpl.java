@@ -46,6 +46,8 @@ public class JourneyStageServiceImpl implements JourneyStageService {
         if (journeyStage.getPid() != null) {
             newJourneyStage = journeyStageEntityMgr.findByPid(journeyStage.getPid());
         }
+        // Add validation here before create/update
+
         if (newJourneyStage == null) {
             newJourneyStage = new JourneyStage();
         }
@@ -54,6 +56,8 @@ public class JourneyStageServiceImpl implements JourneyStageService {
         newJourneyStage.setStageName(journeyStage.getStageName());
         newJourneyStage.setDisplayName(journeyStage.getDisplayName());
         newJourneyStage.setPredicates(journeyStage.getPredicates());
+        newJourneyStage.setDescription(journeyStage.getDescription());
+        newJourneyStage.setDisplayColorCode(journeyStage.getDisplayColorCode());
         journeyStageEntityMgr.createOrUpdate(newJourneyStage);
         return newJourneyStage;
     }

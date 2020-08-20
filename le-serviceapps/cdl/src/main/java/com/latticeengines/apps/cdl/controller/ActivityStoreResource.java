@@ -175,8 +175,7 @@ public class ActivityStoreResource {
     @GetMapping("/metricsGroups/groupId/{groupId}")
     @ResponseBody
     @ApiOperation("Retrieve metricsGroup by tenant and groupId")
-    public ActivityMetricsGroup findGroupByGroupId(
-            @PathVariable(value = "customerSpace") String customerSpace, //
+    public ActivityMetricsGroup findGroupByGroupId(@PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "groupId") String groupId) {
         return activityStoreService.findGroupByGroupId(customerSpace, groupId);
     }
@@ -187,7 +186,7 @@ public class ActivityStoreResource {
     public void deleteDimensionMetadataWithSignature( //
             @PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "signature") String signature) {
-        // TODO make sure signaute belongs to tenant
+        // TODO make sure signature belongs to tenant
         dimensionMetadataService.delete(signature);
     }
 }
