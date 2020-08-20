@@ -102,7 +102,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         ProjectDetails project = testProjectProxy.getProjectByProjectId(projectList.get(0).getProjectId());
         GlobalTeamData teamData = new GlobalTeamData();
-        teamData.setTeamName(project.getProjectDisplayName());
+        teamData.setTeamName(project.getProjectId());
         String externalAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.EXTERNAL_ADMIN);
         String superAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
         teamData.setTeamMembers(Sets.newHashSet(externalAdminUser, superAdminUser));
