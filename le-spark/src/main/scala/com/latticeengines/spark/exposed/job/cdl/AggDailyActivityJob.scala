@@ -7,7 +7,7 @@ import java.util
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity._
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __Row_Count__, __StreamDate, StreamDateId}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, StreamDateId, __Row_Count__, __StreamDate}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, AggDailyActivityConfig}
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils
@@ -260,10 +260,12 @@ object DimensionValueHelper extends Serializable {
     val metadataWithPtn = dimValues
       .map(valueMap => (ActivityStoreUtils.modifyPattern(valueMap(ptnAttr).asInstanceOf[String]).r.pattern, valueMap))
 
+    val fieldIndexMap = df.schema.fieldNames.zipWithIndex.toMap
+
     // can match multiple patterns
     df.flatMap(row => {
       val values = row.toSeq
-      val targetStr = row.getAs[String](regexCalculator.getAttribute)
+      val targetStr = row.getAs[String](fieldIndexMap(regexCalculator.getAttribute))
       if (StringUtils.isBlank(targetStr)) {
         Row.fromSeq(values :+ null) :: Nil
       } else {
