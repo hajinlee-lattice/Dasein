@@ -411,6 +411,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
+            // skip checking type for special mapping for entity match
+            if (bestEffortMapping.getIdType() != null) {
+                continue;
+            }
             // skip user field mapped to standard attribute or user ignored fields
             if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
                 List<FieldMapping> fieldMappingGroup = userFieldMap.get(userField);
@@ -418,6 +422,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     continue;
                 }
                 for (FieldMapping fieldMapping : fieldMappingGroup) {
+                    if (fieldMapping.getIdType() != null) {
+                        continue;
+                    }
                     if (!standardAttrNames.contains(fieldMapping.getMappedField()) && bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
                         String message = String
                                 .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
