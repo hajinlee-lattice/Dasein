@@ -7,8 +7,7 @@ public enum DataLicense {
     WEBSITEKEYWORDS("WebsiteKeywords", "Website Keywords"), //
     ACCOUNT("Account", "My attributes"), //
     CONTACT("Contact", "Contact attributes"), //
-    GROWTHTRENDS("GrowthTrends", "Growth Trends"), //
-    COVID19("COVID-19", "COVID-19"); //
+    GROWTHTRENDS("GrowthTrends", "Growth Trends"); //
 
     private String dataLicense;
     private String description;
