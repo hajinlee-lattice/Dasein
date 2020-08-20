@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
@@ -350,8 +351,8 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         log.info("TestGenerateLaunchArtifactsJobForContactCountyConversion Results: " + JsonUtils.serialize(result));
         // result.getTargets should have [addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData]
         // only fullContactsData and addedContactsData shuould be converted
-        testCountryConversion(yarnConfiguration, result.getTargets().get(2).getPath(), avroFileFilter, "ContactCountry");
-        testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter, "ContactCountry");
+        testCountryConversion(yarnConfiguration, result.getTargets().get(2).getPath(), avroFileFilter, InterfaceName.ContactCountry.name());
+        testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter, InterfaceName.ContactCountry.name());
     }
 
     @Test(groups = "functional")
@@ -377,7 +378,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         log.info("TestGenerateLaunchArtifactsJobForAccountCountyConversion Results: " + JsonUtils.serialize(result));
         // result.getTargets should have [addedAccountsData, removedAccountsData, fullContactsData]
         // only addedAccountsData should be converted
-        testCountryConversion(yarnConfiguration, result.getTargets().get(0).getPath(), avroFileFilter, "Country");
+        testCountryConversion(yarnConfiguration, result.getTargets().get(0).getPath(), avroFileFilter, InterfaceName.Country.name());
     }
 
     interface AvroExportable {

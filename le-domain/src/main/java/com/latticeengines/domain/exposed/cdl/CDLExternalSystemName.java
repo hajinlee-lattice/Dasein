@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public enum CDLExternalSystemName {
@@ -19,6 +21,8 @@ public enum CDLExternalSystemName {
     Google_Display_N_Video_360("Google Display & Video 360"), //
     AppNexus("AppNexus"), //
     Others("Others");
+
+    public static List<CDLExternalSystemName> adPlatforms = Arrays.asList(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook);
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();
 

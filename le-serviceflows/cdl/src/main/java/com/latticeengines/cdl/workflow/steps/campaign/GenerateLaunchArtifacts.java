@@ -234,8 +234,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                         mainEntity, !suppressAccountsWithoutContacts, //
                         getRandomWorkspace(), externalSystemName);
 
-                List<CDLExternalSystemName> adPlatforms = Arrays.asList(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook);
-                if (adPlatforms.contains(externalSystemName)) {
+                if (CDLExternalSystemName.adPlatforms.contains(externalSystemName)) {
                     String encryptionKey = CipherUtils.generateKey();
                     String saltHint = CipherUtils.generateKey();
                     config.setManageDbUrl(url);

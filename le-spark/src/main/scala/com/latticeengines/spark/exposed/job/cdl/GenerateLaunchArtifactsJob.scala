@@ -23,6 +23,8 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val salt = config.getSaltHint
     val accountId = InterfaceName.AccountId.name()
     val contactId = InterfaceName.ContactId.name()
+    val country = InterfaceName.Country.name()
+    val contactCountry = InterfaceName.ContactCountry.name()
 
     val accountsDf = loadHdfsUnit(spark, config.getAccountsData.asInstanceOf[HdfsDataUnit])
     val contactsDf = if (config.getContactsData != null) loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
@@ -42,18 +44,17 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     var fullContactsData = targetSegmentsContactsDF.join(distinctPositiveAccountsDf, Seq(accountId), if (mainEntity == BusinessEntity.Contact && config.isIncludeAccountsWithoutContacts) "right" else "inner")
 
     if (mainEntity == BusinessEntity.Account && externalSystemName == CDLExternalSystemName.LinkedIn) {
-      addedAccountsData = CountryCodeUtils.convert(addedAccountsData, "Country", "Country", url, user, password, key, salt)
+      addedAccountsData = CountryCodeUtils.convert(addedAccountsData, country, country, url, user, password, key, salt)
     }
     lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData)
 
     if (mainEntity == BusinessEntity.Contact) {
       var addedContactsData = contactsDf.drop(accountId).join(positiveDeltaDf, Seq(contactId), if (config.isIncludeAccountsWithoutContacts) "right" else "inner")
       var removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
-      val adPlatforms = List(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook)
 
-      if (adPlatforms.contains(externalSystemName)) {
-        addedContactsData = CountryCodeUtils.convert(addedContactsData, "ContactCountry", "ContactCountry", url, user, password, key, salt)
-        fullContactsData = CountryCodeUtils.convert(fullContactsData, "ContactCountry", "ContactCountry", url, user, password, key, salt)
+      if (CDLExternalSystemName.adPlatforms.contains(externalSystemName)) {
+        addedContactsData = CountryCodeUtils.convert(addedContactsData, contactCountry, contactCountry, url, user, password, key, salt)
+        fullContactsData = CountryCodeUtils.convert(fullContactsData, contactCountry, contactCountry, url, user, password, key, salt)
       }
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
