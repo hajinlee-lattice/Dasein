@@ -3,12 +3,17 @@ package com.latticeengines.app.exposed.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,10 +29,12 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 import io.swagger.annotations.Api;
@@ -46,7 +53,13 @@ public class ActivityTimelineResource {
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
     @Inject
+    private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
     private BatonService batonService;
+
+    @Value("${app.default.journey.streams:JourneyStage,MarketingActivity,Opportunity,WebVisit}")
+    private String defaultStreams;
 
     @GetMapping("/accounts/{accountId:.+}")
     @ResponseBody
@@ -55,27 +68,32 @@ public class ActivityTimelineResource {
     public DataPage getAccountActivities(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod, //
-            @RequestParam(value = "include-journey-stages", required = false) boolean includeJourneyStages) {
+            @RequestParam(value = "streams", required = false) Set<AtlasStream.StreamType> streamTypes) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
         }
         log.info(String.format("Retrieving activity timeline data of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
         DataPage data = activityTimelineService.getAccountActivities(accountId, timelinePeriod, getOrgInfo(authToken));
-        if (!includeJourneyStages)
-            filterJourneyStageData(data);
+        filterStreamData(data, CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams()
+                : streamTypes.stream().map(AtlasStream.StreamType::name).collect(Collectors.toSet()));
         return data;
     }
 
-    // Temporary, will be removed in M39 and add filtering capabilities if necessary
-    private void filterJourneyStageData(DataPage data) {
+    private Set<String> getDefaultStreams() {
+        return Stream.of(defaultStreams.split(",")) //
+                .map(AtlasStream.StreamType::valueOf) //
+                .map(AtlasStream.StreamType::name) //
+                .collect(Collectors.toSet());
+    }
+
+    private void filterStreamData(DataPage data, Set<String> streamTypes) {
         List<Map<String, Object>> filteredData = new ArrayList<>();
         for (Map<String, Object> datum : data.getData()) {
-            if (!datum.containsKey(InterfaceName.StreamType.name())
-                    || !datum.get(InterfaceName.StreamType.name()).equals(AtlasStream.StreamType.JourneyStage.name()))
+            if (datum.containsKey(InterfaceName.StreamType.name())
+                    && streamTypes.contains((String) datum.get(InterfaceName.StreamType.name())))
                 filteredData.add(datum);
         }
         data.setData(filteredData);
@@ -91,8 +109,7 @@ public class ActivityTimelineResource {
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
         }
         log.info(String.format(
                 "Retrieving activity timeline data of contact(Id: %s), accountId(ID: %s) for %s period, ( tenantId: %s )",
@@ -100,6 +117,18 @@ public class ActivityTimelineResource {
                 customerSpace.getTenantId()));
         return activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
                 getOrgInfo(authToken));
+    }
+
+    @GetMapping("/journey-stage-configuration")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve journey stage configurations for this tenant")
+    @SuppressWarnings("ConstantConditions")
+    public List<JourneyStage> getJourneyStageConfig() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
+        }
+        return activityStoreProxy.getJourneyStages(customerSpace.getTenantId());
     }
 
     private Map<String, String> getOrgInfo(String token) {
