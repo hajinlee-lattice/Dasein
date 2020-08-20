@@ -45,7 +45,7 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
         .withColumn(INTERNAL_PRIORITY_KEY, lit(stage.getPriority))
     }).reduce(_ unionByName _)
       .groupBy(AccountId.name)
-      .agg(min(INTERNAL_PRIORITY_KEY).as(INTERNAL_PRIORITY_KEY))
+      .agg(max(INTERNAL_PRIORITY_KEY).as(INTERNAL_PRIORITY_KEY))
     val mergedStageDf = mergedPriorityDf
       .withColumn(StageName.name, priorityToStage(mergedPriorityDf.col(INTERNAL_PRIORITY_KEY)))
       .withColumn(eventTimeCol, lit(currTime.toEpochMilli))

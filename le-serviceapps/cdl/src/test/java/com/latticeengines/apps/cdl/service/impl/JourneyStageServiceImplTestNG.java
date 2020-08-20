@@ -32,11 +32,14 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     private JourneyStageService journeyStageService;
 
     private String stageName = "journeyStage1";
+    private String stageDescription = "Some Description";
+    private String stageDisplayColorCode = "#ColorCode";
     private int priority = 3;
     private StreamFieldToFilter filter;
     private JourneyStagePredicate predicates;
     private JourneyStage journeyStage;
     private String updateStageName = "journeyStage2";
+    private String updatedDescription = "Updated Description";
     private Long pid;
     private RetryTemplate retry;
 
@@ -63,6 +66,8 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         journeyStage.setPredicates(Collections.singletonList(predicates));
         journeyStage.setStageName(stageName);
         journeyStage.setDisplayName(stageName);
+        journeyStage.setDisplayColorCode(stageDisplayColorCode);
+        journeyStage.setDescription(stageDescription);
         journeyStage.setPriority(priority);
         journeyStage.setTenant(mainTestTenant);
         JourneyStage created = journeyStageService.createOrUpdate(mainCustomerSpace, journeyStage);
@@ -101,10 +106,12 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(stage);
         Assert.assertEquals(stage.getStageName(), stageName);
         stage.setStageName(updateStageName);
+        stage.setDescription(updatedDescription);
         journeyStageService.createOrUpdate(mainCustomerSpace, stage);
         retry.execute(context -> {
             createdAtom.set(journeyStageService.findByStageName(mainCustomerSpace, updateStageName));
             Assert.assertNotNull(createdAtom.get());
+            Assert.assertEquals(createdAtom.get().getDescription(), updatedDescription);
             return true;
         });
         stage = createdAtom.get();

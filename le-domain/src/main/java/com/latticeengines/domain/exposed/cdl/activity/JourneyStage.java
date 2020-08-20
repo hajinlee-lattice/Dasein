@@ -37,7 +37,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
-public class JourneyStage  implements HasPid, HasTenant, Serializable {
+public class JourneyStage implements HasPid, HasTenant, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -60,6 +60,14 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
     @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonProperty("display_name")
     private String displayName;
+
+    @Column(name = "DESCRIPTION")
+    @JsonProperty("description")
+    private String description;
+
+    @Column(name = "DISPLAY_COLOR_CODE", nullable = false)
+    @JsonProperty("display_color_code")
+    private String displayColorCode;
 
     @Column(name = "PRIORITY", nullable = false)
     @JsonProperty("priority")
@@ -122,6 +130,22 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
         this.displayName = displayName;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDisplayColorCode() {
+        return displayColorCode;
+    }
+
+    public void setDisplayColorCode(String displayColorCode) {
+        this.displayColorCode = displayColorCode;
+    }
+
     public static final class Builder {
 
         private JourneyStage journeyStage;
@@ -142,6 +166,16 @@ public class JourneyStage  implements HasPid, HasTenant, Serializable {
 
         public Builder withDisplayName(String displayName) {
             journeyStage.setDisplayName(displayName);
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            journeyStage.setDescription(description);
+            return this;
+        }
+
+        public Builder withDisplayColorCode(String displayColorCode) {
+            journeyStage.setDisplayColorCode(displayColorCode);
             return this;
         }
 

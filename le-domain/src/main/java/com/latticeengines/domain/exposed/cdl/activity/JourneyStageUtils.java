@@ -39,41 +39,47 @@ public final class JourneyStageUtils {
     }
 
     private static JourneyStage closedWonStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Closed-Won", 1, predicate(Opportunity, 1, closedFilter(), wonFilter()));
+        return stage(tenant, "Closed-Won", "Opportunity is closed-won", 7, "#059142",
+                predicate(Opportunity, 1, closedFilter(), wonFilter()));
     }
 
     private static JourneyStage closedStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Closed", 2, predicate(Opportunity, 1, closedFilter()));
+        return stage(tenant, "Closed", "Opportunity is closed", 6, "#07da63",
+                predicate(Opportunity, 1, closedFilter()));
     }
 
     private static JourneyStage opportunityStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Opportunity", 3, predicate(Opportunity, 1, notClosedFilter()));
+        return stage(tenant, "Opportunity", "Opportunity on Account", 5, "#0C99BA",
+                predicate(Opportunity, 1, notClosedFilter()));
     }
 
     private static JourneyStage knownEngagedStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Known Engaged", 4, predicate(MarketingActivity, 1, webVisitFilter()));
+        return stage(tenant, "Known Engaged", "Account is being engaged with", 4, "#59bfff",
+                predicate(MarketingActivity, 1, webVisitFilter()));
     }
 
     private static JourneyStage engagedStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Engaged", 5, predicate(WebVisit, 1, 14));
+        return stage(tenant, "Engaged", "Account has website visits", 3, "#055a8c", predicate(WebVisit, 1, 14));
     }
 
     private static JourneyStage awareStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Aware", 6, predicate(DnbIntentData, 1, 28));
+        return stage(tenant, "Aware", "Account is showing interest", 2, "#094c72", predicate(DnbIntentData, 1, 28));
     }
 
     private static JourneyStage darkStage(@NotNull Tenant tenant) {
         // default, can have empty predicate
-        return stage(tenant, "Dark", 7, new JourneyStagePredicate());
+        return stage(tenant, "Dark", "No Activity", 1, "#0c3953", new JourneyStagePredicate());
     }
 
-    private static JourneyStage stage(@NotNull Tenant tenant, @NotNull String stageName, int priority,
-            JourneyStagePredicate... predicates) {
+    private static JourneyStage stage(@NotNull Tenant tenant, @NotNull String stageName, String description,
+            int priority, String colorCode, JourneyStagePredicate... predicates) {
         return new JourneyStage.Builder() //
                 .withTenant(tenant) //
                 .withStageName(stageName) //
                 .withDisplayName(stageName) //
+                .withDescription(description) //
                 .withPriority(priority) //
+                .withDisplayColorCode(colorCode) //
                 .withPredicates(Arrays.asList(predicates)) //
                 .build();
     }
