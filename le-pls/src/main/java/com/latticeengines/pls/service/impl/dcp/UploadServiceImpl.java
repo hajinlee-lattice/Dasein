@@ -356,8 +356,12 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
                 UploadJobStep uploadJobStep = new UploadJobStep();
                 uploadJobStep.setStepName(jobStep.getName());
                 uploadJobStep.setStepDescription(jobStep.getDescription());
-                uploadJobStep.setStartTimestamp(jobStep.getStartTimestamp().getTime());
-                uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
+                if(jobStep.getStartTimestamp() != null) {
+                    uploadJobStep.setStartTimestamp(jobStep.getStartTimestamp().getTime());
+                }
+                if(jobStep.getEndTimestamp() != null) {
+                    uploadJobStep.setEndTimestamp(jobStep.getEndTimestamp().getTime());
+                }
                 uploadJobSteps.add(uploadJobStep);
             });
         }
