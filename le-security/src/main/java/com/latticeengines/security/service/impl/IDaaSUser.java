@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -73,6 +74,9 @@ public class IDaaSUser {
 
     @JsonProperty("country_code")
     private String countryCode;
+
+    @JsonProperty("product_subscription")
+    private List<ProductSubscription> productSubscriptions;
 
     public String getUserName() {
         return userName;
@@ -212,5 +216,13 @@ public class IDaaSUser {
 
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
+    }
+
+    public List<ProductSubscription> getProductSubscriptions() {
+        return productSubscriptions;
+    }
+
+    public void setProductSubscriptions(List<ProductSubscription> productSubscriptions) {
+        this.productSubscriptions = productSubscriptions;
     }
 }

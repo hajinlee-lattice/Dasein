@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -707,6 +708,11 @@ public class UserServiceImpl implements UserService {
             LOGGER.info("user exist in IDaaS, add product access to user {}", email);
             ProductRequest request = new ProductRequest();
             request.setEmailAddress(email);
+            ProductSubscription productSubscription = new ProductSubscription();
+            productSubscription.setIso2CountryCode(idaasUser.getCountryCode());
+            productSubscription.setCompanyName(idaasUser.getCompanyName());
+            productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
+            request.setProductSubscription(productSubscription);
             iDaaSService.addProductAccessToUser(request);
         } else {
             LOGGER.info("IDaaS user existed for {} and has product access", email);

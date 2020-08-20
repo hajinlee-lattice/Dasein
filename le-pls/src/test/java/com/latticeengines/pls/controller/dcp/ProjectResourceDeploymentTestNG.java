@@ -44,7 +44,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testCreateDCPProjectWithProjectId() {
-        ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME+1, PROJECT_ID, Project.ProjectType.Type1);
+        ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME, PROJECT_ID, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectId(), PROJECT_ID);
         testProjectProxy.deleteProject(PROJECT_ID);
@@ -52,9 +52,9 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testCreateDCPProjectWithOutProjectId() {
-        ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME+2, Project.ProjectType.Type1);
+        ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
-        assertEquals(projectDetail.getProjectDisplayName(), DISPLAY_NAME+2);
+        assertEquals(projectDetail.getProjectDisplayName(), DISPLAY_NAME);
         testProjectProxy.deleteProject(projectDetail.getProjectId());
 
         projectDetail = testProjectProxy.getProjectByProjectId(projectDetail.getProjectId());
@@ -64,9 +64,9 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testGetAllDCPProject() {
-        ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME+3, Project.ProjectType.Type1);
+        ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail1);
-        ProjectDetails projectDetail2 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME+4, Project.ProjectType.Type1);
+        ProjectDetails projectDetail2 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail2);
 
         List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
@@ -102,7 +102,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         ProjectDetails project = testProjectProxy.getProjectByProjectId(projectList.get(0).getProjectId());
         GlobalTeamData teamData = new GlobalTeamData();
-        teamData.setTeamName(project.getProjectDisplayName());
+        teamData.setTeamName(project.getProjectId());
         String externalAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.EXTERNAL_ADMIN);
         String superAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
         teamData.setTeamMembers(Sets.newHashSet(externalAdminUser, superAdminUser));
