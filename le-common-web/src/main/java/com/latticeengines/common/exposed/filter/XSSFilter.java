@@ -22,9 +22,9 @@ import org.springframework.stereotype.Component;
 public class XSSFilter implements Filter {
     static class XssRequestWrapper extends HttpServletRequestWrapper {
         /**
-         * Policy file
-         * Note that the policy files to be used need to be placed under the project resource file path
-         * */
+         * Policy file Note that the policy files to be used need to be placed under the
+         * project resource file path
+         */
         private static String policyFile = "antisamy-policy.xml";
 
         private static boolean intialized = false;
@@ -50,18 +50,23 @@ public class XSSFilter implements Filter {
                 try {
                     InputStream policy = new ClassPathResource(policyFile).getInputStream();
                     sanitizer = new XSSSanitizer(policy);
-                    log.info(String.format("Succeeded to initialize XSSSanitizer. AntiSamy Policy file: {%s}.", policyFile));
+                    log.info(String.format("Succeeded to initialize XSSSanitizer. AntiSamy Policy file: {%s}.",
+                            policyFile));
                 } catch (IOException e) {
-                    log.warn(String.format("Failed to initialize XSSSanitizer with policy file: {%s}. Please check this file's existence, and make sure it is accessible.", policyFile), e);
+                    log.warn(String.format(
+                            "Failed to initialize XSSSanitizer with policy file: {%s}. Please check this file's existence, and make sure it is accessible.",
+                            policyFile), e);
                 } catch (PolicyException e) {
-                    log.warn(String.format("Failed to initialize XSSSanitizer. Failed to load AntiSamy policy from: {%s}.", policyFile), e);
+                    log.warn(String.format(
+                            "Failed to initialize XSSSanitizer. Failed to load AntiSamy policy from: {%s}.",
+                            policyFile), e);
                 }
                 intialized = true;
             }
         }
 
         XssRequestWrapper(ServletRequest servletRequest) {
-            super((HttpServletRequest)servletRequest);
+            super((HttpServletRequest) servletRequest);
         }
 
         @Override
