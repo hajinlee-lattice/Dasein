@@ -836,6 +836,8 @@ public class TenantServiceImpl implements TenantService {
                 vboCallback.customerCreation.transactionDetail.ackRefId = traceId;
                 vboCallback.customerCreation.customerDetail.workspaceCountry = vboRequest.getSubscriber().getCountryCode();
                 vboCallback.customerCreation.customerDetail.subscriberNumber = vboRequest.getSubscriber().getSubscriberNumber();
+
+                // TODO: should this use getUserId() or getEmailAddress()? Related: ComponentOrchestrator::finalizeDnBConnect
                 vboCallback.customerCreation.customerDetail.login = vboRequest.getProduct().getUsers().stream().findFirst().get().getEmailAddress();
 
                 // callback needs current status if timeout triggered: assume failed unless proven otherwise

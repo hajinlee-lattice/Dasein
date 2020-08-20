@@ -273,6 +273,7 @@ public class ComponentOrchestrator {
                 Long emailSendTime = emailService.sendDCPWelcomeEmail(generatedUser, tenant.getName(), welcomeUrl);
 
                 if (callback != null && retrievedUser.getEmailAddress().equals(callback.customerCreation.customerDetail.login)) {
+                    // TODO: Use getEmailAddress() or getUsername() above? Related: TenantServiceImpl::createVboTenant
                     if (emailSendTime != null) {
                         callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
                         callback.customerCreation.customerDetail.emailDate = emailSendTime.toString();
