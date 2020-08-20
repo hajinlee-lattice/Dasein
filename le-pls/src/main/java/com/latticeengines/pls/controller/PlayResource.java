@@ -174,38 +174,6 @@ public class PlayResource {
         return playService.getPlayLaunchDashboardEntriesCount(playName, orgId, externalSysType, launchStates, startTimestamp, endTimestamp);
     }
 
-    @PostMapping("/{playName}/launches")
-    @ResponseBody
-    @PreAuthorize("hasRole('Create_PLS_Plays')")
-    @ApiOperation(value = "Create play launch for a given play")
-    @Deprecated
-    public PlayLaunch createPlayLaunch( //
-            @PathVariable("playName") String playName, @RequestBody PlayLaunch playLaunch) {
-        return playService.createPlayLaunch(playName, playLaunch);
-    }
-
-    @PostMapping("/{playName}/launches/{launchId}")
-    @ResponseBody
-    @PreAuthorize("hasRole('Create_PLS_Plays')")
-    @ApiOperation(value = "Update play launch for a given play")
-    @Deprecated
-    public PlayLaunch updatePlayLaunch( //
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, //
-            @RequestBody PlayLaunch playLaunch) {
-        return playService.updatePlayLaunch(playName, launchId, playLaunch);
-    }
-
-    @PostMapping("/{playName}/launches/{launchId}/launch")
-    @ResponseBody
-    @PreAuthorize("hasRole('Create_PLS_Plays')")
-    @ApiOperation(value = "Launch a given play")
-    @Deprecated
-    public PlayLaunch launchPlay(@PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId) {
-        return playService.launchPlay(playName, launchId);
-    }
-
     @GetMapping("/{playName}/launches")
     @ResponseBody
     @ApiOperation(value = "Get list of launches for a given play")
