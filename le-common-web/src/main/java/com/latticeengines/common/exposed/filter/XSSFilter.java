@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.Filter;
-import javax.servlet.ServletRequest;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletResponse;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -60,7 +60,7 @@ public class XSSFilter implements Filter {
             }
         }
 
-        public XssRequestWrapper(ServletRequest servletRequest) {
+        XssRequestWrapper(ServletRequest servletRequest) {
             super((HttpServletRequest)servletRequest);
         }
 
