@@ -4,8 +4,8 @@ import java.io.InputStream;
 
 import org.owasp.esapi.ESAPI;
 import org.owasp.validator.html.AntiSamy;
-import org.owasp.validator.html.Policy;
 import org.owasp.validator.html.CleanResults;
+import org.owasp.validator.html.Policy;
 import org.owasp.validator.html.PolicyException;
 import org.owasp.validator.html.ScanException;
 import org.slf4j.Logger;
@@ -35,9 +35,9 @@ public class XSSSanitizer {
                 CleanResults cr = antiSamy.scan(value, policy);
                 value = cr.getCleanHTML();
             }
-        } catch(ScanException e) {
+        } catch (ScanException e) {
             log.warn(String.format("AntiSamey failed to scan the user input value: {%s}.", value), e);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.warn(String.format("Failed to sanitize the user input value: {%s}.", value), e);
         }
 
