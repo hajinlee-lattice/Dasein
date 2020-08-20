@@ -45,6 +45,17 @@ public interface PAQuotaService {
     Map<String, Long> getTenantPaQuota(@NotNull String tenantId);
 
     /**
+     * Merge (replace based on quota name) input pa quota into existing one
+     *
+     * @param tenantId
+     *            target tenant
+     * @param paQuota
+     *            quota name -> quota value map
+     * @return merged pa quota for target tenant
+     */
+    Map<String, Long> setTenantPaQuota(@NotNull String tenantId, @NotNull Map<String, Long> paQuota);
+
+    /**
      * Retrieve/calculate PA quota related info for specific tenant, including
      * remaining quota, quota reset time and others.
      *

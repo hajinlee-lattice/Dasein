@@ -46,9 +46,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(TalkingPointsDeploymentTestNG.class);
+     private static final Logger log = LoggerFactory.getLogger(TalkingPointsDeploymentTestNG.class);
 
     private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
     private static final String SEGMENT_NAME = "testTPSegment";
@@ -200,7 +198,9 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
-        playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch);
+        // TODO: Clean up needed by Perry
+        // playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(),
+        // play.getName(), playLaunch);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),
                 LaunchState.Launching);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),

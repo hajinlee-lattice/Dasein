@@ -1179,6 +1179,14 @@ public class CDLServiceImpl implements CDLService {
         StringBuffer fileContent = new StringBuffer();
         Map<String, Attribute> templateAttrNameMap = templateTable.getNameAttributeMap();
         if (MapUtils.isNotEmpty(templateAttrNameMap)) {
+            String name = InterfaceName.Name.name();
+            if (templateAttrNameMap.containsKey(name)) {// make column "Name" in the first position.
+                Attribute attribute = templateAttrNameMap.get(name);
+                String displayName = attribute.getSourceAttrName() == null? attribute.getDisplayName() :
+                        attribute.getSourceAttrName();
+                appendTemplateMapptingValue(fileContent, displayName);
+                templateAttrNameMap.remove(name);
+            }
             for (Attribute attribute : templateAttrNameMap.values()) {
                 String displayName = attribute.getSourceAttrName() == null? attribute.getDisplayName() :
                         attribute.getSourceAttrName();

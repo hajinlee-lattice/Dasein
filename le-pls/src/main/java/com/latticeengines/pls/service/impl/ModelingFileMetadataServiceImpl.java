@@ -411,6 +411,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
+            // skip checking type for special mapping for entity match
+            if (bestEffortMapping.getIdType() != null) {
+                continue;
+            }
             // skip user field mapped to standard attribute or user ignored fields
             if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
                 List<FieldMapping> fieldMappingGroup = userFieldMap.get(userField);
@@ -418,6 +422,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     continue;
                 }
                 for (FieldMapping fieldMapping : fieldMappingGroup) {
+                    if (fieldMapping.getIdType() != null) {
+                        continue;
+                    }
                     if (!standardAttrNames.contains(fieldMapping.getMappedField()) && bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
                         String message = String
                                 .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
@@ -889,37 +896,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getCdlExternalSystemType() != null) {
                 fieldMapping.setMappedToLatticeField(false);
-            }
-        }
-        checkStandardFields(fieldMappingDocument, templateTable, schemaTable, customerSpace);
-    }
-
-    private void checkStandardFields(FieldMappingDocument fieldMappingDocument, Table templateTable,
-                                     Table schemaTable, CustomerSpace customerSpace) {
-        if (templateTable == null) {
-            return;
-        }
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        if (!enableEntityMatch) {
-            return ;
-        }
-        Set<String> standardFields = schemaTable.getAttributes()
-                .stream()
-                .filter(attr -> attr.getDefaultValueStr() == null)
-                .map(Attribute::getName)
-                .collect(Collectors.toSet());
-        Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
-        if (CollectionUtils.isNotEmpty(allImportSystemIds)) {
-            standardFields.addAll(allImportSystemIds);
-        }
-        Map<String, String> map = templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName,
-                attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
-                        attr.getDisplayName()));
-        for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
-            String mappedField = mapping.getMappedField();
-            if (standardFields.contains(mappedField) && StringUtils.isBlank(mapping.getUserField())
-                    && StringUtils.isNotBlank(map.get(mappedField))) {
-                throw new LedpException(LedpCode.LEDP_18249, new String[] { mappedField });
             }
         }
     }

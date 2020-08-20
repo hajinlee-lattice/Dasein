@@ -25,15 +25,15 @@ public class ContactMetadataResource {
 
     @GetMapping("/tps-job-functions")
     @ResponseBody
-    @ApiOperation(value = "Get all external system type")
+    @ApiOperation(value = "Get all tps job functions")
     public List<String> getTpsJobFunctions(HttpServletRequest request) {
         return contactMetadataProxy.getTpsJobFunctions();
     }
 
-    @GetMapping("/tps-job-titles")
+    @GetMapping("/tps-job-levels")
     @ResponseBody
-    @ApiOperation(value = "Get all external system type")
-    public List<String> getTpsTitles(HttpServletRequest request) {
-        return contactMetadataProxy.getTpsTitles();
+    @ApiOperation(value = "Get all tps job levels")
+    public List<String> getTpsJobLevels(HttpServletRequest request) {
+        return contactMetadataProxy.getTpsJobLevels();
     }
 }

@@ -26,20 +26,19 @@ public class AtlasSchedulingServiceImpl implements AtlasSchedulingService {
     private AtlasSchedulingEntityMgr atlasSchedulingEntityMgr;
 
     @Override
-    public void createOrUpdateExportScheduling(String customerSpace, String cronExpression) {
+    public void createOrUpdateSchedulingByType(String customerSpace, String cronExpression, AtlasScheduling.ScheduleType type) {
         if (StringUtils.isEmpty(cronExpression)) {
             log.warn("Cron expression is empty, using default cron: " + DEFAULT_CRON);
             cronExpression = DEFAULT_CRON;
         } else if (!CronUtils.isValidExpression(cronExpression)) {
-            log.error(String.format("Invalid cron expression: %s, Using default cron: %s", cronExpression,
-                    DEFAULT_CRON));
+            log.error(String.format("Invalid cron expression: %s, Using default cron: %s", cronExpression, DEFAULT_CRON));
             cronExpression = DEFAULT_CRON;
         }
-        AtlasScheduling schedulingObj = findSchedulingByType(customerSpace, AtlasScheduling.ScheduleType.Export);
+        AtlasScheduling schedulingObj = findSchedulingByType(customerSpace, type);
         if (schedulingObj == null) {
             schedulingObj = new AtlasScheduling();
             schedulingObj.setTenant(MultiTenantContext.getTenant());
-            schedulingObj.setType(AtlasScheduling.ScheduleType.Export);
+            schedulingObj.setType(type);
             schedulingObj.setCronExpression(cronExpression);
             atlasSchedulingEntityMgr.createSchedulingObj(schedulingObj);
         } else {

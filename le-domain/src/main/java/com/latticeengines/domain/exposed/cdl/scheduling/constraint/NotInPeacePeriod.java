@@ -5,9 +5,14 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
@@ -22,12 +27,9 @@ public class NotInPeacePeriod implements Constraint {
         Instant now = Instant.ofEpochMilli(timeClock.getCurrentTime());
 
         Instant firstAction = target.getFirstIngestActionTime() == null ? null : Instant.ofEpochMilli(target.getFirstIngestActionTime());
-        Instant midnight = now.atZone(timezone).truncatedTo(ChronoUnit.DAYS).toInstant();
-        Instant sixAM = midnight.plus(6L, ChronoUnit.HOURS);
-        Instant sixPM = sixAM.plus(12L, ChronoUnit.HOURS);
         Instant oldImportThreshold = now.minus(OLD_IMPORT_THRESHOLD_IN_HR, ChronoUnit.HOURS);
-        // TODO maybe shorten peace period if quota is more than 1
-        if (now.isBefore(sixAM) || now.isAfter(sixPM)) {
+        long autoScheduleQuota = getAutoScheduleQuota(target);
+        if (!SchedulingPAUtils.isInPeacePeriod(now, timezone, autoScheduleQuota)) {
             // not in peace period
             return ConstraintValidationResult.VALID;
         } else if (firstAction != null && firstAction.isBefore(oldImportThreshold)) {
@@ -37,10 +39,17 @@ public class NotInPeacePeriod implements Constraint {
             return new ConstraintValidationResult(false, msg);
         }
 
-        Duration timeUntilPeacePeriodEnd = Duration.between(now, sixPM);
+        Pair<Instant, Instant> period = SchedulingPAUtils.calculatePeacePeriod(now, timezone, autoScheduleQuota);
+        Preconditions.checkNotNull(period, "should have peace period when reaching here");
+        Duration timeUntilPeacePeriodEnd = Duration.between(now, period.getRight());
         long minutes = timeUntilPeacePeriodEnd.toMinutes();
         String hm = String.format("%02dh%02dm", minutes / 60, (minutes % 60));
         String msg = String.format("currently in peace period (which ends in %s)", hm);
         return new ConstraintValidationResult(true, msg);
+    }
+
+    private long getAutoScheduleQuota(@NotNull TenantActivity activity) {
+        return MapUtils.emptyIfNull(activity.getTotalPaQuota()).getOrDefault(SchedulerConstants.QUOTA_AUTO_SCHEDULE,
+                0L);
     }
 }

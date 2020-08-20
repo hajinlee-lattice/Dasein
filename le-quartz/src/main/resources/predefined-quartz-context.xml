@@ -138,6 +138,17 @@
         <property name="jobTimeout" value="${quartz.cdl.schedulingPA.job.timeout}"/>
     </bean>
 
+    <bean name="cdlSchedulingNowPAJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlSchedulingNowPAJob"/>
+        <property name="cronTrigger" value="${quartz.cdl.execution.schedulingNowPA.job.cron}"/>
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}"/>
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}"/>
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}"/>
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlSchedulingNowPAJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.cdl.schedulingNowPA.job.timeout}"/>
+    </bean>
+
     <bean name="cdlEntityStateCorrectionJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="cdlEntityStateCorrectionJob"/>
         <property name="cronTrigger" value="${quartz.cdl.entity.state.correction.job.cron}"/>
@@ -240,6 +251,7 @@
         <ref bean="cdlRedShiftCleanupJob"/>
         <ref bean="cdlExportScheduleJob"/>
         <ref bean="cdlSchedulingPAJob"/>
+        <ref bean="cdlSchedulingNowPAJob"/>
         <ref bean="cdlEntityStateCorrectionJob"/>
         <ref bean="cdlCampaignLaunchSchedulerJob"/>
         <ref bean="adminRecycleTenantJob"/>
