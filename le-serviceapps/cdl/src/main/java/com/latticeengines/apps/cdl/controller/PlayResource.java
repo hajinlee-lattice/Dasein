@@ -31,7 +31,6 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.DeltaCampaignLaunchWorkflowSubmitter;
-import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -83,9 +82,6 @@ public class PlayResource {
     private MetadataProxy metadataProxy;
 
     @Inject
-    private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
-
-    @Inject
     private CampaignLaunchWorkflowSubmitter campaignLaunchWorkflowSubmitter;
 
     @Inject
@@ -102,12 +98,10 @@ public class PlayResource {
 
     @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
-            PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter,
             PlayLaunchChannelService playLaunchChannelService) {
         this.playService = playService;
         this.playLaunchService = playLaunchService;
         this.metadataProxy = metadataProxy;
-        this.playLaunchWorkflowSubmitter = playLaunchWorkflowSubmitter;
         this.playLaunchChannelService = playLaunchChannelService;
     }
 
@@ -526,66 +520,6 @@ public class PlayResource {
                 || StringUtils.isNotBlank(playLaunch.getAddContactsTable())
                 || StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())
                 || StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable());
-    }
-
-    @PostMapping("/{playName}/launches/{launchId}/launch")
-    @ResponseBody
-    @ApiOperation(value = "Launch a play launch for a given play")
-    @Deprecated
-    public PlayLaunch launchPlay(@PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, //
-            @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
-            boolean isDryRunMode, //
-            @RequestParam(value = "use-spark", required = false, defaultValue = "false") //
-            boolean useSpark) {
-        if (StringUtils.isEmpty(playName)) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank play Id" });
-        }
-        Play play = playService.getPlayByName(playName, false);
-        if (play == null) {
-            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
-        }
-        PlayUtils.validatePlay(play);
-
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
-        if (playLaunch == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
-        }
-        playLaunch.setPlay(play);
-        PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
-        if (play.getRatingEngine() != null) {
-            validateNonEmptyTargetsForLaunch(customerSpace, play, playLaunch);
-        }
-        // this dry run flag is useful in writing robust testcases
-        if (!isDryRunMode) {
-            String appId;
-            Long workflowPid;
-            if (useSpark) {
-                workflowPid = campaignLaunchWorkflowSubmitter.submit(playLaunch);
-                playLaunch.setLaunchWorkflowId(workflowPid);
-            } else {
-                appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-                playLaunch.setApplicationId(appId);
-            }
-        }
-
-        playLaunch.setLaunchState(LaunchState.Launching);
-        playLaunch.setPlay(play);
-        playLaunch.setTableName(createTable(playLaunch));
-
-        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
-        Long totalAvailableContacts = play.getTargetSegment().getContacts();
-
-        playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
-        playLaunch.setAccountsSuppressed(0L);
-        playLaunch.setAccountsErrored(0L);
-        playLaunch.setAccountsLaunched(0L);
-        playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
-        playLaunch.setContactsLaunched(0L);
-        playLaunch.setContactsSuppressed(0L);
-        playLaunch.setContactsErrored(0L);
-        return playLaunchService.update(playLaunch);
     }
 
     @GetMapping("/launches/dashboard")

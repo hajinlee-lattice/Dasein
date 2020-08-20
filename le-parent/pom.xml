@@ -184,6 +184,10 @@
         <commons.validator.version>1.6</commons.validator.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
 
+        <!-- OWASP security -->
+        <esapi.verions>2.2.1.1</esapi.verions>
+        <antisamy.version>1.5.7</antisamy.version>
+
         <!-- only used in tests -->
         <testng.version>6.14.2</testng.version>
         <mockito.version>2.13.0</mockito.version>
