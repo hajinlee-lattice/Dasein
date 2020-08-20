@@ -216,7 +216,8 @@ public class TestPlayCreationHelper {
         setupTestRulesBasedModel(testPlaySetupConfig.isUploadRatingTable());
 
         if (testPlaySetupConfig.isMockRatingTable()) {
-            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null, testPlaySetupConfig.isUploadRatingTable());
+            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null,
+                    testPlaySetupConfig.isUploadRatingTable());
         }
 
         createDefaultPlayAndTestCrud(testPlaySetupConfig);
@@ -291,12 +292,16 @@ public class TestPlayCreationHelper {
     }
 
     public void createPlayLaunch(TestPlaySetupConfig testPlaySetupConfig) {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(testPlaySetupConfig));
+        // TODO: Clean up needed by Perry
+        // playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
+        // preparePlayLaunchObject(testPlaySetupConfig));
         assertPlayLaunch(playLaunch);
     }
 
     public PlayLaunch createPlayLaunch2(TestPlaySetupConfig testPlaySetupConfig) {
-        PlayLaunch playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(testPlaySetupConfig));
+        // TODO: Clean up needed by Perry
+        // PlayLaunch playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
+        // preparePlayLaunchObject(testPlaySetupConfig));
         assertPlayLaunch(playLaunch);
         return playLaunch;
     }
@@ -324,8 +329,10 @@ public class TestPlayCreationHelper {
     }
 
     public PlayLaunch launchPlayWorkflow(TestPlaySetupConfig testPlaySetupConfig, boolean useSpark) {
-        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(),
-                testPlaySetupConfig.isPlayLaunchDryRun(), useSpark);
+        // TODO: Clean up needed by Perry
+        // playLaunch = playProxy.launchPlay(tenant.getId(), playName,
+        // playLaunch.getLaunchId(),
+        // testPlaySetupConfig.isPlayLaunchDryRun(), useSpark);
         if (testPlaySetupConfig.isPlayLaunchDryRun()) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {
@@ -351,8 +358,9 @@ public class TestPlayCreationHelper {
         playLaunch.setDestinationSysType(testPlayChannelConfig.getDestinationSystemType() != null
                 ? testPlayChannelConfig.getDestinationSystemType()
                 : CDLExternalSystemType.CRM); // default
-        playLaunch.setDestinationSysName(testPlayChannelConfig.getDestinationSystemName() != null ?
-                testPlayChannelConfig.getDestinationSystemName() : CDLExternalSystemName.Salesforce);
+        playLaunch.setDestinationSysName(testPlayChannelConfig.getDestinationSystemName() != null
+                ? testPlayChannelConfig.getDestinationSystemName()
+                : CDLExternalSystemName.Salesforce);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(testPlayChannelConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
@@ -731,7 +739,8 @@ public class TestPlayCreationHelper {
         return ratingRule;
     }
 
-    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule, boolean uploadRatingTable) {
+    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule,
+            boolean uploadRatingTable) {
         log.info("Creating Rating Engine");
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
@@ -756,7 +765,8 @@ public class TestPlayCreationHelper {
         createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), re);
         Assert.assertNotNull(createdRatingEngine.getPublishedIteration());
 
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null, uploadRatingTable);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null,
+                uploadRatingTable);
         ratingEngine1.setId(createdRatingEngine.getId());
 
         List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());

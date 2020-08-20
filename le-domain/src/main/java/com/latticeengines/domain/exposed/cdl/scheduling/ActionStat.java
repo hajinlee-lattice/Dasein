@@ -16,10 +16,17 @@ public class ActionStat {
 
     private final Date lastActionTime;
 
+    private final Date firstIngestActionTime;
+
     public ActionStat(Long tenantPid, Date firstActionTime, Date lastActionTime) {
+        this(tenantPid, firstActionTime, lastActionTime, null);
+    }
+
+    public ActionStat(Long tenantPid, Date firstActionTime, Date lastActionTime, Date firstIngestActionTime) {
         this.tenantPid = tenantPid;
         this.firstActionTime = firstActionTime;
         this.lastActionTime = lastActionTime;
+        this.firstIngestActionTime = firstIngestActionTime;
     }
 
     public Long getTenantPid() {
@@ -34,6 +41,10 @@ public class ActionStat {
         return lastActionTime;
     }
 
+    public Date getFirstIngestActionTime() {
+        return firstIngestActionTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -42,17 +53,18 @@ public class ActionStat {
             return false;
         ActionStat that = (ActionStat) o;
         return Objects.equal(tenantPid, that.tenantPid) && Objects.equal(firstActionTime, that.firstActionTime)
-                && Objects.equal(lastActionTime, that.lastActionTime);
+                && Objects.equal(lastActionTime, that.lastActionTime)
+                && Objects.equal(firstIngestActionTime, that.firstIngestActionTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(tenantPid, firstActionTime, lastActionTime);
+        return Objects.hashCode(tenantPid, firstActionTime, lastActionTime, firstIngestActionTime);
     }
 
     @Override
     public String toString() {
         return "ActionStat{" + "tenantPid=" + tenantPid + ", firstActionTime=" + firstActionTime + ", lastActionTime="
-                + lastActionTime + '}';
+                + lastActionTime + ", firstIngestActionTime=" + firstIngestActionTime + '}';
     }
 }

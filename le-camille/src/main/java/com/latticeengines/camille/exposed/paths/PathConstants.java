@@ -32,6 +32,10 @@ public final class PathConstants {
     public static final String SPACECONFIGURATION_NODE = "SpaceConfiguration";
     public static final String PRODUCTS_NODE = "Products";
 
+    public static final String TENANT_PA_QUOTA = "PAQuota";
+    public static final String TIMEZONE = "Timezone";
+    public static final String DEFAULT_TIMEZONE = "DefaultTimezone";
+
     public static final String PROPERTIES_FILE = "properties.json";
     public static final String FEATURE_FLAGS_FILE = "feature-flags.json";
     public static final String FEATURE_FLAGS_DEFINITIONS_FILE = "feature-flag-definitions.json";

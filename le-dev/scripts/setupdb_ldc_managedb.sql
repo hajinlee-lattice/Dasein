@@ -45,9 +45,16 @@ IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense,RefreshFrequency)
 SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2024.csv' INTO TABLE `AccountMasterColumn`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense,RefreshFrequency)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv' INTO TABLE `SourceColumn`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceColumnID,SourceName,ColumnName,ColumnType,BaseSource,Preparation,Priority,GroupBy,JoinBy,Calculation,Arguments,Groups,CharAttrId,Categories);
@@ -92,15 +99,13 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES;
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceAttribute.csv' INTO TABLE `SourceAttribute`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv' INTO TABLE `CustomerSourceAttribute`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
@@ -139,26 +144,9 @@ VALUES
   ('JellyBean', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, have DUNS redirect', NULL, 'LatticeAccount', NULL),
   ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Will retire after M28', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
   ('Cupcake', 'AccountMatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDomainCountryBased,EntityNameCountryBased,EntityDunsBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
-  ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7,8', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3);
-
-
-INSERT INTO `DecisionGraph`
-(
-    `Description`,
-    `Edges`,
-    `Entity`,
-    `GraphName`,
-    `StartingVertices`,
-    `Vertices`)
-VALUES
-(
-    'Match multiple candidates from PRIME',
-    '0:1',
-    'PrimeAccount',
-    'WestWind',
-    0,
-    'DunsToDuns,LocationToDuns'
-);
+  ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7,8', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3),
+  ('WestWind', 'DunsToDuns,LocationToDuns,UrlToDuns', '0', '0:1|1:2', 'Default for DCP match', NULL, 'PrimeAccount', NULL),
+  ('Heidegger', 'DunsToTps', '0', '', 'Default for TriPeopleSegment', NULL, 'TriPeopleSegment', NULL);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`
 CHARACTER SET UTF8
@@ -196,10 +184,6 @@ WHERE DecodeStrategy = '' OR DecodeStrategy = 'NULL';
 UPDATE AccountMasterColumn
 SET DisplayDiscretizationStrategy = NULL
 WHERE DisplayDiscretizationStrategy = '' OR DisplayDiscretizationStrategy = 'NULL';
-
-UPDATE SourceColumn
-SET Arguments = REPLACE(Arguments, 'Â', '')
-WHERE SourceName = 'DnBCacheSeedRaw';
 
 UPDATE AccountMasterColumn
 SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
@@ -246,5 +230,72 @@ SET
   `EnrichmentStatsVersion`   = '2020-06-18_17-34-39_UTC',
   `DynamoTableSignature`     = '20200617'
 WHERE `Version` = '2.0.23';
+
+UPDATE SourceColumn
+SET Arguments = REPLACE(Arguments, 'Â', '')
+WHERE SourceName = 'DnBCacheSeedRaw';
+
+UPDATE SourceColumn
+	SET Arguments = null WHERE Arguments = 'NULL';
+
+UPDATE SourceColumn
+	SET BaseSource = null WHERE BaseSource = 'NULL';
+
+UPDATE SourceColumn
+	SET Categories = null WHERE Categories = 'NULL';
+
+UPDATE SourceColumn
+	SET ColumnType = null WHERE ColumnType = 'NULL';
+
+UPDATE SourceColumn
+	SET GroupBy = null WHERE GroupBy = 'NULL';
+
+UPDATE SourceColumn
+	SET JoinBy = null WHERE JoinBy = 'NULL';
+
+UPDATE SourceColumn
+	SET Preparation = null WHERE Preparation = 'NULL';
+
+UPDATE SourceAttribute
+	SET Arguments = null WHERE Arguments = 'NULL';
+
+UPDATE SourceAttribute
+	SET DataCloudVersion = null WHERE DataCloudVersion = 'NULL';
+
+UPDATE CustomerSourceAttribute
+	SET Arguments = null WHERE Arguments = 'NULL';
+
+UPDATE CustomerSourceAttribute
+	SET DataCloudVersion = null WHERE DataCloudVersion = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET ApprovedUsage = null WHERE ApprovedUsage = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET DataLicense = null WHERE DataLicense = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET DecodeStrategy = null WHERE DecodeStrategy = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET Description = null WHERE Description = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET DisplayDiscretizationStrategy = null WHERE DisplayDiscretizationStrategy = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET EOLVersion = null WHERE EOLVersion = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET FundamentalType = null WHERE FundamentalType = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET RefreshFrequency = null WHERE RefreshFrequency = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET StatisticalType = null WHERE StatisticalType = 'NULL';
+
+UPDATE AccountMasterColumn
+	SET Subcategory = null WHERE Subcategory = 'NULL';
 
 SET SQL_SAFE_UPDATES = 1;

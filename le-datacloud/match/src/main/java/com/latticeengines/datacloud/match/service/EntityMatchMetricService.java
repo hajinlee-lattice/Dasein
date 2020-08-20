@@ -46,6 +46,18 @@ public interface EntityMatchMetricService {
     void recordNullEntityIdCount(Tenant tenant, String entity, long count);
 
     /**
+     * Record the reason that dynamo txn being cancelled
+     *
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @param code
+     *            reason txn is cancelled
+     */
+    void recordDynamoTxnCancelReason(Tenant tenant, String entity, String code);
+
+    /**
      * Record metrics for dynamo throttling event (read/write capacity exceeded)
      *
      * @param env

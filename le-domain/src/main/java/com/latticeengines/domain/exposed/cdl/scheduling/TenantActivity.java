@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.time.ZoneId;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.security.TenantType;
 
@@ -35,6 +39,9 @@ public class TenantActivity {
     @JsonProperty("last_finish_time")
     private Long lastFinishTime;
 
+    @JsonProperty("first_ingest_action_time")
+    private Long firstIngestActionTime;
+
     @JsonProperty("is_retry")
     private boolean isRetry;
 
@@ -43,6 +50,15 @@ public class TenantActivity {
 
     @JsonProperty("is_auto_schedule")
     private boolean isAutoSchedule;
+
+    @JsonProperty("timezone")
+    private ZoneId timezone;
+
+    @JsonProperty("total_pa_quota")
+    private Map<String, Long> totalPaQuota;
+
+    @JsonProperty("not_exceeded_quota_names")
+    private Set<String> notExceededQuotaNames;
 
     public String getTenantId() {
         return tenantId;
@@ -116,6 +132,14 @@ public class TenantActivity {
         this.lastFinishTime = lastFinishTime;
     }
 
+    public Long getFirstIngestActionTime() {
+        return firstIngestActionTime;
+    }
+
+    public void setFirstIngestActionTime(Long firstIngestActionTime) {
+        this.firstIngestActionTime = firstIngestActionTime;
+    }
+
     public boolean isRetry() {
         return isRetry;
     }
@@ -146,6 +170,30 @@ public class TenantActivity {
 
     public void setLargeTransaction(boolean largeTransaction) {
         isLargeTransaction = largeTransaction;
+    }
+
+    public ZoneId getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(ZoneId timezone) {
+        this.timezone = timezone;
+    }
+
+    public Set<String> getNotExceededQuotaNames() {
+        return notExceededQuotaNames;
+    }
+
+    public void setNotExceededQuotaNames(Set<String> notExceededQuotaNames) {
+        this.notExceededQuotaNames = notExceededQuotaNames;
+    }
+
+    public Map<String, Long> getTotalPaQuota() {
+        return totalPaQuota;
+    }
+
+    public void setTotalPaQuota(Map<String, Long> totalPaQuota) {
+        this.totalPaQuota = totalPaQuota;
     }
 
     public static final class Builder {
@@ -196,6 +244,21 @@ public class TenantActivity {
 
         public Builder withLastFinishTime(Long lastFinishTime) {
             tenantActivity.setLastFinishTime(lastFinishTime);
+            return this;
+        }
+
+        public Builder withNotExceededQuotaNames(Set<String> notExceededQuotaNames) {
+            tenantActivity.setNotExceededQuotaNames(notExceededQuotaNames);
+            return this;
+        }
+
+        public Builder withTotalPaQuota(Map<String, Long> totalPaQuota) {
+            tenantActivity.setTotalPaQuota(totalPaQuota);
+            return this;
+        }
+
+        public Builder withTimezone(ZoneId timezone) {
+            tenantActivity.setTimezone(timezone);
             return this;
         }
 

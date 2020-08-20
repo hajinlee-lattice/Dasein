@@ -249,26 +249,35 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source.getSourceId(),
                 cache);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source1.getSourceId(),
                 cache);
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails1.getUploadId());
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails2.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails2.getUploadId());
+
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails3.getUploadId(),
                 cache);
+        reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails3.getUploadId());
     }
 
     private String setupTables() throws IOException {

@@ -347,8 +347,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     public Map<String, S3ImportSystem> getTemplateToSystemObjectMap(String customerSpace) {
         Map<String, DataFeedTask> templateToDataFeedTaskMap = getTemplateToDataFeedTaskMap(customerSpace);
         if (MapUtils.isNotEmpty(templateToDataFeedTaskMap)) {
-            return templateToDataFeedTaskMap.entrySet().stream().map(entry -> {
-                DataFeedTask task = entry.getValue();
+            return templateToDataFeedTaskMap.values().stream().map(task -> {
                 S3ImportSystem importSystem = task.getImportSystem();
                 if (StringUtils.isEmpty(task.getImportSystemName())) {
                     String systemName = getSystemNameFromFeedType(task.getFeedType());
@@ -460,8 +459,23 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public List<SourceInfo> getSourcesByProjectId(String customerSpace, String projectId, int pageIndex, int pageSize) {
+        Preconditions.checkArgument(StringUtils.isNotEmpty(customerSpace));
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
+        return dataFeedTaskEntityMgr.getSourcesByProjectId(projectId, customerSpace, pageRequest);
+    }
+
+    @Override
     public Long countSourcesBySystemPid(String customerSpace, Long systemPid) {
         return dataFeedTaskEntityMgr.countSourcesBySystemPid(systemPid);
+    }
+
+    @Override
+    public Long countSourcesByProjectId(String customerSpace, String projectId) {
+        Preconditions.checkArgument(StringUtils.isNotEmpty(customerSpace));
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskEntityMgr.countSourcesByProjectId(projectId, customerSpace);
     }
 
     @Override

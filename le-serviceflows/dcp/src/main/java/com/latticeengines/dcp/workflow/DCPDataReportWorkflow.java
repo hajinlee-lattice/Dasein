@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dcp.workflow.listeners.DataReportListener;
+import com.latticeengines.dcp.workflow.steps.FinishDataReport;
+import com.latticeengines.dcp.workflow.steps.ImportDataReportFromS3;
 import com.latticeengines.dcp.workflow.steps.PrepareDataReport;
 import com.latticeengines.dcp.workflow.steps.RollupDataReport;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPDataReportWorkflowConfiguration;
@@ -21,10 +23,16 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class DCPDataReportWorkflow extends AbstractWorkflow<DCPDataReportWorkflowConfiguration> {
 
     @Inject
+    private ImportDataReportFromS3 importDataReportFromS3;
+
+    @Inject
     private PrepareDataReport prepareDataReport;
 
     @Inject
     private RollupDataReport rollupDataReport;
+
+    @Inject
+    private FinishDataReport finishDataReport;
 
     @Inject
     private DataReportListener dataReportListener;
@@ -32,8 +40,10 @@ public class DCPDataReportWorkflow extends AbstractWorkflow<DCPDataReportWorkflo
     @Override
     public Workflow defineWorkflow(DCPDataReportWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
+                .next(importDataReportFromS3)
                 .next(prepareDataReport)
                 .next(rollupDataReport)
+                .next(finishDataReport)
                 .listener(dataReportListener)
                 .build();
     }

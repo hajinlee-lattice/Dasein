@@ -727,6 +727,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName());
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
+        if (MapUtils.isNotEmpty(request.getTags())) {
+            inputProperties.put(WorkflowContextConstants.Inputs.TAGS, JsonUtils.serialize(request.getTags()));
+        }
 
         List<Catalog> catalogs = catalogEntityMgr.findByTenant(tenant);
         log.info("Catalogs for tenant {} are {}", customerSpace, catalogs);
@@ -817,6 +820,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .entityMatchGAOnly(entityMatchGAOnly) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
+                .entityMatchConfiguration(request.getEntityMatchConfiguration()) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
                 .fullProfile(Boolean.TRUE.equals(request.getFullProfile())) //
                 .skipEntities(request.getSkipEntities()) //

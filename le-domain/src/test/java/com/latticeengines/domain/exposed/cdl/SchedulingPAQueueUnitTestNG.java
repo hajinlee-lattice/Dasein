@@ -11,25 +11,27 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.scheduling.AutoScheduleSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.DataCloudRefreshSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.RetrySchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATestTimeClock;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.AutoScheduleSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.DataCloudRefreshSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.RetrySchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.ScheduleNowSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.queue.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAQueueUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulingPAQueueUnitTestNG.class);
 
-    private SchedulingPATestTimeClock schedulingPATestTimeClock = new SchedulingPATestTimeClock("2018-10-29 15:31:43");
+    private SchedulingPATestTimeClock schedulingPATestTimeClock = new SchedulingPATestTimeClock("2018-10-29 05:31:43");
     private long timestamp = 3600000;
 
     @Test(groups = "unit", dataProvider = "fillAllCanRunJobs")
@@ -43,7 +45,7 @@ public class SchedulingPAQueueUnitTestNG {
         Assert.assertEquals(queue.size(), expectedSizeAfterPush, String
                 .format("Queue(%s) size after adding %s does not match the expected one", queue.getQueueName(), input));
 
-        Set<String> tenants = SchedulingPAUtil.getTenantIds(queue.fillAllCanRunJobs());
+        Set<String> tenants = SchedulingPAUtils.getTenantIds(queue.fillAllCanRunJobs());
         Assert.assertEquals(tenants, expectedTenants, "Resulting can run PA tenants does not match the expected ones");
     }
 
@@ -140,6 +142,8 @@ public class SchedulingPAQueueUnitTestNG {
         activity.setLarge(isLargeTenant);
         activity.setScheduleTime(time);
         activity.setTenantType(tenantType);
+        activity.setNotExceededQuotaNames(
+                ImmutableSet.of(SchedulerConstants.QUOTA_AUTO_SCHEDULE, SchedulerConstants.QUOTA_SCHEDULE_NOW));
         return new ScheduleNowSchedulingPAObject(activity);
     }
 
@@ -161,6 +165,8 @@ public class SchedulingPAQueueUnitTestNG {
         tenantActivity.setDataCloudRefresh(isDataCloudRefresh);
         tenantActivity.setLarge(isLargeTenant);
         tenantActivity.setTenantType(tenantType);
+        tenantActivity.setNotExceededQuotaNames(
+                ImmutableSet.of(SchedulerConstants.QUOTA_AUTO_SCHEDULE, SchedulerConstants.QUOTA_SCHEDULE_NOW));
         return new DataCloudRefreshSchedulingPAObject(tenantActivity);
     }
 
@@ -175,6 +181,8 @@ public class SchedulingPAQueueUnitTestNG {
         tenantActivity.setInvokeTime(invokeTime);
         tenantActivity.setFirstActionTime(firstActionTime);
         tenantActivity.setLastActionTime(lastActionTime);
+        tenantActivity.setNotExceededQuotaNames(
+                ImmutableSet.of(SchedulerConstants.QUOTA_AUTO_SCHEDULE, SchedulerConstants.QUOTA_SCHEDULE_NOW));
         return new AutoScheduleSchedulingPAObject(tenantActivity);
     }
 

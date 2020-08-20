@@ -89,12 +89,14 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.impl.IDaaSUser;
 
 import io.opentracing.Scope;
@@ -143,8 +145,17 @@ public class TenantServiceImpl implements TenantService {
     @Inject
     private FeatureFlagService featureFlagService;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private EmailService emailService;
+
     @Value("${common.pls.url}")
     private String plsEndHost;
+
+    @Value("${security.dcp.public.url}")
+    private String dcpPublicUrl;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -719,7 +730,7 @@ public class TenantServiceImpl implements TenantService {
             // generate email list to be added and IDaaS user list
             List<IDaaSUser> users = new ArrayList<>();
             for (VboRequest.User user : vboRequest.getProduct().getUsers()) {
-                users.add(constructIDaaSUser(user, vboRequest.getSubscriber().getLanguage()));
+                users.add(constructIDaaSUser(user, vboRequest.getSubscriber()));
             }
 
             for (String component : services) {
@@ -790,14 +801,17 @@ public class TenantServiceImpl implements TenantService {
         return tracer.activateSpan(span);
     }
 
-    private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
+    private IDaaSUser constructIDaaSUser(VboRequest.User user, VboRequest.Subscriber subscriber) {
         IDaaSUser iDaasuser = new IDaaSUser();
         iDaasuser.setFirstName(user.getName().getFirstName());
         iDaasuser.setEmailAddress(user.getEmailAddress());
         iDaasuser.setLastName(user.getName().getLastName());
         iDaasuser.setUserName(user.getUserId());
         iDaasuser.setPhoneNumber(user.getTelephoneNumber());
-        iDaasuser.setLanguage(language);
+        iDaasuser.setLanguage(subscriber.getLanguage());
+        iDaasuser.setSubscriberNumber(subscriber.getSubscriberNumber());
+        iDaasuser.setCountryCode(user.getPrimaryAddress().getCountryISOAlpha2Code());
+        iDaasuser.setCompanyName(subscriber.getName());
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
                 "Last name is required");
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),

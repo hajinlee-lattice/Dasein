@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -326,6 +327,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 Preconditions.checkNotNull(tenantReport, String.format("no report found for %s", rootId));
                 tenantIdToReport.put(rootId, tenantReport);
                 Set<String> projectIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level, rootId);
+                parentIdToChildren.put(rootId, projectIds);
                 projectIds.forEach(projectId -> {
                     DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
@@ -402,16 +404,17 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 List.class), DataReport.DuplicationReport.class);
         List<HdfsDataUnit> units = result.getTargets();
         int index = 0;
+        Set<String> dunsCountTables = new HashSet<>();
         for (String ownerId : updatedOwnerIds) {
             Pair<DataReportRecord.Level, Date> pair = updatedOwnerIdToLevelAndDate.get(ownerId);
             DataReportRecord.Level level = pair.getLeft();
             Date snapshotTime = pair.getRight();
             HdfsDataUnit unit = units.get(index);
             // register duns count cache
-            String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId));
+            String dunsCountTableName = NamingUtils.timestamp(String.format("dunsCount_%s", ownerId.replace(".", "_")));
             Table dunsCount = toTable(dunsCountTableName, null, unit);
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), dunsCountTableName, dunsCount);
-            registerTable(dunsCountTableName);
+            dunsCountTables.add(dunsCountTableName);
 
             DunsCountCache cache = new DunsCountCache();
             cache.setDunsCountTableName(dunsCountTableName);
@@ -424,5 +427,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             dataReportProxy.updateDataReport(customerSpace.toString(), level, ownerId, dupReport);
             index++;
         }
+        log.info("the new tables generated at rollup step: " + dunsCountTables);
+        putObjectInContext(DUNS_COUNT_TABLE_NAMES, dunsCountTables);
     }
 }

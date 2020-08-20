@@ -109,10 +109,6 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         matchCompleted(input, command);
     }
 
-    protected Map<MatchKey, String> getPotentialMatchKeyMapping() {
-        return new HashMap<>(MATCH_KEYS_TO_DISPLAY_NAMES);
-    }
-
     protected String getPredeterminedRootOperationUid() {
         return null;
     }
@@ -149,17 +145,22 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         inputBuffer.setAvroDir(avroDir);
         matchInput.setInputBuffer(inputBuffer);
 
-        Map<MatchKey, String> potentialKeyMap = getPotentialMatchKeyMapping();
         Set<String> inputFields = getInputFields(avroDir);
+        Map<MatchKey, List<String>> keyMap = getKeyMap(inputFields);
+        matchInput.setKeyMap(keyMap);
+        matchInput.setSkipKeyResolution(true);
+        return matchInput;
+    }
+
+    protected Map<MatchKey, List<String>> getKeyMap(Set<String> inputFields) {
+        Map<MatchKey, String> potentialKeyMap = new HashMap<>(MATCH_KEYS_TO_DISPLAY_NAMES);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         potentialKeyMap.forEach((key, col) -> {
             if (inputFields.contains(col)) {
                 keyMap.put(key, Collections.singletonList(col));
             }
         });
-        matchInput.setKeyMap(keyMap);
-        matchInput.setSkipKeyResolution(true);
-        return matchInput;
+        return keyMap;
     }
 
     private Set<String> getInputFields(String avroDir) {
@@ -167,7 +168,7 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toSet());
     }
-  
+
     private void saveResultAsParquetTable(String avroResultTableName, String targetTableName) {
         Table avroResultTable = metadataProxy.getTable(customerSpace.toString(), avroResultTableName);
         HdfsDataUnit avroResult = avroResultTable.toHdfsDataUnit("AvroResult");

@@ -27,6 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
@@ -65,9 +66,9 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     @BeforeClass(groups = {"functional", "manual"})
     public void setup() throws Exception {
         switchHdfsPod(podId);
-//        if (HdfsUtils.fileExists(yarnConfiguration, hdfsPathBuilder.podDir().toString())) {
-//            HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
-//        }
+        if (HdfsUtils.fileExists(yarnConfiguration, hdfsPathBuilder.podDir().toString())) {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
+        }
     }
 
     @Test(groups = "functional")

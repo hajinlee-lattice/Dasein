@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DnBLookupActor;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -65,7 +65,7 @@ public class DnBLookupActorTestNG extends SingleActorTestNGBase {
         matchTravelerContext.setMatchInput(matchInput);
         msg.setMatchTravelerContext(matchTravelerContext);
 
-        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, false);
+        Response result = (Response) sendMessageToActor(msg, DnBLookupActor.class, false);
         Assert.assertNotNull(result);
         DnBMatchContext data = (DnBMatchContext) result.getResult();
         log.info(String.format("DnBReturnCode = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
@@ -81,8 +81,9 @@ public class DnBLookupActorTestNG extends SingleActorTestNGBase {
     // ExpectedConfidenceCode, ExpectedMatchGrade
     @DataProvider(name = "dnbLookupActorData")
     private Object[][] provideDnBLookupData() {
-        return new Object[][] { { "LATTICE ENGINES", "US", "CALIFORNIA", "FOSTER CITY", DnBReturnCode.OK, "028675958",
-                7, "AZZFAZZAFAF" }, //
+        return new Object[][] { //
+                { "LATTICE ENGINES", "US", "CALIFORNIA", "FOSTER CITY", //
+                        DnBReturnCode.OK, "028675958", 7, "AZZFAZZAFAF" }, //
         };
     }
 }

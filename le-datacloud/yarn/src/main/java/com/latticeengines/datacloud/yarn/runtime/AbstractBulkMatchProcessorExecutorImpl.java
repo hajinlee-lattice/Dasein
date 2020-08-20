@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -257,30 +258,52 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             throws IOException {
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
-            if (outputRecord.getOutput() == null) {
-                continue;
+            log.info("outputRecord: {}", JsonUtils.serialize(outputRecord)); // to remove
+            List<List<Object>> data = new LinkedList<>();
+            if (processorContext.isMultiResultMatch()) {
+                List<List<Object>> candidates = outputRecord.getCandidateOutput();
+                if (CollectionUtils.isEmpty(candidates)) {
+                    continue;
+                }
+                for (List<Object> candidate: candidates) {
+                    // sequence is very important in all values
+                    // input attr -> output attr -> dedupe -> debug
+                    // the sequence is the same as constructing the output schema
+                    List<Object> allValues = copyAndfilterOverwrittenInput(outputRecord, processorContext);
+                    allValues.addAll(candidate);
+                    data.add(allValues);
+                }
+            } else {
+                if (outputRecord.getOutput() == null) {
+                    continue;
+                }
+                // sequence is very important in all values
+                // input attr -> output attr -> dedupe -> debug
+                // the sequence is the same as constructing the output schema
+                List<Object> allValues = copyAndfilterOverwrittenInput(outputRecord, processorContext);
+                allValues.addAll(outputRecord.getOutput());
+                MatchInput originalInput = processorContext.getOriginalInput();
+                if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
+                        && originalInput.isPrepareForDedupe()) {
+                    dedupeHelper.appendDedupeValues(processorContext, allValues, outputRecord);
+                }
+                if (processorContext.isMatchDebugEnabled()) {
+                    appendDebugValues(allValues, outputRecord);
+                }
+                if (BusinessEntity.PrimeAccount.name().equals(processorContext.getOriginalInput().getTargetEntity())) {
+                    appendCandidateValues(allValues, outputRecord);
+                }
+                data.add(allValues);
             }
 
-            // sequence is very important in all values
-            // input attr -> output attr -> dedupe -> debug
-            // the sequence is the same as constructing the output schema
-            List<Object> allValues = copyAndfilterOverwrittenInput(outputRecord, processorContext);
-            allValues.addAll(outputRecord.getOutput());
-            MatchInput originalInput = processorContext.getOriginalInput();
-            if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
-                    && originalInput.isPrepareForDedupe()) {
-                dedupeHelper.appendDedupeValues(processorContext, allValues, outputRecord);
+            for (List<Object> row: data) {
+                GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
+                List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
+                buildAvroRecords(row, builder, fields);
+                GenericRecord record = builder.build();
+                log.info("Build record: {}", record); // to remove
+                records.add(record);
             }
-            if (processorContext.isMatchDebugEnabled()) {
-                appendDebugValues(allValues, outputRecord);
-            }
-            if (BusinessEntity.PrimeAccount.name().equals(processorContext.getOriginalInput().getTargetEntity())) {
-                appendCandidateValues(allValues, outputRecord);
-            }
-            GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
-            List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
-            buildAvroRecords(allValues, builder, fields);
-            records.add(builder.build());
         }
         int randomSplit = random.nextInt(processorContext.getSplits());
         String splitAvro = processorContext.getOutputAvro(randomSplit);
@@ -558,7 +581,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         Long count = uploadOutput(processorContext);
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
-        if (processorContext.getReturnUnmatched()) {
+        if (!processorContext.isMultiResultMatch() && processorContext.getReturnUnmatched()) {
             if (!processorContext.getExcludePublicDomain()
                     && !processorContext.getBlockSize().equals(count.intValue())) {
                 throw new RuntimeException(

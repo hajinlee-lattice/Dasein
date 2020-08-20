@@ -16,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -26,7 +25,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
@@ -40,11 +38,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private int upsertStep;
     private int diffStep;
-    private int changeListStep;
 
     private String diffTableNameInContext;
-    private String chgListTableNameInContext;
-    private String reportChgListTableNameInContext;
     private String batchStoreNameInContext;
     private String systemBatchStoreNameInContext;
 
@@ -60,11 +55,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        List<String> accountTables = !hasSystemBatch
-                ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, ACCOUNT_CHANGELIST_TABLE_NAME,
-                        ACCOUNT_REPORT_CHANGELIST_TABLE_NAME)
-                : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME,
-                        ACCOUNT_CHANGELIST_TABLE_NAME, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
+        List<String> accountTables = !hasSystemBatch ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME)
+                : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME);
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), accountTables);
         shortCutMode = tablesInCtx != null && tablesInCtx.stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
@@ -72,14 +64,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             shortCutMode = true;
             diffTableNameInContext = tablesInCtx.get(0).getName();
             batchStoreNameInContext = tablesInCtx.get(1).getName();
-            systemBatchStoreNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(2).getName() : null;
-            chgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(3).getName()
-                    : tablesInCtx.get(2).getName();
-            reportChgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(4).getName()
-                    : tablesInCtx.get(3).getName();
+            systemBatchStoreNameInContext = tablesInCtx.size() > 2 ? tablesInCtx.get(2).getName() : null;
             diffTableName = diffTableNameInContext;
-            changeListTableName = chgListTableNameInContext;
-            reportChangeListTableName = reportChgListTableNameInContext;
         } else {
             matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
             newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
@@ -171,28 +157,19 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             upsert = mergeSystemBatch(mergeStep + 1, true);
             upsertStep = mergeStep + 2;
             diffStep = mergeStep + 3;
-            changeListStep = mergeStep + 4;
         } else {
             upsert = upsertMaster(true, mergeStep, true);
             upsertStep = mergeStep + 1;
             diffStep = mergeStep + 2;
-            changeListStep = mergeStep + 3;
         }
 
-        // in migration mode, need to use AccountId because legacy batch store won't
-        // have EntityId column
-        String joinKey = inMigrationMode() ? InterfaceName.AccountId.name() : InterfaceName.EntityId.name();
         TransformationStepConfig diff = diff(mergeStep, upsertStep);
-        TransformationStepConfig changeList = createChangeList(upsertStep, joinKey);
-        TransformationStepConfig reportChangeList = reportChangeList(changeListStep);
         TransformationStepConfig report = reportDiff(diffStep);
         if (upsertSystem != null) {
             steps.add(upsertSystem);
         }
         steps.add(upsert);
         steps.add(diff);
-        steps.add(changeList);
-        steps.add(reportChangeList);
         steps.add(report);
 
         return steps;
@@ -203,16 +180,11 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
         upsertStep = 0;
         diffStep = 1;
-        changeListStep = 2;
         TransformationStepConfig upsert = upsertMaster(false, matchedAccountTable);
         TransformationStepConfig diff = diff(matchedAccountTable, upsertStep);
-        TransformationStepConfig changeList = createChangeList(upsertStep, InterfaceName.AccountId.name());
-        TransformationStepConfig reportChangeList = reportChangeList(changeListStep);
         TransformationStepConfig report = reportDiff(diffStep);
         steps.add(upsert);
         steps.add(diff);
-        steps.add(changeList);
-        steps.add(reportChangeList);
         steps.add(report);
 
         return steps;
@@ -255,33 +227,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         if (!noImports) {
-            if (StringUtils.isNotBlank(changeListTableName)) {
-                exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
-                exportAccountLookupChangeToDynamo(changeListTableName);
-            }
-            if (StringUtils.isNotBlank(reportChangeListTableName)) {
-                exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
-            }
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
         }
         TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
         exportToDynamo(batchStoreTableName, role.getPartitionKey(), role.getRangeKey());
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
-    }
-
-    private void exportAccountLookupChangeToDynamo(String changeListTableName) {
-        Table changeListTable = metadataProxy.getTableSummary(customerSpace.toString(), changeListTableName);
-        if (changeListTable == null) {
-            // ignore error for now
-            log.error("Failed to retrieve change list table with name: {}", changeListTableName);
-            return;
-        }
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(changeListTableName);
-        config.setInputPath(PathUtils.toAvroGlob(changeListTable.getExtracts().get(0).getPath()));
-        config.setPartitionKey(InterfaceName.AtlasLookupKey.name());
-        addToListInContext(ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     @Override
@@ -305,24 +256,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             return diffTableNameInContext;
         } else {
             return TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
-        }
-    }
-
-    @Override
-    protected String getChangeListTableName() {
-        if (shortCutMode) {
-            return chgListTableNameInContext;
-        } else {
-            return TableUtils.getFullTableName(changeListTablePrefix, pipelineVersion);
-        }
-    }
-
-    @Override
-    protected String getReportChangeListTableName() {
-        if (shortCutMode) {
-            return reportChgListTableNameInContext;
-        } else {
-            return TableUtils.getFullTableName(reportChangeListTablePrefix, pipelineVersion);
         }
     }
 

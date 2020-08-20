@@ -16,22 +16,50 @@
     { "Node": "ProductBundlesQuotaLimit", "Data": {"Type": "number", "Required": false}},
     { "Node": "ProductSKUsQuotaLimit", "Data": {"Type": "number", "Required": false}},
     { "Node": "TransactionQuotaLimit", "Data": {"Type": "number", "Required": false}},
-    { "Node": "ModelingProfilingVersion",
+    {
+      "Node": "ModelingProfilingVersion",
       "Data": {
         "Type": "options",
         "Required": "false",
         "Options": [
-              "v1", "v2"
-            ]
-        }
+          "v1",
+          "v2"
+        ]
+      }
     },
-    { "Node": "ExportCronExpression", "Data": {"Type": "string", "Required": false}},
-    { "Node": "Diagnostics",
+    {
+      "Node": "ExportCronExpression",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
+      "Node": "PAScheduleNowCronExpression",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
+      "Node": "Diagnostics",
       "Children": [
-          { "Node": "QueryLogging", "Data": {"Type": "boolean", "Required": false}}
+        {
+          "Node": "QueryLogging",
+          "Data": {
+            "Type": "boolean",
+            "Required": false
+          }
+        }
       ]
     },
-    {"Node": "CampaignLaunchEndPointUrl", "Data": {"Type": "string", "Required": false}},
+    {
+      "Node": "CampaignLaunchEndPointUrl",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
     {
       "Node": "PublishRecommendationsForS3Launch",
       "Data": {
@@ -39,6 +67,26 @@
         "Required": false
       }
     },
-    { "Node": "activityUploadQuota", "Data": {"Type": "string", "Required": false}}
+    {
+      "Node": "activityUploadQuota",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
+      "Node": "PAQuota",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
+      "Node": "Timezone",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    }
   ]
 }

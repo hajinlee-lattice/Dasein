@@ -122,6 +122,11 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             });
             setRematchVersions(matchInput);
         }
+        if (configuration.getEntityMatchConfiguration() != null) {
+            int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
+            log.info("set number of staging shards for match to {}", numStagingShards);
+            matchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
+        }
         matchInput.setSourceEntity(BusinessEntity.Transaction.name());
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {

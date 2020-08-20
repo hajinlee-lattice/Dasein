@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 import com.latticeengines.common.exposed.util.{CipherUtils, JsonUtils, KryoUtils}
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
 import com.latticeengines.domain.exposed.playmakercore.{NonStandardRecColumnName, RecommendationColumnName}
@@ -11,10 +12,10 @@ import com.latticeengines.domain.exposed.pls.{DeltaCampaignLaunchSparkContext, R
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_timestamp, from_unixtime}
+import org.apache.spark.sql.functions.{col, count, from_unixtime, lit, sum, to_timestamp, udf, when}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions.asc
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -189,19 +190,19 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val accountColsRecNotIncludedStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
     val accountColsRecNotIncludedNonStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (deltaCampaignLaunchSparkContext.getContactCols != null) deltaCampaignLaunchSparkContext.getContactCols.asScala else Seq.empty[String]
-    
+
     val createRecommendationDataFrame: Boolean = deltaCampaignLaunchSparkContext.getCreateRecommendationDataFrame
     val createAddCsvDataFrame: Boolean = deltaCampaignLaunchSparkContext.getCreateAddCsvDataFrame
     val createDeleteCsvDataFrame: Boolean = deltaCampaignLaunchSparkContext.getCreateDeleteCsvDataFrame
     val sfdcContactId: String = deltaCampaignLaunchSparkContext.getSfdcContactID
-            
+
     logSpark(f"playId=$playId%s, playLaunchId=$playLaunchId%s, createRecommendationDataFrame=$createRecommendationDataFrame%s, createAddCsvDataFrame=$createAddCsvDataFrame%s, createDeleteCsvDataFrame=$createDeleteCsvDataFrame%s")
-    
+
     // Read Input, the order matters!
-    
+
     val listSize = lattice.input.size
     logSpark(s"input size is: $listSize")
-    
+
     // 0: addAccountTable
     val addAccountTable: DataFrame = lattice.input(0)
     if (!addAccountTable.rdd.isEmpty) {
@@ -232,11 +233,12 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         logDataFrame("completeContactTable", completeContactTable, joinKey, Seq(joinKey), limit = 30)
         completeContactTable.printSchema
     }
-    
+
     var finalDfs = new ListBuffer[DataFrame]()
     val contactNums = new Array[Long](2)
     if (createRecommendationDataFrame) {
-      val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable)
+      val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext,
+        addAccountTable, completeContactTable, CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName))
       val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
       contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
       val recommendationDf = recommendationDfWithContactNum.drop("CONTACT_NUM").checkpoint(eager = true)
@@ -248,7 +250,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         var finalrecommendationDf: DataFrame = recommendationDf
         if (!addContactTable.rdd.isEmpty) {
           // replace contacts
-          val aggregatedContacts = aggregateContacts(addContactTable, contactCols, sfdcContactId, joinKey)
+          val aggregatedContacts = aggregateContacts(addContactTable, contactCols, sfdcContactId, joinKey, false)
           finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
           val contactCount = finalrecommendationDf.agg(sum("CONTACT_NUM")).first.get(0)
           contactNums(0) = if (contactCount != null) contactCount.toString.toLong else 0L
@@ -262,9 +264,10 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         finalDfs += addCsvDataFrame
       }
     }
-    
+
     if (createDeleteCsvDataFrame) {
-        val deleteRecDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, deleteAccountTable, deleteContactTable)
+        val deleteRecDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext,
+          deleteAccountTable, deleteContactTable, false)
         val deleteContactCount = deleteRecDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
         contactNums(1) = if (deleteContactCount != null) deleteContactCount.toString.toLong else 0L
         val deleteRecDf = deleteRecDfWithContactNum.drop("CONTACT_NUM")
@@ -274,9 +277,10 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     lattice.output = finalDfs.toList
     lattice.outputStr = contactNums.mkString("[", ",", "]")
   }
-  
+
   // returns recommendation table with one more column "CONTACT_NUM". Need to drop that column before further processing
-  private def createRecommendationDf(spark: SparkSession, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, addAccountTable: DataFrame, completeContactTable: DataFrame): DataFrame = {
+  private def createRecommendationDf(spark: SparkSession, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext,
+                                     addAccountTable: DataFrame, completeContactTable: DataFrame, onlyPopulateOneContact: Boolean): DataFrame = {
       val joinKey: String = deltaCampaignLaunchSparkContext.getJoinKey
       val playId: String = deltaCampaignLaunchSparkContext.getPlayName
       val playLaunchId: String = deltaCampaignLaunchSparkContext.getPlayLaunchId
@@ -287,7 +291,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       val accountColsRecNotIncludedNonStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
       val contactCols: Seq[String] = if (deltaCampaignLaunchSparkContext.getContactCols != null) deltaCampaignLaunchSparkContext.getContactCols.asScala else Seq.empty[String]
       val sfdcContactId: String = deltaCampaignLaunchSparkContext.getSfdcContactID
-      
+
       val bos: ByteArrayOutputStream = new ByteArrayOutputStream
       KryoUtils.write(bos, deltaCampaignLaunchSparkContext)
       val serializedCtx = JsonUtils.serialize(deltaCampaignLaunchSparkContext)
@@ -321,11 +325,11 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         "TENANT_ID", //
         "DELETED")
 
-      logDataFrame("derivedAccounts", derivedAccounts, joinKey, Seq(joinKey), limit = 100)        
-  
+      logDataFrame("derivedAccounts", derivedAccounts, joinKey, Seq(joinKey), limit = 100)
+
       var finalRecommendations: DataFrame = null
       if (!completeContactTable.rdd.isEmpty) {
-          val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, sfdcContactId, joinKey)
+          val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, sfdcContactId, joinKey, onlyPopulateOneContact)
           val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
 
           logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CONTACT_NUM"), limit = 100)
@@ -338,7 +342,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       logDataFrame("finalRecommendations", finalRecommendations, "ACCOUNT_ID", Seq("ACCOUNT_ID", "EXTERNAL_ID"), limit = 100)
       finalRecommendations
   }
-  
+
   private def exportToRecommendationTable(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, orderedRec: DataFrame) = {
     val driver = deltaCampaignLaunchSparkContext.getDataDbDriver()
     val url = deltaCampaignLaunchSparkContext.getDataDbUrl()
@@ -349,14 +353,14 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val prop = new java.util.Properties
     prop.setProperty("driver", driver)
     prop.setProperty("user", user)
-    prop.setProperty("password", CipherUtils.decrypt(pw, encryptionKey, saltHint)) 
+    prop.setProperty("password", CipherUtils.decrypt(pw, encryptionKey, saltHint))
     val table = "Recommendation"
-    
+
     //write data from spark dataframe to database
     val orderedRecToDate = transformFromTimestampToDate(orderedRec)
     orderedRecToDate.write.mode("append").jdbc(url, table, prop)
   }
-  
+
   private def transformFromTimestampToDate(orderedRec: DataFrame): DataFrame = {
     return orderedRec.withColumn("LAUNCH_DATE_DATE",  to_timestamp(from_unixtime(col("LAUNCH_DATE")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
                      .withColumn("LAST_UPDATED_TIMESTAMP_DATE", to_timestamp(from_unixtime(col("LAST_UPDATED_TIMESTAMP")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
@@ -376,7 +380,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     println(accountColsRecNotIncludedStd)
     println(accountColsRecNotIncludedNonStd)
     println(contactCols)
-    
+
     if (accountColsRecIncluded.isEmpty //
         && accountColsRecNotIncludedStd.isEmpty //
         && accountColsRecNotIncludedNonStd.isEmpty //
@@ -452,19 +456,18 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     userConfiguredDataFrame
   }
 
-  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String): DataFrame = {
-      val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)
-      val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
-        flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
-        count(lit(1)).as("CONTACT_NUM") //
-      )
-      val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("")).otherwise(col("CONTACTS")))
-      //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
-      logSpark("----- BEGIN SCRIPT OUTPUT -----")
-	    processedAggrContacts.printSchema
-	    logSpark("----- END SCRIPT OUTPUT -----")
-    
-      processedAggrContacts
+  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String, onlyPopulateOneContact: Boolean): DataFrame = {
+    val contactWithoutJoinKey = contactTable.drop(joinKey)
+    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, onlyPopulateOneContact)
+    val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
+      flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
+      count(lit(1)).as("CONTACT_NUM") //
+    )
+    val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("")).otherwise(col("CONTACTS")))
+    //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
+    logSpark("----- BEGIN SCRIPT OUTPUT -----")
+    processedAggrContacts.printSchema
+    logSpark("----- END SCRIPT OUTPUT -----")
+    processedAggrContacts
   }
 }

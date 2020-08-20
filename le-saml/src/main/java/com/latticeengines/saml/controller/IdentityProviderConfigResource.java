@@ -4,14 +4,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.opensaml.saml2.metadata.provider.ChainingMetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLProcessingFilter;
-import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,9 +50,6 @@ public class IdentityProviderConfigResource {
     public List<IdentityProvider> findAll(@PathVariable("tenantId") String tenantId) {
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info("Retrieving all identity providers");
-        LogManager.getLogger(SAMLContextProviderImpl.class).setLevel(Level.DEBUG);
-        LogManager.getLogger(SAMLProcessingFilter.class).setLevel(Level.DEBUG);
-        LogManager.getLogger(ChainingMetadataProvider.class).setLevel(Level.DEBUG);
         return identityProviderService.findAll();
     }
 

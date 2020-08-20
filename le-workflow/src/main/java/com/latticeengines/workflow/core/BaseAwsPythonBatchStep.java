@@ -39,6 +39,9 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${hadoop.batch.queue.python}")
+    private String jobQueue;
+
     @Inject
     private EMRCacheService emrCacheService;
 
@@ -140,6 +143,9 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         jobName = jobName.replaceAll(" ", "_");
         log.info("Job name=" + jobName);
         jobRequest.setJobName(jobName);
+
+        log.info("Job queue=" + jobQueue);
+        jobRequest.setJobQueue(jobQueue);
 
         Map<String, String> envs = getRuntimeEnvs();
         jobRequest.setEnvs(envs);

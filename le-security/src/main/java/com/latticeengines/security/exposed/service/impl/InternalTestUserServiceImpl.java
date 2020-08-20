@@ -38,6 +38,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     private static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@lattice-engines.com";
     private static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@lattice-engines.com";
     private static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@lattice-engines.com";
+    private static final String INTERNAL_ANALYST_USERNAME = "pls-internal-analyst-tester@lattice-engines.com";
     private static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@lattice-engines.com";
     private static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@lattice-engines.com";
     private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@lattice-engines.com";
@@ -189,22 +190,33 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
 
     @Override
     public String getUsernameForAccessLevel(AccessLevel accessLevel) {
+        String username;
         switch (accessLevel) {
         case SUPER_ADMIN:
-            return SUPER_ADMIN_USERNAME;
+            username = SUPER_ADMIN_USERNAME;
+            break;
         case INTERNAL_ADMIN:
-            return INTERNAL_ADMIN_USERNAME;
+            username = INTERNAL_ADMIN_USERNAME;
+            break;
+        case INTERNAL_ANALYST:
+            username = INTERNAL_ANALYST_USERNAME;
+            break;
         case INTERNAL_USER:
-            return INTERNAL_USER_USERNAME;
+            username = INTERNAL_USER_USERNAME;
+            break;
         case EXTERNAL_ADMIN:
-            return EXTERNAL_ADMIN_USERNAME;
+            username = EXTERNAL_ADMIN_USERNAME;
+            break;
         case EXTERNAL_USER:
-            return EXTERNAL_USER_USERNAME;
+            username = EXTERNAL_USER_USERNAME;
+            break;
         case THIRD_PARTY_USER:
-            return THIRD_PARTY_USER_USERNAME;
+            username = THIRD_PARTY_USER_USERNAME;
+            break;
         default:
             throw new IllegalArgumentException("Unknown access level!");
         }
+        return username;
     }
 
     @Override

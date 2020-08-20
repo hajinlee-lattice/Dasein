@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -61,8 +63,18 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     @Inject
     private EntityMatchMetricService entityMatchMetricService;
 
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
+
     @Value("${datacloud.match.entity.txn.associate.enabled}")
     private boolean useTransactAssociateByDefault;
+
+    // fail when one seed having too many lookup entries
+    @Value("${datacloud.match.entity.cfg.failIfTooManyLookups:true}")
+    private boolean failIfTooManyLookups;
+
+    @Value("${datacloud.match.entity.cfg.num.lookups.max:250}")
+    private int maxNumLookupsPerSeed;
 
     /**
      * Hook to decide whether this actor should process current request. If this method is invoked, all
@@ -164,6 +176,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         List<Integer> dummyResultIndices = IntStream.range(lookupSizeBefore, postProcessedResults.size()).boxed()
                 .collect(Collectors.toList());
 
+        overwriteConfiguration(traveler);
         Map<EntityMatchEnvironment, Integer> versionMap = traveler.getMatchInput() == null ? null
                 : traveler.getMatchInput().getEntityMatchVersionMap();
         return new EntityAssociationRequest(standardizedTenant, entity, versionMap,
@@ -218,6 +231,16 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 traveler.setEntityMatchErrors(associationResponse.getAssociationErrors());
             }
 
+            EntityRawSeed mergedSeed = associationResponse.getSeedAfterAssociation();
+            if (failIfTooManyLookups && traveler.getMatchInput().isAllocateId() && mergedSeed != null
+                    && CollectionUtils.size(mergedSeed.getLookupEntries()) > maxNumLookupsPerSeed) {
+                // guard against outliers (generally bad data if there are this many lookups)
+                String msg = String.format("%s (ID=%s) have too many (%d) match field values, exceeding limit %d",
+                        mergedSeed.getEntity(), mergedSeed.getId(), CollectionUtils.size(mergedSeed.getLookupEntries()),
+                        maxNumLookupsPerSeed);
+                traveler.addCriticalEntityMatchError(msg);
+            }
+
             // clear all system IDs that have conflict
             if (CollectionUtils.isNotEmpty(associationResponse.getConflictEntries())) {
                 for (EntityLookupEntry entry : associationResponse.getConflictEntries()) {
@@ -246,6 +269,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
         Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
+        overwriteConfiguration(traveler);
         Map<EntityMatchEnvironment, Integer> versionMap = traveler.getMatchInput() == null ? null
                 : traveler.getMatchInput().getEntityMatchVersionMap();
         return new EntityLookupRequest(standardizedTenant, entity, versionMap, tuple);
@@ -285,6 +309,24 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         } else {
             log.error("Got invalid entity lookup response in actor {}, should not have happened", self());
         }
+    }
+
+    private void overwriteConfiguration(@NotNull MatchTraveler traveler) {
+        EntityMatchConfiguration config = getConfiguration(traveler);
+        if (config != null) {
+            // overwrite configuration
+            if (config.getNumStagingShards() > 0) {
+                entityMatchConfigurationService.setNumShards(EntityMatchEnvironment.STAGING,
+                        config.getNumStagingShards());
+            }
+        }
+    }
+
+    private EntityMatchConfiguration getConfiguration(@NotNull MatchTraveler traveler) {
+        if (traveler.getMatchInput() == null) {
+            return null;
+        }
+        return traveler.getMatchInput().getEntityMatchConfiguration();
     }
 
     private boolean useTransactAssociate(@NotNull MatchTraveler traveler) {

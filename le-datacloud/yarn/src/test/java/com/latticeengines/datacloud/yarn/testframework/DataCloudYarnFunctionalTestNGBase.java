@@ -67,7 +67,7 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
             if (url == null) {
                 throw new RuntimeException("Cannot find resource " + fileName);
             }
-            CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT);
+            CSVParser parser = CSVParser.parse(url, Charset.defaultCharset(), CSVFormat.DEFAULT);
             List<List<Object>> data = new ArrayList<>();
             List<String> fieldNames = new ArrayList<>(Arrays.asList("ID", InterfaceName.InternalId.name()));
             int rowNum = 0;
@@ -99,15 +99,15 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
     private void uploadAvroData(List<List<Object>> data, List<String> fieldNames, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\",\"fields\":["
-                + "{\"name\":\"" + fieldNames.get(0) + "\",\"type\":[\"long\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(1) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(2) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(3) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(4) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(5) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(6) + "\",\"type\":[\"string\",\"null\"]}"
-                + "]}");
+        String schemaJson = "{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\",\"fields\":[";
+        List<String> fields = new ArrayList<>();
+        for (String field: fieldNames) {
+            String type = "ID".equals(field) ? "long" : "string";
+            fields.add("{\"name\":\"" + field + "\",\"type\":[\"" + type + "\",\"null\"]}");
+        }
+        schemaJson += StringUtils.join(fields, ",");
+        schemaJson += "]}";
+        Schema schema = parser.parse(schemaJson);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (List<Object> tuple : data) {
             for (int i = 0; i < tuple.size(); i++) {

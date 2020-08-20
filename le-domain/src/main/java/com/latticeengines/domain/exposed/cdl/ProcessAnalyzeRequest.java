@@ -3,12 +3,14 @@ package com.latticeengines.domain.exposed.cdl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
 
@@ -87,6 +89,13 @@ public class ProcessAnalyzeRequest {
 
     @JsonProperty("CurrentPATimestamp")
     private Long currentPATimestamp;
+
+    // workflow tags
+    @JsonProperty("Tags")
+    private Map<String, String> tags;
+
+    @JsonProperty("EntityMatchConfiguration")
+    private EntityMatchConfiguration entityMatchConfiguration;
 
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
@@ -214,5 +223,21 @@ public class ProcessAnalyzeRequest {
 
     public void setCurrentPATimestamp(Long currentPATimestamp) {
         this.currentPATimestamp = currentPATimestamp;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration() {
+        return entityMatchConfiguration;
+    }
+
+    public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
+        this.entityMatchConfiguration = entityMatchConfiguration;
     }
 }

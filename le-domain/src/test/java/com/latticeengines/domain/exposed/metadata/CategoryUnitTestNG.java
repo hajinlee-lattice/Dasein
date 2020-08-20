@@ -18,6 +18,7 @@ public class CategoryUnitTestNG {
         Assert.assertTrue(Category.TECHNOLOGY_PROFILE.isPremium());
         Assert.assertFalse(Category.FIRMOGRAPHICS.isPremium());
         Assert.assertTrue(Category.GROWTH_TRENDS.isPremium());
+        Assert.assertTrue(Category.COVID_19.isPremium());
     }
 
     @Test(groups = "unit")

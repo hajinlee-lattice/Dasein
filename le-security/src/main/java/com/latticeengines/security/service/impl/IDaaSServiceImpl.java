@@ -12,6 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -34,7 +37,9 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -47,6 +52,7 @@ import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.util.LoginUtils;
 
 @Service("iDaasService")
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class IDaaSServiceImpl implements IDaaSService {
 
     private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
@@ -56,10 +62,14 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private final RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
-            .maximumSize(1000) //
-            .expireAfterWrite(1, TimeUnit.HOURS) //
+            .maximumSize(10) //
+            .expireAfterWrite(30, TimeUnit.MINUTES) //
             .build(this::refreshOAuthTokens);
+
     private volatile String tokenInUse;
+
+    @Inject
+    private IDaaSServiceImpl _self;
 
     @Inject
     private SessionService sessionService;
@@ -73,17 +83,14 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Inject
     private TenantService tenantService;
 
-    @Value("${security.idaas.api.url}")
+    @Value("${remote.idaas.api.url}")
     private String apiUrl;
 
-    @Value("${security.idaas.client.id}")
+    @Value("${remote.idaas.client.id}")
     private String clientId;
 
-    @Value("${security.idaas.client.secret.encrypted}")
+    @Value("${remote.idaas.client.secret.encrypted}")
     private String clientSecret;
-
-    @Value("${security.idaas.enabled}")
-    private boolean enabled;
 
     @Override
     public LoginDocument login(Credentials credentials) {
@@ -120,106 +127,81 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     private boolean authenticate(Credentials credentials) {
-        if (enabled) {
-            IDaaSCredentials iDaaSCreds = new IDaaSCredentials();
-            iDaaSCreds.setUserName(credentials.getUsername());
-            iDaaSCreds.setPassword(credentials.getPassword());
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-            try {
-                return retryTemplate.execute(ctx -> {
-                    try (PerformanceTimer timer = new PerformanceTimer("Authenticate user against IDaaS.")) {
-                        ResponseEntity<JsonNode> response = restTemplate.postForEntity(authenticateUri(), iDaaSCreds, JsonNode.class);
-                        if (HttpStatus.OK.equals(response.getStatusCode())) {
-                            return true;
-                        } else {
-                            log.warn("Cannot authenticate user {} against IDaaS: {}", credentials.getUsername(), response.getBody());
-                            throw new RuntimeException(JsonUtils.serialize(response.getBody()));
-                        }
-                    } catch (HttpClientErrorException.Unauthorized e) {
-                        log.warn("Failed to authenticate user {}: {}", credentials.getUsername(), e.getMessage());
-                        return false;
+        IDaaSCredentials iDaaSCreds = new IDaaSCredentials();
+        iDaaSCreds.setUserName(credentials.getUsername());
+        iDaaSCreds.setPassword(credentials.getPassword());
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+        try {
+            return retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("Authenticate user against IDaaS.")) {
+                    ResponseEntity<JsonNode> response = restTemplate.postForEntity(authenticateUri(), iDaaSCreds, JsonNode.class);
+                    if (HttpStatus.OK.equals(response.getStatusCode())) {
+                        return true;
+                    } else {
+                        log.warn("Cannot authenticate user {} against IDaaS: {}", credentials.getUsername(), response.getBody());
+                        throw new RuntimeException(JsonUtils.serialize(response.getBody()));
                     }
-                });
-            } catch (Exception e) {
-                log.warn("Cannot authenticate user {} against IDaaS", credentials.getUsername(), e);
-                return false;
-            }
-        } else {
-            String email = credentials.getUsername();
-            if (StringUtils.isNotBlank(email) && (email.toLowerCase().endsWith("dnb.com")
-                    || email.equalsIgnoreCase("dcp_dev@lattice-engines.com"))) {
-                log.info("Blindly authenticate IDaaS user {}, as IDaaS is disabled.", credentials.getUsername());
-                return true;
-            } else {
-                log.info("Blindly reject IDaaS user {}, as IDaaS is disabled.", credentials.getUsername());
-                return false;
-            }
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    log.warn("Failed to authenticate user {}: {}", credentials.getUsername(), e.getMessage());
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Cannot authenticate user {} against IDaaS", credentials.getUsername(), e);
+            return false;
         }
     }
 
     @Override
     public IDaaSUser getIDaaSUser(String email) {
-        if (enabled) {
-            refreshToken();
-            IDaaSUser user = null;
-            try {
-                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-                user = retryTemplate.execute(ctx -> {
-                    if (ctx.getRetryCount() > 0) {
-                        log.info("Attempt={} retrying to get IDaaS user for {}", ctx.getRetryCount() + 1,
-                                email, ctx.getLastThrowable());
-                    }
-                    try (PerformanceTimer timer =
-                                 new PerformanceTimer(String.format("Check user detail %s in IDaaS.", email))) {
-                        log.info("sending request to get IDaaS user {}", email);
-                        ResponseEntity<IDaaSUser> response = restTemplate.getForEntity(userUri(email), IDaaSUser.class);
-                        return response.getBody();
-                    } catch (HttpClientErrorException.Unauthorized e) {
-                        log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
-                        return null;
-                    }
-                });
-            } catch (Exception e) {
-                log.warn("Failed to check user detail in IDaaS for {}", email, e);
-            }
-            return user;
-        } else {
-            IDaaSUser user = new IDaaSUser();
-            user.setEmailAddress(email);
-            user.setUserName(email);
-            user.setApplications(Collections.singletonList(DCP_PRODUCT));
-            user.setRoles(Collections.singletonList(DCP_ROLE));
-            return user;
+        refreshToken();
+        IDaaSUser user = null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            user = retryTemplate.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt={} retrying to get IDaaS user for {}", ctx.getRetryCount() + 1,
+                            email, ctx.getLastThrowable());
+                }
+                try (PerformanceTimer timer =
+                             new PerformanceTimer(String.format("Check user detail %s in IDaaS.", email))) {
+                    log.info("sending request to get IDaaS user {}", email);
+                    ResponseEntity<IDaaSUser> response = restTemplate.getForEntity(userUri(email), IDaaSUser.class);
+                    return response.getBody();
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to check user detail in IDaaS for {}", email, e);
         }
+        return user;
     }
 
     @Override
     public IDaaSUser updateIDaaSUser(IDaaSUser user) {
-        if (enabled) {
-            refreshToken();
-            String email = user.getEmailAddress();
-            IDaaSUser returnedUser = null;
-            try {
-                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-                returnedUser = retryTemplate.execute(ctx -> {
-                    try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
-                        HttpEntity<IDaaSUser> entity = new HttpEntity<>(user);
-                        ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
-                                HttpMethod.PUT, entity, IDaaSUser.class);
-                        return responseEntity.getBody();
-                    } catch (HttpClientErrorException.Unauthorized e) {
-                        // TODO(penglong) re-evaluate this part after network is setup
-                        log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
-                        return null;
-                    }
-                });
-            } catch (Exception e) {
-                log.warn("Failed to update user detail in IDaaS for {}", email, e);
-            }
-            return returnedUser;
-        } else {
-            return user;
+        refreshToken();
+        String email = user.getEmailAddress();
+        IDaaSUser returnedUser = null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            returnedUser = retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
+                    HttpEntity<IDaaSUser> entity = new HttpEntity<>(user);
+                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
+                            HttpMethod.PUT, entity, IDaaSUser.class);
+                    return responseEntity.getBody();
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    // TODO(penglong) re-evaluate this part after network is setup
+                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to update user detail in IDaaS for {}", email, e);
         }
+        return returnedUser;
     }
 
     @Override
@@ -227,103 +209,123 @@ public class IDaaSServiceImpl implements IDaaSService {
         user.setAppName(DCP_PRODUCT);
         user.setSource(DCP_PRODUCT);
         user.setRequestor(DCP_PRODUCT);
-        if (enabled) {
-            refreshToken();
-            String email = user.getEmailAddress();
-            IDaaSUser returnedUser = null;
-            try {
-                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-                returnedUser = retryTemplate.execute(ctx -> {
-                    if (ctx.getRetryCount() > 0) {
-                        log.info("Attempt={} retrying to create IDaaS user for {}", ctx.getRetryCount() + 1, email,
-                                ctx.getLastThrowable());
-                    }
-                    try (PerformanceTimer timer =
-                                 new PerformanceTimer(String.format("create user %s in IDaaS.", email))) {
-                        log.info("sending request to create IDaaS user {}", email);
-                        ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
-                                user, IDaaSUser.class);
-                        return responseEntity.getBody();
-                    } catch (HttpClientErrorException.Unauthorized e) {
-                        // TODO(penglong) re-evaluate this part after network is setup
-                        log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
-                        return null;
-                    }
-                });
-            } catch (Exception e) {
-                log.warn("Failed to create user detail in IDaaS for {}", email, e);
-            }
-            return returnedUser;
-        } else {
-            return user;
+
+        refreshToken();
+        String email = user.getEmailAddress();
+        IDaaSUser returnedUser = null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            returnedUser = retryTemplate.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt={} retrying to create IDaaS user for {}", ctx.getRetryCount() + 1, email,
+                            ctx.getLastThrowable());
+                }
+                try (PerformanceTimer timer =
+                             new PerformanceTimer(String.format("create user %s in IDaaS.", email))) {
+                    log.info("sending request to create IDaaS user {}", email);
+                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
+                            user, IDaaSUser.class);
+                    return responseEntity.getBody();
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    // TODO(penglong) re-evaluate this part after network is setup
+                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to create user detail in IDaaS for {}", email, e);
         }
+        // get invitation link for user if new user was created successfully
+        if (returnedUser != null) {
+            InvitationLinkResponse invitationLinkResponse = getUserInvitationLink(returnedUser.getEmailAddress());
+            if (invitationLinkResponse != null) {
+                returnedUser.setInvitationLink(invitationLinkResponse.getInviteLink());
+            }
+        }
+        return returnedUser;
     }
 
     @Override
     public IDaaSResponse addProductAccessToUser(ProductRequest request) {
         request.setRequestor(DCP_PRODUCT);
         request.setProducts(Collections.singletonList(DCP_PRODUCT));
-        if (enabled) {
-            refreshToken();
-            IDaaSResponse response = null;
-            String email = request.getEmailAddress();
-            try {
-                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-                response = retryTemplate.execute(ctx -> {
-                    if (ctx.getRetryCount() > 0) {
-                        log.info("Attempt={} retrying to add product access to IDaaS user {}", ctx.getRetryCount() + 1,
-                                email, ctx.getLastThrowable());
-                    }
-                    try (PerformanceTimer timer =
-                                 new PerformanceTimer(String.format("add product access to user %s.", email))) {
-                        log.info("sending request to add product access to IDaaS user {}", email);
-                        HttpEntity<ProductRequest> entity = new HttpEntity<>(request);
-                        ResponseEntity<IDaaSResponse> responseEntity =
-                                restTemplate.exchange(addProductUri(email), HttpMethod.PUT, entity,
-                                        IDaaSResponse.class);
-                        return responseEntity.getBody();
-                    } catch (Exception e) {
-                        // TODO re-evaluate this part after network is setup
-                        log.warn("Failed to execute api", e);
-                        return null;
-                    }
-                });
-            } catch (Exception e) {
-                log.warn("Failed to add product access to user {}", email);
-            }
-            return response;
-        } else {
-            return new IDaaSResponse();
+        request.getProductSubscription().setProductName(DCP_PRODUCT);
+
+        refreshToken();
+        IDaaSResponse response = null;
+        String email = request.getEmailAddress();
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            response = retryTemplate.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt={} retrying to add product access to IDaaS user {}", ctx.getRetryCount() + 1,
+                            email, ctx.getLastThrowable());
+                }
+                try (PerformanceTimer timer =
+                             new PerformanceTimer(String.format("add product access to user %s.", email))) {
+                    log.info("sending request to add product access to IDaaS user {}", email);
+                    HttpEntity<ProductRequest> entity = new HttpEntity<>(request);
+                    ResponseEntity<IDaaSResponse> responseEntity =
+                            restTemplate.exchange(addProductUri(email), HttpMethod.PUT, entity,
+                                    IDaaSResponse.class);
+                    return responseEntity.getBody();
+                } catch (Exception e) {
+                    // TODO re-evaluate this part after network is setup
+                    log.warn("Failed to execute api", e);
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to add product access to user {}", email);
         }
+        return response;
     }
 
     @Override
     public IDaaSResponse addRoleToUser(RoleRequest request) {
-        if (enabled) {
-            refreshToken();
-            IDaaSResponse response = null;
-            String email = request.getEmailAddress();
-            try {
-                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-                response = retryTemplate.execute(ctx -> {
-                    try (PerformanceTimer timer = new PerformanceTimer("add role to user.")){
-                        HttpEntity<RoleRequest> entity = new HttpEntity<>(request);
-                        ResponseEntity<IDaaSResponse> responseEntity = restTemplate.exchange(addRoleUri(email),
-                                HttpMethod.PUT, entity, IDaaSResponse.class);
-                        return responseEntity.getBody();
-                    } catch (Exception e) {
-                        // TODO re-evaluate this part after network is setup
-                        log.warn("Failed to execute api", e);
-                        return null;
-                    }
-                });
-            } catch (Exception e) {
-                log.warn("Failed to add role to user {}", email);
-            }
-            return response;
-        } else {
-            return new IDaaSResponse();
+        refreshToken();
+        IDaaSResponse response = null;
+        String email = request.getEmailAddress();
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            response = retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("add role to user.")){
+                    HttpEntity<RoleRequest> entity = new HttpEntity<>(request);
+                    ResponseEntity<IDaaSResponse> responseEntity = restTemplate.exchange(addRoleUri(email),
+                            HttpMethod.PUT, entity, IDaaSResponse.class);
+                    return responseEntity.getBody();
+                } catch (Exception e) {
+                    // TODO re-evaluate this part after network is setup
+                    log.warn("Failed to execute api", e);
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to add role to user {}", email);
         }
+        return response;
+    }
+
+    @Override
+    public InvitationLinkResponse getUserInvitationLink(String email) {
+        InvitationLinkResponse response = null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            response = retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("get user invitation link")) {
+                    URI invitationLinkURI = createInvitationLink(email, DCP_PRODUCT);
+                    ResponseEntity<InvitationLinkResponse> responseEntity = restTemplate.exchange(invitationLinkURI,
+                            HttpMethod.GET, null, InvitationLinkResponse.class);
+                    return responseEntity.getBody();
+                } catch (Exception e) {
+                    log.warn("Failed to execute invitation link api", e);
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to get invitation link", e);
+        }
+        return response;
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {
@@ -331,6 +333,11 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     private String refreshOAuthTokens(String cacheKey) {
+        return _self.getTokenFromIDaaS(clientId);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.IDaaSTokenCacheName, key = "T(java.lang.String).format(\"%s|idaas-token\", #clientId)", unless = "#result == null")
+    public String getTokenFromIDaaS(String clientId) {
         Map<String, String> payload = ImmutableMap.of("grant_type", "client_credentials");
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         String headerValue = String.format("client_id:%s,client_secret:%s", clientId, clientSecret);
@@ -348,10 +355,7 @@ public class IDaaSServiceImpl implements IDaaSService {
                 }
             }
         });
-        String accessToken = jsonNode.get("access_token").asText();
-        String refreshToken = jsonNode.get("refresh_token").asText();
-//        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
-        return accessToken;
+        return jsonNode.get("access_token").asText();
     }
 
     private void refreshToken() {
@@ -394,6 +398,10 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private URI addRoleUri(String email) {
         return URI.create(apiUrl + String.format("/user/%s/role", email));
+    }
+
+    private URI createInvitationLink(String email, String source) {
+        return URI.create(apiUrl + "/user/" + email + "/" + source + "/invitation");
     }
 
 }

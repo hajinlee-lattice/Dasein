@@ -38,6 +38,7 @@ public class EmailSettings {
     public static final String TENANT_RIGHT_REMOVE_SUBJECT = "Remove tenant for user – Removed";
     public static final String DCP_UPLOAD_COMPLETED_SUBJECT = "DCP Upload Completed";
     public static final String DCP_UPLOAD_FAILED_SUBJECT = "DCP Upload Failed";
+    public static final String DNB_CONNECT_WELCOME_NEW_USER_SUBJECT = "Welcome to D&B Connect!";
 
     private String from;
     private String password;

@@ -4,12 +4,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -113,6 +115,16 @@ public class WorkflowResource {
             job.setInputs(new HashMap<>());
         }
         job.getInputs().put(WorkflowContextConstants.Inputs.RESTART_JOB_ID, String.valueOf(wfId));
+
+        Map<String, String> tags = new HashMap<>(MapUtils.emptyIfNull(job.getTags()));
+        // only set if this is first retry
+        tags.putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_PID, job.getPid().toString());
+        tags.putIfAbsent(WorkflowContextConstants.Tags.ROOT_WORKFLOW_START_TIME,
+                String.valueOf(job.getStartTimestamp().getTime()));
+        // parent link
+        tags.putIfAbsent(WorkflowContextConstants.Tags.PARENT_WORKFLOW_PID,
+                job.getPid().toString());
+        job.setTags(tags);
 
         workflowConfig.setInputProperties(job.getInputs());
         if (Boolean.TRUE.equals(autoRetry)) {
@@ -354,9 +366,12 @@ public class WorkflowResource {
     @GetMapping("/jobsbycluster")
     @ApiOperation(value = "Get list of workflow jobs by given clusterId or list of job types or job statuses.")
     public List<WorkflowJob> jobsByCluster(@RequestParam(required = false) String clusterId,
+            @RequestParam(value = "tenantPid", required = false) Long tenantPid,
             @RequestParam(value = "type", required = false) List<String> workflowTypes,
-            @RequestParam(value = "status", required = false) List<String> statuses) {
-        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+            @RequestParam(value = "status", required = false) List<String> statuses,
+            @RequestParam(value = "earliestStartTime", required = false) Long earliestStartTime) {
+        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, tenantPid, workflowTypes, statuses,
+                earliestStartTime);
     }
 
     @GetMapping("/jobs/{customerSpace}/{workflowPid}")

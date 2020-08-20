@@ -12,6 +12,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -19,7 +20,10 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
+import com.latticeengines.apps.dcp.service.ProjectSystemLinkService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -37,6 +41,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -51,17 +56,22 @@ public class SourceServiceImpl implements SourceService {
     private static final String DROP_FOLDER = "drop/";
     private static final String UPLOAD_FOLDER = "Uploads/";
     private static final String SOURCE_RELATIVE_PATH_PATTERN = "Sources/%s/";
+    private static final String SYSTEM_NAME_PATTERN = "SourceSystem_%s";
     private static final String RANDOM_SOURCE_ID_PATTERN = "Source_%s";
     private static final String TEMPLATE_NAME = "%s_Template";
     private static final String FEED_TYPE_PATTERN = "%s_%s"; // SystemName_SourceId;
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project+source path}
     private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int MAX_RETRY = 3;
 
     @Inject
     private SourceFileProxy sourceFileProxy;
 
     @Inject
     private ProjectService projectService;
+
+    @Inject
+    private ProjectSystemLinkService projectSystemLinkService;
 
     @Inject
     private ImportWorkflowSpecService importWorkflowSpecService;
@@ -81,6 +91,9 @@ public class SourceServiceImpl implements SourceService {
     @Inject
     private MatchRuleProxy matchRuleProxy;
 
+    @Inject
+    private CDLProxy cdlProxy;
+
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId,
                                FieldDefinitionsRecord fieldDefinitionsRecord) {
@@ -97,15 +110,15 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
                                String fileImportId, FieldDefinitionsRecord fieldDefinitionsRecord) {
-        S3ImportSystem importSystem = projectService.getImportSystemByProjectId(customerSpace, projectId);
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
-        if (importSystem == null || projectInfo == null) {
+        if (projectInfo == null) {
             throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
         }
         if (StringUtils.isBlank(sourceId)) {
             sourceId = generateRandomSourceId(customerSpace);
         }
         validateSourceId(customerSpace, sourceId);
+        S3ImportSystem importSystem = createSourceSystem(customerSpace, displayName, sourceId);
         String relativePath = generateRelativePath(sourceId);
 
         Table templateTable = getTableFromRecord(fileImportId, customerSpace, sourceId, fieldDefinitionsRecord);
@@ -120,6 +133,9 @@ public class SourceServiceImpl implements SourceService {
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + DROP_FOLDER);
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + UPLOAD_FOLDER);
         }
+
+        // link project & system
+        projectSystemLinkService.createLink(customerSpace, projectId, importSystem);
 
         // Generate default base rule for new source
         MatchRule defaultRule = new MatchRule();
@@ -193,8 +209,8 @@ public class SourceServiceImpl implements SourceService {
     public List<Source> getSourceList(String customerSpace, String projectId, int pageIndex, int pageSize, List<String> teamIds) {
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
         if (projectInfo != null && (projectInfo.getTeamId() == null || (teamIds == null || teamIds.contains(projectInfo.getTeamId())))) {
-            List<SourceInfo> sourceInfoList = dataFeedProxy.getSourcesBySystemPid(customerSpace,
-                    projectInfo.getSystemId(), pageIndex, pageSize);
+            List<SourceInfo> sourceInfoList = dataFeedProxy.getSourcesByProjectId(customerSpace,
+                    projectInfo.getProjectId(), pageIndex, pageSize);
             if (CollectionUtils.isEmpty(sourceInfoList)) {
                 return Collections.emptyList();
             }
@@ -210,6 +226,12 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public long getSourceCount(String customerSpace, Long systemPid) {
         Long count = dataFeedProxy.countSourcesBySystemPid(customerSpace, systemPid);
+        return count == null ? 0L : count;
+    }
+
+    @Override
+    public long getSourceCount(String customerSpace, String projectId) {
+        Long count = dataFeedProxy.countSourcesByProjectId(customerSpace, projectId);
         return count == null ? 0L : count;
     }
 
@@ -328,5 +350,28 @@ public class SourceServiceImpl implements SourceService {
             dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, sourceInfo.getPid(), DataFeedTask.S3ImportStatus.Active);
         }
         return true;
+    }
+
+    private S3ImportSystem createSourceSystem(String customerSpace, String displayName, String sourceId) {
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(MultiTenantContext.getTenant());
+        String systemName = String.format(SYSTEM_NAME_PATTERN, sourceId);
+        system.setName(systemName);
+        system.setDisplayName(displayName);
+        system.setSystemType(S3ImportSystem.SystemType.DCP);
+        cdlProxy.createS3ImportSystem(customerSpace, system);
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRY,
+                Collections.singleton(IllegalArgumentException.class), null);
+        system = retryTemplate.execute(context -> {
+            S3ImportSystem createdSystem = cdlProxy.getS3ImportSystem(customerSpace, systemName);
+            if (createdSystem == null) {
+                throw new IllegalArgumentException("Cannot get importSystem: " + systemName);
+            }
+            return createdSystem;
+        });
+        if (system == null) {
+            throw new RuntimeException("Cannot create DCP Project due to ImportSystem creation error!");
+        }
+        return system;
     }
 }

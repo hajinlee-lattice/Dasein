@@ -69,12 +69,13 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_STARTED, null);
-        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
-        if (upload == null || upload.getUploadConfig() == null || StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath())) {
+        UploadDetails uploadDetails = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
+        if (uploadDetails == null || uploadDetails.getUploadConfig() == null ||
+                StringUtils.isEmpty(uploadDetails.getUploadConfig().getDropFilePath())) {
             throw new RuntimeException("Cannot start DCP import job due to lack of import info!");
         }
 
-        String sourceKey = upload.getUploadConfig().getDropFilePath();
+        String sourceKey = uploadDetails.getUploadConfig().getDropFilePath();
         String csvFileName = sourceKey.substring(sourceKey.lastIndexOf("/") + 1);
 
         // Build upload dir
@@ -109,29 +110,31 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         s3Service.createFolder(dropBoxSummary.getBucket(),
                 UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadImportResult));
 
-        upload.getUploadConfig().setUploadTSPrefix(uploadTS);
+        uploadDetails.getUploadConfig().setUploadTSPrefix(uploadTS);
 
-        upload.getUploadConfig().setUploadRawFilePath(UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+        uploadDetails.getUploadConfig().setUploadRawFilePath(UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                 uploadRaw, csvFileName));
 
         // Copy file from drop folder to raw input folder.
-        copyFromDropfolder(upload, dropBoxSummary);
+        copyFromDropfolder(uploadDetails, dropBoxSummary);
 
-        if (Boolean.TRUE.equals(upload.getUploadConfig().getSourceOnHdfs())) {
+        long dropFileTime = 0;
+        if (Boolean.TRUE.equals(uploadDetails.getUploadConfig().getSourceOnHdfs())) {
             try {
                 FileStatus hdfsFile = HdfsUtils.getFileStatus(yarnConfiguration, sourceKey);
-                upload.getUploadConfig().setDropFileTime(hdfsFile.getModificationTime());
+                dropFileTime = hdfsFile.getModificationTime();
             } catch (IOException e) {
                 log.warn("Can not get time stamp of file " + sourceKey + " error="
                         + e.getMessage());
             }
         } else {
             ObjectMetadata sourceFile = s3Service.getObjectMetadata(dropBoxSummary.getBucket(), sourceKey);
-            upload.getUploadConfig().setDropFileTime(sourceFile.getLastModified().getTime());
+            dropFileTime = sourceFile.getLastModified().getTime();
         }
 
-        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
-        checkCSVFile(upload, dropBoxSummary);
+        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, uploadDetails.getUploadConfig());
+        uploadProxy.updateDropFileTime(customerSpace.toString(), uploadId, dropFileTime);
+        checkCSVFile(uploadDetails, dropBoxSummary);
     }
 
     private void copyFromDropfolder(UploadDetails upload, DropBoxSummary dropBoxSummary) {

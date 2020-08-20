@@ -161,8 +161,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public void deleteConnection(String lookupIdMapId, TraySettings traySettings) {
-        try {
-
+        try{
             LookupIdMap map = getLookupIdMap(lookupIdMapId);
             ExternalSystemAuthentication trayAuth = map.getExternalAuthentication();
             // remove solution instance
@@ -184,6 +183,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             deleteLookupIdMap(lookupIdMapId);
         } catch (Exception ex) {
             log.error("Errors while deleting connection: ", ex.getMessage());
+            throw new LedpException(LedpCode.LEDP_40096, new String[] { lookupIdMapId, ex.getMessage() });
         }
     }
 

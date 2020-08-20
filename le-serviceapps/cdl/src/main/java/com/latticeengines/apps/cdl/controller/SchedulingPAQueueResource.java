@@ -2,36 +2,69 @@ package com.latticeengines.apps.cdl.controller;
 
 import static com.latticeengines.apps.cdl.service.SchedulingPAService.ACTIVE_STACK_SCHEDULER_NAME;
 import static com.latticeengines.apps.cdl.service.SchedulingPAService.INACTIVE_STACK_SCHEDULER_NAME;
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.PA_JOB_TYPE;
+import static com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants.RECENT_PA_LOOK_BACK_DAYS;
+import static java.util.Collections.singletonList;
 
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.ActiveStackInfoService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.PAQuotaService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.scheduling.PAQuotaSummary;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "priorityQueue", description = "Rest resource for get priority queue")
+@Api(value = "paScheduler")
 @RestController
 @RequestMapping("/schedulingPAQueue")
 public class SchedulingPAQueueResource {
+
+    private static final Logger log = LoggerFactory.getLogger(SchedulingPAQueueResource.class);
 
     @Inject
     private SchedulingPAService schedulingPAService;
@@ -40,7 +73,19 @@ public class SchedulingPAQueueResource {
     private ActiveStackInfoService activeStackInfoService;
 
     @Inject
+    private BatonService batonService;
+
+    @Inject
     private CDLJobService cdlJobService;
+
+    @Inject
+    private PAQuotaService paQuotaService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @GetMapping("/getQueueInfo")
     @ResponseBody
@@ -99,7 +144,100 @@ public class SchedulingPAQueueResource {
     public SchedulingStatus getSchedulingStatus(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         boolean isActive = activeStackInfoService.isCurrentStackActive();
-        return schedulingPAService.getSchedulingStatus(customerSpace,
+        SchedulingStatus status = schedulingPAService.getSchedulingStatus(customerSpace,
                 isActive ? ACTIVE_STACK_SCHEDULER_NAME : INACTIVE_STACK_SCHEDULER_NAME);
+        if (status.isSchedulerEnabled()) {
+            try {
+                PAQuotaSummary summary = getPAQuota(customerSpace);
+                if (summary != null) {
+                    status.setRemainingPaQuota(summary.getRemainingPaQuota());
+                    status.setHandHoldPATenant(summary.isHandHoldPATenant());
+                }
+            } catch (Exception e) {
+                log.error("Failed to get PA quota summary for tenant {}, error = {}", customerSpace, e);
+            }
+        }
+        return status;
+    }
+
+    // TODO maybe merge/remove both API, currently only for convenience/testing
+
+    @PostMapping("/timezone/{customerSpace}")
+    @ResponseBody
+    @ApiOperation("Set timezone for specific tenant")
+    public Boolean setTimezone(@PathVariable String customerSpace, @RequestBody String timezone) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(timezone), "timezone string should not be blank");
+
+        try {
+            ZoneId zoneId = ZoneId.of(timezone);
+            Camille camille = CamilleEnvironment.getCamille();
+            Path tenantPath = PathBuilder.buildTenantTimezonePath(CamilleEnvironment.getPodId(),
+                    CustomerSpace.parse(customerSpace));
+            Document doc = new Document(zoneId.getId());
+            camille.upsert(tenantPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            log.info("setting timezone to {} for tenant {}", zoneId.getId(), customerSpace);
+            return true;
+        } catch (DateTimeException e) {
+            String msg = String.format("input timezone string (%s) is not valid", timezone);
+            log.error("Input timezone string ({}) is not valid. error = {}", timezone, e);
+            throw new IllegalArgumentException(msg, e);
+        } catch (Exception e) {
+            log.error("Failed to set timezone ({}) for tenant {}", timezone, customerSpace);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("/quota/{customerSpace}")
+    @ResponseBody
+    @ApiOperation("Update (merge) PA quota for specific tenant")
+    public Map<String, Long> setPAQuota(@PathVariable String customerSpace, @RequestBody Map<String, Long> paQuota) {
+        return paQuotaService.setTenantPaQuota(customerSpace, paQuota);
+    }
+
+    @GetMapping("/quota/{customerSpace}")
+    @ResponseBody
+    @ApiOperation("Retrieve PA quota for specific tenant")
+    public PAQuotaSummary getPAQuota(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        String shortTenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        Preconditions.checkArgument(tenant != null && tenant.getPid() != null,
+                String.format("cannot find tenant with ID [%s]", customerSpace));
+        Pair<ZoneId, Boolean> result = getTenantTimezone(customerSpace);
+        ZoneId timezone = result.getKey();
+        long earliestStartTime = Instant.now().minus(RECENT_PA_LOOK_BACK_DAYS, ChronoUnit.DAYS).toEpochMilli();
+        List<WorkflowJob> completedPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(null,
+                tenant.getPid(), singletonList(PA_JOB_TYPE), singletonList(JobStatus.COMPLETED.getName()),
+                earliestStartTime);
+        log.info("Retrieving PA quota info for tenant {} (timezone = {}), no. completed PAs in last {} days = {}",
+                customerSpace, timezone, RECENT_PA_LOOK_BACK_DAYS, CollectionUtils.size(completedPAJobs));
+        List<WorkflowJob> completedJobs = CollectionUtils.emptyIfNull(completedPAJobs).stream() //
+                .filter(Objects::nonNull) //
+                .filter(job -> job.getTenant() != null && StringUtils.isNotBlank(job.getTenant().getId())) //
+                .filter(job -> {
+                    String tenantId = CustomerSpace.shortenCustomerSpace(job.getTenant().getId());
+                    return shortTenantId.equals(tenantId);
+                }) //
+                .collect(Collectors.toList());
+        PAQuotaSummary summary = paQuotaService.getPAQuotaSummary(customerSpace, completedJobs, null, timezone);
+        if (timezone != null) {
+            summary.setTimezone(timezone.toString());
+        } else if (result.getRight()) {
+            // TODO return invalid timezone value
+            summary.setTimezone("Timezone configured for this tenant does not have the correct format");
+        }
+        return summary;
+    }
+
+    // timezone, flag to indicate parsing error
+    private Pair<ZoneId, Boolean> getTenantTimezone(String customerSpace) {
+        try {
+            ZoneId timezone = batonService.getTenantTimezone(CustomerSpace.parse(customerSpace));
+            return Pair.of(timezone, false);
+        } catch (DateTimeException e) {
+            log.error("timezone configured for tenant {} is not valid", customerSpace);
+            return Pair.of(null, true);
+        }
     }
 }

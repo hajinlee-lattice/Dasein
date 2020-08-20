@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.datacloud.match.util.MatchHistoryUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
@@ -109,63 +110,77 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
             if (future != null) {
-                // null future means already has lattice account id, or failed
-                // in initialization
+                // null future means already has lattice account id,
+                // or failed in initialization
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 // Copy Data Cloud Version from traveler to the InternalOutputRecord.
                 matchRecord.setDataCloudVersion(traveler.getDataCloudVersion());
                 boolean ldcMatched = false;
-                String result = (String) traveler.getResult();
-                if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
-                    populateEntityMatchRecordWithTraveler(traveler, result, matchRecord);
-                } else if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(traveler.getMatchInput().getTargetEntity())) {
-                    boolean multiCandidates = OperationalMode.MULTI_CANDIDATES.equals(traveler.getMatchInput().getOperationalMode());
-                    populatePrimeMatchResult(traveler, result, matchRecord, multiCandidates);
+
+                if (ContactMasterConstants.MATCH_ENTITY_TPS.equals(traveler.getMatchInput().getTargetEntity())) {
+                    @SuppressWarnings("unchecked")
+                    List<String> result = (List<String>) traveler.getResult();
+                    populateTpsMatchResult(traveler, result, matchRecord);
                 } else {
-                    matchRecord.setLatticeAccountId(result);
-                    if (StringUtils.isNotEmpty(result)) {
-                        matchRecord.setMatched(true);
-                        ldcMatched = true;
+                    String result = (String) traveler.getResult();
+                    if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
+                        populateEntityMatchRecordWithTraveler(traveler, result, matchRecord);
+                    } else if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(traveler.getMatchInput().getTargetEntity())) {
+                        boolean multiCandidates = OperationalMode.MULTI_CANDIDATES.equals(traveler.getMatchInput().getOperationalMode());
+                        populatePrimeMatchResult(traveler, result, matchRecord, multiCandidates);
                     } else {
-                        matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
-                    }
-                }
-
-                if (StringUtils.isNotEmpty(traveler.getMatchKeyTuple().getDuns())) {
-                    matchRecord.setMatchedDuns(traveler.getMatchKeyTuple().getDuns());
-                } else if (Level.DEBUG.equals(logLevel)) {
-                    // might be the case of low quality duns
-
-                    List<DnBMatchContext> dnBMatchContexts = traveler.getDnBMatchContexts();
-                    List<String> dnbCacheIds = new ArrayList<>();
-
-                    if (dnBMatchContexts != null && !dnBMatchContexts.isEmpty()) {
-                        for (DnBMatchContext dnBMatchContext : dnBMatchContexts) {
-                            String cacheId = dnBMatchContext.getCacheId();
-                            if (StringUtils.isNotEmpty(cacheId)) {
-                                dnbCacheIds.add(cacheId);
-                            }
+                        matchRecord.setLatticeAccountId(result);
+                        if (StringUtils.isNotEmpty(result)) {
+                            matchRecord.setMatched(true);
+                            ldcMatched = true;
+                        } else {
+                            matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
                         }
                     }
-                    if (!dnbCacheIds.isEmpty()) {
-                        matchRecord.setDnbCacheIds(dnbCacheIds);
+
+                    if (StringUtils.isNotEmpty(traveler.getMatchKeyTuple().getDuns())) {
+                        matchRecord.setMatchedDuns(traveler.getMatchKeyTuple().getDuns());
+                    } else if (Level.DEBUG.equals(logLevel)) {
+                        // might be the case of low quality duns
+
+                        List<DnBMatchContext> dnBMatchContexts = traveler.getDnBMatchContexts();
+                        List<String> dnbCacheIds = new ArrayList<>();
+
+                        if (dnBMatchContexts != null && !dnBMatchContexts.isEmpty()) {
+                            for (DnBMatchContext dnBMatchContext : dnBMatchContexts) {
+                                String cacheId = dnBMatchContext.getCacheId();
+                                if (StringUtils.isNotEmpty(cacheId)) {
+                                    dnbCacheIds.add(cacheId);
+                                }
+                            }
+                        }
+                        if (!dnbCacheIds.isEmpty()) {
+                            matchRecord.setDnbCacheIds(dnbCacheIds);
+                        }
                     }
-                }
-                setDnbReturnCode(traveler, matchRecord);
-                setDebugValues(traveler, matchRecord);
-                traveler.setBatchMode(actorSystem.isBatchMode());
-                FuzzyMatchHistory history = new FuzzyMatchHistory(traveler);
-                fuzzyMatchHistories.add(history);
-                if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
-                    entityMatchMetricService.recordMatchHistory(history);
-                }
-                if (isMatchHistoryEnabled) {
-                    matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler, ldcMatched));
+                    setDnbReturnCode(traveler, matchRecord);
+                    setDebugValues(traveler, matchRecord);
+                    traveler.setBatchMode(actorSystem.isBatchMode());
+                    FuzzyMatchHistory history = new FuzzyMatchHistory(traveler);
+                    fuzzyMatchHistories.add(history);
+                    if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
+                        entityMatchMetricService.recordMatchHistory(history);
+                    }
+                    if (isMatchHistoryEnabled) {
+                        matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler, ldcMatched));
+                    }
                 }
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
                 dumpEntityMatchErrors(matchRecord, traveler);
+
+                if (CollectionUtils.isNotEmpty(traveler.getCriticalEntityMatchErrors())) {
+                    log.error("Found critical errors = {}, failing match block",
+                            StringUtils.join(traveler.getCriticalEntityMatchErrors()));
+                    // only throw with the first one
+                    throw new IllegalStateException(traveler.getCriticalEntityMatchErrors().get(0));
+                }
             }
         }
 
@@ -219,8 +234,18 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
     }
 
+    private void populateTpsMatchResult(MatchTraveler traveler, List<String> recordIds,
+                                        InternalOutputRecord matchRecord) {
+        if (CollectionUtils.isNotEmpty(recordIds)) {
+            matchRecord.setMatched(true);
+            matchRecord.setFetchIds(recordIds);
+        } else {
+            matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
+        }
+    }
+
     private MatchHistory getDnbMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler,
-            boolean ldcMatched) {
+                                            boolean ldcMatched) {
         MatchHistory matchHistory = matchRecord.getFabricMatchHistory();
         matchHistory.setMatched(traveler.isMatched()).setLdcMatched(ldcMatched).setMatchMode(traveler.getMode());
         if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {

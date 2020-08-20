@@ -45,6 +45,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -67,6 +68,9 @@ public class UserResource {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String apiPublicUrl;
+
+    @Value("${security.dcp.public.url}")
+    private String dcpPublicUrl;
 
     @Inject
     private TenantService tenantService;
@@ -155,15 +159,22 @@ public class UserResource {
         }
         LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
                 tenant.getId()));
-        if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-            emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
-                    !tenantService.getTenantEmailFlag(tenant.getId()));
-            tenantService.updateTenantEmailFlag(tenant.getId(), true);
-        } else {
-            emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
+        if (!batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
+                        !tenantService.getTenantEmailFlag(tenant.getId()));
+                tenantService.updateTenantEmailFlag(tenant.getId(), true);
+            } else {
+                emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
+            }
         }
-        if (batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-            userService.createDCPIDaaSUser(user.getEmail());
+        else {
+            IDaaSUser idaasUser = userService.createIDaaSUser(user);
+            String welcomeUrl = dcpPublicUrl;
+            if (idaasUser.getInvitationLink() != null) {
+                welcomeUrl = idaasUser.getInvitationLink();
+            }
+            emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
         }
         response.setSuccess(true);
         return response;
@@ -214,6 +225,7 @@ public class UserResource {
         String tenantId = tenant.getId();
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
+        User user = userService.findByUsername(username);
         // update access level
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
@@ -230,8 +242,7 @@ public class UserResource {
                     false, !newUser, data.getUserTeams());
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
-            User user = userService.findByUsername(username);
-            if (newUser && user != null) {
+            if (newUser && user != null && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
                             !tenantService.getTenantEmailFlag(tenant.getId()));
@@ -247,7 +258,12 @@ public class UserResource {
                     .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
         }
         if (batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-            userService.createDCPIDaaSUser(username);
+            IDaaSUser idaasUser = userService.createIDaaSUser(user);
+            String welcomeUrl = dcpPublicUrl;
+            if (idaasUser.getInvitationLink() != null) {
+                welcomeUrl = idaasUser.getInvitationLink();
+            }
+            emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
         }
         return SimpleBooleanResponse.successResponse();
     }

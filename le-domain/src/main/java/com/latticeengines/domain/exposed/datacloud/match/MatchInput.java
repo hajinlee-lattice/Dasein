@@ -24,6 +24,8 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -135,6 +137,9 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("RealTimeThreadPoolSize")
     private Integer realTimeThreadPoolSize;
+
+    @JsonProperty("TpsMatchConfig")
+    private TpsMatchConfig tpsMatchConfig;
 
     // ====================
     // BEGIN FLAGS
@@ -276,6 +281,13 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("UseTransactAssociate")
     private Boolean useTransactAssociate;
 
+    /*-
+     * all metadata used in entity match
+     * TODO migrate other configuration to this class
+     */
+    @JsonProperty("EntityMatchConfiguration")
+    private EntityMatchConfiguration entityMatchConfiguration;
+
     // ====================
     // END ENTITY MATCH PROPERTIES
     // ====================
@@ -374,6 +386,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDecisionGraph(String decisionGraph) {
         this.decisionGraph = decisionGraph;
+    }
+
+    public TpsMatchConfig getTpsMatchConfig() {
+        return tpsMatchConfig;
+    }
+
+    public void setTpsMatchConfig(TpsMatchConfig tpsMatchConfig) {
+        this.tpsMatchConfig = tpsMatchConfig;
     }
 
     @JsonIgnore
@@ -752,6 +772,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setUseTransactAssociate(Boolean useTransactAssociate) {
         this.useTransactAssociate = useTransactAssociate;
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration() {
+        return entityMatchConfiguration;
+    }
+
+    public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
+        this.entityMatchConfiguration = entityMatchConfiguration;
     }
 
     @Override

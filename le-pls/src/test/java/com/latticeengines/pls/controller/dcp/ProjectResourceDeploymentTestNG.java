@@ -92,7 +92,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 4);
         switchToExternalAdmin();
-        String url = getRestAPIHostPort() + "pls/projects/list";
+        String url = getRestAPIHostPort() + "/pls/projects/list";
         projectList = restTemplate.getForObject(url, List.class);
         Assert.assertEquals(projectList.size(), 0);
 
@@ -106,12 +106,12 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String externalAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.EXTERNAL_ADMIN);
         String superAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
         teamData.setTeamMembers(Sets.newHashSet(externalAdminUser, superAdminUser));
-        url = getRestAPIHostPort() + "pls/teams/teamId/" + project.getTeamId();
+        url = getRestAPIHostPort() + "/pls/teams/teamId/" + project.getTeamId();
         restTemplate.put(url, teamData);
 
         cleanupSession(AccessLevel.EXTERNAL_ADMIN);
         switchToExternalAdmin();
-        url = getRestAPIHostPort() + "pls/projects/list";
+        url = getRestAPIHostPort() + "/pls/projects/list";
         projectList = restTemplate.getForObject(url, List.class);
         Assert.assertEquals(projectList.size(), 1);
     }

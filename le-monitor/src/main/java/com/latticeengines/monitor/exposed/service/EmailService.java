@@ -15,12 +15,21 @@ import com.latticeengines.domain.exposed.security.User;
 
 public interface EmailService {
 
+    void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients,
+                         EmailFromAddress emailFRomAddress);
+
     void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients);
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
-            Collection<String> bccRecipients);
+                            EmailFromAddress fromAddress);
+
+    void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
+                            Collection<String> bccRecipients);
+
+    void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
+                            Collection<String> bccRecipients, EmailFromAddress fromAddress);
 
     void sendNewUserEmail(User user, String password, String hostport, boolean bccEmail);
 
@@ -87,4 +96,11 @@ public interface EmailService {
     void sendUploadCompletedEmail(UploadEmailInfo uploadEmailInfo);
 
     void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo);
+
+    boolean sendDCPWelcomeEmail(User user, String tenantName, String url);
+
+    enum EmailFromAddress {
+        DNB_CONNECT, LATTICE_ENGINES
+    }
+
 }

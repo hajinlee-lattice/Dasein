@@ -49,6 +49,16 @@
             <groupId>io.projectreactor.netty</groupId>
             <artifactId>reactor-netty</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.owasp.esapi</groupId>
+            <artifactId>esapi</artifactId>
+            <version>${esapi.verions}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.owasp.antisamy</groupId>
+            <artifactId>antisamy</artifactId>
+            <version>${antisamy.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

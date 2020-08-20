@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
-import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -415,39 +414,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createDCPIDaaSUser(String email) {
-        IDaaSUser existingUser = iDaaSService.getIDaaSUser(email);
-        if (existingUser != null) {
-            if (!existingUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
-                LOGGER.info("User {} exists, but need assign DCP product access", email);
-                ProductRequest request = new ProductRequest();
-                request.setEmailAddress(email);
-                iDaaSService.addProductAccessToUser(request);
-            }
-            if (!existingUser.getApiUserStatus().contains(IDaaSServiceImpl.DCP_ROLE)) {
-                RoleRequest request = new RoleRequest();
-                request.setEmailAddress(email);
-                request.setRoles(Collections.singletonList(IDaaSServiceImpl.DCP_ROLE));
-                request.setProducts(Collections.singletonList(IDaaSServiceImpl.DCP_PRODUCT));
-                iDaaSService.addRoleToUser(request);
-            }
-        } else {
-            // create IDaaSUser
-            User user = globalUserManagementService.getUserByUsername(email);
-            IDaaSUser iDaaSUser = new IDaaSUser();
-            iDaaSUser.setFirstName(user.getFirstName());
-            iDaaSUser.setEmailAddress(email);
-            iDaaSUser.setLastName(user.getLastName());
-            iDaaSUser.setUserName(StringUtils.isEmpty(user.getUsername()) ? email.toLowerCase() : user.getUsername());
-            iDaaSUser.setPhoneNumber(StringUtils.isEmpty(user.getPhoneNumber()) ? "123-456-7890" :
-                    user.getPhoneNumber());
-            iDaaSUser.setLanguage("English");
-            iDaaSUser.setRoles(Collections.singletonList(IDaaSServiceImpl.DCP_ROLE));
-            iDaaSService.createIDaaSUser(iDaaSUser);
-        }
-    }
-
-    @Override
     public List<User> getUsers(String tenantId, UserFilter filter, boolean withTeam) {
         return getUsers(tenantId, filter, null, withTeam);
     }
@@ -534,10 +500,6 @@ public class UserServiceImpl implements UserService {
         result.setValid(createUser(userName, userRegistration));
         if (!result.isValid()) {
             return result;
-        }
-
-        if (Boolean.TRUE.equals(userRegistration.isUseIDaaS())) {
-            createIDaaSUser(user);
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
@@ -721,24 +683,26 @@ public class UserServiceImpl implements UserService {
                     tenantId, globalAuthTicket.getPid(), globalAuthTicket.getUserId());
         }
     }
-    private void createIDaaSUser(User user) {
+
+    @Override
+    public IDaaSUser createIDaaSUser(User user) {
         String email = user.getEmail();
-        IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
-        if (retrievedUser == null) {
-            IDaaSUser iDaasuser = new IDaaSUser();
-            iDaasuser.setFirstName(user.getFirstName());
-            iDaasuser.setEmailAddress(email);
-            iDaasuser.setLastName(user.getLastName());
-            iDaasuser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : user.getUsername());
-            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
+        IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
+        if (idaasUser == null) {
+            IDaaSUser newUser = new IDaaSUser();
+            newUser.setFirstName(user.getFirstName());
+            newUser.setEmailAddress(email);
+            newUser.setLastName(user.getLastName());
+            newUser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : user.getUsername());
+            Preconditions.checkState(StringUtils.isNotEmpty(newUser.getLastName()),
                     "Last name is required");
-            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
+            Preconditions.checkState(StringUtils.isNotEmpty(newUser.getEmailAddress()),
                     "Email is required");
-            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getUserName()),
+            Preconditions.checkState(StringUtils.isNotEmpty(newUser.getUserName()),
                     "User name is required");
             LOGGER.info("begin creating IDaaS user for {}", email);
-            iDaaSService.createIDaaSUser(iDaasuser);
-        } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
+            idaasUser = iDaaSService.createIDaaSUser(newUser);
+        } else if (!idaasUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
             // add product access and default role to user when user already exists in IDaaS
             LOGGER.info("user exist in IDaaS, add product access to user {}", email);
             ProductRequest request = new ProductRequest();
@@ -747,5 +711,7 @@ public class UserServiceImpl implements UserService {
         } else {
             LOGGER.info("IDaaS user existed for {} and has product access", email);
         }
+
+        return idaasUser;
     }
 }

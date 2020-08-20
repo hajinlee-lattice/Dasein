@@ -530,12 +530,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (standardAttrNames.contains(mapping.getMappedField())) {
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
                 String userField = mapping.getUserField();
-                if (StringUtils.isNotBlank(preUserField) && StringUtils.isBlank(userField)) {
-                    String message = String.format("%s was previously mapped to %s. " +
-                                    "This mapping can be changed, but removing the mapping is currently not supported.",
-                            mapping.getMappedField(), preUserField);
-                    validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.ERROR, message));
-                } else if (StringUtils.isNotBlank(preUserField) && StringUtils.isNotBlank(userField) &&
+                if (StringUtils.isNotBlank(preUserField) && StringUtils.isNotBlank(userField) &&
                         !preUserField.equals(userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
@@ -544,15 +539,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 previousStandardFieldMapping.remove(mapping.getMappedField());
             }
         }
-        // lost mapping in previous mapping
-        previousStandardFieldMapping.forEach((mappedField, userField) -> {
-            if (StringUtils.isNotBlank(userField)) {
-                String message = String.format("%s was previously mapped to %s. " +
-                                "This mapping can be changed, but removing the mapping is currently not supported.",
-                        mappedField, userField);
-                validations.add(createValidation(userField, mappedField, ValidationStatus.ERROR, message));
-            }
-        });
     }
 
     private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate,
@@ -903,37 +889,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getCdlExternalSystemType() != null) {
                 fieldMapping.setMappedToLatticeField(false);
-            }
-        }
-        checkStandardFields(fieldMappingDocument, templateTable, schemaTable, customerSpace);
-    }
-
-    private void checkStandardFields(FieldMappingDocument fieldMappingDocument, Table templateTable,
-                                     Table schemaTable, CustomerSpace customerSpace) {
-        if (templateTable == null) {
-            return;
-        }
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        if (!enableEntityMatch) {
-            return ;
-        }
-        Set<String> standardFields = schemaTable.getAttributes()
-                .stream()
-                .filter(attr -> attr.getDefaultValueStr() == null)
-                .map(Attribute::getName)
-                .collect(Collectors.toSet());
-        Set<String> allImportSystemIds = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
-        if (CollectionUtils.isNotEmpty(allImportSystemIds)) {
-            standardFields.addAll(allImportSystemIds);
-        }
-        Map<String, String> map = templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName,
-                attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
-                        attr.getDisplayName()));
-        for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
-            String mappedField = mapping.getMappedField();
-            if (standardFields.contains(mappedField) && StringUtils.isBlank(mapping.getUserField())
-                    && StringUtils.isNotBlank(map.get(mappedField))) {
-                throw new LedpException(LedpCode.LEDP_18249, new String[] { mappedField });
             }
         }
     }

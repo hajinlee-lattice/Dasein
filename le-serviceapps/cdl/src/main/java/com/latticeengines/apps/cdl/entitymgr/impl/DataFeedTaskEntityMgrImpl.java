@@ -366,10 +366,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByTaskId(Long taskId) {
-        DataFeedTask datafeedTask = datafeedTaskRepository.findById(taskId).orElse(null);
-        if (datafeedTask != null) {
-            delete(datafeedTask);
-        }
+        datafeedTaskRepository.findById(taskId).ifPresent(this::delete);
     }
 
     @Override
@@ -520,8 +517,25 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<SourceInfo> getSourcesByProjectId(String projectId, String customerSpace, Pageable pageable) {
+        List<Object[]> result = datafeedTaskRepository.findSourceInfoByProjectId(projectId, customerSpace, pageable);
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyList();
+        } else {
+            return result.stream().map(this::getSource).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Long countSourcesBySystemPid(Long systemPid) {
         return datafeedTaskRepository.countSourceInfoBySystemPid(systemPid);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public Long countSourcesByProjectId(String projectId, String customerSpace) {
+        return datafeedTaskRepository.countSourceInfoByProjectId(projectId, customerSpace);
     }
 
     @Override

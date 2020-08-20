@@ -20,8 +20,6 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -175,16 +173,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         List<FieldValidation> errorValidations =
                 validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 2);
-
-        try {
-            modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
-                    SOURCE,
-                    feedType);
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof LedpException);
-            LedpException ledp = (LedpException) e;
-            Assert.assertEquals(ledp.getCode(), LedpCode.LEDP_18249);
-        }
+        Assert.assertEquals(errorValidations.size(), 0);
     }
 }

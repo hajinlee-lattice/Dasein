@@ -165,7 +165,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
         Assert.assertNull(upload.getUploadDiagnostics().getLastErrorMessage());
 
-        Assert.assertNotNull(upload.getUploadConfig().getDropFileTime());
+        Assert.assertNotNull(upload.getDropFileTime());
+        Assert.assertTrue(upload.getDropFileTime() > 1590000000000L);
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
         // Only verify the Error File if there are errors during ingestion and thus the file exists.
@@ -191,7 +192,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println("Error file path=" + errorFileKey);
         Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
         Assert.assertNotNull(upload.getStatistics().getImportStats().getFailedIngested());
-        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 5L);
+        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 1L);
     }
 
     private void prepareTenant() {
@@ -267,49 +268,61 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             String[] nextRecord = csvReader.readNext();
             int count = 0;
             List<String> headers = new ArrayList<>();
+            int idIdx = -1;
             int nameIdx = -1;
             int dunsIdx = -1;
             int ccIdx = -1;
             int rnIdx = -1;
+            int mtIdx = -1;
             while (nextRecord != null && (count++) < 100) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
                     verifyOutputHeaders(headers);
+                    idIdx = headers.indexOf("Customer ID");
                     nameIdx = headers.indexOf("Company Name");
                     dunsIdx = headers.indexOf("Matched D-U-N-S Number");
                     ccIdx = headers.indexOf("Match Confidence Code");
                     rnIdx = headers.indexOf("Registration Number");
+                    mtIdx = headers.indexOf("Match Type");
                 } else {
-                    String regNumber = nextRecord[rnIdx];
-                    if (StringUtils.isNotBlank(regNumber)) {
+                    String customerId = nextRecord[idIdx];
+                    String matchType = nextRecord[mtIdx];
+                    if ("25".equals(customerId)) { // url
+                        log.info("CSV record for [bp.com]: {}", StringUtils.join(nextRecord, ","));
+                        Assert.assertEquals(matchType, "Domain Lookup");
+                    } else if (Arrays.asList("21", "22", "23", "24").contains(customerId)) { // reg number
+                        String regNumber = nextRecord[rnIdx];
+                        Assert.assertNotNull(regNumber);
                         String matcheDuns = nextRecord[dunsIdx];
-                        log.info("CSV record [{}] for [{}]: {}", count, regNumber, StringUtils.join(nextRecord, ","));
+                        log.info("CSV record for [{}]: {}", regNumber, StringUtils.join(nextRecord, ","));
                         switch (regNumber) {
                             case "432126092":
                                 Assert.assertEquals(matcheDuns, "268487989");
+                                Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             case "DE129273398":
                                 Assert.assertEquals(matcheDuns, "315369934");
+                                Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             case "77-0493581":
                                 Assert.assertTrue(StringUtils.isBlank(matcheDuns));
                                 break;
                             case "160043":
                                 Assert.assertEquals(matcheDuns, "229515499");
-                                break;
-                            case "Registration Number":
+                                Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             default:
                         }
+                    } else if ("4".equals(customerId)) { // matched but rejected
+                        String companyName = nextRecord[nameIdx];
+                        Assert.assertEquals(companyName, "AAC Technologies Holdings");
+                        log.info("CSV record for [Tencent]: {}", StringUtils.join(nextRecord, ","));
+                        String confidenceCode = nextRecord[ccIdx];
+                        Assert.assertTrue(StringUtils.isNotBlank(confidenceCode));
+                        Assert.assertTrue(Integer.parseInt(confidenceCode) < 6);
                     } else {
                         String companyName = nextRecord[nameIdx];
                         Assert.assertTrue(StringUtils.isNotBlank(companyName)); // Original Name is non-empty
-                        if ("AAC Technologies Holdings".equals(companyName)) {
-                            log.info("CSV record [{}] for [Tencent]: {}", count, StringUtils.join(nextRecord, ","));
-                            String confidenceCode = nextRecord[ccIdx];
-                            Assert.assertTrue(StringUtils.isNotBlank(confidenceCode));
-                            Assert.assertTrue(Integer.parseInt(confidenceCode) < 6);
-                        }
                     }
                     nextRecord = csvReader.readNext();
                 }

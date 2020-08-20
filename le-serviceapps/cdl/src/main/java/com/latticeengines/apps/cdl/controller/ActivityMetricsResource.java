@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
@@ -96,13 +97,25 @@ public class ActivityMetricsResource {
 
     @PostMapping("/setupDefaultIntentProfile")
     @ApiOperation(value = "Setup default intent metric groups")
-    public Boolean setupDefaultIntentProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
-        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultBuyingScoreGroups(customerSpace,
-                streamName);
-        if (defaultGroups == null || defaultGroups.size() != 2) {
-            throw new IllegalStateException(String.format("Failed to setup default Opportunity metric groups for tenant %s",
-                    customerSpace));
+    public Boolean setupDefaultIntentProfile(@PathVariable String customerSpace,
+                                             @RequestBody String streamName,
+                                             @RequestParam(value = "processBuyingScore", required = false, defaultValue = "true") boolean processBuyingScore) {
+        if (processBuyingScore) {
+            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultBuyingScoreGroups(customerSpace,
+                    streamName);
+            if (defaultGroups == null || defaultGroups.size() != 3) {
+                throw new IllegalStateException(String.format("Failed to setup default intent with buying score metric groups for tenant %s",
+                        customerSpace));
+            }
+            return true;
+        } else {
+            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultDnbIntentDataProfile(customerSpace,
+                    streamName);
+            if (defaultGroups == null || defaultGroups.size() != 2) {
+                throw new IllegalStateException(String.format("Failed to setup default intent metric groups for tenant %s",
+                        customerSpace));
+            }
+            return true;
         }
-        return true;
     }
 }

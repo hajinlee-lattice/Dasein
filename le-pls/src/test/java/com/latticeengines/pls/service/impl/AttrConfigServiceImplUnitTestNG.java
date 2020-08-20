@@ -153,7 +153,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertEquals(selections.get(i).getDisplayName(),
                     AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.usageProperties[i]));
             Assert.assertEquals(selections.get(i).getSelected() - 3677, 0);
-            Assert.assertEquals(selections.get(i).getCategories().size(), 6);
+            Assert.assertEquals(selections.get(i).getCategories().size(), 7);
             Assert.assertNotNull(selections.get(i).getCategories().values());
         }
         // Export

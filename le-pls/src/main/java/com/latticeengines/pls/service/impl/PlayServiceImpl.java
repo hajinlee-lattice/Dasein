@@ -35,7 +35,7 @@ public class PlayServiceImpl implements PlayService {
     public List<Play> getPlays(Boolean shouldLoadCoverage, String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
-        shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
+        shouldLoadCoverage = shouldLoadCoverage != null && shouldLoadCoverage;
         Tenant tenant = MultiTenantContext.getTenant();
         List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
         teamWrapperService.fillTeamInfoForList(plays);
@@ -83,7 +83,8 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel, Boolean launchNow) {
+    public PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
+            Boolean launchNow) {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setCreatedBy(MultiTenantContext.getEmailAddress());
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
@@ -91,23 +92,25 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public PlayLaunchChannel updatePlayLaunchChannel(String playName, String channelId, PlayLaunchChannel playLaunchChannel, Boolean launchNow) {
+    public PlayLaunchChannel updatePlayLaunchChannel(String playName, String channelId,
+            PlayLaunchChannel playLaunchChannel, Boolean launchNow) {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel, launchNow);
     }
 
     @Override
-    public PlayLaunchDashboard getPlayLaunchDashboard(String playName, String orgId, String externalSysType, List<LaunchState> launchStates,
-                                                      Long startTimestamp, Long offset, Long max, String sortBy, boolean descending, Long endTimestamp) {
+    public PlayLaunchDashboard getPlayLaunchDashboard(String playName, String orgId, String externalSysType,
+            List<LaunchState> launchStates, Long startTimestamp, Long offset, Long max, String sortBy,
+            boolean descending, Long endTimestamp) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayLaunchDashboard(tenant.getId(), playName, launchStates, startTimestamp, offset, max,
                 sortBy, descending, endTimestamp, orgId, externalSysType);
     }
 
     @Override
-    public Long getPlayLaunchDashboardEntriesCount(String playName, String orgId,
-                                                   String externalSysType, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp) {
+    public Long getPlayLaunchDashboardEntriesCount(String playName, String orgId, String externalSysType,
+            List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayLaunchDashboardEntriesCount(tenant.getId(), playName, launchStates, startTimestamp,
                 endTimestamp, orgId, externalSysType);
@@ -122,7 +125,9 @@ public class PlayServiceImpl implements PlayService {
         if (StringUtils.isEmpty(playLaunch.getUpdatedBy())) {
             playLaunch.setUpdatedBy(MultiTenantContext.getEmailAddress());
         }
-        return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
+        // TODO: Clean up needed by Perry
+        // return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
+        return null;
     }
 
     @Override
@@ -140,7 +145,9 @@ public class PlayServiceImpl implements PlayService {
     @Override
     public PlayLaunch launchPlay(String playName, String launchId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return playProxy.launchPlay(tenant.getId(), playName, launchId, false);
+        // TODO: Clean up needed by Perry
+        // return playProxy.launchPlay(tenant.getId(), playName, launchId, false);
+        return null;
     }
 
     @Override

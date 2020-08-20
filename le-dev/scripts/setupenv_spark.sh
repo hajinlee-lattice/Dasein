@@ -5,6 +5,9 @@ printf "%s\n" "${LIVY_HOME:?You must set LIVY_HOME}"
 
 BOOTSTRAP_MODE=$1
 
+source "${WSHOME}/le-dev/scripts/check_aws_creds_expiration.sh"
+check_aws_creds_expiration
+
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping Spark ..."
 

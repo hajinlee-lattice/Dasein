@@ -8,7 +8,10 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
@@ -23,30 +26,35 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.proxy.exposed.RestApiClient;
 import com.latticeengines.remote.exposed.service.IDaaSService;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 
 @Service
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class IDaaSServiceImpl implements IDaaSService  {
 
     @Inject
     private ApplicationContext appCtx;
 
-    @Value("${security.idaas.api.url}")
+    @Inject
+    private IDaaSServiceImpl _self;
+
+    @Value("${remote.idaas.api.url}")
     private String apiUrl;
 
-    @Value("${security.idaas.client.id}")
+    @Value("${remote.idaas.client.id}")
     private String clientId;
 
-    @Value("${security.idaas.client.secret.encrypted}")
+    @Value("${remote.idaas.client.secret.encrypted}")
     private String clientSecret;
 
     private volatile RestApiClient client;
     private volatile String tokenInUse;
     private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
-            .maximumSize(1000) //
-            .expireAfterWrite(1, TimeUnit.HOURS) //
+            .maximumSize(10) //
+            .expireAfterWrite(30, TimeUnit.MINUTES) //
             .build(this::refreshOAuthTokens);
 
     @Override
@@ -69,6 +77,11 @@ public class IDaaSServiceImpl implements IDaaSService  {
     }
 
     private String refreshOAuthTokens(String cacheKey) {
+        return _self.getTokenFromIDaaS(clientId);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.IDaaSTokenCacheName, key = "T(java.lang.String).format(\"%s|idaas-token\", #clientId)", unless = "#result == null")
+    public String getTokenFromIDaaS(String clientId) {
         Map<String, String> payload = ImmutableMap.of("grant_type", "client_credentials");
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         String headerValue = String.format("client_id:%s,client_secret:%s", clientId, clientSecret);

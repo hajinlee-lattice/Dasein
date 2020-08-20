@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.workflow;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -192,6 +193,29 @@ public class Job implements HasId<Long>, HasName {
         this.outputs = outputs;
     }
 
+    @JsonIgnore
+    public Map<String, String> getTags() {
+        if (inputs == null || !inputs.containsKey(WorkflowContextConstants.Inputs.TAGS)) {
+            return null;
+        }
+
+        String tagStr = inputs.get(WorkflowContextConstants.Inputs.TAGS);
+        Map<?, ?> rawMap = JsonUtils.deserialize(tagStr, Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, String.class);
+    }
+
+    @JsonIgnore
+    public void setTags(Map<String, String> tags) {
+        if (tags == null) {
+            return;
+        }
+
+        if (inputs == null) {
+            inputs = new HashMap<>();
+        }
+        inputs.put(WorkflowContextConstants.Inputs.TAGS, JsonUtils.serialize(tags));
+    }
+
     @JsonProperty
     public String getApplicationId() {
         return applicationId;
@@ -322,8 +346,7 @@ public class Job implements HasId<Long>, HasName {
         return isJobRetried;
     }
 
-    @JsonProperty
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     public void setJobRetried(Boolean jobRetried) {
         isJobRetried = jobRetried;
     }
@@ -364,14 +387,16 @@ public class Job implements HasId<Long>, HasName {
     public static class SchedulingInfo {
         private boolean schedulerEnabled;
         private boolean scheduled;
+        private boolean hasScheduleNowQuota;
         private String message;
 
         public SchedulingInfo() {
         }
 
-        public SchedulingInfo(boolean schedulerEnabled, boolean scheduled) {
+        public SchedulingInfo(boolean schedulerEnabled, boolean scheduled, boolean hasScheduleNowQuota) {
             this.schedulerEnabled = schedulerEnabled;
             this.scheduled = scheduled;
+            this.hasScheduleNowQuota = hasScheduleNowQuota;
         }
 
         public void setSchedulerEnabled(boolean schedulerEnabled) {
@@ -388,6 +413,14 @@ public class Job implements HasId<Long>, HasName {
 
         public boolean isScheduled() {
             return scheduled;
+        }
+
+        public boolean isHasScheduleNowQuota() {
+            return hasScheduleNowQuota;
+        }
+
+        public void setHasScheduleNowQuota(boolean hasScheduleNowQuota) {
+            this.hasScheduleNowQuota = hasScheduleNowQuota;
         }
 
         public String getMessage() {

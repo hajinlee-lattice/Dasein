@@ -81,11 +81,11 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("DestinationOrgId")
     private String destinationOrgId;
 
+    @JsonProperty("DestinationSysName")
+    private String destinationSysName;
+
     @JsonProperty("DestinationOrgName")
     private String destinationOrgName;
-
-    @JsonProperty("LaunchSystemName")
-    private String launchSystemName;
 
     @JsonProperty("SfdcAccountID")
     private String sfdcAccountID;
@@ -283,14 +283,6 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         return this.destinationOrgName;
     }
 
-    public String getLaunchSystemName() {
-        return this.launchSystemName;
-    }
-
-    public void setLaunchSystemName(String launchSystemName) {
-        this.launchSystemName = launchSystemName;
-    }
-
     public String getSfdcAccountID() {
         return this.sfdcAccountID;
     }
@@ -450,6 +442,7 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         this.synchronizationDestination = synchronizationDestination;
         if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
             this.destinationOrgId = playLaunch.getDestinationOrgId();
+            this.destinationSysName = playLaunch.getDestinationSysName().name();
             this.destinationOrgName = playLaunch.getDestinationOrgName();
             this.destinationSysType = destinationSysType;
         }
@@ -466,6 +459,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         } else {
             this.sfdcContactID = null;
         }
+    }
+
+    public String getDestinationSysName() {
+        return destinationSysName;
+    }
+
+    public void setDestinationSysName(String destinationSysName) {
+        this.destinationSysName = destinationSysName;
     }
 
     public static class DeltaCampaignLaunchSparkContextBuilder {

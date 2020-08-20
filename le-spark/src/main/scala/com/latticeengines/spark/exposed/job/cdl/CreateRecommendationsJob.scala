@@ -159,9 +159,9 @@ object CreateRecommendationsJob {
     try {
       val obj = account.get(account.fieldIndex(field))
       if  (obj == null) {
-        return defaultValue
+        defaultValue
       } else {
-        return obj.toString()
+        obj.toString()
       }
     } catch {
       case _: IllegalArgumentException => defaultValue
@@ -419,7 +419,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, false)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //

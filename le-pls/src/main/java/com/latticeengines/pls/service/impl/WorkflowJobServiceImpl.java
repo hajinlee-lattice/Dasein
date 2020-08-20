@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -636,11 +637,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         boolean paRunning = schedulingStatus.getDataFeed() != null
                 && schedulingStatus.getDataFeed().getStatus() == DataFeed.Status.ProcessAnalyzing;
-        log.info("Tenant = {}, schedulerEnabled = {}, scheduleNowClicked = {}, paRunning = {}",
-                customerSpace.toString(), schedulingStatus.isSchedulerEnabled(), scheduleNowClicked, paRunning);
+        boolean hasScheduleNowQuota = MapUtils.emptyIfNull(schedulingStatus.getRemainingPaQuota())
+                .getOrDefault(SchedulerConstants.QUOTA_SCHEDULE_NOW, 0L) > 0;
+        log.info("Tenant = {}, schedulerEnabled = {}, scheduleNowClicked = {}, paRunning = {}, remainingPaQuota = {}",
+                customerSpace.toString(), schedulingStatus.isSchedulerEnabled(), scheduleNowClicked, paRunning,
+                schedulingStatus.getRemainingPaQuota());
         // currently only consider schedule now & pa not running
         boolean tenantScheduled = schedulingStatus.isSchedulerEnabled() && scheduleNowClicked && !paRunning;
-        job.setSchedulingInfo(new Job.SchedulingInfo(schedulingStatus.isSchedulerEnabled(), tenantScheduled));
+        job.setSchedulingInfo(
+                new Job.SchedulingInfo(schedulingStatus.isSchedulerEnabled(), tenantScheduled, hasScheduleNowQuota));
 
         // change the job status for scheduled tenant (when job is running, status
         // should be ready)

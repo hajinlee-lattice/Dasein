@@ -34,9 +34,6 @@ public class UploadConfig {
     @JsonProperty("sourceOnHdfs")
     private Boolean sourceOnHdfs;
 
-    @JsonProperty("dropFileTime")
-    private Long dropFileTime;
-
     public String getDropFilePath() {
         return dropFilePath;
     }
@@ -104,13 +101,5 @@ public class UploadConfig {
     public List<String> getDownloadPaths() {
         return Arrays.asList(uploadRawFilePath, uploadImportedFilePath,
                 uploadImportedErrorFilePath, uploadMatchResultPrefix);
-    }
-
-    public Long getDropFileTime() {
-        return dropFileTime;
-    }
-
-    public void setDropFileTime(Long dropFileTime) {
-        this.dropFileTime = dropFileTime;
     }
 }

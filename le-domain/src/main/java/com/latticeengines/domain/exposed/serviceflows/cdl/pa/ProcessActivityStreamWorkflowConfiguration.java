@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
@@ -97,6 +98,11 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder setRematchMode(boolean isRematchMode) {
             processStepConfiguration.setRematchMode(isRematchMode);
+            return this;
+        }
+
+        public Builder entityMatchConfiguration(EntityMatchConfiguration configuration) {
+            processStepConfiguration.setEntityMatchConfiguration(configuration);
             return this;
         }
 

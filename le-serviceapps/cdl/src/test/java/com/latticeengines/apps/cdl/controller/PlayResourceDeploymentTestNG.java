@@ -142,7 +142,9 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         playCreationHelper.createPlayLaunch(testPlaySetupConfig);
         play = playCreationHelper.getPlay();
         playLaunch = playCreationHelper.getPlayLaunch();
-        playLaunch = playProxy.launchPlay(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(), true);
+        // TODO: Clean up needed by Perry
+        // playLaunch = playProxy.launchPlay(mainTestTenant.getId(), play.getName(),
+        // playLaunch.getLaunchId(), true);
         Assert.assertNotNull(playLaunch.getAccountsSelected());
         Assert.assertNotNull(playLaunch.getAccountsLaunched());
         Assert.assertNotNull(playLaunch.getContactsLaunched());

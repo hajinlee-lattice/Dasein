@@ -3,23 +3,33 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <bean id="emailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
-        <property name="from" value="${monitor.emailsettings.from:no-reply@lattice-engines.com}" />
-        <property name="server" value="${monitor.emailsettings.server:smtprelay.lattice.local}" />
-        <property name="username" value="${monitor.emailsettings.username:build@lattice-engines.com}" />
-        <property name="password" value="${monitor.emailsettings.password:ryTy2wEiaw51Le9qTXxx3w==}" />
-        <property name="port" value="${monitor.emailsettings.port:25}" />
-        <property name="useSSL" value="${monitor.emailsettings.useSSL:false}" />
-        <property name="useSTARTTLS" value="${monitor.emailsettings.useSTARTTLS:false}" />
+        <property name="from" value="${monitor.emailsettings.from}" />
+        <property name="server" value="${monitor.emailsettings.server}" />
+        <property name="username" value="${monitor.emailsettings.username}" />
+        <property name="password" value="${monitor.emailsettings.password}" />
+        <property name="port" value="${monitor.emailsettings.port}" />
+        <property name="useSSL" value="${monitor.emailsettings.useSSL}" />
+        <property name="useSTARTTLS" value="${monitor.emailsettings.useSTARTTLS}" />
+    </bean>
+
+    <bean id="dnbEmailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
+        <property name="from" value="${monitor.dnb.emailsettings.from}" />
+        <property name="server" value="${monitor.dnb.emailsettings.server}" />
+        <property name="username" value="" />
+        <property name="password" value="" />
+        <property name="port" value="${monitor.dnb.emailsettings.port}" />
+        <property name="useSSL" value="${monitor.dnb.emailsettings.useSSL}" />
+        <property name="useSTARTTLS" value="${monitor.dnb.emailsettings.useSTARTTLS}" />
     </bean>
 
     <bean id="sendgridEmailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
-        <property name="from" value="${monitor.sendgrid.emailsettings.from:no-reply@connect.dnb.com}" />
-        <property name="server" value="${monitor.sendgrid.emailsettings.from.server:smtp.sendgrid.net}" />
-        <property name="username" value="${monitor.sendgrid.emailsettings.from.username:apikey}" />
-        <property name="password" value="${monitor.sendgrid.emailsettings.from.password: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}" />
-        <property name="port" value="${monitor.sendgrid.emailsettings.port:25}" />
-        <property name="useSSL" value="${monitor.sendgrid.emailsettings.useSSL:false}" />
-        <property name="useSTARTTLS" value="${monitor.sendgrid.emailsettings.useSTARTTLS:false}" />
+        <property name="from" value="${monitor.sendgrid.emailsettings.from}" />
+        <property name="server" value="${monitor.sendgrid.emailsettings.server}" />
+        <property name="username" value="apikey" /> <!-- The username with sendgrid is 'apikey' -->
+        <property name="password" value="${monitor.sendgrid.emailsettings.password.encrypted}" />
+        <property name="port" value="${monitor.sendgrid.emailsettings.port}" />
+        <property name="useSSL" value="${monitor.sendgrid.emailsettings.useSSL}" />
+        <property name="useSTARTTLS" value="${monitor.sendgrid.emailsettings.useSTARTTLS}" />
     </bean>
 
 </beans>

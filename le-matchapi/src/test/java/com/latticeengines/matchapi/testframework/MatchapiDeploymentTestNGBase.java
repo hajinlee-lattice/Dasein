@@ -42,6 +42,8 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
+    protected static final int NUM_STAGING_SHARDS_FOR_TESTING = 5;
+
     @Value("${common.test.matchapi.url}")
     private String hostPort;
 
