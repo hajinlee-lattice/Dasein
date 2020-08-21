@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.TradeDeskChannelConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTestNGBase {
@@ -369,6 +370,24 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 8);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testGoogleLaunch")
+    public void testLiveRampLaunch() {
+        registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.TradeDesk, "TradeDesk");
+
+        createPlayLaunchChannel(new TradeDeskChannelConfig(), lookupIdMap);
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(fieldMetadataService.getClass().getName());
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 1);
+
+        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
+        assertEquals(nonStandardFields, 0);
     }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
