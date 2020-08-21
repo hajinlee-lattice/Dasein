@@ -241,7 +241,8 @@ public enum AccessLevel implements GrantedAuthority {
     public static AccessLevel maxAccessLevel(List<GrantedRight> hadRights) {
         AccessLevel maxLevel = null;
         for (AccessLevel accessLevel : AccessLevel.values()) {
-            if (hadRights.containsAll(accessLevel.getGrantedRights())) {
+            if (hadRights.containsAll(accessLevel.getGrantedRights())
+                    && accessLevel.getGrantedRights().containsAll(hadRights)) {
                 maxLevel = accessLevel;
             }
         }

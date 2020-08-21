@@ -25,8 +25,8 @@ public class AccessLevelUnitTestNG {
                 AccessLevel.INTERNAL_ANALYST, //
                 AccessLevel.INTERNAL_USER, //
                 AccessLevel.EXTERNAL_ADMIN, //
-                AccessLevel.BUSINESS_ANALYST,
                 AccessLevel.EXTERNAL_USER, //
+                AccessLevel.BUSINESS_ANALYST,
                 AccessLevel.THIRD_PARTY_USER //
         };
         for (int i = 0; i < levelsInOrder.length - 1; i++) {
@@ -58,6 +58,11 @@ public class AccessLevelUnitTestNG {
 
     private void testMaxAccessLevel(List<GrantedRight> rights, AccessLevel expectedLevel) {
         AccessLevel maxLevel = AccessLevel.maxAccessLevel(rights);
-        assertEquals(maxLevel, expectedLevel);
+        // There's an exception: because INTERNAL_ANALYST & BUSINESS_ANALYST have exact same rights
+        if (AccessLevel.BUSINESS_ANALYST.equals(expectedLevel)) {
+            assertTrue(maxLevel.compareTo(expectedLevel) >= 0);
+        } else {
+            assertEquals(maxLevel, expectedLevel);
+        }
     }
 }
