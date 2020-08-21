@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -206,7 +207,12 @@ public class DataLakeAccountResource {
             @RequestParam(value = "is-preview", required = false) boolean isPreview) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
         try {
-            List<TalkingPointDTO> tps = talkingPointProxy.findAllByPlayName(customerSpace, playId, !isPreview);
+            List<TalkingPointDTO> tps;
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    "AccountPlayLookup: Retrieve TalkingPoints by PlayId | Tenant "
+                            + CustomerSpace.shortenCustomerSpace(customerSpace))) {
+                tps = talkingPointProxy.findAllByPlayName(customerSpace, playId, !isPreview);
+            }
             AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
             accountFormatter
                     .setIsEntityMatchEnabled(batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
@@ -218,8 +224,13 @@ public class DataLakeAccountResource {
                 requiredAccountAttributes.addAll(extractedAccountAttributes);
             }
 
-            DataPage accountRawData = dataLakeService.getAccountById(accountId,
-                    new ArrayList<>(requiredAccountAttributes), getOrgInfo(authToken));
+            DataPage accountRawData;
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    "AccountPlayLookup: Retrieve Account data for " + requiredAccountAttributes.size()
+                            + " attributes | Tenant " + CustomerSpace.shortenCustomerSpace(customerSpace))) {
+                accountRawData = dataLakeService.getAccountById(accountId, new ArrayList<>(requiredAccountAttributes),
+                        getOrgInfo(authToken));
+            }
             if (accountRawData.getData().size() != 1) {
                 String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
                         accountRawData.getData().size());
@@ -229,7 +240,9 @@ public class DataLakeAccountResource {
             }
             accountFormatter.enrichForDante(accountRawData.getData().get(0));
             return new FrontEndResponse<>(new AccountAndTalkingPoints(accountRawData.getData().get(0), tps));
-        } catch (LedpException le) {
+        } catch (
+
+        LedpException le) {
             log.error("Failed to populate talkingpoints and accounts for " + customerSpace, le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
