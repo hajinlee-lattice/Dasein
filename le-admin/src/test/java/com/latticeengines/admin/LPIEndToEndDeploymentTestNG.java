@@ -163,6 +163,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         user.setUserId("testdcp2");
         user.setEmailAddress(userEmail);
         user.setTelephoneNumber("1234567");
+        user.setPrimaryAddress(new VboRequest.PrimaryAddress());
 
         pro.setUsers(new ArrayList<>());
         pro.getUsers().add(user);
