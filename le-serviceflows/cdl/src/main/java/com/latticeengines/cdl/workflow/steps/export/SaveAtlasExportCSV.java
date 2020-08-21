@@ -245,6 +245,7 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
         if (CollectionUtils.isNotEmpty(cms)) {
             changeDisplayNameMap.putIfAbsent(entity, true);
             if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity) && changeDisplayNameMap.get(entity)) {
+                log.info("May need to change display name of some attributes which have subcategory for entity {}.", entity.name());
                 for (ColumnMetadata cm : cms) {
                     String displayName = cm.getDisplayName();
                     String subCategory = cm.getSubcategory();
@@ -252,8 +253,8 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
                             && !Category.SUB_CAT_OTHER.equalsIgnoreCase(subCategory)) {
                         cm.setDisplayName(subCategory + ": " + displayName);
                     }
-                    changeDisplayNameMap.put(entity, false);
                 }
+                changeDisplayNameMap.put(entity, false);
             }
             schema.addAll(cms);
         }
