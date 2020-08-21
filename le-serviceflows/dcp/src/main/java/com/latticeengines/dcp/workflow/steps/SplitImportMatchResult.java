@@ -266,7 +266,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             }
         }));
         Map<String, List<String>> reversMap = dispNames.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getValue, e -> Collections.singletonList(e.getKey()),
+                .collect(Collectors.toMap(Map.Entry::getValue, e -> new ArrayList<>(Collections.singleton(e.getKey())),
                         (l1, l2) -> {
                             CollectionUtils.addAll(l1, l2);
                             return l1;
