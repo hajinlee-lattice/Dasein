@@ -243,7 +243,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         List<ColumnMetadata> cms = schemaMap.getOrDefault(businessEntity, new ArrayList<>());
         cms.add(columnMetadata);
         schemaMap.put(businessEntity, cms);
-        WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
     }
 
     private List<Lookup> convertToLookup(List<List<ColumnMetadata>> columnMetadataList) {
