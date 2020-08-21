@@ -132,10 +132,6 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private LocalCacheManager<String, Map<String, StatsCube>> statsCubesCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
-    private LoadingCache<String, Boolean> hasAccountLookupCache = Caffeine.newBuilder() //
-            .maximumSize(1000) //
-            .expireAfterWrite(30, TimeUnit.SECONDS) //
-            .build(this::hasAccountLookupCache);
     private LoadingCache<String, Boolean> contactsByAccountLookupsPopulatedCache = Caffeine.newBuilder() //
             .maximumSize(1000) //
             .expireAfterWrite(30, TimeUnit.SECONDS) //
@@ -242,14 +238,20 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Override
     public DataPage getAccountById(String accountId, List<String> lookupAttributes, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        String internalAccountId = getInternalAccountId(accountId, orgInfo);
-
+        String internalAccountId;
+        try (PerformanceTimer timer = new PerformanceTimer("AccountPlayLookup: Lookup Internal Account id | Tenant "
+                + CustomerSpace.shortenCustomerSpace(customerSpace))) {
+            internalAccountId = getInternalAccountId(accountId, orgInfo);
+        }
         DataPage dataPage;
         if (StringUtils.isNotBlank(internalAccountId)) {
-            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId,
-                    lookupAttributes.stream().map(Column::new).collect(Collectors.toList()));
-
-            if (dataPage != null && dataPage.getData() != null && dataPage.getData().size() == 1) {
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    "AccountPlayLookup: Account match for " + lookupAttributes.size() + " attributes | Tenant "
+                            + CustomerSpace.shortenCustomerSpace(customerSpace))) {
+                dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId,
+                        lookupAttributes.stream().map(Column::new).collect(Collectors.toList()));
+            }
+            if (dataPage.getData() != null && dataPage.getData().size() == 1) {
                 if (!dataPage.getData().get(0).containsKey(InterfaceName.AccountId.name())) {
                     dataPage.getData().get(0).put(InterfaceName.AccountId.name(), internalAccountId);
                 }
@@ -295,7 +297,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             DataPage reqdAttributesPage = getAccountByIdViaMatchApi(customerSpace, accountID,
                     missingAttributesNotInPredefinedSelections);
 
-            if (reqdAttributesPage != null && CollectionUtils.isNotEmpty(reqdAttributesPage.getData())
+            if (CollectionUtils.isNotEmpty(reqdAttributesPage.getData())
                     && MapUtils.isNotEmpty(reqdAttributesPage.getData().get(0))) {
                 accountData.putAll(reqdAttributesPage.getData().get(0));
             } else {
@@ -363,17 +365,20 @@ public class DataLakeServiceImpl implements DataLakeService {
         // If AccountLookup table is populated for this tenant,
         // skip both special cache and redshift, go straight to match api
         // special cache lookup should be removed soon
-        String internalAccountId;
-        if (Boolean.TRUE.equals(hasAccountLookupCache.get(customerSpace))) {
+        String internalAccountId = null;
+        try {
             internalAccountId = matchProxy.lookupInternalAccountId(customerSpace, lookupIdColumn, accountId, null);
-        } else {
-            log.warn("Tenant " + customerSpace + " does not have AccountLookup table, trying special lookupcache");
-
+        } catch (Exception e) {
+            log.error(String.format("Account lookup failed for LookupColumn : %s | LookupId : %s | tenant: %s \n",
+                    lookupIdColumn, accountId, customerSpace), e);
+        }
+        if (StringUtils.isBlank(internalAccountId)) {
+            log.warn(String.format("AccountLookup failed for LookupColumn : %s | LookupId : %s | tenant: %s ",
+                    lookupIdColumn, accountId, customerSpace));
             internalAccountId = getInternalIdViaAccountCache(customerSpace, lookupIdColumn, accountId);
-
             if (StringUtils.isBlank(internalAccountId)) {
                 log.warn(String.format(
-                        "Failed to find LookupId:%s AccountId:%s for customerspace: %s in special cache. attempting redshift lookup.",
+                        "Failed to find LookupId:%s AccountId:%s for customerspace: %s in special cache. Falling back to redshift lookup.",
                         lookupIdColumn, accountId, customerSpace));
                 List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
                         Collections.singletonList(accountId), lookupIdColumn);
@@ -515,16 +520,19 @@ public class DataLakeServiceImpl implements DataLakeService {
         matchInput.setUseRemoteDnB(false);
         matchInput.setDataCloudVersion(dataCloudVersion);
 
-        log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
         // Future<List<ColumnMetadata>> dateAttrsFuture = getWorkers().submit(() -> {
-        // try (PerformanceTimer timer = new PerformanceTimer(
+        //
         // "Get date attributes for " +
         // CustomerSpace.shortenCustomerSpace(customerSpace))) {
         // return servingStoreProxy.getDateAttrsFromCache(customerSpace,
         // BusinessEntity.Account);
         // }
         // });
-        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+        MatchOutput matchOutput;
+        try (PerformanceTimer timer = new PerformanceTimer(String.format(
+                "AccountPlayLookup: Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)))) {
+            matchOutput = matchProxy.matchRealTime(matchInput);
+        }
         DataPage datapage;
         if (wasMatchFound(matchOutput)) {
             // avoiding expensive metadata retrieval if match failed
@@ -767,18 +775,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     @VisibleForTesting
     void setMatchProxy(MatchProxy matchProxy) {
         this.matchProxy = matchProxy;
-    }
-
-    @VisibleForTesting
-    void setAccountLookupCacheTable(String testTable) {
-        this.dynamoAccountLookupCacheTableName = testTable;
-    }
-
-    private boolean hasAccountLookupCache(String customerSpace) {
-        DynamoDataUnit dynamoDataUnit = //
-                dataCollectionProxy.getDynamoDataUnitByTableRole(customerSpace, null,
-                        TableRoleInCollection.AccountLookup);
-        return dynamoDataUnit != null;
     }
 
     private boolean contactsLookupsPopulated(String customerSpace) {
