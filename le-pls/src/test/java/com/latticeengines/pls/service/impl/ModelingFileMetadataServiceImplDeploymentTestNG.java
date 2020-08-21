@@ -110,7 +110,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         boolean idExist = false;
-        boolean countryExist = false;
+        boolean externalIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -124,14 +124,14 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 fieldMapping.setMappedToLatticeSystem(false);
                 idExist = true;
             }
-            if ("Country".equals(fieldMapping.getUserField())) {
-                countryExist = true;
+            if ("CrmAccount_External_ID".equals(fieldMapping.getUserField())) {
+                externalIdExist = true;
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
             }
         }
         Assert.assertTrue(idExist);
-        Assert.assertTrue(countryExist);
+        Assert.assertTrue(externalIdExist);
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 feedType);
 
@@ -207,20 +207,20 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
-        boolean countryExist = false;
+        boolean externalIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
-            if ("Country".equals(fieldMapping.getUserField())) {
-                countryExist = true;
+            if ("CrmAccount_External_ID".equals(fieldMapping.getUserField())) {
+                externalIdExist = true;
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
                 fieldMapping.setFieldType(UserDefinedType.NUMBER);
             }
         }
-        Assert.assertTrue(countryExist);
+        Assert.assertTrue(externalIdExist);
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
                         SOURCE, feedType);
