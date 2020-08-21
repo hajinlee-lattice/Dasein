@@ -12,7 +12,8 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     Project findByProjectId(String projectId);
 
-    @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, p.teamId" +
+    @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
+            " p.recipientList, p.teamId, p.description" +
             " FROM Project AS p WHERE p.projectId = ?1")
     List<Object[]> findProjectInfoByProjectId(String projectId);
 

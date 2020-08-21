@@ -18,6 +18,9 @@ public class ProjectSummary {
     @JsonProperty("projectDisplayName")
     private String projectDisplayName;
 
+    @JsonProperty("projectDescription")
+    private String projectDescription;
+
     @JsonProperty("archived")
     private Boolean archieved;
 
@@ -56,6 +59,14 @@ public class ProjectSummary {
 
     public void setProjectDisplayName(String projectDisplayName) {
         this.projectDisplayName = projectDisplayName;
+    }
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
     }
 
     public Boolean getArchieved() {
