@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -29,13 +30,32 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     @JsonProperty("IncludeAccountsWithoutContacts")
     private boolean includeAccountsWithoutContacts;
 
+    @JsonProperty("ExternalSystemName")
+    private CDLExternalSystemName externalSystemName;
+
+    @JsonProperty("ManageDbUrl")
+    private String manageDbUrl;
+
+    @JsonProperty("User")
+    private String user;
+
+    @JsonProperty("Password")
+    private String password;
+
+    @JsonProperty("EncryptionKey")
+    private String encryptionKey;
+
+    @JsonProperty("SaltHint")
+    private String saltHint;
+
     public GenerateLaunchArtifactsJobConfig() {
     }
 
     public GenerateLaunchArtifactsJobConfig(DataUnit accountsData, //
             DataUnit contactsData, DataUnit targetSegmentsContactsData, //
             DataUnit negativeDelta, DataUnit positiveDelta, //
-            BusinessEntity mainEntity, boolean includeAccountsWithoutContacts, String workSpace) {
+            BusinessEntity mainEntity, boolean includeAccountsWithoutContacts, //
+            String workSpace, CDLExternalSystemName externalSystemName) {
         this.setWorkspace(workSpace);
         this.negativeDelta = negativeDelta;
         this.positiveDelta = positiveDelta;
@@ -44,6 +64,7 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
         this.targetSegmentsContactsData = targetSegmentsContactsData;
         this.mainEntity = mainEntity;
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
+        this.externalSystemName = externalSystemName;
     }
 
     @Override
@@ -113,4 +134,51 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
     }
 
+    public void setExternalSystemName(CDLExternalSystemName externalSystemName) {
+        this.externalSystemName = externalSystemName;
+    }
+
+    public CDLExternalSystemName getExternalSystemName() {
+        return externalSystemName;
+    }
+
+    public String getManageDbUrl() {
+        return manageDbUrl;
+    }
+
+    public void setManageDbUrl(String manageDbUrl) {
+        this.manageDbUrl = manageDbUrl;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEncryptionKey() {
+        return encryptionKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
+    public String getSaltHint() {
+        return saltHint;
+    }
+
+    public void setSaltHint(String saltHint) {
+        this.saltHint = saltHint;
+    }
 }

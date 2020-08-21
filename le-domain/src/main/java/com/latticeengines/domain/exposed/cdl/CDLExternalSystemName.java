@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.cdl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+
 public enum CDLExternalSystemName {
     Marketo("Marketo"), //
     Eloqua("Eloqua"), //
@@ -19,6 +21,9 @@ public enum CDLExternalSystemName {
     Google_Display_N_Video_360("Google Display & Video 360"), //
     AppNexus("AppNexus"), //
     Others("Others");
+
+    public static final ImmutableList<CDLExternalSystemName> adPlatforms = //
+            ImmutableList.of(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook);
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();
 
