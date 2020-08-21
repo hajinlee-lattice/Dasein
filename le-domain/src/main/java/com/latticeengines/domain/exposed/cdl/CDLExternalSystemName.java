@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.cdl;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
 
 public enum CDLExternalSystemName {
     Marketo("Marketo"), //
@@ -22,7 +22,8 @@ public enum CDLExternalSystemName {
     AppNexus("AppNexus"), //
     Others("Others");
 
-    public static List<CDLExternalSystemName> adPlatforms = Arrays.asList(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook);
+    public static final ImmutableList<CDLExternalSystemName> adPlatforms = //
+            ImmutableList.of(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook);
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();
 
