@@ -12,6 +12,7 @@ import com.latticeengines.cdl.workflow.steps.campaign.CalculateDeltaStep;
 import com.latticeengines.cdl.workflow.steps.campaign.ExportDeltaArtifactsToS3;
 import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchArtifacts;
 import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchUniverse;
+import com.latticeengines.cdl.workflow.steps.campaign.GenerateLiveRampLaunchArtifacts;
 import com.latticeengines.cdl.workflow.steps.campaign.ImportDeltaArtifactsFromS3;
 import com.latticeengines.cdl.workflow.steps.campaign.QueuePlayLaunches;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
@@ -37,6 +38,9 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
     private GenerateLaunchArtifacts generateLaunchArtifacts;
 
     @Inject
+    private GenerateLiveRampLaunchArtifacts generateLiveRampLaunchArtifacts;
+
+    @Inject
     private ExportDeltaArtifactsToS3 exportArtifactsToS3Step;
 
     @Inject
@@ -52,6 +56,7 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
                 .next(generateLaunchUniverse) //
                 .next(calculateDeltaStep) //
                 .next(generateLaunchArtifacts) //
+                .next(generateLiveRampLaunchArtifacts) //
                 .next(exportArtifactsToS3Step) //
                 .next(queuePlayLaunches) //
                 .listener(campaignDeltaCalculationWorkflowListener) //

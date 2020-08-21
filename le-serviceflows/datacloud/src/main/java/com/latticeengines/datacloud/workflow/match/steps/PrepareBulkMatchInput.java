@@ -143,7 +143,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     Integer[] determineBlockSizes(Long count) {
         MatchInput matchInput = getConfiguration().getMatchInput();
         // Seperate AccountMaster and ContactMaster match
-        if (!ContactMasterConstants.MATCH_ENTITY_TPS.equalsIgnoreCase(matchInput.getTargetEntity())
+        if (!matchInput.getTargetEntity().equalsIgnoreCase(ContactMasterConstants.MATCH_ENTITY_TPS)
                 && MatchUtils.isValidForAccountMasterBasedMatch(matchInput.getDataCloudVersion())) {
             if (getConfiguration().getMatchInput().isFetchOnly()) {
                 return divideIntoNumBlocks(count, determineNumBlocksForFetchOnly(count));
