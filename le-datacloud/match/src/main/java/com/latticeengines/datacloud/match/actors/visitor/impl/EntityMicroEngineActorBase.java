@@ -137,6 +137,10 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
 
         // For Allocate ID Mode, capture entity's MatchLookupResults into entity map.
         traveler.addEntityMatchLookupResults(entity, traveler.getMatchLookupResults());
+        if (traveler.getRetries() > 2) {
+            log.warn("Record retried more than once. No. travels = {}, record = {}", traveler.getRetries(),
+                    traveler.getMatchLookupResults());
+        }
 
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getMatchLookupResults()
                 .stream()
