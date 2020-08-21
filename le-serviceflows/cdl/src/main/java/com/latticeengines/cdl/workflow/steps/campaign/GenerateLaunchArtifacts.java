@@ -17,6 +17,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -93,6 +95,15 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private DataCollection.Version version;
     private String evaluationDate;
     private AttributeRepository attrRepo;
+
+    @Value("${datacloud.manage.url}")
+    private String url;
+
+    @Value("${datacloud.manage.user}")
+    private String user;
+
+    @Value("${datacloud.manage.password.encrypted}")
+    private String password;
 
     @Override
     public void execute() {
@@ -170,7 +181,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
                 positiveDeltaDataUnit, negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
-                contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts());
+                contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
     }
 
@@ -186,7 +197,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,
             Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
-            BusinessEntity mainEntity, boolean contactsDataExists, boolean suppressAccountsWithoutContacts) {
+            BusinessEntity mainEntity, boolean contactsDataExists, boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -221,7 +232,18 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                         contactDataUnit, targetContactsDataUnit, //
                         negativeDeltaDataUnit, positiveDeltaDataUnit, //
                         mainEntity, !suppressAccountsWithoutContacts, //
-                        getRandomWorkspace());
+                        getRandomWorkspace(), externalSystemName);
+
+                if (CDLExternalSystemName.adPlatforms.contains(externalSystemName)) {
+                    String encryptionKey = CipherUtils.generateKey();
+                    String saltHint = CipherUtils.generateKey();
+                    config.setManageDbUrl(url);
+                    config.setUser(user);
+                    config.setEncryptionKey(encryptionKey);
+                    config.setSaltHint(saltHint);
+                    config.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+                }
+
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
