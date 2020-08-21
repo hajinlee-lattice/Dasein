@@ -20,7 +20,13 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
         @Type(value = LinkedInChannelConfig.class, name = "linkedin"), //
         @Type(value = FacebookChannelConfig.class, name = "facebook"), //
         @Type(value = OutreachChannelConfig.class, name = "outreach"), //
-        @Type(value = GoogleChannelConfig.class, name = "googleads") //
+        @Type(value = GoogleChannelConfig.class, name = "googleads"), //
+        @Type(value = AdobeAudienceManagerChannelConfig.class, name = "adobe_audience_mgr"), //
+        @Type(value = AppNexusChannelConfig.class, name = "appnexus"), //
+        @Type(value = GoogleDisplayNVideo360ChannelConfig.class, name = "google_display_n_video_360"), //
+        @Type(value = MediaMathChannelConfig.class, name = "mediamath"), //
+        @Type(value = TradeDeskChannelConfig.class, name = "tradedesk"), //
+        @Type(value = VerizonMediaChannelConfig.class, name = "verizonmedia") //
 })
 public interface ChannelConfig {
 
