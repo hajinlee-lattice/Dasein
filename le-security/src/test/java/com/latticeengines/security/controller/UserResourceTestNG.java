@@ -107,14 +107,14 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @DataProvider(name="authTableProvider")
     private static Object[][] authTableProvider() {
         return new Object[][] { //
-                { AccessLevel.SUPER_ADMIN, new Boolean[]      {true,  true,  true,  true,  true,  true,  true } },
-                { AccessLevel.INTERNAL_ADMIN, new Boolean[]   {true,  true,  true,  true,  true,  true,  false} },
-                { AccessLevel.INTERNAL_USER, new Boolean[]    {false, false, false, false, false, false, false} },
-                { AccessLevel.EXTERNAL_ADMIN, new Boolean[]   {true,  true,  true,  true,  false, false, false} },
-                { AccessLevel.EXTERNAL_USER, new Boolean[]    {false, false, false, false, false, false, false} },
-                { AccessLevel.BUSINESS_ANALYST, new Boolean[] {false, false, false, false, false, false, false} },
-                { AccessLevel.INTERNAL_ANALYST, new Boolean[] {false, false, false, false, false, false, false} },
-                { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false, false} },
+                { AccessLevel.SUPER_ADMIN, new Boolean[]      {true,  true,  true,  true,  true,  true,  true,  true} },
+                { AccessLevel.INTERNAL_ADMIN, new Boolean[]   {true,  true,  true,  true,  true,  true,  true,  false} },
+                { AccessLevel.INTERNAL_USER, new Boolean[]    {false, false, false, false, false, false, false, false} },
+                { AccessLevel.EXTERNAL_ADMIN, new Boolean[]   {true,  true,  true,  true,  false, false, false, false} },
+                { AccessLevel.EXTERNAL_USER, new Boolean[]    {false, false, false, false, false, false, false, false} },
+                { AccessLevel.BUSINESS_ANALYST, new Boolean[] {false, false, false, false, false, false, false, false} },
+                { AccessLevel.INTERNAL_ANALYST, new Boolean[] {false, false, false, false, false, false, false, false} },
+                { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false, false, false} },
         };
     }
 
@@ -183,8 +183,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @DataProvider(name="getAllUsersProvider")
     public static Object[][] getAllUsersProvider() {
         return new Object[][] {
-                { AccessLevel.SUPER_ADMIN, true, 7 },
-                { AccessLevel.INTERNAL_ADMIN, true, 7 },
+                { AccessLevel.SUPER_ADMIN, true, 8 },
+                { AccessLevel.INTERNAL_ADMIN, true, 8 },
                 { AccessLevel.INTERNAL_USER, false, 0 },
                 { AccessLevel.EXTERNAL_ADMIN, true, 2 },
                 { AccessLevel.EXTERNAL_USER, false, 0 },
