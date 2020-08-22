@@ -58,6 +58,8 @@ import com.latticeengines.domain.exposed.spark.cdl.SplitSystemBatchStoreConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TruncateLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ValidateProductConfig;
+import com.latticeengines.domain.exposed.spark.cm.CMTpsLookupCreationConfig;
+import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig;
 import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
@@ -159,10 +161,11 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = GetRowChangesConfig.class, name = GetRowChangesConfig.NAME), //
         @JsonSubTypes.Type(value = MapAttributeTxfmrConfig.class, name = MapAttributeTxfmrConfig.NAME), //
         @JsonSubTypes.Type(value = FilterByJoinConfig.class, name = FilterByJoinConfig.NAME), //
-        @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name =
-                MigrateActivityPartitionKeyJobConfig.NAME), //
+        @JsonSubTypes.Type(value = MigrateActivityPartitionKeyJobConfig.class, name = MigrateActivityPartitionKeyJobConfig.NAME), //
         @JsonSubTypes.Type(value = RollupDataReportConfig.class, name = RollupDataReportConfig.NAME), //
-        @JsonSubTypes.Type(value = PrepareDataReportConfig.class, name = PrepareDataReportConfig.NAME) })
+        @JsonSubTypes.Type(value = PrepareDataReportConfig.class, name = PrepareDataReportConfig.NAME), //
+        @JsonSubTypes.Type(value = CMTpsSourceCreationConfig.class, name = CMTpsSourceCreationConfig.NAME), //
+        @JsonSubTypes.Type(value = CMTpsLookupCreationConfig.class, name = CMTpsLookupCreationConfig.NAME) })
 public abstract class SparkJobConfig implements Serializable {
 
     /**
