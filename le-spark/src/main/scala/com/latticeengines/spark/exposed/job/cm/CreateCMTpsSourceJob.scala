@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cm
 
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants
 import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig
 import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig.FieldMapping
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -23,10 +24,10 @@ class CreateCMTpsSourceJob extends AbstractSparkJob[CMTpsSourceCreationConfig] {
       val newField = fieldMapping.getNewStandardField
       val sourceFields = fieldMapping.getSourceFields.asScala.toList
       if (newField.toLowerCase.contains("level")) {
-        standardized = standardized.withColumn(newField, getLevelFromTitleAndFunctionUdf(col(sourceFields(0)), col(sourceFields(1))))
+        standardized = standardized.withColumn(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL, getLevelFromTitleAndFunctionUdf(col(sourceFields(0)), col(sourceFields(1))))
       }
       if (newField.toLowerCase.contains("function")) {
-        standardized = standardized.withColumn(newField, getStandardJobFunctionUdf(col(sourceFields(0))))
+        standardized = standardized.withColumn(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION, getStandardJobFunctionUdf(col(sourceFields(0))))
       }
     }
 

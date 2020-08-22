@@ -40,7 +40,12 @@ public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implement
         Schema schema = getSchema(recordType);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(TPS_RECORD_ID, id);
-        builder.set(ATTRIBUTES, attributes);
+        try {
+            String serializedAttributes = JsonUtils.serialize(getAttributes());
+            builder.set(ATTRIBUTES, serializedAttributes);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize json attributes", e);
+        }
         return builder.build();
     }
 

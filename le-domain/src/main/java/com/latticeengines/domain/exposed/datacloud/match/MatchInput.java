@@ -138,6 +138,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("RealTimeThreadPoolSize")
     private Integer realTimeThreadPoolSize;
 
+    // Filters for tps records
     @JsonProperty("TpsMatchConfig")
     private TpsMatchConfig tpsMatchConfig;
 
