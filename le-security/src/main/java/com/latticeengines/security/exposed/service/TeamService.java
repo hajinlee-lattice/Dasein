@@ -42,4 +42,6 @@ public interface TeamService {
 
     List<GlobalTeam> getTeams(User loginUser, boolean withTeamMember);
 
+    String createDefaultTeam();
+
 }

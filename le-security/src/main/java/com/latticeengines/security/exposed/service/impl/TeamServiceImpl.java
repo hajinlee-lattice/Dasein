@@ -170,6 +170,12 @@ public class TeamServiceImpl implements TeamService {
         return globalAuthTeam.getTeamId();
     }
 
+    @Override
+    public String createDefaultTeam() {
+        GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createDefaultTeam();
+        return globalAuthTeam.getTeamId();
+    }
+
     private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {
         if (AccessLevel.INTERNAL_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())
                 || AccessLevel.INTERNAL_USER.name().equals(globalAuthUserTenantRight.getOperationName())

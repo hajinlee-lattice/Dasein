@@ -140,7 +140,11 @@ public class AttributeSetEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createDefaultAttributeSet() {
-        AttributeSet defaultSet = getDefaultAttributeSet();
+        AttributeSet defaultSet = findByName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+        if (defaultSet != null) {
+            return defaultSet;
+        }
+        defaultSet = getDefaultAttributeSet();
         attributeSetDao.create(defaultSet);
         return defaultSet;
     }
