@@ -52,5 +52,5 @@ public class TeamResource {
     public String createDefaultTeam(@PathVariable String customerSpace) {
         return teamService.createDefaultTeam();
     }
-    
+
 }
