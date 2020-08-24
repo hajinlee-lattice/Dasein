@@ -226,6 +226,7 @@ public class UserResource {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
         User user = userService.findByUsername(username);
+        boolean newUser = !userService.inTenant(tenantId, username);
         // update access level
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
@@ -237,7 +238,6 @@ public class UserResource {
                 return SimpleBooleanResponse.failedResponse(
                         Collections.singletonList("Cannot update to a level higher than that of the login user."));
             }
-            boolean newUser = !userService.inTenant(tenantId, username);
             userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
                     false, !newUser, data.getUserTeams());
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
@@ -257,7 +257,7 @@ public class UserResource {
             return SimpleBooleanResponse
                     .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
         }
-        if (batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+        if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
             IDaaSUser idaasUser = userService.createIDaaSUser(user);
             String welcomeUrl = dcpPublicUrl;
             if (idaasUser.getInvitationLink() != null) {
