@@ -133,9 +133,8 @@ public class ScoreArtifactCache {
     private void refreshCache() {
         log.info(String.format("Begin to refresh cache, the size of the cache=%d, with stats=%s",
                 scoreArtifactCache.asMap().size(), scoreArtifactCache.stats().toString()));
-        List<ModelSummary> modelSummaryListNeedsToRefresh = modelRetriever
-                .getModelSummariesModifiedWithinTimeFrame(
-                        new Double(TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime) * 1.05).longValue());
+        List<ModelSummary> modelSummaryListNeedsToRefresh = modelRetriever.getModelSummariesModifiedWithinTimeFrame(
+                TimeUnit.SECONDS.toMillis(Double.valueOf(scoreArtifactCacheRefreshTime * 1.05).longValue()));
         if (CollectionUtils.isNotEmpty(modelSummaryListNeedsToRefresh)) {
             // get the modelsummary and its associated bucket metadata
             modelSummaryListNeedsToRefresh.forEach(modelsummay -> {
