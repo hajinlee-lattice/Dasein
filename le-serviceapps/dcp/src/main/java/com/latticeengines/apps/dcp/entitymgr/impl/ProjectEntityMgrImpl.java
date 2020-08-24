@@ -93,7 +93,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         return getReadOrWriteRepository().count();
     }
 
-    /* Get count of projects with delted = false */
+    /* Get count of projects with deleted = false */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Long countAllActiveProjects() {
@@ -153,6 +153,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setCreatedBy((String) columns[6]);
         info.setRecipientList((List<String>) columns[7]);
         info.setTeamId((String) columns[8]);
+        info.setProjectDescription((String) columns[9]);
         return info;
     }
 }

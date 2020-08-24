@@ -7,6 +7,7 @@ public class ProjectInfo {
 
     private String projectId;
     private String projectDisplayName;
+    private String projectDescription;
     private String rootPath;
     private Boolean deleted;
     private Date created;
@@ -29,6 +30,14 @@ public class ProjectInfo {
 
     public void setProjectDisplayName(String projectDisplayName) {
         this.projectDisplayName = projectDisplayName;
+    }
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
     }
 
     public String getRootPath() {

@@ -93,14 +93,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, List<String> teamIds) {
-        return getAllProject(customerSpace, includeSources, Boolean.TRUE, 0, MAX_PAGE_SIZE, teamIds);
-    }
-
-    @Override
     public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, Boolean includeArchived,
                                               int pageIndex, int pageSize, List<String> teamIds) {
-        log.info("Invoke findAll Project!");
+        log.info("Start getAllProject!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
             PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
             List<ProjectInfo> projectInfoList;
@@ -228,6 +223,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setUpdated(projectInfo.getUpdated().getTime());
         details.setCreatedBy(projectInfo.getCreatedBy());
         details.setTeamId(projectInfo.getTeamId());
+        details.setProjectDescription(projectInfo.getProjectDescription());
         return details;
     }
 
