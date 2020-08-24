@@ -125,14 +125,14 @@ public final class DirectPlusUtils {
         metadata.forEach(md -> {
             String jsonPath = md.getJsonPath();
             JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
-            String value = (String) toValue(jsonNode);
+            String value = toStrValue(jsonNode);
             String attrName = md.getAttrName();
             result.put(attrName, value);
         });
         return result;
     }
 
-    private static Object toValue(JsonNode jsonNode) {
+    private static String toStrValue(JsonNode jsonNode) {
         if (jsonNode == null) {
             return null;
         } else {
@@ -141,11 +141,11 @@ public final class DirectPlusUtils {
                 case MISSING:
                     return null;
                 case BOOLEAN:
-                    return jsonNode.asBoolean();
+                    return String.valueOf(jsonNode.asBoolean());
                 case STRING:
                     return jsonNode.asText();
                 case NUMBER:
-                    return jsonNode.asDouble();
+                    return String.valueOf(jsonNode.asDouble());
                 default:
                     throw new UnsupportedOperationException("Cannot convert json node of type " //
                             + jsonNode.getNodeType() + " to a value object.");
