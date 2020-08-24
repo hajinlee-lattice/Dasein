@@ -86,7 +86,6 @@ public class ProjectServiceImpl implements ProjectService {
         return getProjectDetails(customerSpace, project, Boolean.FALSE);
     }
 
-    /* This method doesn't seem to be called from anywhere */
     @Override
     public Project getProjectByProjectId(String customerSpace, String projectId) {
         return projectEntityMgr.findByProjectId(projectId);
