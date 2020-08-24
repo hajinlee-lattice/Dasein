@@ -50,40 +50,47 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
     public Flux<ColumnMetadata> getMetadata(Namespace2<String, BusinessEntity> namespace) {
         Flux<ColumnMetadata> flux = Flux.empty();
         // only account has external system ids now
-        if (BusinessEntity.Account.equals(namespace.getCoord2())) {
+        BusinessEntity entity = namespace.getCoord2();
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
             CustomerSpace customerSpace = CustomerSpace.parse(namespace.getCoord1());
             isEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             isEntityMatchGAOnly = batonService.onlyEntityMatchGAEnabled(customerSpace);
-            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(BusinessEntity.Account);
+            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(entity);
 
             if (externalSystem != null) {
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
                     flux = flux.concatWith(Flux.fromIterable(externalSystem.getCRMIdList())
-                            .map(id -> toColumnMetadata(id, "CRM", externalSystem.getDisplayNameById(id))));
+                            .map(id -> toColumnMetadata(id, "CRM", externalSystem.getDisplayNameById(id), entity)));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getMAPIdList())) {
                     flux = flux.concatWith(Flux.fromIterable(externalSystem.getMAPIdList())
-                            .map(id -> toColumnMetadata(id, "MAP", externalSystem.getDisplayNameById(id))));
+                            .map(id -> toColumnMetadata(id, "MAP", externalSystem.getDisplayNameById(id), entity)));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getERPIdList())) {
                     flux = flux.concatWith(Flux.fromIterable(externalSystem.getERPIdList())
-                            .map(id -> toColumnMetadata(id, "ERP", externalSystem.getDisplayNameById(id))));
+                            .map(id -> toColumnMetadata(id, "ERP", externalSystem.getDisplayNameById(id), entity)));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getOtherIdList())) {
                     flux = flux.concatWith(Flux.fromIterable(externalSystem.getOtherIdList())
-                            .map(id -> toColumnMetadata(id, null, externalSystem.getDisplayNameById(id))));
+                            .map(id -> toColumnMetadata(id, null, externalSystem.getDisplayNameById(id), entity)));
                 }
             }
         }
         return flux;
     }
 
-    private ColumnMetadata toColumnMetadata(String attrName, String type, String displayName) {
+
+    private ColumnMetadata toColumnMetadata(String attrName, String type, String displayName, BusinessEntity entity) {
         ColumnMetadata cm = new ColumnMetadata();
         cm.setAttrName(attrName);
         cm.enableGroup(ColumnSelection.Predefined.LookupId);
-        cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
+        if (BusinessEntity.Account.equals(entity)) {
+            cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
+        }
+        if (BusinessEntity.Contact.equals(entity)) {
+            cm.setSubcategory(Category.SUB_CAT_CONTACT_IDS);
+        }
         if (StringUtils.isNotBlank(type)) {
             cm.setSecondaryDisplayName(type);
         }
