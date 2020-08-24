@@ -5,13 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Lattice Ingestion Job</title>
     <style type="text/css">
-        img {
-            max-width: 100%;
-        }
         body {
-            -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 22px;
+            -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6;
+            background-color: #f6f6f6;
         }
         @media only screen and (max-width: 640px) {
+            .container {
+                width: 100% !important;
+            }
             .content {
                 padding: 10px !important;
             }
@@ -19,60 +20,58 @@
     </style>
 </head>
 
-<body style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 22px; background: #f5fafc; margin: 0; padding: 0;">
+<body style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6; background: #f5fafc; margin: 0; padding: 0;">
 
-<div class="content" style="box-shadow:  0 0.4rem 0.8rem rgba(0, 0, 0, 0.16); font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto;">
-    <div style="width: 100%; margin-top: 50px;"/>
-    <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-        <tbody>
-            <tr style="box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.16); background-color: #ffffff; font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0;" valign="top">
-                    <div style="padding: 15px 30px;">
-                        <img width="160px" height="30px" src="DnB%20Connect.svg" alt="dnb_logo">
-                    </div>
-                </td>
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: middle; margin: 0;" valign="middle">
-                    <img width="30px" height="30px" style="border-radius: 30px; display: block; margin-left: auto; margin-right: 30px" src="avatar.svg">
-                </td>
-            </tr>
-            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0" valign="top" colspan="2">
-                    <p style="margin: 30px 0 0 30px; font-weight: 600;">Hello, </p>
-                </td>
-            </tr>
-            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 0 35px;" valign="top" colspan="2">
-                    <img width="30px" height="30px" src="green-check-no-outline.svg" alt="dnb_logo">
-                    <p style=" max-width: 480px; line-height: 22px; margin: 20px 20px 20px 10px; display:inline-block;">Great news! We've successfully matched and enriched your data based on your inputs for the below project:</p>
-                </td>
-            </tr>
-            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top" colspan="2">
-                    <p style="margin: 0 35px;">Project Name: {{projectDisplayName}}</p>
-                    <p style="margin: 0 35px;">Source Name: {{sourceDisplayName}}</p>
-                    <p style="margin: 0 35px;">File Name: {{uploadDisplayName}}</p>
-                </td>
-            </tr>
-            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top" colspan="2">
-                    <p style="margin: 0 35px; font-weight: 600;">You can now <a style="text-decoration: none; color: #009ece;" href="https://testdcp.lattice-engines.com/">click here to login</a> and download the results.</p>
-                </td>
-            </tr>
-            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top" colspan="2">
-                    <p style="margin: 0 35px; line-height: 22px;">Sincerely,</br>D&B Connect Team</p>
-                </td>
-            </tr>
-            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 10px; margin: 0; padding: 0;">
-                <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 10px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top" colspan="2">
-                    <div style="margin-top: 150px">
-                        <p style="color: #b1b1b1; text-align: center; font-style:oblique; font-weight: 600; margin: 0 35px; line-height: 14px;">Please do not respond to this message. Emails sent to this address will not be answered. If you need help, please contact us at  <a style="text-decoration: none; color: #009ece;" href="http://support.dnb.com/">http://support.dnb.com/</a></p>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
+<table class="body-wrap" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background: #f5fafc; margin: 0; padding: 0;">
+    <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+        <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0;" valign="top"></td>
+        <td class="container" width="600" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;" valign="top">
+            <div class="content" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto;">
+                <table style="width: 100%; margin-top: 50px;" cellspacing="0" cellpadding="0">
+                    <tbody>
+                    <tr style="box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.16); background-color: #ffffff; font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                        <td style="padding: 15px 30px; box-sizing: border-box; vertical-align: top; margin: 0;" valign="top">
+                            <img width="160px" height="30px" src="dnb_connect.png" alt="dnb_logo">
+                        </td>
+                        <td style="box-sizing: border-box; vertical-align: middle; margin: 0;" valign="middle">
+                            <img width="30px" height="30px" style="display: block; margin-left: auto; margin-right: 30px" src="avatar.png" alt="avatar">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <table class="main" cellpadding="0" cellspacing="0" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background: #fff; margin: 0; padding: 0; border: 1px solid #e9e9e9; width: 600px;">
+                    <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0; background-color: #f5fafc; box-shadow:  0 0.4rem 0.8rem rgba(0, 0, 0, 0.16);">
+                        <td class="content-wrap" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 20px 30px;" valign="top">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                                <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; margin: 0; padding: 0;">
+                                    <td class="content-block" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0;" valign="top">
+                                        <p style="margin: 0; font-weight: 600;  ">Hello, </p>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                                            <tr style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                                                <td align="center" class="content-block" style="padding: 0 5px ;font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: middle;" valign="top">
+                                                    <img width="30px" height="30px" src="green-check-no-outline.png" alt="dnb_logo">
+                                                </td>
+                                                <td class="content-block" style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0;" valign="top">
+                                                    <p style="margin: 20px 20px 20px 10px; line-height: 22px;">Great news! We've successfully matched and enriched your data based on your inputs for the below project: </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <p style="margin: 0 5px;">Project Name: {{projectDisplayName}}</p>
+                                        <p style="margin: 0 5px;">Source Name: {{sourceDisplayName}}</p>
+                                        <p style="margin: 0 5px;">File Name: {{uploadDisplayName}}</p>
+                                        <p style="margin: 20px 5px; font-weight: 600;">You can now <a style="text-decoration: none; color: #009ece;" href="https://testdcp.lattice-engines.com/">click here to login</a> and download the results.</p>
+                                        <p style="margin: 0 5px; line-height: 22px;">Sincerely,</br>D&B Connect Team</p>
+                                        <p style="margin: 150px 5px 0 5px; color: #b1b1b1; text-align: center; font-style:oblique; font-weight: 600; line-height: 14px; font-size: 10px;">Please do not respond to this message. Emails sent to this address will not be answered. If you need help, please contact us at  <a style="text-decoration: none; color: #009ece;" href="http://support.dnb.com/">http://support.dnb.com/</a></p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+        <td style="font-family: Open Sans Regular, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0;" valign="top"></td>
+    </tr>
+</table>
 </body>
 </html>
