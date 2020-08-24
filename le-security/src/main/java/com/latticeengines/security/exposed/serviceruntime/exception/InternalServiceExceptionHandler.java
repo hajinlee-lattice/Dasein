@@ -1,5 +1,6 @@
 package com.latticeengines.security.exposed.serviceruntime.exception;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -70,8 +71,14 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     }
 
     private JsonNode getJsonView(LedpException e, String stackTrace) {
-        String serialized = JsonUtils.serialize(ImmutableMap.of("errorCode", e.getCode().name(), //
-                "errorMsg", emptyStringIfNull(e.getMessage()), "stackTrace", stackTrace, "errorParamsMap", e.getParamsMap()));
+        String serialized;
+        if (MapUtils.isNotEmpty(e.getParamsMap())) {
+            serialized = JsonUtils.serialize(ImmutableMap.of("errorCode", e.getCode().name(), //
+                    "errorMsg", emptyStringIfNull(e.getMessage()), "stackTrace", stackTrace, "errorParamsMap", e.getParamsMap()));
+        } else {
+            serialized = JsonUtils.serialize(ImmutableMap.of("errorCode", e.getCode().name(), //
+                    "errorMsg", emptyStringIfNull(e.getMessage()), "stackTrace", stackTrace));
+        }
         return JsonUtils.deserialize(serialized, JsonNode.class);
     }
 
