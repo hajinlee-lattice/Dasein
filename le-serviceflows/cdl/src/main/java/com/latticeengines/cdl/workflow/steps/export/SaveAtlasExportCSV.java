@@ -73,6 +73,8 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
     @Inject
     private AtlasExportProxy atlasExportProxy;
 
+    private Map<BusinessEntity, Boolean> changeDisplayNameMap = new HashMap<>();
+
     @Override
     protected CustomerSpace parseCustomerSpace(EntityExportStepConfiguration stepConfiguration) {
         return stepConfiguration.getCustomerSpace();
@@ -234,40 +236,34 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
     @SuppressWarnings("unchecked")
     private void setAccountSchema(Map<BusinessEntity, List> schemaMap, List<ColumnMetadata> schema) {
         for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
-            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(entity, Collections.emptyList());
-            if (CollectionUtils.isNotEmpty(cms)) {
-                if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
-                    for (ColumnMetadata cm : cms) {
-                        String dispName = cm.getDisplayName();
-                        String subCategory = cm.getSubcategory();
-                        if (StringUtils.isNotBlank(dispName) && StringUtils.isNotBlank(subCategory)
-                                && !Category.SUB_CAT_OTHER.equalsIgnoreCase(subCategory)) {
-                            cm.setDisplayName(subCategory + ": " + dispName);
-                        }
+            changeDisplayNameIfNeeded(schemaMap, entity, schema);
+        }
+    }
+
+    private void changeDisplayNameIfNeeded(Map<BusinessEntity, List> schemaMap, BusinessEntity entity, List<ColumnMetadata> schema) {
+        List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(entity, Collections.emptyList());
+        if (CollectionUtils.isNotEmpty(cms)) {
+            changeDisplayNameMap.putIfAbsent(entity, true);
+            if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity) && changeDisplayNameMap.get(entity)) {
+                log.info("May need to change display name of some attributes which have subcategory for entity {}.", entity.name());
+                for (ColumnMetadata cm : cms) {
+                    String displayName = cm.getDisplayName();
+                    String subCategory = cm.getSubcategory();
+                    if (StringUtils.isNotBlank(displayName) && StringUtils.isNotBlank(subCategory)
+                            && !Category.SUB_CAT_OTHER.equalsIgnoreCase(subCategory)) {
+                        cm.setDisplayName(subCategory + ": " + displayName);
                     }
                 }
-                schema.addAll(cms);
+                changeDisplayNameMap.put(entity, false);
             }
+            schema.addAll(cms);
         }
     }
 
     @SuppressWarnings("unchecked")
     private void setContactSchema(Map<BusinessEntity, List> schemaMap, List<ColumnMetadata> schema) {
         for (BusinessEntity entity : BusinessEntity.EXPORT_CONTACT_ENTITIES) {
-            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(entity, Collections.emptyList());
-            if (CollectionUtils.isNotEmpty(cms)) {
-                if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
-                    for (ColumnMetadata cm : cms) {
-                        String dispName = cm.getDisplayName();
-                        String subCategory = cm.getSubcategory();
-                        if (StringUtils.isNotBlank(dispName) && StringUtils.isNotBlank(subCategory)
-                                && !Category.SUB_CAT_OTHER.equalsIgnoreCase(subCategory)) {
-                            cm.setDisplayName(subCategory + ": " + dispName);
-                        }
-                    }
-                }
-                schema.addAll(cms);
-            }
+            changeDisplayNameIfNeeded(schemaMap, entity, schema);
         }
     }
 

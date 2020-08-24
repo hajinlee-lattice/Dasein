@@ -304,6 +304,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setNotExceededQuotaNames(
                         getNotExceededQuotaNames(recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)),
                                 tenantId, timezone));
+                tenantActivity.setTimezone(timezone);
                 tenantActivity.setTotalPaQuota(paQuotaService.getTenantPaQuota(tenantId));
 
                 // auto scheduling
