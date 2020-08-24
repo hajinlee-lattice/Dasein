@@ -12,6 +12,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -29,6 +30,9 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
+
+    private static final Boolean DONT_INCLUDE_ARCHIVED = Boolean.FALSE;
+    private static final Boolean INCLUDE_ARCHIVED = Boolean.TRUE;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -176,6 +180,49 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         cleanUpProjects(projectId);
     }
 
+    private List<String> createProjects (int numToCreate) {
+        List<String> projectIdList = new ArrayList<>(numToCreate);
+        for (int j=0; j<numToCreate; j++) {
+            projectIdList.add("Project_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        }
+
+        String teamId = "Team_" + RandomStringUtils.randomAlphanumeric(7).toLowerCase();
+        String description = getRandomDescription();
+        for (String projectId : projectIdList) {
+            projectEntityMgr.create(generateProjectObject(projectId, description, teamId));
+
+        }
+        return projectIdList;
+    }
+
+    @Test(groups = "functional")
+    public void testInTeamIdWithArchived() {
+
+        List<String> projectIdList = createProjects(6);
+
+        // delete some projects
+        Project project1 = projectEntityMgr.findByProjectId(projectIdList.get(1));
+        project1.setDeleted(Boolean.TRUE);
+        projectEntityMgr.update(project1);
+
+        Project project3 = projectEntityMgr.findByProjectId(projectIdList.get(3));
+        project3.setDeleted(Boolean.TRUE);
+        projectEntityMgr.update(project3);
+
+        Project project0 = projectEntityMgr.findByProjectId(projectIdList.get(0));
+        String teamId = project0.getTeamId();
+
+        List<String> teamIdList = Arrays.asList("TeamOne", "TeamTwo", "TeamThree", teamId);
+
+        List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfoInTeamIds(Pageable.unpaged(), teamIdList, DONT_INCLUDE_ARCHIVED);
+        Assert.assertEquals(projectInfoList.size(), 4);
+
+        List<ProjectInfo> projectInfoWithArchivedList = projectEntityMgr.findAllProjectInfoInTeamIds(Pageable.unpaged(), teamIdList, INCLUDE_ARCHIVED);
+        Assert.assertEquals(projectInfoWithArchivedList.size(), 6);
+
+        cleanUpProjects(projectIdList);
+    }
+
     @Test(groups = "functional")
     public void testInTeamId() {
         Sort sort = Sort.by(Sort.Direction.DESC, "updated");
@@ -187,13 +234,13 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         projectEntityMgr.create(generateProjectObject(projectId, description, teamId));
 
         List<String> teamIdList = Arrays.asList("notTheTeamId", "alsoNotTheTeamId", "farFromTheTeamId");
-        List<ProjectInfo> emptyList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, teamIdList);
+        List<ProjectInfo> emptyList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, teamIdList, DONT_INCLUDE_ARCHIVED);
         Assert.assertTrue(emptyList.isEmpty());
 
         List<String> updatedTeamIdList = new ArrayList<>(teamIdList);
         updatedTeamIdList.add(teamId);
         List<ProjectInfo> containsOneList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest,
-                updatedTeamIdList);
+                updatedTeamIdList, DONT_INCLUDE_ARCHIVED);
         Assert.assertEquals(1, containsOneList.size());
 
         String projectId2 = "Project_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase();
@@ -201,7 +248,7 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         projectEntityMgr.create(generateProjectObject(projectId2, desc2, teamId));
 
         List<ProjectInfo> containsTwoList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest,
-                updatedTeamIdList);
+                updatedTeamIdList, DONT_INCLUDE_ARCHIVED);
         Assert.assertEquals(2, containsTwoList.size());
 
         // Check that the two projects are different
@@ -214,7 +261,7 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNull(noProjectInfo); // shouldn't find because not in team list
 
         ProjectInfo foundProjectInfo = projectEntityMgr.findProjectInfoByProjectIdInTeamIds(projectId,
-                updatedTeamIdList);
+                updatedTeamIdList); // It is in the updated team list
         Assert.assertNotNull(foundProjectInfo);
         Assert.assertEquals(projectId, foundProjectInfo.getProjectId());
 
@@ -223,6 +270,13 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
 
     private void cleanUpProjects(String... projectIds) {
         for (String projectId : projectIds) {
+            Project project = projectEntityMgr.findByProjectId(projectId);
+            projectEntityMgr.delete(project);
+        }
+    }
+
+    private void cleanUpProjects(List<String> projectIdList) {
+        for (String projectId : projectIdList) {
             Project project = projectEntityMgr.findByProjectId(projectId);
             projectEntityMgr.delete(project);
         }

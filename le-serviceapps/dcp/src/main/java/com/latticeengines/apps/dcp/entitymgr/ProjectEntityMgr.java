@@ -22,8 +22,6 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     ProjectInfo findProjectInfoBySourceId(String sourceId);
 
-    List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds);
-
     List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds, Boolean includeArchived);
 
     ProjectInfo findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds);

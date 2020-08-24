@@ -116,18 +116,13 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds, Boolean includeArchived) {
         List<Object[]> result = includeArchived ?
-                getReadOrWriteRepository().findProjectsInTeamIds(teamIds, pageable) :
-                getReadOrWriteRepository().findProjectsInTeamIdsNotIncludingArchived(teamIds, pageable);
+                getReadOrWriteRepository().findProjectsInTeamIdsIncludingArchived(teamIds, pageable) :
+                getReadOrWriteRepository().findProjectsInTeamIds(teamIds, pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {
             return result.stream().map(this::getProjectInfo).collect(Collectors.toList());
         }
-    }
-
-    @Override
-    public List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds) {
-        return findAllProjectInfoInTeamIds(pageable, teamIds, Boolean.FALSE);
     }
 
     @Override
