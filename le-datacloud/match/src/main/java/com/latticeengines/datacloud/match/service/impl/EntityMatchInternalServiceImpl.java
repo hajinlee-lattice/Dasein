@@ -241,6 +241,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                                     getMatchVersion(env, tenant, versionMap));
                     return created ? Pair.of(idx, id) : null;
                 })
+                .filter(Objects::nonNull) //
                 .findFirst();
         if (!allocatedId.isPresent()) {
             // fail to allocate

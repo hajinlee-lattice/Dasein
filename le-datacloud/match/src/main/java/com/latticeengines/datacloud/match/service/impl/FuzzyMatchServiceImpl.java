@@ -487,6 +487,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     //     possible despite the error, rather than just returning null.  Also, provide log errors when returning
     //     null explaining the issue, along with better debugging logs (print out data structures).
     private EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
+        if (!isMatchHistoryEnabled) {
+            return null;
+        }
         EntityMatchHistory history = new EntityMatchHistory();
         log.debug("Generating EntityMatchHistory for Match Report.");
         log.debug("------------------------ Entity Match History Debug Logs ------------------------");
@@ -555,7 +558,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
             log.debug("------------------------ BEGIN L2A Match History Debug Logs ------------------------");
             if (!generateL2aMatchHistory(traveler, history)) {
-                log.error("Failed to generate Lead-to-Account Entity Match History");
+                log.debug("Failed to generate Lead-to-Account Entity Match History");
                 return null;
             }
         }
