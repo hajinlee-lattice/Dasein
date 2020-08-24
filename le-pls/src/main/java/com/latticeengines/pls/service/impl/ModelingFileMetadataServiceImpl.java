@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -363,8 +365,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         // modify field document before final validation
         Table templateTable = null;
+        String dataFeedTaskUniqueId = null;
         if (dataFeedTask != null) {
             templateTable = dataFeedTask.getImportTemplate();
+            dataFeedTaskUniqueId = dataFeedTask.getUniqueId();
         }
 
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
@@ -501,6 +505,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
         checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch || enableEntityMatchGA, enableEntityMatchGA, validations);
+        crosscheckDataType(customerSpace, entity, source, finalTemplate, dataFeedTaskUniqueId, validations);
         fieldValidationResult.setFieldValidations(validations);
         return fieldValidationResult;
     }
@@ -582,6 +587,112 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         int fieldSize = attributes.size();
         ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
     }
+
+    private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
+                                    String dataFeedTaskUniqueId, List<FieldValidation> validations) {
+        List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(),
+                entity);
+        if (dataFeedTasks != null && dataFeedTasks.size() != 0) {
+            boolean updatedAttrName = false;
+            for (DataFeedTask dataFeedTask : dataFeedTasks) {
+                if (!updatedAttrName) {
+                    updateTableAttributeName(dataFeedTask.getImportTemplate(), metaTable);
+                    updatedAttrName = true;
+                }
+                if (StringUtils.equals(dataFeedTask.getUniqueId(), dataFeedTaskUniqueId)) {
+                    continue;
+                }
+                List<String> inconsistentAttrs = compareAttribute(dataFeedTask.getSource(),
+                        dataFeedTask.getImportTemplate(), source, metaTable);
+                if (CollectionUtils.isNotEmpty(inconsistentAttrs)) {
+                    String message = String.format(
+                            "The following field data type is not consistent with the one that already exists: %s",
+                            String.join(",", inconsistentAttrs));
+                    validations.add(createValidation(null, null, ValidationStatus.ERROR, message));
+                }
+            }
+        }
+    }
+
+    void updateTableAttributeName(Table templateTable, Table metaTable) {
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        templateTable.getAttributes()
+                .forEach(attribute -> templateAttrs.put(attribute.getName().toLowerCase(), attribute));
+        for (Attribute attr : metaTable.getAttributes()) {
+            if (templateAttrs.containsKey(attr.getName().toLowerCase())) {
+                attr.setName(templateAttrs.get(attr.getName().toLowerCase()).getName());
+            }
+        }
+    }
+    private List<String> compareAttribute(String baseSource, Table baseTable, String targetSource, Table targetTable) {
+        List<String> inconsistentAttrs = new ArrayList<>();
+        Map<String, Attribute> baseAttrs = new HashMap<>();
+        baseTable.getAttributes().forEach(attribute -> baseAttrs.put(attribute.getName().toLowerCase(), attribute));
+        for (Attribute attr : targetTable.getAttributes()) {
+            if (baseAttrs.containsKey(attr.getName().toLowerCase())) {
+                Schema.Type baseType = getAvroType(baseAttrs.get(attr.getName().toLowerCase()), baseSource);
+                Schema.Type targetType = getAvroType(attr, targetSource);
+                if (baseType != targetType) {
+                    inconsistentAttrs.add(attr.getName());
+                }
+            }
+        }
+        return inconsistentAttrs;
+    }
+
+    public Schema.Type getAvroType(Attribute attribute, String source) {
+        if (SourceType.VISIDB.getName().toLowerCase().equals(source.toLowerCase())) {
+            if (attribute == null) {
+                return null;
+            } else {
+                return Schema.Type.valueOf(attribute.getPhysicalDataType().toUpperCase());
+            }
+        } else if (SourceType.FILE.getName().toLowerCase().equals(source.toLowerCase())) {
+            Schema.Type type = null;
+            if (attribute.getPhysicalDataType() == null) {
+                throw new RuntimeException(
+                        String.format("Physical data type for attribute %s is null", attribute.getName()));
+            }
+            String typeStrLowerCase = attribute.getPhysicalDataType().toLowerCase();
+            switch (typeStrLowerCase) {
+                case "bit":
+                case "boolean":
+                    type = Schema.Type.BOOLEAN;
+                    break;
+                case "byte":
+                case "short":
+                case "int":
+                    type = Schema.Type.INT;
+                    break;
+                case "long":
+                case "date":
+                case "datetime":
+                case "datetimeoffset":
+                    type = Schema.Type.LONG;
+                    break;
+                case "float":
+                    type = Schema.Type.FLOAT;
+                    break;
+                case "double":
+                    type = Schema.Type.DOUBLE;
+                    break;
+                case "string":
+                    type = Schema.Type.STRING;
+                    break;
+                default:
+                    break;
+            }
+            if (type == null) {
+                if (typeStrLowerCase.startsWith("nvarchar") || typeStrLowerCase.startsWith("varchar")) {
+                    type = Schema.Type.STRING;
+                }
+            }
+            return type;
+        } else {
+            return null;
+        }
+    }
+
 
     private Table mergeTable(Table templateTable, Table renderedTable) {
         if (templateTable == null) {

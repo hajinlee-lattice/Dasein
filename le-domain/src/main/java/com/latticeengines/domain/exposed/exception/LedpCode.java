@@ -712,6 +712,7 @@ public enum LedpCode {
     // Generic Errors
     LEDP_32000("Validation Error: {0}"), //
     LEDP_32001("Unsupported Operation: {0}"), //
+    LEDP_32002("Feature disabled, {0} is not enabled for {1}, Please contact your administrator to enable this feature"), //
 
     // le-saml
     LEDP_33000("An identity provider with ID {0} already exists"), //

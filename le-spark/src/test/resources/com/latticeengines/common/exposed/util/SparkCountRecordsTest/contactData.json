@@ -2,6 +2,7 @@
   {
     "AccountId": "A1",
     "ContactId": "C11",
+    "ContactCountry": "USA",
     "Email": "Test_853715_fe@nationwide.com",
     "FirstName": "Dave",
     "Title": "Business Consultant",
@@ -11,6 +12,7 @@
   {
     "AccountId": "A1",
     "ContactId": "C12",
+    "ContactCountry": "USA",
     "Email": "Test_775702_oy@wolterskluwer.com",
     "FirstName": "Cynjhia",
     "Title": "President",
@@ -20,6 +22,7 @@
   {
     "AccountId": "A2",
     "ContactId": "C21",
+    "ContactCountry": "United States",
     "Email": "Test_197968_rg@ul.com",
     "FirstName": "Aleq",
     "Title": "Senior DBA",
@@ -29,6 +32,7 @@
   {
     "AccountId": "A2",
     "ContactId": "C22",
+    "ContactCountry": "United States",
     "Email": "Test_857240_in@tmihospitality.com",
     "FirstName": "jodd",
     "Title": "President of Enterprise Applications",
@@ -38,6 +42,7 @@
   {
     "AccountId": "A3",
     "ContactId": "C3",
+    "ContactCountry": "Canada",
     "Email": "Test_210670_ll@hawaiianair.com",
     "FirstName": "Linda",
     "Title": "ETL Lead",
@@ -47,6 +52,7 @@
   {
     "AccountId": "A4",
     "ContactId": "C4",
+    "ContactCountry": "Canada",
     "Email": "Test_384897_el@planejamento.gov.br",
     "FirstName": "galperhh",
     "Title": "Analista de TI",
@@ -56,6 +62,7 @@
   {
     "AccountId": "A5",
     "ContactId": "C5",
+    "ContactCountry": null,
     "Email": "Test_5473_jj@detran.ba.gov.br",
     "FirstName": "Gary",
     "Title": "Coordenador de Comunica??o",
@@ -65,6 +72,7 @@
   {
     "AccountId": "A6",
     "ContactId": "C6",
+    "ContactCountry": "France",
     "Email": "Test_736423_ri@tcs.com",
     "FirstName": "Valenjina",
     "Title": null,
@@ -74,6 +82,7 @@
   {
     "AccountId": "A7",
     "ContactId": "C71",
+    "ContactCountry": "China",
     "Email": "Test_792744_je@panduit.com",
     "FirstName": "Nicholarh",
     "Title": "B.I. Developer",
@@ -83,6 +92,7 @@
   {
     "AccountId": "A7",
     "ContactId": "C72",
+    "ContactCountry": "China",
     "Email": "Test_122321_rh@magna.com",
     "FirstName": "narie",
     "Title": "Chief Operating Officer",
@@ -92,6 +102,7 @@
   {
     "AccountId": "A7",
     "ContactId": "C73",
+    "ContactCountry": "China",
     "Email": "Test_846541_on@adia.ae",
     "FirstName": "Bernice",
     "Title": null,
@@ -101,6 +112,7 @@
   {
     "AccountId": "A8",
     "ContactId": "C81",
+    "ContactCountry": "India",
     "Email": "Test_806786_ee@arrowstreetcapital.com",
     "FirstName": "Jurhjine",
     "Title": "Analyst",
@@ -110,6 +122,7 @@
   {
     "AccountId": "A8",
     "ContactId": "C82",
+    "ContactCountry": "India",
     "Email": "Test_554959_el@hackergroup.com",
     "FirstName": "narg",
     "Title": "Executive President/Sales",
@@ -119,6 +132,7 @@
   {
     "AccountId": "A9",
     "ContactId": "C91",
+    "ContactCountry": null,
     "Email": "Test_976354_na@klabin.com.br",
     "FirstName": "rhurhan",
     "Title": "Secret?ria",
@@ -128,6 +142,7 @@
   {
     "AccountId": "A9",
     "ContactId": "C92",
+    "ContactCountry": null,
     "Email": "Test_796584_do@lboro.ac.uk",
     "FirstName": "Eduardo",
     "Title": "Sales Analyst",

@@ -293,22 +293,23 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     } else if (Arrays.asList("21", "22", "23", "24").contains(customerId)) { // reg number
                         String regNumber = nextRecord[rnIdx];
                         Assert.assertNotNull(regNumber);
-                        String matcheDuns = nextRecord[dunsIdx];
+                        String matchDuns = nextRecord[dunsIdx];
                         log.info("CSV record for [{}]: {}", regNumber, StringUtils.join(nextRecord, ","));
                         switch (regNumber) {
                             case "432126092":
-                                Assert.assertEquals(matcheDuns, "268487989");
+                                Assert.assertEquals(matchDuns, "268487989");
                                 Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             case "DE129273398":
-                                Assert.assertEquals(matcheDuns, "315369934");
+                                Assert.assertEquals(matchDuns, "315369934");
                                 Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             case "77-0493581":
-                                Assert.assertTrue(StringUtils.isBlank(matcheDuns));
+                                Assert.assertEquals(matchDuns, "060902413");
+                                Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             case "160043":
-                                Assert.assertEquals(matcheDuns, "229515499");
+                                Assert.assertEquals(matchDuns, "229515499");
                                 Assert.assertEquals(matchType, "National ID Lookup");
                                 break;
                             default:

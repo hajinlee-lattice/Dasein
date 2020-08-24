@@ -65,6 +65,10 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
         ADD COLUMN `CATEGORIZATION` JSON NULL DEFAULT NULL;
 
+      ALTER TABLE `PLS_MultiTenant`.`JOURNEY_STAGE`
+        ADD COLUMN `DESCRIPTION` varchar(255),
+        ADD COLUMN `DISPLAY_COLOR_CODE` varchar(255) NOT NULL;
+
       CREATE TABLE `PROJECT_SYSTEM_LINK`
         (
            `PID`                 BIGINT NOT NULL auto_increment,
