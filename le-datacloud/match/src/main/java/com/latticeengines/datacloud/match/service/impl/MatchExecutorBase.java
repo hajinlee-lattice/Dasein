@@ -186,7 +186,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void publishMatchHistory(List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
-            log.info("MatchHistory not enabled, returning.");
+            log.debug("MatchHistory not enabled, returning.");
             return;
         }
         if (CollectionUtils.isEmpty(matchHistories)) {
@@ -358,7 +358,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
-            if (matchContext.getOutput().getStatistics().getNullEntityIdCount() != null) {
+            if (MapUtils.isNotEmpty(matchContext.getOutput().getStatistics().getNullEntityIdCount())) {
                 log.warn("Found null entity id count map in existing context {}, merging with current map {}",
                         matchContext.getOutput().getStatistics().getNullEntityIdCount(), nullEntityIdCount);
                 MatchUtils.mergeEntityCnt(nullEntityIdCount,

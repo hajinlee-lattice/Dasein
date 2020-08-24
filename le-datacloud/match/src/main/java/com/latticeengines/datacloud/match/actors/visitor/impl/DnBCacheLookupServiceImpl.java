@@ -19,6 +19,10 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 @Component("dnbCacheLookupService")
 public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
 
+    // in bulk match, only log cache hit if duration required for cache retrieval is
+    // greater than this number
+    private static final long BULK_MATCH_CACHE_HIT_DURATION_LOG_THRESHOLD = 50L;
+
     private static final Logger log = LoggerFactory.getLogger(DnBCacheLookupServiceImpl.class);
 
     @Inject
@@ -63,19 +67,24 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
                         // restore the original value
                         context.setDunsInAM(isDunsInAM);
 
-                        log.info(String.format(
-                                "Found DnB match context in white cache%s: Name=%s, Country=%s, State=%s, City=%s, "
-                                        + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
-                                        + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
-                                context.getRootOperationUid() == null ? ""
-                                        : " (RootOperationID=" + context.getRootOperationUid() + ")",
-                                context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
-                                context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
-                                context.getInputNameLocation().getZipcode(),
-                                context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
-                                context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
-                                context.isOutOfBusinessString(), context.isDunsInAMString(),
-                                System.currentTimeMillis() - startTime));
+                        long duration = System.currentTimeMillis() - startTime;
+                        // in realtime mode, log cache hit regardless
+                        if (!actorSystem.isBatchMode() || duration > BULK_MATCH_CACHE_HIT_DURATION_LOG_THRESHOLD) {
+                            log.info(String.format(
+                                    "Found DnB match context in white cache%s: Name=%s, Country=%s, State=%s, City=%s, "
+                                            + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
+                                            + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
+                                    context.getRootOperationUid() == null ? ""
+                                            : " (RootOperationID=" + context.getRootOperationUid() + ")",
+                                    context.getInputNameLocation().getName(),
+                                    context.getInputNameLocation().getCountry(),
+                                    context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
+                                    context.getInputNameLocation().getZipcode(),
+                                    context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
+                                    context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
+                                    context.isOutOfBusinessString(), context.isDunsInAMString(),
+                                    System.currentTimeMillis() - startTime));
+                        }
                     } else {
                         log.info(String.format(
                                 "Reject invalid white cache: Id=%s DUNS=%s OutOfBusiness=%s IsDunsInAM=%s",

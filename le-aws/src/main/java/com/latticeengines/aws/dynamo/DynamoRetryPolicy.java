@@ -71,6 +71,7 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
         // multiple txn working on the same item
         TXN_CONFLICT_ERROR_CODES.add("TransactionConflict");
         TXN_CONFLICT_ERROR_CODES.add("Transaction Conflict");
+        RETRY_ERROR_CODES.put("InternalServerError", true);
     }
 
     private final RetryPolicy policy;
@@ -90,7 +91,9 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
                                     && StringUtils.isNotBlank(r.getCode())) //
                             .map(CancellationReason::getCode) //
                             .allMatch(TXN_CONFLICT_ERROR_CODES::contains);
-                    return allConflictError ? policy : NEVER_RETRY;
+                    if (allConflictError) {
+                        return policy;
+                    }
                 }
             }
 

@@ -36,6 +36,7 @@ public final class MetricNames {
         public static final String METRIC_NUM_TRIES = "match.entity.num.tries";
         public static final String METRIC_DISTRIBUTION_RETRY = "match.entity.num.tries.dist.retry";
         public static final String METRIC_HAVE_RETRY_NUM_TRIES = "match.entity.num.tries.count.retry";
+        public static final String METRIC_ASSOCIATION_LOOKUP_LIMIT_EXCEEDED = "match.entity.lookup.limit.exceeded";
         public static final String METRIC_ASSOCIATION_CONFLICT_COUNT = "match.entity.associate.conflict.count";
         public static final String METRIC_ASSOCIATION_NULL_ID_COUNT = "match.entity.associate.null.id.count";
         public static final String METRIC_ASSOCIATION_CONFLICT_DISTRIBUTION = "match.entity.associate.conflict.dist";
