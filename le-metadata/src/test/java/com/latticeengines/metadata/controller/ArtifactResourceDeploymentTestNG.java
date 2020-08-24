@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -68,7 +69,7 @@ public class ArtifactResourceDeploymentTestNG extends MetadataDeploymentTestNGBa
                     String.format("%s/metadata/customerspaces/%s/artifacttype/%s?file=%s", getRestAPIHostPort(),
                             "validateArtifact.validateArtifact.Production", ArtifactType.PivotMapping, hdfsPath), //
                     null, ResponseDocument.class);
-            assertTrue(false);
+            Assert.fail("Rest call should fail!");
         } catch (HttpServerErrorException e) {
             log.error(ExceptionUtils.getStackTrace(e));
             log.warn("ResponseBodyAsString is " + e.getResponseBodyAsString());
@@ -91,6 +92,7 @@ public class ArtifactResourceDeploymentTestNG extends MetadataDeploymentTestNGBa
                 String.format("%s/metadata/customerspaces/%s/artifacttype/%s?file=%s", getRestAPIHostPort(),
                         "validateArtifact.validateArtifact.Production", ArtifactType.PivotMapping, hdfsPath), //
                 null, ResponseDocument.class);
+        Assert.assertNotNull(response);
         assertTrue(response.isSuccess());
         String error = new ObjectMapper().convertValue(response.getResult(), String.class);
         assertEquals(error, "");
@@ -120,12 +122,13 @@ public class ArtifactResourceDeploymentTestNG extends MetadataDeploymentTestNGBa
                 String.format("%s/metadata/customerspaces/%s/modules/%s/artifacts/%s", getRestAPIHostPort(),
                         customerSpace1, "module11", "pivotfile"), //
                 pivotMappingFile, Boolean.class);
-        assertTrue(res);
+        Assert.assertEquals(Boolean.TRUE, res);
 
         Artifact artifact = restTemplate.getForObject( //
                 String.format("%s/metadata/customerspaces/%s/artifactpath?file=%s", getRestAPIHostPort(),
                         customerSpace1, hdfsPath),
                 Artifact.class);
+        Assert.assertNotNull(artifact);
         assertEquals(artifact.getPath(), hdfsPath);
     }
 
