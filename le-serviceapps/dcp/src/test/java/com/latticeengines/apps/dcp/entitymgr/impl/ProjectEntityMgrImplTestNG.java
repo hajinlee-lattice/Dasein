@@ -1,12 +1,15 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.testng.Assert;
@@ -72,7 +75,84 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
 
     }
 
+    @Test(groups = "functional")
+    public void testFields () {
+        String projectId = "Project_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        String description = getRandomDescription();
+        projectEntityMgr.create(generateProjectObject(projectId, description));
+
+        ProjectInfo projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
+        Assert.assertEquals(description, projectInfo.getProjectDescription());
+        Assert.assertEquals(projectId, projectInfo.getProjectDisplayName());
+        Assert.assertEquals(String.format("Projects/%s/", projectId), projectInfo.getRootPath());
+        Assert.assertFalse(projectInfo.getDeleted());
+
+        // Really delete project so it doesn't get counted in other tests
+        cleanUpProjects(projectId);
+    }
+
+    @Test(groups = "functional")
+    public void testInTeamId () {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updated");
+        PageRequest pageRequest = PageRequest.of(0, 20, sort);
+
+        String teamId = "Team_" + RandomStringUtils.randomAlphanumeric(7).toLowerCase();
+        String projectId = "Project_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        String description = getRandomDescription();
+        projectEntityMgr.create(generateProjectObject(projectId, description, teamId));
+
+
+        List<String> teamIdList = Arrays.asList("notTheTeamId", "alsoNotTheTeamId", "farFromTheTeamId");
+        List<ProjectInfo> emptyList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, teamIdList);
+        Assert.assertTrue(emptyList.isEmpty());
+
+        List<String> updatedTeamIdList = new ArrayList<>(teamIdList);
+        updatedTeamIdList.add(teamId);
+        List<ProjectInfo> containsOneList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, updatedTeamIdList);
+        Assert.assertEquals(1, containsOneList.size());
+
+        String projectId2 = "Project_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        String desc2 = getRandomDescription();
+        projectEntityMgr.create(generateProjectObject(projectId2, desc2, teamId));
+
+        List<ProjectInfo> containsTwoList = projectEntityMgr.findAllProjectInfoInTeamIds(pageRequest, updatedTeamIdList);
+        Assert.assertEquals(2, containsTwoList.size());
+
+        // Check that the two projects are different
+        Assert.assertNotEquals(containsTwoList.get(0).getProjectDisplayName(), containsTwoList.get(1).getProjectDisplayName());
+
+        // Now check that findProjectInfoByProjectIdInTeamIds properly filters projects in other teams
+        ProjectInfo noProjectInfo = projectEntityMgr.findProjectInfoByProjectIdInTeamIds(projectId, teamIdList);
+        Assert.assertNull(noProjectInfo);   // shouldn't find because not in team list
+
+        ProjectInfo foundProjectInfo = projectEntityMgr.findProjectInfoByProjectIdInTeamIds(projectId, updatedTeamIdList);
+        Assert.assertNotNull(foundProjectInfo);
+        Assert.assertEquals(projectId, foundProjectInfo.getProjectId());
+
+        cleanUpProjects(projectId, projectId2);
+    }
+
+    private void cleanUpProjects(String ...projectIds) {
+        for (String projectId: projectIds) {
+            Project project = projectEntityMgr.findByProjectId(projectId);
+            projectEntityMgr.delete(project);
+        }
+    }
+
+    private String getRandomDescription () {
+        List<String> descriptionList = Arrays.asList("A test project 1", "A test project 2");
+        return descriptionList.get(RandomUtils.nextInt(0, descriptionList.size()));
+    }
+
     private Project generateProjectObject(String projectId) {
+        return generateProjectObject(projectId, getRandomDescription());
+    }
+
+    private Project generateProjectObject(String projectId, String description) {
+        return generateProjectObject(projectId, description, null);
+    }
+
+    private Project generateProjectObject(String projectId, String description, String teamId) {
         Project project = new Project();
         project.setCreatedBy("testdcp@dnb.com");
         project.setProjectDisplayName(projectId);
@@ -81,6 +161,8 @@ public class ProjectEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         project.setDeleted(Boolean.FALSE);
         project.setProjectType(Project.ProjectType.Type1);
         project.setRootPath(String.format("Projects/%s/", projectId));
+        project.setProjectDescription(description);
+        project.setTeamId(teamId);
         return project;
     }
 }
