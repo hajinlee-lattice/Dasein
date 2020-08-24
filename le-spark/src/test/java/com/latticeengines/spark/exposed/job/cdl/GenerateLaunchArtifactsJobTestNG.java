@@ -56,6 +56,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     private DataUnit negativeExtraContacts;
     private DataUnit accountData;
     private DataUnit contactData;
+    private DataUnit contactNoContactCountryData;
 
     private HdfsFileFilter avroFileFilter = new HdfsFileFilter() {
         @Override
@@ -73,6 +74,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Value("${datacloud.manage.password.encrypted}")
     private String password;
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
@@ -175,6 +177,14 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
                     String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
                     contactSchema, Contact.class, yarnConfiguration);
             contactData = HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
+
+            fileName = "contactNoContactCountry";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    contactSchema, Contact.class, yarnConfiguration);
+            contactNoContactCountryData = HdfsDataUnit
+                    .fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
             logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
 
         } catch (Exception e) {
@@ -349,10 +359,14 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         log.info("Config: " + JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
         log.info("TestGenerateLaunchArtifactsJobForContactCountyConversion Results: " + JsonUtils.serialize(result));
-        // result.getTargets should have [addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData]
+        // result.getTargets should have [addedAccountsData,
+        // removedAccountsData, fullContactsData, addedContactsData,
+        // removedContactsData]
         // only fullContactsData and addedContactsData shuould be converted
-        testCountryConversion(yarnConfiguration, result.getTargets().get(2).getPath(), avroFileFilter, InterfaceName.ContactCountry.name());
-        testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter, InterfaceName.ContactCountry.name());
+        testCountryConversion(yarnConfiguration, result.getTargets().get(2).getPath(), avroFileFilter,
+                InterfaceName.ContactCountry.name());
+        testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter,
+                InterfaceName.ContactCountry.name());
     }
 
     @Test(groups = "functional")
@@ -376,9 +390,35 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         log.info("Config: " + JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
         log.info("TestGenerateLaunchArtifactsJobForAccountCountyConversion Results: " + JsonUtils.serialize(result));
-        // result.getTargets should have [addedAccountsData, removedAccountsData, fullContactsData]
+        // result.getTargets should have [addedAccountsData,
+        // removedAccountsData, fullContactsData]
         // only addedAccountsData should be converted
-        testCountryConversion(yarnConfiguration, result.getTargets().get(0).getPath(), avroFileFilter, InterfaceName.Country.name());
+        testCountryConversion(yarnConfiguration, result.getTargets().get(0).getPath(), avroFileFilter,
+                InterfaceName.Country.name());
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsJobWithNoCountry() throws Exception {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        config.setAccountsData(accountData);
+        config.setContactsData(contactNoContactCountryData);
+        config.setTargetSegmentsContactsData(contactNoContactCountryData);
+        config.setPositiveDelta(positiveContacts);
+        config.setMainEntity(BusinessEntity.Contact);
+        config.setWorkspace("testGenerateLaunchArtifactsJobWithNoCountry");
+        config.setExternalSystemName(CDLExternalSystemName.GoogleAds);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("TestGenerateLaunchArtifactsJobForContactCountyConversion Results: " + JsonUtils.serialize(result));
+        // result.getTargets should have [addedAccountsData,
+        // removedAccountsData, fullContactsData, addedContactsData,
+        // removedContactsData]
+        // only fullContactsData and addedContactsData shuould be converted
+        testCountryConversion(yarnConfiguration, result.getTargets().get(2).getPath(), avroFileFilter,
+                InterfaceName.ContactCountry.name());
+        testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter,
+                InterfaceName.ContactCountry.name());
     }
 
     interface AvroExportable {
