@@ -226,6 +226,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setUpdated(projectInfo.getUpdated().getTime());
         details.setCreatedBy(projectInfo.getCreatedBy());
         details.setTeamId(projectInfo.getTeamId());
+        details.setProjectDescription(projectInfo.getProjectDescription());
         return details;
     }
 
