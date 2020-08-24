@@ -75,7 +75,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${monitor.urls.helpcenter}")
     private String helpCenterUrl;
 
-    @Value("${monitor.dcp.public.url}")
+    @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
     @VisibleForTesting

@@ -69,7 +69,7 @@ public class UserResource {
     @Value("${security.app.public.url:http://localhost:8081}")
     private String apiPublicUrl;
 
-    @Value("${security.dcp.public.url}")
+    @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
     @Inject
