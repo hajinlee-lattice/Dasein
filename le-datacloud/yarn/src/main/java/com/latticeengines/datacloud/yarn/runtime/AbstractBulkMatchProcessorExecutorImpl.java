@@ -83,7 +83,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     private String[] suppressedWarnings = new String[] { //
             "Cannot find a match in data cloud for the input", //
-            "Parsed to a public domain" //
+            "Parsed to a public domain", //
+            "All the domains are public domain:"
     };
 
     @Inject
@@ -258,7 +259,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             throws IOException {
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
-            log.info("outputRecord: {}", JsonUtils.serialize(outputRecord)); // to remove
             List<List<Object>> data = new LinkedList<>();
             if (processorContext.isMultiResultMatch()) {
                 List<List<Object>> candidates = outputRecord.getCandidateOutput();
@@ -301,7 +301,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
                 buildAvroRecords(row, builder, fields);
                 GenericRecord record = builder.build();
-                log.info("Build record: {}", record); // to remove
                 records.add(record);
             }
         }

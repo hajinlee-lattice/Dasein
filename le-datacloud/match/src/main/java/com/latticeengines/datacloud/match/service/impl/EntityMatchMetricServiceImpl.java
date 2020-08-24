@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ACTOR_VISIT;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_CONFLICT_COUNT;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_CONFLICT_DISTRIBUTION;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_LOOKUP_LIMIT_EXCEEDED;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_NULL_ID_COUNT;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DISTRIBUTION_RETRY;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_ERROR_DIST;
@@ -20,6 +21,7 @@ import static com.latticeengines.common.exposed.metric.MetricTags.TAG_DYNAMO_TAB
 import static com.latticeengines.common.exposed.metric.MetricTags.TAG_TENANT;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ALLOCATE_ID_MODE;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ENTITY;
+import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ENTITY_ID;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_IS_NEWLY_ALLOCATED;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_MATCH_ENV;
 import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_ACTOR;
@@ -87,6 +89,22 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
     @Inject
     private MetricService metricService;
+
+    @Override
+    public void recordLookupEntryLimitExceeded(Tenant tenant, String entity, String id, int numEntries) {
+        if (tenant == null || StringUtils.isBlank(tenant.getId()) || StringUtils.isBlank(entity)) {
+            return;
+        }
+
+        // shouldn't have too many so tagging ID should be fine, remove if it is not
+        String tenantId = EntityMatchUtils.newStandardizedTenant(tenant).getId();
+        DistributionSummary.builder(METRIC_ASSOCIATION_LOOKUP_LIMIT_EXCEEDED) //
+                .tag(TAG_TENANT, tenantId) //
+                .tag(TAG_ENTITY, entity) //
+                .tag(TAG_ENTITY_ID, id) //
+                .register(registryFactory.getServiceLevelRegistry()) //
+                .record(numEntries);
+    }
 
     @Override
     public void recordAssociation(Tenant tenant, String entity, boolean hasConcurrentConflict,

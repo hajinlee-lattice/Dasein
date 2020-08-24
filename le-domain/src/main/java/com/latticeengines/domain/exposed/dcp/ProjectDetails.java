@@ -24,6 +24,9 @@ public class ProjectDetails {
     @JsonProperty("projectFullPath")
     private String projectFullPath;
 
+    @JsonProperty("projectDescription")
+    private String projectDescription;
+
     @JsonProperty("archived")
     private Boolean deleted;
 
@@ -142,5 +145,13 @@ public class ProjectDetails {
 
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
     }
 }

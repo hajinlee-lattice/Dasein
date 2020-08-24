@@ -39,6 +39,7 @@ public final class MetricTags {
         public static final String TAG_MATCH_ENV = "Environment";
         public static final String TAG_ALLOCATE_ID_MODE = "AllocateId";
         public static final String TAG_ENTITY = "Entity";
+        public static final String TAG_ENTITY_ID = "EntityId";
         public static final String TAG_IS_NEWLY_ALLOCATED = "NewlyAllocated";
     }
 

@@ -70,10 +70,10 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     private boolean useTransactAssociateByDefault;
 
     // fail when one seed having too many lookup entries
-    @Value("${datacloud.match.entity.cfg.failIfTooManyLookups:true}")
+    @Value("${datacloud.match.entity.cfg.failIfTooManyLookups:false}")
     private boolean failIfTooManyLookups;
 
-    @Value("${datacloud.match.entity.cfg.num.lookups.max:250}")
+    @Value("${datacloud.match.entity.cfg.num.lookups.max:500}")
     private int maxNumLookupsPerSeed;
 
     /**
@@ -137,6 +137,10 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
 
         // For Allocate ID Mode, capture entity's MatchLookupResults into entity map.
         traveler.addEntityMatchLookupResults(entity, traveler.getMatchLookupResults());
+        if (traveler.getRetries() > 2) {
+            log.warn("Record retried more than once. No. travels = {}, record = {}", traveler.getRetries(),
+                    traveler.getMatchLookupResults());
+        }
 
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getMatchLookupResults()
                 .stream()
@@ -232,13 +236,21 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             }
 
             EntityRawSeed mergedSeed = associationResponse.getSeedAfterAssociation();
-            if (failIfTooManyLookups && traveler.getMatchInput().isAllocateId() && mergedSeed != null
-                    && CollectionUtils.size(mergedSeed.getLookupEntries()) > maxNumLookupsPerSeed) {
-                // guard against outliers (generally bad data if there are this many lookups)
-                String msg = String.format("%s (ID=%s) have too many (%d) match field values, exceeding limit %d",
-                        mergedSeed.getEntity(), mergedSeed.getId(), CollectionUtils.size(mergedSeed.getLookupEntries()),
-                        maxNumLookupsPerSeed);
-                traveler.addCriticalEntityMatchError(msg);
+            if (traveler.getMatchInput().isAllocateId() && mergedSeed != null) {
+                int numLookupEntries = CollectionUtils.size(mergedSeed.getLookupEntries());
+                if (numLookupEntries > maxNumLookupsPerSeed) {
+                    // guard against outliers (generally bad data if there are this many lookups)
+                    String msg = String.format("%s (ID=%s) have too many (%d) match field values, exceeding limit %d",
+                            mergedSeed.getEntity(), mergedSeed.getId(), numLookupEntries, maxNumLookupsPerSeed);
+                    entityMatchMetricService.recordLookupEntryLimitExceeded(associationResponse.getTenant(),
+                            associationResponse.getEntity(), associationResponse.getAssociatedEntityId(),
+                            numLookupEntries);
+                    if (failIfTooManyLookups) {
+                        traveler.addCriticalEntityMatchError(msg);
+                    } else {
+                        log.warn("{}, seed = {}", msg, mergedSeed);
+                    }
+                }
             }
 
             // clear all system IDs that have conflict

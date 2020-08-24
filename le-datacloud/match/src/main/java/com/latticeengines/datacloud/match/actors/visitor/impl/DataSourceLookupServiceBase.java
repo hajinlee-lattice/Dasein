@@ -31,7 +31,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     protected MatchMetricService matchMetricService;
 
     @Autowired
-    private MatchActorSystem actorSystem;
+    protected MatchActorSystem actorSystem;
 
     private final ConcurrentMap<String, String> reqReturnAddrs = new ConcurrentHashMap<String, String>();
 

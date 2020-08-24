@@ -18,6 +18,9 @@ public class ProjectSummary {
     @JsonProperty("projectDisplayName")
     private String projectDisplayName;
 
+    @JsonProperty("projectDescription")
+    private String projectDescription;
+
     @JsonProperty("archived")
     private Boolean archieved;
 
@@ -120,5 +123,13 @@ public class ProjectSummary {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
     }
 }

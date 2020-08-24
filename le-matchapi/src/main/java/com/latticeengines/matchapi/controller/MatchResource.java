@@ -2,6 +2,7 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,7 @@ import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationServi
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
+import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -59,6 +62,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishSta
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
@@ -92,6 +96,10 @@ public class MatchResource {
 
     @Inject
     private EntityMatchInternalService entityInternalMatchService;
+
+    @Lazy
+    @Inject
+    private EntityMatchCommitter entityMatchCommitter;
 
     @Inject
     private DataCloudVersionService datacloudVersionService;
@@ -306,6 +314,20 @@ public class MatchResource {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25042, e);
         }
+    }
+
+    @PostMapping("/entity/publish/all")
+    @ResponseBody
+    @ApiOperation(value = "Publish all entity for specified tenant from staging to serving")
+    public Map<String, EntityPublishStatistics> publishAll(@RequestBody Tenant tenant) {
+        // TODO change to start a workflow
+        Map<String, EntityPublishStatistics> stats = new HashMap<>();
+
+        for (BusinessEntity entity : Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
+            EntityPublishStatistics stat = entityMatchCommitter.commit(entity.name(), tenant, true, null);
+            stats.put(entity.name(), stat);
+        }
+        return stats;
     }
 
     @PostMapping("/entity/versions")

@@ -19,6 +19,20 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public interface EntityMatchMetricService {
 
     /**
+     * Some entity exceeds the maximum allowed no. lookup entries
+     *
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @param id
+     *            target entity id
+     * @param numEntries
+     *            number of lookup entries in this entity
+     */
+    void recordLookupEntryLimitExceeded(Tenant tenant, String entity, String id, int numEntries);
+
+    /**
      * Record association result
      *
      * @param tenant
