@@ -154,7 +154,7 @@ public class TenantServiceImpl implements TenantService {
     @Value("${common.pls.url}")
     private String plsEndHost;
 
-    @Value("${security.dcp.public.url}")
+    @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
