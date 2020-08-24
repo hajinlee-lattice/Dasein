@@ -39,6 +39,7 @@ import com.latticeengines.datacloud.match.exposed.service.MatchValidationService
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -90,6 +91,9 @@ public class MatchResource {
 
     @Inject
     private MatchValidationService matchValidationService;
+
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
 
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
@@ -279,16 +283,28 @@ public class MatchResource {
     @ApiOperation(value = "Publish entity seed/lookup entries "
             + "from source tenant (staging env) to dest tenant (staging/serving env). "
             + "Only support small-scale publish (approx. <= 10K seeds).")
-    public EntityPublishStatistics publishEntity(@RequestBody EntityPublishRequest request) {
+    public synchronized EntityPublishStatistics publishEntity(@RequestBody EntityPublishRequest request) {
         try {
             validateEntityPublishRequest(request);
             if (request.isBumpupVersion()) {
                 entityMatchVersionService.bumpVersion(request.getDestEnv(), request.getDestTenant());
             }
+            // TODO allow a better way of overwriting no. staging shards, it's fine right
+            // now since only tests use this API
+            int origNumStagingShards = entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
+            Integer numStagingShards = request.getNumStagingShards();
+            if (numStagingShards != null) {
+                log.info("Overwrite no. staging shard according to request = {}", numStagingShards);
+                entityMatchConfigurationService.setNumShards(EntityMatchEnvironment.STAGING, numStagingShards);
+            }
             EntityPublishStatistics statistics = entityInternalMatchService.publishEntity(request.getEntity(),
                     request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), request.getDestTTLEnabled(),
                     request.getSrcVersion(), request.getDestVersion());
             statistics.setRequest(request);
+            if (numStagingShards != null) {
+                log.info("Restoring no. staging shard back to original value = {}", origNumStagingShards);
+                entityMatchConfigurationService.setNumShards(EntityMatchEnvironment.STAGING, origNumStagingShards);
+            }
             return statistics;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25042, e);

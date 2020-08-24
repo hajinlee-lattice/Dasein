@@ -37,6 +37,9 @@ public class EntityPublishRequest {
     @JsonProperty("BumpupVersion")
     private boolean bumpupVersion = true;
 
+    @JsonProperty("NumStagingShards")
+    private Integer numStagingShards;
+
     public String getEntity() {
         return entity;
     }
@@ -101,4 +104,11 @@ public class EntityPublishRequest {
         this.bumpupVersion = bumpupVersion;
     }
 
+    public Integer getNumStagingShards() {
+        return numStagingShards;
+    }
+
+    public void setNumStagingShards(Integer numStagingShards) {
+        this.numStagingShards = numStagingShards;
+    }
 }

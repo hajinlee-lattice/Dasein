@@ -550,6 +550,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         request.setDestTenant(tenant);
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
+        request.setNumStagingShards(NUM_STAGING_SHARDS_FOR_TESTING);
         EntityPublishStatistics stats = matchProxy.publishEntity(request);
         Assert.assertEquals(stats.getSeedCount(), DATA_ALL_KEYS.length);
     }
