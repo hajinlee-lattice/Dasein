@@ -65,6 +65,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
+    @Override
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -198,9 +199,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
-        // TODO: Clean up needed by Perry
-        // playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(),
-        // play.getName(), playLaunch);
+        playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),
                 LaunchState.Launching);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),
