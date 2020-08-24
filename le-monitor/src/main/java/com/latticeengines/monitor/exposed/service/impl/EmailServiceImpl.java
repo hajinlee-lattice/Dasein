@@ -75,6 +75,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${monitor.urls.helpcenter}")
     private String helpCenterUrl;
 
+    @Value("${common.dcp.public.url}")
+    private String dcpPublicUrl;
+
     @VisibleForTesting
     public void enableEmail() {
         emailEnabled = true;
@@ -852,8 +855,15 @@ public class EmailServiceImpl implements EmailService {
                 builder.replaceToken("{{uploadDisplayName}}", uploadEmailInfo.getUploadDisplayName());
                 builder.replaceToken("{{sourceDisplayName}}", uploadEmailInfo.getSourceDisplayName());
                 builder.replaceToken("{{projectDisplayName}}", uploadEmailInfo.getProjectDisplayName());
-
+                builder.replaceToken("{{url}}", dcpPublicUrl);
                 Multipart mp = builder.buildMultipart();
+                builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_connect.png",
+                        "image/png", "dnb_connect_logo");
+                builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/avatar.png",
+                        "image/png", "avatar");
+                builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/green-check-no-outline.png",
+                        "image/png", "status_icon");
+
                 sendMultiPartEmail(EmailSettings.DCP_UPLOAD_COMPLETED_SUBJECT,
                         mp, uploadEmailInfo.getRecipientList(), EmailFromAddress.DNB_CONNECT);
                 log.info("Sending upload completed email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
@@ -875,8 +885,15 @@ public class EmailServiceImpl implements EmailService {
                 builder.replaceToken("{{uploadDisplayName}}", uploadEmailInfo.getUploadDisplayName());
                 builder.replaceToken("{{sourceDisplayName}}", uploadEmailInfo.getSourceDisplayName());
                 builder.replaceToken("{{projectDisplayName}}", uploadEmailInfo.getProjectDisplayName());
-
+                builder.replaceToken("{{url}}", dcpPublicUrl);
                 Multipart mp = builder.buildMultipart();
+                builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_connect.png",
+                        "image/png", "dnb_connect_logo");
+                builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/avatar.png",
+                        "image/png", "avatar");
+                builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/alert-big.png",
+                        "image/png", "status_icon");
+
                 sendMultiPartEmail(EmailSettings.DCP_UPLOAD_FAILED_SUBJECT,
                         mp, uploadEmailInfo.getRecipientList(), EmailFromAddress.DNB_CONNECT);
                 log.info("Sending upload failed email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
@@ -897,6 +914,10 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{tenantname}}", tenantName);
             builder.replaceToken("{{url}}", url);
             Multipart multipart = builder.buildMultipart();
+            builder.addCustomImagesToMultipart(multipart, "com/latticeengines/monitor/dnb_connect.png",
+                    "image/png", "dnb_connect_logo");
+            builder.addCustomImagesToMultipart(multipart, "com/latticeengines/monitor/avatar.png",
+                    "image/png", "avatar");
 
             sendMultiPartEmail(EmailSettings.DNB_CONNECT_WELCOME_NEW_USER_SUBJECT, multipart, Collections.singleton(user.getEmail()), EmailFromAddress.DNB_CONNECT);
             log.info("Sending welcome email to " + user.getEmail().toString() + "succeeded.");
