@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.DataUnitCrossTenantService;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
+import com.latticeengines.security.exposed.service.TeamService;
 
 import io.opentracing.References;
 import io.opentracing.Scope;
@@ -77,6 +78,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private TeamService teamService;
 
     @Override
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
@@ -124,6 +128,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
                     String paCron = configDir.get("/PAScheduleNowCronExpression").getDocument().getData();
                     log.info(String.format("PA schedule now Cron for tenant %s is: %s", customerSpace, paCron));
                     atlasSchedulingService.createOrUpdateSchedulingByType(customerSpace, paCron, AtlasScheduling.ScheduleType.PA);
+                }
+                if (batonService.isEnabled(space, LatticeFeatureFlag.TEAM_FEATURE)) {
+                    teamService.createDefaultTeam();
                 }
             }
         } finally {

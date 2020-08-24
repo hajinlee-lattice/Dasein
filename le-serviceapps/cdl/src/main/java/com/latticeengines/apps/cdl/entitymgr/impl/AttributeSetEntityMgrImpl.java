@@ -146,9 +146,10 @@ public class AttributeSetEntityMgrImpl
     public AttributeSet createDefaultAttributeSet() {
         AttributeSet defaultSet = findByName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
         if (defaultSet != null) {
-            log.info("Default attribute group already exists in tenant {}.", defaultSet.getDisplayName());
+            log.info("Default attribute set already exists in tenant {}.", defaultSet.getTenant().getName());
             return defaultSet;
         }
+        log.info("Create default attribute set for tenant: " + MultiTenantContext.getShortTenantId());
         defaultSet = getDefaultAttributeSet();
         attributeSetDao.create(defaultSet);
         return defaultSet;
