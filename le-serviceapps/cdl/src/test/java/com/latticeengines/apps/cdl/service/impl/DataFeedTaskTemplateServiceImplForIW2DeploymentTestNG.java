@@ -118,7 +118,9 @@ public class DataFeedTaskTemplateServiceImplForIW2DeploymentTestNG extends CDLDe
         templateFeedType = webVisitSourceMediumTask.getFeedType();
         Table template = webVisitSourceMediumTask.getImportTemplate();
         Assert.assertNotNull(template);
-        Assert.assertEquals(template.getAttributes().size(), 1);
+        // Name (display name), SourceMedium (regex)
+        Assert.assertEquals(template.getAttributes().size(), 2);
+        Assert.assertNotNull(template.getAttribute(InterfaceName.Name));
         Attribute attrSourceMedium = template.getAttribute(InterfaceName.SourceMedium);
         Assert.assertNotNull(attrSourceMedium);
         Assert.assertEquals(attrSourceMedium.getDisplayName(), "RandomName_xyz");
