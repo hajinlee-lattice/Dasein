@@ -29,6 +29,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.repository.reader.StringTemplateReaderRepository;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -596,6 +597,7 @@ public abstract class CheckpointServiceBase {
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
         request.setBumpupVersion(false);
+        request.setNumStagingShards(CDLEnd2EndDeploymentTestNGBase.TEST_NUM_STAGING_SHARDS);
         log.info("Start copying entity match table for {} using request: {}.", entity, JsonUtils.serialize(request));
         EntityPublishStatistics stats = matchProxy.publishEntity(request);
         log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}", stats.getSeedCount(),

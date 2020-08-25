@@ -137,6 +137,7 @@ public class AdvancedMatchDeploymentTestNGBase extends MatchapiDeploymentTestNGB
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
         request.setBumpupVersion(false);
+        request.setNumStagingShards(NUM_STAGING_SHARDS_FOR_TESTING);
         List<EntityPublishStatistics> result = matchProxy.publishEntity(Collections.singletonList(request));
         Assert.assertTrue(CollectionUtils.isNotEmpty(result));
         Assert.assertNotNull(result.get(0));

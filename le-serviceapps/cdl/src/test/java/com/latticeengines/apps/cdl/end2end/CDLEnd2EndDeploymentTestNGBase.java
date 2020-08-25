@@ -190,7 +190,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     // number of shards in staging environment for entity match
     // set to a static value so that we don't need to regenerate checkpoint
-    private static final int TEST_NUM_STAGING_SHARDS = 5;
+    public static final int TEST_NUM_STAGING_SHARDS = 5;
 
     /* Expected account result */
 
