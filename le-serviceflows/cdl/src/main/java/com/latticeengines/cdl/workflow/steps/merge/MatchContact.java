@@ -56,7 +56,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         if (isShortCutMode()) {
-            log.info("Found diff table and batch store in context, using short-cut pipeline");
+            log.info("Found entity match checkpoint in the context, using short-cut pipeline");
             return null;
         } else if (hasNoImportAndNoBatchStore()) {
             log.info("no Import and no batchStore, skip this step.");
