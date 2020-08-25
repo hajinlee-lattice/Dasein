@@ -94,7 +94,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         String responseBody = responseEntity.getBody();
         Assert.assertNotNull(responseBody);
         JsonNode jsonNode = JsonUtils.deserialize(responseBody, JsonNode.class);
-        UIAction uiAction = JsonUtils.deserialize(jsonNode.get("UIAction").asText(), UIAction.class);
+        UIAction uiAction = JsonUtils.deserialize(jsonNode.get("UIAction").toString(), UIAction.class);
         Assert.assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 
@@ -111,7 +111,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         String responseBody = responseEntity.getBody();
         Assert.assertNotNull(responseBody);
         JsonNode jsonNode = JsonUtils.deserialize(responseBody, JsonNode.class);
-        UIAction uiAction = JsonUtils.deserialize(jsonNode.get("UIAction").asText(), UIAction.class);
+        UIAction uiAction = JsonUtils.deserialize(jsonNode.get("UIAction").toString(), UIAction.class);
         Assert.assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 
