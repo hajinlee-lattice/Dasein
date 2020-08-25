@@ -30,6 +30,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
@@ -187,6 +188,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             request.setDestEnv(EntityMatchEnvironment.STAGING);
             request.setDestTTLEnabled(false);
             request.setBumpupVersion(false);
+            request.setNumStagingShards(CDLEnd2EndDeploymentTestNGBase.TEST_NUM_STAGING_SHARDS);
             requests.add(request);
         }
         log.info("Start copying entity match table for {} using request: {}.", entity, JsonUtils.serialize(requests));
