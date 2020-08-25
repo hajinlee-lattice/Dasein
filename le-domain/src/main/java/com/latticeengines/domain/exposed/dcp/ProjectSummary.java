@@ -61,6 +61,14 @@ public class ProjectSummary {
         this.projectDisplayName = projectDisplayName;
     }
 
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
+    }
+
     public Boolean getArchieved() {
         return archieved;
     }
@@ -123,13 +131,5 @@ public class ProjectSummary {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public String getProjectDescription() {
-        return projectDescription;
-    }
-
-    public void setProjectDescription(String projectDescription) {
-        this.projectDescription = projectDescription;
     }
 }
