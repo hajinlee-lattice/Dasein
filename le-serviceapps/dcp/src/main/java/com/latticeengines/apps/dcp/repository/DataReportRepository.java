@@ -16,7 +16,7 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
     boolean existsByLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
     @Query("select count(*) from DataReportRecord d join DataReportRecord d2 on d.parentId = d2.pid " +
-            "where d2.level = ?1 AND d2.ownerId = ?2")
+            "where d2.level = ?1 AND d2.ownerId = ?2 AND d.readyForRollup = true")
     int countSiblingsByParentLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
     @Query("select d.pid,dc.name from DataReportRecord as d left join d.dunsCount as dc WHERE d.level = ?1 AND " +
@@ -40,7 +40,6 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
     List<Object[]> findBasicStatsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId);
 
     @Query("select d.ownerId from DataReportRecord d join DataReportRecord d2 on d.parentId = d2.pid " +
-            "where d2.level = ?1 AND d2.ownerId = ?2 and d.readyForRollup = ?3")
-    Set<String> findChildrenIdsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId,
-                                                       boolean readyForRollup);
+            "where d2.level = ?1 AND d2.ownerId = ?2 and d.readyForRollup = true")
+    Set<String> findChildrenIdsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId);
 }

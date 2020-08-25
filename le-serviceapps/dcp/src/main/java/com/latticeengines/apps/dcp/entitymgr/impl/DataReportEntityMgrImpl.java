@@ -118,8 +118,8 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Set<String> findChildrenIds(DataReportRecord.Level level, String ownerId, boolean readyForRollup) {
-        return getReadOrWriteRepository().findChildrenIdsByParentLevelAndOwnerId(level, ownerId, readyForRollup);
+    public Set<String> findChildrenIds(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findChildrenIdsByParentLevelAndOwnerId(level, ownerId);
     }
 
     @Override

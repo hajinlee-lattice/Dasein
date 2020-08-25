@@ -165,12 +165,15 @@ public class DataReportServiceImpl implements DataReportService {
         }
     }
 
+    /**
+     * in data report, the logic only retrieves the data report with readyForRollup = true
+     */
     @Override
     public Set<String> getChildrenIds(String customerSpace, DataReportRecord.Level level, String ownerId) {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        Set<String> subOwnerIds = dataReportEntityMgr.findChildrenIds(level, ownerId, true);
+        Set<String> subOwnerIds = dataReportEntityMgr.findChildrenIds(level, ownerId);
         if (subOwnerIds == null) {
             return new HashSet<>();
         } else {
@@ -210,6 +213,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (!DataReportRecord.Level.Tenant.equals(level)) {
             Preconditions.checkNotNull(parentOwnerId, "parent owner id should not be empty");
         }
+        // in data report, the logic only retrieves the data report with readyForRollup = true
         int siblings = dataReportEntityMgr.countSiblingsByParentLevelAndOwnerId(level.getParentLevel(), parentOwnerId);
         log.info("the siblings are " + siblings);
         DunsCountCopy copy = new DunsCountCopy();
