@@ -931,7 +931,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url) {
+    public Long sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url) {
         User user = new User();
         user.setEmail(idaasUser.getEmailAddress());
         user.setFirstName(idaasUser.getFirstName());

@@ -64,6 +64,9 @@ public class IDaaSUser {
 
     @JsonProperty("invitation_link")
     private String invitationLink;
+
+    @JsonProperty("invitationSentTime")
+    private Long invitationSentTime;
   
     @JsonProperty("subscriber_number")
     private String subscriberNumber;
@@ -192,6 +195,14 @@ public class IDaaSUser {
     public String getInvitationLink() { return invitationLink; }
 
     public void setInvitationLink(String invitationLink) { this.invitationLink = invitationLink; }
+
+    public Long getInvitationSentTime() {
+        return invitationSentTime;
+    }
+
+    public void setInvitationSentTime(Long invitationSentTime) {
+        this.invitationSentTime = invitationSentTime;
+    }
 
     public String getSubscriberNumber() {
         return subscriberNumber;

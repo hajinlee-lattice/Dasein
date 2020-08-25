@@ -404,7 +404,6 @@ public class TenantServiceImpl implements TenantService {
         ProductAndExternalAdminInfo prodAndExternalEmail = new ProductAndExternalAdminInfo();
         List<LatticeProduct> selectedProducts = spaceConfig.getProducts();
         List<String> externalEmailList = null;
-        List<IDaaSUser> usersDnBConnect = null;
         log.info(StringUtils.join(", ", selectedProducts));
         for (SerializableDocumentDirectory configDirectory : configDirectories) {
             if (configDirectory.getRootPath().equals("/PLS")) {
@@ -414,10 +413,6 @@ public class TenantServiceImpl implements TenantService {
                         String externalAminEmailsString = node.getData();
                         log.info(externalAminEmailsString);
                         externalEmailList = EmailUtils.parseEmails(externalAminEmailsString);
-                    } else if (node.getNode().equals("IDaaSUsers")) {
-                        String userListString = node.getData();
-                        log.info(userListString);
-                        usersDnBConnect = Arrays.asList(JsonUtils.deserialize(userListString, IDaaSUser[].class));
                     }
                 }
             }
@@ -432,7 +427,6 @@ public class TenantServiceImpl implements TenantService {
         }
         prodAndExternalEmail.setProducts(selectedProducts);
         prodAndExternalEmail.setExternalEmailMap(externalEmailMap);
-        prodAndExternalEmail.setUsersDnBConnect(usersDnBConnect);
 
         return prodAndExternalEmail;
     }
@@ -994,7 +988,6 @@ public class TenantServiceImpl implements TenantService {
     public static class ProductAndExternalAdminInfo {
         public List<LatticeProduct> products;
         public Map<String, Boolean> externalEmailMap;
-        public List<IDaaSUser> usersDnBConnect;
 
         public ProductAndExternalAdminInfo() {
         }
@@ -1013,14 +1006,6 @@ public class TenantServiceImpl implements TenantService {
 
         public void setExternalEmailMap(Map<String, Boolean> externalEmailMap) {
             this.externalEmailMap = externalEmailMap;
-        }
-
-        public List<IDaaSUser> getUsersDnBConnect() {
-            return usersDnBConnect;
-        }
-
-        public void setUsersDnBConnect(List<IDaaSUser> usersDnBConnect) {
-            this.usersDnBConnect = usersDnBConnect;
         }
     }
 

@@ -100,7 +100,7 @@ public interface EmailService {
 
     Long sendDCPWelcomeEmail(User user, String tenantName, String url);
 
-    boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url);
+    Long sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url);
 
     enum EmailFromAddress {
         DNB_CONNECT, LATTICE_ENGINES

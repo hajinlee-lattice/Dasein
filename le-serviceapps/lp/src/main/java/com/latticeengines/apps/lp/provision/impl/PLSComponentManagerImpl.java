@@ -36,8 +36,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
-import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
-import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -55,7 +53,6 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
-import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 
 import io.opentracing.References;
 import io.opentracing.Scope;
@@ -377,6 +374,11 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
+
+        // Update IDaaS users node with email sent times; to be stored in Camille
+        String usersWithEmailTime = JsonUtils.serialize(retrievedUsers);
+        configDir.get("/IDaaSUsers").getDocument().setData(usersWithEmailTime);
+
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
             tenant = tenantService.findByTenantId(PLSTenantId);
@@ -468,8 +470,32 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("Operating IDaaS users");
         List<IDaaSUser> createdUsers = new ArrayList<>();
         for (IDaaSUser user : iDaaSUsers) {
-            IDaaSUser createdUser = userService.createIDaaSUser(user);
-            createdUsers.add(createdUser == null ? user : createdUser);
+            String email = user.getEmailAddress();
+
+            User createUserData = new User();
+            createUserData.setEmail(user.getEmailAddress());
+            createUserData.setFirstName(user.getFirstName());
+            createUserData.setLastName(user.getLastName());
+            createUserData.setUsername(user.getUserName());
+            createUserData.setPhoneNumber(user.getPhoneNumber());
+            IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber());
+
+            String welcomeUrl = dcpPublicUrl;
+            if (createdUser.getInvitationLink() != null) {
+                welcomeUrl = createdUser.getInvitationLink();
+            }
+
+            // Add info needed for VBO callback
+            createdUser.setInvitationSentTime(emailService.sendDCPWelcomeEmail(createdUser, tenantName, welcomeUrl));
+            createdUser.setSubscriberNumber(user.getSubscriberNumber());
+
+            if (EmailUtils.isInternalUser(email)) {
+                superAdminEmails.add(email.toLowerCase());
+            } else {
+                externalAdminEmails.add(email.toLowerCase());
+            }
+
+            createdUsers.add(createdUser);
         }
         return createdUsers;
     }

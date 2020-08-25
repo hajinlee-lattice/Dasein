@@ -28,22 +28,28 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.graph.traversal.impl.ReverseTopologicalTraverse;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.ComponentStatus;
 import com.latticeengines.domain.exposed.component.InstallDocument;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -56,7 +62,6 @@ import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestI
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
-import com.latticeengines.security.service.impl.IDaaSUser;
 
 @Component
 public class ComponentOrchestrator {
@@ -85,7 +90,7 @@ public class ComponentOrchestrator {
     @Value("${common.pls.url}")
     private String plsEndHost;
 
-    @Value("${security.dcp.public.url}")
+    @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
     private static Map<String, LatticeComponent> componentMap;
@@ -215,7 +220,7 @@ public class ComponentOrchestrator {
         }
 
         if (isDnBConnect && installSuccess)
-            finalizeDnBConnect(prodAndExternalAminInfo, tenantId, callback);
+            finalizeDnBConnect(tenantId, callback, visitor.contractId, visitor.spaceId);
         else
             emailService(installSuccess, prodAndExternalAminInfo, tenantId);
     }
@@ -257,36 +262,40 @@ public class ComponentOrchestrator {
         sendNewEmails(newEmailList, tenantId, products);
     }
 
-    private void finalizeDnBConnect(ProductAndExternalAdminInfo prodAndExternalAdminInfo, String tenantId, VboCallback callback) {
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(tenantId).toString());
-        if (callback != null)
-            callback.customerCreation.customerDetail.subscriberNumber = tenant.getSubscriberNumber();
+    private void finalizeDnBConnect(String tenantId, VboCallback callback, String contractId, String spaceId) {
+        // Retrieve user list with email sent times
+        Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
+                tenantId, spaceId, PLSComponent.componentName);
+        Camille camille = CamilleEnvironment.getCamille();
+        DocumentDirectory document = camille.getDirectory(servicePath);
+        DocumentDirectory.Node usersNode = document.get("/IDaaSUsers");
+        List<IDaaSUser> users = null;
+        if (usersNode != null) {
+            users = JsonUtils.convertList(JsonUtils.deserialize(usersNode.getDocument().getData(), List.class),
+                    IDaaSUser.class);
+        }
 
-        for (IDaaSUser user : prodAndExternalAdminInfo.getUsersDnBConnect()) {
-            String email = user.getEmailAddress();
-            IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
-            if (retrievedUser != null && tenant != null) {
-                String welcomeUrl = retrievedUser.getInvitationLink() == null ? dcpPublicUrl : retrievedUser.getInvitationLink();
-                User generatedUser = new User();
-                generatedUser.setEmail(email);
-                generatedUser.setFirstName(retrievedUser.getFirstName());
-                Long emailSendTime = emailService.sendDCPWelcomeEmail(generatedUser, tenant.getName(), welcomeUrl);
+        if (users != null) {
+            for (IDaaSUser user : users) {
+                String email = user.getEmailAddress();
+                IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
+                if (retrievedUser != null && callback != null && user.getEmailAddress().equals(callback.customerCreation.customerDetail.login)) {
+                        // TODO: Use getEmailAddress() or getUsername() above? Related: TenantServiceImpl::createVboTenant
+                        if (user.getInvitationSentTime() != null) {
+                            callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
+                            callback.customerCreation.customerDetail.emailDate = user.getInvitationSentTime().toString();
+                        }
 
-                if (callback != null && retrievedUser.getEmailAddress().equals(callback.customerCreation.customerDetail.login)) {
-                    // TODO: Use getEmailAddress() or getUsername() above? Related: TenantServiceImpl::createVboTenant
-                    if (emailSendTime != null) {
-                        callback.customerCreation.customerDetail.emailSent = Boolean.toString(true);
-                        callback.customerCreation.customerDetail.emailDate = emailSendTime.toString();
-                    }
+                        if (VboStatus.ALL_FAIL.equals(callback.customerCreation.transactionDetail.status)) {
+                            callback.customerCreation.transactionDetail.status = VboStatus.PROVISION_FAIL;
+                        } else {
+                            callback.customerCreation.transactionDetail.status = VboStatus.SUCCESS;
+                        }
 
-                    if (VboStatus.ALL_FAIL.equals(callback.customerCreation.transactionDetail.status)) {
-                        callback.customerCreation.transactionDetail.status = VboStatus.PROVISION_FAIL;
-                    } else {
-                        callback.customerCreation.transactionDetail.status = VboStatus.SUCCESS;
-                    }
+                        callback.customerCreation.customerDetail.firstName = retrievedUser.getFirstName();
+                        callback.customerCreation.customerDetail.lastName = retrievedUser.getLastName();
 
-                    callback.customerCreation.customerDetail.firstName = retrievedUser.getFirstName();
-                    callback.customerCreation.customerDetail.lastName = retrievedUser.getLastName();
+                        callback.customerCreation.customerDetail.subscriberNumber = user.getSubscriberNumber();
                 }
             }
         }
