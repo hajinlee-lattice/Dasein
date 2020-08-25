@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -13,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
@@ -25,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -37,7 +41,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
-public class JourneyStage implements HasPid, HasTenant, Serializable {
+public class JourneyStage implements HasPid, HasTenant, Serializable, HasAuditingFields {
 
     private static final long serialVersionUID = 0L;
 
@@ -77,6 +81,16 @@ public class JourneyStage implements HasPid, HasTenant, Serializable {
     @JsonProperty("predicates")
     @Type(type = "json")
     private List<JourneyStagePredicate> predicates;
+
+    @Column(name = "CREATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonProperty("created")
+    private Date created;
+
+    @Column(name = "UPDATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonProperty("updated")
+    private Date updated;
 
     @Override
     public Long getPid() {
@@ -145,6 +159,18 @@ public class JourneyStage implements HasPid, HasTenant, Serializable {
     public void setDisplayColorCode(String displayColorCode) {
         this.displayColorCode = displayColorCode;
     }
+
+    @Override
+    public Date getCreated() { return created; }
+
+    @Override
+    public void setCreated(Date created) { this.created = created; }
+
+    @Override
+    public Date getUpdated() { return updated; }
+
+    @Override
+    public void setUpdated(Date updated) { this.updated = updated; }
 
     public static final class Builder {
 

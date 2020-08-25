@@ -219,7 +219,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
     }
 
     private boolean isShortCutMode() {
-        return getStringValueFromContext(JOURNEY_STAGE_TABLE_NAME) != null;
+        return StringUtils.isNotBlank(getStringValueFromContext(JOURNEY_STAGE_TABLE_NAME));
     }
 
     private void handleUpdatedAccount360TimelineTables(List<HdfsDataUnit> outputs) {
