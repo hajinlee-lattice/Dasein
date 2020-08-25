@@ -40,7 +40,10 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
-        if (hasNoImportAndNoBatchStore()) {
+        if (isShortCutMode()) {
+            log.info("Found entity match checkpoint in the context, using short-cut pipeline");
+            return null;
+        } else if (hasNoImportAndNoBatchStore()) {
             log.info("no Import and no batchStore, skip this step.");
             return null;
         }
@@ -96,6 +99,10 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             putStringValueInContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, newAccountTableName);
             addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
         }
+    }
+
+    private boolean isShortCutMode() {
+        return Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
     }
 
     private TransformationStepConfig matchTransaction(int inputStep, String matchTargetTable,
