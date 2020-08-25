@@ -69,6 +69,11 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
                     postJobExecution(result);
                 } else {
                     log.info("Found contact serving table in context, skip this step.");
+                    String servingTableName = tableInCtx.getName();
+                    log.info("Link contact serving table {} to inactive version {}", servingTableName, inactive);
+                    dataCollectionProxy.upsertTable(customerSpace.toString(), servingTableName, SortedContact,
+                            inactive);
+                    exportTableRoleToRedshift(tableInCtx, SortedContact);
                 }
             } else {
                 log.info("No need to refresh contact serving store.");

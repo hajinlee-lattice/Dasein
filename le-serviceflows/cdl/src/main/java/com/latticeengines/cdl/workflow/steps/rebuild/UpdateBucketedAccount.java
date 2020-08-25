@@ -76,6 +76,9 @@ public class UpdateBucketedAccount extends BaseProcessAnalyzeSparkStep<ProcessAc
         Table servingTable = getTableSummaryFromKey(customerSpaceStr, ACCOUNT_SERVING_TABLE_NAME);
         if (servingTable != null) {
             log.info("Found account serving store in context, going through short-cut mode.");
+            String servingTableName = servingTable.getName();
+            log.info("Link account serving table {} to inactive version {}", servingTableName, inactive);
+            dataCollectionProxy.upsertTable(customerSpaceStr, servingTableName, BucketedAccount, inactive);
         } else {
             latticeAccountTbl = attemptGetTableRole(LatticeAccount, false);
             if (shouldRunEncode()) {
