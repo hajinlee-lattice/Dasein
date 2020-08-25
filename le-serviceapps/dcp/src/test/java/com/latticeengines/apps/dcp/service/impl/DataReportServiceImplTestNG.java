@@ -189,6 +189,8 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(projectBasicStats);
         Assert.assertEquals(projectBasicStats.size(), 1);
 
+        // update ready for rollup for uploadUID2
+        dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID2");
         // verify upload node is not only brothers
         DunsCountCopy copy2 = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
                 "uploadUID");
