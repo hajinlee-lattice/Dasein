@@ -19,7 +19,7 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
             " p.recipientList, p.teamId, p.projectDescription " +
-            " FROM Project AS p where p.deleted = false")
+            " FROM Project AS p where p.deleted = false OR p.deleted IS null")
     List<Object[]> findAllProjects(Pageable pageable);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
@@ -47,13 +47,8 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
             "p.recipientList, p.teamId, p.projectDescription " +
-            " FROM Project AS p WHERE (p.teamId IN (?1) OR p.teamId IS null) and p.deleted = false")
+            " FROM Project AS p WHERE (p.teamId IN (?1) OR p.teamId IS null) and (p.deleted = false OR p.deleted IS null)")
     List<Object[]> findProjectsInTeamIds(List<String> teamIds, Pageable pageable);
-
-    /* @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            "p.recipientList, p.teamId, p.projectDescription " +
-            " FROM Project AS p WHERE p.projectId = ?1 AND (p.teamId IN (?2) OR p.teamId IS null) and p.deleted = false")
-    List<Object[]> findProjectInfoByProjectIdInTeamIdsNotIncludingArchived(String projectId, List<String> teamIds); */
 
     @Query("SELECT count(p) from Project AS p where p.deleted = false")
     Long countActiveProjects();
