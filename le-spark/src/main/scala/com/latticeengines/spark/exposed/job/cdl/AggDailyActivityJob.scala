@@ -158,9 +158,9 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     val streamReducerMap = lattice.config.streamReducerMap.asScala
     val version: Long = lattice.config.currentEpochMilli
 
-    val metadataInStream = metadataMap(streamId)
+    val metadataInStream = metadataMap.getOrElse(streamId, Map.empty[String, DimensionMetadata])
     val dateAttr = dateAttrs(streamId)
-    val calculators = calculatorMap(streamId)
+    val calculators = calculatorMap.getOrElse(streamId, Map.empty[String, DimensionCalculator])
     val attrs = metadataInStream.keys
     val additionalDimCols = entityIdColMap.getOrElse(streamId, Nil)
     val hashDimensions = hashDimensionMap.getOrElse(streamId, Set())

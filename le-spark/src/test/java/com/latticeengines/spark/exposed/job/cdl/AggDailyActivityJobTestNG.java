@@ -1,6 +1,9 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Amount;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Cost;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelName;
@@ -8,11 +11,17 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.Opportuni
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductType;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Quantity;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMedium;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMediumId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionTime;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
@@ -44,6 +53,7 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -228,6 +238,14 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         log.info("Output metadata: {}", result.getOutput());
     }
 
+    @Test(groups = "functional")
+    private void testTransaction() {
+        List<String> inputs = Collections.singletonList(setupRawTransactionStreamData());
+        AggDailyActivityConfig config = txnConfig();
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+    }
+
     private AggDailyActivityConfig incrConfig(boolean withBatch) {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
@@ -352,6 +370,44 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.streamReducerMap.put(STREAM_ID, prepareBuyingScoreReducer());
         config.currentEpochMilli = DAY_0_EPOCH;
         return config;
+    }
+
+    private AggDailyActivityConfig txnConfig() {
+        AggDailyActivityConfig config = new AggDailyActivityConfig();
+        config.streamDateAttrs.put(STREAM_ID, InterfaceName.TransactionTime.name());
+        config.attrDeriverMap.put(STREAM_ID, prepareTxnDerivers());
+        config.additionalDimAttrMap.put(STREAM_ID, Arrays.asList( //
+                InterfaceName.AccountId.name(), //
+                InterfaceName.ContactId.name(), //
+                InterfaceName.ProductId.name(), //
+                TransactionType.name(), //
+                ProductType.name()
+        ));
+        config.currentEpochMilli = DAY_0_EPOCH;
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        details.setStartIdx(0);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        return config;
+    }
+
+    private List<StreamAttributeDeriver> prepareTxnDerivers() {
+        return Arrays.asList( //
+                constructSumDeriver(InterfaceName.Amount.name()), //
+                constructSumDeriver(InterfaceName.Quantity.name()), //
+                constructSumDeriver(InterfaceName.Cost.name()) //
+        );
+    }
+
+    private StreamAttributeDeriver constructSumDeriver(String attrName) {
+        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
+        deriver.setSourceAttributes(Collections.singletonList(attrName));
+        deriver.setTargetAttribute(attrName);
+        deriver.setCalculation(StreamAttributeDeriver.Calculation.SUM);
+        return deriver;
     }
 
     private ActivityRowReducer prepareReducer() {
@@ -526,6 +582,30 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc1", MODEL_1, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.1},
                 {"acc2", MODEL_1, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.2},
                 {"acc2", MODEL_2, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.2}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupRawTransactionStreamData() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(TransactionId.name(), String.class), // unused
+                Pair.of(AccountId.name(), String.class),
+                Pair.of(ContactId.name(), String.class),
+                Pair.of(ProductId.name(), String.class),
+                Pair.of(TransactionTime.name(), Long.class),
+                Pair.of(__StreamDate.name(), String.class),
+                Pair.of(StreamDateId.name(), Integer.class),
+                Pair.of(Cost.name(), Double.class),
+                Pair.of(Quantity.name(), Integer.class),
+                Pair.of(Amount.name(), Integer.class),
+                Pair.of(TransactionType.name(), String.class),
+                Pair.of(ProductType.name(), String.class)
+        );
+        Object[][] data = new Object[][]{
+                {"t1", "a1", "c1", "p1", DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 0.2, 2, 20, "Purchase", "Spending"},
+                {"t2", "a1", "c1", "p1", DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 0.4, 4, 40, "Purchase", "Spending"},
+                {"t3", "a1", "c1", "p1", DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 0.7, 7, 70, "Purchase", "Spending"},
+                {"t4", "a1", "c1", "p2", DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 0.1, 1, 10, "Purchase", "Spending"}
         };
         return uploadHdfsDataUnit(data, fields);
     }
