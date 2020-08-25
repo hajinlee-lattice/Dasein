@@ -20,7 +20,8 @@
                     "COMPANY NAME",
                     "DISPLAY NAME"
                 ],
-                "required": true
+                "required": true,
+                "nullable": false
             },
             {
                 "fieldName": "Address_Street_1",
@@ -98,7 +99,8 @@
                     "BILLING COUNTRY",
                     "BILLING COUNTRY CODE"
                 ],
-                "required": true
+                "required": true,
+                "nullable": false
             }
         ],
         "uniqueIds": [
