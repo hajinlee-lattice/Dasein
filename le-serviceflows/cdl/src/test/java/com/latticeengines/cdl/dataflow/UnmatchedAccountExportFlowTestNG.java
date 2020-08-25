@@ -9,9 +9,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -22,6 +27,8 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-dataflow-context.xml" })
 public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(UnmatchedAccountExportFlowTestNG.class);
+
     private static final String ACCOUNT_TABLE = "AccountTable";
     private static final String ACCOUNT_EM_TABLE = "AccountEMTable";
     private static final String ACCOUNT_DIR = "/tmp/UnmatchedAccountExportFlowTestNG/account/legacy/";
@@ -74,14 +81,14 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
     public void testUnmatchedAccountExportFlow() {
         UnmatchedAccountExportParameters parameters = prepareInput(accountData, false);
         executeDataFlow(parameters);
-        verifyResult(expectedData);
+        verifyResult(expectedData, "legacy");
     }
 
     @Test(groups = "functional")
     public void testUnmatchedAccountEMExportFlow() {
         UnmatchedAccountExportParameters parameters = prepareInput(accountEMData, true);
         executeDataFlow(parameters);
-        verifyResult(expectedEMData);
+        verifyResult(expectedEMData, "entity match");
     }
 
     @Override
@@ -123,21 +130,37 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
         return parameters;
     }
 
-    private void verifyResult(Object[][] expectedData) {
+    // first column is the primary key (AccountId)
+    private void verifyResult(Object[][] expectedData, String testCase) {
         List<GenericRecord> records = readOutput();
+        Map<String, Object[]> rows = Arrays.stream(expectedData)
+                .collect(Collectors.toMap(row -> (String) row[0], row -> row));
+        printRecords(records, testCase);
         int rowNum = 0;
         for (GenericRecord record : records) {
-            Assert.assertEquals(record.get(AccountId.name()).toString(), expectedData[rowNum][0]);
-            Assert.assertEquals(record.get(Name.name()).toString(), expectedData[rowNum][1]);
+            Object[] row = rows.get(record.get(AccountId.name()).toString());
+            Assert.assertEquals(record.get(AccountId.name()).toString(), row[0]);
+            Assert.assertEquals(record.get(Name.name()).toString(), row[1]);
             if (record.get(LatticeAccountId.name()) != null) {
-                Assert.assertEquals(record.get(LatticeAccountId.name()).toString(),
-                        expectedData[rowNum][2]);
+                Assert.assertEquals(record.get(LatticeAccountId.name()).toString(), row[2]);
             } else {
-                Assert.assertEquals(record.get(LatticeAccountId.name()), expectedData[rowNum][2]);
+                Assert.assertEquals(record.get(LatticeAccountId.name()), row[2]);
             }
             rowNum++;
         }
         Assert.assertEquals(rowNum, 4);
+    }
+
+    private void printRecords(List<GenericRecord> records, String testCase) {
+        log.info("No. records for {} = {}", testCase, CollectionUtils.size(records));
+
+        for (GenericRecord record : records) {
+            List<String> nameValues = Stream //
+                    .of(AccountId.name(), Name.name(), LatticeAccountId.name()) //
+                    .map(field -> String.format("%s=%s", field, record.get(field))) //
+                    .collect(Collectors.toList());
+            log.info("[{}]: {}", testCase, String.join(",", nameValues));
+        }
     }
 
     private String getAccountTable(boolean entityMatchEnabled) {
