@@ -100,8 +100,8 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
                         "matchCandidates.matchQualityInformation.matchDataProfile"), //
                 new PrimeColumn(NameMatchScore, "Name Match Score", //
                         "matchCandidates.matchQualityInformation.nameMatchScore"), //
-                new PrimeColumn(OperatingStatusText, "Operating Status Text", //
-                        "matchCandidates.matchQualityInformation.confidenceCode") //
+                new PrimeColumn(OperatingStatusText, "Match Candidate Operating Status", //
+                        "matchCandidates.organization.dunsControlStatus.operatingStatus.description") //
         );
     }
 
