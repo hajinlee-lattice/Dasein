@@ -81,12 +81,15 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         pid = created.getPid();
         Assert.assertEquals(created.getStageName(), stageName);
         Assert.assertEquals(created.getPriority(), priority);
+        Assert.assertNotNull(created.getCreated());
+        Assert.assertNotNull(created.getUpdated());
         List<JourneyStagePredicate> predicateList = created.getPredicates();
         Assert.assertEquals(predicateList.size(), 1);
         JourneyStagePredicate createdPre = predicateList.get(0);
         Assert.assertEquals(createdPre.getNoOfEvents(), predicates.getNoOfEvents());
         Assert.assertEquals(createdPre.getPeriodDays(), predicates.getPeriodDays());
         Assert.assertEquals(createdPre.getStreamType(), predicates.getStreamType());
+
         List<StreamFieldToFilter> createdFilter = createdPre.getStreamFieldsToFilter();
         Assert.assertEquals(createdFilter.size(), 1);
         Assert.assertEquals(createdFilter.get(0).getColumnName(), filter.getColumnName());

@@ -24,7 +24,7 @@ import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -69,7 +69,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Pair<Instant, Instant> timeWindow = getTimeWindowFromPeriod(customerSpace, timelinePeriod);
         query.setStartTimeStamp(timeWindow.getLeft());
         query.setEndTimeStamp(timeWindow.getRight());
-
+        log.info(String.format("Retrieving Account activity data using query: %s", JsonUtils.serialize(query)));
         return activityProxy.getData(customerSpace, null, query);
     }
 
@@ -96,7 +96,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Pair<Instant, Instant> timeWindow = getTimeWindowFromPeriod(customerSpace, timelinePeriod);
         query.setStartTimeStamp(timeWindow.getLeft());
         query.setEndTimeStamp(timeWindow.getRight());
-
+        log.info(String.format("Retrieving Contact activity data using query: %s", JsonUtils.serialize(query)));
         return activityProxy.getData(customerSpace, null, query);
     }
 
@@ -116,19 +116,13 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     }
 
     private Instant getCurrentInstant(String customerSpace) {
-        try (PerformanceTimer timer = new PerformanceTimer()) {
-            String fakeCurrentDate = "";
+        try {
+            String fakeCurrentDate;
             Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
                     CustomerSpace.parse(customerSpace), componentName);
             Path fakeCurrentDatePath = cdlPath.append("FakeCurrentDate");
             Camille camille = CamilleEnvironment.getCamille();
-            if (camille.exists(fakeCurrentDatePath)) {
-                fakeCurrentDate = camille.get(fakeCurrentDatePath).getData();
-                timer.setTimerMessage(
-                        "Retrieved FakeCurrentDate(" + fakeCurrentDate + ") from ZK for tenant: " + customerSpace);
-            } else {
-                timer.setTimerMessage("FakeCurrentDate not found in ZK for tenant: " + customerSpace);
-            }
+            fakeCurrentDate = camille.get(fakeCurrentDatePath).getData();
             return LocalDate.parse(fakeCurrentDate, DateTimeFormatter.ISO_DATE).atStartOfDay(ZoneOffset.UTC)
                     .toOffsetDateTime().toInstant();
         } catch (Exception e) {

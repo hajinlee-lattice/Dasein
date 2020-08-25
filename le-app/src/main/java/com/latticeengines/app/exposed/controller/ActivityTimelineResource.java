@@ -106,7 +106,8 @@ public class ActivityTimelineResource {
     public DataPage getContactActivities(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @PathVariable String contactId, //
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
+            @RequestParam(value = "timeline-period", required = false) String timelinePeriod,
+            @RequestParam(value = "streams", required = false) Set<AtlasStream.StreamType> streamTypes) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
             throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
@@ -115,8 +116,11 @@ public class ActivityTimelineResource {
                 "Retrieving activity timeline data of contact(Id: %s), accountId(ID: %s) for %s period, ( tenantId: %s )",
                 contactId, accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        return activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
+        DataPage data = activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
                 getOrgInfo(authToken));
+        filterStreamData(data, CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams()
+                : streamTypes.stream().map(AtlasStream.StreamType::name).collect(Collectors.toSet()));
+        return data;
     }
 
     @GetMapping("/journey-stage-configuration")
