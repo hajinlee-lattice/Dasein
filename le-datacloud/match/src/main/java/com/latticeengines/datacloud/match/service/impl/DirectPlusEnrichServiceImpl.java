@@ -31,7 +31,6 @@ import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
-import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
@@ -45,9 +44,6 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     @Inject
     private DnBAuthenticationService dnBAuthenticationService;
-
-    @Inject
-    private PrimeMetadataService primeMetadataService;
 
     @Inject
     private ApplicationContext appCtx;
