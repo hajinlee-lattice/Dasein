@@ -27,7 +27,7 @@ public class UnmatchedAccountExportFlow extends TypesafeDataFlowBuilder<Unmatche
         List<String> retainFields = srcAccount.getFieldNames().stream().filter(name -> validatedColumns.contains(name))
                 .collect(Collectors.toList());
         String lattceId = InterfaceName.LatticeAccountId.name();
-        srcAccount = srcAccount.filter(String.format("%s == null || %s == \"\"", lattceId, lattceId),
+        srcAccount = srcAccount.filter(String.format("%s == null || \"\".equals(%s)", lattceId, lattceId),
                 new FieldList(lattceId)).retain(new FieldList(retainFields));
         return finalizeSchema(srcAccount);
     }
