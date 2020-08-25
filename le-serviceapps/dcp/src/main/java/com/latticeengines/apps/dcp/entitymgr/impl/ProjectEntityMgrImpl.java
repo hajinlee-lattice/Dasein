@@ -77,8 +77,9 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ProjectInfo> findAllProjectInfo(Pageable pageable) {
-        List<Object[]> result = getReadOrWriteRepository().findAllProjects(pageable);
+    public List<ProjectInfo> findAllProjectInfo(Pageable pageable, Boolean includeArchived) {
+        List<Object[]> result = includeArchived ? getReadOrWriteRepository().findAllProjectsIncludingArchived(pageable)
+                : getReadOrWriteRepository().findAllProjects(pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {
@@ -90,6 +91,13 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Long countAllProjects() {
         return getReadOrWriteRepository().count();
+    }
+
+    /* Get count of projects with deleted = false */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countAllActiveProjects() {
+        return getReadOrWriteRepository().countActiveProjects();
     }
 
     @Override
@@ -106,8 +114,10 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds) {
-        List<Object[]> result = getReadOrWriteRepository().findProjectsInTeamIds(teamIds, pageable);
+    public List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds, Boolean includeArchived) {
+        List<Object[]> result = includeArchived ?
+                getReadOrWriteRepository().findProjectsInTeamIdsIncludingArchived(teamIds, pageable) :
+                getReadOrWriteRepository().findProjectsInTeamIds(teamIds, pageable);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {

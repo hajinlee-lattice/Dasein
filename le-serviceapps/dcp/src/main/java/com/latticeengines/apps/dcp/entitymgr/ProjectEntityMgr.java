@@ -14,13 +14,15 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     ProjectInfo findProjectInfoByProjectId(String projectId);
 
-    List<ProjectInfo> findAllProjectInfo(Pageable pageable);
+    List<ProjectInfo> findAllProjectInfo(Pageable pageable, Boolean includeArchived);
 
     Long countAllProjects();
 
+    Long countAllActiveProjects();
+
     ProjectInfo findProjectInfoBySourceId(String sourceId);
 
-    List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds);
+    List<ProjectInfo> findAllProjectInfoInTeamIds(Pageable pageable, List<String> teamIds, Boolean includeArchived);
 
     ProjectInfo findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds);
 }
