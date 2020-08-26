@@ -160,7 +160,18 @@ public final class DirectPlusUtils {
             if (path.contains(".")) {
                 List<String> parts = Arrays.asList(path.split("\\."));
                 String parent = StringUtils.join(parts.subList(0, parts.size() - 1), '.');
-                JsonNode parentNode = nodeCache.computeIfAbsent(parent, (key) -> getNodeAt(root, key, nodeCache));
+
+                JsonNode parentNode = nodeCache.getOrDefault(parent, null);
+                if (parentNode == null) {
+                    parentNode = getNodeAt(root, parent, nodeCache);
+                }
+
+                // directly inserting a null object into the map triggers a NullPointerException
+                if (parentNode == null) {
+                    return null;
+                }
+                nodeCache.putIfAbsent(parent, parentNode);
+
                 if (parentNode instanceof ArrayNode) {
                     ArrayNode arrayNode = (ArrayNode) parentNode;
                     if (arrayNode.size() == 0) {
