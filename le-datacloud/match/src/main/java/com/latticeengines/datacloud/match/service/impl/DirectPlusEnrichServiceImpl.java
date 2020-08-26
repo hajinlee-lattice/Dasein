@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.ENRICH;
+import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -24,6 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -59,6 +62,8 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private volatile RestApiClient apiClient;
     private volatile ExecutorService fetchers;
+
+    private AtomicLong stopUntil = new AtomicLong(0);
 
     @Override
     public List<PrimeAccount> fetch(Collection<DirectPlusEnrichRequest> requests) {
@@ -100,7 +105,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                             }
                         }));
                 return ThreadPoolUtils.callInParallel(fetchers(), callables, //
-                        1, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
+                        5, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
             }
         });
     }
@@ -118,9 +123,35 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     @Cacheable(cacheNames = CacheName.Constants.DnBRealTimeLookup, key = "T(java.lang.String).format(\"%s\", #url)")
     public String sendCacheableRequest(String url) {
-        String token = dnBAuthenticationService.requestToken(ENRICH, null);
-        HttpEntity<String> entity = constructEntity(token);
-        return client().get(entity, url);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            while (System.currentTimeMillis() < stopUntil.get()) {
+                log.info("In peace period, wait 5 seconds.");
+                SleepUtils.sleep(5000);
+            }
+            String token = dnBAuthenticationService.requestToken(ENRICH, null);
+            HttpEntity<String> entity = constructEntity(token);
+            try (PerformanceTimer timer = new PerformanceTimer("Fetching datablock from " + url)) {
+                timer.setThreshold(10000);
+                return client().get(entity, url);
+            } catch (HttpClientErrorException e) {
+                log.warn("Got http client error when calling {}", url, e);
+                if (TOO_MANY_REQUESTS.equals(e.getStatusCode())) {
+                    // this is the only exception we want to retry
+                    // hold off 10 second
+                    stopUntil.set(System.currentTimeMillis() + 10000);
+                    log.info("TOO_MANY_REQUESTS, pause fetching for 10 second.");
+                } else {
+                    // not retry any more
+                    ctx.setExhaustedOnly();
+                }
+                throw e;
+            } catch (Exception e2) {
+                // not retry any more
+                ctx.setExhaustedOnly();
+                throw e2;
+            }
+        });
     }
 
     private HttpEntity<String> constructEntity(String token) {
@@ -153,7 +184,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private synchronized void initFetchers() {
         if (fetchers == null) {
-            fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 8);
+            fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 4);
         }
     }
 
