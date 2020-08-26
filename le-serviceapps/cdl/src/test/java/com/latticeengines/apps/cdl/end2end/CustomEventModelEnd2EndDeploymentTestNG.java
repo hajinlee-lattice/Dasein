@@ -135,11 +135,13 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
                     hdfsDataDir + "/*Aggregated*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
-                    hdfsDataDir + "/*Calculated*", s3DataDir, "");
+                    hdfsDataDir + "/CalculatedDepivotedPurchaseHistory**", s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/CalculatedPurchaseHistory**",
+                    s3DataDir, "");
             HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
             HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
         } catch (Exception ex) {
-            log.error(ex.getLocalizedMessage());
+            log.error("Failed to move customer data to s3", ex);
             throw new RuntimeException(ex);
         }
     }

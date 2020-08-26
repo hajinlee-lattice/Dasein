@@ -218,7 +218,6 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 "curatedAccountAttributesStep", //
                 "combineStatistics", //
                 "exportToRedshift", //
-                "exportToDynamo", //
                 "generateProcessingReport", // mimic failed in scoring
                 "generateProcessingReport", //
                 "generateProcessingReport", //
