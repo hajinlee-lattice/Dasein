@@ -20,7 +20,7 @@ public class ProductRequest {
     private String requestor;
 
     @JsonProperty("product_subscription")
-    private ProductSubscription productSubscription;
+    private List<ProductSubscription> productSubscription;
 
     public String getEmailAddress() {
         return emailAddress;
@@ -46,11 +46,11 @@ public class ProductRequest {
         this.requestor = requestor;
     }
 
-    public ProductSubscription getProductSubscription() {
+    public List<ProductSubscription> getProductSubscription() {
         return productSubscription;
     }
 
-    public void setProductSubscription(ProductSubscription productSubscription) {
+    public void setProductSubscription(List<ProductSubscription> productSubscription) {
         this.productSubscription = productSubscription;
     }
 }

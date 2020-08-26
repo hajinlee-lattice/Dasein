@@ -686,11 +686,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public IDaaSUser createIDaaSUser(User user) {
+    public IDaaSUser createIDaaSUser(User user, String subscriberNumber) {
         String email = user.getEmail();
         IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
         if (idaasUser == null) {
             IDaaSUser newUser = new IDaaSUser();
+            newUser.setSubscriberNumber(subscriberNumber);
             newUser.setFirstName(user.getFirstName());
             newUser.setEmailAddress(email);
             newUser.setLastName(user.getLastName());
@@ -712,7 +713,10 @@ public class UserServiceImpl implements UserService {
             productSubscription.setIso2CountryCode(idaasUser.getCountryCode());
             productSubscription.setCompanyName(idaasUser.getCompanyName());
             productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
-            request.setProductSubscription(productSubscription);
+            productSubscription.setSubscriberNumber(subscriberNumber);
+            List<ProductSubscription>productSubscriptions = new ArrayList<>();
+            productSubscriptions.add(productSubscription);
+            request.setProductSubscription(productSubscriptions);
             iDaaSService.addProductAccessToUser(request);
         } else {
             LOGGER.info("IDaaS user existed for {} and has product access", email);

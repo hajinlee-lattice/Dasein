@@ -511,8 +511,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
             request.setUserId(USERID);
             request.setAutoSchedule(true);
-            ApplicationId applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), false, request);
-            log.info(String.format("Succeed to submit entity schedulenow job for tenant name: %s，applicationId is %s.", customerSpace, applicationId.toString()));
+            cdlProxy.scheduleProcessAnalyze(tenant.getId(), false, request);
+            log.info(String.format("Succeed to submit entity schedulenow job for tenant name: %s .", customerSpace));
         } catch (Exception e) {
             log.info(String.format("Failed to submit entity schedulenow job for tenant name: %s，message is %s", customerSpace, e.getMessage()));
         }
