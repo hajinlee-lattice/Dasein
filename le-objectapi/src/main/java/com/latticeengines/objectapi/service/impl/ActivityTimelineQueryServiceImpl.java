@@ -94,13 +94,15 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
                             activityTimelineQuery.getMainEntity().name(), customerSpace) });
         }
 
+        // [ startTime, endTime ], need to + 1 because it is doing string comparison and
+        // there is a suffix after timestamp
         QuerySpec spec = new QuerySpec() //
                 .withHashKey(PARTITION_KEY,
                         buildPartitionKey(timeline.getTimelineId(), timeLineVersion,
                                 activityTimelineQuery.getEntityId()))
                 .withRangeKeyCondition(new RangeKeyCondition(RANGE_KEY).between(
                         activityTimelineQuery.getStartTimeStamp().toEpochMilli() + "",
-                        activityTimelineQuery.getEndTimeStamp().toEpochMilli() + ""))
+                        String.valueOf(activityTimelineQuery.getEndTimeStamp().toEpochMilli() + 1L)))
                 .withScanIndexForward(false);
         String tableName = TABLE_NAME + signature;
         return new DataPage(dynamoItemService.query(tableName, spec).stream().map(this::extractRecords)
