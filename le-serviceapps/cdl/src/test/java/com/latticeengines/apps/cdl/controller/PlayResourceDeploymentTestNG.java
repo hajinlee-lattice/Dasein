@@ -138,23 +138,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testAutomaticLaunchByChannel" })
-    public void createPlayLaunch() {
-        playCreationHelper.createPlayLaunch(testPlaySetupConfig);
-        play = playCreationHelper.getPlay();
-        playLaunch = playCreationHelper.getPlayLaunch();
-        // TODO: Clean up needed by Perry
-        // playLaunch = playProxy.launchPlay(mainTestTenant.getId(), play.getName(),
-        // playLaunch.getLaunchId(), true);
-        Assert.assertNotNull(playLaunch.getAccountsSelected());
-        Assert.assertNotNull(playLaunch.getAccountsLaunched());
-        Assert.assertNotNull(playLaunch.getContactsLaunched());
-        Assert.assertNotNull(playLaunch.getAccountsErrored());
-        Assert.assertNotNull(playLaunch.getAccountsSuppressed());
-
-        totalRatedAccounts = playLaunch.getAccountsSelected();
-    }
-
-    @Test(groups = "deployment-app", dependsOnMethods = { "createPlayLaunch" })
     private void searchPlayLaunch() {
         List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Collections.singletonList(LaunchState.Failed));

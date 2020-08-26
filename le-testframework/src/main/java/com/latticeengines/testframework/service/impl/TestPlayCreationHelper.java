@@ -292,16 +292,13 @@ public class TestPlayCreationHelper {
     }
 
     public void createPlayLaunch(TestPlaySetupConfig testPlaySetupConfig) {
-        // TODO: Clean up needed by Perry
-        // playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
-        // preparePlayLaunchObject(testPlaySetupConfig));
+        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(testPlaySetupConfig));
         assertPlayLaunch(playLaunch);
     }
 
     public PlayLaunch createPlayLaunch2(TestPlaySetupConfig testPlaySetupConfig) {
-        // TODO: Clean up needed by Perry
-        // PlayLaunch playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
-        // preparePlayLaunchObject(testPlaySetupConfig));
+        PlayLaunch playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
+                preparePlayLaunchObject(testPlaySetupConfig));
         assertPlayLaunch(playLaunch);
         return playLaunch;
     }
@@ -333,6 +330,10 @@ public class TestPlayCreationHelper {
         // playLaunch = playProxy.launchPlay(tenant.getId(), playName,
         // playLaunch.getLaunchId(),
         // testPlaySetupConfig.isPlayLaunchDryRun(), useSpark);
+        List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);
+        playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channels.get(0).getId(), channels.get(0), true);
+
+        playLaunch = channels.get(0).getLastLaunch();
         if (testPlaySetupConfig.isPlayLaunchDryRun()) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {

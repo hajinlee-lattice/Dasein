@@ -30,11 +30,7 @@ public interface PlayService {
     Long getPlayLaunchDashboardEntriesCount(String playName, String orgId,
                                             String externalSysType, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp);
 
-    PlayLaunch createPlayLaunch(String playName, PlayLaunch playLaunch);
-
     PlayLaunch updatePlayLaunch(String playName, String launchId, PlayLaunch playLaunch);
-
-    PlayLaunch launchPlay(String playName, String launchId);
 
     List<PlayLaunch> getPlayLaunches(String playName, List<LaunchState> launchStates);
 

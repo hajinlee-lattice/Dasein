@@ -117,20 +117,6 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public PlayLaunch createPlayLaunch(String playName, PlayLaunch playLaunch) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
-            playLaunch.setCreatedBy(MultiTenantContext.getEmailAddress());
-        }
-        if (StringUtils.isEmpty(playLaunch.getUpdatedBy())) {
-            playLaunch.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        }
-        // TODO: Clean up needed by Perry
-        // return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
-        return null;
-    }
-
-    @Override
     public PlayLaunch updatePlayLaunch(String playName, String launchId, PlayLaunch playLaunch) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (StringUtils.isEmpty(playLaunch.getCreatedBy())) {
@@ -142,13 +128,6 @@ public class PlayServiceImpl implements PlayService {
         return playProxy.updatePlayLaunch(tenant.getId(), playName, launchId, playLaunch);
     }
 
-    @Override
-    public PlayLaunch launchPlay(String playName, String launchId) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        // TODO: Clean up needed by Perry
-        // return playProxy.launchPlay(tenant.getId(), playName, launchId, false);
-        return null;
-    }
 
     @Override
     public List<PlayLaunch> getPlayLaunches(String playName, List<LaunchState> launchStates) {
