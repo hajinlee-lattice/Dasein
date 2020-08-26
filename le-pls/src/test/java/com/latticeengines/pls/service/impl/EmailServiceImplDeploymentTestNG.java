@@ -88,7 +88,8 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         createNewUserAndSendEmail(INTERNAL_USER_EMAIL);
     }
 
-    @Test(groups = "deployment")
+    // 8/25/2020 Disable this test because cannot connect to Gmail with DNB network.
+    @Test(groups = "deployment", enabled = false)
     public void testSendAndReceiveExternalEmail() throws Exception {
         long registrationTime = getTimeWorldClockApi();
         Thread.sleep(1000);
