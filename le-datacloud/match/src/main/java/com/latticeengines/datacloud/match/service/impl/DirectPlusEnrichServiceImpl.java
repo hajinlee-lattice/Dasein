@@ -105,7 +105,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                             }
                         }));
                 return ThreadPoolUtils.callInParallel(fetchers(), callables, //
-                        5, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
+                        1, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
             }
         });
     }
@@ -184,7 +184,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private synchronized void initFetchers() {
         if (fetchers == null) {
-            fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 4);
+            fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 8);
         }
     }
 
