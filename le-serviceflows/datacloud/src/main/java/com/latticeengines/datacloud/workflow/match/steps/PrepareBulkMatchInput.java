@@ -39,6 +39,7 @@ import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -140,7 +141,10 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     @VisibleForTesting
     Integer[] determineBlockSizes(Long count) {
-        if (MatchUtils.isValidForAccountMasterBasedMatch(getConfiguration().getMatchInput().getDataCloudVersion())) {
+        MatchInput matchInput = getConfiguration().getMatchInput();
+        // Seperate AccountMaster and ContactMaster match
+        if (!matchInput.getTargetEntity().equalsIgnoreCase(ContactMasterConstants.MATCH_ENTITY_TPS)
+                && MatchUtils.isValidForAccountMasterBasedMatch(matchInput.getDataCloudVersion())) {
             if (getConfiguration().getMatchInput().isFetchOnly()) {
                 return divideIntoNumBlocks(count, determineNumBlocksForFetchOnly(count));
             } else {
@@ -155,7 +159,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     /**
      * For 2.0 DataCloud based fuzzy match (Non-FetchOnly mode)
      *
-     * Determine total number of blocks and set maximum concurrent #block into executionContext
+     * Determine total number of blocks and set maximum concurrent #block into
+     * executionContext
      *
      * @param count
      * @param input
@@ -225,7 +230,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     /**
      * For 2.0 DataCloud based fuzzy match (FetchOnly mode)
      *
-     * Determine total number of blocks and set maximum concurrent #block into executionContext
+     * Determine total number of blocks and set maximum concurrent #block into
+     * executionContext
      *
      * @param count
      * @return
@@ -238,7 +244,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     /**
      * For V1.0 DerivedColumnsCache based SQL lookup match
      *
-     * Determine total number of blocks and set maximum concurrent #block into executionContext
+     * Determine total number of blocks and set maximum concurrent #block into
+     * executionContext
      *
      * @param count
      * @return
@@ -330,10 +337,10 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             MatchInput matchInput = jobConfiguration.getMatchInput();
             if (matchInput.getInputBuffer() != null) {
                 RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-                retry.execute(ctx ->  {
+                retry.execute(ctx -> {
                     if (ctx.getRetryCount() > 0) {
                         log.info("(Attempt=" + ctx.getRetryCount() + ") writing MatchInput on to hdfs, " + //
-                                "path=" + matchInputFile);
+                        "path=" + matchInputFile);
                     }
                     try {
                         if (HdfsUtils.fileExists(yarnConfiguration, matchInputFile)) {
