@@ -84,7 +84,7 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @JsonProperty("created_by")
     private String createdBy;
 
-    @Column(name = "DELETED")
+    @Column(name = "DELETED", nullable = false)
     @JsonProperty("archived")
     private Boolean deleted;
 
