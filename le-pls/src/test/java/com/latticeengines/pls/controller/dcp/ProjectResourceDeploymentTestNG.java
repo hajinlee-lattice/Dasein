@@ -71,7 +71,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        Assert.assertEquals(projectList.size(), 4);
+        Assert.assertEquals(projectList.size(), 2);
 
         testProjectProxy.deleteProject(projectDetail1.getProjectId());
         testProjectProxy.deleteProject(projectDetail2.getProjectId());
@@ -90,7 +90,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testGetAllDCPProjectWithTeamRestriction() {
         List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        Assert.assertEquals(projectList.size(), 4);
+        Assert.assertEquals(projectList.size(), 2);
         switchToExternalAdmin();
         String url = getRestAPIHostPort() + "/pls/projects/list";
         projectList = restTemplate.getForObject(url, List.class);
