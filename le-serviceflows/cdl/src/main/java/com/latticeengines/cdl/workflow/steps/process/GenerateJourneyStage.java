@@ -160,7 +160,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
 
         // sorted by priority, the one with highest priority number is the default stage
         List<JourneyStage> sortedStages = stages.stream() //
-                .sorted(Comparator.comparing(JourneyStage::getPriority)) //
+                .sorted(Comparator.comparing(JourneyStage::getPriority).reversed()) //
                 .collect(Collectors.toList());
         int size = sortedStages.size();
         return Pair.of(new ArrayList<>(sortedStages.subList(0, size - 1)), sortedStages.get(size - 1));
@@ -227,7 +227,8 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         HdfsDataUnit diffUnit = outputs.get(1);
         // create updated (appended with new journey stage events) master/diff table
         String masterTableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(TimelineProfile.name());
-        String diffTableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(TimelineProfile.name() + "Diff");
+        String diffTableName = customerSpace.getTenantId() + "_"
+                + NamingUtils.timestamp(TimelineProfile.name() + "Diff");
         metadataProxy.createTable(customerSpace.toString(), masterTableName, toTable(masterTableName, masterUnit));
         metadataProxy.createTable(customerSpace.toString(), diffTableName, toTable(diffTableName, diffUnit));
         // update table name in ctx
@@ -265,8 +266,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
     }
 
     private void updateValueInContext(String ctxKey, String key, String value) {
-        Map<String, String> map = getMapObjectFromContext(ctxKey, String.class,
-                String.class);
+        Map<String, String> map = getMapObjectFromContext(ctxKey, String.class, String.class);
         map.put(key, value);
         putObjectInContext(ctxKey, map);
     }
