@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 
 public interface IDaaSService {
 

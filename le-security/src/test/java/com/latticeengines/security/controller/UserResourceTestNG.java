@@ -40,7 +40,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
 import com.latticeengines.security.service.IDaaSService;
-import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
 

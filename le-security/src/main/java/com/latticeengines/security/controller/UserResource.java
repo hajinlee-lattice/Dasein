@@ -45,7 +45,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -1,4 +1,4 @@
-package com.latticeengines.security.service.impl;
+package com.latticeengines.domain.exposed.dcp.idaas;
 
 import java.util.ArrayList;
 import java.util.List;

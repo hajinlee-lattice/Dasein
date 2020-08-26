@@ -97,7 +97,7 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;

@@ -54,7 +54,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
-import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.monitor.exposed.service.EmailService;
 
 import io.opentracing.References;
 import io.opentracing.Scope;
@@ -87,8 +88,14 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     @Inject
     private S3Service s3Service;
 
+    @Inject
+    private EmailService emailService;
+
     @Value("${aws.customer.s3.bucket}")
     private String customersBucket;
+
+    @Value("${common.dcp.public.url}")
+    private String dcpPublicUrl;
 
     @Override
     public void provisionTenant(CustomerSpace space, InstallDocument installDocument) {
@@ -369,7 +376,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("IDaaS users are: " + usersInJson);
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
-        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails);
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
             tenant = tenantService.findByTenantId(PLSTenantId);
@@ -457,24 +464,24 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     }
 
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
-                                   List<String> externalAdminEmails) {
+                                   List<String> externalAdminEmails, String tenantName) {
         log.info("Operating IDaaS users");
         List<IDaaSUser> retrievedUsers = new ArrayList<>();
-        for (IDaaSUser user : iDaaSUsers) {
-            String email = user.getEmailAddress();
+        for (IDaaSUser idaasUser : iDaaSUsers) {
+            String email = idaasUser.getEmailAddress();
             IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
             if (retrievedUser == null) {
                 log.info("begin creating IDaaS user for {}", email);
-                iDaaSService.createIDaaSUser(user);
+                retrievedUser = iDaaSService.createIDaaSUser(idaasUser);
             } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
                 // add product access and default role to user when user already exists in IDaaS
                 log.info("user exist in IDaaS, add product access to user {}", email);
                 ProductRequest request = new ProductRequest();
                 request.setEmailAddress(email);
                 ProductSubscription productSubscription = new ProductSubscription();
-                productSubscription.setSubscriberNumber(user.getSubscriberNumber());
-                productSubscription.setIso2CountryCode(user.getCountryCode());
-                productSubscription.setCompanyName(user.getCompanyName());
+                productSubscription.setSubscriberNumber(idaasUser.getSubscriberNumber());
+                productSubscription.setIso2CountryCode(idaasUser.getCountryCode());
+                productSubscription.setCompanyName(idaasUser.getCompanyName());
                 productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
                 List<ProductSubscription>productSubscriptions = new ArrayList<>();
                 productSubscriptions.add(productSubscription);
@@ -483,12 +490,17 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             } else {
                 log.info("IDaaS user existed for {} and has product access", email);
             }
+            String welcomeUrl = dcpPublicUrl;
+            if (retrievedUser.getInvitationLink() != null) {
+                welcomeUrl = retrievedUser.getInvitationLink();
+            }
+            emailService.sendDCPWelcomeEmail(idaasUser, tenantName, welcomeUrl);
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());
             } else {
                 externalAdminEmails.add(email.toLowerCase());
             }
-            retrievedUsers.add(retrievedUser == null ? user : retrievedUser);
+            retrievedUsers.add(retrievedUser);
         }
         return retrievedUsers;
     }

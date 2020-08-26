@@ -51,7 +51,7 @@ import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
-import com.latticeengines.security.service.impl.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.security.util.IntegrationUserUtils;
 
 @Component("userService")

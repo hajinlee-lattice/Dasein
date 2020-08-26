@@ -12,6 +12,7 @@ import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.util.EmailTemplateBuilder;
 import com.latticeengines.monitor.util.EmailTemplateBuilder.Template;
 import com.latticeengines.monitor.util.EmailUtils;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -927,6 +929,15 @@ public class EmailServiceImpl implements EmailService {
         }
 
         return success;
+    }
+
+    @Override
+    public boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url) {
+        User user = new User();
+        user.setEmail(idaasUser.getEmailAddress());
+        user.setFirstName(idaasUser.getFirstName());
+
+        return sendDCPWelcomeEmail(user, tenantName, url);
     }
 
 }
