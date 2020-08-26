@@ -64,6 +64,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private static final String TEST_DATA_VERSION = "6";
     private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
     private static final String TEST_ACCOUNT_ERROR_FILE = "Account_dup_header.csv";
+    private static final String TEST_ACCOUNT_MISSING_REQUIRED = "Account_missing_country.csv";
 
     protected static final String TEST_TEMPLATE_VERSION = "4";
 
@@ -150,6 +151,35 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
         Assert.assertEquals(upload.getStatus(), Upload.Status.ERROR);
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
+        Assert.assertNotNull(upload.getUploadDiagnostics().getLastErrorMessage());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testErrorImport")
+    public void testMissingRequired() {
+
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+        String dropPath = UploadS3PathBuilderUtils.getDropRoot(projectDetails.getProjectId(), source.getSourceId());
+        dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
+                UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
+        String errorFileKey = dropPath + TEST_ACCOUNT_MISSING_REQUIRED;
+        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_MISSING_REQUIRED, s3Bucket,
+                errorFileKey);
+
+        DCPImportRequest request = new DCPImportRequest();
+        request.setProjectId(projectDetails.getProjectId());
+        request.setSourceId(source.getSourceId());
+        request.setS3FileKey(errorFileKey);
+        ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.FAILED);
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
+                Boolean.FALSE, 0, 20);
+        Assert.assertNotNull(uploadList);
+        Assert.assertEquals(uploadList.size(), 3);
+        UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
+        Assert.assertEquals(upload.getStatus(), Upload.Status.ERROR);
+        Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
+        System.out.println(upload.getUploadDiagnostics().getLastErrorMessage());
         Assert.assertNotNull(upload.getUploadDiagnostics().getLastErrorMessage());
     }
 

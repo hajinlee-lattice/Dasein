@@ -35,6 +35,8 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
@@ -111,6 +113,10 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         UploadStats.ImportStats importStats = new UploadStats.ImportStats();
         long totalCnt = jobDetail.getTotalRows();
         long errorCnt = jobDetail.getIgnoredRows() == null ? 0 : jobDetail.getIgnoredRows();
+        if (totalCnt == errorCnt) {
+            log.info("No records can be ingested!");
+            throw new LedpException(LedpCode.LEDP_60010);
+        }
         importStats.setSubmitted(totalCnt);
         importStats.setSuccessfullyIngested(totalCnt - errorCnt);
         importStats.setFailedIngested(errorCnt);
