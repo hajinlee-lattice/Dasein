@@ -41,6 +41,7 @@ public class GetDnBResponseErrorHandler implements ResponseErrorHandler {
         switch (response.getStatusCode()) {
         case UNAUTHORIZED:
         case REQUEST_TIMEOUT:
+        case TOO_MANY_REQUESTS:
         case FORBIDDEN:
             throw cause;
         case BAD_REQUEST:
