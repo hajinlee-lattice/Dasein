@@ -169,7 +169,7 @@ public class UserResource {
             }
         }
         else {
-            IDaaSUser idaasUser = userService.createIDaaSUser(user);
+            IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
             String welcomeUrl = dcpPublicUrl;
             if (idaasUser.getInvitationLink() != null) {
                 welcomeUrl = idaasUser.getInvitationLink();
@@ -258,7 +258,7 @@ public class UserResource {
                     .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
         }
         if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-            IDaaSUser idaasUser = userService.createIDaaSUser(user);
+            IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
             String welcomeUrl = dcpPublicUrl;
             if (idaasUser.getInvitationLink() != null) {
                 welcomeUrl = idaasUser.getInvitationLink();
