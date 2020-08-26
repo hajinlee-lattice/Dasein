@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.time.Instant;
@@ -9,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -28,9 +28,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
@@ -45,7 +44,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -59,7 +57,6 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
 
     private static Logger log = LoggerFactory.getLogger(GenerateTimeLine.class);
     private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.StreamDateId.name());
-    private static final String TIMELINE_TABLE_PREFIX = "Timeline_%s";
     private static final String PARTITION_KEY_NAME = InterfaceName.PartitionKey.name();
     private static final String SORT_KEY_NAME = InterfaceName.SortKey.name();
     private static final String SUFFIX = String.format("_%s", TableRoleInCollection.TimelineProfile.name());
@@ -202,19 +199,21 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         Map<String, Table> tables = new HashMap<>();
         Map<String, String> mergedMaterStoreNames = new HashMap<>();
         timelineOutputIdx.forEach((timelineId, outputIdx) -> {
-            // create table
-            String key = String.format(TIMELINE_TABLE_PREFIX, timelineId);
-            String name = TableUtils.getFullTableName(key,
-                    HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
-            Table table = toTable(name, result.getTargets().get(outputIdx));
-            metadataProxy.createTable(configuration.getCustomer(), name, table);
             if (timelineId.endsWith(SUFFIX)) {
                 int lastIndex = timelineId.lastIndexOf(SUFFIX);
                 timelineId = timelineId.substring(0, lastIndex);
-                mergedMaterStoreNames.put(timelineId, name);
+                String masterTableName = timelineId + "_" + NamingUtils.timestamp(TimelineProfile.name());
+                Table table = toTable(masterTableName, result.getTargets().get(outputIdx));
+                log.info("Create timeline master table {} for timeline ID {}", masterTableName, timelineId);
+                metadataProxy.createTable(configuration.getCustomer(), masterTableName, table);
+                mergedMaterStoreNames.put(timelineId, masterTableName);
                 exportToS3(table);
             } else {
-                tableNames.put(timelineId, name);
+                String diffTableName = timelineId + "_" + NamingUtils.timestamp(TimelineProfile.name() + "Diff");
+                Table table = toTable(diffTableName, result.getTargets().get(outputIdx));
+                log.info("Create timeline diff table {} for timeline ID {}", diffTableName, timelineId);
+                metadataProxy.createTable(configuration.getCustomer(), diffTableName, table);
+                tableNames.put(timelineId, diffTableName);
                 tables.put(timelineId, table);
             }
         });
