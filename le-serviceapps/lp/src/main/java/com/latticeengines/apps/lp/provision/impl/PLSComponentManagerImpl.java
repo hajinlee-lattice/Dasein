@@ -476,10 +476,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 productSubscription.setIso2CountryCode(user.getCountryCode());
                 productSubscription.setCompanyName(user.getCompanyName());
                 productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
-                List<ProductSubscription>productSubscriptions = retrievedUser.getProductSubscriptions();
-                if(productSubscriptions == null){
-                    productSubscriptions = new ArrayList<>();
-                }
+                List<ProductSubscription>productSubscriptions = new ArrayList<>();
                 productSubscriptions.add(productSubscription);
                 request.setProductSubscription(productSubscriptions);
                 iDaaSService.addProductAccessToUser(request);

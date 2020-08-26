@@ -714,10 +714,7 @@ public class UserServiceImpl implements UserService {
             productSubscription.setCompanyName(idaasUser.getCompanyName());
             productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
             productSubscription.setSubscriberNumber(subscriberNumber);
-            List<ProductSubscription>productSubscriptions = idaasUser.getProductSubscriptions();
-            if(productSubscriptions == null){
-                productSubscriptions = new ArrayList<>();
-            }
+            List<ProductSubscription>productSubscriptions = new ArrayList<>();
             productSubscriptions.add(productSubscription);
             request.setProductSubscription(productSubscriptions);
             iDaaSService.addProductAccessToUser(request);
