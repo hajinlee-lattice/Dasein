@@ -15,6 +15,8 @@ public class LaunchSummary {
 
     private static final String AUTOMATED_LAUNCH = "Automated launch";
 
+    private static final String SYSTEM_USER = "build-admin@lattice-engines.com";
+
     private String playName;
 
     private String playDisplayName;
@@ -101,7 +103,7 @@ public class LaunchSummary {
     }
 
     private String updateSystemLaunch(String createdBy) {
-        if ("build-admin@lattice-engines.com".equals(createdBy)) {
+        if (SYSTEM_USER.equals(createdBy)) {
             return AUTOMATED_LAUNCH;
         }
         return createdBy;
