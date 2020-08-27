@@ -62,16 +62,16 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(projectDetail.getDeleted(), Boolean.TRUE);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = {"testCreateDCPProjectWithProjectId", "testCreateDCPProjectWithOutProjectId"})
     public void testGetAllDCPProject() {
         ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail1);
         ProjectDetails projectDetail2 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail2);
 
-        List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
+        List<ProjectSummary> projectList = testProjectProxy.getAllProjects(Boolean.TRUE);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        Assert.assertEquals(projectList.size(), 2);
+        Assert.assertEquals(projectList.size(), 4);
 
         testProjectProxy.deleteProject(projectDetail1.getProjectId());
         testProjectProxy.deleteProject(projectDetail2.getProjectId());
@@ -79,25 +79,25 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         RetryTemplate retry = RetryUtils.getRetryTemplate(5,
                 Collections.singleton(AssertionError.class), null);
         retry.execute(ctx -> {
-            List<ProjectSummary> allProjects = testProjectProxy.getAllProjects();
+            List<ProjectSummary> allProjects = testProjectProxy.getAllProjects(Boolean.TRUE);
             Assert.assertEquals(allProjects.size(), 4);
             allProjects.forEach(project -> Assert.assertEquals(project.getArchieved(), Boolean.TRUE));
             return true;
         });
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "testGetAllDCPProject")
     public void testGetAllDCPProjectWithTeamRestriction() {
-        List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
+        List<ProjectSummary> projectList = testProjectProxy.getAllProjects(Boolean.TRUE);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        Assert.assertEquals(projectList.size(), 2);
+        Assert.assertEquals(projectList.size(), 4);
         switchToExternalAdmin();
-        String url = getRestAPIHostPort() + "/pls/projects/list";
+        String url = getRestAPIHostPort() + "/pls/projects/list?includeArchived=True";
         projectList = restTemplate.getForObject(url, List.class);
         Assert.assertEquals(projectList.size(), 0);
 
         switchToSuperAdmin();
-        projectList = testProjectProxy.getAllProjects();
+        projectList = testProjectProxy.getAllProjects(Boolean.TRUE);
         Assert.assertEquals(projectList.size(), 4);
 
         ProjectDetails project = testProjectProxy.getProjectByProjectId(projectList.get(0).getProjectId());
@@ -111,7 +111,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         cleanupSession(AccessLevel.EXTERNAL_ADMIN);
         switchToExternalAdmin();
-        url = getRestAPIHostPort() + "/pls/projects/list";
+        url = getRestAPIHostPort() + "/pls/projects/list?includeArchived=True";
         projectList = restTemplate.getForObject(url, List.class);
         Assert.assertEquals(projectList.size(), 1);
     }

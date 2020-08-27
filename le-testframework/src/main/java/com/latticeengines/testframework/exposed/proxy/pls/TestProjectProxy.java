@@ -36,7 +36,11 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
     }
 
     public List<ProjectSummary> getAllProjects() {
-        List<?> raw = get("getAllProjects", constructUrl("/list"), List.class);
+        return getAllProjects(Boolean.FALSE);
+    }
+
+    public List<ProjectSummary> getAllProjects(Boolean includeArchived) {
+        List<?> raw = get("getAllProjects", constructUrl("/list?includeArchived={includeArchived}", includeArchived), List.class);
         return JsonUtils.convertList(raw, ProjectSummary.class);
     }
 

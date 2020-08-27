@@ -36,6 +36,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     private static final String hdfsDir = "/tmp/sftp2hdfsfunctional";
 
     private static final int sftpPort = 22;
+    private static final String sftpRootFolder = "/home/sftpdev/";
     private static final String fileName = "madison.csv.gz";
 
     @Value("${eai.test.sftp.host}")
@@ -86,13 +87,13 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
             ChannelSftp sftpChannel = (ChannelSftp) channel;
 
             try {
-                sftpChannel.stat(sftpChannel.pwd() + "/" + fileName);
+                sftpChannel.stat(sftpChannel.pwd() + sftpRootFolder + fileName);
             } catch (SftpException e) {
                 if (e.getMessage().contains("No such file")) {
                     log.info("Test file " + fileName + " does not exists. Uploading ...");
                     InputStream inputStream = Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("com/latticeengines/eai/service/impl/camel/" + fileName);
-                    sftpChannel.put(inputStream, sftpChannel.pwd() + "/" + fileName);
+                    sftpChannel.put(inputStream, sftpChannel.pwd() + sftpRootFolder + fileName);
                 } else {
                     throw new RuntimeException(e);
                 }
@@ -124,6 +125,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     public SftpToHdfsRouteConfiguration getRouteConfiguration() {
         SftpToHdfsRouteConfiguration configuration = new SftpToHdfsRouteConfiguration();
         configuration.setFileName(fileName);
+        configuration.setSftpDir(sftpRootFolder);
         configuration.setSftpHost(sftpHost);
         configuration.setSftpPort(sftpPort);
         configuration.setHdfsDir(hdfsDir);
