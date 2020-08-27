@@ -103,7 +103,8 @@ public class LaunchSummary {
     private String updateSystemLaunch(String createdBy) {
     	if ("build-admin@lattice-engines.com".equals(createdBy)) {
     		return AUTOMATED_LAUNCH;
-    	} return createdBy;
+    	} 
+    	return createdBy;
     }
     
     private long getCount(Long count) {
