@@ -929,7 +929,8 @@ public enum LedpCode {
     LEDP_60006("CSV file {0} is empty!"), //
     LEDP_60007("Cannot read raw input file {0}: {1}"), //
     LEDP_60008("Invalid CSV file: {0}"), //
-    LEDP_60009("Error when updating source");
+    LEDP_60009("Error when updating source"),//
+    LEDP_60010("Upload failed because no records could be ingested successfully");
 
     private String message;
 
