@@ -183,6 +183,16 @@ public class ProjectServiceImpl implements ProjectService {
         projectEntityMgr.update(project);
     }
 
+    @Override
+    public void updateDescription(String customerSpace, String projectId, String description) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        if (null == project) {
+            return;
+        }
+        project.setProjectDescription(description);
+        projectEntityMgr.update(project);
+    }
+
     private void validateProjectId(String projectId) {
         if (StringUtils.isBlank(projectId)) {
             throw new RuntimeException("Cannot create DCP project with blank projectId!");
