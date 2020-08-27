@@ -190,13 +190,17 @@ public class SourceImportListener extends LEJobListener {
             DataReport report = reportProxy.getDataReport(tenantId, DataReportRecord.Level.Tenant, rootId);
             long refreshTime = report.getRefreshTimestamp() == null ? 0L : report.getRefreshTimestamp();
             long now = Instant.now().toEpochMilli();
-            log.info("last refresh time is {}, current time is {}, has unterminal uploads: {}", refreshTime, now,
-                    hasUnterminalUploads);
-            if (now - refreshTime > TimeUnit.HOURS.toMillis(4) && Boolean.FALSE.equals(hasUnterminalUploads)) {
+            boolean moreThan4HoursSinceRefresh = now - refreshTime > TimeUnit.HOURS.toMillis(4);
+            boolean shouldTriggerRollup = moreThan4HoursSinceRefresh && Boolean.FALSE.equals(hasUnterminalUploads);
+            log.info("last refresh time is {}, current time is {}, " + //
+                            "moreThan4HoursSinceRefresh={}, hasUnterminalUploads={}: shouldTriggerRollup={}", //
+                    refreshTime, now, moreThan4HoursSinceRefresh, hasUnterminalUploads, shouldTriggerRollup);
+            if (shouldTriggerRollup) {
                 DCPReportRequest request = new DCPReportRequest();
                 request.setMode(DataReportMode.UPDATE);
                 request.setLevel(DataReportRecord.Level.Tenant);
                 request.setRootId(rootId);
+                log.info("Sending request to rollup data report.");
                 reportProxy.rollupDataReport(tenantId, request);
             }
         }
