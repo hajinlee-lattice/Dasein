@@ -19,6 +19,10 @@ public enum TableRoleInCollection {
     ConsolidatedCatalog, //
     ConsolidatedActivityStream, //
 
+    RawTransactionStream, //
+    DailyTransactionStream, //
+    PeriodTransactionStream, //
+
     SystemAccount, //
     SystemContact, //
     LatticeAccount, //
@@ -96,6 +100,9 @@ public enum TableRoleInCollection {
         AggregatedActivityStream.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedActivityStream.hasSignature = true;
 
+        RawTransactionStream.partitionKey = InterfaceName.StreamDateId;
+        DailyTransactionStream.partitionKey = InterfaceName.StreamDateId;
+        PeriodTransactionStream.partitionKey = InterfaceName.PeriodId;
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedTransaction.distKey = BucketedAccount.distKey;
         AggregatedTransaction.sortKeys = ImmutableList.of(InterfaceName.TransactionDate);

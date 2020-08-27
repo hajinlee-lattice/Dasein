@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -38,6 +39,13 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String PathPatternId = InterfaceName.PathPatternId.name();
     private static final String SourceMediumId = InterfaceName.SourceMediumId.name();
     private static final String AccountId = InterfaceName.AccountId.name();
+    private static final String ContactId = InterfaceName.ContactId.name();
+    private static final String ProductId = InterfaceName.ProductId.name();
+    private static final String ProductType = InterfaceName.ProductType.name();
+    private static final String TxnType = InterfaceName.TransactionType.name();
+    private static final String Amount = InterfaceName.Amount.name();
+    private static final String Quantity = InterfaceName.Quantity.name();
+    private static final String Cost = InterfaceName.Cost.name();
     private static final String PeriodId = InterfaceName.PeriodId.name();
     private static final String OpportunityId = InterfaceName.OpportunityId.name();
     private static final String StageName = InterfaceName.StageName.name();
@@ -246,6 +254,24 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
     }
 
+    @Test(groups = "functional")
+    public void testTxn() {
+        List<String> inputs = Collections.singletonList(setupDailyTransactionStore());
+        DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
+        config.evaluationDate = EVAL_DATE;
+        config.streams = Collections.singletonList(setupTransactionStream());
+        ActivityStoreSparkIOMetadata inputMetadataWrapper = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> inputMetadata = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(PERIODS);
+        inputMetadata.put(STREAM_ID, details);
+        inputMetadataWrapper.setMetadata(inputMetadata);
+        config.inputMetadata = inputMetadataWrapper;
+        SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+    }
+
     private String setupIncrReducerBatchStore() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of(AccountId, String.class), //
@@ -368,6 +394,33 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc1", MODEL_1, MODEL_1_ID, "2019-10-01", 49825, DAY_1_EPOCH_LATE, 1, 0L, NEW_VERSION, 0.9}, // same day later
                 {"acc1", MODEL_2, MODEL_2_ID, "2019-10-02", 49826, DAY_2_EPOCH, 1, 0L, NEW_VERSION, 0.3}, // second day
                 {"acc2", MODEL_1, MODEL_1_ID, "2019-10-01", 49825, DAY_1_EPOCH, 1, 0L, NEW_VERSION, 0.8} // same day earlier
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupDailyTransactionStore() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(AccountId, String.class),
+                Pair.of(ContactId, String.class),
+                Pair.of(ProductId, String.class),
+                Pair.of(TxnType, String.class),
+                Pair.of(ProductType, String.class),
+                Pair.of(Amount, Integer.class),
+                Pair.of(Quantity, Integer.class),
+                Pair.of(Cost, Double.class),
+                Pair.of(Count, Integer.class),
+                Pair.of(StreamDate, String.class),
+                Pair.of(StreamDateId, Integer.class),
+                Pair.of(VERSION_COL, Long.class)
+        );
+        Object[][] data = new Object[][] {
+                {"a1", "c1", "p1", "Purchase", "Spending", 10, 10, 1.1, 2, "2019-10-01", 49825, 0L},
+                {"a1", "c1", "p1", "Purchase", "Spending", 10, 20, 1.1, 4, "2019-10-02", 49826, 0L},
+                {"a1", "c1", "p1", "Purchase", "Spending", 10, 20, 1.1, 6, "2019-10-03", 49827, 0L},
+                {"a1", "c1", "p1", "Purchase", "Spending", 99, 99, 9.9, 9, "2019-10-08", 49832, 0L}, // aggregated in month period
+                {"a1", "c2", "p1", "Purchase", "Spending", 14, 5, 18.5, 19, "2019-10-04", 49828, 0L},
+                {"a1", "c2", "p2", "Purchase", "Spending", 15, 1, 12.1, 12, "2019-10-04", 49828, 0L},
+                {"a1", "c2", "p3", "Purchase", "Spending", 18, 3, 13.1, 16, "2019-10-04", 49828, 0L}
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -540,6 +593,32 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setReducer(prepareBuyingScoreReducer());
         return stream;
+    }
+
+    private AtlasStream setupTransactionStream() {
+        AtlasStream stream = new AtlasStream();
+        stream.setStreamId(STREAM_ID);
+        stream.setPeriods(PERIODS);
+        stream.setDimensions(Arrays.asList(
+                prepareDimension(ProductId),
+                prepareDimension(TxnType),
+                prepareDimension(ProductType)
+        ));
+        stream.setAggrEntities(Collections.singletonList(BusinessEntity.Contact.name()));
+        stream.setAttributeDerivers(Arrays.asList( //
+                constructSumDeriver(Amount), //
+                constructSumDeriver(Quantity), //
+                constructSumDeriver(Cost) //
+        ));
+        return stream;
+    }
+
+    private StreamAttributeDeriver constructSumDeriver(String attrName) {
+        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
+        deriver.setSourceAttributes(Collections.singletonList(attrName));
+        deriver.setTargetAttribute(attrName);
+        deriver.setCalculation(StreamAttributeDeriver.Calculation.SUM);
+        return deriver;
     }
 
     private ActivityRowReducer prepareBuyingScoreReducer() {

@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -305,5 +306,9 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
     protected void addShortRetentionToTable(String tableName) {
         RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.DAY);
         metadataProxy.updateDataTablePolicy(customerSpace.toString(), tableName, retentionPolicy);
+    }
+
+    protected boolean isShortcutMode(Map<String, Table> tables) {
+        return MapUtils.isNotEmpty(tables) && tables.values().stream().noneMatch(Objects::isNull);
     }
 }
