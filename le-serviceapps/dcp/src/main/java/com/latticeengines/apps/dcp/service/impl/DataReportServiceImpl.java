@@ -217,7 +217,8 @@ public class DataReportServiceImpl implements DataReportService {
         int siblings = dataReportEntityMgr.countSiblingsByParentLevelAndOwnerId(level.getParentLevel(), parentOwnerId);
         log.info("the siblings are " + siblings);
         DunsCountCopy copy = new DunsCountCopy();
-        copy.setOnlyChild(siblings == 1);
+        // when workflow call the api, the ready for rollup for current upload is false
+        copy.setOnlyChild(siblings == 0);
         copy.setParentOwnerId(parentOwnerId);
         return copy;
     }
