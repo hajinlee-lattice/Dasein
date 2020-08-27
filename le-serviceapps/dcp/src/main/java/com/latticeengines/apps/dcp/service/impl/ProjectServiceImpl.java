@@ -241,6 +241,7 @@ public class ProjectServiceImpl implements ProjectService {
         summary.setCreated(projectInfo.getCreated().getTime());
         summary.setUpdated(projectInfo.getUpdated().getTime());
         summary.setCreatedBy(projectInfo.getCreatedBy());
+        summary.setProjectDescription(projectInfo.getProjectDescription());
         return summary;
     }
 
