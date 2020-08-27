@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LiveRampChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -61,7 +62,7 @@ public class ImportDeltaCalculationResultsFromS3
 
     }
 
-    private List<String> getMetadataTableNames(CustomerSpace customerSpace, String playId, String launchId) {
+    protected List<String> getMetadataTableNames(CustomerSpace customerSpace, String playId, String launchId) {
         PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.getTenantId(), playId, launchId);
         if (playLaunch == null) {
             throw new NullPointerException("PlayLaunch should not be null");
@@ -79,8 +80,22 @@ public class ImportDeltaCalculationResultsFromS3
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
         AudienceType audienceType = channelConfig.getAudienceType();
+        boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
 
-        if (AudienceType.ACCOUNTS == audienceType) {
+        if (isLiveRampLaunch) {
+            if (StringUtils.isNotEmpty(addContacts)) {
+                totalDfs += 1;
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME,
+                        Boolean.toString(true));
+                tableNames.add(addContacts);
+            }
+            if (StringUtils.isNotEmpty(delContacts)) {
+                totalDfs += 1;
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME,
+                        Boolean.toString(true));
+                tableNames.add(delContacts);
+            }
+        } else if (AudienceType.ACCOUNTS == audienceType) {
             if (StringUtils.isNotEmpty(addAccounts)) {
                 totalDfs += 2; // add csv and recommendation csv
                 putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_RECOMMENDATION_DATA_FRAME,
