@@ -687,6 +687,7 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
         statsContainer.setVersion(inactive);
         log.info("Saving stats " + statsName + " with " + cubeMap.size() + " cubes.");
         dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
+        putObjectInContext(STATS_UPDATED, Boolean.TRUE); // flag to indicate any stat is updated
     }
 
     protected Map<String, StatsCube> getCurrentCubeMap() {

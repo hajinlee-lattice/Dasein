@@ -866,8 +866,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
 
         new Thread(() -> {
-            log.info("Removing stats in " + inactiveVersion);
-            dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
+            boolean statsUpdated = Boolean.TRUE.equals(getObjectFromContext(STATS_UPDATED, Boolean.class));
+            if (!statsUpdated) {
+                log.info("Removing stats in " + inactiveVersion);
+                dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
+            } else {
+                log.info("Stats has been updated in previous job, keep inactive (version = {}) stats", inactiveVersion);
+            }
 
             List<DataCollectionArtifact> artifacts =
                     dataCollectionProxy.getDataCollectionArtifacts(customerSpace.toString(), READY, inactiveVersion);
