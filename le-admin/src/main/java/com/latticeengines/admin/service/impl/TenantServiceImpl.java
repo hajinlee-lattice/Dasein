@@ -84,6 +84,7 @@ import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -97,7 +98,6 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;

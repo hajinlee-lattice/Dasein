@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.dcp.idaas.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,11 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
+import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
