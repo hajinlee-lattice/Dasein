@@ -101,7 +101,8 @@ public class DirectPlusUtilsUnitTestNG {
                 new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
                 new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name"),
                 new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
-                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4")
+                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4"),
+                new PrimeColumn("BankAddressLocality", "Bank Address Locality Name", "organization.banks.address.addressLocality.name") // test nulls and hash collisions in cache
         );
     }
 

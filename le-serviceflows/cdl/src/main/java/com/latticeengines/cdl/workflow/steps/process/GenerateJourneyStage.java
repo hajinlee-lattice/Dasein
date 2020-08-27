@@ -5,7 +5,6 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.T
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -71,7 +70,6 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
     private DataCollection.Version inactive;
     private DataCollection.Version active;
     private String accountBatchStoreTableName;
-    private String accountJourneyStageTableName;
 
     @Override
     protected JourneyStageJobConfig configureJob(TimeLineSparkStepConfiguration stepConfiguration) {
@@ -80,12 +78,12 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         if (isShortCutMode()) {
             log.info("In short cut mode, skip generating journey stages");
             linkTimelineMasterTablesToInactive();
-            linkJourneyStageTableToInactive();
+            linkJourneyStageTableToInactive(getStringValueFromContext(JOURNEY_STAGE_TABLE_NAME));
             return null;
         }
 
         accountBatchStoreTableName = getAccountTableName();
-        accountJourneyStageTableName = getAccountJourneyStageTableName();
+        String accountJourneyStageTableName = getAccountJourneyStageTableName();
         acc360Timeline = getAccount360TimeLine();
         journeyStages = activityStoreProxy.getJourneyStages(customerSpace.toString());
 
@@ -183,8 +181,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         if (StringUtils.isNotBlank(evaluationDateStr)) {
             long currTime = LocalDate
                     .parse(evaluationDateStr, DateTimeFormatter.ofPattern(DateTimeUtils.DATE_ONLY_FORMAT_STRING)) //
-                    .atTime(LocalTime.MAX) // end of date
-                    .atZone(ZoneId.of("UTC")) //
+                    .atStartOfDay(ZoneId.of("UTC")) // start of date in UTC
                     .toInstant() //
                     .toEpochMilli();
             log.info("Found evaluation date {}, use end of date as current time. Timestamp = {}", evaluationDateStr,
@@ -226,11 +223,15 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         HdfsDataUnit masterUnit = outputs.get(0);
         HdfsDataUnit diffUnit = outputs.get(1);
         // create updated (appended with new journey stage events) master/diff table
-        String masterTableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(TimelineProfile.name());
-        String diffTableName = customerSpace.getTenantId() + "_"
+        String masterTableName = acc360Timeline.getTimelineId() + "_" + NamingUtils.timestamp(TimelineProfile.name());
+        String diffTableName = acc360Timeline.getTimelineId() + "_"
                 + NamingUtils.timestamp(TimelineProfile.name() + "Diff");
-        metadataProxy.createTable(customerSpace.toString(), masterTableName, toTable(masterTableName, masterUnit));
-        metadataProxy.createTable(customerSpace.toString(), diffTableName, toTable(diffTableName, diffUnit));
+        Table updatedTimelineMasterTable = toTable(masterTableName, masterUnit);
+        Table updatedTimelineDiffTable = toTable(diffTableName, diffUnit);
+        metadataProxy.createTable(customerSpace.toString(), masterTableName, updatedTimelineMasterTable);
+        metadataProxy.createTable(customerSpace.toString(), diffTableName, updatedTimelineDiffTable);
+        exportToS3(updatedTimelineDiffTable);
+        exportToS3(updatedTimelineMasterTable);
         // update table name in ctx
         updateValueInContext(TIMELINE_MASTER_TABLE_NAME, acc360Timeline.getTimelineId(), masterTableName);
         updateValueInContext(TIMELINE_DIFF_TABLE_NAME, acc360Timeline.getTimelineId(), diffTableName);
@@ -239,10 +240,10 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
     private void handleJourneyStageTable(HdfsDataUnit unit) {
         String journeyStageTableName = customerSpace.getTenantId() + "_"
                 + NamingUtils.timestamp(AccountJourneyStage.name());
-        metadataProxy.createTable(customerSpace.toString(), journeyStageTableName,
-                toTable(journeyStageTableName, unit));
-        putStringValueInContext(JOURNEY_STAGE_TABLE_NAME, journeyStageTableName);
-        linkJourneyStageTableToInactive();
+        Table table = toTable(journeyStageTableName, unit);
+        metadataProxy.createTable(customerSpace.toString(), journeyStageTableName, table);
+        exportToS3AndAddToContext(table, JOURNEY_STAGE_TABLE_NAME);
+        linkJourneyStageTableToInactive(journeyStageTableName);
     }
 
     private void linkTimelineMasterTablesToInactive() {
@@ -255,13 +256,10 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         }
     }
 
-    private void linkJourneyStageTableToInactive() {
-        if (StringUtils.isBlank(accountJourneyStageTableName)) {
-            accountJourneyStageTableName = getStringValueFromContext(JOURNEY_STAGE_TABLE_NAME);
-        }
-        log.info("Linking account journey stage table name {} to inactive version {}", accountJourneyStageTableName,
+    private void linkJourneyStageTableToInactive(String journeyStageTableName) {
+        log.info("Linking account journey stage table name {} to inactive version {}", journeyStageTableName,
                 inactive);
-        dataCollectionProxy.upsertTable(customerSpace.toString(), accountJourneyStageTableName, AccountJourneyStage,
+        dataCollectionProxy.upsertTable(customerSpace.toString(), journeyStageTableName, AccountJourneyStage,
                 inactive);
     }
 
