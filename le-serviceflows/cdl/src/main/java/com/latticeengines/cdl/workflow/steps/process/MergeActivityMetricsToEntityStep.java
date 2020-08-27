@@ -179,11 +179,16 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         rolesToRelink.forEach(role -> {
             Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), role, active, allowedSignatures);
             if (MapUtils.isNotEmpty(signatureTableNames)) {
-                log.info("Linking existing {} metrics to inactive version{}: {}", role, inactive, signatureTableNames);
                 dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, role, inactive);
-                relinkedMetrics.putAll(signatureTableNames);
+                relinkedMetrics.putAll(signatureTableNames.entrySet().stream().map(entry -> {
+                    String entity = entry.getKey();
+                    String tableName = entry.getValue();
+                    String mergedLabel = String.format("%s_%s", entity, role);
+                    return Pair.of(mergedLabel, tableName);
+                }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
             }
         });
+        log.info("Linked existing metrics to inactive version {}: {}", inactive, relinkedMetrics);
     }
 
     private void appendActiveActivityMetrics(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata, List<ActivityMetricsGroup> groups) {
