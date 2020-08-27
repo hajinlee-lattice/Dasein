@@ -201,7 +201,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public void testStreetAddress() {
         // Schema: ID, CompanyName, State, Country, ZipCode, Address
         Object[][] data = new Object[][] {
-                { 123, "AMAZON.COM, INC.", "WASHINGTON", "USA", "98109-5210", "410 Terry Ave N" } //
+                { 123, "APPLE INC.", "California", "USA", "95014-0642", "1 Apple Park Way" } //
         };
         // ColumnSelection is RTS
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data, //
