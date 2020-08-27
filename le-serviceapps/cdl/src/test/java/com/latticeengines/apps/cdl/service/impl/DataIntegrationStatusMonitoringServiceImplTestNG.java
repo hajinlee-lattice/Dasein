@@ -27,6 +27,7 @@ import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.cdl.AudienceEventDetail;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -219,11 +220,15 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch1.getId(), false);
         Assert.assertEquals(LaunchState.Syncing, playLaunch.getLaunchState());
 
+        testCompletedMessage(workflowRequestId, playLaunch1);
+
+        testAudienceSizeUpdateMessage(workflowRequestId, playLaunch1);
+
         List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
                 .getAllStatusMessages(statusMonitor.getPid());
 
         Assert.assertNotNull(messages);
-        Assert.assertEquals(messages.size(), 2);
+        Assert.assertEquals(messages.size(), 4);
     }
 
     @Test(groups = "functional")
@@ -237,36 +242,11 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         Assert.assertNotNull(statusMonitor);
 
+        testCompletedMessage(workflowRequestId, playLaunch2);
+
+        testAudienceSizeUpdateMessage(workflowRequestId, playLaunch2);
+
         DataIntegrationStatusMonitorMessage updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
-        updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
-        updateStatusMonitorMessage.setEventType(DataIntegrationEventType.Completed.toString());
-        updateStatusMonitorMessage.setEventTime(new Date());
-        updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
-        ProgressEventDetail eventDetail = new ProgressEventDetail();
-        eventDetail.setFailed(1L);
-        eventDetail.setProcessed(2L);
-        eventDetail.setTotalRecordsSubmitted(4L);
-        eventDetail.setDuplicates(1L);
-        eventDetail.setAudienceSize(1L);
-        eventDetail.setMatchedCount(1L);
-        updateStatusMonitorMessage.setEventDetail(eventDetail);
-
-        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
-        statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
-
-        Assert.assertNotNull(statusMonitor);
-        Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
-        Assert.assertNotNull(statusMonitor.getEventCompletedTime());
-        Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
-
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId(), false);
-        Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
-        Assert.assertEquals(Long.valueOf(1), playLaunch.getContactsErrored());
-        Assert.assertEquals(Long.valueOf(1), playLaunch.getContactsDuplicated());
-        Assert.assertEquals(Long.valueOf(1), playLaunch.getAudienceSize());
-        Assert.assertEquals(Long.valueOf(1), playLaunch.getMatchedCount());
-
-        updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
         updateStatusMonitorMessage.setEventType(DataIntegrationEventType.Initiated.toString());
         updateStatusMonitorMessage.setEventTime(new Date());
@@ -279,12 +259,12 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertNotNull(statusMonitor);
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
         Assert.assertNotNull(statusMonitor.getEventCompletedTime());
-        Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
+        Assert.assertEquals(DataIntegrationEventType.AudienceSizeUpdate.toString(), statusMonitor.getStatus());
 
         List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
                 .getAllStatusMessages(statusMonitor.getPid());
         Assert.assertNotNull(messages);
-        Assert.assertEquals(messages.size(), 3);
+        Assert.assertEquals(messages.size(), 4);
 
         // throw new Exception();
     }
@@ -296,6 +276,57 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
     private List<DataIntegrationStatusMonitorMessage> generateListMessages(
             DataIntegrationStatusMonitorMessage... statusMessage) {
         return Arrays.asList(statusMessage);
+    }
+
+    private void testCompletedMessage(String workflowRequestId, PlayLaunch testPlayLaunch) {
+        DataIntegrationStatusMonitorMessage updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
+        updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
+        updateStatusMonitorMessage.setEventType(DataIntegrationEventType.Completed.toString());
+        updateStatusMonitorMessage.setEventTime(new Date());
+        updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
+
+        ProgressEventDetail eventDetail = new ProgressEventDetail();
+        eventDetail.setFailed(1L);
+        eventDetail.setProcessed(2L);
+        eventDetail.setTotalRecordsSubmitted(4L);
+        eventDetail.setDuplicates(1L);
+        updateStatusMonitorMessage.setEventDetail(eventDetail);
+
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
+        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
+
+        Assert.assertNotNull(statusMonitor);
+        Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
+        Assert.assertNotNull(statusMonitor.getEventCompletedTime());
+        Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), false);
+        Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
+        Assert.assertEquals(Long.valueOf(1), playLaunch.getContactsErrored());
+        Assert.assertEquals(Long.valueOf(1), playLaunch.getContactsDuplicated());
+    }
+
+    private void testAudienceSizeUpdateMessage(String workflowRequestId, PlayLaunch testPlayLaunch) {
+        DataIntegrationStatusMonitorMessage updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
+        updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
+        updateStatusMonitorMessage.setEventType(DataIntegrationEventType.AudienceSizeUpdate.toString());
+        updateStatusMonitorMessage.setEventTime(new Date());
+        updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
+
+        AudienceEventDetail audienceDetail = new AudienceEventDetail();
+        audienceDetail.setAudienceSize(2L);
+        audienceDetail.setMatchedCount(2L);
+        updateStatusMonitorMessage.setEventDetail(audienceDetail);
+
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
+        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
+
+        Assert.assertNotNull(statusMonitor);
+        Assert.assertEquals(DataIntegrationEventType.AudienceSizeUpdate.toString(), statusMonitor.getStatus());
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), false);
+        Assert.assertEquals(Long.valueOf(2), playLaunch.getAudienceSize());
+        Assert.assertEquals(Long.valueOf(2), playLaunch.getMatchedCount());
     }
 
     private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState, Set<RatingBucketName> bucketToLaunch,

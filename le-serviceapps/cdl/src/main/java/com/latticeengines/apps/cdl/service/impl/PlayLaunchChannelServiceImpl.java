@@ -213,7 +213,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                     EventDetail details = audienceState.getEventDetail();
                     if (details instanceof ProgressEventDetail) {
                         playLaunch.setAudienceState(((ProgressEventDetail) details).getStatus());
-                        playLaunch.setMatchedRate(((ProgressEventDetail) details).getMatchRate());
                     }
                 }
             }
