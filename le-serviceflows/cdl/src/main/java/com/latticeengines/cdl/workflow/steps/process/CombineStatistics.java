@@ -150,6 +150,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             statsContainer.setVersion(inactiveVersion);
             log.info("Saving stats with " + cubeMap.size() + " cubes.");
             dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
+            putObjectInContext(STATS_UPDATED, Boolean.TRUE); // flag to indicate any stat is updated
         } else {
             log.info("Skip saving an empty stats.");
         }
