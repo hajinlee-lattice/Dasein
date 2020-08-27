@@ -192,7 +192,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println("Error file path=" + errorFileKey);
         Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
         Assert.assertNotNull(upload.getStatistics().getImportStats().getFailedIngested());
-        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 1L);
+        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 6L);
     }
 
     private void prepareTenant() {
