@@ -13,6 +13,10 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 
 public class LaunchSummary {
 
+    private static final String AUTOMATED_LAUNCH = "Automated launch";
+
+    private static final String SYSTEM_USER = "build-admin@lattice-engines.com";
+
     private String playName;
 
     private String playDisplayName;
@@ -44,6 +48,8 @@ public class LaunchSummary {
     private String folderName;
 
     private String channelConfig;
+
+    private String createdBy;
 
     private DataIntegrationStatusMonitor integrationStatusMonitor;
 
@@ -86,6 +92,7 @@ public class LaunchSummary {
         this.setAudienceName(launch.getAudienceName());
         this.setFolderName(launch.getFolderName());
         this.setLaunchType(launch.getLaunchType());
+        this.setCreatedBy(updateSystemLaunch(launch.getCreatedBy()));
         if (launch.getChannelConfig() != null) {
             this.setChannelConfig(launch.getChannelConfig());
         }
@@ -93,6 +100,13 @@ public class LaunchSummary {
             this.setPlayName(launch.getPlay().getName());
             this.setPlayDisplayName(launch.getPlay().getDisplayName());
         }
+    }
+
+    private String updateSystemLaunch(String createdBy) {
+        if (SYSTEM_USER.equals(createdBy)) {
+            return AUTOMATED_LAUNCH;
+        }
+        return createdBy;
     }
 
     private long getCount(Long count) {
@@ -229,6 +243,14 @@ public class LaunchSummary {
 
     public void setChannelConfig(ChannelConfig channelConfig) {
         this.channelConfig = JsonUtils.serialize(channelConfig);
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getCreatedBy() {
+        return this.createdBy;
     }
 
     public ChannelConfig getChannelConfig() {
