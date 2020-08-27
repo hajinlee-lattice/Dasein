@@ -76,6 +76,13 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
                 "sourceUID");
         Assert.assertTrue(CollectionUtils.isEmpty(subOwnerIds));
 
+        // verify upload node has no brothers
+        DunsCountCopy copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
+                "uploadUID");
+        Assert.assertNotNull(copy);
+        Assert.assertTrue(copy.isOnlyChild());
+        Assert.assertNotNull(copy.getParentOwnerId());
+
         // modify the readyForRollup
         dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID");
         subOwnerIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Source,
@@ -83,10 +90,10 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertTrue(CollectionUtils.isNotEmpty(subOwnerIds));
 
         // verify upload node has no brothers
-        DunsCountCopy copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
+        copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
                 "uploadUID");
         Assert.assertNotNull(copy);
-        Assert.assertTrue(copy.isOnlyChild());
+        Assert.assertFalse(copy.isOnlyChild());
         Assert.assertNotNull(copy.getParentOwnerId());
 
 
