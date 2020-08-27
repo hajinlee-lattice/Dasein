@@ -36,4 +36,6 @@ public interface ProjectService {
     GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId);
 
     void updateTeamId(String customerSpace, String projectId, String teamId);
+
+    void updateDescription (String customerSpace, String projectId, String description);
 }
