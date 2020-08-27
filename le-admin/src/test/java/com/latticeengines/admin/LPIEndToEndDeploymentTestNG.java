@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -51,7 +52,6 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
-import com.latticeengines.security.service.impl.IDaaSUser;
 
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 

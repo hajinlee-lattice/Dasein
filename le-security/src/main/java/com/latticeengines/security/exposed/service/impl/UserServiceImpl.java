@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -51,7 +52,6 @@ import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
-import com.latticeengines.security.service.impl.IDaaSUser;
 import com.latticeengines.security.util.IntegrationUserUtils;
 
 @Component("userService")

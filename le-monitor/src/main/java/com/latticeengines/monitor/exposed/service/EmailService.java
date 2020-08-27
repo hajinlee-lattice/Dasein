@@ -8,6 +8,7 @@ import javax.mail.Multipart;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -98,6 +99,8 @@ public interface EmailService {
     void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo);
 
     boolean sendDCPWelcomeEmail(User user, String tenantName, String url);
+
+    boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url);
 
     enum EmailFromAddress {
         DNB_CONNECT, LATTICE_ENGINES
