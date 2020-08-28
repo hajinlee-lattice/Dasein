@@ -26,6 +26,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -254,7 +256,7 @@ public class DeltaCampaignLaunchInitStep
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(deleteCsvTargetPath));
         } else {
-            throw new RuntimeException("Illegal situation.");
+            throw new LedpException(LedpCode.LEDP_70000);
         }
 
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);

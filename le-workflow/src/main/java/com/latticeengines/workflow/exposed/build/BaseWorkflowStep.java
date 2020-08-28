@@ -225,7 +225,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
     protected static final String DELTA_TABLE_COUNTS = "DELTA_TABLE_COUNTS";
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
-    protected static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
+    public static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
     protected static final String PROCESS_ACCOUNT_FULL_PROFILE = "PROCESS_ACCOUNT_FULL_PROFILE";
     protected static final String ACTIVITY_STREAMS_NEED_REBUILD = "ACTIVITY_STREAMS_NEED_REBUILD";
