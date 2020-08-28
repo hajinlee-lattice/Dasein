@@ -196,7 +196,7 @@ VALUES
   ('2.0.21', '2019-12-23', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.22', '2020-04-02', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.23', '2020-06-23', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.24', '2020-06-23', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.24', '2020-08-15', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
