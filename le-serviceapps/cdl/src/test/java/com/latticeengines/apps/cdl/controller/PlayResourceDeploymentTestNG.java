@@ -141,6 +141,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private void searchPlayLaunch() {
         playCreationHelper.createPlayLaunch(testPlaySetupConfig);
         playLaunch = playCreationHelper.getPlayLaunch();
+        playLaunch.setAccountsSelected(totalRatedAccounts);
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), playLaunch);
 
         List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Collections.singletonList(LaunchState.Failed));
@@ -148,6 +150,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launching);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launched);
         playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 8L, 25L,
                 0L, (totalRatedAccounts - 8L), 0L, 0L);
