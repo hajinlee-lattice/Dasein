@@ -51,6 +51,9 @@ public class TenantActivity {
     @JsonProperty("is_auto_schedule")
     private boolean isAutoSchedule;
 
+    @JsonProperty("is_hand_hold_tenant")
+    private boolean isHandHoldTenant;
+
     @JsonProperty("timezone")
     private ZoneId timezone;
 
@@ -164,6 +167,14 @@ public class TenantActivity {
         isAutoSchedule = autoSchedule;
     }
 
+    public boolean isHandHoldTenant() {
+        return isHandHoldTenant;
+    }
+
+    public void setHandHoldTenant(boolean handHoldTenant) {
+        isHandHoldTenant = handHoldTenant;
+    }
+
     public boolean isLargeTransaction() {
         return isLargeTransaction;
     }
@@ -259,6 +270,11 @@ public class TenantActivity {
 
         public Builder withTimezone(ZoneId timezone) {
             tenantActivity.setTimezone(timezone);
+            return this;
+        }
+
+        public Builder handHoldTenant() {
+            tenantActivity.setHandHoldTenant(true);
             return this;
         }
 
