@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.constraint.HasPAQuota;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargePA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargeTxnPA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxPA;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.NotHandHoldTenant;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.RetryNotExist;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantDuplicate;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantGroupQuota;
@@ -40,6 +41,7 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new DataCloudRefreshExist());
         pushConstraintList.add(new RetryNotExist());
+        pushConstraintList.add(new NotHandHoldTenant());
     }
 
     private static void initPopConstraint() {

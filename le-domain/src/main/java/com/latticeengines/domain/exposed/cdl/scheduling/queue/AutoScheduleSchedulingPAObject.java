@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.constraint.LastActionTim
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargePA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargeTxnPA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxPA;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.NotHandHoldTenant;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.NotInPeacePeriod;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.RetryNotExist;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantDuplicate;
@@ -74,6 +75,7 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
         pushConstraintList.add(new FirstActionTimePending());
         pushConstraintList.add(new LastActionTimePending());
         pushConstraintList.add(new RetryNotExist());
+        pushConstraintList.add(new NotHandHoldTenant());
     }
 
     private static void initPopConstraint() {

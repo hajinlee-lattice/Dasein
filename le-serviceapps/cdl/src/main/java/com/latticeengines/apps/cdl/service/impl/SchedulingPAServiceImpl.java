@@ -239,12 +239,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 // skip entity match migration tenants
                 skippedMigrationTenants.add(tenantId);
                 continue;
-            } else if (isHandHoldPATenant(tenantId)) {
-                handHoldPATenants.add(tenantId);
-                continue;
             }
 
-
+            boolean isHandHoldPATenant = isHandHoldPATenant(tenantId);
+            if (isHandHoldPATenant) {
+                handHoldPATenants.add(tenantId);
+            }
             // configure the context
             Tenant tenant = simpleDataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
@@ -280,6 +280,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setTenantType(tenant.getTenantType());
                 tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus));
                 tenantActivity.setLargeTransaction(isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus));
+                tenantActivity.setHandHoldTenant(isHandHoldPATenant);
                 if (tenantActivity.isLarge()) {
                     largeJobTenantId.add(tenantId);
                 }
