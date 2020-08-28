@@ -195,7 +195,8 @@ VALUES
   ('2.0.6', '2017-09-01', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.21', '2019-12-23', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.22', '2020-04-02', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.23', '2020-06-23', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.23', '2020-06-23', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.24', '2020-06-23', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -230,6 +231,14 @@ SET
   `EnrichmentStatsVersion`   = '2020-06-18_17-34-39_UTC',
   `DynamoTableSignature`     = '20200617'
 WHERE `Version` = '2.0.23';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2020-08-15_18-19-27_UTC',
+  `AccountLookupHdfsVersion` = '2020-08-15_18-19-27_UTC',
+  `DunsGuideBookHdfsVersion` = '2020-08-15_18-19-27_UTC',
+  `EnrichmentStatsVersion`   = '2020-08-15_18-19-27_UTC'
+WHERE `Version` = '2.0.24';
 
 UPDATE SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')
