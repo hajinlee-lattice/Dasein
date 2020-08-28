@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -927,6 +928,15 @@ public class EmailServiceImpl implements EmailService {
         }
 
         return success;
+    }
+
+    @Override
+    public boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url) {
+        User user = new User();
+        user.setEmail(idaasUser.getEmailAddress());
+        user.setFirstName(idaasUser.getFirstName());
+
+        return sendDCPWelcomeEmail(user, tenantName, url);
     }
 
 }

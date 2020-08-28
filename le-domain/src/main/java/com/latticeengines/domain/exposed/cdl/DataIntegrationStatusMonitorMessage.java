@@ -51,10 +51,10 @@ public class DataIntegrationStatusMonitorMessage {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "eventType")
     @JsonSubTypes({ //
-            @Type(value = ProgressEventDetail.class, name = "Progress"), //
             @Type(value = ProgressEventDetail.class, name = "Completed"),
             @Type(value = ProgressEventDetail.class, name = "InProgress"),
-            @Type(value = AudienceCreationEventDetail.class, name = "AudienceCreation"),
+            @Type(value = AudienceEventDetail.class, name = "AudienceCreation"),
+            @Type(value = AudienceEventDetail.class, name = "AudienceSizeUpdate"),
             @Type(value = FailedEventDetail.class, name = "Failed"),
             @Type(value = InitiatedEventDetail.class, name = "Initiated") })
     private EventDetail eventDetail;

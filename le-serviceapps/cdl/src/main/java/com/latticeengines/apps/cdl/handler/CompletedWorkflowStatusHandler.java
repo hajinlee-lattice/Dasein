@@ -88,9 +88,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
                 playLaunch.setContactsDuplicated(duplicatedRecords);
             }
 
-            playLaunch.setAudienceSize(eventDetail.getAudienceSize());
-            playLaunch.setMatchedCount(eventDetail.getMatchedCount());
-
             playLaunchService.update(playLaunch);
         }
 

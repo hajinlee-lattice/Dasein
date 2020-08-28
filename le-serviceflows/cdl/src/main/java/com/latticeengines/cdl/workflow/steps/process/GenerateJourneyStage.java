@@ -318,7 +318,12 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
     }
 
     private String getAccountJourneyStageTableName() {
-        return getTableName(AccountJourneyStage, "account journey stage master store");
+        String tableName = getTableName(AccountJourneyStage, "account journey stage master store");
+        if (configuration.isShouldRebuild()) {
+            log.info("In rebuild mode, ignoring active journey stage table {}", tableName);
+            return null;
+        }
+        return tableName;
     }
 
     private String getAccountTableName() {

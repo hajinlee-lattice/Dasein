@@ -30,7 +30,7 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     private static final Logger log = LoggerFactory.getLogger(AMStatisticsResourceDeploymentTestNG.class);
     private int enrichmentOnlyCubeFieldsCount = 0;
 
-    private List<Category> amCats = Arrays.asList(Category.FIRMOGRAPHICS, Category.GROWTH_TRENDS, Category.INTENT,
+    private List<Category> amCats = Arrays.asList(Category.FIRMOGRAPHICS, Category.COVID_19, Category.INTENT,
             Category.ONLINE_PRESENCE, Category.TECHNOLOGY_PROFILE, Category.WEBSITE_KEYWORDS, Category.WEBSITE_PROFILE);
 
     @Test(groups = { "deployment" }, enabled = true)

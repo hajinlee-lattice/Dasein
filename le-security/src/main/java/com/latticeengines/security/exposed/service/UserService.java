@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -12,7 +13,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.service.impl.IDaaSUser;
 
 public interface UserService {
 

@@ -39,6 +39,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;

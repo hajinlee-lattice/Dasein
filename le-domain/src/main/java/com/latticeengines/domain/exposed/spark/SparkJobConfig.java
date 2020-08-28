@@ -55,7 +55,9 @@ import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SplitSystemBatchStoreConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SplitTransactionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.TruncateLatticeAccountConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ValidateProductConfig;
 import com.latticeengines.domain.exposed.spark.cm.CMTpsLookupCreationConfig;
@@ -165,7 +167,10 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = RollupDataReportConfig.class, name = RollupDataReportConfig.NAME), //
         @JsonSubTypes.Type(value = PrepareDataReportConfig.class, name = PrepareDataReportConfig.NAME), //
         @JsonSubTypes.Type(value = CMTpsSourceCreationConfig.class, name = CMTpsSourceCreationConfig.NAME), //
-        @JsonSubTypes.Type(value = CMTpsLookupCreationConfig.class, name = CMTpsLookupCreationConfig.NAME) })
+        @JsonSubTypes.Type(value = CMTpsLookupCreationConfig.class, name = CMTpsLookupCreationConfig.NAME), //
+        @JsonSubTypes.Type(value = SplitTransactionConfig.class, name = SplitTransactionConfig.NAME), //
+        @JsonSubTypes.Type(value = TransformTxnStreamConfig.class, name = TransformTxnStreamConfig.NAME) //
+})
 public abstract class SparkJobConfig implements Serializable {
 
     /**

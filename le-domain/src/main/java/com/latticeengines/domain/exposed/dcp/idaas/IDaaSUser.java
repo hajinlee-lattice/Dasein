@@ -1,4 +1,4 @@
-package com.latticeengines.security.service.impl;
+package com.latticeengines.domain.exposed.dcp.idaas;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)

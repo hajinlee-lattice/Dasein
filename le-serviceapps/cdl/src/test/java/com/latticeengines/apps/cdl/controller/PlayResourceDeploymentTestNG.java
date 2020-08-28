@@ -139,6 +139,9 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testAutomaticLaunchByChannel" })
     private void searchPlayLaunch() {
+        playCreationHelper.createPlayLaunch(testPlaySetupConfig);
+        playLaunch = playCreationHelper.getPlayLaunch();
+
         List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Collections.singletonList(LaunchState.Failed));
 

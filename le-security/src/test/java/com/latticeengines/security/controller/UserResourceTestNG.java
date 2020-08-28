@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -40,7 +41,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
 import com.latticeengines.security.service.IDaaSService;
-import com.latticeengines.security.service.impl.IDaaSUser;
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
