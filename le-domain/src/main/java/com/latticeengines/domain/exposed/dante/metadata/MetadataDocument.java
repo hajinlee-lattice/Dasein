@@ -1,10 +1,12 @@
 package com.latticeengines.domain.exposed.dante.metadata;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class MetadataDocument {
+public class MetadataDocument implements Serializable{
 
     @JsonProperty("Notions")
     private List<NotionMetadataWrapper> notions;
@@ -15,5 +17,10 @@ public class MetadataDocument {
 
     public void setNotions(List<NotionMetadataWrapper> notions) {
         this.notions = notions;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

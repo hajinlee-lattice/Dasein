@@ -1,0 +1,387 @@
+{
+  "Applications": [
+    {
+      "HeaderNameProperty": "DisplayName",
+      "ID": "LatticeForAccounts",
+      "Notion": "DanteAccount",
+      "Type": "ApplicationWidget",
+      "Version": "1",
+      "Widgets": [
+        {
+          "ID": "playDetailsWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "playDetailsHeaderWidget",
+              "Notion": "DanteLead",
+              "SubtitleProperty": "PlayDescription",
+              "TitleProperty": "PlayDisplayName",
+              "Type": "ScreenHeaderWidget"
+            },
+            {
+              "DefaultTab": 0,
+              "ID": "playDetailsTabWidget",
+              "Type": "TabWidget",
+              "Widgets": [
+                {
+                  "Columns": 2,
+                  "ID": "playAttributesScreenWidget",
+                  "NoDataString": "DANTE_LEAD_NO_INSIGHTS_DESCRIPTION",
+                  "Notion": "DanteLead",
+                  "TargetNotion": "DanteLeadAnalyticAttribute",
+                  "TitleString": "DANTE_ACCOUNT_ATTRIBUTES_TITLE",
+                  "Type": "ScreenWidget",
+                  "Widgets": [
+                    {
+                      "ID": "playDetailsExternalAttributesPanelWidget",
+                      "Notion": "DanteLead",
+                      "TitleString": "DANTE_LEAD_EXTERNAL_INSIGHTS_TITLE",
+                      "Type": "CollapsiblePanelWidget",
+                      "Widgets": [
+                        {
+                          "ExcludedTags": [],
+                          "ID": "playDetailsExternalAttributeList",
+                          "Limit": "5",
+                          "ModelIdProperty": "ModelID",
+                          "ModelNotion": "FrontEndCombinedModelSummary",
+                          "Notion": "DanteLead",
+                          "NullThreshold": "100",
+                          "RequiredTags": [
+                            "External"
+                          ],
+                          "ShowLift": "false",
+                          "Sorts": [],
+                          "TargetNotion": "DanteLeadAnalyticAttribute",
+                          "TargetNotionKey": "LeadID",
+                          "Type": "AnalyticAttributeListWidget",
+                          "ValueProperty": "ExternalProbability",
+                          "Widgets": [
+                            {
+                              "ID": "playDetailsExternalAttributeTile",
+                              "Notion": "DanteLeadAnalyticAttribute",
+                              "Type": "AnalyticAttributeTileWidget",
+                              "Widgets": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "ID": "playDetailsInternalAttributesPanelWidget",
+                      "Notion": "DanteLead",
+                      "TitleString": "DANTE_LEAD_INTERNAL_INSIGHTS_TITLE",
+                      "Type": "CollapsiblePanelWidget",
+                      "Widgets": [
+                        {
+                          "ExcludedTags": [
+                            "External"
+                          ],
+                          "ID": "playDetailsInternalAttributeList",
+                          "Limit": "5",
+                          "ModelIdProperty": "ModelID",
+                          "ModelNotion": "FrontEndCombinedModelSummary",
+                          "Notion": "DanteLead",
+                          "NullThreshold": "100",
+                          "RequiredTags": [],
+                          "ShowLift": "false",
+                          "Sorts": [],
+                          "TargetNotion": "DanteLeadAnalyticAttribute",
+                          "TargetNotionKey": "LeadID",
+                          "Type": "AnalyticAttributeListWidget",
+                          "ValueProperty": "ExternalProbability",
+                          "Widgets": [
+                            {
+                              "ID": "playDetailsInternalAttributeTile",
+                              "Notion": "DanteLeadAnalyticAttribute",
+                              "Type": "AnalyticAttributeTileWidget",
+                              "Widgets": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "ID": "playTalkingPointsScreenWidget",
+                  "NoDataString": "DANTE_NO_TALKING_POINTS_DESCRIPTION",
+                  "Notion": "DanteLead",
+                  "TargetNotion": "DanteTalkingPoint",
+                  "TitleString": "DANTE_TALKING_POINTS_TITLE",
+                  "Type": "ScreenWidget",
+                  "Widgets": [
+                    {
+                      "ActiveWidgets": [
+                        "First"
+                      ],
+                      "Columns": 1,
+                      "ID": "talkingPointRepeater",
+                      "Notion": "DanteLead",
+                      "TargetNotion": "DanteTalkingPoint",
+                      "TargetNotionKey": "PlayID",
+                      "Type": "RepeaterWidget",
+                      "Widgets": [
+                        {
+                          "ID": "talkingPointPanelWidget",
+                          "Notion": "DanteTalkingPoint",
+                          "TitleProperty": "Title",
+                          "Type": "CollapsiblePanelWidget",
+                          "Widgets": [
+                            {
+                              "Column": 0,
+                              "ID": "talkingPointRichTextWidget",
+                              "Row": 0,
+                              "Type": "TalkingPointWidget"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "ID": "purchaseHistoryScreenWidget",
+                  "TitleString": "DANTE_PURCHASE_HISTORY_TITLE",
+                  "Type": "ScreenWidget",
+                  "Widgets": [
+                    {
+                      "ID": "purchaseHistoryWidget",
+                      "NoDataString": "DANTE_NO_PURCHASE_HISTORY_DESCRIPTION",
+                      "Notion": "DantePurchaseHistory",
+                      "Type": "PurchaseHistoryWidget"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "ID": "playDetailsTileRepeater",
+              "Notion": "DanteAccount",
+              "Sorts": [
+                {
+                  "Property": "ExternalProbability"
+                },
+                {
+                  "Property": "ExpectedValue"
+                },
+                {
+                  "IsAscending": true,
+                  "Property": "PlayDisplayName"
+                }
+              ],
+              "TargetNotion": "DanteLead",
+              "TargetNotionKey": "SalesforceAccountID",
+              "Type": "RepeaterWidget",
+              "Widgets": [
+                {
+                  "CrmIdProperty": "SfdcID",
+                  "ID": "playDetailsTileWidget",
+                  "IdProperty": "LeadID",
+                  "LaunchDateProperty": "LastLaunched",
+                  "LiftProperty": "Lift",
+                  "NameProperty": "PlayDisplayName",
+                  "Notion": "DanteLead",
+                  "ObjectiveProperty": "PlayDescription",
+                  "PlayTypeProperty": "PlayType",
+                  "RevenueProperty": "ExpectedValue",
+                  "Type": "PlayDetailsTileWidget",
+                  "Widgets": [
+                    {
+                      "ID": "playDetailsTileArcChartWidget",
+                      "LabelProperty": "LikelihoodBucketDisplayName",
+                      "LabelResourceKey": "",
+                      "Notion": "DanteLead",
+                      "Type": "ArcChartWidget",
+                      "ValueProperty": "ExternalProbability"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ID": "playListScreenWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ID": "playListTileRepeater",
+              "Notion": "DanteAccount",
+              "Sorts": [
+                {
+                  "Property": "ExternalProbability"
+                },
+                {
+                  "Property": "ExpectedValue"
+                },
+                {
+                  "IsAscending": true,
+                  "Property": "PlayDisplayName"
+                }
+              ],
+              "TargetNotion": "DanteLead",
+              "TargetNotionKey": "SalesforceAccountID",
+              "Type": "RepeaterWidget",
+              "Widgets": [
+                {
+                  "CrmIdProperty": "SfdcID",
+                  "ID": "playListTileWidget",
+                  "IdProperty": "LeadID",
+                  "LaunchDateProperty": "LastLaunched",
+                  "LiftProperty": "Lift",
+                  "NameProperty": "PlayDisplayName",
+                  "Notion": "DanteLead",
+                  "ObjectiveProperty": "PlayDescription",
+                  "PlayTypeProperty": "PlayType",
+                  "RevenueProperty": "ExpectedValue",
+                  "Type": "PlayListTileWidget",
+                  "Widgets": [
+                    {
+                      "ID": "playListTileArcChartWidget",
+                      "LabelProperty": "LikelihoodBucketDisplayName",
+                      "LabelResourceKey": "",
+                      "Notion": "DanteLead",
+                      "Type": "ArcChartWidget",
+                      "ValueProperty": "ExternalProbability"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "HeaderNameProperty": "DisplayName",
+      "ID": "LatticeForLeads",
+      "Notion": "DanteLead",
+      "Type": "ApplicationWidget",
+      "Version": "1",
+      "Widgets": [
+        {
+          "ID": "leadDetailsWidget",
+          "Type": "ScreenWidget",
+          "Widgets": [
+            {
+              "ActiveWidgets": [
+                "None"
+              ],
+              "ID": "leadDetailsTileWidget",
+              "IdProperty": "SfdcID",
+              "Notion": "DanteLead",
+              "Type": "LeadDetailsTileWidget",
+              "Widgets": [
+                {
+                  "ID": "leadDetailsTileArcChartWidget",
+                  "LabelProperty": "",
+                  "LabelResourceKey": "DANTE_LEAD_PERCENTILE_LABEL",
+                  "Notion": "DanteLead",
+                  "Type": "ArcChartWidget",
+                  "ValueProperty": "Percentile"
+                }
+              ]
+            },
+            {
+              "ID": "externalLeadDetailsPanelWidget",
+              "Notion": "DanteLead",
+              "TitleString": "DANTE_LEAD_EXTERNAL_INSIGHTS_TITLE",
+              "Type": "CollapsiblePanelWidget",
+              "Widgets": [
+                {
+                  "ExcludedTags": [],
+                  "ID": "externalLeadDetailsAttributeList",
+                  "Limit": "5",
+                  "ModelIdProperty": "ModelID",
+                  "ModelNotion": "FrontEndCombinedModelSummary",
+                  "Notion": "DanteLead",
+                  "NullThreshold": "100",
+                  "RequiredTags": [
+                    "External"
+                  ],
+                  "ShowLift": "false",
+                  "Sorts": [],
+                  "TargetNotion": "DanteLeadAnalyticAttribute",
+                  "TargetNotionKey": "LeadID",
+                  "Type": "AnalyticAttributeListWidget",
+                  "ValueProperty": "Percentile",
+                  "Widgets": [
+                    {
+                      "ID": "externalLeadDetailsAttributeTile",
+                      "Notion": "DanteLeadAnalyticAttribute",
+                      "Type": "AnalyticAttributeTileWidget",
+                      "Widgets": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "ID": "internalLeadDetailsPanelWidget",
+              "Notion": "DanteLead",
+              "TitleString": "DANTE_LEAD_INTERNAL_INSIGHTS_TITLE",
+              "Type": "CollapsiblePanelWidget",
+              "Widgets": [
+                {
+                  "ExcludedTags": [
+                    "External"
+                  ],
+                  "ID": "internalLeadDetailsAttributeList",
+                  "Limit": "5",
+                  "ModelIdProperty": "ModelID",
+                  "ModelNotion": "FrontEndCombinedModelSummary",
+                  "Notion": "DanteLead",
+                  "NullThreshold": "100",
+                  "RequiredTags": [],
+                  "ShowLift": "false",
+                  "Sorts": [],
+                  "TargetNotion": "DanteLeadAnalyticAttribute",
+                  "TargetNotionKey": "LeadID",
+                  "Type": "AnalyticAttributeListWidget",
+                  "ValueProperty": "Percentile",
+                  "Widgets": [
+                    {
+                      "ID": "internalLeadDetailsAttributeTile",
+                      "Notion": "DanteLeadAnalyticAttribute",
+                      "Type": "AnalyticAttributeTileWidget",
+                      "Widgets": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "HeaderNameProperty": "DisplayName",
+      "ID": "PurchaseHistory",
+      "Notion": "DanteAccount",
+      "Type": "ApplicationWidget",
+      "Version": "1",
+      "Widgets": [
+        {
+          "DefaultTab": 0,
+          "ID": "purchaseHistoryTabWidget",
+          "Type": "TabWidget",
+          "Widgets": [
+            {
+              "ID": "purchaseHistoryScreenWidget",
+              "TitleString": "DANTE_PURCHASE_HISTORY_TITLE",
+              "Type": "ScreenWidget",
+              "Widgets": [
+                {
+                  "ID": "purchaseHistoryWidget",
+                  "NoDataString": "DANTE_NO_PURCHASE_HISTORY_DESCRIPTION",
+                  "Notion": "DanteAccount",
+                  "Type": "PurchaseHistoryWidget"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,11 @@
 package com.latticeengines.domain.exposed.dante.metadata;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-public class NotionMetadataWrapper {
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+
+public class NotionMetadataWrapper implements Serializable{
     @JsonProperty("Key")
     private String key;
 
@@ -26,5 +29,10 @@ public class NotionMetadataWrapper {
 
     public void setValue(NotionMetadata value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }
