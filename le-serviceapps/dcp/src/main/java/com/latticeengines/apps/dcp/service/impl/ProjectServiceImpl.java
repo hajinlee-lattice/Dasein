@@ -241,7 +241,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectSummary summary = new ProjectSummary();
         summary.setProjectId(projectInfo.getProjectId());
         summary.setProjectDisplayName(projectInfo.getProjectDisplayName());
-        summary.setArchieved(projectInfo.getDeleted());
+        summary.setArchived(projectInfo.getDeleted());
         if(includeSources) {
             summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
             summary.setTotalSourceCount(sourceService.getSourceCount(customerSpace, projectInfo.getProjectId()));

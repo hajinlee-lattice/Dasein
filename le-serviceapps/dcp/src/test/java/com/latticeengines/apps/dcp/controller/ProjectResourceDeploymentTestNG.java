@@ -63,7 +63,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Set<String> projectIds = new HashSet<>(Arrays.asList("getalltest1", "getalltest2"));
         for (ProjectSummary project: result) {
             if (project.getProjectId().equals("createtest")) {
-                Assert.assertEquals(project.getArchieved(), Boolean.TRUE);
+                Assert.assertEquals(project.getArchived(), Boolean.TRUE);
             } else {
                 projectIds.remove(project.getProjectId());
             }

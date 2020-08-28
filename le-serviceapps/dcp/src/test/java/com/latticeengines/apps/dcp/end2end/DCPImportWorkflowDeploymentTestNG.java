@@ -222,7 +222,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println("Error file path=" + errorFileKey);
         Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
         Assert.assertNotNull(upload.getStatistics().getImportStats().getFailedIngested());
-        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 6L);
+        // There are 10 error rows.  4 records are missing a Company Name.  2 records are missing a Country.
+        // 2 records are missing both Company Name and Country.  2 records are blank.
+        Assert.assertEquals(upload.getStatistics().getImportStats().getFailedIngested().longValue(), 10L);
     }
 
     private void prepareTenant() {
@@ -258,7 +260,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(uploadStats);
         UploadStats.ImportStats importStats = uploadStats.getImportStats();
         Assert.assertNotNull(importStats);
-        Assert.assertTrue(importStats.getSuccessfullyIngested() > 0);
+        Assert.assertEquals(importStats.getSuccessfullyIngested().longValue(), 20L);
 
         UploadStats.MatchStats matchStats = uploadStats.getMatchStats();
         Assert.assertNotNull(matchStats);
