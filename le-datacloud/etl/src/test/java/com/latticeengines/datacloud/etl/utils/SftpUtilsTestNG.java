@@ -20,12 +20,16 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrateg
 /**
  * This test requires setup some files on the sftp server:
  *
- * 1. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190714/AllDomainsAllTopicsZips_20190714_1.csv.gz
- * 2. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_1.csv.gz
- * 3. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_2.csv.gz
+ * 1.
+ * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190714/AllDomainsAllTopicsZips_20190714_1.csv.gz
+ * 2.
+ * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_1.csv.gz
+ * 3.
+ * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_2.csv.gz
  * 4. ingest_test/SftpUtilsTestNG/DnB/gets/LE_SEED_OUTPUT_2019_05_001.OUT.gz
  *
- * The files can be found in s3://latticeengines-test-artifacts/le-datacloud/etl-ingestion/1/
+ * The files can be found in
+ * s3://latticeengines-test-artifacts/le-datacloud/etl-ingestion/1/
  */
 public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     @SuppressWarnings("unused")
@@ -39,9 +43,9 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     // Expected returned Bombora files based on files on SFTP and prepared SFTP
     // config and calendar
     private static final List<String> BOMBORA_FILES = Arrays.asList( //
-            "20190714/AllDomainsAllTopicsZips_20190714_1.csv.gz", //
-            "20190721/AllDomainsAllTopicsZips_20190721_1.csv.gz", //
-            "20190721/AllDomainsAllTopicsZips_20190721_2.csv.gz" //
+            "20200108/AllDomainsAllTopicsZips_20190714_1.csv.gz", //
+            "20200115/AllDomainsAllTopicsZips_20190721_1.csv.gz", //
+            "20200115/AllDomainsAllTopicsZips_20190721_2.csv.gz" //
     );
 
     private static final Calendar DNB_CALENDAR = getDnBCalendar();
@@ -71,12 +75,12 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         config = getTestDnBSftpConfig();
         fileNames = SftpUtils.getFileList(config, DNB_CALENDAR);
         Collections.sort(fileNames);
-        Assert.assertEquals(
-                DNB_FILES.toArray(new String[0]), fileNames.toArray(new String[0]), String.format("Expected DnB files: %s, actual DnB files: %s", String.join(",", DNB_FILES),
+        Assert.assertEquals(DNB_FILES.toArray(new String[0]), fileNames.toArray(new String[0]),
+                String.format("Expected DnB files: %s, actual DnB files: %s", String.join(",", DNB_FILES),
                         String.join(",", fileNames)));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testBomboraSFTP() {
         SftpConfiguration config = getBomboraSftpConfig();
         List<String> fileNames = SftpUtils.getFileList(config, null);
@@ -104,7 +108,7 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         config.setSftpPort(sftpProvider.getSftpPort());
         config.setSftpUserName(sftpProvider.getSftpUserName());
         config.setSftpPasswordEncrypted(sftpProvider.getSftpPassword());
-        config.setSftpDir("ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip");
+        config.setSftpDir("/home/sftpdev/ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip");
 
         config.setCheckStrategy(VersionCheckStrategy.WEEK);
         config.setCheckVersion(1);
@@ -141,7 +145,7 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         config.setSftpPort(sftpProvider.getSftpPort());
         config.setSftpUserName(sftpProvider.getSftpUserName());
         config.setSftpPasswordEncrypted(sftpProvider.getSftpPassword());
-        config.setSftpDir("/ingest_test/SftpUtilsTestNG/DnB/gets");
+        config.setSftpDir("/home/sftpdev/ingest_test/SftpUtilsTestNG/DnB/gets");
 
         config.setCheckStrategy(VersionCheckStrategy.MONTH);
         config.setCheckVersion(0);
@@ -159,7 +163,7 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         config.setSftpPort(sftpProvider.getBomboraSftpPort());
         config.setSftpUserName(sftpProvider.getBomboraSftpUsername());
         config.setSftpPasswordEncrypted(sftpProvider.getBomboraSftpPassword());
-        config.setSftpDir("/bombora-clientfiles-adat_zip");
+        config.setSftpDir("/home/sftpdev/ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip");
 
         config.setCheckStrategy(VersionCheckStrategy.WEEK);
         config.setCheckVersion(1);
