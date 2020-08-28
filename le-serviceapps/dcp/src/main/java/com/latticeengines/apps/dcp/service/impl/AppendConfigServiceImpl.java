@@ -245,7 +245,6 @@ public class AppendConfigServiceImpl implements AppendConfigService {
                 "registered_legalform_registrationstatus_code", //
                 "registeredname", //
                 "startdate" //
-
         );
         DplusAppendConfig appendConfig = new DplusAppendConfig();
         appendConfig.setElementIds(elementIds);

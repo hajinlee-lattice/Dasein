@@ -156,6 +156,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), data.length);
+        verifyOutputFieldsAlignment(columnSelection, output);
 
         OutputRecord output1 = output.getResult().get(0); // Chevron - 7 - AZZAAZZZFFA
         // System.out.println(JsonUtils.pprint(output1));
@@ -223,7 +224,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 "primaryname",
                 "tradestylenames_name",
                 "telephone_telephonenumber",
-                "primaryindcode_ussicv4"
+                "primaryindcode_ussicv4",
+                "activities_language_code"
         ).map(c -> new Column(c, c)).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columns);
@@ -231,8 +233,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         input.setPredefinedSelection(null);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
+        // System.out.println(JsonUtils.pprint(output));
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        verifyOutputFieldsAlignment(columnSelection, output);
         Assert.assertTrue(output.getResult().get(0).isMatched());
         String matchGrade = getCandidateField(output.getResult().get(0), MatchGrade).toString();
         Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
@@ -267,8 +271,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         input.setPredefinedSelection(null);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
+        verifyOutputFieldsAlignment(columnSelection, output);
         System.out.println(JsonUtils.pprint(output));
-        Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         if (StringUtils.isNotBlank(expectedDuns)) {
             Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
@@ -337,6 +341,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         MatchOutput output = realTimeMatchService.match(input);
         System.out.println(JsonUtils.pprint(output));
         Assert.assertNotNull(output);
+        verifyOutputFieldsAlignment(columnSelection, output);
         Assert.assertTrue(output.getResult().size() > 0);
         if (StringUtils.isNotBlank(expectedDUNS)) {
             Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
@@ -478,12 +483,11 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         Assert.assertEquals(output.getStatistics().getRowsMatched().intValue(), data.length);
-        // MatchGrade is AAAAAAAAAAA, if it was matched by DUNS
-        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
+        Assert.assertEquals(getCandidateField(output.getResult().get(0), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertEquals(getCandidateField(output.getResult().get(1), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertEquals(getCandidateField(output.getResult().get(2), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertNotEquals(getCandidateField(output.getResult().get(3), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertNotEquals(getCandidateField(output.getResult().get(4), MatchType).toString(), "DUNS Number Lookup");
     }
 
     @Test(groups = "functional")
@@ -1010,5 +1014,16 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             throw new UnsupportedOperationException("Cannot find " + fieldName + " from candidate output");
         }
         return candidateFields.get(idx);
+    }
+
+    private void verifyOutputFieldsAlignment(ColumnSelection columnSelection, MatchOutput output) {
+        List<Column> columns = columnSelection.getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            String inputField = columns.get(i).getExternalColumnId();
+            String outputField = output.getOutputFields().get(i);
+            Assert.assertEquals(inputField, outputField, //
+                    String.format("The %d-th selected field is [%s], but the output field becomes [%s]", //
+                            i, inputField, outputField));
+        }
     }
 }
