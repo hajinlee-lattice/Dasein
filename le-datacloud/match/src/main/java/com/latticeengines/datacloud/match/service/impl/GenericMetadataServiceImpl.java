@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +16,8 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -33,6 +36,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Service
 public class GenericMetadataServiceImpl implements GenericMetadataService {
+
+    private static final Logger log = LoggerFactory.getLogger(GenericMetadataServiceImpl.class);
 
     @Inject
     private PrimeMetadataService primeMetadataService;
@@ -73,8 +78,10 @@ public class GenericMetadataServiceImpl implements GenericMetadataService {
         }
         if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
             Set<String> requestedCols = new HashSet<>(columnSelection.getColumnIds());
-            List<PrimeColumn> columns = primeMetadataService.getPrimeColumns(requestedCols);
-            return columns.stream().map(PrimeColumn::toColumnMetadata).collect(Collectors.toList());
+            Map<String, PrimeColumn> columnMap  = primeMetadataService.getPrimeColumns(requestedCols) //
+                    .stream().collect(Collectors.toMap(PrimeColumn::getPrimeColumnId, Function.identity()));
+            return columnSelection.getColumnIds().stream().filter(columnMap::containsKey) //
+                    .map(columnMap::get).map(PrimeColumn::toColumnMetadata).collect(Collectors.toList());
         } else if (ContactMasterConstants.MATCH_ENTITY_TPS.equals(input.getTargetEntity())) {
             // FIXME [M39-LiveRamp]: to be changed to read from SQL, using columnSelection.getColumnIds()
             ColumnMetadata cm = new ColumnMetadata();
@@ -101,14 +108,21 @@ public class GenericMetadataServiceImpl implements GenericMetadataService {
         } else if (BusinessEntity.PrimeAccount.name().equals(input.getTargetEntity())) {
             List<PrimeColumn> primeColumns = //
                     primeMetadataService.getPrimeColumns(columnSelection.getColumnIds());
+            Map<String, PrimeColumn> columnMap  = primeColumns.stream() //
+                    .collect(Collectors.toMap(PrimeColumn::getPrimeColumnId, Function.identity()));
             List<Pair<String, Class<?>>> pairs = new ArrayList<>();
-            primeColumns.forEach(pc -> {
-                try {
-                    pairs.add(Pair.of(pc.getAttrName(), //
-                            Class.forName("java.lang." + pc.getJavaClass())));
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException("Cannt parse java class " + pc.getJavaClass(), e);
-                }
+            columnSelection.getColumnIds().forEach(columnId -> {
+                    if (columnMap.containsKey(columnId)) {
+                        PrimeColumn pc = columnMap.get(columnId);
+                        try {
+                            pairs.add(Pair.of(pc.getAttrName(), //
+                                    Class.forName("java.lang." + pc.getJavaClass())));
+                        } catch (ClassNotFoundException e) {
+                            throw new RuntimeException("Cannot parse java class " + pc.getJavaClass(), e);
+                        }
+                    } else {
+                        log.warn("[{}] is not a valid PrimeColumn", columnId);
+                    }
             });
             outputSchema = AvroUtils.constructSchema("PrimeAccount", pairs);
         } else {
