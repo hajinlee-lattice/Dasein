@@ -29,6 +29,15 @@ public final class TemplateUtils {
         return render(template, params);
     }
 
+    public static boolean isValid(String template) {
+        try {
+            new Template("inline-template", template, getCfg());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     private static String render(String template, Object params) {
         Template tpl;
         try {
@@ -40,7 +49,7 @@ public final class TemplateUtils {
             StringWriter stringWriter = new StringWriter();
             tpl.process(params, stringWriter);
             return stringWriter.toString();
-        } catch (IOException|TemplateException e) {
+        } catch (IOException | TemplateException e) {
             String msg = String.format("Failed to render FreeMarker template %s by parameter %s", //
                     template, JsonUtils.serialize(params));
             throw new RuntimeException(msg, e);
