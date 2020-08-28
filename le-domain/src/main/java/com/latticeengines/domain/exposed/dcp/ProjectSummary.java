@@ -22,7 +22,7 @@ public class ProjectSummary {
     private String projectDescription;
 
     @JsonProperty("archived")
-    private Boolean archieved;
+    private Boolean archived;
 
     @JsonProperty("sources")
     private List<Source> sources;
@@ -69,12 +69,12 @@ public class ProjectSummary {
         this.projectDescription = projectDescription;
     }
 
-    public Boolean getArchieved() {
-        return archieved;
+    public Boolean getArchived() {
+        return archived;
     }
 
-    public void setArchieved(Boolean archieved) {
-        this.archieved = archieved;
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
     }
 
     public List<Source> getSources() {

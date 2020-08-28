@@ -218,7 +218,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
     public void testGetAndDelete() {
-        List<ProjectSummary> projects = testProjectProxy.getAllProjects();
+        List<ProjectSummary> projects = testProjectProxy.getAllProjects(false, true);
         Assert.assertNotNull(projects);
         Assert.assertEquals(projects.size(), 1);
         ProjectDetails details = testProjectProxy.getProjectByProjectId(PROJECT_ID);
@@ -250,9 +250,13 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         // soft delete project
         testProjectProxy.deleteProject(PROJECT_ID);
         SleepUtils.sleep(1000);
-        projects = testProjectProxy.getAllProjects();
-
-        Assert.assertFalse(CollectionUtils.isEmpty(projects));
+        // Check that project does not show up in standard list of active projects (non-archived).
+        projects = testProjectProxy.getAllProjects(false, false);
+        Assert.assertTrue(CollectionUtils.isEmpty(projects));
+        // Check that project shows up as archived.
+        projects = testProjectProxy.getAllProjects(false, true);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(projects));
+        Assert.assertEquals(projects.size(), 1);
         details = testProjectProxy.getProjectByProjectId(PROJECT_ID);
         Assert.assertNotNull(details);
         log.info("retrieved details : " + JsonUtils.serialize(details));

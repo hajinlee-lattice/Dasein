@@ -35,12 +35,17 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         return post("createProject", url, request, ProjectDetails.class);
     }
 
-    public List<ProjectSummary> getAllProjects() {
-        return getAllProjects(Boolean.FALSE);
-    }
-
-    public List<ProjectSummary> getAllProjects(Boolean includeArchived) {
-        List<?> raw = get("getAllProjects", constructUrl("/list?includeArchived={includeArchived}", includeArchived), List.class);
+    public List<ProjectSummary> getAllProjects(Boolean includeSources, Boolean includeArchived) {
+        String url = constructUrl("/list");
+        boolean isFirst = true;
+        if (includeSources) {
+            url += "?includeSources=true";
+            isFirst = false;
+        }
+        if (includeArchived) {
+            url += isFirst ? "?includeArchived=true" : "&includeArchived=true";
+        }
+        List<?> raw = get("getAllProjects", url, List.class);
         return JsonUtils.convertList(raw, ProjectSummary.class);
     }
 
