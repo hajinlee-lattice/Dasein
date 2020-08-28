@@ -24,7 +24,6 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -153,22 +152,6 @@ public class PrepareDataReport extends RunSparkJob<RollupDataReportStepConfigura
             cache.setSnapshotTimestamp(new Date(report.getRefreshTimestamp()));
             dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                     uploadId, cache);
-
-            DataReportRecord.Level level = DataReportRecord.Level.Upload;
-            String ownerId = uploadId;
-            while(level != DataReportRecord.Level.Tenant) {
-                // update parent node if it's the only child
-                DunsCountCopy copy = dataReportProxy.getDunsCountCopy(configuration.getCustomerSpace().toString(), level,
-                        ownerId);
-                if (copy.isOnlyChild()) {
-                    dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), level.getParentLevel()
-                            , copy.getParentOwnerId(), cache);
-                    ownerId = copy.getParentOwnerId();
-                } else {
-                    break;
-                }
-                level = level.getParentLevel();
-            }
         }
     }
 }

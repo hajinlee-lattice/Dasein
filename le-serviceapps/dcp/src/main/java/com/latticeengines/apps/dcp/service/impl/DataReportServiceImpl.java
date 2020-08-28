@@ -18,13 +18,11 @@ import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -155,7 +153,27 @@ public class DataReportServiceImpl implements DataReportService {
         Preconditions.checkNotNull(pid, String.format("data record should exist for %s and %s.", level, ownerId));
         Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), cache.getDunsCountTableName());
         Preconditions.checkNotNull(table, String.format("table shouldn't be null for %s", cache.getDunsCountTableName()));
-        dataReportEntityMgr.uploadDataReportRecord(pid, table, cache.getSnapshotTimestamp());
+        dataReportEntityMgr.updateDataReportRecord(pid, table, cache.getSnapshotTimestamp());
+
+        DataReport dataReport = getDataReport(customerSpace, level, ownerId);
+        Long parentId = dataReportEntityMgr.findParentId(pid);
+        String parentOwnerId = getParentOwnerId(customerSpace, level, ownerId);
+        DataReportRecord.Level parentLevel = level.getParentLevel();
+        while (parentId != null) {
+            // link the same duns count as child if parent is null
+            int count = dataReportEntityMgr.updateDataReportRecordIfNull(parentId, table, cache.getSnapshotTimestamp());
+            // stop updating the parental node
+            if (count == 0) {
+                log.info("stop registering duns count for {}", parentId);
+                break;
+            }
+            // this is to keep the consistency, after linking the duns count as child,
+            // override parent's data report too
+            updateDataReport(customerSpace, parentLevel, parentOwnerId, dataReport);
+            parentOwnerId = getParentOwnerId(customerSpace, parentLevel, parentOwnerId);
+            parentLevel = parentLevel.getParentLevel();
+            parentId = dataReportEntityMgr.findParentId(parentId);
+        }
         if (StringUtils.isNotBlank(oldTableName)) {
             log.info("There was an old duns count table {}, going to be marked as temporary.", oldTableName);
             RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
@@ -206,26 +224,6 @@ public class DataReportServiceImpl implements DataReportService {
     }
 
     @Override
-    public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {
-        if (DataReportRecord.Level.Tenant.equals(level)) {
-            ownerId = customerSpace;
-        }
-        String parentOwnerId = getParentOwnerId(customerSpace, level, ownerId);
-        if (!DataReportRecord.Level.Tenant.equals(level)) {
-            Preconditions.checkNotNull(parentOwnerId, "parent owner id should not be empty");
-        }
-        // in data report, the logic only retrieves the data report with readyForRollup = true
-        int siblings = dataReportEntityMgr.countSiblingsByParentLevelAndOwnerId(level.getParentLevel(), parentOwnerId);
-        log.info("the siblings are " + siblings);
-        DunsCountCopy copy = new DunsCountCopy();
-        // when workflow call the api, the ready for rollup for current upload is false
-        copy.setOnlyChild(siblings == 0);
-        copy.setParentOwnerId(parentOwnerId);
-        System.out.println("the copy is : " + JsonUtils.pprint(copy));
-        return copy;
-    }
-
-    @Override
     public void updateReadyForRollup(String customerSpace, DataReportRecord.Level level, String ownerId) {
 
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
@@ -236,7 +234,12 @@ public class DataReportServiceImpl implements DataReportService {
         // update readyForRollup for parental data report if it's not ready
         Long parentId = dataReportEntityMgr.findParentId(pid);
         while (parentId != null) {
-            dataReportEntityMgr.updateReadyForRollupIfNotReady(parentId);
+            int count = dataReportEntityMgr.updateReadyForRollupIfNotReady(parentId);
+            // stop updating value for parental node
+            if (count == 0) {
+                log.info("stop updating ready for rollup for {}", parentId);
+                break;
+            }
             parentId = dataReportEntityMgr.findParentId(parentId);
         }
 
