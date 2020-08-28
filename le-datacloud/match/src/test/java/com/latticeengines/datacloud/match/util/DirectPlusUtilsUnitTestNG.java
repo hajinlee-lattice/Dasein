@@ -63,6 +63,8 @@ public class DirectPlusUtilsUnitTestNG {
         Assert.assertNotNull(result.get("TradeStyleName"));
         System.out.println(JsonUtils.pprint(result));
 
+        Assert.assertTrue(result.get("OperatingStatusCode") instanceof Integer);
+
         ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("data-block-test", 8);
         List<Callable<Map<String, Object>>> callables = new ArrayList<>();
         for (int i = 0; i < 32; i++) {
@@ -102,7 +104,8 @@ public class DirectPlusUtilsUnitTestNG {
                 new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name"),
                 new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
                 new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4"),
-                new PrimeColumn("BankAddressLocality", "Bank Address Locality Name", "organization.banks.address.addressLocality.name") // test nulls and hash collisions in cache
+                new PrimeColumn("BankAddressLocality", "Bank Address Locality Name", "organization.banks.address.addressLocality.name"), // test nulls and hash collisions in cache
+                new PrimeColumn("OperatingStatusCode", "Operating Status Code", "organization.dunsControlStatus.operatingStatus.dnbCode", "Integer") // test integer value
         );
     }
 

@@ -718,10 +718,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             DnBRealTimeLookupService lookupService;
             if (Boolean.TRUE.equals(context.getUseDirectPlus())) {
                 lookupService = directPlusRealTimeLookupService;
-                log.info("Using direct+ realtime"); // to be removed
             } else {
                 lookupService = dnbRealTimeLookupService;
-                log.info("Using direct 2.0 realtime"); // to be removed
             }
             try {
                 returnedContext = lookupService.realtimeEntityLookup(context);
