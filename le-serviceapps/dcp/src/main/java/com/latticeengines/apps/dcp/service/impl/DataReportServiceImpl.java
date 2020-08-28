@@ -18,6 +18,7 @@ import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -96,6 +97,7 @@ public class DataReportServiceImpl implements DataReportService {
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
+            log.info("data report record: " + JsonUtils.pprint(dataReportRecord));
             if (dataReport.getBasicStats() != null) {
                 dataReportRecord.setBasicStats(dataReport.getBasicStats());
             }
@@ -162,6 +164,7 @@ public class DataReportServiceImpl implements DataReportService {
         while (parentId != null) {
             // link the same duns count as child if parent is null
             int count = dataReportEntityMgr.updateDataReportRecordIfNull(parentId, table, cache.getSnapshotTimestamp());
+            log.info("some info ownerId {}, level {}, count {}", parentOwnerId, parentId, count);
             // stop updating the parental node
             if (count == 0) {
                 log.info("stop registering duns count for {}", parentId);
@@ -235,6 +238,7 @@ public class DataReportServiceImpl implements DataReportService {
         Long parentId = dataReportEntityMgr.findParentId(pid);
         while (parentId != null) {
             int count = dataReportEntityMgr.updateReadyForRollupIfNotReady(parentId);
+            log.info("parentId: {}, count: {}", parentId, count);
             // stop updating value for parental node
             if (count == 0) {
                 log.info("stop updating ready for rollup for {}", parentId);
