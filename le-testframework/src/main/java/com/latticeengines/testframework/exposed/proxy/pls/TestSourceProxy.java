@@ -65,7 +65,7 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
     }
 
     public ValidateFieldDefinitionsResponse validateSourceMappings(String fileImportId, String entityType,
-                                                                     ValidateFieldDefinitionsRequest validateRequest) {
+                                                                   ValidateFieldDefinitionsRequest validateRequest) {
         String url = constructUrl("/validate/");
         boolean isFirst = true;
         if (StringUtils.isNotBlank(fileImportId)) {
