@@ -483,12 +483,11 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         Assert.assertEquals(output.getStatistics().getRowsMatched().intValue(), data.length);
-        // MatchGrade is AAAAAAAAAAA, if it was matched by DUNS
-        Assert.assertEquals(output.getResult().get(0).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertEquals(output.getResult().get(2).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(3).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
-        Assert.assertNotEquals(output.getResult().get(4).getCandidateOutput().get(0).get(4), "AAAAAAAAAAA");
+        Assert.assertEquals(getCandidateField(output.getResult().get(0), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertEquals(getCandidateField(output.getResult().get(1), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertEquals(getCandidateField(output.getResult().get(2), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertNotEquals(getCandidateField(output.getResult().get(3), MatchType).toString(), "DUNS Number Lookup");
+        Assert.assertNotEquals(getCandidateField(output.getResult().get(4), MatchType).toString(), "DUNS Number Lookup");
     }
 
     @Test(groups = "functional")
@@ -1023,7 +1022,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             String inputField = columns.get(i).getExternalColumnId();
             String outputField = output.getOutputFields().get(i);
             Assert.assertEquals(inputField, outputField, //
-                    String.format("The %d-th input field is [%s], but the output field becomes [%s]", //
+                    String.format("The %d-th selected field is [%s], but the output field becomes [%s]", //
                             i, inputField, outputField));
         }
     }

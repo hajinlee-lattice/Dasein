@@ -88,6 +88,7 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         log.info("Fields: {}", StringUtils.join(schema.getFields().stream() //
                 .map(Schema.Field::name).collect(Collectors.toList()), ","));
+        verifyOutputFieldsAlignment(getColumnSelection(), schema);
         Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
         long count = 0L;
         while (records.hasNext()) {
@@ -96,7 +97,10 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
             // System.out.println(record);
             if (record.get("controlownershipdate") != null) {
                 String shipDate = record.get("controlownershipdate").toString();
-                Assert.assertTrue(Integer.parseInt(shipDate) > 1900);
+                if (shipDate.contains("-")) {
+                    shipDate = shipDate.split("-")[0];
+                }
+                Assert.assertTrue(Integer.parseInt(shipDate) > 1800, shipDate);
             }
             count++;
         }
@@ -344,6 +348,19 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         ColumnSelection cs = new ColumnSelection();
         cs.setColumns(columns);
         return cs;
+    }
+
+    private void verifyOutputFieldsAlignment(ColumnSelection columnSelection, Schema schema) {
+        int numInputFields = 7; // ID,InternalId,Domain,Name,City,State,Country
+        List<Column> columns = columnSelection.getColumns();
+        List<String> avroFields = schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+        for (int i = 0; i < columns.size(); i++) {
+            String inputField = columns.get(i).getExternalColumnId();
+            String outputField = avroFields.get(i + 7);
+            Assert.assertEquals(inputField, outputField, //
+                    String.format("The %d-th selected field is [%s], but the output field becomes [%s]", //
+                            i, inputField, outputField));
+        }
     }
 
 }
