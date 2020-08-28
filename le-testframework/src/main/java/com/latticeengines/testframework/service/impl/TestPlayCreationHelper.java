@@ -326,10 +326,6 @@ public class TestPlayCreationHelper {
     }
 
     public PlayLaunch launchPlayWorkflow(TestPlaySetupConfig testPlaySetupConfig, boolean useSpark) {
-        // TODO: Clean up needed by Perry
-        // playLaunch = playProxy.launchPlay(tenant.getId(), playName,
-        // playLaunch.getLaunchId(),
-        // testPlaySetupConfig.isPlayLaunchDryRun(), useSpark);
         List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);
         playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channels.get(0).getId(), channels.get(0), true);
 
