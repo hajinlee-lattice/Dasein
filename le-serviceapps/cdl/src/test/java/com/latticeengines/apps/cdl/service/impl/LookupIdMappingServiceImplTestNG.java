@@ -205,7 +205,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         ExternalSystemAuthentication sysAuth2 = new ExternalSystemAuthentication();
         sysAuth2.setSolutionInstanceId(validSolInstance);
         sysAuth2.setTrayAuthenticationId(validAuth);
-        lookupIdMap.setExternalAuthentication(sysAuth2);
+        lookupIdMap2.setExternalAuthentication(sysAuth2);
         lookupIdMap2.setOrgId("orgId");
         lookupIdMap2.setOrgName("orgName");
 
