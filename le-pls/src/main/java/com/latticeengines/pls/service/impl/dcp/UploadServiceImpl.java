@@ -391,17 +391,23 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         UploadJobStep currentStep = null;
         List<UploadJobStep> mergedSteps = new ArrayList<>();
         for(UploadJobStep step: uploadJobSteps) {
-            if(currentStep != null && step.getStepName().equalsIgnoreCase(currentStep.getStepName())){
-                if(currentStep.getEndTimestamp() < step.getEndTimestamp()) {
-                    currentStep.setEndTimestamp(step.getEndTimestamp());
+            if (step != null) {
+                if(currentStep != null && step.getStepName().equalsIgnoreCase(currentStep.getStepName())){
+                    if(currentStep.getEndTimestamp() < step.getEndTimestamp()) {
+                        currentStep.setEndTimestamp(step.getEndTimestamp());
+                    } else {
+                        currentStep.setStartTimestamp(step.getStartTimestamp());
+                    }
                 } else {
-                    currentStep.setStartTimestamp(step.getStartTimestamp());
+                    if(currentStep != null){
+                        mergedSteps.add(currentStep);
+                    }
+                    currentStep = step;
                 }
             } else {
-                if(currentStep != null){
+                if (currentStep != null) {
                     mergedSteps.add(currentStep);
                 }
-                currentStep = step;
             }
         }
         mergedSteps.add(currentStep);
