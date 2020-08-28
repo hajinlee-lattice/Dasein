@@ -204,10 +204,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
     protected static final String ATLAS_EXPORT_DELETE_PATH = "ATLAS_EXPORT_DELETE_PATH";
     protected static final String PRIMARY_IMPORT_SYSTEM = "PRIMARY_IMPORT_SYSTEM";
-    protected static final String ADDED_ACCOUNTS_DELTA_TABLE = "ADDED_ACCOUNTS_DELTA_TABLE";
-    protected static final String REMOVED_ACCOUNTS_DELTA_TABLE = "REMOVED_ACCOUNTS_DELTA_TABLE";
-    protected static final String ADDED_CONTACTS_DELTA_TABLE = "ADDED_CONTACTS_DELTA_TABLE";
-    protected static final String REMOVED_CONTACTS_DELTA_TABLE = "REMOVED_CONTACTS_DELTA_TABLE";
+    public static final String ADDED_ACCOUNTS_DELTA_TABLE = "ADDED_ACCOUNTS_DELTA_TABLE";
+    public static final String REMOVED_ACCOUNTS_DELTA_TABLE = "REMOVED_ACCOUNTS_DELTA_TABLE";
+    public static final String ADDED_CONTACTS_DELTA_TABLE = "ADDED_CONTACTS_DELTA_TABLE";
+    public static final String REMOVED_CONTACTS_DELTA_TABLE = "REMOVED_CONTACTS_DELTA_TABLE";
     protected static final String ADDED_ACCOUNTS_FULL_CONTACTS_TABLE = "ADDED_ACCOUNTS_FULL_CONTACTS_TABLE";
     protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
     protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
