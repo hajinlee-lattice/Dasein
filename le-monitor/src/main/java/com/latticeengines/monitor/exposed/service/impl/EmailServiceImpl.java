@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
-import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -34,7 +34,6 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.util.EmailTemplateBuilder;
 import com.latticeengines.monitor.util.EmailTemplateBuilder.Template;
 import com.latticeengines.monitor.util.EmailUtils;
-
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
