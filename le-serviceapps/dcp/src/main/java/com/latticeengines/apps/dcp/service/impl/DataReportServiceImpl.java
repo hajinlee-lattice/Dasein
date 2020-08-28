@@ -18,6 +18,7 @@ import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -220,6 +221,7 @@ public class DataReportServiceImpl implements DataReportService {
         // when workflow call the api, the ready for rollup for current upload is false
         copy.setOnlyChild(siblings == 0);
         copy.setParentOwnerId(parentOwnerId);
+        System.out.println("the copy is : " + JsonUtils.pprint(copy));
         return copy;
     }
 

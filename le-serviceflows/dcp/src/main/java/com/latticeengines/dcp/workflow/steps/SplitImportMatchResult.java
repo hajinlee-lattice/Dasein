@@ -212,6 +212,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             // update parent node if it's the only child
             DunsCountCopy copy = dataReportProxy.getDunsCountCopy(configuration.getCustomerSpace().toString(), level,
                     ownerId);
+            System.out.println("the duns copy is : " + JsonUtils.pprint(copy));
             if (copy.isOnlyChild()) {
                 dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), level.getParentLevel()
                         , copy.getParentOwnerId(), cache);
