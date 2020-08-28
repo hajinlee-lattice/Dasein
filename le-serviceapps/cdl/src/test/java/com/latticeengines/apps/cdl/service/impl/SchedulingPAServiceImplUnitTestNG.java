@@ -83,8 +83,10 @@ public class SchedulingPAServiceImplUnitTestNG {
         SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
         Assert.assertNotNull(result);
-        Assert.assertEquals(result.getRetryPATenants().size(), 3);
-        Assert.assertEquals(result.getNewPATenants().size(), 7);
+        Assert.assertEquals(result.getRetryPATenants().size(), 2);
+        Assert.assertEquals(result.getNewPATenants().size(), 8);
+        // hand hold PA cannot be retried
+        Assert.assertFalse(result.getRetryPATenants().contains("Tenant16"));
         //Retry invalid, last finish time < 15min, can not poll from queue
         Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
     }
@@ -109,10 +111,12 @@ public class SchedulingPAServiceImplUnitTestNG {
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
         SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
-        Assert.assertEquals(result.getRetryPATenants().size(), 3);
-        Assert.assertEquals(result.getNewPATenants().size(), 2);
+        Assert.assertEquals(result.getRetryPATenants().size(), 2);
+        Assert.assertEquals(result.getNewPATenants().size(), 3);
         //Retry invalid, last finish time < 15min, can not poll from queue
         Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
+        // hand hold PA cannot be retried
+        Assert.assertFalse(result.getRetryPATenants().contains("Tenant16"));
     }
 
     @Test(groups = "unit")
@@ -137,10 +141,12 @@ public class SchedulingPAServiceImplUnitTestNG {
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
         SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME, 0L);
         log.info(JsonUtils.serialize(result));
-        Assert.assertEquals(result.getRetryPATenants().size(), 2);
-        Assert.assertEquals(result.getNewPATenants().size(), 3);
+        Assert.assertEquals(result.getRetryPATenants().size(), 1);
+        Assert.assertEquals(result.getNewPATenants().size(), 4);
         //Retry invalid, last finish time < 15min, can not poll from queue
         Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
+        // hand hold PA cannot be retried
+        Assert.assertFalse(result.getRetryPATenants().contains("Tenant16"));
         //QA tenant has limit, can not poll from queue.
         Assert.assertFalse(result.getNewPATenants().contains("tenant2"));
     }
@@ -878,6 +884,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity16 = new TenantActivity();
         tenantActivity16.setRetry(true);
+        tenantActivity16.setHandHoldTenant(true);
         tenantActivity16.setLastFinishTime(MOCK_CURRENT_TIME - 9000000);
         tenantActivity16.setDataCloudRefresh(false);
         tenantActivity16.setScheduledNow(false);

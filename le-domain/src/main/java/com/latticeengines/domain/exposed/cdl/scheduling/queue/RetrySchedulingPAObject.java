@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.constraint.LastFinishTim
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargePA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxLargeTxnPA;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.MaxPA;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.NotHandHoldTenant;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.RetryExist;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantDuplicate;
 import com.latticeengines.domain.exposed.cdl.scheduling.constraint.TenantGroupQuota;
@@ -61,6 +62,7 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new RetryExist());
         pushConstraintList.add(new LastFinishTimePending());
+        pushConstraintList.add(new NotHandHoldTenant());
     }
 
     private static void initPopConstraint() {
