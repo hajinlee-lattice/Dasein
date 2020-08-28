@@ -80,7 +80,7 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
                         String.join(",", fileNames)));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testBomboraSFTP() {
         SftpConfiguration config = getBomboraSftpConfig();
         List<String> fileNames = SftpUtils.getFileList(config, null);
@@ -163,7 +163,7 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         config.setSftpPort(sftpProvider.getBomboraSftpPort());
         config.setSftpUserName(sftpProvider.getBomboraSftpUsername());
         config.setSftpPasswordEncrypted(sftpProvider.getBomboraSftpPassword());
-        config.setSftpDir("/bombora-clientfiles-adat_zip");
+        config.setSftpDir("/home/sftpdev/ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip");
 
         config.setCheckStrategy(VersionCheckStrategy.WEEK);
         config.setCheckVersion(1);
