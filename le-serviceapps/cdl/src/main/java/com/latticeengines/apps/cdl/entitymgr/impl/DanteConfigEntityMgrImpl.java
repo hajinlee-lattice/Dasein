@@ -49,7 +49,7 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     public List<DanteConfigurationDocument> findAllByTenantId(String tenantId) {
         List<DanteConfigEntity> danteConfigEntities = readerRepository.findByTenantId(tenantId);
         if (danteConfigEntities.size() > 1) {
-            log.warn(String.format("Tenant %s have multiple Dante Configurations.", tenantId));
+            log.warn(String.format("Found multiple Dante Configurations for tenant: %s", tenantId));
         }
         return danteConfigEntities.stream() //
                 .map(DanteConfigEntity::getDocument) //
@@ -73,6 +73,7 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
             }
             writerRepository.removeByTenantId(tenantId);
         }
+
         DanteConfigEntity saved = writerRepository.save(danteConfigEntity);
         return saved.getDocument();
     }
