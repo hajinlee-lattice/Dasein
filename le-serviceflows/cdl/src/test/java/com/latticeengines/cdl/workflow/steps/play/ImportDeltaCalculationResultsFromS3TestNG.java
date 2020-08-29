@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -29,11 +30,11 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
         "classpath:test-serviceflows-cdl-context.xml" })
 public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBase {
 
-    private static String ADD_ACCOUNTS_LOCATION = "ADD_ACCOUNTS_LOCATION";
-    private static String ADD_CONTACTS_LOCATION = "ADD_CONTACTS_LOCATION";
-    private static String REMOVE_ACCOUNTS_LOCATION = "REMOVE_ACCOUNTS_LOCATION";
-    private static String REMOVE_CONTACTS_LOCATION = "REMOVE_CONTACTS_LOCATION";
-    private static String COMPLETE_CONTACTS_LOCATION = "COMPLETE_CONTACTS_LOCATION";
+    private static final String ADD_ACCOUNTS_LOCATION = "ADD_ACCOUNTS_LOCATION";
+    private static final String ADD_CONTACTS_LOCATION = "ADD_CONTACTS_LOCATION";
+    private static final String REMOVE_ACCOUNTS_LOCATION = "REMOVE_ACCOUNTS_LOCATION";
+    private static final String REMOVE_CONTACTS_LOCATION = "REMOVE_CONTACTS_LOCATION";
+    private static final String COMPLETE_CONTACTS_LOCATION = "COMPLETE_CONTACTS_LOCATION";
 
     @InjectMocks
     private ImportDeltaCalculationResultsFromS3 importDeltaCalculationResultsFromS3;
@@ -118,7 +119,7 @@ public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBas
         channelConfig.setAudienceType(AudienceType.ACCOUNTS);
         playLaunch.setChannelConfig(channelConfig);
         List<String> result = null;
-        
+
         // Enable all contacts
         reconfigureCurrentPlayLaunchForContacts(true, true, true);
 
@@ -229,35 +230,23 @@ public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBas
         // All contacts
         clearExecutionContext();
         reconfigureCurrentPlayLaunchForContacts(true, true, true);
-        try {
-            result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
-            fail("Expected message with wrong dataframe combination");
-        } catch (Exception e) {
-        }
+        Assert.assertThrows(() -> importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", ""));
 
         // Only Add and Complete Contacts
         clearExecutionContext();
         reconfigureCurrentPlayLaunchForContacts(true, false, true);
-        try {
-            result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
-            fail("Expected message with wrong dataframe combination");
-        } catch (Exception e) {
-        }
+        Assert.assertThrows(() -> importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", ""));
 
         // Only Add Contacts
         clearExecutionContext();
         reconfigureCurrentPlayLaunchForContacts(true, false, false);
-        try {
-            result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
-            fail("Expected message with wrong dataframe combination");
-        } catch (Exception e) {
-        }
+        Assert.assertThrows(() -> importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", ""));
 
         // Only Complete Contacts
         clearExecutionContext();
         reconfigureCurrentPlayLaunchForContacts(false, false, true);
         try {
-            result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
+            importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
             fail("Expected message with \"There is nothing to be launched.\"");
         } catch (Exception e) {
             assertDataFrameResults(false, false, false);
@@ -267,17 +256,13 @@ public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBas
         // Only Remove Contacts
         clearExecutionContext();
         reconfigureCurrentPlayLaunchForContacts(false, true, false);
-        try {
-            result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
-            fail("Expected message with wrong dataframe combination");
-        } catch (Exception e) {
-        }
+        Assert.assertThrows(() -> importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", ""));
 
         // Only Remove Contacts
         clearExecutionContext();
         reconfigureCurrentPlayLaunchForContacts(false, false, false);
         try {
-            result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
+            importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
             fail("Expected message with \"There is nothing to be launched.\"");
         } catch (Exception e) {
             assertDataFrameResults(false, false, false);
@@ -295,7 +280,7 @@ public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBas
         } else {
             playLaunch.setAddAccountsTable(null);
         }
-        
+
         if (setRemoveAccounts) {
             playLaunch.setRemoveAccountsTable(REMOVE_ACCOUNTS_LOCATION);
         } else {
