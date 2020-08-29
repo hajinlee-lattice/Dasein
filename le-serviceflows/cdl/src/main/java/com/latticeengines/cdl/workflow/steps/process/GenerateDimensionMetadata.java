@@ -38,6 +38,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
@@ -76,6 +78,8 @@ public class GenerateDimensionMetadata
     // tableName -> idx in units
     private Map<String, Integer> unitIdxMap = new HashMap<>();
     private Map<String, String> streamErrorMsgs = new HashMap<>();
+    // warning msgs that should be surfaced to user
+    private Set<String> streamWarningMsgs = new HashSet<>();
     // streamId -> set of dimName that has no data
     private Map<String, Set<String>> emptyMetadataDimensions = new HashMap<>();
 
@@ -247,12 +251,11 @@ public class GenerateDimensionMetadata
     private void recordStreamSkippedForAgg() {
         Set<String> streamsToSkipAgg = streamErrorMsgs.keySet();
         if (CollectionUtils.isNotEmpty(streamsToSkipAgg)) {
-            String warningMsg = String.format("Streams %s will not be processed further",
-                    String.join(",", streamsToSkipAgg));
-            addToListInContext(PROCESS_ANALYTICS_WARNING_KEY, warningMsg, String.class);
             putObjectInContext(ACTIVITY_STREAMS_SKIP_AGG, streamsToSkipAgg);
             log.warn("Some streams are skipped for aggregation. errorMsgs = {}", streamErrorMsgs);
         }
+
+        streamWarningMsgs.forEach(msg -> addToListInContext(PROCESS_ANALYTICS_WARNING_KEY, msg, String.class));
     }
 
     private Map<String, ProcessDimensionConfig.Dimension> buildDimensions(Map<String, AtlasStream> streams,
@@ -273,6 +276,7 @@ public class GenerateDimensionMetadata
                 // no new import nor batch store
                 log.info("No raw stream data for stream {}, skip generating metadata", streamId);
                 streamErrorMsgs.put(streamId, "No data for this stream");
+                logNoDataStream(stream);
                 return Stream.empty();
             }
 
@@ -306,6 +310,7 @@ public class GenerateDimensionMetadata
                     log.info(
                             "Catalog {} in dimName {} and stream {} does not have any data, generate empty metadata for it",
                             catalogId, dimName, streamId);
+                    logNoDataCatalog(dimension.getCatalog());
                     emptyMetadataDimensions.putIfAbsent(streamId, new HashSet<>());
                     emptyMetadataDimensions.get(streamId).add(dimName);
                     return null;
@@ -333,6 +338,57 @@ public class GenerateDimensionMetadata
 
             return Pair.of(dimId, dim);
         }).filter(Objects::nonNull);
+    }
+
+    private void logNoDataStream(AtlasStream stream) {
+        if (stream == null) {
+            return;
+        }
+
+        String displayName = getStreamTypeDisplayName(stream.getStreamType());
+        if (StringUtils.isBlank(displayName)) {
+            return;
+        }
+
+        streamWarningMsgs.add(String.format("%s template has been set up but no data ingested yet", displayName));
+    }
+
+    private String getStreamTypeDisplayName(AtlasStream.StreamType type) {
+        if (type == AtlasStream.StreamType.WebVisit) {
+            return "Website Visit";
+        } else if (type == AtlasStream.StreamType.Opportunity) {
+            return "Opportunity";
+        } else if (type == AtlasStream.StreamType.MarketingActivity) {
+            return "Marketing Activity";
+        } else if (type == AtlasStream.StreamType.DnbIntentData) {
+            return "D&B Intent";
+        }
+        return null;
+    }
+
+    private void logNoDataCatalog(Catalog catalog) {
+        if (catalog == null || StringUtils.isBlank(catalog.getName())) {
+            return;
+        }
+
+        String[] displayNames = getCatalogStreamDisplayNames(catalog.getName());
+        if (displayNames == null || displayNames.length < 2) {
+            return;
+        }
+
+        streamWarningMsgs.add(String.format("%s is not configured yet. %s attributes will not be generated",
+                displayNames[0], displayNames[1]));
+    }
+
+    private String[] getCatalogStreamDisplayNames(@NotNull String catalogName) {
+        if (catalogName.contains(EntityType.WebVisitPathPattern.name())) {
+            return new String[] { "Website Path", "Website Visit" };
+        } else if (catalogName.contains(EntityType.Opportunity.name())) {
+            return new String[] { "Opportunity Stage", "Opportunity" };
+        } else if (catalogName.contains(EntityType.MarketingActivity.name())) {
+            return new String[] { "Marketing Activity Type", "Marketing Activity" };
+        }
+        return null;
     }
 
     // streamId -> {dimId -> dimMetadata}
