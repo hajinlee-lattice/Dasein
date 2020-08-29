@@ -5,6 +5,7 @@ import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.commons.collections4.CollectionUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, lit, struct, udf}
@@ -44,6 +45,9 @@ class TransformTxnStreamJob extends AbstractSparkJob[TransformTxnStreamConfig] {
     val generateCompKey: UserDefinedFunction = udf((row: Row) => row.mkString(""))
     val withCompositeKey: DataFrame = transformed.withColumn(InterfaceName.__Composite_Key__.name, generateCompKey(struct(compositeSrc.map(col): _*)))
     lattice.output = withCompositeKey.select(targetCols.head, targetCols.tail: _*) :: Nil
+    if (StringUtils.isNotBlank(lattice.config.partitionKey)) {
+      setPartitionTargets(0, Seq(lattice.config.partitionKey), lattice)
+    }
   }
 
   def renameFieldsAndAddPeriodName(df: DataFrame, renameMapping: Map[String, String], periodName: String): DataFrame = {

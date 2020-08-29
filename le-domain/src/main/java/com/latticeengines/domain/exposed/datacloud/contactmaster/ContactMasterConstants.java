@@ -10,4 +10,11 @@ public final class ContactMasterConstants {
 
     public static final String TPS_ATTR_RECORD_ID = "RECORD_ID";
 
+    public static final String CONTACT_TPS_ENTRY_RECORD_TYPE = "ContactTpsEntry";
+
+    public static final String CONTACT_TPS_LOOKUPENTRY_RECORD_TYPE = "ContactTpsLookupEntry";
+
+    public static final String TPS_STANDARD_JOB_FUNCTION = "STANDARD_JOB_FUNCTION";
+
+    public static final String TPS_STANDARD_JOB_LEVEL = "STANDARD_JOB_LEVEL";
 }

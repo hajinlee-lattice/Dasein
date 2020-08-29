@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-
 // use dcdpl to deploy code to hdfs
 public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
 
@@ -48,7 +47,7 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
     @Inject
     private DataCloudYarnService dataCloudYarnService;
 
-    @BeforeClass(groups = {"functional", "manual"})
+    @BeforeClass(groups = { "functional", "manual" })
     public void setup() throws Exception {
         switchHdfsPod(podId);
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsPathBuilder.podDir().toString())) {
@@ -69,7 +68,9 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
+        String outputDir = getBlockOutputDir(jobConfiguration);
+        log.info("Output dir: " + outputDir);
+        String avroGlob = outputDir + "/*.avro";
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         log.info("Fields: {}", StringUtils.join(schema.getFields().stream() //
                 .map(Schema.Field::name).collect(Collectors.toList()), ","));
@@ -80,7 +81,27 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
             System.out.println(record);
             String recordId = record.get(ContactMasterConstants.TPS_ATTR_RECORD_ID).toString();
             Assert.assertNotNull(recordId);
-            //FIXME [M39-LiveRamp]: for true data, add more assertion
+            log.info("recordId: " + recordId);
+
+            switch (recordId) {
+            case "3112747756":
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString(),
+                        "Other");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "Entry");
+                break;
+            case "3032324202":
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString(),
+                        "Operations");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "Manager");
+                break;
+            case "3144036597":
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString(),
+                        "Business Development");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "VP");
+                break;
+            default:
+            }
+
             count++;
         }
         Assert.assertTrue(count > 0);

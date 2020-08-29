@@ -143,6 +143,13 @@ public class PrimeColumn implements MetadataColumn {
         this.jsonPath = jsonPath;
     }
 
+    public PrimeColumn(String attrName, String displayName, String jsonPath, String javaClass) {
+        this.primeColumnId = attrName;
+        this.displayName = displayName;
+        this.jsonPath = jsonPath;
+        this.javaClass = javaClass;
+    }
+
     public String getAttrName() {
         return primeColumnId;
     }

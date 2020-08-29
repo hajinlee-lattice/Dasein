@@ -930,7 +930,10 @@ public enum LedpCode {
     LEDP_60007("Cannot read raw input file {0}: {1}"), //
     LEDP_60008("Invalid CSV file: {0}"), //
     LEDP_60009("Error when updating source"),//
-    LEDP_60010("Upload failed because no records could be ingested successfully");
+    LEDP_60010("Upload failed because no records could be ingested successfully"),
+
+    // le-serviceflows
+    LEDP_70000("No Add or Delete file");
 
     private String message;
 

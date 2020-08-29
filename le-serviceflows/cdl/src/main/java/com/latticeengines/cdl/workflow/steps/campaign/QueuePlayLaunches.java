@@ -203,12 +203,28 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         case LinkedIn:
         case Outreach:
         case GoogleAds:
-            return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
-                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+            return doesMapContainValues(counts, audienceType);
+        case Adobe_Audience_Mgr:
+            return doesMapContainValues(counts, AudienceType.CONTACTS);
+        case MediaMath:
+            return doesMapContainValues(counts, AudienceType.CONTACTS);
+        case TradeDesk:
+            return doesMapContainValues(counts, AudienceType.CONTACTS);
+        case Verizon_Media:
+            return doesMapContainValues(counts, AudienceType.CONTACTS);
+        case Google_Display_N_Video_360:
+            return doesMapContainValues(counts, AudienceType.CONTACTS);
+        case AppNexus:
+            return doesMapContainValues(counts, AudienceType.CONTACTS);
         default:
             return false;
         }
+    }
+
+    private boolean doesMapContainValues(Map<String, Long> counts, AudienceType audienceType) {
+        return MapUtils.isNotEmpty(counts) && //
+                (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
+                        || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
     }
 
     private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {

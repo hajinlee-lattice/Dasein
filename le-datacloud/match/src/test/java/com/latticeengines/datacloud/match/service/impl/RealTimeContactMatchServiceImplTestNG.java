@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
@@ -48,8 +47,7 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         input.setFields(Arrays.asList("ID", "SiteDuns"));
-        input.setKeyMap(ImmutableMap.<MatchKey, List<String>>builder()
-                .put(DUNS, Collections.singletonList("SiteDuns"))
+        input.setKeyMap(ImmutableMap.<MatchKey, List<String>> builder().put(DUNS, Collections.singletonList("SiteDuns"))
                 .build());
         input.setSkipKeyResolution(true);
 
@@ -65,12 +63,15 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
 
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
-        System.out.println(JsonUtils.serialize(output));
+        System.out.println("Match output fields: " + output.getOutputFields());
+        System.out.println("Match output: " + JsonUtils.serialize(output));
         Assert.assertEquals(output.getResult().size(), data.length);
-
-        OutputRecord output1 = output.getResult().get(0);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(output1.getCandidateOutput()));
-        // FIXME [M39-LiveRamp]: change to true assertions of candidates
+        List<List<Object>> candidateOutputs = output.getResult().get(0).getCandidateOutput();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(candidateOutputs));
+        Assert.assertEquals(candidateOutputs.size(), 3);
+        for(List<Object> list: candidateOutputs) {
+            Assert.assertTrue(Arrays.asList("Administrative", "Engineering").contains(list.get(14)));
+            Assert.assertTrue(Arrays.asList("CXO", "VP").contains(list.get(13)));
+        }
     }
-
 }

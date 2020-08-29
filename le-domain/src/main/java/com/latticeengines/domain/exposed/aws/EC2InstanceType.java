@@ -28,7 +28,8 @@ public enum EC2InstanceType {
 
     i3en_xlarge("i3en.xlarge", 4, 32), //
     i3en_2xlarge("i3en.2xlarge", 8, 64), //
-    h1_2xlarge("h1.2xlarge", 8, 32);
+    h1_2xlarge("h1.2xlarge", 8, 32), //
+    h1_4xlarge("h1.4xlarge", 16, 64);
 
     private static Map<String, EC2InstanceType> nameMap;
 

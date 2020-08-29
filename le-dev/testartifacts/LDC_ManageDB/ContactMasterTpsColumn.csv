@@ -1,0 +1,16 @@
+PID,ColumnName,JavaClass,IsDerived,MatchDestination
+1,SITE_DUNS_NUMBER,String,0,null
+2,RECORD_ID,String,0,null
+3,DNB_JOB_TITLE,String,0,null
+4,DNB_JOB_FUNCTION,String,0,null
+5,ULTIMATE_DUNS_NUMBER,String,0,null
+6,DOMESTIC_ULTIMATE_DUNS_NUMBER,String,0,null
+7,LIVERAMP_LR_MATCH,String,0,null
+8,GOOGLE_LR_MATCH,String,0,Google
+9,ADOBE_LR_MATCH,String,0,Adobe
+10,TRADEDESK_LR_MATCH,String,0,Tradedesk
+11,VERIZIONMEDIA_LR_MATCH,String,0,Verizon
+12,APPNEXUS_LR_MATCH,String,0,AppNexus
+13,MEIDAMATH_LR_MATCH,String,0,Mediamath
+14,STANDARD_JOB_LEVEL,String,1,null
+15,STANDARD_JOB_FUNCTION,String,1,null

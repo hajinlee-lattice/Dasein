@@ -56,7 +56,6 @@ import com.latticeengines.domain.exposed.spark.common.ChangeListConstants;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterByJoinConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
-import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
@@ -67,7 +66,6 @@ import com.latticeengines.spark.exposed.job.common.CopyJob;
 import com.latticeengines.spark.exposed.job.common.CreateChangeListJob;
 import com.latticeengines.spark.exposed.job.common.FilterByJoinJob;
 import com.latticeengines.spark.exposed.job.common.FilterChangelistJob;
-import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
 @Lazy
 @Component(EnrichLatticeAccount.BEAN_NAME)
@@ -469,36 +467,29 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
 
     private void merge(HdfsDataUnit inputData, String creationMode) {
         log.info("EnrichLatticeAccount, merge fetch result into current LatticeAccount");
-        HdfsDataUnit output = null;
-        SparkJobResult result = null;
+        HdfsDataUnit output;
+        SparkJobResult result;
         if (inputData == null) { // no need to really merge
             output = (HdfsDataUnit) oldLatticeAccountDU;
         } else {
+            MergeLatticeAccountConfig jobConfig = new MergeLatticeAccountConfig();
             switch (creationMode) {
             case ChangeListConstants.HorizontalMode:
-                MergeLatticeAccountConfig jobConfig = new MergeLatticeAccountConfig();
-                jobConfig.setInput(Arrays.asList(oldLatticeAccountDU, // old table
-                        inputData // new table
-                ));
-                jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-                setPartitionMultiplier(4);
-                result = runSparkJob(MergeLatticeAccount.class, jobConfig);
-                setPartitionMultiplier(1);
-                output = result.getTargets().get(0);
-                break;
             case ChangeListConstants.VerticalMode:
-                UpsertConfig upsertConfig = new UpsertConfig();
-                upsertConfig.setJoinKey(InterfaceName.AccountId.name());
-                upsertConfig.setInput(Arrays.asList(oldLatticeAccountDU, inputData));
-                upsertConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-                setPartitionMultiplier(4);
-                result = runSparkJob(UpsertJob.class, upsertConfig);
-                setPartitionMultiplier(1);
-                output = result.getTargets().get(0);
+                jobConfig.setMergeMode(creationMode);
                 break;
             default:
                 log.warn("Unsupported creationMode!");
             }
+            jobConfig.setInput(Arrays.asList( //
+                    oldLatticeAccountDU, // old table
+                    inputData // new table
+            ));
+            jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+            setPartitionMultiplier(4);
+            result = runSparkJob(MergeLatticeAccount.class, jobConfig);
+            setPartitionMultiplier(1);
+            output = result.getTargets().get(0);
         }
 
         // Update oldLatticeAccountDU as new base

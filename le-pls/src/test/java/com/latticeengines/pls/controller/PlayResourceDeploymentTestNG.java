@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +26,6 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -38,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -46,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -69,6 +69,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private Play play;
     private String name;
     private List<PlayType> playTypes;
+    private PlayLaunchChannel playLaunchChannel;
     private PlayLaunch playLaunch;
     private Tenant tenant;
 
@@ -369,26 +370,26 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createPlayLaunch(boolean isDryRunMode) {
         logInterceptor();
 
-        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
+        playLaunchChannel = restTemplate.postForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/channels?launch-now=" + !isDryRunMode, createDefaultPlayLaunchChannel(),
+                PlayLaunchChannel.class);
 
-        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches/" + playLaunch.getId() + "/launch?dry-run=" + isDryRunMode,
-                new Object(), PlayLaunch.class);
+        playLaunch = playLaunchChannel.getLastLaunch();
 
         assertPlayLaunch(playLaunch, isDryRunMode);
 
     }
 
     public void createPlayLaunch(boolean isDryRunMode, Set<RatingBucketName> bucketsToLaunch,
-            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
+            Long topNCount) {
         logInterceptor();
-
         LookupIdMap lookupIdMap = createDefaultLookupIdMap();
-        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
-                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount, lookupIdMap),
-                PlayLaunch.class);
+
+        playLaunchChannel = restTemplate.postForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/channels?launch-now=" + !isDryRunMode,
+                createDefaultPlayLaunchChannel(bucketsToLaunch, topNCount, lookupIdMap), PlayLaunchChannel.class);
+
+        playLaunch = playLaunchChannel.getLastLaunch();
 
         assertPlayLaunch(playLaunch, bucketsToLaunch, isDryRunMode);
     }
@@ -408,24 +409,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         // }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail1" })
-    public void createPlayLaunchFail2() {
-        PlayLaunch launch = createDefaultPlayLaunch();
-        launch.setBucketsToLaunch(new HashSet<>(Collections.singletonList(RatingBucketName.F)));
-        try {
-            launch = restTemplate.postForObject(getRestAPIHostPort() + //
-                    "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
-            restTemplate.postForObject(getRestAPIHostPort() + //
-                    "/pls/play/" + name + "/launches/" + launch.getId() + "/launch", new Object(), PlayLaunch.class);
-            Assert.fail("Play launch submission should fail");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex.getMessage().contains(LedpCode.LEDP_18176.name()));
-        }
-    }
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail2" })
+    @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail1" })
     public void searchPlayLaunch() {
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launching);
         List<PlayLaunch> launchList = restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Failed, List.class);
 
@@ -453,7 +440,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 "/pls/play/" + name + "/launches", List.class);
 
         Assert.assertNotNull(launchList);
-        Assert.assertEquals(launchList.size(), 2);
+        Assert.assertEquals(launchList.size(), 1);
 
         launchList = restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);
@@ -552,14 +539,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playLaunch.getPid());
         Assert.assertNotNull(playLaunch.getUpdated());
         Assert.assertNotNull(playLaunch.getCreated());
-        if (isDryRunMode) {
-            Assert.assertNull(playLaunch.getApplicationId());
-        } else {
-            Assert.assertNotNull(playLaunch.getApplicationId());
-        }
         Assert.assertNotNull(playLaunch.getLaunchState());
         assertBucketsToLaunch(playLaunch.getBucketsToLaunch(), expectedBucketsForLaunch);
-        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNotNull(playLaunch.getAccountsSelected());
         Assert.assertNotNull(playLaunch.getAccountsLaunched());
         Assert.assertNotNull(playLaunch.getContactsLaunched());
@@ -627,26 +608,25 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(play.getRatingEngine().getId(), ruleBasedRatingEngine.getId());
     }
 
-    private PlayLaunch createDefaultPlayLaunch() {
+    private PlayLaunchChannel createDefaultPlayLaunchChannel() {
         LookupIdMap lookupIdMap = createDefaultLookupIdMap();
-        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null,
+        return createDefaultPlayLaunchChannel(new HashSet<>(Arrays.asList(RatingBucketName.values())), null,
                 lookupIdMap);
     }
 
-    private PlayLaunch createDefaultPlayLaunch(Set<RatingBucketName> bucketsToLaunch,
-            Boolean excludeItemsWithoutSalesforceId, Long topNCount, LookupIdMap lookupIdMap) {
-        PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(bucketsToLaunch);
-        playLaunch.setDestinationOrgId(lookupIdMap.getOrgId());
-        playLaunch.setDestinationSysType(lookupIdMap.getExternalSystemType());
-        playLaunch.setDestinationSysName(lookupIdMap.getExternalSystemName());
-        playLaunch.setDestinationAccountId(lookupIdMap.getAccountId());
-        playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
-        playLaunch.setTopNCount(topNCount);
-        playLaunch.setLaunchType(LaunchType.FULL);
-        playLaunch.setCreatedBy(CREATED_BY);
-        playLaunch.setUpdatedBy(CREATED_BY);
-        return playLaunch;
+    private PlayLaunchChannel createDefaultPlayLaunchChannel(Set<RatingBucketName> bucketsToLaunch,
+            Long topNCount, LookupIdMap lookupIdMap) {
+        PlayLaunchChannel playLaunchChannel = new PlayLaunchChannel();
+        playLaunchChannel.setBucketsToLaunch(bucketsToLaunch);
+        playLaunchChannel.setLookupIdMap(lookupIdMap);
+        playLaunchChannel.setMaxAccountsToLaunch(topNCount);
+        playLaunchChannel.setLaunchUnscored(false);
+        playLaunchChannel.setLaunchType(LaunchType.FULL);
+        playLaunchChannel.setCreatedBy(CREATED_BY);
+        playLaunchChannel.setUpdatedBy(CREATED_BY);
+        playLaunchChannel.setChannelConfig(new SalesforceChannelConfig());
+
+        return playLaunchChannel;
     }
 
     private LookupIdMap createDefaultLookupIdMap() {

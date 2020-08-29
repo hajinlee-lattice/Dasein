@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
@@ -125,31 +126,47 @@ public final class DirectPlusUtils {
         metadata.forEach(md -> {
             String jsonPath = md.getJsonPath();
             JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
-            String value = toStrValue(jsonNode);
+            Object value = toTypedValue(jsonNode, md.getJavaClass());
             String attrName = md.getAttrName();
             result.put(attrName, value);
         });
         return result;
     }
 
-    private static String toStrValue(JsonNode jsonNode) {
-        if (jsonNode == null) {
+    private static Object toTypedValue(JsonNode jsonNode, String javaClz) {
+        if (jsonNode == null || JsonNodeType.NULL.equals(jsonNode.getNodeType()) || //
+                JsonNodeType.MISSING.equals(jsonNode.getNodeType())) {
             return null;
+        } else if (StringUtils.isBlank(javaClz) || "String".equals(javaClz)) {
+            return jsonNode.asText();
         } else {
+            Object result;
             switch (jsonNode.getNodeType()) {
-                case NULL:
-                case MISSING:
-                    return null;
                 case BOOLEAN:
-                    return String.valueOf(jsonNode.asBoolean());
+                    result = jsonNode.asBoolean();
+                    break;
                 case STRING:
-                    return jsonNode.asText();
+                    result = jsonNode.asText();
+                    break;
                 case NUMBER:
-                    return String.valueOf(jsonNode.asDouble());
+                    switch (javaClz) {
+                        case "Integer":
+                            result = jsonNode.asInt();
+                            break;
+                        case "Long":
+                            result = jsonNode.asLong();
+                            break;
+                        case "Float":
+                        case "Double":
+                        default:
+                            result = jsonNode.asDouble();
+                    }
+                    break;
                 default:
                     throw new UnsupportedOperationException("Cannot convert json node of type " //
                             + jsonNode.getNodeType() + " to a value object.");
             }
+            return result;
         }
     }
 

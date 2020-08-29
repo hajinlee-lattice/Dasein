@@ -10,11 +10,13 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LiveRampChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesToS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.LiveRampCampaignLaunchInitStepConfiguration;
 
 public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -43,7 +45,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static class Builder {
         private DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration();
         private ImportDeltaCalculationResultsFromS3StepConfiguration importDeltaCalculationResultsFromS3Conf = new ImportDeltaCalculationResultsFromS3StepConfiguration();
-        private DeltaCampaignLaunchInitStepConfiguration initStepConf = new DeltaCampaignLaunchInitStepConfiguration();
+        private DeltaCampaignLaunchInitStepConfiguration nonLiveRampInitStep = new DeltaCampaignLaunchInitStepConfiguration();
+        private LiveRampCampaignLaunchInitStepConfiguration liveRampInitStepConf = new LiveRampCampaignLaunchInitStepConfiguration();
         private DeltaCampaignLaunchExportFilesGeneratorConfiguration exportFileGeneratorConf = new DeltaCampaignLaunchExportFilesGeneratorConfiguration();
         private DeltaCampaignLaunchExportFilesToS3Configuration exportFilesToS3Conf = new DeltaCampaignLaunchExportFilesToS3Configuration();
         private DeltaCampaignLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new DeltaCampaignLaunchExportPublishToSNSConfiguration();
@@ -52,7 +55,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.setContainerConfiguration("deltaCampaignLaunchWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
             importDeltaCalculationResultsFromS3Conf.setCustomerSpace(customerSpace);
-            initStepConf.setCustomerSpace(customerSpace);
+            nonLiveRampInitStep.setCustomerSpace(customerSpace);
+            liveRampInitStepConf.setCustomerSpace(customerSpace);
             exportFileGeneratorConf.setCustomerSpace(customerSpace);
             exportFilesToS3Conf.setCustomerSpace(customerSpace);
             exportPublishToSNSConf.setCustomerSpace(customerSpace);
@@ -60,15 +64,25 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
-            initStepConf.setDataCollectionVersion(version);
+            nonLiveRampInitStep.setDataCollectionVersion(version);
             return this;
         }
 
         public Builder playLaunch(PlayLaunch playLaunch) {
+            boolean isLiveRampLaunch = playLaunch.getChannelConfig() instanceof LiveRampChannelConfig;
+
+            if (isLiveRampLaunch) {
+                nonLiveRampInitStep.setSkipStep(true);
+            } else {
+                liveRampInitStepConf.setSkipStep(true);
+            }
+
             importDeltaCalculationResultsFromS3Conf.setPlayId(playLaunch.getPlay().getName());
             importDeltaCalculationResultsFromS3Conf.setLaunchId(playLaunch.getLaunchId());
-            initStepConf.setPlayName(playLaunch.getPlay().getName());
-            initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
+            nonLiveRampInitStep.setPlayName(playLaunch.getPlay().getName());
+            nonLiveRampInitStep.setPlayLaunchId(playLaunch.getLaunchId());
+            liveRampInitStepConf.setPlayName(playLaunch.getPlay().getName());
+            liveRampInitStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
             exportFileGeneratorConf.setChannelConfig(playLaunch.getChannelConfig());
             exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
@@ -140,7 +154,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public DeltaCampaignLaunchWorkflowConfiguration build() {
             configuration.add(importDeltaCalculationResultsFromS3Conf);
-            configuration.add(initStepConf);
+            configuration.add(nonLiveRampInitStep);
+            configuration.add(liveRampInitStepConf);
             configuration.add(exportFileGeneratorConf);
             configuration.add(exportFilesToS3Conf);
             configuration.add(exportPublishToSNSConf);

@@ -14,6 +14,18 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+        CREATE TABLE `ContactMasterTpsColumn` (
+            `PID`               BIGINT NOT NULL AUTO_INCREMENT,
+            `ColumnName`        VARCHAR(100) NOT NULL,
+            `JavaClass`         VARCHAR(50) NOT NULL,
+            `IsDerived`         BOOLEAN NOT NULL,
+            `MatchDestination`  VARCHAR(100),
+            PRIMARY KEY (`PID`)
+        ) ENGINE = InnoDB;
+
+        CREATE INDEX IX_ColumnName ON `ContactMasterTpsColumn` (`ColumnName`);
+
+        CREATE INDEX IX_MatchDestination ON `ContactMasterTpsColumn` (`MatchDestination`);
 
   END //
 -- ##############################################################

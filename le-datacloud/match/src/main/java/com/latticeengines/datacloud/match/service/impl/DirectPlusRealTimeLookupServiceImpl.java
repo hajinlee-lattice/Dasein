@@ -58,7 +58,6 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
             long startTime = System.currentTimeMillis();
-            log.info("Lookup using Direct+"); // to be removed
             executeLookup(context, DnBKeyType.MATCH, DnBAPIType.REALTIME_ENTITY);
             context.setDuration(System.currentTimeMillis() - startTime);
             if (context.getDnbCode() != DnBReturnCode.UNAUTHORIZED) {
