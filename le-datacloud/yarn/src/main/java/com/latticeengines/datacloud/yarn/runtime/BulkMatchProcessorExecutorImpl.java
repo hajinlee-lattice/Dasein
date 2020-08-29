@@ -48,8 +48,10 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
                 }
                 Future<MatchContext> future;
                 if (processorContext.isUseProxy()) {
+                    log.info("BulkMatchProcessorExecutorImpl#execute, real time match");
                     future = executor.submit(new RealTimeMatchCallable(input, processorContext.getPodId(), matchProxy));
                 } else {
+                    log.info("BulkMatchProcessorExecutorImpl#execute, bulk match");
                     future = executor.submit(
                             new BulkMatchCallable(input, processorContext.getPodId(), matchPlanner, matchExecutor));
                 }
@@ -104,6 +106,7 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
                 if (combinedContext == null) {
                     combinedContext = context;
                 } else {
+                    log.info("Add {} outputRecords into the combined output", context.getOutput().getResult().size());
                     combinedContext.getOutput().getResult().addAll(context.getOutput().getResult());
                 }
                 processorContext.getRowsProcessed().addAndGet(context.getInput().getNumRows());
@@ -120,7 +123,8 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
         log.info(String.format("%d out of %d futures are finished.", toDelete.size(), futures.size()));
         futures.removeAll(toDelete);
         if (dataSizeSinceGC >= MAX_DATA_SIZE_BETWEEN_GC) {
-            log.info("Processed " + dataSizeSinceGC + " data elements (rows x columns) since last GC, calling System.gc()?");
+            log.info("Processed " + dataSizeSinceGC
+                    + " data elements (rows x columns) since last GC, calling System.gc()?");
             // System.gc();
             dataSizeSinceGC = 0L;
         }

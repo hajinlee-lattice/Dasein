@@ -474,7 +474,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             output.flush();
             return ByteBuffer.wrap(Snappy.compress(output.toByteArray()));
         } catch (Exception e) {
-            log.warn("Exception in encoding generic record.");
+            log.warn("Exception in encoding generic record.", e);
             return null;
         }
     }

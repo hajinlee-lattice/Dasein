@@ -14,6 +14,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,12 +25,16 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DnBLookupService;
 import com.latticeengines.datacloud.match.domain.TpsLookupResult;
+import com.latticeengines.datacloud.match.entitymgr.ContactTpsLookupEntryMgr;
+import com.latticeengines.datacloud.match.entitymgr.impl.ContactTpsLookupEntryMgrImpl;
+import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-
 
 @Component("tpsLookupService")
 public class TpsLookupService extends DataSourceLookupServiceBase implements DnBLookupService {
@@ -38,6 +44,17 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
 
     private Map<String, TpsLookupResult.ReturnCode> mockErrorDuns = new HashMap<>();
     private Random random = new Random(4);
+
+    private Map<String, ContactTpsLookupEntryMgr> lookupMgrs = new HashMap<>();
+
+    @Inject
+    private FabricMessageService messageService;
+
+    @Inject
+    private FabricDataService dataService;
+
+    @Inject
+    private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -80,8 +97,7 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
             } else {
                 Collection<String> recordIds;
                 try {
-                    // FIXME [M39-LiveRamp]: change to lookup from DynamoDB
-                    recordIds = lookupFakeResults(duns);
+                    recordIds = lookupResults(duns);
                 } catch (Exception e) {
                     log.error("Failed to lookup tps record ids using duns {}", duns, e);
                     result.setReturnCode(TpsLookupResult.ReturnCode.UnknownRemoteError);
@@ -100,7 +116,8 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
     }
 
     @Override
-    protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request, String returnAddress) {
+    protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
+            String returnAddress) {
         ExecutorService executor = getExecutor();
         executor.submit(() -> {
             Object result = lookupFromService(lookupRequestId, request);
@@ -129,8 +146,7 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
         if (executor == null) {
             log.info("Initialize tps lookup thread pool.");
             BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>();
-            executor = new ThreadPoolExecutor(1, 16, 1,
-                    TimeUnit.MINUTES, runnableQueue);
+            executor = new ThreadPoolExecutor(1, 16, 1, TimeUnit.MINUTES, runnableQueue);
         }
     }
 
@@ -139,6 +155,28 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
         result.setRecordIds(Collections.emptyList());
         result.setReturnCode(TpsLookupResult.ReturnCode.EmptyResult);
         return result;
+    }
+
+    private Collection<String> lookupResults(String duns) {
+        Set<String> recordIds = new HashSet<>();
+        ContactTpsLookupEntryMgr lookupMgr = getLookupMgr();
+        String[] ids = lookupMgr.findByKey(duns).getRecordIds().split(",");
+        for (String id : ids) {
+            recordIds.add(id);
+        }
+        return recordIds;
+    }
+
+    public ContactTpsLookupEntryMgr getLookupMgr() {
+        String version = versionEntityMgr.currentApprovedVersion().getVersion();
+        log.info("TpsLookupService, datacloud version " + version);
+        ContactTpsLookupEntryMgr lookupMgr = lookupMgrs.get(version);
+        if (lookupMgr == null) {
+            lookupMgr = new ContactTpsLookupEntryMgrImpl(messageService, dataService, version);
+            lookupMgr.init();
+            lookupMgrs.put(version, lookupMgr);
+        }
+        return lookupMgr;
     }
 
     private Collection<String> lookupFakeResults(String duns) {

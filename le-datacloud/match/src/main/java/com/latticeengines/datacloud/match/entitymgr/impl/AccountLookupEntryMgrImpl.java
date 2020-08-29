@@ -7,15 +7,15 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 
 public class AccountLookupEntryMgrImpl extends BaseFabricEntityMgrImpl<AccountLookupEntry>
-        implements AccountLookupEntryMgr {
-    public AccountLookupEntryMgrImpl(FabricMessageService messageService, FabricDataService dataService,
-            String version) {
-        super(new BaseFabricEntityMgrImpl.Builder() //
-                .messageService(messageService) //
-                .dataService(dataService) //
-                .recordType("AccountLookup" + version) //
-                .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //
-                .enforceRemoteDynamo(true) //
-                .repository("DataCloud"));
-    }
+        implements AccountLookupEntryMgr {    public AccountLookupEntryMgrImpl(FabricMessageService messageService, FabricDataService dataService,
+                                                                               String version) {
+    super(new BaseFabricEntityMgrImpl.Builder() //
+            .messageService(messageService) //
+            .dataService(dataService) //
+            .recordType("AccountLookup" + version) //
+            .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //
+            .enforceRemoteDynamo(true) //
+            .repository("DataCloud"));
+}
+
 }

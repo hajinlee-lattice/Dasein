@@ -13,16 +13,16 @@
         <property name="minPoolSize" value="1" />
         <property name="maxPoolSize" value="${datacloud.manage.poolsize.max}" />
         <property name="maxPoolSizeForWebApp" value="${datacloud.manage.poolsize.max.webapp}"/>
-        <property name="maxPoolSizeForAppMaster" value="${datacloud.manage.poolsize.max.appmaster}"/>        
+        <property name="maxPoolSizeForAppMaster" value="${datacloud.manage.poolsize.max.appmaster}"/>
     </bean>
-    
+
     <!-- Hibernate session factory -->
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
 	    <property name="entityManagerFactory" ref="entityManagerFactoryPropDataManage" />
 	</bean>
-	
+
 	<!-- Entity manager factory -->
-	<bean id="entityManagerFactoryPropDataManage" 
+	<bean id="entityManagerFactoryPropDataManage"
 			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="propDataManage" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer" />
@@ -118,7 +118,7 @@
     <bean id="customerReportDao" class="com.latticeengines.datacloud.core.dao.impl.CustomerReportDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-    
+
     <bean id="customerSourceAttributeDao" class="com.latticeengines.datacloud.core.dao.impl.CustomerSourceAttributeDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>

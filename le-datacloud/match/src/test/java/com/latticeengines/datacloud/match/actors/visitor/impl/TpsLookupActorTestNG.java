@@ -5,6 +5,7 @@ import static com.latticeengines.datacloud.match.domain.TpsLookupResult.ReturnCo
 import static com.latticeengines.datacloud.match.domain.TpsLookupResult.ReturnCode.UnknownLocalError;
 import static com.latticeengines.datacloud.match.domain.TpsLookupResult.ReturnCode.UnknownRemoteError;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -88,11 +89,16 @@ public class TpsLookupActorTestNG extends SingleActorTestNGBase {
         Assert.assertEquals(data.getReturnCode(), expectedError);
     }
 
-
-    // FIXME [M39-LiveRamp]: change to true verification
     private void verifyOkResult(TpsLookupResult data) {
         if (Ok.equals(data.getReturnCode())) {
-            Assert.assertFalse(data.getRecordIds().isEmpty());
+            List<String> recordIds = data.getRecordIds();
+            Assert.assertFalse(recordIds.isEmpty());
+            // Add few assertions for record Ids
+            // Might need to update once dataset has changed
+            Assert.assertTrue(recordIds.contains("A49684718"));
+            Assert.assertTrue(recordIds.contains("40540763374"));
+            Assert.assertTrue(recordIds.contains("3159760438"));
+            Assert.assertTrue(recordIds.contains("A44627160"));
         } else {
             Assert.assertTrue(CollectionUtils.isEmpty(data.getRecordIds()));
             Assert.assertEquals(data.getReturnCode(), EmptyResult);
@@ -103,7 +109,7 @@ public class TpsLookupActorTestNG extends SingleActorTestNGBase {
     private Object[][] provideTpsLookupData() {
         // duns
         return new Object[][] { //
-                { "028675958", null }, //
+                { "028675958", null }, // Use LATTICE ENGINES site duns for testing
                 { null, null }, //
                 { REMOTE_ERROR_DUNS, UnknownRemoteError }, // UnknownRemoteError
                 { LOCAL_ERROR_DUNS, UnknownLocalError }, // UnknownLocalError
