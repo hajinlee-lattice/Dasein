@@ -313,7 +313,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after ProcessTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TXN_PT_EM = 62037L;
+    static final Long PERIOD_TXN_PT_EM = 62027L;
     // Number of aggregated period transaction after UpdateTransaction test
     static final Long PERIOD_TRANSACTION_UT = 73892L;
     // Number of aggregated period transaction after UpdateTransaction entity

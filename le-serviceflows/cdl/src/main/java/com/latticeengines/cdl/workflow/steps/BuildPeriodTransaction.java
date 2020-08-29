@@ -80,15 +80,13 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
     @Override
     public void execute() {
         bootstrap();
-        // TODO - retry
         Map<String, Table> periodTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, PERIOD_TXN_STREAMS);
-        buildConsolidatedPeriodTransaction(periodTransactionTables);
-        buildAggregatedPeriodTransaction(periodTransactionTables);
+        buildConsolidatedPeriodTransaction(periodTransactionTables); // no partition
+        buildAggregatedPeriodTransaction(periodTransactionTables); // no partition
     }
 
     private void buildConsolidatedPeriodTransaction(Map<String, Table> periodTransactionTables) {
         log.info("Building consolidated period transaction");
-        // TODO - maybe share a livy session?
         Map<String, Table> consolidatedPeriodTxnTables = periodStrategies.stream().map(periodName -> {
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
                     buildConsolidatedPeriodTxnConfig(periodName, periodTransactionTables));
