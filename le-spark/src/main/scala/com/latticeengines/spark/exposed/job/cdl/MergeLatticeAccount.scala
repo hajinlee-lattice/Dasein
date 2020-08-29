@@ -2,7 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.MergeLatticeAccountConfig
-import com.latticeengines.domain.exposed.spark.common.CopyConfig
+import com.latticeengines.domain.exposed.spark.common.{ChangeListConstants, CopyConfig}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CopyUtils
 import org.apache.spark.sql.functions.{col, lit}
@@ -21,23 +21,65 @@ import scala.collection.JavaConverters._
 class MergeLatticeAccount extends AbstractSparkJob[MergeLatticeAccountConfig] {
 
   private val AccountId = InterfaceName.AccountId.name
-  private val new_marker = "__new__"
+  private val CDLCreatedTime = InterfaceName.CDLCreatedTime.name
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeLatticeAccountConfig]): Unit = {
     val oldTbl = lattice.input.head
     val newTbl = lattice.input(1)
+    val config = lattice.config
 
-    val newIds = newTbl.select(AccountId).withColumn(new_marker, lit(true)).checkpoint()
-    val rollover = oldTbl
-      .join(newIds, Seq(AccountId), joinType = "left")
-      .filter(col(new_marker).isNull)
-      .drop(new_marker)
+    val result = if (ChangeListConstants.VerticalMode.equals(config.getMergeMode)) {
+      mergeVertically(newTbl, oldTbl)
+    } else {
+      mergeHorizontally(newTbl, oldTbl)
+    }
 
+    lattice.output = List(result)
+  }
+
+  /**
+    * In Vertical mode:
+    * Divide old table in 4 parts:
+    * ---------
+    *      |
+    *   A  | D
+    *      |
+    * ---------
+    *   B  | C
+    * ---------
+    *
+    * Use new table to replace "D"
+    *
+    */
+  private def mergeVertically(newTbl: DataFrame, oldTbl: DataFrame): DataFrame = {
+    val newMarker = "__new__"
+    val newIds = newTbl.select(AccountId).withColumn(newMarker, lit(true))
+    val joined = oldTbl.join(newIds, Seq(AccountId), joinType = "left")
+    val partBC = joined.filter(col(newMarker).isNull).drop(newMarker)
+    val partAD = joined.filter(col(newMarker) === true).drop(newMarker)
+
+    val newTblWithTs = CopyUtils.fillTimestamps(newTbl).drop(CDLCreatedTime)
+    val newCols = newTblWithTs.columns // columns for part C and D
+    val oldCols = oldTbl.columns.diff(newCols).union(Seq(AccountId)) // columns for part A and B
+    val partA = partAD.select(oldCols map col:_*)
+    val newAD = partA.join(newTblWithTs, Seq(AccountId), joinType = "left")
+
+    val newBC = alignOldTblSchema(newAD, partBC)
+    newAD unionByName newBC
+  }
+
+  /**
+    * In Horizontal mode:
+    * The new table has all the columns
+    * take new table as a whole,
+    * then union with the missing rows from old table and align the schema to the new table
+    */
+  private def mergeHorizontally(newTbl: DataFrame, oldTbl: DataFrame): DataFrame = {
+    val newIds = newTbl.select(AccountId)
+    val rollover = oldTbl.join(newIds, Seq(AccountId), joinType = "left_anti")
     val newTblWithTs = CopyUtils.fillTimestamps(newTbl)
     val filtered = filterOldTbl(newTblWithTs, rollover)
-
-    val result = newTblWithTs unionByName filtered
-    lattice.output = List(result)
+    newTblWithTs unionByName filtered
   }
 
   private def filterOldTbl(newTbl: DataFrame, oldTbl: DataFrame): DataFrame = {
@@ -49,12 +91,16 @@ class MergeLatticeAccount extends AbstractSparkJob[MergeLatticeAccountConfig] {
     } else {
       oldTbl
     }
-    val newCols = newTbl.columns.diff(filtered.columns)
+    alignOldTblSchema(newTbl, filtered)
+  }
+
+  private def alignOldTblSchema(newTbl: DataFrame, oldTbl: DataFrame): DataFrame = {
+    val newCols = newTbl.columns.diff(oldTbl.columns)
     if (newCols.isEmpty) {
-      filtered
+      oldTbl
     } else {
       val fields = newTbl.schema.fields.filter(f => newCols.contains(f.name))
-      fields.foldLeft(filtered)((df, f) => df.withColumn(f.name, lit(null).cast(f.dataType)))
+      fields.foldLeft(oldTbl)((df, f) => df.withColumn(f.name, lit(null).cast(f.dataType)))
     }
   }
 
