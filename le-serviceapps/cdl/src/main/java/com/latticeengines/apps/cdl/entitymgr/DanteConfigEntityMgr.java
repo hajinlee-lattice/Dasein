@@ -2,13 +2,13 @@ package com.latticeengines.apps.cdl.entitymgr;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.dante.DanteConfig;
+import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 
 public interface DanteConfigEntityMgr {
 
-    void cleanupTenant(String tenantId);
+    void deleteByTenantId(String tenantId);
 
-    List<DanteConfig> findAllByTenantId(String tenantId);
+    List<DanteConfigurationDocument> findAllByTenantId(String tenantId);
 
-    DanteConfig saveAndUpdate(String tenantId, DanteConfig danteConfig);
+    DanteConfigurationDocument createOrUpdate(String tenantId, DanteConfigurationDocument danteConfig);
 }

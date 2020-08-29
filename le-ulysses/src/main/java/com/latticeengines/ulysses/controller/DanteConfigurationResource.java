@@ -5,12 +5,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.dante.DanteConfig;
+import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
@@ -33,10 +35,13 @@ public class DanteConfigurationResource {
     @GetMapping
     @ResponseBody
     @ApiOperation(value = "Get an account by of attributes in a group")
-    public FrontEndResponse<DanteConfig> getDanteConfiguration() {
+    public FrontEndResponse<DanteConfigurationDocument> getDanteConfiguration() {
         String customerSpace = MultiTenantContext.getShortTenantId();
         try {
-            return new FrontEndResponse<>(cdlDanteConfigProxy.getDanteConfiguration(customerSpace));
+            PerformanceTimer timer = new PerformanceTimer("get Dante Configuration", log);
+            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy.generateDanteConfiguration(customerSpace);
+            timer.close();
+            return new FrontEndResponse<>(danteConfigurationDocument);
         } catch (LedpException le) {
             log.error("Failed to get talking point data", le);
             return new FrontEndResponse<>(le.getErrorDetails());

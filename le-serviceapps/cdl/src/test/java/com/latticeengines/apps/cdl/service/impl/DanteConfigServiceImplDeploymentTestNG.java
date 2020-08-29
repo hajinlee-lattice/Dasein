@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.DanteConfigService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dante.DanteConfig;
+import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -35,7 +35,7 @@ public class DanteConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGB
     @Inject
     private DanteConfigService danteConfigService;
 
-    private DanteConfig danteConfig;
+    private DanteConfigurationDocument danteConfig;
 
     @BeforeClass(groups = "deployment")
     public void setup() {
@@ -51,41 +51,22 @@ public class DanteConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGB
     public void testCrud() throws InterruptedException {
         danteConfig = danteConfigService.generateDanteConfig();
 
-        List<DanteConfig> danteConfigs = danteConfigService.findByTenant();
+        List<DanteConfigurationDocument> danteConfigs = danteConfigService.findByTenant();
         Assert.assertTrue(CollectionUtils.isEmpty(danteConfigs));
 
-        danteConfigService.createAndUpdateDanteConfig(danteConfig);
+        danteConfigService.createAndUpdateDanteConfig();
         Thread.sleep(500);
         danteConfigs = danteConfigService.findByTenant();
-        DanteConfig danteConfig1 = danteConfigService.getDanteConfigByTenantId(mainCustomerSpace);
+        DanteConfigurationDocument danteConfig1 = danteConfigService.getDanteConfigByTenantId();
         Assert.assertNotNull(danteConfig1);
         Assert.assertTrue(CollectionUtils.isNotEmpty(danteConfigs));
         Assert.assertEquals(danteConfigs.size(), 1);
 
-        danteConfigService.createAndUpdateDanteConfig();
-        Thread.sleep(100);
-        danteConfigs = danteConfigService.findByTenant();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(danteConfigs));
-        Assert.assertEquals(danteConfigs.size(), 1);
-
-        danteConfigService.cleanupByTenant();
+        danteConfigService.deleteByTenant();
         Thread.sleep(100);
         danteConfigs = danteConfigService.findByTenant();
         Assert.assertTrue(CollectionUtils.isEmpty(danteConfigs));
         Assert.assertEquals(danteConfigs.size(), 0);
-
-        danteConfigService.createAndUpdateDanteConfig(mainCustomerSpace);
-        Thread.sleep(100);
-        danteConfigs = danteConfigService.findByTenant(mainCustomerSpace);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(danteConfigs));
-        Assert.assertEquals(danteConfigs.size(), 1);
-
-        danteConfigService.cleanupByTenantId(mainCustomerSpace);
-        Thread.sleep(100);
-        danteConfigs = danteConfigService.findByTenant(mainCustomerSpace);
-        Assert.assertTrue(CollectionUtils.isEmpty(danteConfigs));
-        Assert.assertEquals(danteConfigs.size(), 0);
-
     }
 
     private List<ColumnMetadata> getTestData(String filePath) {

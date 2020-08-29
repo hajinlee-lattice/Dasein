@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 
-public class DanteConfig implements Serializable {
+public class DanteConfigurationDocument implements Serializable {
 
     private MetadataDocument metadataDocument;
     private String widgetConfigurationDocument;
@@ -35,7 +35,7 @@ public class DanteConfig implements Serializable {
         return JsonUtils.serialize(this);
     }
 
-    public DanteConfig(MetadataDocument metadataDocument, String widgetConfigurationDocument) {
+    public DanteConfigurationDocument(MetadataDocument metadataDocument, String widgetConfigurationDocument) {
         this.metadataDocument = metadataDocument;
         this.widgetConfigurationDocument = widgetConfigurationDocument;
     }

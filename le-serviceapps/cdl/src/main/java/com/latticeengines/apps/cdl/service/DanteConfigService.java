@@ -2,28 +2,17 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.dante.DanteConfig;
-import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 
 public interface DanteConfigService {
 
-    void cleanupByTenant();
+    void deleteByTenant();
 
-    void cleanupByTenantId(String tenantId);
+    List<DanteConfigurationDocument> findByTenant();
 
-    List<DanteConfig> findByTenant();
+    DanteConfigurationDocument getDanteConfigByTenantId();
 
-    List<DanteConfig> findByTenant(String tenantId);
+    DanteConfigurationDocument createAndUpdateDanteConfig();
 
-    DanteConfig getDanteConfigByTenantId(String tenantId);
-
-    DanteConfig createAndUpdateDanteConfig(DanteConfig danteConfig);
-
-    DanteConfig createAndUpdateDanteConfig(String tenantId);
-
-    DanteConfig createAndUpdateDanteConfig();
-
-    DanteConfig generateDanteConfig(String tenantId);
-
-    DanteConfig generateDanteConfig();
+    DanteConfigurationDocument generateDanteConfig();
 }
