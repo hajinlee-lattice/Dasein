@@ -99,6 +99,7 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
                         "Business Development");
                 Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "VP");
                 break;
+            default:
             }
 
             count++;
