@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -16,12 +17,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
@@ -63,47 +64,59 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
     @Override
     public void execute() {
         bootstrap();
-        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig());
-        processOutput(result.getTargets().get(0));
-    }
-
-    private void processOutput(HdfsDataUnit aggregatedTxnDu) {
-        String prefix = String.format(SERVING_PREFIX, customerSpace.getTenantId());
-        String servingTableName = TableUtils.getFullTableName(prefix,
-                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
-        Table servingTable = toTable(servingTableName, compositeKey, aggregatedTxnDu);
-        metadataProxy.createTable(customerSpaceStr, servingTableName, servingTable);
-
-        /*
-         * FIXME - original steps does direct copy from batch store to serving store,
-         * whereas new steps try using same extract for both roles
-         */
-        Table batchTable = metadataProxy.copyTable(customerSpaceStr, servingTableName, customerSpaceStr);
-        String batchTableName = TableUtils.getFullTableName(BATCH_PREFIX,
-                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
-        metadataProxy.renameTable(customerSpaceStr, batchTable.getName(), batchTableName);
-
-        TableRoleInCollection batchStore = BusinessEntity.Transaction.getBatchStore(); // ConsolidatedDailyTransaction
-        TableRoleInCollection servingStore = BusinessEntity.Transaction.getServingStore(); // AggregatedTransaction
-        dataCollectionProxy.upsertTable(customerSpaceStr, batchTableName, batchStore, inactive);
-        dataCollectionProxy.upsertTable(customerSpaceStr, servingTableName, servingStore, inactive);
-        exportToS3AndAddToContext(batchTable, DAILY_TRXN_TABLE_NAME); // batch store
-        putObjectInContext(servingTableName, AGG_DAILY_TRXN_TABLE_NAME); // serving store
-
-        exportTableRoleToRedshift(servingTable, servingStore);
-    }
-
-    private TransformTxnStreamConfig getSparkConfig() {
-        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
-        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, txnDate, txnDayPeriod);
-        config.renameMapping = constructDailyRename();
-        config.targetColumns = STANDARD_FIELDS;
-
         Map<String, Table> dailyTxnStream = getTablesFromMapCtxKey(customerSpaceStr, DAILY_TXN_STREAMS);
         Table analyticDailyStream = dailyTxnStream.get(ProductType.Analytic.name());
         Table spendingDailyStream = dailyTxnStream.get(ProductType.Spending.name());
         log.info("Retrieved analytic stream {} and spending stream{}", analyticDailyStream.getName(),
                 spendingDailyStream.getName());
+
+        buildTransactionBatchStore(dailyTxnStream); // ConsolidatedDaily, partitioned by txnDayPeriod
+        buildTransactionServingStore(dailyTxnStream); // Aggregated, no partition
+
+        setTransactionRebuiltFlag();
+    }
+
+    private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream) {
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(txnDayPeriod, dailyTxnStream));
+        saveBatchStore(result.getTargets().get(0));
+    }
+
+    private void saveBatchStore(HdfsDataUnit consolidatedTxnDU) {
+        String tableName = TableUtils.getFullTableName(BATCH_PREFIX,
+                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+        Table consolidatedTxnTable = dirToTable(tableName, compositeKey, consolidatedTxnDU);
+        metadataProxy.createTable(customerSpaceStr, tableName, consolidatedTxnTable);
+        dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.ConsolidatedDailyTransaction,
+                inactive);
+        exportToS3AndAddToContext(consolidatedTxnTable, DAILY_TRXN_TABLE_NAME);
+    }
+
+    private void buildTransactionServingStore(Map<String, Table> dailyTxnStream) {
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(null, dailyTxnStream));
+        saveServingStore(result.getTargets().get(0));
+    }
+
+    private void saveServingStore(HdfsDataUnit aggregatedTxnDU) {
+        String prefix = String.format(SERVING_PREFIX, customerSpace.getTenantId());
+        String tableName = TableUtils.getFullTableName(prefix,
+                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+        Table aggregatedTxnTable = toTable(tableName, compositeKey, aggregatedTxnDU);
+        metadataProxy.createTable(customerSpaceStr, tableName, aggregatedTxnTable);
+        dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedTransaction,
+                inactive);
+        exportToS3AndAddToContext(aggregatedTxnTable, AGG_DAILY_TRXN_TABLE_NAME);
+        exportTableRoleToRedshift(aggregatedTxnTable, TableRoleInCollection.AggregatedTransaction);
+    }
+
+    private TransformTxnStreamConfig getSparkConfig(String partitionKey, Map<String, Table> dailyTxnStream) {
+        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
+        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, txnDate, txnDayPeriod);
+        config.renameMapping = constructDailyRename();
+        config.targetColumns = STANDARD_FIELDS;
+        config.partitionKey = partitionKey;
+
+        Table analyticDailyStream = dailyTxnStream.get(ProductType.Analytic.name());
+        Table spendingDailyStream = dailyTxnStream.get(ProductType.Spending.name());
         config.setInput(Arrays.asList(
                 analyticDailyStream.partitionedToHdfsDataUnit(null,
                         Collections.singletonList(InterfaceName.StreamDateId.name())),
@@ -121,5 +134,16 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         map.put(quantity, totalQuantity);
         map.put(rowCount, txnCount);
         return map;
+    }
+
+    private void setTransactionRebuiltFlag() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
+            log.info("Rebuild transaction finished, set TransactionRebuilt=true in data collection status");
+            status.setTransactionRebuilt(true);
+            putObjectInContext(CDL_COLLECTION_STATUS, status);
+        } else {
+            log.info("TransactionRebuilt flag already set to true");
+        }
     }
 }
