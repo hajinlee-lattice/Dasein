@@ -414,7 +414,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void testLDCAttrs() {
         testLDCFirmographics();
-        testLDCGrowthTrends();
+        // testLDCCovid19();
         testLDCOnlinePresence();
         testLDCWebsiteProfile();
         testLDCIntent();
@@ -453,8 +453,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         });
     }
 
-    private void testLDCGrowthTrends() {
-        checkAndVerifyCategory(Category.GROWTH_TRENDS, (config) -> {
+    private void testLDCCovid19() {
+        checkAndVerifyCategory(Category.COVID_19, (config) -> {
             if (skipVerifyDeprecatedLDCAttrs(config)) {
                 return true;
             }
@@ -468,7 +468,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             };
             initialState = overwrite11Flags(flags, initialState, config.getAttrName());
             String partition = getLDCPartition(config.getAttrName());
-            verifyFlags(config, Category.GROWTH_TRENDS, partition, initialState, flags);
+            verifyFlags(config, Category.COVID_19, partition, initialState, flags);
             return true;
         });
     }

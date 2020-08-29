@@ -10,8 +10,6 @@ import javax.inject.Inject;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
@@ -30,17 +28,15 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
         "classpath:test-serviceflows-cdl-context.xml" })
 public class LiveRampCampaignLaunchInitStepTestNG extends WorkflowTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(LiveRampCampaignLaunchInitStepTestNG.class);
-
     @Inject
     @Spy
     private LiveRampCampaignLaunchInitStep liveRampCampaignLaunchInitStep;
 
-    private final static String MOCK_ADD_CONTACTS_TABLE = "FAKE_ADD_TABLE";
-    private final static String MOCK_REMOVE_CONTACTS_TABLE = "FAKE_REMOVE_TABLE";
+    private static final String MOCK_ADD_CONTACTS_TABLE = "FAKE_ADD_TABLE";
+    private static final String MOCK_REMOVE_CONTACTS_TABLE = "FAKE_REMOVE_TABLE";
 
-    private final static String ADD_CONTACTS_LOCATION = "ADD_CONTACTS_TEST_LOCATION";
-    private final static String REMOVE_CONTACTS_LOCATION = "REMOVE_CONTACTS_TEST_LOCATION";
+    private static final String ADD_CONTACTS_LOCATION = "ADD_CONTACTS_TEST_LOCATION";
+    private static final String REMOVE_CONTACTS_LOCATION = "REMOVE_CONTACTS_TEST_LOCATION";
 
     @Override
     @BeforeClass(groups = "functional")
@@ -53,12 +49,12 @@ public class LiveRampCampaignLaunchInitStepTestNG extends WorkflowTestNGBase {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setAddContactsTable(MOCK_ADD_CONTACTS_TABLE);
         playLaunch.setRemoveContactsTable(MOCK_REMOVE_CONTACTS_TABLE);
-        
+
         HdfsDataUnit fakeAddUnit = new HdfsDataUnit();
         fakeAddUnit.setPath(ADD_CONTACTS_LOCATION);
         HdfsDataUnit fakeRemoveUnit = new HdfsDataUnit();
         fakeRemoveUnit.setPath(REMOVE_CONTACTS_LOCATION);
-        
+
         MockitoAnnotations.initMocks(this);
         Mockito.doReturn(playLaunch).when(liveRampCampaignLaunchInitStep).getPlayLaunchFromConfiguration();
 
@@ -89,7 +85,7 @@ public class LiveRampCampaignLaunchInitStepTestNG extends WorkflowTestNGBase {
                 .getMapObjectFromContext(
                         LiveRampCampaignLaunchInitStep.RECOMMENDATION_CONTACT_DISPLAY_NAMES,
                         String.class, String.class);
-        
+
         assertTrue(displayNames.containsKey(ContactMasterConstants.TPS_ATTR_RECORD_ID));
         assertEquals(LiveRampCampaignLaunchInitStep.RECORD_ID_DISPLAY_NAME, displayNames.get(ContactMasterConstants.TPS_ATTR_RECORD_ID));
     }
@@ -100,7 +96,7 @@ public class LiveRampCampaignLaunchInitStepTestNG extends WorkflowTestNGBase {
         String actualRemoveContactsLocation = liveRampCampaignLaunchInitStep
                 .getStringValueFromContext(
                         DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH);
-        
+
         assertEquals(PathUtils.toAvroGlob(ADD_CONTACTS_LOCATION), actualAddContactsLocation);
         assertEquals(PathUtils.toAvroGlob(REMOVE_CONTACTS_LOCATION), actualRemoveContactsLocation);
     }
