@@ -105,7 +105,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                             }
                         }));
                 return ThreadPoolUtils.callInParallel(fetchers(), callables, //
-                        1, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
+                        10, TimeUnit.MINUTES, 250, TimeUnit.MILLISECONDS);
             }
         });
     }
@@ -123,7 +123,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     @Cacheable(cacheNames = CacheName.Constants.DnBRealTimeLookup, key = "T(java.lang.String).format(\"%s\", #url)")
     public String sendCacheableRequest(String url) {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10);
         return retry.execute(ctx -> {
             while (System.currentTimeMillis() < stopUntil.get()) {
                 log.info("In peace period, wait 5 seconds.");
@@ -184,7 +184,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private synchronized void initFetchers() {
         if (fetchers == null) {
-            fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 8);
+            fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 4);
         }
     }
 
