@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +16,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.proxy.exposed.cdl.CDLDanteConfigProxy;
-
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,7 +37,7 @@ public class DanteConfigurationResource {
         String customerSpace = MultiTenantContext.getShortTenantId();
         try {
             PerformanceTimer timer = new PerformanceTimer("get Dante Configuration", log);
-            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy.generateDanteConfiguration(customerSpace);
+            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy.getDanteConfiguration(customerSpace);
             timer.close();
             return new FrontEndResponse<>(danteConfigurationDocument);
         } catch (LedpException le) {

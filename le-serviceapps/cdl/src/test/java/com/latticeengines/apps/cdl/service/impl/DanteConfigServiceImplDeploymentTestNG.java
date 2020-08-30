@@ -44,29 +44,13 @@ public class DanteConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGB
         doReturn((getTestData(commonResourcePath + accountMetadataPath))).when(servingStoreProxy).getAccountMetadata(
                 any(String.class), any(ColumnSelection.Predefined.class), any(DataCollection.Version.class));
         ((DanteConfigServiceImpl) danteConfigService).setServingStoreProxy(servingStoreProxy);
-
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testCrud() throws InterruptedException {
-        danteConfig = danteConfigService.generateDanteConfig();
-
-        List<DanteConfigurationDocument> danteConfigs = danteConfigService.findByTenant();
-        Assert.assertTrue(CollectionUtils.isEmpty(danteConfigs));
-
-        danteConfigService.createAndUpdateDanteConfig();
-        Thread.sleep(500);
-        danteConfigs = danteConfigService.findByTenant();
-        DanteConfigurationDocument danteConfig1 = danteConfigService.getDanteConfigByTenantId();
-        Assert.assertNotNull(danteConfig1);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(danteConfigs));
-        Assert.assertEquals(danteConfigs.size(), 1);
-
-        danteConfigService.deleteByTenant();
+    public void testGetDanteConfig() throws InterruptedException {
+        danteConfig = danteConfigService.getDanteConfiguration();
         Thread.sleep(100);
-        danteConfigs = danteConfigService.findByTenant();
-        Assert.assertTrue(CollectionUtils.isEmpty(danteConfigs));
-        Assert.assertEquals(danteConfigs.size(), 0);
+        Assert.assertNotNull(danteConfig);
     }
 
     private List<ColumnMetadata> getTestData(String filePath) {

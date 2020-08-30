@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
@@ -54,43 +53,35 @@ public class DanteConfigServiceImpl implements DanteConfigService {
     @Inject
     private DanteConfigEntityMgr entityMgr;
 
-    @Override
-    public DanteConfigurationDocument createAndUpdateDanteConfig() {
+    private DanteConfigurationDocument createAndUpdateDanteConfig() {
         String tenantId = MultiTenantContext.getShortTenantId();
-        DanteConfigurationDocument danteConfig = generateDanteConfig();
+        DanteConfigurationDocument danteConfig = getDanteConfiguration(tenantId);
         return entityMgr.createOrUpdate(tenantId, danteConfig);
     }
 
-    @Override
-    public void deleteByTenant() {
+    private void deleteByTenant() {
         String tenantId = MultiTenantContext.getShortTenantId();
         entityMgr.deleteByTenantId(tenantId);
     }
 
-    @Override
-    public List<DanteConfigurationDocument> findByTenant() {
+    private List<DanteConfigurationDocument> findByTenant() {
         String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findAllByTenantId(tenantId);
     }
 
-    public DanteConfigurationDocument getDanteConfigByTenantId() {
+    @Override
+    public DanteConfigurationDocument getDanteConfiguration() {
         String tenantId = MultiTenantContext.getShortTenantId();
         List<DanteConfigurationDocument> danteConfigs = entityMgr.findAllByTenantId(tenantId);
         if (danteConfigs.size() > 1) {
-            log.warn(String.format("Found multiple Dante Configurations cached for tenant: %s",tenantId));
+            log.warn(String.format("Found multiple Dante Configurations cached for tenant: %s", tenantId));
             return createAndUpdateDanteConfig();
         }
         if (CollectionUtils.isEmpty(danteConfigs)) {
-            log.warn(String.format("Found no Dante Configurations cached for tenant: %s",tenantId));
+            log.warn(String.format("Found no Dante Configurations cached for tenant: %s", tenantId));
             return createAndUpdateDanteConfig();
         }
         return danteConfigs.get(0);
-    }
-
-    @Override
-    public DanteConfigurationDocument generateDanteConfig() {
-        String customerSpace = MultiTenantContext.getShortTenantId();
-        return getDanteConfiguration(customerSpace);
     }
 
     private DanteConfigurationDocument getDanteConfiguration(String customerSpace) {
