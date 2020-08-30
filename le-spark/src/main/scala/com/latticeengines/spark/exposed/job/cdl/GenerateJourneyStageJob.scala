@@ -23,7 +23,7 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
   private val INTERNAL_TIME_KEY = "__Time__"
   private val JOURNEY_STAGE_EVENT_TYPE = "Journey Stage Change"
   private val JOURNEY_STAGE_SOURCE = "Atlas"
-  private val CHANGE_DETECTION_LOOKBACK_DAYS = 30
+  private val CHANGE_DETECTION_LOOKBACK_DAYS = 90
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[JourneyStageJobConfig]): Unit = {
     val config = lattice.config
@@ -47,8 +47,11 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
       .groupBy(AccountId.name)
       .agg(max(INTERNAL_PRIORITY_KEY).as(INTERNAL_PRIORITY_KEY))
     val mergedStageDf = mergedPriorityDf
-      .withColumn(StageName.name, priorityToStage(mergedPriorityDf.col(INTERNAL_PRIORITY_KEY)))
+      .join(timelineMaster.select(AccountId.name).distinct, Seq(AccountId.name), "right")
       .withColumn(eventTimeCol, lit(currTime.toEpochMilli))
+      .withColumn(StageName.name, coalesce(
+        priorityToStage(mergedPriorityDf.col(INTERNAL_PRIORITY_KEY)),
+        lit(defaultStageName))) // fill default stage name for all account with event
       .drop(INTERNAL_PRIORITY_KEY)
 
     // calculate changed journey stages and merged master journey stages
@@ -63,10 +66,7 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
           mergedStageDf.col(StageName.name), //
           lit(defaultStageName) // previously have stage but currently not, set to default stage
         ))
-        .withColumn(INTERNAL_TIME_KEY, coalesce( //
-          mergedStageDf.col(eventTimeCol), //
-          prevAccStageDf.col(eventTimeCol) //
-        ))
+        .withColumn(INTERNAL_TIME_KEY, lit(currTime.toEpochMilli))
         .select(AccountId.name, INTERNAL_STAGENAME_KEY, INTERNAL_TIME_KEY)
         .withColumnRenamed(INTERNAL_STAGENAME_KEY, StageName.name)
         .withColumnRenamed(INTERNAL_TIME_KEY, eventTimeCol)

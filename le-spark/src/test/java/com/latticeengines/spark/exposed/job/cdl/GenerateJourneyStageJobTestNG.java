@@ -90,11 +90,11 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(verifyTimeLineFn(17, 6), verifyTimeLineFn(7, 6),
+        return Arrays.asList(verifyTimeLineFn("master", 18, 6), verifyTimeLineFn("diff", 7, 6),
                 verifyJourneyStageFn(getExpectedStageNames()));
     }
 
-    private Function<HdfsDataUnit, Boolean> verifyTimeLineFn(int expectedNumRecords,
+    private Function<HdfsDataUnit, Boolean> verifyTimeLineFn(String name, int expectedNumRecords,
             int expectedNumJourneyStageRecords) {
         return (tgt) -> {
             AtomicInteger counter = new AtomicInteger(0);
@@ -115,7 +115,7 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
             });
             log.info("TimeLine Output:");
             List<String> cols = TIMELINE_FIELDS.stream().map(Pair::getKey).collect(Collectors.toList());
-            records.forEach(record -> log.info(debugStr(record, cols)));
+            records.forEach(record -> log.info(name + ": " + debugStr(record, cols)));
 
             Assert.assertEquals(counter.get(), expectedNumRecords);
             Assert.assertEquals(journeyStageCounter.get(), expectedNumJourneyStageRecords);
@@ -171,8 +171,10 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                 newTimelineRecord("a6", DnbIntentData, "Model1"), //
                 newTimelineRecord("a6", Opportunity, "Closed Won"), //
 
+                oldTimelineRecord("a8", WebVisit, "Page 1"), // old visit, no existing stage
+
                 /*-
-                 * accounts with no current records (qualify for default stage): a7, a8
+                 * accounts with no current records (qualify for default stage): a8
                  */
         };
 
@@ -185,7 +187,9 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                 { "a5", "Closed", 0L }, //
                 { "a6", "Known Engaged", 0L }, //
                 { "a7", "Aware", 0L }, //
-                { "a8", "Closed-Won", 0L }, //
+                /*-
+                 * no existing stage for a8, generate default
+                 */
         };
 
         uploadHdfsDataUnit(masterData, TIMELINE_FIELDS);
@@ -204,6 +208,12 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
         stageNames.put("a7", "Dark");
         stageNames.put("a8", "Dark");
         return stageNames;
+    }
+
+    private Object[] oldTimelineRecord(String accountId, AtlasStream.StreamType type, String detail1) {
+        Object[] row = newTimelineRecord(accountId, type, detail1);
+        row[3] = Long.MIN_VALUE;
+        return row;
     }
 
     private Object[] newTimelineRecord(String accountId, AtlasStream.StreamType type, String detail1) {
