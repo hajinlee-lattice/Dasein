@@ -78,11 +78,11 @@ public final class EmailUtils {
 
     private static Session applySettings(final EmailSettings emailSettings) throws MessagingException {
         Properties props = new Properties();
-        props.put("mail.smtp.starttls.enable", emailSettings.isUseSTARTTLS());
         props.put("mail.smtp.host", emailSettings.getServer());
         props.put("mail.smtp.port", emailSettings.getPort());
 
         if (emailSettings.isUseSSL()) {
+            props.put("mail.smtp.socketFactory.port", emailSettings.getPort());
             props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         }
 
@@ -92,14 +92,17 @@ public final class EmailUtils {
             props.put("mail.smtp.auth", "true");
         }
 
-        Session session = Session.getInstance(props, new Authenticator() {
+        props.put("mail.smtp.ssl.enable", emailSettings.isUseSSL());
+        props.put("mail.smtp.starttls.enable", emailSettings.isUseSTARTTLS());
+
+        // props.put("mail.debug", "true");
+
+        return Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(emailSettings.getUsername(), emailSettings.getPassword());
             }
         });
-
-        return session;
     }
 
 }
