@@ -172,8 +172,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
-        log.info("processMatchOutput, groupOutput candidate size {}",
-                groupOutput.getResult().get(0).getCandidateOutput().size());
+        if (groupOutput.getResult() != null && groupOutput.getResult().size() > 0 && groupOutput.getResult().get(0).getCandidateOutput() != null) {
+            log.info("processMatchOutput, groupOutput candidate size {}",
+                    groupOutput.getResult().get(0).getCandidateOutput().size());
+        }
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
