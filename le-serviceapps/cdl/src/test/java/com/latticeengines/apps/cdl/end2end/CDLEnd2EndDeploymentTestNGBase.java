@@ -168,7 +168,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    public static final int S3_CHECKPOINTS_VERSION = 26;
+    public static final int S3_CHECKPOINTS_VERSION = 27;
     private static final int S3_RATING_CHECKPOINTS_VERSION = 26;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -318,7 +318,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    static final Long PERIOD_TRANSACTION_UT_EM = 75175L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
     // Number of total purchase history attributes after UpdateTransaction test

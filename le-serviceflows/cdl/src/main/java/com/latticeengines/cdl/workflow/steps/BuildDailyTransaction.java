@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -72,8 +70,6 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
 
         buildTransactionBatchStore(dailyTxnStream); // ConsolidatedDaily, partitioned by txnDayPeriod
         buildTransactionServingStore(dailyTxnStream); // Aggregated, no partition
-
-        setTransactionRebuiltFlag();
     }
 
     private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream) {
@@ -134,16 +130,5 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         map.put(quantity, totalQuantity);
         map.put(rowCount, txnCount);
         return map;
-    }
-
-    private void setTransactionRebuiltFlag() {
-        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        if (BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
-            log.info("Rebuild transaction finished, set TransactionRebuilt=true in data collection status");
-            status.setTransactionRebuilt(true);
-            putObjectInContext(CDL_COLLECTION_STATUS, status);
-        } else {
-            log.info("TransactionRebuilt flag already set to true");
-        }
     }
 }

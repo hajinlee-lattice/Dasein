@@ -172,10 +172,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
-        if (groupOutput.getResult() != null && groupOutput.getResult().size() > 0 && groupOutput.getResult().get(0).getCandidateOutput() != null) {
-            log.info("processMatchOutput, groupOutput candidate size {}",
-                    groupOutput.getResult().get(0).getCandidateOutput().size());
-        }
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
@@ -261,9 +257,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     private void writeDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
             throws IOException {
         List<GenericRecord> records = new ArrayList<>();
-        log.info(
-                "AbstractBulkMatchProcessorExecutorImpl#writeDataToAvro, outputRecords size {}, isMultiResultMatch: {}",
-                outputRecords.size(), processorContext.isMultiResultMatch());
         for (OutputRecord outputRecord : outputRecords) {
             List<List<Object>> data = new LinkedList<>();
             if (processorContext.isMultiResultMatch()) {
@@ -278,7 +271,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                     List<Object> allValues = copyAndfilterOverwrittenInput(outputRecord, processorContext);
                     allValues.addAll(candidate);
                     data.add(allValues);
-                    log.info("Added data {}", allValues);
                 }
             } else {
                 if (outputRecord.getOutput() == null) {
@@ -302,8 +294,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 }
                 data.add(allValues);
             }
-
-            log.info("data size {}", data.size());
             for (List<Object> row : data) {
                 GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
                 List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
@@ -316,7 +306,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         String splitAvro = processorContext.getOutputAvro(randomSplit);
         FileUtils.forceMkdirParent(new File(splitAvro));
         Schema schema = processorContext.getOutputSchema();
-        log.info("Schema fields {}", schema.getFields());
         if (new File(splitAvro).exists()) {
             AvroUtils.appendToLocalFile(records, splitAvro, useSnappy);
         } else {
