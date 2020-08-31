@@ -19,6 +19,7 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -97,7 +98,7 @@ public class DataReportServiceImpl implements DataReportService {
         Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         if (pid != null) {
             DataReportRecord dataReportRecord = dataReportEntityMgr.findDataReportRecord(level, ownerId);
-            log.info("data report record: " + JsonUtils.pprint(dataReportRecord));
+            log.info("Data report record: " + JsonUtils.serialize(dataReportRecord));
             if (dataReport.getBasicStats() != null) {
                 dataReportRecord.setBasicStats(dataReport.getBasicStats());
             }
@@ -164,14 +165,17 @@ public class DataReportServiceImpl implements DataReportService {
         while (parentId != null) {
             // link the same duns count as child if parent is null
             int count = dataReportEntityMgr.updateDataReportRecordIfNull(parentId, table, cache.getSnapshotTimestamp());
-            log.info("some info ownerId {}, level {}, count {}", parentOwnerId, parentId, count);
+            log.info("some info: ownerId {}, level {}, count {}", parentOwnerId, parentId, count);
             // stop updating the parental node
             if (count == 0) {
-                log.info("stop registering duns count for {}", parentId);
+                log.info("Stop registering duns count for {}", parentId);
                 break;
             }
             // this is to keep the consistency, after linking the duns count as child,
             // override parent's data report too
+            log.info("Begin overriding the data report for ownerId {} and level {} after updating duns count",
+                    parentOwnerId, parentLevel);
+            SleepUtils.sleep(150);
             updateDataReport(customerSpace, parentLevel, parentOwnerId, dataReport);
             parentOwnerId = getParentOwnerId(customerSpace, parentLevel, parentOwnerId);
             parentLevel = parentLevel.getParentLevel();
