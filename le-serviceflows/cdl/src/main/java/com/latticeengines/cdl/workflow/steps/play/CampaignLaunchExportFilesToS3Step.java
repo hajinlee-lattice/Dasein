@@ -88,7 +88,7 @@ public class CampaignLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLa
 
         log.info("Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
-        if (lookupIdMap.isTrayAuthenticationSetUp()) {
+        if (lookupIdMap.isTrayEnabled()) {
             exportFiles.forEach(hdfsFilePath -> {
                 ImportExportRequest request = new ImportExportRequest();
                 request.srcPath = hdfsFilePath;

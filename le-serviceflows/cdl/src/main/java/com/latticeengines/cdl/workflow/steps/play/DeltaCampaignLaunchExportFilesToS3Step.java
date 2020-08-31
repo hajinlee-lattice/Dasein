@@ -109,7 +109,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         }
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
-        if (lookupIdMap.isTrayAuthenticationSetUp()) {
+        if (lookupIdMap.isTrayEnabled()) {
             exportFiles.keySet().forEach(k -> {
                 List<String> sourcePaths = exportFiles.get(k);
                 List<String> targetPaths = new ArrayList<>();

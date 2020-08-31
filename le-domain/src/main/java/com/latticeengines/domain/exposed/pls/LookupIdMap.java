@@ -274,11 +274,13 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
         this.exportFolder = exportFolder;
     }
 
-    public boolean isTrayAuthenticationSetUp() {
-        if (CDLExternalSystemName.liveRamp.contains(externalSystemName)) {
+    public boolean isTrayEnabled() {
+        if (externalSystemType.equals(CDLExternalSystemType.FILE_SYSTEM)
+                || CDLExternalSystemName.LIVERAMP.contains(externalSystemName)) {
             return true;
         }
-        return externalAuthentication != null && !StringUtils.isBlank(externalAuthentication.getTrayAuthenticationId());
+        return externalAuthentication != null && !StringUtils.isBlank(externalAuthentication.getTrayAuthenticationId())
+                && externalAuthentication.getTrayWorkflowEnabled();
     }
 
     @Override

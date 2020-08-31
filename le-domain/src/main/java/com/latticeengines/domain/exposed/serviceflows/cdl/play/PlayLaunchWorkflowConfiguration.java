@@ -61,9 +61,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             }
 
             ExternalSystemAuthentication externalAuth = lookupIdMap.getExternalAuthentication();
-            if (lookupIdMap.getExternalSystemType() != CDLExternalSystemType.FILE_SYSTEM
-                    && (!lookupIdMap.isTrayAuthenticationSetUp()
-                            || !externalAuth.getTrayWorkflowEnabled())) {
+            if (!lookupIdMap.isTrayEnabled()) {
                 exportFileGeneratorConf.setSkipStep(true);
                 exportFilesToS3Conf.setSkipStep(true);
                 exportPublishToSNSConf.setSkipStep(true);

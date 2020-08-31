@@ -85,7 +85,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (destinationSysType != CDLExternalSystemType.FILE_SYSTEM && !lookupIdMap.isTrayAuthenticationSetUp()) {
+        if (!lookupIdMap.isTrayEnabled()) {
             return null;
         }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
@@ -96,7 +96,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (destinationSysType != CDLExternalSystemType.FILE_SYSTEM && (!lookupIdMap.isTrayAuthenticationSetUp())) {
+        if (!lookupIdMap.isTrayEnabled()) {
             return null;
         }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
@@ -138,8 +138,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
             return false;
         }
         ExternalSystemAuthentication extSysAuth = lookupIdMap.getExternalAuthentication();
-        if (!lookupIdMap.isTrayAuthenticationSetUp()
-                || extSysAuth.getTrayWorkflowEnabled() == null || !extSysAuth.getTrayWorkflowEnabled()) {
+        if (!lookupIdMap.isTrayEnabled()) {
             log.info("Skipping Data Export as Destination org is not fully configured: {}",
                     extSysAuth != null
                             ? extSysAuth.getTrayAuthenticationId() + "-" + extSysAuth.getTrayWorkflowEnabled()

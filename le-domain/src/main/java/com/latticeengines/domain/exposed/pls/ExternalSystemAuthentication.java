@@ -119,42 +119,52 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
         this.tenant = extSysAuth.getTenant();
     }
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
 
+    @Override
     public Tenant getTenant() {
         return tenant;
     }
 
+    @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
 
+    @Override
     public Date getCreated() {
         return created;
     }
 
+    @Override
     public void setCreated(Date created) {
         this.created = created;
     }
 
+    @Override
     public Date getUpdated() {
         return updated;
     }
 
+    @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
     }
@@ -196,6 +206,8 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
     }
 
     public Boolean getTrayWorkflowEnabled() {
+        if (trayWorkflowEnabled == null)
+            return false;
         return trayWorkflowEnabled;
     }
 

@@ -234,7 +234,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                         mainEntity, !suppressAccountsWithoutContacts, //
                         getRandomWorkspace(), externalSystemName);
 
-                if (CDLExternalSystemName.adPlatforms.contains(externalSystemName)) {
+                if (CDLExternalSystemName.ADPLATFORMS.contains(externalSystemName)) {
                     String encryptionKey = CipherUtils.generateKey();
                     String saltHint = CipherUtils.generateKey();
                     config.setManageDbUrl(url);
