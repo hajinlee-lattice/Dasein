@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -382,35 +383,33 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         uploadJobDetails.setUploadCreatedTime(uploadDetails.getUploadCreatedTime());
         uploadJobDetails.setProgressPercentage(uploadDetails.getProgressPercentage());
         if(uploadJobDetails.getProgressPercentage() < 100 && mergedJobSteps.size() > 0){
-            uploadJobDetails.setCurrentStep(mergedJobSteps.get(mergedJobSteps.size()-1));
+            uploadJobDetails.setCurrentStep(mergedJobSteps.get(mergedJobSteps.size() - 1));
         }
         return uploadJobDetails;
     }
 
     private List<UploadJobStep> mergeDupSteps(List<UploadJobStep> uploadJobSteps) {
-        UploadJobStep currentStep = null;
         List<UploadJobStep> mergedSteps = new ArrayList<>();
-        for(UploadJobStep step: uploadJobSteps) {
-            if (step != null) {
-                if(currentStep != null && step.getStepName().equalsIgnoreCase(currentStep.getStepName())){
-                    if(currentStep.getEndTimestamp() < step.getEndTimestamp()) {
-                        currentStep.setEndTimestamp(step.getEndTimestamp());
-                    } else {
-                        currentStep.setStartTimestamp(step.getStartTimestamp());
-                    }
-                } else {
-                    if(currentStep != null){
-                        mergedSteps.add(currentStep);
-                    }
-                    currentStep = step;
+        if (CollectionUtils.isEmpty(uploadJobSteps)) {
+            return mergedSteps;
+        }
+        Map<String, List<UploadJobStep>> stepMap = uploadJobSteps.stream()
+                .filter(step -> StringUtils.isNotEmpty(step.getStepName()))
+                .collect(Collectors.groupingBy(UploadJobStep::getStepName));
+        stepMap.forEach((name, stepList) -> {
+            UploadJobStep currentStep = stepList.get(0);
+            for (int i = 1; i < stepList.size(); i++) {
+                if (stepList.get(i).getStartTimestamp() != null) {
+                    currentStep.setStartTimestamp(currentStep.getStartTimestamp() == null ?
+                            stepList.get(i).getStartTimestamp() : Math.min(currentStep.getStartTimestamp(), stepList.get(i).getStartTimestamp()));
                 }
-            } else {
-                if (currentStep != null) {
-                    mergedSteps.add(currentStep);
+                if (currentStep.getEndTimestamp() != null) {
+                    currentStep.setEndTimestamp(stepList.get(i).getEndTimestamp() == null ? null :
+                            Math.max(stepList.get(i).getEndTimestamp(), currentStep.getEndTimestamp()));
                 }
             }
-        }
-        mergedSteps.add(currentStep);
+            mergedSteps.add(currentStep);
+        });
         return mergedSteps;
     }
 }
