@@ -138,7 +138,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            if (CDLExternalSystemName.liveRamp.contains(config.getDestinationSysName())) {
+            if (CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName())) {
                 AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
                         new LiveRampRecommendationAvroToCSVTransformer(config.getContactDisplayNames()));
             } else {
@@ -169,7 +169,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            if (CDLExternalSystemName.liveRamp.contains(config.getDestinationSysName())) {
+            if (CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName())) {
                 AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
                         new LiveRampRecommendationAvroToJsonFunction(config.getContactDisplayNames()));
             } else {
