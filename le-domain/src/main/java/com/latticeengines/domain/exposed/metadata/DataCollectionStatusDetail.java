@@ -90,6 +90,13 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("TransactionRebuilt")
     private Boolean transactionRebuilt;
 
+    /*
+     * temp flag to indicate a tenant's txn is built with new steps
+     * TODO remove after new steps support incremental update
+     */
+    @JsonProperty("TransactionRebuiltWithNewSteps")
+    private Boolean transactionRebuiltWithNewSteps;
+
     @JsonProperty("activityBookKeeping")
     private ActivityBookkeeping bookkeeping;
 
@@ -257,6 +264,14 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setTransactionRebuilt(Boolean transactionRebuilt) {
         this.transactionRebuilt = transactionRebuilt;
+    }
+
+    public Boolean getTransactionRebuiltWithNewSteps() {
+        return transactionRebuiltWithNewSteps;
+    }
+
+    public void setTransactionRebuiltWithNewSteps(Boolean transactionRebuiltWithNewSteps) {
+        this.transactionRebuiltWithNewSteps = transactionRebuiltWithNewSteps;
     }
 
     public ActivityBookkeeping getBookkeeping() {
