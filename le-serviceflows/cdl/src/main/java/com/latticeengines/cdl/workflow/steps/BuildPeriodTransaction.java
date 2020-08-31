@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -61,8 +63,6 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
     private static final String periodId = InterfaceName.PeriodId.name();
     private static final String txnCount = InterfaceName.TransactionCount.name();
 
-    // FIXME - in db there are cols (e.g. txnDate) not in avro. not having
-    // those here breaks anything?
     private static final List<String> STANDARD_PERIOD_TXN_FIELDS = Arrays.asList(accountId, productId, productType,
             txnType, periodId, periodName, totalAmount, totalCost, totalQuantity, txnCount, compositeKey);
 
@@ -83,6 +83,8 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         Map<String, Table> periodTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, PERIOD_TXN_STREAMS);
         buildConsolidatedPeriodTransaction(periodTransactionTables); // no partition
         buildAggregatedPeriodTransaction(periodTransactionTables); // no partition
+
+        setTransactionRebuiltFlag();
     }
 
     private void buildConsolidatedPeriodTransaction(Map<String, Table> periodTransactionTables) {
@@ -171,5 +173,16 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         map.put(quantity, totalQuantity);
         map.put(rowCount, txnCount);
         return map;
+    }
+
+    private void setTransactionRebuiltFlag() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
+            log.info("Rebuild transaction finished, set TransactionRebuilt=true in data collection status");
+            status.setTransactionRebuilt(true);
+            putObjectInContext(CDL_COLLECTION_STATUS, status);
+        } else {
+            log.info("TransactionRebuilt flag already set to true");
+        }
     }
 }

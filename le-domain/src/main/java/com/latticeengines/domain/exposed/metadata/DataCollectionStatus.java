@@ -383,6 +383,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.detail.setTransactionRebuilt(transactionRebuilt);
     }
 
+    @JsonProperty("TransactionRebuiltWithNewSteps")
+    public Boolean getTransactionRebuiltWithNewSteps() {
+        return this.detail.getTransactionRebuiltWithNewSteps();
+    }
+
+    @JsonProperty("TransactionRebuiltWithNewSteps")
+    public void setTransactionRebuiltWithNewSteps(Boolean transactionRebuiltWithNewSteps) {
+        this.detail.setTransactionRebuiltWithNewSteps(transactionRebuiltWithNewSteps);
+    }
+
     @JsonProperty("activityPartitionKeyMigrated")
     public Boolean isActivityPartitionKeyMigrated() {
         return this.detail.isActivityPartitionKeyMigrated();
