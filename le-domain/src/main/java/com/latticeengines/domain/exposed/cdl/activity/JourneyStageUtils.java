@@ -55,7 +55,7 @@ public final class JourneyStageUtils {
 
     private static JourneyStage knownEngagedStage(@NotNull Tenant tenant) {
         return stage(tenant, "Known Engaged", "Account is being engaged with", 4, "#59bfff",
-                predicate(MarketingActivity, 1, webVisitFilter()));
+                predicate(MarketingActivity, 1, 14, webVisitFilter()));
     }
 
     private static JourneyStage engagedStage(@NotNull Tenant tenant) {
