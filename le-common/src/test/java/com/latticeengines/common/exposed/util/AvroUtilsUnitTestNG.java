@@ -33,6 +33,8 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.latticeengines.common.exposed.transformer.LiveRampRecommendationAvroToCSVTransformer;
+import com.latticeengines.common.exposed.transformer.LiveRampRecommendationAvroToJsonFunction;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToJsonFunction;
 
@@ -302,6 +304,50 @@ public class AvroUtilsUnitTestNG {
             List<String[]> csvRows = reader.readAll();
             log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
             assertEquals(csvRows.size(), 16);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void convertLiveRampRecommendationsAvroToJSON() throws IOException {
+        URL avroUrl = ClassLoader
+                .getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/liveramp.avro");
+        File jsonFile = File.createTempFile("RecommendationsTest_", ".json");
+        String displayName = "Record ID";
+        Map<String, String> contactsMap = new HashMap<String, String>();
+        contactsMap.put("RECORD_ID", displayName);
+        AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile,
+                new LiveRampRecommendationAvroToJsonFunction(contactsMap));
+
+        log.info("Created JSON File at: " + jsonFile.getAbsolutePath());
+        ObjectMapper om = new ObjectMapper();
+        try (FileInputStream fis = new FileInputStream(jsonFile)) {
+            JsonNode node = om.readTree(fis);
+            Assert.assertEquals(node.getNodeType(), JsonNodeType.ARRAY);
+            Assert.assertNotNull(node.get(0));
+            Assert.assertEquals(node.size(), 21);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void convertLiveRampRecommendationsAvroToCSV() throws IOException {
+        URL avroUrl = ClassLoader
+                .getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/liveramp.avro");
+        File csvFile = File.createTempFile("RecommendationsTest_", ".csv");
+
+        Map<String, String> contactsMap = new HashMap<String, String>();
+        contactsMap.put("RECORD_ID", "Record ID");
+
+        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
+                new LiveRampRecommendationAvroToCSVTransformer(contactsMap));
+
+        log.info("Created CSV File at: " + csvFile.getAbsolutePath());
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
+            for (String[] row : csvRows) {
+                log.info(Arrays.deepToString(row));
+            }
+            assertEquals(csvRows.size(), 22);
         }
     }
 

@@ -22,12 +22,15 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.transformer.LiveRampRecommendationAvroToCSVTransformer;
+import com.latticeengines.common.exposed.transformer.LiveRampRecommendationAvroToJsonFunction;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToJsonFunction;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -135,9 +138,14 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
-                    new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
-                            config.getContactDisplayNames(), shouldIgnoreAccountsWithoutContacts(config)));
+            if (CDLExternalSystemName.liveRamp.contains(config.getDestinationSysName())) {
+                AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
+                        new LiveRampRecommendationAvroToCSVTransformer(config.getContactDisplayNames()));
+            } else {
+                AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
+                        new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
+                                config.getContactDisplayNames(), shouldIgnoreAccountsWithoutContacts(config)));
+            }
         }
 
         @Override
@@ -161,9 +169,14 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
-                    new RecommendationAvroToJsonFunction(config.getAccountDisplayNames(),
-                            config.getContactDisplayNames()));
+            if (CDLExternalSystemName.liveRamp.contains(config.getDestinationSysName())) {
+                AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
+                        new LiveRampRecommendationAvroToJsonFunction(config.getContactDisplayNames()));
+            } else {
+                AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
+                        new RecommendationAvroToJsonFunction(config.getAccountDisplayNames(),
+                                config.getContactDisplayNames()));
+            }
         }
 
         @Override
