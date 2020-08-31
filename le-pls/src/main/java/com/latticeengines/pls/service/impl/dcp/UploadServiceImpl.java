@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -396,20 +398,25 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         Map<String, List<UploadJobStep>> stepMap = uploadJobSteps.stream()
                 .filter(step -> StringUtils.isNotEmpty(step.getStepName()))
                 .collect(Collectors.groupingBy(UploadJobStep::getStepName));
-        stepMap.forEach((name, stepList) -> {
-            UploadJobStep currentStep = stepList.get(0);
-            for (int i = 1; i < stepList.size(); i++) {
-                if (stepList.get(i).getStartTimestamp() != null) {
-                    currentStep.setStartTimestamp(currentStep.getStartTimestamp() == null ?
-                            stepList.get(i).getStartTimestamp() : Math.min(currentStep.getStartTimestamp(), stepList.get(i).getStartTimestamp()));
+        Set<String> processedStep = new HashSet<>();
+        for (UploadJobStep jobStep : uploadJobSteps) {
+            if (!processedStep.contains(jobStep.getStepName())) {
+                processedStep.add(jobStep.getStepName());
+                List<UploadJobStep> stepList = stepMap.get(jobStep.getStepName());
+                UploadJobStep currentStep = stepList.get(0);
+                for (int i = 1; i < stepList.size(); i++) {
+                    if (stepList.get(i).getStartTimestamp() != null) {
+                        currentStep.setStartTimestamp(currentStep.getStartTimestamp() == null ?
+                                stepList.get(i).getStartTimestamp() : Math.min(currentStep.getStartTimestamp(), stepList.get(i).getStartTimestamp()));
+                    }
+                    if (currentStep.getEndTimestamp() != null) {
+                        currentStep.setEndTimestamp(stepList.get(i).getEndTimestamp() == null ? null :
+                                Math.max(stepList.get(i).getEndTimestamp(), currentStep.getEndTimestamp()));
+                    }
                 }
-                if (currentStep.getEndTimestamp() != null) {
-                    currentStep.setEndTimestamp(stepList.get(i).getEndTimestamp() == null ? null :
-                            Math.max(stepList.get(i).getEndTimestamp(), currentStep.getEndTimestamp()));
-                }
+                mergedSteps.add(currentStep);
             }
-            mergedSteps.add(currentStep);
-        });
+        }
         return mergedSteps;
     }
 }
