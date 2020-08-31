@@ -184,6 +184,12 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         // update ready for rollup for uploadUID2
         dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID2");
+
+
+        dataReportService.deleteDataReportUnderOwnerId(mainCustomerSpace, DataReportRecord.Level.Project, "projectUID");
+        Set<String> childrenIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Project,
+                "projectUID");
+        Assert.assertTrue(CollectionUtils.isEmpty(childrenIds));
     }
 
     public static DataReport getDataReport() {

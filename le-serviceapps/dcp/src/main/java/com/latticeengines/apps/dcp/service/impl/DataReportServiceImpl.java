@@ -353,6 +353,39 @@ public class DataReportServiceImpl implements DataReportService {
         }
     }
 
+    @Override
+    public void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        Set<Long> idToBeRemoved = new HashSet<>();
+        switch (level) {
+            case Project:
+                Long projectPid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+                idToBeRemoved.add(projectPid);
+                Set<Long> sourcePIds = dataReportEntityMgr.findPidsByParentId(projectPid);
+                idToBeRemoved.addAll(sourcePIds);
+                sourcePIds.forEach(sourcePId -> {
+                    Set<Long> uploadPIds = dataReportEntityMgr.findPidsByParentId(sourcePId);
+                    idToBeRemoved.addAll(uploadPIds);
+                });
+                break;
+            case Source:
+                Long sourcePid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+                idToBeRemoved.add(sourcePid);
+                Set<Long> uploadPids = dataReportEntityMgr.findPidsByParentId(sourcePid);
+                idToBeRemoved.addAll(uploadPids);
+                break;
+            case Upload:
+                Long uploadPid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+                idToBeRemoved.add(uploadPid);
+                break;
+            default:
+                break;
+        }
+        if (CollectionUtils.isNotEmpty(idToBeRemoved)) {
+            log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeRemoved);
+            dataReportEntityMgr.updateReadyForRollupToFalse(idToBeRemoved);
+        }
+    }
+
     private DataReportRecord getEmptyReportRecord(DataReportRecord.Level level, String ownerId) {
         DataReportRecord dataReportRecord = new DataReportRecord();
         dataReportRecord.setTenant(MultiTenantContext.getTenant());

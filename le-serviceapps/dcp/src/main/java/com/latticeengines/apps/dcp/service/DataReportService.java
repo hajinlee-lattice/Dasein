@@ -41,6 +41,12 @@ public interface DataReportService {
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.MatchToDUNSReport matchToDUNSReport);
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.DuplicationReport duplicationReport);
+<<<<<<< HEAD
 
     void copyDataReportToParent(String customerSpace, DataReportRecord.Level level, String ownerId);
+||||||| merged common ancestors
+=======
+
+    void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
+>>>>>>> DCP-1481 remove the corresponding report when archiving the project
 }

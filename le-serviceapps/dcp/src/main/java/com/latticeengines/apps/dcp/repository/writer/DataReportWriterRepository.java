@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.repository.writer;
 
 import java.util.Date;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +17,11 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DataReportRecord d SET d.readyForRollup = true, d.refreshTime = ?2 where d.pid = ?1")
     void updateReadyForRollup(Long pid, Date refreshTime);
+
+    @Transactional(transactionManager = "jpaTransactionManager")
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE DataReportRecord d SET d.readyForRollup = false, d.refreshTime = ?2 where d.pid in ?1")
+    void updateReadyForRollup(Set<Long> pids, Date refreshTime);
 
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
