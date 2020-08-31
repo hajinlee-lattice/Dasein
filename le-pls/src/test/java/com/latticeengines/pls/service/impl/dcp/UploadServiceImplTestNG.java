@@ -63,9 +63,10 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         UploadJobDetails completeJobDetails = uploadService.getJobDetailsByUploadId(FINISHED_UPLOAD);
         Assert.assertNotNull(runningJobDetails);
         Assert.assertNotNull(runningJobDetails.getUploadJobSteps());
-        Assert.assertEquals(runningJobDetails.getUploadJobSteps().size(), 1);
+        Assert.assertEquals(runningJobDetails.getUploadJobSteps().size(), 3);
         Assert.assertNotNull(runningJobDetails.getCurrentStep());
         Assert.assertNull(runningJobDetails.getCurrentStep().getEndTimestamp());
+        Assert.assertEquals(runningJobDetails.getCurrentStep().getStepName(), "Analysis");
 
         Assert.assertNotNull(completeJobDetails);
         Assert.assertNotNull(completeJobDetails.getUploadJobSteps());
@@ -111,7 +112,10 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         if (RUNNING_APPLICATION.equals(applicationId)) {
             stepList.add(getJobStep(0, true));
             stepList.add(getJobStep(1, true));
-            stepList.add(getJobStep(2, false));
+            stepList.add(getJobStep(2, true));
+            stepList.add(getJobStep(3, true));
+            stepList.add(getJobStep(4, true));
+            stepList.add(getJobStep(5, false));
         } else if (COMPLETED_APPLICATION.equals(applicationId)) {
             stepList.add(getJobStep(0, true));
             stepList.add(getJobStep(1, true));
