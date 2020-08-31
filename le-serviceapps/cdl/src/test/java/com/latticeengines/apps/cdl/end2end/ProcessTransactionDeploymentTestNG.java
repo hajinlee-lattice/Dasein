@@ -91,8 +91,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
-        // FIXME (Ray) - disable until resolving daily txn partition key verification issue resolved
-        // verifyTxnDailyStore();
+        verifyTxnDailyStore();
         verifyPurchaseHistoryAttrs();
     }
 

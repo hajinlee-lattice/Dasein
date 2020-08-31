@@ -138,7 +138,6 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.ActivityMetricsTestUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
-import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -1910,41 +1909,53 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void verifyTxnDailyStore(int totalDays, String minDate, String maxDate, //
             double amount, double quantity, double cost) {
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
-        Table dailyTable = dataCollectionProxy.getTable(mainCustomerSpace,
-                TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion);
+        Table batchStore = dataCollectionProxy.getTable(mainCustomerSpace,
+                TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion); // partitioned by txnDayPeriod
         // Verify number of days
-        List<String> dailyFiles;
+        List<Integer> dayPeriods;
         try {
-            dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dailyTable.getExtractsDirectory());
+            List<String> partitionPaths = HdfsUtils.getFilesForDir(yarnConfiguration, batchStore.getExtracts().get(0).getPath());
+            dayPeriods = partitionPaths.stream().map(path -> {
+                String periodId = path.substring(path.lastIndexOf("=") + 1);
+                return Integer.parseInt(periodId);
+            }).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get daily periods", e);
+        }
+        Assert.assertEquals(dayPeriods.size(), totalDays);
+        // Verify max/min day period
+        int minDay = DateTimeUtils.dateToDayPeriod(minDate);
+        int maxDay = DateTimeUtils.dateToDayPeriod(maxDate);
+        Assert.assertEquals((int) Collections.min(dayPeriods), minDay);
+        Assert.assertEquals((int) Collections.max(dayPeriods), maxDay);
+
+        // Verify daily aggregated result
+        List<String> dailyFiles;
+        int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFY_DAILYTXN_TXNDATE);
+        try {
+            dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, batchStore.getExtracts().get(0).getPath() + "/TransactionDayPeriod=" + dayPeriod);
         } catch (IOException e) {
             throw new RuntimeException("Failed to get daily table extracts.", e);
         }
-        dailyFiles = dailyFiles.stream().filter(f -> !f.contains("_SUCCESS")).collect(Collectors.toList());
-        Assert.assertEquals(dailyFiles.size(), totalDays);
-        // Verify max/min day period
-        Pair<Integer, Integer> minMaxPeriods = TimeSeriesUtils.getMinMaxPeriod(yarnConfiguration, dailyTable);
-        Assert.assertNotNull(minMaxPeriods);
-        int minDay = DateTimeUtils.dateToDayPeriod(minDate);
-        int maxDay = DateTimeUtils.dateToDayPeriod(maxDate);
-        Assert.assertEquals((int) minMaxPeriods.getLeft(), minDay);
-        Assert.assertEquals((int) minMaxPeriods.getRight(), maxDay);
-        // Verify daily aggregated result
-        int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFY_DAILYTXN_TXNDATE);
-        String dailyFileContainingTargetDay = dailyFiles.stream().filter(f -> f.contains(String.valueOf(dayPeriod)))
-                .findFirst().orElse(null);
-        Assert.assertNotNull(dailyFileContainingTargetDay);
-        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
+        Assert.assertNotEquals(dailyFiles.size(), 0);
         GenericRecord verifyRecord = null;
-        String aidFld = InterfaceName.AccountId.name();
-        while (iter.hasNext()) {
-            GenericRecord record = iter.next();
-            if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(aidFld).toString())
-                    && VERIFY_DAILYTXN_PRODUCTID.equals(record.get(InterfaceName.ProductId.name()).toString())) {
-                verifyRecord = record;
+        for (String fileName : dailyFiles) {
+            Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, fileName);
+            String aidFld = InterfaceName.AccountId.name();
+            while (iter.hasNext()) {
+                GenericRecord record = iter.next();
+                if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(aidFld).toString())
+                        && VERIFY_DAILYTXN_PRODUCTID.equals(record.get(InterfaceName.ProductId.name()).toString())) {
+                    verifyRecord = record;
+                    break;
+                }
+            }
+            if (verifyRecord != null) {
                 break;
             }
         }
-        Assert.assertNotNull(verifyRecord);
+        Assert.assertNotNull(verifyRecord, String.format("Unable to find record with combination AccountId=%s, ProductId=%s",
+                VERIFY_DAILYTXN_ACCOUNTID, VERIFY_DAILYTXN_PRODUCTID));
         log.info("Verified record: " + verifyRecord.toString());
         Assert.assertEquals(verifyRecord.get(InterfaceName.TotalAmount.name()), amount);
         Assert.assertEquals(verifyRecord.get(InterfaceName.TotalQuantity.name()), quantity);
