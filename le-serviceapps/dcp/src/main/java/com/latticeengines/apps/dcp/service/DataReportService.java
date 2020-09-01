@@ -6,7 +6,6 @@ import java.util.Set;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 
 public interface DataReportService {
 
@@ -32,8 +31,6 @@ public interface DataReportService {
     Set<String> getChildrenIds(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     DunsCountCache getDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId);
-
-    DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.BasicStats basicStats);
 
