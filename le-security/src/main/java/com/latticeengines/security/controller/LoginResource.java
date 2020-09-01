@@ -3,6 +3,7 @@ package com.latticeengines.security.controller;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,6 +66,7 @@ import io.swagger.annotations.ApiOperation;
 public class LoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(LoginResource.class);
+    private static final String REDIS_PREFIX = "Forgot_Password_";
 
     @Value("${security.app.public.url}")
     private String APP_BASE_URL;
@@ -97,6 +100,9 @@ public class LoginResource {
 
     @Inject
     private IDaaSService iDaaSService;
+
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping("/login")
     @ResponseBody
@@ -257,6 +263,20 @@ public class LoginResource {
     public boolean forgotPassword(@RequestBody ResetPasswordRequest request) {
         try {
             String username = request.getUsername();
+            if (StringUtils.isEmpty(username)) {
+                return false;
+            }
+            synchronized (this) {
+                if (redisTemplate.opsForValue().get(REDIS_PREFIX + username) != null) {
+                    log.warn(String.format("Already reset password for user %s in less then 10 seconds, skip reset!",
+                            username));
+                    return true;
+                } else {
+                    redisTemplate.opsForValue().set(REDIS_PREFIX + username, System.currentTimeMillis(),
+                            10, TimeUnit.SECONDS);
+                    log.info("Trying to reset password for user " + username);
+                }
+            }
             String tempPass = globalUserManagementService.resetLatticeCredentials(username);
 
             if (LatticeProduct.LPA.equals(request.getProduct())) {
