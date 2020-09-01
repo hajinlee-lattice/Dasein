@@ -52,7 +52,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
       var addedContactsData = contactsDf.drop(accountId).join(positiveDeltaDf, Seq(contactId), if (config.isIncludeAccountsWithoutContacts) "right" else "inner")
       var removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
 
-      if (CDLExternalSystemName.adPlatforms.contains(externalSystemName)) {
+      if (CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName)) {
         addedContactsData = CountryCodeUtils.convert(addedContactsData, contactCountry, contactCountry, url, user, password, key, salt)
         fullContactsData = CountryCodeUtils.convert(fullContactsData, contactCountry, contactCountry, url, user, password, key, salt)
       }
