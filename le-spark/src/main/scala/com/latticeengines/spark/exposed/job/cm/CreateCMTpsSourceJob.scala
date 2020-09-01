@@ -1,5 +1,7 @@
 package com.latticeengines.spark.exposed.job.cm
 
+import java.util.UUID
+
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants
 import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig
 import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig.FieldMapping
@@ -31,6 +33,9 @@ class CreateCMTpsSourceJob extends AbstractSparkJob[CMTpsSourceCreationConfig] {
       }
     }
 
-    lattice.output = standardized :: Nil
+    // Add UUID for each row since record_id won't be unique in raw data
+    val generateUUID = udf(() => UUID.randomUUID().toString)
+    val result = standardized.withColumn(ContactMasterConstants.TPS_RECORD_UUID, generateUUID())
+    lattice.output = result :: Nil
   }
 }
