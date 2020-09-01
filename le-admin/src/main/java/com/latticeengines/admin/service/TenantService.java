@@ -12,12 +12,13 @@ import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 
 public interface TenantService {
 
-    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration, String userName);
+    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration, String userName, VboCallback callback);
 
     boolean createTenantV2(String contractId, String tenantId, TenantRegistration tenantRegistration,  String userName);
 
@@ -51,5 +52,5 @@ public interface TenantService {
 
     List<LatticeModule> updateModules(String contractId, String tenantId, Collection<LatticeModule> modules);
 
-    VboResponse createVboTenant(VboRequest vboRequest, String userName);
+    VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback, Boolean useMock);
 }

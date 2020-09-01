@@ -84,6 +84,10 @@ public class LivyConfigurer {
         int partitions = maxExe * executorCores * partitionMultiplier;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
+
+        // others
+        conf.put("spark.sql.autoBroadcastJoinThreshold", "-1");
+        conf.put("spark.sql.crossJoin.enabled", "true");
         return conf;
     }
 

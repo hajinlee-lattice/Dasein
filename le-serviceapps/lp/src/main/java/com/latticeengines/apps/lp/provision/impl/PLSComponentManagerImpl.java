@@ -36,8 +36,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
-import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
-import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -55,7 +53,6 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
-import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 
 import io.opentracing.References;
 import io.opentracing.Scope;
@@ -377,6 +374,11 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
+
+        // Update IDaaS users node with email sent times; to be stored in Camille
+        String usersWithEmailTime = JsonUtils.serialize(retrievedUsers);
+        configDir.get("/IDaaSUsers").getDocument().setData(usersWithEmailTime);
+
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
             tenant = tenantService.findByTenantId(PLSTenantId);
@@ -466,43 +468,36 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
                                    List<String> externalAdminEmails, String tenantName) {
         log.info("Operating IDaaS users");
-        List<IDaaSUser> retrievedUsers = new ArrayList<>();
-        for (IDaaSUser idaasUser : iDaaSUsers) {
-            String email = idaasUser.getEmailAddress();
-            IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
-            if (retrievedUser == null) {
-                log.info("begin creating IDaaS user for {}", email);
-                retrievedUser = iDaaSService.createIDaaSUser(idaasUser);
-            } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
-                // add product access and default role to user when user already exists in IDaaS
-                log.info("user exist in IDaaS, add product access to user {}", email);
-                ProductRequest request = new ProductRequest();
-                request.setEmailAddress(email);
-                ProductSubscription productSubscription = new ProductSubscription();
-                productSubscription.setSubscriberNumber(idaasUser.getSubscriberNumber());
-                productSubscription.setIso2CountryCode(idaasUser.getCountryCode());
-                productSubscription.setCompanyName(idaasUser.getCompanyName());
-                productSubscription.setProductName(IDaaSServiceImpl.DCP_PRODUCT);
-                List<ProductSubscription>productSubscriptions = new ArrayList<>();
-                productSubscriptions.add(productSubscription);
-                request.setProductSubscription(productSubscriptions);
-                iDaaSService.addProductAccessToUser(request);
-            } else {
-                log.info("IDaaS user existed for {} and has product access", email);
-            }
+        List<IDaaSUser> createdUsers = new ArrayList<>();
+        for (IDaaSUser user : iDaaSUsers) {
+            String email = user.getEmailAddress();
+
+            User createUserData = new User();
+            createUserData.setEmail(user.getEmailAddress());
+            createUserData.setFirstName(user.getFirstName());
+            createUserData.setLastName(user.getLastName());
+            createUserData.setUsername(user.getUserName());
+            createUserData.setPhoneNumber(user.getPhoneNumber());
+            IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber());
+
             String welcomeUrl = dcpPublicUrl;
-            if (retrievedUser.getInvitationLink() != null) {
-                welcomeUrl = retrievedUser.getInvitationLink();
+            if (createdUser.getInvitationLink() != null) {
+                welcomeUrl = createdUser.getInvitationLink();
             }
-            emailService.sendDCPWelcomeEmail(idaasUser, tenantName, welcomeUrl);
+
+            // Add info needed for VBO callback
+            createdUser.setInvitationSentTime(emailService.sendDCPWelcomeEmail(createdUser, tenantName, welcomeUrl));
+            createdUser.setSubscriberNumber(user.getSubscriberNumber());
+
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());
             } else {
                 externalAdminEmails.add(email.toLowerCase());
             }
-            retrievedUsers.add(retrievedUser);
+
+            createdUsers.add(createdUser);
         }
-        return retrievedUsers;
+        return createdUsers;
     }
 
 }
