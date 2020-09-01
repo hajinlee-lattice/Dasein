@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
 @JsonSubTypes({ //
+        @JsonSubTypes.Type(value = ProgressEventDetail.class, name = "Progress"),
         @JsonSubTypes.Type(value = ProgressEventDetail.class, name = "Completed"),
         @JsonSubTypes.Type(value = ProgressEventDetail.class, name = "InProgress"),
         @JsonSubTypes.Type(value = AudienceEventDetail.class, name = "AudienceCreation"),
