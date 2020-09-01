@@ -2,12 +2,9 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
@@ -76,10 +73,7 @@ public class CampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 return this;
             }
 
-            ExternalSystemAuthentication externalAuth = lookupIdMap.getExternalAuthentication();
-            if (lookupIdMap.getExternalSystemType() != CDLExternalSystemType.FILE_SYSTEM
-                    && (externalAuth == null || StringUtils.isBlank(externalAuth.getTrayAuthenticationId())
-                            || !externalAuth.getTrayWorkflowEnabled())) {
+            if (!lookupIdMap.isTrayEnabled()) {
                 exportFileGeneratorConf.setSkipStep(true);
                 exportFilesToS3Conf.setSkipStep(true);
                 exportPublishToSNSConf.setSkipStep(true);

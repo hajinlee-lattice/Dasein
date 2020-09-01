@@ -24,6 +24,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -271,6 +272,15 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
 
     public void setExportFolder(String exportFolder) {
         this.exportFolder = exportFolder;
+    }
+
+    public boolean isTrayEnabled() {
+        if (externalSystemType.equals(CDLExternalSystemType.FILE_SYSTEM)
+                || CDLExternalSystemName.LIVERAMP.contains(externalSystemName)) {
+            return true;
+        }
+        return externalAuthentication != null && !StringUtils.isBlank(externalAuthentication.getTrayAuthenticationId())
+                && externalAuthentication.getTrayWorkflowEnabled();
     }
 
     @Override

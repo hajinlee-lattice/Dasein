@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.shaded.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,6 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
 import com.latticeengines.domain.exposed.cdl.MessageType;
-import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -90,8 +88,7 @@ public class CampaignLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLa
 
         log.info("Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
-        ExternalSystemAuthentication externalAuth = lookupIdMap.getExternalAuthentication();
-        if (externalAuth != null && !StringUtils.isBlank(externalAuth.getTrayAuthenticationId())) {
+        if (lookupIdMap.isTrayEnabled()) {
             exportFiles.forEach(hdfsFilePath -> {
                 ImportExportRequest request = new ImportExportRequest();
                 request.srcPath = hdfsFilePath;

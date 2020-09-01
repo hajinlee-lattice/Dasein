@@ -22,8 +22,13 @@ public enum CDLExternalSystemName {
     AppNexus("AppNexus"), //
     Others("Others");
 
-    public static final ImmutableList<CDLExternalSystemName> adPlatforms = //
+    public static final ImmutableList<CDLExternalSystemName> AD_PLATFORMS = //
             ImmutableList.of(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Facebook);
+
+    public static final ImmutableList<CDLExternalSystemName> LIVERAMP = //
+            ImmutableList.of(CDLExternalSystemName.Adobe_Audience_Mgr, CDLExternalSystemName.MediaMath,
+                    CDLExternalSystemName.TradeDesk, CDLExternalSystemName.Verizon_Media,
+                    CDLExternalSystemName.Google_Display_N_Video_360, CDLExternalSystemName.AppNexus);
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();
 
