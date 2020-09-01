@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cm.CMTpsLookupCreationConfig;
@@ -29,8 +30,8 @@ public class CreateCMTpsLookupJobTestNG extends SparkJobFunctionalTestNGBase {
     private void testCreateTpsLookup() {
         List<String> input = prepareData();
         CMTpsLookupCreationConfig config = new CMTpsLookupCreationConfig();
-        config.setKey("SITE_DUNS_NUMBER");
-        config.setTargetColumn("RECORD_ID");
+        config.setKey(ContactMasterConstants.TPS_SITE_DUNS_NUMBER);
+        config.setTargetColumn(ContactMasterConstants.TPS_RECORD_UUID);
         SparkJobResult result = runSparkJob(CreateCMTpsLookupJob.class, config, input,
                 String.format("/tmp/%s/%s/testCreateTpsLookup", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(this::verifyTpsLookup));
@@ -40,19 +41,22 @@ public class CreateCMTpsLookupJobTestNG extends SparkJobFunctionalTestNGBase {
         Iterator<GenericRecord> iter = verifyAndReadTarget(tpsLookup);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-            int siteDuns = (int) record.get("SITE_DUNS_NUMBER");
+            int siteDuns = (int) record.get(ContactMasterConstants.TPS_SITE_DUNS_NUMBER);
             switch (siteDuns) {
             case 1014559:
                 // System.out.println(record);
-                Assert.assertEquals(record.get("RECORD_IDS").toString(), "10075525003,18813140529");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_RECORD_UUIDS).toString(),
+                        "3c4a5f10-4670-4b29-b10a-c538eb2436b0,ea58edb8-1f49-4ae2-975e-0d93f0973043");
                 break;
             case 1017490:
                 System.out.println(record);
-                Assert.assertEquals(record.get("RECORD_IDS").toString(), "10076299495");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_RECORD_UUIDS).toString(),
+                        "ccb2f49d-8d4d-42e4-a004-ab496d62e3ce,9f7a61bd-3406-4e23-ae29-0c434f651960");
                 break;
             case 1089858:
                 // System.out.println(record);
-                Assert.assertEquals(record.get("RECORD_IDS").toString(), "10072300773");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_RECORD_UUIDS).toString(),
+                        "1a9007e8-55be-4947-b29c-ac46a24a8ec3");
                 break;
             default:
                 Assert.fail("Should not see a record with SITE_DUNS_NUMBER " + siteDuns + ": " + record.toString());
@@ -68,6 +72,7 @@ public class CreateCMTpsLookupJobTestNG extends SparkJobFunctionalTestNGBase {
     private List<String> prepareData() {
         List<String> input = new ArrayList<>();
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of("TPS_RECORD_UUID", String.class), //
                 Pair.of("SITE_DUNS_NUMBER", Integer.class), //
                 Pair.of("RECORD_ID", String.class), //
                 Pair.of("DNB_JOB_TITLE", String.class), //
@@ -89,15 +94,18 @@ public class CreateCMTpsLookupJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Object[][] getInput1Data() {
         Object[][] data = new Object[][] { //
-                { 1014559, "10075525003", "senior director of Engineering", "Software Engineering", null, null, "f",
+                { "3c4a5f10-4670-4b29-b10a-c538eb2436b0", 1014559, "10075525003", "senior director of Engineering",
+                        "Software Engineering", null, null, "f", "f", "f", "f", "f", "f", "f" }, //
+                { "ea58edb8-1f49-4ae2-975e-0d93f0973043", 1014559, "18813140529", "VP", "Marketing", null, null, "f",
                         "f", "f", "f", "f", "f", "f" }, //
-                { 1014559, "18813140529", "VP", "Marketing", null, null, "f", "f", "f", "f", "f", "f", "f" }, //
-                { 1017490, "10076299495", "sales representative", "Sales Support", "1017490", "1017490", "t", "t", "t",
-                        "t", "t", "t", "f" }, //
-                { 1017490, null, "Teacher", "Education", "1017999", "1017999", "t", "t", "t", "t", "t", "t", "f" }, //
-                { null, "11082300999", "CEO", "CEO", "1018666", "1018666", "f", "t", "f", "t", "t", "t", "f" }, //
-                { 1089858, "10072300773", "contributing editor", "Writer/Editor", "6962435", "6962435", "t", "f", "t",
-                        "f", "t", "t", "f" } };
+                { "ccb2f49d-8d4d-42e4-a004-ab496d62e3ce", 1017490, "10076299495", "sales representative",
+                        "Sales Support", "1017490", "1017490", "t", "t", "t", "t", "t", "t", "f" }, //
+                { "9f7a61bd-3406-4e23-ae29-0c434f651960", 1017490, null, "Teacher", "Education", "1017999", "1017999",
+                        "t", "t", "t", "t", "t", "t", "f" }, //
+                { "0fe29adf-f099-4cf4-be42-918d3d16bcc1", null, "11082300999", "CEO", "CEO", "1018666", "1018666", "f",
+                        "t", "f", "t", "t", "t", "f" }, //
+                { "1a9007e8-55be-4947-b29c-ac46a24a8ec3", 1089858, "10072300773", "contributing editor",
+                        "Writer/Editor", "6962435", "6962435", "t", "f", "t", "f", "t", "t", "f" } };
         return data;
     }
 }
