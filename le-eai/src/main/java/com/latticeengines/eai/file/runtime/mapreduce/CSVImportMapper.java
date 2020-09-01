@@ -662,6 +662,20 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
         }
 
+        private void validateUTF8String(String str) {
+            if(StringUtils.isNotEmpty(str)) {
+                str.chars().forEach(c -> {
+                    if(isInvalidUTF8CodePoints(c)) {
+                        throw new RuntimeException(String.format("Invalid or unsupported UTF8 codepoints: %s", Integer.toHexString(c)));
+                    }});
+            }
+        }
+
+        //invalid uft8 for redshift: 0xffff,0xfffe,0xfdd0 - 0xfdef
+        private boolean isInvalidUTF8CodePoints(int c) {
+            return c == 0xffff || c == 0xfffe || (c > 0xfdd0 && c < 0xfdef);
+        }
+
         private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
             Map<String, String> headerCaseMapping = headerMap.keySet().stream()
                                                     .collect(Collectors.toMap(String::toLowerCase, header -> header));
@@ -696,6 +710,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         if (StringUtils.length(csvFieldValue) > MAX_STRING_LENGTH) {
                             throw new RuntimeException(String.format("%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
                         }
+                        validateUTF8String(csvFieldValue);
                         validateAttribute(csvRecord, attr, headerCaseMapping, csvColumnNameInLowerCase);
                         if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
                             if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
