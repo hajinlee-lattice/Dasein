@@ -12,6 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
@@ -40,7 +41,6 @@ public class CDLDanteConfigResourceDeploymentTestNG extends CDLDeploymentTestNGB
     @Test(groups = "deployment")
     public void testGetDanteConfig() throws InterruptedException {
         danteConfig = cdlDanteConfigProxy.getDanteConfiguration(MultiTenantContext.getShortTenantId());
-        Thread.sleep(100);
         Assert.assertNotNull(danteConfig);
     }
 }

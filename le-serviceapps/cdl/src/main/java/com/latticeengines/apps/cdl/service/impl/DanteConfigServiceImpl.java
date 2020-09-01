@@ -53,22 +53,6 @@ public class DanteConfigServiceImpl implements DanteConfigService {
     @Inject
     private DanteConfigEntityMgr entityMgr;
 
-    private DanteConfigurationDocument createAndUpdateDanteConfig() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        DanteConfigurationDocument danteConfig = getDanteConfiguration(tenantId);
-        return entityMgr.createOrUpdate(tenantId, danteConfig);
-    }
-
-    private void deleteByTenant() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        entityMgr.deleteByTenantId(tenantId);
-    }
-
-    private List<DanteConfigurationDocument> findByTenant() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return entityMgr.findAllByTenantId(tenantId);
-    }
-
     @Override
     public DanteConfigurationDocument getDanteConfiguration() {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -89,7 +73,7 @@ public class DanteConfigServiceImpl implements DanteConfigService {
         MetadataDocument metadataDocument = JsonUtils.deserialize(
                 getStaticDocument(commonResourcePath + metadataDocumentTemplatePath), MetadataDocument.class);
         DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
-        log.info("version: " + version.toString());
+        log.info("version: " + version);
         List<ColumnMetadata> allAttrs = servingStoreProxy.getAccountMetadata(customerSpace,
                 ColumnSelection.Predefined.TalkingPoint, version);
         if (CollectionUtils.isEmpty(allAttrs)) {
@@ -109,6 +93,22 @@ public class DanteConfigServiceImpl implements DanteConfigService {
                 .getValue();
         danteAccountMetadata.getProperties().addAll(talkingPointAttributes);
         return new DanteConfigurationDocument(metadataDocument, widgetConfigurationDocument);
+    }
+
+    private DanteConfigurationDocument createAndUpdateDanteConfig() {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        DanteConfigurationDocument danteConfig = getDanteConfiguration(tenantId);
+        return entityMgr.createOrUpdate(tenantId, danteConfig);
+    }
+
+    private void deleteByTenant() {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        entityMgr.deleteByTenantId(tenantId);
+    }
+
+    private List<DanteConfigurationDocument> findByTenant() {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.findAllByTenantId(tenantId);
     }
 
     private String getStaticDocument(String documentPath) {

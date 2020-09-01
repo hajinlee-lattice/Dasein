@@ -32,7 +32,7 @@ public class DanteConfigurationResource {
 
     @GetMapping
     @ResponseBody
-    @ApiOperation(value = "Get an account by of attributes in a group")
+    @ApiOperation(value = "Get Dante configuration")
     public FrontEndResponse<DanteConfigurationDocument> getDanteConfiguration() {
         String customerSpace = MultiTenantContext.getShortTenantId();
         try {

@@ -16,8 +16,9 @@ import com.latticeengines.domain.exposed.metadata.IsColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize()
-public class DanteConfigurationDocument implements Serializable {
+public class DanteConfigurationDocument {
 
     private MetadataDocument metadataDocument;
     private String widgetConfigurationDocument;
@@ -30,11 +31,6 @@ public class DanteConfigurationDocument implements Serializable {
     @JsonProperty("widgetConfigurationDocument")
     public String getWidgetConfigurationDocument() {
         return widgetConfigurationDocument;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 
     public DanteConfigurationDocument(MetadataDocument metadataDocument, String widgetConfigurationDocument) {

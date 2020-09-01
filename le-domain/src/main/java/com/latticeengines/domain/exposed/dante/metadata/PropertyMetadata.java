@@ -7,7 +7,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
-public class PropertyMetadata extends BaseObjectMetadata implements Serializable{
+public class PropertyMetadata extends BaseObjectMetadata {
     @JsonProperty("DefaultValue")
     private String defaultValue;
 
@@ -153,10 +153,5 @@ public class PropertyMetadata extends BaseObjectMetadata implements Serializable
             default:
                 return PropertyType.String;
         }
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }

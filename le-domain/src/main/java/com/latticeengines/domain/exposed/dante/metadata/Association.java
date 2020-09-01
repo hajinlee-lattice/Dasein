@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class Association extends BaseObjectMetadata implements Serializable{
+public class Association extends BaseObjectMetadata {
     @JsonProperty("Cardinality")
     private int cardinality;
 
@@ -59,10 +59,5 @@ public class Association extends BaseObjectMetadata implements Serializable{
 
     public void setTargetNotion(String targetNotion) {
         this.targetNotion = targetNotion;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }

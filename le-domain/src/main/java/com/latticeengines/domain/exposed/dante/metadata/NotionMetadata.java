@@ -9,7 +9,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 /// <summary>
 /// Class for defining metadata about objects (e.g. Account, Lead)
 /// </summary>
-public class NotionMetadata extends BaseObjectMetadata implements Serializable {
+public class NotionMetadata extends BaseObjectMetadata {
 
     @JsonProperty("DescriptionKey")
     private String descriptionKey;
@@ -46,10 +46,5 @@ public class NotionMetadata extends BaseObjectMetadata implements Serializable {
 
     public void setRootNotion(boolean rootNotion) {
         isRootNotion = rootNotion;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }

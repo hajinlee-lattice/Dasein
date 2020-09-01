@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class NotionMetadataWrapper implements Serializable{
+public class NotionMetadataWrapper {
     @JsonProperty("Key")
     private String key;
 
@@ -29,10 +29,5 @@ public class NotionMetadataWrapper implements Serializable{
 
     public void setValue(NotionMetadata value) {
         this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }

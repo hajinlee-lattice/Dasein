@@ -6,7 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class MetadataDocument implements Serializable{
+public class MetadataDocument {
 
     @JsonProperty("Notions")
     private List<NotionMetadataWrapper> notions;
@@ -17,10 +17,5 @@ public class MetadataDocument implements Serializable{
 
     public void setNotions(List<NotionMetadataWrapper> notions) {
         this.notions = notions;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 }
