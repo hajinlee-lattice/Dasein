@@ -328,6 +328,14 @@ public class IDaaSServiceImpl implements IDaaSService {
         return response;
     }
 
+    @Override
+    public void callbackWithAuth(String url, Object responseBody) {
+        refreshToken();
+        log.info("Sending callback to " + url);
+        log.info(responseBody.toString());
+        restTemplate.postForLocation(URI.create(url), responseBody);
+    }
+
     private boolean hasAccessToApp(IDaaSUser user) {
         return user.getApplications().contains(DCP_PRODUCT) || user.getRoles().contains(DCP_ROLE);
     }

@@ -905,8 +905,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean sendDCPWelcomeEmail(User user, String tenantName, String url) {
-        boolean success = false;
+    public Long sendDCPWelcomeEmail(User user, String tenantName, String url) {
+        Long success = null;
         try {
             log.info("Sending welcome email to " + user.getEmail().toString() + " started.");
 
@@ -921,8 +921,8 @@ public class EmailServiceImpl implements EmailService {
                     "image/png", "avatar");
 
             sendMultiPartEmail(EmailSettings.DNB_CONNECT_WELCOME_NEW_USER_SUBJECT, multipart, Collections.singleton(user.getEmail()), EmailFromAddress.DNB_CONNECT);
-            log.info("Sending welcome email to " + user.getEmail().toString() + " succeeded.");
-            success = true;
+            log.info("Sending welcome email to " + user.getEmail().toString() + "succeeded.");
+            success = System.currentTimeMillis();
         } catch (Exception e) {
             log.error("Failed to send welcome email to " + user.getEmail().toString(), e);
         }
@@ -931,7 +931,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url) {
+    public Long sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url) {
         User user = new User();
         user.setEmail(idaasUser.getEmailAddress());
         user.setFirstName(idaasUser.getFirstName());
