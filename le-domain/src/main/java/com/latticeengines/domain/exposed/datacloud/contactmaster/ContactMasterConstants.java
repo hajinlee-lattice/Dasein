@@ -17,4 +17,10 @@ public final class ContactMasterConstants {
     public static final String TPS_STANDARD_JOB_FUNCTION = "STANDARD_JOB_FUNCTION";
 
     public static final String TPS_STANDARD_JOB_LEVEL = "STANDARD_JOB_LEVEL";
+
+    public static final String TPS_RECORD_UUID = "TPS_RECORD_UUID";
+
+    public static final String TPS_RECORD_UUIDS = "TPS_RECORD_UUIDS";
+
+    public static final String TPS_SITE_DUNS_NUMBER = "SITE_DUNS_NUMBER";
 }

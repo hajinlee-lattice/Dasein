@@ -12,13 +12,14 @@ import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implements FabricEntity<ContactTpsEntry> {
 
-    public static final String TPS_RECORD_ID_HDFS = "RECORD_ID";
-    private static final String TPS_RECORD_ID = "Tps_record_id";
+    public static final String TPS_UUID_HDFS = ContactMasterConstants.TPS_RECORD_UUID;
+    private static final String TPS_ID = "Tps_id";
     private static final String ATTRIBUTES = "attributes";
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
 
@@ -26,10 +27,10 @@ public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implement
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Contact TPS\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}" + "]}",
-            RECORD_TYPE_TOKEN, TPS_RECORD_ID, ATTRIBUTES);
+            RECORD_TYPE_TOKEN, TPS_ID, ATTRIBUTES);
 
     @Id
-    @JsonProperty(TPS_RECORD_ID)
+    @JsonProperty(TPS_ID)
     private String id;
 
     @JsonProperty(ATTRIBUTES)
@@ -39,7 +40,7 @@ public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implement
     public GenericRecord toFabricAvroRecord(String recordType) {
         Schema schema = getSchema(recordType);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        builder.set(TPS_RECORD_ID, id);
+        builder.set(TPS_ID, id);
         try {
             String serializedAttributes = JsonUtils.serialize(getAttributes());
             builder.set(ATTRIBUTES, serializedAttributes);
@@ -60,7 +61,7 @@ public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implement
 
     @Override
     public ContactTpsEntry fromFabricAvroRecord(GenericRecord record) {
-        setId(record.get(TPS_RECORD_ID).toString());
+        setId(record.get(TPS_ID).toString());
         if (record.get(ATTRIBUTES) != null) {
             String serializedAttributes = record.get(ATTRIBUTES).toString();
             Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes, Map.class);
@@ -71,7 +72,7 @@ public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implement
 
     @Override
     public ContactTpsEntry fromHdfsAvroRecord(GenericRecord record) {
-        Object idObj = record.get(TPS_RECORD_ID_HDFS);
+        Object idObj = record.get(TPS_UUID_HDFS);
         if (idObj instanceof Utf8 || idObj instanceof String) {
             setId(idObj.toString());
         } else {
@@ -95,7 +96,7 @@ public class ContactTpsEntry extends BaseFabricEntity<ContactTpsEntry> implement
 
     @Override
     public String getId() {
-        return this.id;
+        return id;
     }
 
     @Override
