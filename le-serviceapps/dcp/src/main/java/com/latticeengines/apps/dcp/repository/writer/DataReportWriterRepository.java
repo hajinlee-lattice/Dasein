@@ -20,8 +20,8 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DataReportRecord d SET d.readyForRollup = true, d.refreshTime = ?2 where d.pid = ?1 and d" +
-            ".readyForRollup != true")
-    void updateReadyForRollupIfNotReady(Long pid, Date refreshTime);
+            ".readyForRollup != true and d.dunsCount is not null")
+    int updateReadyForRollupIfNotReady(Long pid, Date refreshTime);
 
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
@@ -79,4 +79,10 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DataReportRecord d SET d.duplicationReport = ?3, d.refreshTime = ?2 WHERE d.pid = ?1 AND d.duplicationReport IS NULL")
     void updateDataReportIfNull(Long pid, Date refreshTime, DataReport.DuplicationReport duplicationReport);
+
+    @Transactional(transactionManager = "jpaTransactionManager")
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE DataReportRecord d SET d.dunsCount = ?4, d.refreshTime = ?2, d.dataSnapshotTime=?3 WHERE d.pid = " +
+            "?1 and d.dunsCount IS NULL")
+    int updateDataReportIfNull(Long pid, Date refreshTime, Date snapshotTime, Table dunsCount);
 }

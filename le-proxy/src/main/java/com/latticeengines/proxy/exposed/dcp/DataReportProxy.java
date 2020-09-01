@@ -10,7 +10,6 @@ import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -38,12 +37,6 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         String baseUrl = "/customerspaces/{customerSpace}/datareport/childrenids?level={level}";
         String url = getUrl(customerSpace, level, ownerId, baseUrl);
         return getSet("Get children's owner ids", url, String.class);
-    }
-
-    public DunsCountCopy getDunsCountCopy(String customerSpace, DataReportRecord.Level level, String ownerId) {
-        String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscountcopy?level={level}";
-        String url = getUrl(customerSpace, level, ownerId, baseUrl);
-        return get("Get duns count copy", url, DunsCountCopy.class);
     }
 
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
