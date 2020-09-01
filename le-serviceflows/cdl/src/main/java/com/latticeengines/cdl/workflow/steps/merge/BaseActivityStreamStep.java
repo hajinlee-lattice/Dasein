@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -89,7 +91,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
             return Optional.empty();
         }
         return appendRawStream(steps, stream, evalTimeEpoch,
-                getConfigureAppendRawStreamInputFn(matchedImportTable, activeBatchTable), prefixFormat);
+                getConfigureAppendRawStreamInputFn(matchedImportTable, activeBatchTable), prefixFormat, null);
     }
 
     /**
@@ -106,7 +108,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
      */
     Optional<Pair<String, Integer>> appendRawStream(@NotNull List<TransformationStepConfig> steps,
             @NotNull AtlasStream stream, @NotNull Long paTimestamp, Integer matchedImportIdx, String activeBatchTable,
-            String prefixFormat) {
+            String prefixFormat, Set<String> discardAttrs) {
         if (!needAppendRawStream(matchedImportIdx, activeBatchTable)) {
             log.info("No matched import table and no active batch store for stream {}. Skip append raw stream step",
                     stream.getStreamId());
@@ -114,13 +116,13 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
         }
 
         return appendRawStream(steps, stream, paTimestamp,
-                getConfigureAppendRawStreamInputFn(matchedImportIdx, activeBatchTable), prefixFormat);
+                getConfigureAppendRawStreamInputFn(matchedImportIdx, activeBatchTable), prefixFormat, discardAttrs);
     }
 
     private Optional<Pair<String, Integer>> appendRawStream(@NotNull List<TransformationStepConfig> steps,
             @NotNull AtlasStream stream, @NotNull Long paTimestamp,
             BiFunction<TransformationStepConfig, AppendRawStreamConfig, Void> configureStepInputFn,
-            String prefixFormat) {
+            String prefixFormat, Set<String> discardAttrs) {
         String streamId = stream.getStreamId();
         String rawStreamTablePrefix = String.format(prefixFormat, streamId);
         AppendRawStreamConfig config = new AppendRawStreamConfig();
@@ -131,6 +133,9 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
         config.retentionDays = stream.getRetentionDays();
         config.currentEpochMilli = paTimestamp;
         config.reducer = stream.getReducer();
+        if (CollectionUtils.isNotEmpty(discardAttrs)) {
+            config.discardAttrs.addAll(discardAttrs);
+        }
 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_APPEND_RAWSTREAM);

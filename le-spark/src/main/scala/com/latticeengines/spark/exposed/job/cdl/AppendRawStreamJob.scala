@@ -14,6 +14,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Process activity stream imports and merge with current batch store if any
@@ -25,6 +26,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
     val config: AppendRawStreamConfig = lattice.config
     val hasImport = config.matchedRawStreamInputIdx != null
     val hasMaster = config.masterInputIdx != null
+    val discardAttrs = config.discardAttrs.asScala
     // partition by dateId
     setPartitionTargets(0, Seq(StreamDateId.name()), lattice)
 
@@ -61,6 +63,14 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       }
       df = DeriveAttrsUtils.applyReducer(df, reducer)
     }
+
+    df = discardAttrs.foldLeft(df)((accDf, attr) => {
+      if (accDf.columns.contains(attr)) {
+        accDf.drop(attr)
+      } else {
+        accDf
+      }
+    })
 
     val cnt = df.count
     if (cnt == 0) {
