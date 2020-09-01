@@ -1,10 +1,8 @@
 package com.latticeengines.domain.exposed.dante.metadata;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
 
 /// <summary>
 /// Class for defining metadata about objects (e.g. Account, Lead)
