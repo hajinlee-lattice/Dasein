@@ -28,6 +28,15 @@ public class ProgressEventDetail extends EventDetail {
 
     private Map<String, String> errorFile;
 
+    @JsonProperty("audience_size")
+    private Long audienceSize;
+
+    @JsonProperty("matched_count")
+    private Long matchedCount;
+
+    @JsonProperty("matched_rate")
+    private Long matchRate;
+
     @JsonProperty("total_records_submitted")
     private Long totalRecordsSubmitted;
 
@@ -101,6 +110,30 @@ public class ProgressEventDetail extends EventDetail {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Long getAudienceSize() {
+        return audienceSize;
+    }
+
+    public void setAudienceSize(Long audienceSize) {
+        this.audienceSize = audienceSize;
+    }
+
+    public Long getMatchedCount() {
+        return matchedCount;
+    }
+
+    public void setMatchedCount(Long matchedCount) {
+        this.matchedCount = matchedCount;
+    }
+
+    public void setMatchRate(Long matchRate) {
+        this.matchRate = matchRate;
+    }
+
+    public Long getMatchRate() {
+        return matchRate;
     }
 
     public Long getTotalRecordsSubmitted() {
