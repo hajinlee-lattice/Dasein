@@ -55,7 +55,8 @@ public class TpsLookupActorTestNG extends SingleActorTestNGBase {
         testTpsActor(duns, true, expectedError);
     }
 
-    private void testTpsActor(String duns, boolean isBatchMode, TpsLookupResult.ReturnCode expectedError) throws Exception {
+    private void testTpsActor(String duns, boolean isBatchMode, TpsLookupResult.ReturnCode expectedError)
+            throws Exception {
         actorSystem.setBatchMode(isBatchMode);
         DataSourceLookupRequest msg = new DataSourceLookupRequest();
         msg.setCallerMicroEngineReference(null);
@@ -93,12 +94,12 @@ public class TpsLookupActorTestNG extends SingleActorTestNGBase {
         if (Ok.equals(data.getReturnCode())) {
             List<String> recordIds = data.getRecordIds();
             Assert.assertFalse(recordIds.isEmpty());
-            // Add few assertions for record Ids
+            // Add few assertions for record uuids
             // Might need to update once dataset has changed
-            Assert.assertTrue(recordIds.contains("A49684718"));
-            Assert.assertTrue(recordIds.contains("40540763374"));
-            Assert.assertTrue(recordIds.contains("3159760438"));
-            Assert.assertTrue(recordIds.contains("A44627160"));
+            Assert.assertTrue(recordIds.contains("23219b43-bf68-46e1-a549-3161c5e66c20"));
+            Assert.assertTrue(recordIds.contains("9531eac4-b6d3-4367-864f-c7f6c7022012"));
+            Assert.assertTrue(recordIds.contains("7a552ad6-ca82-4912-99b0-02bb680363f9"));
+            Assert.assertTrue(recordIds.contains("03692007-c329-4138-882b-cc3e124a3074"));
         } else {
             Assert.assertTrue(CollectionUtils.isEmpty(data.getRecordIds()));
             Assert.assertEquals(data.getReturnCode(), EmptyResult);
