@@ -466,6 +466,12 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         case Eloqua:
             return MapUtils.isEmpty(counts) || //
                     (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L);
+        case Adobe_Audience_Mgr:
+        case MediaMath:
+        case TradeDesk:
+        case Verizon_Media:
+        case Google_Display_N_Video_360:
+        case AppNexus:
         case AWS_S3:
         case Marketo:
         case Facebook:
