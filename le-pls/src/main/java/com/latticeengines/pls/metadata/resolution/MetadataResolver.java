@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.MutableTriple;
@@ -195,10 +196,8 @@ public class MetadataResolver {
                     boolean hasExternalId = false;
                     String externalDisplayName = fieldMapping.getMappedField();
                     if (fieldMapping.getCdlExternalSystemType() != null
-                            && StringUtils.isNotEmpty(fieldMapping.getMappedField())) {
-                        if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
-                            fieldMapping.setMappedField(fieldMapping.getMappedField() + "_ID");
-                        }
+                            && StringUtils.isNotEmpty(externalDisplayName)) {
+                        fieldMapping.setMappedField(getExternalSystemID(externalDisplayName));
                         hasExternalId = true;
                     }
 
@@ -212,7 +211,6 @@ public class MetadataResolver {
                     } else {
                         if (standardAttrs.containsKey(attrName)) {
                             Attribute attribute = standardAttrs.get(attrName);
-                            //attribute.setDisplayName(fieldMapping.getUserField());
                             attribute.setSourceAttrName(fieldMapping.getUserField());
                             attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                             if (StringUtils.isNotEmpty(fieldMapping.getDateFormatString())) {
@@ -272,6 +270,17 @@ public class MetadataResolver {
             result.metadata.setLastModifiedKey(null);
         }
         result.metadata.deduplicateAttributeNames();
+    }
+
+    private String getExternalSystemID(String externalDisplayName) {
+        String suffix = "_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase() + "_external_id";
+        if (externalDisplayName.toUpperCase().endsWith("_ID")) {
+            return externalDisplayName.substring(0, externalDisplayName.length() - 3) + suffix;
+        } else if (externalDisplayName.toUpperCase().endsWith("ID")) {
+            return externalDisplayName.substring(0, externalDisplayName.length() - 2) + suffix;
+        } else {
+            return externalDisplayName + suffix;
+        }
     }
 
     public List<FieldMapping> calculateBasedOnExistingMetadata(Table metadataTable) {
