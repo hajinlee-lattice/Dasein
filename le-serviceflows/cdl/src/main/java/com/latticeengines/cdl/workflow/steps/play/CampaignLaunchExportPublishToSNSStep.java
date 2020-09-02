@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 

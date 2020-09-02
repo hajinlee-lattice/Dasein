@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateContactWorkfl
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateProductWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteAccountWorkFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteContactWorkFlowConfiguratiion;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteTransactionWorkFlowConfiguration;
@@ -57,7 +56,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CustomEventModelingWorkflowConfiguration.class, name = "CustomEventModelingWorkflowConfiguration"),
         @Type(value = GenerateRatingWorkflowConfiguration.class, name = "GenerateRatingWorkflowConfiguration"),
         @Type(value = GenerateAIRatingWorkflowConfiguration.class, name = "GenerateAIRatingWorkflowConfiguration"),
-        @Type(value = PlayLaunchWorkflowConfiguration.class, name = "PlayLaunchWorkflowConfiguration"),
         @Type(value = CampaignLaunchWorkflowConfiguration.class, name = "CampaignLaunchWorkflowConfiguration"),
         @Type(value = DeltaCampaignLaunchWorkflowConfiguration.class, name = "DeltaCampaignLaunchWorkflowConfiguration"),
         @Type(value = ProcessAnalyzeWorkflowConfiguration.class, name = "ProcessAnalyzeWorkflowConfiguration"),
