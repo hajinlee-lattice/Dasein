@@ -100,11 +100,11 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         Mockito.doReturn(MOCKED_ADD_ACCOUNTS_TABLE)
                 .when(
                 generateLiveRampLaunchArtifacts)
-                .getStringValueFromContext(GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE);
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE, String.class);
         Mockito.doReturn(
                 MOCKED_REMOVE_ACCOUNTS_TABLE)
                 .when(generateLiveRampLaunchArtifacts)
-                .getStringValueFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE);
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE, String.class);
 
         Mockito.doReturn(addedAccountsLocation).when(generateLiveRampLaunchArtifacts)
                 .getAvroPathFromTable(MOCKED_ADD_ACCOUNTS_TABLE);
@@ -113,8 +113,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
     }
 
-    // FIXME: fix the test avro file issue
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testBulkMathTps() {
         executionContext = new ExecutionContext();
         generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
@@ -122,9 +121,9 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         generateLiveRampLaunchArtifacts.execute();
 
         String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
-                .getStringValueFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE);
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE, String.class);
         String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
-                .getStringValueFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE);
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
 
         assertEquals(CREATED_ADD_ACCOUNTS_TABLE_NAME, addedContactsDeltaTable);
         assertEquals(CREATED_REMOVE_ACCOUNTS_TABLE_NAME, removedContactsDeltaTable);
@@ -140,9 +139,9 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
     @AfterClass(groups = "functional")
     public void cleanup() {
         String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
-                .getStringValueFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE);
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE, String.class);
         String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
-                .getStringValueFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE);
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
 
         cleanupFromCustomerSpace(addedContactsDeltaTable);
         cleanupFromCustomerSpace(removedContactsDeltaTable);
@@ -176,7 +175,8 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
     private void setUpAvroFiles() throws Exception {
         Schema deltaAccountSchema = SchemaBuilder.record("Account").fields() //
-                .name("DUNS").type().longType()
+                .name("LDC_DUNS").type()
+                .longType()
                 .noDefault()//
                 .endRecord();
 
@@ -228,8 +228,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
         List<T> accounts = JsonUtils.convertList(raw, elementClazz);
         String extension = ".avro";
-        // FIXME: either checkin to test resources, or use s3 test artifact framework
-        String avroPath = "/tmp/campaign/" + fileName + extension;
+        String avroPath = "/tmp/liveRampCampaignArtifact" + fileName + extension;
 
         File localFile = new File(avroPath);
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<>(schema))) {
