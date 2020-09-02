@@ -180,7 +180,7 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                     : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-            // Product report is generated in MergeProduct step
+            // Product report is generated in MergeProduct step, update PRODUCT_ID when product not imported
             // PurchaseHistory report is generated in ProfilePurchaseHistory
             // step
             if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
@@ -193,6 +193,8 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            } else if (entity == BusinessEntity.Product && !hasImport(BusinessEntity.Product)) {
+                consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, currentCnts.get(entity));
             }
             // Populate entity match summary
             ObjectNode entityMatchNode = JsonUtils.createObjectNode();
@@ -216,6 +218,12 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
         }
 
         updateCollectionStatus(currentCnts, orphanCnts);
+    }
+
+    //not available for embedded entity
+    private boolean hasImport(BusinessEntity entity) {
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS, BusinessEntity.class, List.class);
+        return MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(entity);
     }
 
     private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts,
