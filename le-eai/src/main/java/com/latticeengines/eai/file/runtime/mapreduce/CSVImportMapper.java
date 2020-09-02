@@ -504,11 +504,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private boolean hasRecord(File avroFile) throws IOException {
         try (DataFileStream<GenericRecord> reader = new DataFileStream<>(new FileInputStream(avroFile),
                 new GenericDatumReader<>())) {
-            if (reader.hasNext()) {
-                return true;
-            } else {
-                return false;
-            }
+            return reader.hasNext();
         }
     }
 
@@ -643,8 +639,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     throw new RuntimeException(String.format("csv file should contain the column %s", csvColumnNameInLowerCase));
                 }
                 if (StringUtils.isEmpty(csvRecord.get(csvColumnName))) {
-                        missingRequiredColValue = true;
-                        throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
+                    missingRequiredColValue = true;
+                    throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
                 }
             }
             List<InputValidatorWrapper> validatorWrappers = attr.getValidatorWrappers();
@@ -733,7 +729,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                     if (attr.getRequired() || !attr.isNullable()) {
                         String oldMsg = errorMap.get(attr.getName());
-                        String newMsg = String.format("%s cannot be empty!", attr.getName());
+                        String newMsg = String.format("%s cannot be empty! Expecting value from CSV column \"%s\".",
+                                attr.getName(),
+                                attr.getSourceAttrName() == null ? attr.getDisplayName() : attr.getSourceAttrName());
                         String msg = StringUtils.isBlank(oldMsg) ? newMsg : String.format("%s,%s", oldMsg, newMsg);
                         errorMap.put(attr.getName(), msg);
                     } else {
@@ -872,7 +870,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             }
             errorDetail.add(String.valueOf(lineNumber));
-            errorDetail.add(String.valueOf(id));
+            errorDetail.add(id);
             errorDetail.add(String.valueOf(errorMap.values().toString()));
             csvFilePrinter.printRecord(errorDetail);
             csvFilePrinter.flush();
