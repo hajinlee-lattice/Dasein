@@ -51,6 +51,14 @@ public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore 
         return cms;
     }
 
+    private void disableGroups(ColumnMetadata cm) {
+        cm.disableGroup(ColumnSelection.Predefined.Segment);
+        cm.disableGroup(ColumnSelection.Predefined.Enrichment);
+        cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+        cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
+        cm.disableGroup(ColumnSelection.Predefined.Model);
+    }
+
     @Override
     public ParallelFlux<ColumnMetadata> getMetadataInParallel(Namespace2<String, DataCollection.Version> namespace) {
         ParallelFlux<ColumnMetadata> cms;
@@ -64,16 +72,14 @@ public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore 
             cms = servingStore.map(cm -> {
                 cm.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
                 cm.setAttrState(AttrState.Active);
-
                 if (systemAttributes.contains(cm.getAttrName())) {
+                    disableGroups(cm);
+                    cm.setCanSegment(false);
+                    cm.setCanEnrich(false);
+                    cm.setCanModel(false);
                     return cm;
                 }
-
-                cm.disableGroup(ColumnSelection.Predefined.Segment);
-                cm.disableGroup(ColumnSelection.Predefined.Enrichment);
-                cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-                cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
-                cm.disableGroup(ColumnSelection.Predefined.Model);
+                disableGroups(cm);
                 cm.setCanSegment(true);
                 cm.setCanEnrich(true);
                 cm.setCanModel(true);
