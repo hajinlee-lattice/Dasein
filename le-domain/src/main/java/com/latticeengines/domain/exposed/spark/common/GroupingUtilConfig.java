@@ -76,12 +76,19 @@ public class GroupingUtilConfig {
                 new ValueLookup(predicate.getStreamType().name()));
         filterRestrictions.add(streamTypeFilter);
 
-        // Timestamp filter
-        ConcreteRestriction timeStampFilter = new ConcreteRestriction(false, //
+        // Timestamp filter for start time
+        ConcreteRestriction startTimeStampFilter = new ConcreteRestriction(false, //
                 new ColumnLookup(InterfaceName.EventTimestamp.name()), //
                 ComparisonType.GREATER_THAN, //
                 new ValueLookup(TimeLineStoreUtils.toEventTimestampNDaysAgo(now, predicate.getPeriodDays())));
-        filterRestrictions.add(timeStampFilter);
+        filterRestrictions.add(startTimeStampFilter);
+
+        // Timestamp filter for current time/fake date
+        ConcreteRestriction endTimeStampFilter = new ConcreteRestriction(false, //
+                new ColumnLookup(InterfaceName.EventTimestamp.name()), //
+                ComparisonType.LESS_OR_EQUAL, //
+                new ValueLookup(TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 0)));
+        filterRestrictions.add(endTimeStampFilter);
 
         // Contact not null
         if (predicate.isContactNotNull())
@@ -154,6 +161,8 @@ public class GroupingUtilConfig {
             return "is not null";
         case GREATER_THAN:
             return ">";
+        case LESS_OR_EQUAL:
+            return "<=";
         case IN_COLLECTION:
             return "in";
         case CONTAINS:

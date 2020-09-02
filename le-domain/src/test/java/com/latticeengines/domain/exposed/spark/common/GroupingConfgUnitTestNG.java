@@ -52,10 +52,10 @@ public class GroupingConfgUnitTestNG {
         Assert.assertEquals(config.getGroupKey(), InterfaceName.AccountId.name());
         Assert.assertNotNull(config.getAggregateLookup());
         Assert.assertEquals(config.getAggregationColumn(), InterfaceName.AccountId.name());
-        Assert.assertEquals(config.getSparkSqlWhereClause(),
-                String.format(
-                        "StreamType = 'MarketingActivity' and EventTimestamp > '%d' and Detail1 in ('WebVisit','Email Bounce')",
-                        TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 14)));
+        Assert.assertEquals(config.getSparkSqlWhereClause(), String.format(
+                "StreamType = 'MarketingActivity' and EventTimestamp > '%d' and EventTimestamp <= '%d' and Detail1 in ('WebVisit','Email Bounce')",
+                TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 14),
+                TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 0)));
 
         // Test 2: Opportunity-> Opportunity 1 90 Days Detail1 NOT CONTAINS "Closed%"
         stage.setStageName("Opportunity");
@@ -85,10 +85,10 @@ public class GroupingConfgUnitTestNG {
         Assert.assertEquals(config.getGroupKey(), InterfaceName.AccountId.name());
         Assert.assertNotNull(config.getAggregateLookup());
         Assert.assertEquals(config.getAggregationColumn(), InterfaceName.AccountId.name());
-        Assert.assertEquals(config.getSparkSqlWhereClause(),
-                String.format(
-                        "StreamType = 'Opportunity' and EventTimestamp > '%d' and Detail1 like 'closed%%' and Detail1 like '%%won'",
-                        TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 90)));
+        Assert.assertEquals(config.getSparkSqlWhereClause(), String.format(
+                "StreamType = 'Opportunity' and EventTimestamp > '%d' and EventTimestamp <= '%d' and Detail1 like 'closed%%' and Detail1 like '%%won'",
+                TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 90),
+                TimeLineStoreUtils.toEventTimestampNDaysAgo(now, 0)));
 
     }
 }
