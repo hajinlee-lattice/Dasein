@@ -182,4 +182,12 @@ public class DataReportResource {
         return appId.toString();
     }
 
+    @PutMapping("/copytoparent")
+    @ResponseBody
+    @ApiOperation(value = "Copy data report to parent")
+    public void copyDataReportToParent(@PathVariable String customerSpace, @RequestParam DataReportRecord.Level level,
+                                 @RequestParam String ownerId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataReportService.copyDataReportToParent(customerSpace, level, ownerId);
+    }
 }

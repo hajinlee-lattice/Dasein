@@ -113,6 +113,12 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         return ApplicationId.fromString(appId);
     }
 
+    public void copyDataReportToParent(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        String baseUrl = "/customerspaces/{customerSpace}/datareport/copytoparent?level={level}";
+        String url = getUrl(customerSpace, level, ownerId, baseUrl);
+        put("Copy data report to parent", url);
+    }
+
     private String getUrl(String customerSpace, DataReportRecord.Level level, String ownerId, String baseUrl) {
         String url;
         if (StringUtils.isNotEmpty(ownerId)) {
