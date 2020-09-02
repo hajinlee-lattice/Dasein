@@ -35,6 +35,7 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -387,7 +388,8 @@ public class RatingEngineEntityMgrImpl //
             ratingEngineNote.setId(UUID.randomUUID().toString());
             ratingEngine.addRatingEngineNote(ratingEngineNote);
         }
-        ratingEngine.setTeamId(TeamUtils.isGlobalTeam(ratingEngine.getTeamId()) ? TeamUtils.GLOBAL_TEAM_ID : ratingEngine.getTeamId());
+        ratingEngine.setTeamId(TeamUtils.isGlobalTeam(ratingEngine.getTeamId()) ? TeamUtils.GLOBAL_TEAM_ID :
+                ratingEngine.getTeamId());
         AdvancedModelingConfig advancedModelingConfig = null;
         AdvancedRatingConfig advancedRatingConfig = ratingEngine.getAdvancedRatingConfig();
         switch (type) {
