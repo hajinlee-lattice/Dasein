@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +25,8 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
@@ -52,6 +54,7 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
                 return Pair.of(productType, table.getName());
             }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
             log.info("Found daily transaction streams {}. Going through shortcut mode.", signatureTableNames);
+            log.info("Retaining transactions of product type: {}", getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class));
             dataCollectionProxy.upsertTablesWithSignatures(customerSpaceStr, signatureTableNames,
                     TableRoleInCollection.DailyTransactionStream, inactive);
             return;
@@ -63,11 +66,13 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
     private void processOutputMetadata(SparkJobResult result) {
         log.info("Output metadata: {}", result.getOutput());
         List<HdfsDataUnit> outputs = result.getTargets();
-        Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils
+                .deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<String, Table> dailyStores = new HashMap<>(); // type -> table
         outputMetadata.forEach((productType, details) -> {
             String prefix = String.format(DAILY_TXN_FORMAT, productType);
-            String tableName = TableUtils.getFullTableName(prefix, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+            String tableName = TableUtils.getFullTableName(prefix,
+                    HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
             Table table = dirToTable(tableName, outputs.get(details.getStartIdx()));
             metadataProxy.createTable(customerSpaceStr, tableName, table);
             dailyStores.put(productType, table);
@@ -78,50 +83,41 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
     private void saveDailyTxnTables(Map<String, Table> dailyStores) {
         Map<String, String> signatureTableNames = exportToS3AndAddToContext(dailyStores, DAILY_TXN_STREAMS);
         log.info("Daily transaction tables: {}", signatureTableNames);
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpaceStr, signatureTableNames, TableRoleInCollection.DailyTransactionStream, inactive);
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpaceStr, signatureTableNames,
+                TableRoleInCollection.DailyTransactionStream, inactive);
     }
 
     private AggDailyActivityConfig getSparkConfig() {
-        // using txn type as streamId
-        String analyticStreamId = ProductType.Analytic.name();
-        String spendingStreamId = ProductType.Spending.name();
-
+        List<DataUnit> inputs = new ArrayList<>();
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-
-        config.streamDateAttrs.put(analyticStreamId, InterfaceName.TransactionTime.name());
-        config.streamDateAttrs.put(spendingStreamId, InterfaceName.TransactionTime.name());
-
-        List<StreamAttributeDeriver> derivers = getDerivers();
-        config.attrDeriverMap.put(analyticStreamId, derivers);
-        config.attrDeriverMap.put(spendingStreamId, derivers);
-
-        List<String> additionalAttrs = getAdditionalAttrs();
-        config.additionalDimAttrMap.put(analyticStreamId, additionalAttrs);
-        config.additionalDimAttrMap.put(spendingStreamId, additionalAttrs);
-
-        config.currentEpochMilli = getLongValueFromContext(PA_TIMESTAMP);
-
+        List<String> retainTypes = getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class);
+        if (CollectionUtils.isEmpty(retainTypes)) {
+            throw new IllegalStateException("No retain types found in context");
+        }
+        log.info("Retaining transactions of product type: {}", retainTypes);
         Map<String, Table> rawTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, Raw_TXN_STREAMS);
-        Table analyticStream = rawTransactionTables.get(ProductType.Analytic.name());
-        Table spendingStream = rawTransactionTables.get(ProductType.Spending.name());
-        log.info("Retrieved analytic stream {} and spending stream {}", analyticStream.getName(),
-                spendingStream.getName());
-        config.inputMetadata = getMetadata();
-        config.setInput(Arrays.asList(
-                analyticStream.partitionedToHdfsDataUnit(null,
-                        Collections.singletonList(InterfaceName.StreamDateId.name())),
-                spendingStream.partitionedToHdfsDataUnit(null,
-                        Collections.singletonList(InterfaceName.StreamDateId.name()))));
-        return config;
-    }
-
-    private ActivityStoreSparkIOMetadata getMetadata() {
+        log.info("Retrieved raw transaction tables: {}",
+                rawTransactionTables.entrySet().stream()
+                        .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
+                        .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        List<StreamAttributeDeriver> derivers = getDerivers();
+        List<String> additionalAttrs = getAdditionalAttrs();
         ActivityStoreSparkIOMetadata metadataWrapper = new ActivityStoreSparkIOMetadata();
         Map<String, ActivityStoreSparkIOMetadata.Details> metadata = new HashMap<>();
-        metadata.put(ProductType.Analytic.name(), getIdxDetils(0));
-        metadata.put(ProductType.Spending.name(), getIdxDetils(1));
+        retainTypes.forEach(type -> {
+            config.streamDateAttrs.put(type, InterfaceName.TransactionTime.name());
+            config.attrDeriverMap.put(type, derivers);
+            config.additionalDimAttrMap.put(type, additionalAttrs);
+            Table table = rawTransactionTables.get(type);
+            metadata.put(type, getIdxDetils(inputs.size()));
+            inputs.add(table.partitionedToHdfsDataUnit(null,
+                    Collections.singletonList(InterfaceName.StreamDateId.name())));
+        });
         metadataWrapper.setMetadata(metadata);
-        return metadataWrapper;
+        config.currentEpochMilli = getLongValueFromContext(PA_TIMESTAMP);
+        config.inputMetadata = metadataWrapper;
+        config.setInput(inputs);
+        return config;
     }
 
     private ActivityStoreSparkIOMetadata.Details getIdxDetils(int idx) {
@@ -152,7 +148,6 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //
-                InterfaceName.ProductType.name()
-        );
+                InterfaceName.ProductType.name());
     }
 }

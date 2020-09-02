@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -81,17 +82,25 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
     public void execute() {
         bootstrap();
         Map<String, Table> periodTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, PERIOD_TXN_STREAMS);
-        buildConsolidatedPeriodTransaction(periodTransactionTables); // no partition
-        buildAggregatedPeriodTransaction(periodTransactionTables); // no partition
+        log.info("Retrieved period streams: {}", periodTransactionTables.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        List<String> retainTypes = getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class);
+        if (CollectionUtils.isEmpty(retainTypes)) {
+            throw new IllegalStateException("No retain types found in context");
+        }
+        log.info("Retaining transactions of product type: {}", retainTypes);
+        buildConsolidatedPeriodTransaction(periodTransactionTables, retainTypes); // no partition
+        buildAggregatedPeriodTransaction(periodTransactionTables, retainTypes); // no partition
 
         setTransactionRebuiltFlag();
     }
 
-    private void buildConsolidatedPeriodTransaction(Map<String, Table> periodTransactionTables) {
+    private void buildConsolidatedPeriodTransaction(Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         log.info("Building consolidated period transaction");
         Map<String, Table> consolidatedPeriodTxnTables = periodStrategies.stream().map(periodName -> {
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
-                    buildConsolidatedPeriodTxnConfig(periodName, periodTransactionTables));
+                    buildConsolidatedPeriodTxnConfig(periodName, periodTransactionTables, retainTypes));
             String prefix = String.format(CON_PREFIX_FORMAT, periodName);
             String tableName = TableUtils.getFullTableName(prefix,
                     HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
@@ -104,13 +113,13 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         log.info("Generated consolidated period stores: {}", tableNames);
         dataCollectionProxy.upsertTables(customerSpaceStr, tableNames,
                 TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
-        exportToS3AndAddToContext(consolidatedPeriodTxnTables, PERIOD_TRXN_TABLE_NAME);
+        exportToS3AndAddToContext(consolidatedPeriodTxnTables, PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME);
     }
 
-    private void buildAggregatedPeriodTransaction(Map<String, Table> periodTransactionTables) {
+    private void buildAggregatedPeriodTransaction(Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         log.info("Building aggregated period transaction");
         SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
-                buildAggregatedPeriodTxnConfig(periodTransactionTables));
+                buildAggregatedPeriodTxnConfig(periodTransactionTables, retainTypes));
         String prefix = String.format(AGG_PREFIX_FORMAT, customerSpace.getTenantId());
         String tableName = TableUtils.getFullTableName(prefix,
                 HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
@@ -124,43 +133,38 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
     }
 
     private TransformTxnStreamConfig buildConsolidatedPeriodTxnConfig(String period,
-            Map<String, Table> periodTransactionTables) {
+                                                                      Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         TransformTxnStreamConfig config = new TransformTxnStreamConfig();
         config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
         config.renameMapping = constructPeriodRename();
         config.inputPeriods = Collections.singletonList(period);
         config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
-
-        String analyticPrefix = String.format(PERIOD_STREAM_PREFIX, ProductType.Analytic.name(), period);
-        String spendingPrefix = String.format(PERIOD_STREAM_PREFIX, ProductType.Spending.name(), period);
-        Table analyticStream = periodTransactionTables.get(analyticPrefix);
-        Table spendingStream = periodTransactionTables.get(spendingPrefix);
-        log.info("Retrieved period streams analytic={}, spending={}", analyticStream.getName(),
-                spendingStream.getName());
-        config.setInput(Arrays.asList( //
-                analyticStream.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)),
-                spendingStream.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId))));
+        config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
+        List<DataUnit> inputs = new ArrayList<>();
+        retainTypes.forEach(type -> {
+            String periodStreamPrefix = String.format(PERIOD_STREAM_PREFIX, type, period);
+            Table table = periodTransactionTables.get(periodStreamPrefix);
+            inputs.add(table.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
+        });
+        config.setInput(inputs);
         return config;
     }
 
-    private TransformTxnStreamConfig buildAggregatedPeriodTxnConfig(Map<String, Table> periodTransactionTables) {
+    private TransformTxnStreamConfig buildAggregatedPeriodTxnConfig(Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         TransformTxnStreamConfig config = new TransformTxnStreamConfig();
         config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
         config.renameMapping = constructPeriodRename();
         config.inputPeriods = periodStrategies;
         config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
+        config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
 
         List<DataUnit> inputs = new ArrayList<>();
         periodStrategies.forEach(periodName -> {
-            String analyticPrefix = String.format(PERIOD_STREAM_PREFIX, ProductType.Analytic.name(), periodName);
-            String spendingPrefix = String.format(PERIOD_STREAM_PREFIX, ProductType.Spending.name(), periodName);
-            Table analyticStream = periodTransactionTables.get(analyticPrefix);
-            Table spendingStream = periodTransactionTables.get(spendingPrefix);
-            log.info("Retrieved {} streams analytic={}, spending={}", periodName, analyticStream.getName(),
-                    spendingStream.getName());
-            inputs.addAll(Arrays.asList( //
-                    analyticStream.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)),
-                    spendingStream.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId))));
+            retainTypes.forEach(type -> {
+                String periodStreamPrefix = String.format(PERIOD_STREAM_PREFIX, type, periodName);
+                Table table = periodTransactionTables.get(periodStreamPrefix);
+                inputs.add(table.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
+            });
         });
         config.setInput(inputs);
         return config;
@@ -184,5 +188,9 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         } else {
             log.info("TransactionRebuilt flag already set to true");
         }
+    }
+
+    private boolean retainAllTypes(List<String> retainTypes) {
+        return retainTypes.contains(ProductType.Spending.name()) && retainTypes.contains(ProductType.Analytic.name());
     }
 }

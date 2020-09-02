@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateLastActivityDateConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ConcatenateAIRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
+import com.latticeengines.domain.exposed.spark.cdl.CountProductTypeConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
@@ -169,7 +170,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CMTpsSourceCreationConfig.class, name = CMTpsSourceCreationConfig.NAME), //
         @JsonSubTypes.Type(value = CMTpsLookupCreationConfig.class, name = CMTpsLookupCreationConfig.NAME), //
         @JsonSubTypes.Type(value = SplitTransactionConfig.class, name = SplitTransactionConfig.NAME), //
-        @JsonSubTypes.Type(value = TransformTxnStreamConfig.class, name = TransformTxnStreamConfig.NAME) //
+        @JsonSubTypes.Type(value = TransformTxnStreamConfig.class, name = TransformTxnStreamConfig.NAME), //
+        @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

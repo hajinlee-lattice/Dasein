@@ -26,18 +26,35 @@ class TransformTxnStreamJob extends AbstractSparkJob[TransformTxnStreamConfig] {
     val transformed: DataFrame =
       if (CollectionUtils.isEmpty(lattice.config.inputPeriods)) {
         // build aggregated txn
-        assert(txnStreams.size == 2)
+        if (CollectionUtils.isEmpty(lattice.config.retainTypes)) {
+          assert(txnStreams.size == 2)
+        } else {
+          assert(txnStreams.size == 1)
+        }
         val transformed: Seq[DataFrame] = txnStreams.map(txnStream => renameFieldsAndAddPeriodName(txnStream, renameMapping, null))
-        // should be only two transformed: Spending & Analytic
-        MergeUtils.concat2(transformed.head, transformed(1))
+        transformed.reduce((t1, t2) => MergeUtils.concat2(t1, t2))
       } else {
         // build aggregated period txn
-        // inputs ordered by period names. 2 productTypes for each period
-        assert(txnStreams.size == lattice.config.inputPeriods.size * 2)
+        // inputs ordered by period names
+        val defaultRetainTypes: Boolean = {
+          if (CollectionUtils.isEmpty(lattice.config.retainTypes)) {
+            assert(txnStreams.size == lattice.config.inputPeriods.size * 2)
+            true
+          } else {
+            assert(txnStreams.size == lattice.config.inputPeriods.size)
+            false
+          }
+        }
         var fragments: Seq[DataFrame] = Seq()
         for (i <- lattice.config.inputPeriods.indices) {
           val periodName: String = lattice.config.inputPeriods(i)
-          val typeMerged: DataFrame = MergeUtils.concat2(txnStreams(i * 2), txnStreams(i * 2 + 1))
+          val typeMerged: DataFrame = {
+            if (defaultRetainTypes) {
+              MergeUtils.concat2(txnStreams(i * 2), txnStreams(i * 2 + 1))
+            } else {
+              txnStreams(i)
+            }
+          }
           fragments :+= renameFieldsAndAddPeriodName(typeMerged, renameMapping, periodName)
         }
         fragments.reduce((f1, f2) => MergeUtils.concat2(f1, f2))

@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
@@ -92,6 +93,44 @@ public class TransformTxnStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         config.renameMapping = constructPeriodRename();
         config.inputPeriods = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
         config.targetColumns = PERIOD_TXN_FIELDS;
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, config, inputs, getWorkspace());
+        verify(result, Collections.singletonList(this::verifyOutputPeriodFields));
+    }
+
+    @Test(groups = "functional")
+    private void testRetainAnalyticDaily() {
+        List<String> inputs = Collections.singletonList(setupAnalyticDaily());
+        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
+        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, txnDate, txnDayPeriod);
+        config.renameMapping = constructDailyRename();
+        config.targetColumns = DAILY_TXN_FIELDS;
+        config.retainTypes = Collections.singletonList(ProductType.Analytic.name());
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, config, inputs, getWorkspace());
+        verify(result, Collections.singletonList(this::verifyOutputDailyFields));
+    }
+
+    @Test(groups = "functional")
+    private void testConsolidatedPeriodTxnRetainAnalytic() {
+        List<String> inputs = Collections.singletonList(setupAnalyticWeekPeriod());
+        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
+        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
+        config.renameMapping = constructPeriodRename();
+        config.inputPeriods = Collections.singletonList(PeriodStrategy.Template.Week.name());
+        config.targetColumns = PERIOD_TXN_FIELDS;
+        config.retainTypes = Collections.singletonList(ProductType.Analytic.name());
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, config, inputs, getWorkspace());
+        verify(result, Collections.singletonList(this::verifyOutputPeriodFields));
+    }
+
+    @Test(groups = "functional")
+    private void testAggregatedPeriodTxnRetainSpending() {
+        List<String> inputs = Arrays.asList(setupSpendingWeekPeriod(), setupSpendingMonthPeriod());
+        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
+        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
+        config.renameMapping = constructPeriodRename();
+        config.inputPeriods = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
+        config.targetColumns = PERIOD_TXN_FIELDS;
+        config.retainTypes = Collections.singletonList(ProductType.Spending.name());
         SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, config, inputs, getWorkspace());
         verify(result, Collections.singletonList(this::verifyOutputPeriodFields));
     }
