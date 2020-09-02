@@ -127,15 +127,6 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
         }
-        Long parentId = dataReportEntityMgr.findParentId(pid);
-        while (parentId != null) {
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getBasicStats());
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getInputPresenceReport());
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getGeoDistributionReport());
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getMatchToDUNSReport());
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getDuplicationReport());
-            parentId = dataReportEntityMgr.findParentId(parentId);
-        }
     }
 
     @Override
@@ -267,11 +258,6 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
         }
-        Long parentId = dataReportEntityMgr.findParentId(pid);
-        while (parentId != null) {
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, basicStats);
-            parentId = dataReportEntityMgr.findParentId(parentId);
-        }
     }
 
     @Override
@@ -289,11 +275,6 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportRecord.setParentId(getParentPid(customerSpace, level, ownerId));
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
-        }
-        Long parentId = dataReportEntityMgr.findParentId(pid);
-        while (parentId != null) {
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, inputPresenceReport);
-            parentId = dataReportEntityMgr.findParentId(parentId);
         }
     }
 
@@ -313,11 +294,6 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
         }
-        Long parentId = dataReportEntityMgr.findParentId(pid);
-        while (parentId != null) {
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, geoDistributionReport);
-            parentId = dataReportEntityMgr.findParentId(parentId);
-        }
     }
 
     @Override
@@ -335,11 +311,6 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportRecord.setParentId(getParentPid(customerSpace, level, ownerId));
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
-        }
-        Long parentId = dataReportEntityMgr.findParentId(pid);
-        while (parentId != null) {
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, matchToDUNSReport);
-            parentId = dataReportEntityMgr.findParentId(parentId);
         }
     }
 
@@ -359,9 +330,25 @@ public class DataReportServiceImpl implements DataReportService {
             dataReportEntityMgr.create(dataReportRecord);
             pid = dataReportRecord.getPid();
         }
+    }
+
+    @Override
+    public void copyDataReportToParent(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        DataReport dataReport = getDataReport(customerSpace, level, ownerId);
+        if (dataReport == null) {
+            return;
+        }
+        if (DataReportRecord.Level.Tenant.equals(level)) {
+            return;
+        }
+        Long pid = dataReportEntityMgr.findDataReportPid(level, ownerId);
         Long parentId = dataReportEntityMgr.findParentId(pid);
         while (parentId != null) {
-            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, duplicationReport);
+            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getBasicStats());
+            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getInputPresenceReport());
+            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getGeoDistributionReport());
+            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getMatchToDUNSReport());
+            dataReportEntityMgr.updateDataReportRecordIfNull(parentId, dataReport.getDuplicationReport());
             parentId = dataReportEntityMgr.findParentId(parentId);
         }
     }

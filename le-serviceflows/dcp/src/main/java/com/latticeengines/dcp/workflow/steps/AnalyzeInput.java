@@ -96,6 +96,8 @@ public class AnalyzeInput extends RunSparkJob<ImportSourceStepConfiguration, Inp
         DataReport.InputPresenceReport inputPresenceReport = new DataReport.InputPresenceReport();
         map.forEach((name, populated) -> inputPresenceReport.addPresence(name, populated, ingested));
 
+        putObjectInContext(INPUT_PRESENCE_REPORT, inputPresenceReport);
+
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 configuration.getUploadId(), inputPresenceReport);
 
