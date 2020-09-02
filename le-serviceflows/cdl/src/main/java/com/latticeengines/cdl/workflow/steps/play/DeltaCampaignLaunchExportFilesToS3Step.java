@@ -66,7 +66,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
     private String integrationSessionContextTable;
 
     @Value("${cdl.campaign.integration.session.context.ttl}")
-    private long sessionContextTTL;
+    private long sessionContextTTLinSec;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -216,7 +216,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         session.put("Url", microserviceHostPort + CDL_DATA_INTEGRATION_END_POINT);
         session.put("Mapping", "");
         return new Item().withPrimaryKey("WorkflowId", workflowRequestId)
-                .withLong("TTL", System.currentTimeMillis() + sessionContextTTL)
+                .withLong("TTL", System.currentTimeMillis() / 1000 + sessionContextTTLinSec)
                 .withString("Session", JsonUtils.serialize(session));
     }
 
