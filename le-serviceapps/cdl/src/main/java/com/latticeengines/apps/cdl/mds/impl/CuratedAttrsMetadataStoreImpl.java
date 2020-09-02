@@ -74,6 +74,9 @@ public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore 
                 cm.setAttrState(AttrState.Active);
                 if (systemAttributes.contains(cm.getAttrName())) {
                     disableGroups(cm);
+                    cm.setCanSegment(false);
+                    cm.setCanEnrich(false);
+                    cm.setCanModel(false);
                     return cm;
                 }
                 disableGroups(cm);
