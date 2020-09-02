@@ -79,8 +79,8 @@ public class GenerateLiveRampLaunchArtifacts extends BaseSparkStep<GenerateLiveR
 
         Map<String, Long> newCounts = new HashMap<>();
 
-        String addedAccountsDeltaTable = getStringValueFromContext(ADDED_ACCOUNTS_DELTA_TABLE);
-        String removedAccountsDeltaTable = getStringValueFromContext(REMOVED_ACCOUNTS_DELTA_TABLE);
+        String addedAccountsDeltaTable = getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class);
+        String removedAccountsDeltaTable = getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class);
 
         if (!StringUtils.isEmpty(addedAccountsDeltaTable)) {
             String addedAccountsDeltaAvroPath = getAvroPathFromTable(addedAccountsDeltaTable);
@@ -195,7 +195,7 @@ public class GenerateLiveRampLaunchArtifacts extends BaseSparkStep<GenerateLiveR
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
-        putStringValueInContext(contextKey, tableName);
+        putObjectInContext(contextKey, tableName);
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 

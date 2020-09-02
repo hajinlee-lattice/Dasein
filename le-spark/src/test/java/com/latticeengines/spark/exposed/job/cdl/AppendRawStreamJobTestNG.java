@@ -136,6 +136,7 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         config.matchedRawStreamInputIdx = 0;
         config.masterInputIdx = 1;
         config.dateAttr = DATE_ATTR;
+        config.discardAttrs.add(CompanyName.name());
         return Pair.of(config, inputs);
     }
 
@@ -248,6 +249,7 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
                     .map(Pair::getKey) //
                     .map(field -> String.format("%s=%s", field, record.get(field))) //
                     .collect(Collectors.toList());
+            log.info("Output: " + String.join(",", nameValues));
             // has internal ID and date attrs
             Assert.assertNotNull(record.get(InternalId.name()));
             Assert.assertNotNull(record.get(__StreamDate.name()));
