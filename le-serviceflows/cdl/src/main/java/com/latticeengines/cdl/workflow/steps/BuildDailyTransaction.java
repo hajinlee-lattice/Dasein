@@ -1,12 +1,16 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -19,6 +23,7 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
@@ -63,17 +68,20 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
     public void execute() {
         bootstrap();
         Map<String, Table> dailyTxnStream = getTablesFromMapCtxKey(customerSpaceStr, DAILY_TXN_STREAMS);
-        Table analyticDailyStream = dailyTxnStream.get(ProductType.Analytic.name());
-        Table spendingDailyStream = dailyTxnStream.get(ProductType.Spending.name());
-        log.info("Retrieved analytic stream {} and spending stream{}", analyticDailyStream.getName(),
-                spendingDailyStream.getName());
-
-        buildTransactionBatchStore(dailyTxnStream); // ConsolidatedDaily, partitioned by txnDayPeriod
-        buildTransactionServingStore(dailyTxnStream); // Aggregated, no partition
+        log.info("Retrieved daily streams: {}", dailyTxnStream.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        List<String> retainTypes = getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class);
+        if (CollectionUtils.isEmpty(retainTypes)) {
+            throw new IllegalStateException("No retain types found in context");
+        }
+        log.info("Retaining transactions of product type: {}", retainTypes);
+        buildTransactionBatchStore(dailyTxnStream, retainTypes); // ConsolidatedDaily, partitioned by txnDayPeriod
+        buildTransactionServingStore(dailyTxnStream, retainTypes); // Aggregated, no partition
     }
 
-    private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream) {
-        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(txnDayPeriod, dailyTxnStream));
+    private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(txnDayPeriod, dailyTxnStream, retainTypes));
         saveBatchStore(result.getTargets().get(0));
     }
 
@@ -87,8 +95,8 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         exportToS3AndAddToContext(consolidatedTxnTable, DAILY_TRXN_TABLE_NAME);
     }
 
-    private void buildTransactionServingStore(Map<String, Table> dailyTxnStream) {
-        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(null, dailyTxnStream));
+    private void buildTransactionServingStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
+        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(null, dailyTxnStream, retainTypes));
         saveServingStore(result.getTargets().get(0));
     }
 
@@ -104,20 +112,21 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         exportTableRoleToRedshift(aggregatedTxnTable, TableRoleInCollection.AggregatedTransaction);
     }
 
-    private TransformTxnStreamConfig getSparkConfig(String partitionKey, Map<String, Table> dailyTxnStream) {
+    private TransformTxnStreamConfig getSparkConfig(String partitionKey, Map<String, Table> dailyTxnStream, List<String> retainTypes) {
         TransformTxnStreamConfig config = new TransformTxnStreamConfig();
         config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, txnDate, txnDayPeriod);
         config.renameMapping = constructDailyRename();
         config.targetColumns = STANDARD_FIELDS;
         config.partitionKey = partitionKey;
+        config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
 
-        Table analyticDailyStream = dailyTxnStream.get(ProductType.Analytic.name());
-        Table spendingDailyStream = dailyTxnStream.get(ProductType.Spending.name());
-        config.setInput(Arrays.asList(
-                analyticDailyStream.partitionedToHdfsDataUnit(null,
-                        Collections.singletonList(InterfaceName.StreamDateId.name())),
-                spendingDailyStream.partitionedToHdfsDataUnit(null,
-                        Collections.singletonList(InterfaceName.StreamDateId.name()))));
+        List<DataUnit> inputs = new ArrayList<>();
+        retainTypes.forEach(type -> {
+            Table table = dailyTxnStream.get(type);
+            inputs.add(table.partitionedToHdfsDataUnit(null,
+                    Collections.singletonList(InterfaceName.StreamDateId.name())));
+        });
+        config.setInput(inputs);
         return config;
     }
 
@@ -130,5 +139,9 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         map.put(quantity, totalQuantity);
         map.put(rowCount, txnCount);
         return map;
+    }
+
+    private boolean retainAllTypes(List<String> retainTypes) {
+        return retainTypes.contains(ProductType.Spending.name()) && retainTypes.contains(ProductType.Analytic.name());
     }
 }

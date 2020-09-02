@@ -8,16 +8,19 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductType.{Analy
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, SplitTransactionConfig}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import org.apache.commons.collections4.CollectionUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types.{IntegerType, LongType, StringType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
+import scala.collection.JavaConversions._
+
 class SplitTransactionJob extends AbstractSparkJob[SplitTransactionConfig] {
 
   val TRANSACTION: String = TableRoleInCollection.ConsolidatedRawTransaction.name
   val PRODUCT: String = TableRoleInCollection.ConsolidatedProduct.name
-  val TXN_TYPE: Seq[String] = Seq(
+  val PROD_TYPE: Seq[String] = Seq(
     Analytic.name, //
     Spending.name //
   )
@@ -27,13 +30,14 @@ class SplitTransactionJob extends AbstractSparkJob[SplitTransactionConfig] {
     val rawTransaction: DataFrame = lattice.input.head
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]()
+    val retainTypes: Seq[String] = if (CollectionUtils.isEmpty(lattice.config.retainProductType)) PROD_TYPE else lattice.config.retainProductType
 
     val resultColumns: Seq[String] = rawTransaction.columns
     var outputs: Seq[DataFrame] = Seq()
     val getDateUdf = UserDefinedFunction((time: Long) => toDateOnlyFromMillis(time.toString), StringType, Some(Seq(LongType)))
     val getDateIdUdf = UserDefinedFunction((time: Long) => dateToDayPeriod(toDateOnlyFromMillis(time.toString)), IntegerType, Some(Seq(LongType)))
-    for (i <- TXN_TYPE.indices) {
-      val typeName = TXN_TYPE(i)
+    for (i <- retainTypes.indices) {
+      val typeName = retainTypes(i)
       detailsMap.put(typeName, createSimpleDetails(i))
       outputs :+= rawTransaction.filter(col(InterfaceName.ProductType.name) === typeName).select(resultColumns.head, resultColumns.tail: _*)
         .withColumn(InterfaceName.StreamDateId.name, getDateIdUdf(col(TXN_DATE_ATTR))) // int date id

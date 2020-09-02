@@ -62,6 +62,18 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
         verify(result, Arrays.asList(this::verifyAnalytic, this::verifySpending));
     }
 
+    @Test(groups = "functional")
+    private void testRetainOneType() {
+        List<String> inputs = Collections.singletonList(prepareTransactionTable());
+        SplitTransactionConfig config = new SplitTransactionConfig();
+        config.retainProductType = Collections.singletonList(analytic);
+        SparkJobResult result = runSparkJob(SplitTransactionJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
+        verify(result, Collections.singletonList(this::verifyAnalytic));
+    }
+
     private String prepareTransactionTable() {
         List<Pair<String, Class<?>>> fields = Arrays.asList(
                 Pair.of(txnId, String.class),

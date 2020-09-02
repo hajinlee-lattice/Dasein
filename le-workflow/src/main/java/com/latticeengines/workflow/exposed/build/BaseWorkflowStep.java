@@ -253,6 +253,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACTIVITY_IMPORT_AFTER_HARD_DELETE = "ACTIVITY_IMPORT_AFTER_HARD_DELETE"; //
     protected static final String MERGED_PRODUCT_IMPORTS = "MERGED_PRODUCT_IMPORTS";
     protected static final String ROLLUP_PRODUCT_TABLE = "ROLLUP_PRODUCT_TABLE";
+    protected static final String RETAIN_PRODUCT_TYPE = "RETAIN_PRODUCT_TYPE";
     protected static final String Raw_TXN_STREAMS = "Raw_TXN_STREAMS";
     protected static final String DAILY_TXN_STREAMS = "DAILY_TXN_STREAMS";
     protected static final String PERIOD_TXN_STREAMS = "PERIOD_TXN_STREAMS";
@@ -298,6 +299,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DAILY_TRXN_TABLE_NAME = "DAILY_TRXN_TABLE_NAME";
     protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
     protected static final String PERIOD_TRXN_TABLE_NAME = "PERIOD_TRXN_TABLE_NAME";
+    protected static final String PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME = "PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME";
     protected static final String CATALOG_TABLE_NAME = "CATALOG_TABLE_NAME";
     protected static final String CATALOG_NEW_IMPORT = "CATALOG_NEW_IMPORT";
     protected static final String ENTITY_MATCH_STREAM_TARGETTABLE = "ENTITY_MATCH_STREAM_TARGETTABLE";
@@ -439,7 +441,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             LAST_ACTIVITY_DATE_TABLE_NAME, //
             Raw_TXN_STREAMS, //
             DAILY_TXN_STREAMS, //
-            PERIOD_TXN_STREAMS //
+            PERIOD_TXN_STREAMS, //
+            PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME //
     );
 
     protected static final Set<String> REMATCH_TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
@@ -466,7 +469,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PROCESS_ACCOUNT_STATS_MERGE, //
             ACTIVITY_STREAMS_RELINK, //
             ACTIVITY_METRICS_CATEGORICAL_ATTR, //
-            ACTIVITY_METRICS_CATEGORIES //
+            ACTIVITY_METRICS_CATEGORIES, //
+            RETAIN_PRODUCT_TYPE
     );
 
     @Autowired

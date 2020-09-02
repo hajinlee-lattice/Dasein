@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +29,8 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
@@ -68,10 +70,12 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
                         return Pair.of(productType, table.getName());
             }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
             log.info("Found period transaction streams {}. Going through shortcut mode.", signatureTableNames);
+            log.info("Retaining transactions of product type: {}", getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class));
             dataCollectionProxy.upsertTablesWithSignatures(customerSpaceStr, signatureTableNames,
                     TableRoleInCollection.PeriodTransactionStream, inactive);
             return;
         }
+
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, getSparkConfig());
         processOutputMetadata(result);
     }
@@ -105,42 +109,50 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
 
     private DailyStoreToPeriodStoresJobConfig getSparkConfig() {
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.streams = constructTransactionStreams();
+        List<String> retainTypes = getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class);
+        log.info("Retaining transactions of product type: {}", retainTypes);
+        if (CollectionUtils.isEmpty(retainTypes)) {
+            throw new IllegalStateException("No retain types found in context");
+        }
+        config.streams = constructTransactionStreams(retainTypes);
         config.evaluationDate = evaluationDate;
         config.businessCalendar = businessCalendar;
-        config.inputMetadata = constructInputMetadata();
-
         Map<String, Table> dailyTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, DAILY_TXN_STREAMS);
-        Table analyticDailyTable = dailyTransactionTables.get(ProductType.Analytic.name());
-        Table spendingDailyTable = dailyTransactionTables.get(ProductType.Spending.name());
-        config.setInput(Arrays.asList(
-                analyticDailyTable.partitionedToHdfsDataUnit(null,
-                        Collections.singletonList(InterfaceName.StreamDateId.name())),
-                spendingDailyTable.partitionedToHdfsDataUnit(null,
-                        Collections.singletonList(InterfaceName.StreamDateId.name()))));
+        List<DataUnit> inputs = new ArrayList<>();
+        ActivityStoreSparkIOMetadata metadataWrapper = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> inputMetadata = new HashMap<>();
+        config.streams.forEach(stream -> {
+            String type = stream.getStreamId();
+            ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+            details.setStartIdx(inputs.size());
+            details.setLabels(periodStrategies);
+            inputMetadata.put(type, details);
+            Table table = dailyTransactionTables.get(type);
+            inputs.add(table.partitionedToHdfsDataUnit(null,
+                    Collections.singletonList(InterfaceName.StreamDateId.name())));
+        });
+        config.setInput(inputs);
+        metadataWrapper.setMetadata(inputMetadata);
+        config.inputMetadata = metadataWrapper;
         return config;
     }
 
-    private ActivityStoreSparkIOMetadata constructInputMetadata() {
+    private ActivityStoreSparkIOMetadata constructInputMetadata(List<String> retainTypes) {
         ActivityStoreSparkIOMetadata metadataWrapper = new ActivityStoreSparkIOMetadata();
         Map<String, ActivityStoreSparkIOMetadata.Details> inputMetadata = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details analytic = new ActivityStoreSparkIOMetadata.Details();
-        analytic.setStartIdx(0);
-        analytic.setLabels(periodStrategies);
-        ActivityStoreSparkIOMetadata.Details spending = new ActivityStoreSparkIOMetadata.Details();
-        spending.setStartIdx(1);
-        spending.setLabels(periodStrategies);
-        inputMetadata.put(ProductType.Analytic.name(), analytic);
-        inputMetadata.put(ProductType.Spending.name(), spending);
+        for (int i = 0; i < retainTypes.size(); i++) {
+            String type = retainTypes.get(i);
+            ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+            details.setStartIdx(i);
+            details.setLabels(periodStrategies);
+            inputMetadata.put(type, details);
+        }
         metadataWrapper.setMetadata(inputMetadata);
         return metadataWrapper;
     }
 
-    private List<AtlasStream> constructTransactionStreams() {
-        return Arrays.asList( //
-                constructStream(ProductType.Analytic.name()), //
-                constructStream(ProductType.Spending.name()) //
-        );
+    private List<AtlasStream> constructTransactionStreams(List<String> retainTypes) {
+        return retainTypes.stream().map(this::constructStream).collect(Collectors.toList());
     }
 
     private AtlasStream constructStream(String type) {
