@@ -226,11 +226,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             if (ls.getIntegrationStatusMonitor() != null) {
                 LookupIdMap lookupIdMap = lookupIdMaps.get(ls.getDestinationOrgId());
                 ls.getIntegrationStatusMonitor()
-                        .setS3Bucket(lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null
-                                && !StringUtils
-                                        .isBlank(lookupIdMap.getExternalAuthentication().getTrayAuthenticationId())
-                                                ? s3CustomerExportBucket
-                                                : s3CustomerBucket);
+                        .setS3Bucket(lookupIdMap.isTrayEnabled() ? s3CustomerExportBucket : s3CustomerBucket);
             }
         });
     }

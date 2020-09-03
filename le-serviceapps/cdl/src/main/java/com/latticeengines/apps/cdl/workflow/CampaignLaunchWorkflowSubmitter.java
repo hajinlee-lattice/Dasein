@@ -85,7 +85,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (!lookupIdMap.isTrayEnabled()) {
+        if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
             return null;
         }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
@@ -96,7 +96,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (!lookupIdMap.isTrayEnabled()) {
+        if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
             return null;
         }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3

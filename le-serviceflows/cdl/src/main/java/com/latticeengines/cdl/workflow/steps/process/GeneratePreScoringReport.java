@@ -180,7 +180,7 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                     : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-            // Product report is generated in MergeProduct step
+            // Product report is generated in MergeProduct step, update PRODUCT_ID when product not imported
             // PurchaseHistory report is generated in ProfilePurchaseHistory
             // step
             if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
@@ -193,6 +193,8 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            } else if (entity == BusinessEntity.Product && entitiesSummaryNode.get(entity.name()) == null) {
+                consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, currentCnts.get(entity));
             }
             // Populate entity match summary
             ObjectNode entityMatchNode = JsonUtils.createObjectNode();

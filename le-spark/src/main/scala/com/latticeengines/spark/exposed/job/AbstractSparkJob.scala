@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.livy.scalaapi.ScalaJobContext
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 

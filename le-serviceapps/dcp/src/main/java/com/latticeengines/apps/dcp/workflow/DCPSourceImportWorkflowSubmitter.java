@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -63,6 +64,9 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
         Job job = workflowJobService.findByApplicationId(applicationId.toString());
         uploadService.updateStatsWorkflowPid(upload.getUploadId(), container.getPid(), job.getPid());
+        UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();
+        uploadDiagnostics.setApplicationId(applicationId.toString());
+        uploadService.updateUploadStatus(customerSpace.toString(), upload.getUploadId(), upload.getStatus(), uploadDiagnostics);
         return applicationId;
     }
 

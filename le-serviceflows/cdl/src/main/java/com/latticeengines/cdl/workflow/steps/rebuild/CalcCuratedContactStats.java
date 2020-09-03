@@ -37,7 +37,7 @@ public class CalcCuratedContactStats extends BaseCalcStatsStep<CuratedContactAtt
     @Override
     protected List<ProfileParameters.Attribute> getDeclaredAttrs() {
         List<ProfileParameters.Attribute> catAttrs = new ArrayList<>(
-                CuratedAttributeUtils.getCategoricalAttributes(Contact, getSystemMap().keySet()));
+                CuratedAttributeUtils.getCategoricalAttributes(Contact, getCreatedSourceNames()));
         catAttrs.addAll(CollectionUtils.emptyIfNull(super.getDeclaredAttrs()));
         return catAttrs;
     }
