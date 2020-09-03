@@ -216,6 +216,7 @@ public class DataReportEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataReportRecord findReadyForRollUpDataReportRecord(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findByLevelAndOwnerIdAndReadyForRollUp(level, ownerId, true);
+    }
 
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime) {
