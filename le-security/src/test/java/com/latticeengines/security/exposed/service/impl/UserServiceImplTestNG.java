@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.latticeengines.security.exposed.service.UserFilter;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -23,6 +22,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
