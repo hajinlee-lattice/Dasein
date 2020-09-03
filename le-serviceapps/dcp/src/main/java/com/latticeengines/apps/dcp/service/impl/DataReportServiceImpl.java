@@ -385,7 +385,7 @@ public class DataReportServiceImpl implements DataReportService {
             log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeRemoved);
             dataReportEntityMgr.updateReadyForRollupToFalse(idToBeRemoved);
             // wait the replication log
-            SleepUtils.sleep(150);
+            SleepUtils.sleep(200);
             // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
             Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
             if (CollectionUtils.isEmpty(projectIds)) {

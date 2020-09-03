@@ -16,12 +16,12 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DataReportRecord d SET d.readyForRollup = true, d.refreshTime = ?2 where d.pid = ?1")
-    void updateReadyForRollup(Long pid, Date refreshTime);
+    void updateReadyForRollupToTrue(Long pid, Date refreshTime);
 
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DataReportRecord d SET d.readyForRollup = false, d.refreshTime = ?2 where d.pid in ?1")
-    void updateReadyForRollup(Set<Long> pids, Date refreshTime);
+    void updateReadyForRollupToFalse(Set<Long> pids, Date refreshTime);
 
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)

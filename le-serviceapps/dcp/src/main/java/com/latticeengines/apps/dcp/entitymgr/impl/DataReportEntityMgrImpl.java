@@ -143,7 +143,7 @@ public class DataReportEntityMgrImpl
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateReadyForRollup(Long pid) {
-        dataReportWriterRepository.updateReadyForRollup(pid, new Date());
+        dataReportWriterRepository.updateReadyForRollupToTrue(pid, new Date());
     }
 
     @Override
@@ -155,7 +155,7 @@ public class DataReportEntityMgrImpl
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateReadyForRollupToFalse(Set<Long> pids) {
-        dataReportWriterRepository.updateReadyForRollup(pids, new Date());
+        dataReportWriterRepository.updateReadyForRollupToFalse(pids, new Date());
     }
 
     @Override
