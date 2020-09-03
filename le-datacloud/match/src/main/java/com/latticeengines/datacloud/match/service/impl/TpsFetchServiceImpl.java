@@ -125,9 +125,13 @@ public class TpsFetchServiceImpl implements TpsFetchService {
         // Filter by match destination
         if (destination != null) {
             String columnName = cmTpsColumnRepository.findColumnNameByMatchDestination(destination.name());
-            String dest = result.get(columnName).toString().toLowerCase();
-            if (!Arrays.asList("t", "true").contains(dest)) {
+            if (result.get(columnName) == null) {
                 return false;
+            } else {
+                String dest = result.get(columnName).toString().toLowerCase();
+                if (!Arrays.asList("t", "true").contains(dest)) {
+                    return false;
+                }
             }
         }
 

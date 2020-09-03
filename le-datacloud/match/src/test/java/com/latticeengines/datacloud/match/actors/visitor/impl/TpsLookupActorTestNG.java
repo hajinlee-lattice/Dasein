@@ -111,6 +111,7 @@ public class TpsLookupActorTestNG extends SingleActorTestNGBase {
         // duns
         return new Object[][] { //
                 { "028675958", null }, // Use LATTICE ENGINES site duns for testing
+                { "918536814", EmptyResult}, // Non-existing duns
                 { null, null }, //
                 { REMOTE_ERROR_DUNS, UnknownRemoteError }, // UnknownRemoteError
                 { LOCAL_ERROR_DUNS, UnknownLocalError }, // UnknownLocalError
