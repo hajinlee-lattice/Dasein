@@ -32,6 +32,9 @@ public class TransformTxnStreamConfig extends SparkJobConfig {
     public String partitionKey;
 
     @JsonProperty
+    public String repartitionKey;
+
+    @JsonProperty
     public List<String> retainTypes = new ArrayList<>(); // remain empty to retain both spending and analytic
 
     @Override

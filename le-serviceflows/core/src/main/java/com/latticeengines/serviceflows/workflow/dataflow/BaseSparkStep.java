@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -94,6 +96,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     private int partitionMultiplier = 1;
     private String sparkMaxResultSize = null;
     private List<String> workSpaces = new ArrayList<>();
+    ExecutorService s3ExporterPool;
 
     @PreDestroy
     public void tearDown() {
@@ -293,10 +296,18 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             if (sync) {
                 exporter.run();
             } else {
-                new Thread(exporter).start();
+                ExecutorService pool = getS3ExporterPool();
+                pool.execute(exporter);
             }
         }
         return shouldSkip;
+    }
+
+    private ExecutorService getS3ExporterPool() {
+        if (s3ExporterPool == null) {
+            s3ExporterPool = Executors.newFixedThreadPool(4);
+        }
+        return s3ExporterPool;
     }
 
     protected Map<String, String> exportToS3AndAddToContext(Map<String, Table> tables, String contextKey) {

@@ -68,9 +68,9 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
     public void execute() {
         bootstrap();
         Map<String, Table> dailyTxnStream = getTablesFromMapCtxKey(customerSpaceStr, DAILY_TXN_STREAMS);
-        log.info("Retrieved daily streams: {}", dailyTxnStream.entrySet().stream()
-                .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        log.info("Retrieved daily streams: {}",
+                dailyTxnStream.entrySet().stream().map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
+                        .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
         List<String> retainTypes = getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class);
         if (CollectionUtils.isEmpty(retainTypes)) {
             throw new IllegalStateException("No retain types found in context");
@@ -81,8 +81,18 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
     }
 
     private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
-        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(txnDayPeriod, dailyTxnStream, retainTypes));
-        saveBatchStore(result.getTargets().get(0));
+        Table dailyTxnBatchStoreTable = getTableSummaryFromKey(customerSpaceStr, DAILY_TRXN_TABLE_NAME);
+        if (isShortcutMode(dailyTxnBatchStoreTable)) {
+            String tableName = dailyTxnBatchStoreTable.getName();
+            log.info("Retrieved daily transaction batch store from context: {}. Going through shortcut mode.",
+                    tableName);
+            dataCollectionProxy.upsertTable(customerSpaceStr, tableName,
+                    TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+        } else {
+            SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
+                    getSparkConfig(txnDayPeriod, null, dailyTxnStream, retainTypes));
+            saveBatchStore(result.getTargets().get(0));
+        }
     }
 
     private void saveBatchStore(HdfsDataUnit consolidatedTxnDU) {
@@ -96,8 +106,19 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
     }
 
     private void buildTransactionServingStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
-        SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, getSparkConfig(null, dailyTxnStream, retainTypes));
-        saveServingStore(result.getTargets().get(0));
+        Table dailyTxnServingStoreTable = getTableSummaryFromKey(customerSpaceStr, AGG_DAILY_TRXN_TABLE_NAME);
+        if (isShortcutMode(dailyTxnServingStoreTable)) {
+            String tableName = dailyTxnServingStoreTable.getName();
+            log.info("Retrieved daily transaction serving store from context: {}. Going through shortcut mode.",
+                    tableName);
+            dataCollectionProxy.upsertTable(customerSpaceStr, tableName,
+                    TableRoleInCollection.AggregatedTransaction, inactive);
+            exportTableRoleToRedshift(dailyTxnServingStoreTable, TableRoleInCollection.AggregatedTransaction);
+        } else {
+            SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
+                    getSparkConfig(null, txnDayPeriod, dailyTxnStream, retainTypes));
+            saveServingStore(result.getTargets().get(0));
+        }
     }
 
     private void saveServingStore(HdfsDataUnit aggregatedTxnDU) {
@@ -112,12 +133,14 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         exportTableRoleToRedshift(aggregatedTxnTable, TableRoleInCollection.AggregatedTransaction);
     }
 
-    private TransformTxnStreamConfig getSparkConfig(String partitionKey, Map<String, Table> dailyTxnStream, List<String> retainTypes) {
+    private TransformTxnStreamConfig getSparkConfig(String partitionKey, String repartitionKey,
+            Map<String, Table> dailyTxnStream, List<String> retainTypes) {
         TransformTxnStreamConfig config = new TransformTxnStreamConfig();
         config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, txnDate, txnDayPeriod);
         config.renameMapping = constructDailyRename();
         config.targetColumns = STANDARD_FIELDS;
         config.partitionKey = partitionKey;
+        config.repartitionKey = repartitionKey;
         config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
 
         List<DataUnit> inputs = new ArrayList<>();

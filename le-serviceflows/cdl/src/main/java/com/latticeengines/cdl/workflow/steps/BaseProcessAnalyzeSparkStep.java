@@ -308,6 +308,10 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         metadataProxy.updateDataTablePolicy(customerSpace.toString(), tableName, retentionPolicy);
     }
 
+    protected boolean isShortcutMode(Table table) {
+        return table != null;
+    }
+
     protected boolean isShortcutMode(Map<String, Table> tables) {
         return MapUtils.isNotEmpty(tables) && tables.values().stream().noneMatch(Objects::isNull);
     }
