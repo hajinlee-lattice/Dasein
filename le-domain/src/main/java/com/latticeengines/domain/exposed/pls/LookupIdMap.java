@@ -275,12 +275,15 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     }
 
     public boolean isTrayEnabled() {
-        if (externalSystemType.equals(CDLExternalSystemType.FILE_SYSTEM)
-                || CDLExternalSystemName.LIVERAMP.contains(externalSystemName)) {
+        if (CDLExternalSystemName.LIVERAMP.contains(externalSystemName)) {
             return true;
         }
         return externalAuthentication != null && !StringUtils.isBlank(externalAuthentication.getTrayAuthenticationId())
                 && externalAuthentication.getTrayWorkflowEnabled();
+    }
+
+    public boolean isFileSystem() {
+        return externalSystemType.equals(CDLExternalSystemType.FILE_SYSTEM);
     }
 
     @Override
