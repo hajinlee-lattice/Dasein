@@ -13,15 +13,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.proxy.exposed.cdl.CDLDanteConfigProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
@@ -45,7 +42,7 @@ public class DanteConfigurationResourceDeplomentTestNG extends UlyssesDeployment
     @Override
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException, InterruptedException {
-        
+
         String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
