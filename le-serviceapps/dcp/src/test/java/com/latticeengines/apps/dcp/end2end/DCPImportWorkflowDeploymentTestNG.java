@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -442,5 +443,11 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(tenantCache);
         Assert.assertNotNull(tenantCache.getSnapshotTimestamp());
         Assert.assertNotNull(tenantCache.getDunsCountTableName());
+
+        // test archive the project, then verify no child report in tenant level
+        projectProxy.deleteProject(mainCustomerSpace, projectDetails.getProjectId(), null);
+        Set<String> childrenIds = dataReportProxy.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Tenant,
+                mainCustomerSpace);
+        Assert.assertTrue(CollectionUtils.isEmpty(childrenIds));
     }
 }
