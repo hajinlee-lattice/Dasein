@@ -75,5 +75,4 @@ public interface UserService {
     List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam);
 
     IDaaSUser createIDaaSUser(User user, String subscriberNumber);
-
 }

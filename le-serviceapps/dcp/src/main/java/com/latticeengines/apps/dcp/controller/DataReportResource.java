@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -120,16 +119,6 @@ public class DataReportResource {
                                             @RequestParam(required = false) String ownerId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataReportService.getDunsCount(customerSpace, level, ownerId);
-    }
-
-    @GetMapping("/dunscountcopy")
-    @ResponseBody
-    @ApiOperation(value = "Get duns count copy")
-    public DunsCountCopy getDunsCountCopy(@PathVariable String customerSpace,
-                                          @RequestParam DataReportRecord.Level level,
-                                          @RequestParam(required = false) String ownerId) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataReportService.getDunsCountCopy(customerSpace, level, ownerId);
     }
 
     @PostMapping("/basicstats")

@@ -142,6 +142,9 @@ public class VboRequest {
         @JsonProperty("language")
         private String language;
 
+        @JsonProperty("countryISOAlpha2Code")
+        private String countryCode;
+
         @JsonProperty("name")
         private String name;
 
@@ -167,6 +170,14 @@ public class VboRequest {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getCountryCode() {
+            return countryCode;
+        }
+
+        public void setCountryCode(String countryCode) {
+            this.countryCode = countryCode;
         }
     }
 

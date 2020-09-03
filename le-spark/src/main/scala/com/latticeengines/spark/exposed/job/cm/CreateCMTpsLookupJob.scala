@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cm
 
 import com.latticeengines.domain.exposed.spark.cm.CMTpsLookupCreationConfig
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants
 import com.latticeengines.spark.aggregation.ConcatStringsUDAF
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.functions.col
@@ -17,7 +18,7 @@ class CreateCMTpsLookupJob extends AbstractSparkJob[CMTpsLookupCreationConfig] {
     val filtered = tpsSource.filter(col(key).isNotNull)
 
     val concatUdaf = new ConcatStringsUDAF(targetColumn, ",")
-    val result = filtered.groupBy(key).agg(concatUdaf(col(targetColumn)).as("RECORD_IDS"))
+    val result = filtered.groupBy(key).agg(concatUdaf(col(targetColumn)).as(ContactMasterConstants.TPS_RECORD_UUIDS))
 
     lattice.output = result :: Nil
   }

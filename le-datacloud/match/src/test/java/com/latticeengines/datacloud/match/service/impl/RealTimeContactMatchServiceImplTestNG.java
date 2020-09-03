@@ -68,7 +68,7 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
         Assert.assertEquals(output.getResult().size(), data.length);
         List<List<Object>> candidateOutputs = output.getResult().get(0).getCandidateOutput();
         Assert.assertTrue(CollectionUtils.isNotEmpty(candidateOutputs));
-        Assert.assertEquals(candidateOutputs.size(), 3);
+        Assert.assertEquals(candidateOutputs.size(), 5);
         for(List<Object> list: candidateOutputs) {
             Assert.assertTrue(Arrays.asList("Administrative", "Engineering").contains(list.get(14)));
             Assert.assertTrue(Arrays.asList("CXO", "VP").contains(list.get(13)));

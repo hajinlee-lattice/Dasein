@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -206,21 +205,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 uploadId, cache);
         // set table name to variable, then set table policy forever at finish step
         putStringValueInContext(DUNS_COUNT_TABLE_NAME, dunsCountTableName);
-        DataReportRecord.Level level = DataReportRecord.Level.Upload;
-        String ownerId = uploadId;
-        while(level != DataReportRecord.Level.Tenant) {
-            // update parent node if it's the only child
-            DunsCountCopy copy = dataReportProxy.getDunsCountCopy(configuration.getCustomerSpace().toString(), level,
-                    ownerId);
-            if (copy.isOnlyChild()) {
-                dataReportProxy.registerDunsCount(configuration.getCustomerSpace().toString(), level.getParentLevel()
-                        , copy.getParentOwnerId(), cache);
-                ownerId = copy.getParentOwnerId();
-            } else {
-                break;
-            }
-            level = level.getParentLevel();
-        }
     }
 
     private void updateUploadStatistics(SparkJobResult result) {

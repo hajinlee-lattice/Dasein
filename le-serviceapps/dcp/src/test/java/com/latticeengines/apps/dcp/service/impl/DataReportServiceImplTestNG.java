@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
-import com.latticeengines.domain.exposed.dcp.DunsCountCopy;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 
@@ -76,25 +75,12 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
                 "sourceUID");
         Assert.assertTrue(CollectionUtils.isEmpty(subOwnerIds));
 
-        // verify upload node has no brothers
-        DunsCountCopy copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
-                "uploadUID");
-        Assert.assertNotNull(copy);
-        Assert.assertTrue(copy.isOnlyChild());
-        Assert.assertNotNull(copy.getParentOwnerId());
 
         // modify the readyForRollup
         dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID");
         subOwnerIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Source,
                 "sourceUID");
         Assert.assertTrue(CollectionUtils.isNotEmpty(subOwnerIds));
-
-        // verify upload node has no brothers
-        copy = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
-                "uploadUID");
-        Assert.assertNotNull(copy);
-        Assert.assertFalse(copy.isOnlyChild());
-        Assert.assertNotNull(copy.getParentOwnerId());
 
 
         // test find Pid and corresponding duns count table name
@@ -198,12 +184,6 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         // update ready for rollup for uploadUID2
         dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID2");
-        // verify upload node is not only brothers
-        DunsCountCopy copy2 = dataReportService.getDunsCountCopy(mainCustomerSpace, DataReportRecord.Level.Upload,
-                "uploadUID");
-        Assert.assertNotNull(copy2);
-        Assert.assertFalse(copy2.isOnlyChild());
-        Assert.assertNotNull(copy2.getParentOwnerId());
     }
 
     public static DataReport getDataReport() {

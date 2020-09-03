@@ -56,7 +56,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final String CDL_TRAY_TEST_VERIFICATION_END_POINT = "/cdl/tray/test/verify";
 
     @Value("${cdl.campaign.integration.session.context.ttl}")
-    private long sessionContextTTL;
+    private long sessionContextTTLinSec;
 
     @Value("${cdl.campaign.integration.session.context.dynamo.table}")
     private String integrationSessionContextTable;
@@ -129,7 +129,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         session.put("Url", microserviceHostPort + CDL_TRAY_TEST_VERIFICATION_END_POINT);
         session.put("Mapping", "");
         return new Item().withPrimaryKey("WorkflowId", workflowRequestId)
-                .withLong("TTL", System.currentTimeMillis() + sessionContextTTL)
+                .withLong("TTL", System.currentTimeMillis() / 1000 + sessionContextTTLinSec)
                 .withString("Session", JsonUtils.serialize(session));
     }
 

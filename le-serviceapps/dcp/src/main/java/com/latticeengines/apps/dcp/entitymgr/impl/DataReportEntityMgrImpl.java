@@ -142,8 +142,8 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
-    public void updateReadyForRollupIfNotReady(Long pid) {
-        dataReportWriterRepository.updateReadyForRollupIfNotReady(pid, new Date());
+    public int updateReadyForRollupIfNotReady(Long pid) {
+        return dataReportWriterRepository.updateReadyForRollupIfNotReady(pid, new Date());
     }
 
     @Override
@@ -154,7 +154,7 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
-    public void uploadDataReportRecord(Long pid, Table dunsCountTable, Date snapShotTime) {
+    public void updateDataReportRecord(Long pid, Table dunsCountTable, Date snapShotTime) {
         dataReportWriterRepository.updateDataReport(pid, new Date(), snapShotTime,
                 dunsCountTable);
     }
@@ -213,9 +213,13 @@ public class DataReportEntityMgrImpl
         dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), duplicationReport);
     }
 
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataReportRecord findReadyForRollUpDataReportRecord(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findByLevelAndOwnerIdAndReadyForRollUp(level, ownerId, true);
+
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime) {
+        return dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), snapShotTime,
+                dunsCountTable);
     }
 }

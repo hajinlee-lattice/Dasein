@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -85,8 +87,10 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionReque
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
+import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -98,6 +102,7 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -120,6 +125,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Inject
     private ServiceService serviceService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     @Inject
     private VboRequestLogService vboRequestLogService;
@@ -157,6 +165,12 @@ public class TenantServiceImpl implements TenantService {
     @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
+    @Value("${admin.vbo.callback.url}")
+    private String callbackUrl;
+
+    @Value("${admin.vbo.callback.canmock}")
+    private boolean canMock;
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private ProductAndExternalAdminInfo prodAndExternalAminInfo;
@@ -184,7 +198,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean createTenant(final String contractId, final String tenantId, TenantRegistration tenantRegistration,
-            String userName) {
+            String userName, VboCallback callback) {
         final ContractInfo contractInfo = tenantRegistration.getContractInfo();
         final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -231,8 +245,17 @@ public class TenantServiceImpl implements TenantService {
         // retrieve mappings from Camille
         final Map<String, Map<String, String>> orchestratorProps = props;
         executorService.submit(() -> {
+            boolean isDnBConnectRequest = batonService.hasProduct(customerSpace, LatticeProduct.DCP);
+            CallbackTimeoutThread timeoutThread = null;
+            Semaphore timeoutSemaphore = new Semaphore(1); // only to be used when updating timeout status
+            if (callback != null) {
+                timeoutThread = new CallbackTimeoutThread(callback, timeoutSemaphore);
+                timeoutThread.start();
+            }
+
             orchestrator.orchestrateForInstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                    orchestratorProps, prodAndExternalAminInfo);
+                    orchestratorProps, prodAndExternalAminInfo, isDnBConnectRequest, callback);
+
             // record tenant status after being created
             TenantDocument tenantDoc = getTenant(contractId, tenantId);
             if (tenantDoc != null) {
@@ -240,6 +263,27 @@ public class TenantServiceImpl implements TenantService {
                     tenantInfo.properties.status = TenantStatus.INACTIVE.name();
                 }
                 updateTenantInfo(contractId, tenantId, tenantInfo);
+            }
+
+            if (callback != null) {
+                try {
+                    timeoutSemaphore.acquire();
+                    if (!callback.timeout) {
+                        callback.timeout = true;
+                        timeoutThread.interrupt();
+                        timeoutSemaphore.release();
+
+                        // VBO needs OAuth token/Authorization header
+                        iDaaSService.callbackWithAuth(callback.targetUrl, callback);
+                    } else {
+                        timeoutSemaphore.release();
+                        // callback timed out: should we clean up tenant?
+                        // deleteTenant(userName, contractId, tenantId, true);
+                    }
+                } catch (InterruptedException e) {
+                    log.error("Unexpected semaphore interruption");
+                    callback.customerCreation.transactionDetail.status = VboStatus.OTHER;
+                }
             }
         });
 
@@ -652,7 +696,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public VboResponse createVboTenant(VboRequest vboRequest, String userName) {
+    public VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback, Boolean useMock) {
         String subNumber  = vboRequest.getSubscriber().getSubscriberNumber();
         Tenant existingTenant = tenantService.findBySubscriberNumber(subNumber);
         if (existingTenant != null) {
@@ -775,7 +819,30 @@ public class TenantServiceImpl implements TenantService {
             registration.setSpaceInfo(spaceInfo);
             registration.setTenantInfo(tenantInfo);
             registration.setConfigDirectories(configDirs);
-            boolean result = createTenant(tenantName, tenantName, registration, userName);
+
+            VboCallback vboCallback = null;
+            if (callback) {
+                vboCallback = new VboCallback();
+                vboCallback.customerCreation = new VboCallback.CustomerCreation();
+                vboCallback.customerCreation.transactionDetail = new VboCallback.TransactionDetail();
+                vboCallback.customerCreation.customerDetail = new VboCallback.CustomerDetail();
+
+                vboCallback.customerCreation.transactionDetail.ackRefId = traceId;
+                vboCallback.customerCreation.customerDetail.workspaceCountry = vboRequest.getSubscriber().getCountryCode();
+                vboCallback.customerCreation.customerDetail.subscriberNumber = vboRequest.getSubscriber().getSubscriberNumber();
+
+                // TODO: should this use getUserId() or getEmailAddress()? Related: ComponentOrchestrator::finalizeDnBConnect
+                vboCallback.customerCreation.customerDetail.login = vboRequest.getProduct().getUsers().stream().findFirst().get().getEmailAddress();
+
+                // callback needs current status if timeout triggered: assume failed unless proven otherwise
+                vboCallback.customerCreation.transactionDetail.status = VboStatus.ALL_FAIL;
+                vboCallback.customerCreation.customerDetail.emailSent = Boolean.toString(false);
+
+                vboCallback.timeout = Boolean.FALSE;
+                vboCallback.targetUrl = (canMock && useMock) ? (requestUrl.substring(0, requestUrl.indexOf("/tenants")) + "/vbomock") : callbackUrl;
+            }
+
+            boolean result = createTenant(tenantName, tenantName, registration, userName, vboCallback);
             String status = result ? "success" : "failed";
             String message = result ? "tenant created successfully via Vbo request" :
                     "tenant created failed via Vbo request";
@@ -939,6 +1006,35 @@ public class TenantServiceImpl implements TenantService {
 
         public void setExternalEmailMap(Map<String, Boolean> externalEmailMap) {
             this.externalEmailMap = externalEmailMap;
+        }
+    }
+
+    private class CallbackTimeoutThread extends Thread {
+        private final VboCallback callback;
+        private final Semaphore semaphore;
+
+        private final long WAIT_TIME = TimeUnit.MINUTES.toMillis(30);
+
+        CallbackTimeoutThread(final VboCallback callback, Semaphore semaphore) {
+            this.callback = callback;
+            this.semaphore = semaphore;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(WAIT_TIME);
+                semaphore.acquire();
+                if (!callback.timeout) {
+                    callback.timeout = true;
+                    log.info("Callback timed out: sending callback as-is");
+                    iDaaSService.callbackWithAuth(callback.targetUrl, callback);
+                }
+                semaphore.release();
+            } catch (InterruptedException e) {
+                // expected interrupt if main thread already performed callback: absorb
+                log.info("Stopping callback timer");
+            }
         }
     }
 }

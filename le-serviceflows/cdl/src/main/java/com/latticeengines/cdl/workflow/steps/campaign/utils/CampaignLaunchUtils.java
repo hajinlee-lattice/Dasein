@@ -25,24 +25,15 @@ public final class CampaignLaunchUtils {
 
     public boolean shouldPublishRecommendationsForS3Launch(CustomerSpace customerSpace, CDLExternalSystemName cdlExternalSystemName) {
         if (cdlExternalSystemName != null) {
-            switch (cdlExternalSystemName) {
-                case Eloqua:
-                case Salesforce:
-                    return true;
-                case AWS_S3:
-                    return WorkflowJobUtils.getPublishRecommendationsForS3Launch(customerSpace);
-                case Marketo:
-                case LinkedIn:
-                case GoogleAds:
-                case Facebook:
-                case Outreach:
-                case Others:
-                default:
-                    return false;
+            if (cdlExternalSystemName == CDLExternalSystemName.Salesforce
+                    || cdlExternalSystemName == CDLExternalSystemName.Eloqua) {
+                return true;
             }
-        } else {
-            return false;
+            if (cdlExternalSystemName == CDLExternalSystemName.AWS_S3) {
+                return WorkflowJobUtils.getPublishRecommendationsForS3Launch(customerSpace);
+            }
         }
+        return false;
     }
 
     public void checkCampaignLaunchAccountLimitation(long accountsCount) {

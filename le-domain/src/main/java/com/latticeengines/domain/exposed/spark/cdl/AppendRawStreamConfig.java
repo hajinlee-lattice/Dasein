@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -31,6 +34,9 @@ public class AppendRawStreamConfig extends SparkJobConfig {
 
     @JsonProperty
     public ActivityRowReducer reducer;
+
+    @JsonProperty
+    public Set<String> discardAttrs = new HashSet<>();
 
     @Override
     public String getName() {

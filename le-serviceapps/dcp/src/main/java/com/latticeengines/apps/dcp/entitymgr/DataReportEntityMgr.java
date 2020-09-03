@@ -35,9 +35,9 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     void updateReadyForRollup(Long pid);
 
-    void updateReadyForRollupIfNotReady(Long pid);
+    int updateReadyForRollupIfNotReady(Long pid);
 
-    void uploadDataReportRecord(Long pid, Table dunsCountTable, Date snapshotTime);
+    void updateDataReportRecord(Long pid, Table dunsCountTable, Date snapshotTime);
 
     void updateDataReportRecord(Long pid, DataReport.BasicStats basicStats);
 
@@ -60,4 +60,7 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
     void updateDataReportRecordIfNull(Long pid, DataReport.DuplicationReport duplicationReport);
 
     DataReportRecord findReadyForRollUpDataReportRecord(DataReportRecord.Level level, String ownerId);
+  
+    int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime);
+
 }

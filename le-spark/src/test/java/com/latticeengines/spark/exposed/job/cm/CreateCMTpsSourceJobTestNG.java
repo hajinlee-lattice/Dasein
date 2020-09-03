@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig;
@@ -32,10 +33,10 @@ public class CreateCMTpsSourceJobTestNG extends SparkJobFunctionalTestNGBase {
         CMTpsSourceCreationConfig config = new CMTpsSourceCreationConfig();
         List<FieldMapping> fieldMaps = new LinkedList<>();
         FieldMapping map1 = new FieldMapping();
-        map1.setNewStandardField("STANDARD_JOB_LEVEL");
+        map1.setNewStandardField(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL);
         map1.setSourceFields(Arrays.asList("DNB_JOB_TITLE", "DNB_JOB_FUNCTION"));
         FieldMapping map2 = new FieldMapping();
-        map2.setNewStandardField("STANDARD_JOB_FUNCTION");
+        map2.setNewStandardField(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION);
         map2.setSourceFields(Arrays.asList("DNB_JOB_FUNCTION"));
         fieldMaps.add(map1);
         fieldMaps.add(map2);
@@ -48,19 +49,23 @@ public class CreateCMTpsSourceJobTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifyTpsSource(HdfsDataUnit tpsSource) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tpsSource).forEachRemaining(record -> {
-            int siteDuns = (int) record.get("SITE_DUNS_NUMBER");
+            // Generated UUID can't be null
+            Assert.assertNotNull(record.get(ContactMasterConstants.TPS_RECORD_UUID));
+            int siteDuns = (int) record.get(ContactMasterConstants.TPS_SITE_DUNS_NUMBER);
             switch (siteDuns) {
             case 1014559:
-                Assert.assertEquals(record.get("STANDARD_JOB_LEVEL").toString(), "Director");
-                Assert.assertEquals(record.get("STANDARD_JOB_FUNCTION").toString(), "Information Technology");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "Director");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString(),
+                        "Information Technology");
                 break;
             case 1017490:
-                Assert.assertEquals(record.get("STANDARD_JOB_LEVEL").toString(), "Entry");
-                Assert.assertEquals(record.get("STANDARD_JOB_FUNCTION").toString(), "Sales");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "Entry");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString(), "Sales");
                 break;
             case 1089858:
-                Assert.assertEquals(record.get("STANDARD_JOB_LEVEL").toString(), "Entry");
-                Assert.assertEquals(record.get("STANDARD_JOB_FUNCTION").toString(), "Arts and Design");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_LEVEL).toString(), "Entry");
+                Assert.assertEquals(record.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString(),
+                        "Arts and Design");
                 break;
             default:
                 Assert.fail("Should not see a record with SITE_DUNS_NUMBER " + siteDuns + ": " + record.toString());
