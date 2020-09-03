@@ -12,7 +12,8 @@ public interface UserFilter {
             return false;
         }
         AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
-        return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN);
+        return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN)
+                || level.equals(AccessLevel.BUSINESS_ANALYST);
     };
 
     UserFilter TRIVIAL_FILTER = user -> {
