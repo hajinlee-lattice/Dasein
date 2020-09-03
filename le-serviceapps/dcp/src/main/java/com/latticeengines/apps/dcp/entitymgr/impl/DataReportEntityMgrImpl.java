@@ -135,15 +135,27 @@ public class DataReportEntityMgrImpl
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Set<Long> findPidsByParentId(Long parentId) {
+        return getReadOrWriteRepository().findPidsByParentId(parentId);
+    }
+
+    @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public void updateReadyForRollup(Long pid) {
-        dataReportWriterRepository.updateReadyForRollup(pid, new Date());
+        dataReportWriterRepository.updateReadyForRollupToTrue(pid, new Date());
     }
 
     @Override
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public int updateReadyForRollupIfNotReady(Long pid) {
         return dataReportWriterRepository.updateReadyForRollupIfNotReady(pid, new Date());
+    }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateReadyForRollupToFalse(Set<Long> pids) {
+        dataReportWriterRepository.updateReadyForRollupToFalse(pids, new Date());
     }
 
     @Override
