@@ -1,9 +1,9 @@
 [
    {
-      "attrName":"DUNS",
+      "attrName":"LDC_DUNS",
       "displayName":"Duns number",
       "entity":"Account",
-      "javaClass":"Long",
+      "javaClass":"String",
       "externalSystemName":"Google_Display_N_Video_360",
       "standardField":true,
       "exportEnabled":true,
