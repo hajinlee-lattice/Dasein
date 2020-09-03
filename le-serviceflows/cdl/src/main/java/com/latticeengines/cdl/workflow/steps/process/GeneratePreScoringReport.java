@@ -193,7 +193,7 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
-            } else if (entity == BusinessEntity.Product && !hasImport(BusinessEntity.Product)) {
+            } else if (entity == BusinessEntity.Product && entitiesSummaryNode.get(entity.name()) == null) {
                 consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, currentCnts.get(entity));
             }
             // Populate entity match summary
@@ -218,12 +218,6 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
         }
 
         updateCollectionStatus(currentCnts, orphanCnts);
-    }
-
-    //not available for embedded entity
-    private boolean hasImport(BusinessEntity entity) {
-        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS, BusinessEntity.class, List.class);
-        return MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(entity);
     }
 
     private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts,
