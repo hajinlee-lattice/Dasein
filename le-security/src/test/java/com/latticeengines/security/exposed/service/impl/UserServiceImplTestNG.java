@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.latticeengines.security.exposed.service.UserFilter;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -128,6 +129,45 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertTrue(userService.upsertSamlIntegrationUser(null, samlUser, tenant.getId()));
         level = userService.getAccessLevel(tenant.getId(), samlUser.getUserId());
         assertEquals(level, AccessLevel.EXTERNAL_ADMIN);
+    }
+
+    @Test(groups = "functional")
+    public void testListUsers() {
+        createTestUser(AccessLevel.BUSINESS_ANALYST);
+        createTestUser(AccessLevel.EXTERNAL_USER);
+        createTestUser(AccessLevel.EXTERNAL_ADMIN);
+
+        List<User> users = userService.getUsers(tenant.getId(), UserFilter.EXTERNAL_FILTER);
+        User businessAnalystUser = null;
+
+        for (User user: users) {
+            if (user.getAccessLevel() == AccessLevel.BUSINESS_ANALYST.toString()) {
+                businessAnalystUser = user;
+                break;
+            }
+        }
+        assertNotNull(businessAnalystUser);
+    }
+
+    private void createTestUser(AccessLevel accessLevel) {
+        UserRegistration userReg = new UserRegistration();
+        User user = new User();
+        user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
+        user.setAccessLevel(accessLevel.toString());
+
+        Credentials creds = new Credentials();
+        creds.setUsername(user.getEmail());
+        creds.setPassword("WillBeModifiedImmediately");
+
+        user.setUsername(creds.getUsername());
+
+        userReg.setUser(user);
+        userReg.setCredentials(creds);
+
+        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
+
+        createUser(userReg.getCredentials().getUsername(), userReg.getUser().getEmail(),
+                userReg.getUser().getFirstName(), userReg.getUser().getLastName());
     }
 
     private UserRegistration createUserRegistration() {
