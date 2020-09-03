@@ -10,21 +10,31 @@
     <import resource="classpath:serviceapps-core-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
     <import resource="classpath:serviceapps-cdl-aspect-context.xml"/>
-    <import resource="classpath:graphdb-context.xml" />
+    <import resource="classpath:graphdb-context.xml"/>
     <context:component-scan base-package="com.latticeengines.remote.service.tray"/>
 
     <context:component-scan base-package="com.latticeengines.apps.cdl">
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.controller.*" />
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.provision.*" />
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.controller.*"/>
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.provision.*"/>
     </context:component-scan>
 
     <context:component-scan base-package="com.latticeengines.domain.exposed.cdl.util"/>
 
-	<jpa:repositories base-package="com.latticeengines.apps.cdl.repository.writer"
+    <jpa:repositories base-package="com.latticeengines.apps.cdl.document.repository.writer"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="documentEntityManagerFactory"
+                      transaction-manager-ref="documentTransactionManager"/>
+
+    <jpa:repositories base-package="com.latticeengines.apps.cdl.document.repository.reader"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="documentEntityManagerFactoryReader"
+                      transaction-manager-ref="documentTransactionManagerReader"/>
+
+    <jpa:repositories base-package="com.latticeengines.apps.cdl.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactory"
                       transaction-manager-ref="transactionManager"/>
-                      
+
     <jpa:repositories base-package="com.latticeengines.apps.cdl.tray.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactory"
@@ -39,7 +49,7 @@
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactoryReader"
                       transaction-manager-ref="transactionManagerReader"/>
-                      
+
     <jpa:repositories base-package="com.latticeengines.apps.cdl.tray.repository.reader"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactoryReader"
