@@ -160,10 +160,14 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
     private Collection<String> lookupResults(String duns) {
         Set<String> recordIds = new HashSet<>();
         ContactTpsLookupEntryMgr lookupMgr = getLookupMgr();
-        String[] uuids = lookupMgr.findByKey(duns).getRecordUuids().split(",");
-        for (String id : uuids) {
-            recordIds.add(id);
+        String ids = lookupMgr.findByKey(duns).getRecordUuids();
+        if (!StringUtils.isEmpty(ids)) {
+            String[] uuids = lookupMgr.findByKey(duns).getRecordUuids().split(",");
+            for (String id : uuids) {
+                recordIds.add(id);
+            }
         }
+
         return recordIds;
     }
 
