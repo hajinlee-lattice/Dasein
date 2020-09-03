@@ -59,7 +59,8 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
-    private OAuth2RestTemplate oAuth2RestTemplate;
+    protected OAuth2RestTemplate oAuth2RestTemplate;
+
 
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException, InterruptedException {
@@ -100,6 +101,14 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     protected Tenant setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product) throws IOException {
         turnOffSslChecking();
         deploymentTestBed.bootstrapForProduct(product);
+        deploymentTestBed.switchToSuperAdmin();
+        return deploymentTestBed.getMainTestTenant();
+    }
+
+    protected Tenant setupTestEnvironment() {
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        deploymentTestBed.bootstrapForProduct(LatticeProduct.CG, featureFlagMap);
         deploymentTestBed.switchToSuperAdmin();
         return deploymentTestBed.getMainTestTenant();
     }
