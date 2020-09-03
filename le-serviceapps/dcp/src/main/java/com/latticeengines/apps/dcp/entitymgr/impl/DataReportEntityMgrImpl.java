@@ -225,7 +225,11 @@ public class DataReportEntityMgrImpl
         dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), duplicationReport);
     }
 
-    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataReportRecord findReadyForRollupDataReportRecord(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findByLevelAndOwnerIdAndReadyForRollup(level, ownerId, true);
+    }
+
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
     public int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime) {
         return dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), snapShotTime,

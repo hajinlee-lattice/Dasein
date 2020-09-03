@@ -44,5 +44,7 @@ public interface DataReportService {
 
     void copyDataReportToParent(String customerSpace, DataReportRecord.Level level, String ownerId);
 
+    DataReport getReadyForRollupDataReport(String customerSpace, DataReportRecord.Level level, String ownerId);
+
     void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
 }
