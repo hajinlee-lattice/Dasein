@@ -59,4 +59,5 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     void updateDataReportRecordIfNull(Long pid, DataReport.DuplicationReport duplicationReport);
 
+    DataReportRecord findReadyForRollUpDataReportRecord(DataReportRecord.Level level, String ownerId);
 }

@@ -259,7 +259,11 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
                 cache);
+        DataReport reportBeforeSetReadyForRollUp = reportProxy.getReadyForRollUpDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
+        Assert.assertNull(reportBeforeSetReadyForRollUp);
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
+        reportBeforeSetReadyForRollUp = reportProxy.getReadyForRollUpDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
+        Assert.assertNotNull(reportBeforeSetReadyForRollUp);
 
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());

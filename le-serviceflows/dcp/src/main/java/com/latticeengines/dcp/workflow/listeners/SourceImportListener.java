@@ -66,6 +66,9 @@ public class SourceImportListener extends LEJobListener {
     @Inject
     private DataReportProxy reportProxy;
 
+    @Inject
+    private DataReportProxy dataReportProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
 
@@ -184,6 +187,8 @@ public class SourceImportListener extends LEJobListener {
                 throw new IllegalArgumentException("Cannot locate workflow job with id " + jobExecution.getId());
             }
             String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
+
+            dataReportProxy.copyDataReportToParent(tenantId, DataReportRecord.Level.Upload, uploadId);
             // update the report to be ready for rollup
             reportProxy.updateDataReport(tenantId, DataReportRecord.Level.Upload, uploadId);
             Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(tenantId, uploadId);

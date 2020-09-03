@@ -212,4 +212,10 @@ public class DataReportEntityMgrImpl
     public void updateDataReportRecordIfNull(Long pid, DataReport.DuplicationReport duplicationReport) {
         dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), duplicationReport);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataReportRecord findReadyForRollUpDataReportRecord(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findByLevelAndOwnerIdAndReadyForRollUp(level, ownerId, true);
+    }
 }
