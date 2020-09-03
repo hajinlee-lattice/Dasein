@@ -160,6 +160,7 @@ public class GenerateLiveRampLaunchArtifacts extends BaseSparkStep<GenerateLiveR
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
         matchInput.setKeyMap(getKeyMap());
         matchInput.setSkipKeyResolution(true);
+        matchInput.setDataCloudOnly(true);
         matchInput.setTpsMatchConfig(createTpsMatchConfig(channelConfig));
 
         AvroInputBuffer inputBuffer = new AvroInputBuffer();

@@ -16,6 +16,7 @@ public enum AccessLevel implements GrantedAuthority {
     BUSINESS_ANALYST(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_USERS, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS //
     )), //
@@ -126,6 +127,7 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_USERS, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS //
     )),

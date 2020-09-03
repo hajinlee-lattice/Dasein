@@ -484,22 +484,26 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             createUserData.setPhoneNumber(user.getPhoneNumber());
             IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber());
 
-            String welcomeUrl = dcpPublicUrl;
-            if (createdUser.getInvitationLink() != null) {
-                welcomeUrl = createdUser.getInvitationLink();
-            }
-
-            // Add info needed for VBO callback
-            createdUser.setInvitationSentTime(emailService.sendDCPWelcomeEmail(createdUser, tenantName, welcomeUrl));
-            createdUser.setSubscriberNumber(user.getSubscriberNumber());
-
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());
             } else {
                 externalAdminEmails.add(email.toLowerCase());
             }
 
-            createdUsers.add(createdUser);
+            if (createdUser != null) {
+                String welcomeUrl = dcpPublicUrl;
+                if (createdUser.getInvitationLink() != null) {
+                    welcomeUrl = createdUser.getInvitationLink();
+                }
+
+                // Add info needed for VBO callback
+                createdUser.setInvitationSentTime(emailService.sendDCPWelcomeEmail(createdUser, tenantName, welcomeUrl));
+                createdUser.setSubscriberNumber(user.getSubscriberNumber());
+
+                createdUsers.add(createdUser);
+            } else {
+                createdUsers.add(user);
+            }
         }
         return createdUsers;
     }

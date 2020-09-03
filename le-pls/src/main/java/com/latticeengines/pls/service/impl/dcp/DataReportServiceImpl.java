@@ -39,7 +39,7 @@ public class DataReportServiceImpl implements DataReportService {
         if (Boolean.TRUE.equals(mock)) {
             return mockReturn();
         }
-        return dataReportProxy.getDataReport(customerSpace.toString(), level, ownerId);
+        return dataReportProxy.getReadyForRollupDataReport(customerSpace.toString(), level, ownerId);
     }
 
     @Override
