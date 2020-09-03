@@ -43,5 +43,5 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
             "where d2.level = ?1 AND d2.ownerId = ?2 and d.readyForRollup = true")
     Set<String> findChildrenIdsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId);
 
-    DataReportRecord findByLevelAndOwnerIdAndReadyForRollUp(DataReportRecord.Level level, String ownerId, boolean readyForRollup);
+    DataReportRecord findByLevelAndOwnerIdAndReadyForRollup(DataReportRecord.Level level, String ownerId, boolean readyForRollup);
 }

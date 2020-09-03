@@ -214,8 +214,8 @@ public class DataReportEntityMgrImpl
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DataReportRecord findReadyForRollUpDataReportRecord(DataReportRecord.Level level, String ownerId) {
-        return getReadOrWriteRepository().findByLevelAndOwnerIdAndReadyForRollUp(level, ownerId, true);
+    public DataReportRecord findReadyForRollupDataReportRecord(DataReportRecord.Level level, String ownerId) {
+        return getReadOrWriteRepository().findByLevelAndOwnerIdAndReadyForRollup(level, ownerId, true);
     }
 
     @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)

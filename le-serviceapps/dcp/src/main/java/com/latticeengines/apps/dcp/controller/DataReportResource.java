@@ -52,10 +52,10 @@ public class DataReportResource {
     @GetMapping("/readyforrollup")
     @ResponseBody
     @ApiOperation(value = "Get Ready For Rollup Data Report")
-    public DataReport getReadyForRollUpDataReport(@PathVariable String customerSpace, @RequestParam DataReportRecord.Level level,
+    public DataReport getReadyForRollupDataReport(@PathVariable String customerSpace, @RequestParam DataReportRecord.Level level,
                                  @RequestParam String ownerId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataReportService.getReadyForRollUpDataReport(customerSpace, level, ownerId);
+        return dataReportService.getReadyForRollupDataReport(customerSpace, level, ownerId);
     }
 
     @GetMapping("/basicstats")

@@ -354,11 +354,11 @@ public class DataReportServiceImpl implements DataReportService {
     }
 
     @Override
-    public DataReport getReadyForRollUpDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
+    public DataReport getReadyForRollupDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
         if (DataReportRecord.Level.Tenant.equals(level)) {
             ownerId = customerSpace;
         }
-        DataReportRecord dataReportRecord = dataReportEntityMgr.findReadyForRollUpDataReportRecord(level, ownerId);
+        DataReportRecord dataReportRecord = dataReportEntityMgr.findReadyForRollupDataReportRecord(level, ownerId);
         return convertRecordToDataReport(dataReportRecord);
     }
 
