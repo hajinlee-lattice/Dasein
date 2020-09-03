@@ -1,9 +1,9 @@
 [
    {
-      "attrName":"DUNS",
+      "attrName":"LDC_DUNS",
       "displayName":"Duns number",
       "entity":"Account",
-      "javaClass":"Long",
+      "javaClass":"String",
       "externalSystemName":"AppNexus",
       "standardField":true,
       "exportEnabled":true,
