@@ -361,6 +361,7 @@ public class DataReportServiceImpl implements DataReportService {
         }
         DataReportRecord dataReportRecord = dataReportEntityMgr.findReadyForRollupDataReportRecord(level, ownerId);
         return convertRecordToDataReport(dataReportRecord);
+    }
 
     public void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
         Set<Long> idToBeRemoved = new HashSet<>();
