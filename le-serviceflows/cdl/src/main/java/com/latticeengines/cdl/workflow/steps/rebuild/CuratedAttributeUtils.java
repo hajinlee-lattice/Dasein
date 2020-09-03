@@ -277,15 +277,15 @@ public final class CuratedAttributeUtils {
      *
      * @param entity
      *            target entity of these curated attributes
-     * @param systemNames
-     *            all possible {@link S3ImportSystem#getName()} values
+     * @param sourceNames
+     *            all possible {@link S3ImportSystem#getDisplayName()} values
      * @return non {@code null} list of {@link ProfileParameters.Attribute}
      */
     public static List<ProfileParameters.Attribute> getCategoricalAttributes(@NotNull BusinessEntity entity,
-            Set<String> systemNames) {
+            Set<String> sourceNames) {
         // created source
         CategoricalBucket sysNameBkt = new CategoricalBucket();
-        sysNameBkt.setCategories(new ArrayList<>(CollectionUtils.emptyIfNull(systemNames)));
+        sysNameBkt.setCategories(new ArrayList<>(CollectionUtils.emptyIfNull(sourceNames)));
         ProfileParameters.Attribute createdSourceAttr = new ProfileParameters.Attribute(
                 formatEntityAttribute(entity.name(), EntityCreatedSource.name()), null, null, sysNameBkt);
 
