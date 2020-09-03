@@ -34,6 +34,7 @@ import com.latticeengines.datacloud.match.entitymgr.ContactTpsLookupEntryMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.ContactTpsLookupEntryMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datacloud.match.ContactTpsLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("tpsLookupService")
@@ -160,12 +161,14 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
     private Collection<String> lookupResults(String duns) {
         Set<String> recordIds = new HashSet<>();
         ContactTpsLookupEntryMgr lookupMgr = getLookupMgr();
-        String ids = lookupMgr.findByKey(duns).getRecordUuids();
-        if (!StringUtils.isEmpty(ids)) {
-            String[] uuids = lookupMgr.findByKey(duns).getRecordUuids().split(",");
+        ContactTpsLookupEntry entry = lookupMgr.findByKey(duns);
+        if (entry != null) {
+            String[] uuids = entry.getRecordUuids().split(",");
             for (String id : uuids) {
                 recordIds.add(id);
             }
+        } else {
+            log.warn("Can't find a match in datacloud for duns {}", duns);
         }
 
         return recordIds;
