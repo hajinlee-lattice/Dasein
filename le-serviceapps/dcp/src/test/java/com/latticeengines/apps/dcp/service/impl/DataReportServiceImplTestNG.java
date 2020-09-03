@@ -105,6 +105,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
                 dataReport.getMatchToDUNSReport());
         dataReportService.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID",
                 dataReport.getDuplicationReport());
+        dataReportService.copyDataReportToParent(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID");
 
         dataReportPersist = dataReportService.getDataReport(mainCustomerSpace,
                 DataReportRecord.Level.Upload,  "uploadUID");
@@ -187,9 +188,13 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
 
         dataReportService.deleteDataReportUnderOwnerId(mainCustomerSpace, DataReportRecord.Level.Project, "projectUID");
-        Set<String> childrenIds = dataReportService.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Project,
+        Set<String> childrenIdsForProject = dataReportService.getChildrenIds(mainCustomerSpace,
+                DataReportRecord.Level.Project,
                 "projectUID");
-        Assert.assertTrue(CollectionUtils.isEmpty(childrenIds));
+        Assert.assertTrue(CollectionUtils.isEmpty(childrenIdsForProject));
+        Set<String> childrenIdsForTenant = dataReportService.getChildrenIds(mainCustomerSpace,
+                DataReportRecord.Level.Tenant, mainCustomerSpace);
+        Assert.assertTrue(CollectionUtils.isEmpty(childrenIdsForTenant));
     }
 
     public static DataReport getDataReport() {

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -383,6 +384,14 @@ public class DataReportServiceImpl implements DataReportService {
         if (CollectionUtils.isNotEmpty(idToBeRemoved)) {
             log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeRemoved);
             dataReportEntityMgr.updateReadyForRollupToFalse(idToBeRemoved);
+            // wait the replication log
+            SleepUtils.sleep(150);
+            // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
+            Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
+            if (CollectionUtils.isEmpty(projectIds)) {
+                Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
+                dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
+            }
         }
     }
 
