@@ -61,10 +61,18 @@ class TransformTxnStreamJob extends AbstractSparkJob[TransformTxnStreamConfig] {
       }
     val generateCompKey: UserDefinedFunction = udf((row: Row) => row.mkString(""))
     val withCompositeKey: DataFrame = transformed.withColumn(InterfaceName.__Composite_Key__.name, generateCompKey(struct(compositeSrc.map(col): _*)))
-    lattice.output = withCompositeKey.select(targetCols.head, targetCols.tail: _*) :: Nil
+    val cleaned: DataFrame = withCompositeKey.select(targetCols.head, targetCols.tail: _*)
+    val result: DataFrame = {
+      if (StringUtils.isNotBlank(lattice.config.repartitionKey)) {
+        cleaned.repartition(200, col(lattice.config.repartitionKey))
+      } else {
+        cleaned
+      }
+    }
     if (StringUtils.isNotBlank(lattice.config.partitionKey)) {
       setPartitionTargets(0, Seq(lattice.config.partitionKey), lattice)
     }
+    lattice.output = result :: Nil
   }
 
   def renameFieldsAndAddPeriodName(df: DataFrame, renameMapping: Map[String, String], periodName: String): DataFrame = {
