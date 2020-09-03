@@ -34,6 +34,7 @@ import com.latticeengines.apps.cdl.entitymgr.impl.CDLDependencyChecker;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AIModelService;
+import com.latticeengines.apps.cdl.service.DanteConfigService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
@@ -172,6 +173,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private DanteConfigService danteConfigService;
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -925,6 +929,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
         servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
+        danteConfigService.getDanteConfiguration();
     }
 
     @SuppressWarnings("unchecked")

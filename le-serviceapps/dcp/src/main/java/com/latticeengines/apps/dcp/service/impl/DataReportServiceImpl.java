@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -360,6 +361,45 @@ public class DataReportServiceImpl implements DataReportService {
         }
         DataReportRecord dataReportRecord = dataReportEntityMgr.findReadyForRollupDataReportRecord(level, ownerId);
         return convertRecordToDataReport(dataReportRecord);
+
+    public void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        Set<Long> idToBeRemoved = new HashSet<>();
+        switch (level) {
+            case Project:
+                Long projectPid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+                idToBeRemoved.add(projectPid);
+                Set<Long> sourcePIds = dataReportEntityMgr.findPidsByParentId(projectPid);
+                idToBeRemoved.addAll(sourcePIds);
+                sourcePIds.forEach(sourcePId -> {
+                    Set<Long> uploadPIds = dataReportEntityMgr.findPidsByParentId(sourcePId);
+                    idToBeRemoved.addAll(uploadPIds);
+                });
+                break;
+            case Source:
+                Long sourcePid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+                idToBeRemoved.add(sourcePid);
+                Set<Long> uploadPids = dataReportEntityMgr.findPidsByParentId(sourcePid);
+                idToBeRemoved.addAll(uploadPids);
+                break;
+            case Upload:
+                Long uploadPid = dataReportEntityMgr.findDataReportPid(level, ownerId);
+                idToBeRemoved.add(uploadPid);
+                break;
+            default:
+                break;
+        }
+        if (CollectionUtils.isNotEmpty(idToBeRemoved)) {
+            log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeRemoved);
+            dataReportEntityMgr.updateReadyForRollupToFalse(idToBeRemoved);
+            // wait the replication log
+            SleepUtils.sleep(200);
+            // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
+            Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
+            if (CollectionUtils.isEmpty(projectIds)) {
+                Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
+                dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
+            }
+        }
     }
 
     private DataReportRecord getEmptyReportRecord(DataReportRecord.Level level, String ownerId) {

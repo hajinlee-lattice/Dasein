@@ -364,9 +364,11 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
 
-        String usersInJson ;
+        String usersInJson;
+        boolean hasNode = false;
         try {
             usersInJson = configDir.get("/IDaaSUsers").getDocument().getData();
+            hasNode = true;
         } catch (Exception e) {
             usersInJson = "[]";
         }
@@ -376,8 +378,10 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
 
         // Update IDaaS users node with email sent times; to be stored in Camille
-        String usersWithEmailTime = JsonUtils.serialize(retrievedUsers);
-        configDir.get("/IDaaSUsers").getDocument().setData(usersWithEmailTime);
+        if (hasNode) {
+            String usersWithEmailTime = JsonUtils.serialize(retrievedUsers);
+            configDir.get("/IDaaSUsers").getDocument().setData(usersWithEmailTime);
+        }
 
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {

@@ -33,9 +33,13 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     Long findParentId(Long pid);
 
+    Set<Long> findPidsByParentId(Long parentId);
+
     void updateReadyForRollup(Long pid);
 
     int updateReadyForRollupIfNotReady(Long pid);
+
+    void updateReadyForRollupToFalse(Set<Long> pids);
 
     void updateDataReportRecord(Long pid, Table dunsCountTable, Date snapshotTime);
 

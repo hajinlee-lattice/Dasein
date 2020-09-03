@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLDanteConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -56,6 +57,8 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
 
     private final MetadataProxy metadataProxy;
 
+    private final CDLDanteConfigProxy cdlDanteConfigProxy;
+
     private ServingStoreCacheServiceImpl _service;
 
     private MeterRegistryFactoryService registryFactory;
@@ -66,13 +69,14 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
 
     @Inject
     protected ServingStoreCacheServiceImpl(DataCollectionProxy dataCollectionProxy, //
-            MetadataProxy metadataProxy, ServingStoreCacheServiceImpl service,
+            MetadataProxy metadataProxy, CDLDanteConfigProxy cdlDanteConfigProxy, ServingStoreCacheServiceImpl service,
             @Lazy MeterRegistryFactoryService registryFactory) {
         super("cdl");
         this.dataCollectionProxy = dataCollectionProxy;
         this.metadataProxy = metadataProxy;
         this._service = service;
         this.registryFactory = registryFactory;
+        this.cdlDanteConfigProxy = cdlDanteConfigProxy;
     }
 
     @Override
@@ -81,7 +85,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         return getOrCreateMetadataCache(entity).getWatcherCache().get(key);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", unless = "#result == null")
     public List<ColumnMetadata> getDecoratedMetadataFromDistributedCache(String customerSpace, BusinessEntity entity) {
         String key = customerSpace + "|" + entity.name();
         try (PerformanceTimer timer = new PerformanceTimer()) {
@@ -92,7 +96,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|dateattrs\", #customerSpace, #entity)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|dateattrs\", #customerSpace, #entity)", unless = "#result == null")
     public List<ColumnMetadata> getDateAttrs(String customerSpace, BusinessEntity entity) {
         String key = customerSpace + "|" + entity.name();
         try (PerformanceTimer timer = new PerformanceTimer()) {
@@ -132,6 +136,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         String keyPrefix = tenantId + "|" + entity.name();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
+        cdlDanteConfigProxy.getDanteConfiguration(customerSpace);
     }
 
     private List<ColumnMetadata> getDateAttrsFromApi(String key) {

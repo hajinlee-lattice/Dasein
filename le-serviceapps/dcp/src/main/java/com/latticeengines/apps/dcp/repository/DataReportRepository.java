@@ -29,6 +29,9 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
     @Query("SELECT d.parentId from DataReportRecord d WHERE d.pid = ?1")
     Long findParentIdByPid(Long pid);
 
+    @Query("SELECT d.pid from DataReportRecord d WHERE d.parentId = ?1")
+    Set<Long> findPidsByParentId(Long parentId);
+
     @Query("SELECT d.basicStats from DataReportRecord d WHERE d.level = ?1 AND d.ownerId = ?2")
     DataReport.BasicStats findBasicStatsByLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 
