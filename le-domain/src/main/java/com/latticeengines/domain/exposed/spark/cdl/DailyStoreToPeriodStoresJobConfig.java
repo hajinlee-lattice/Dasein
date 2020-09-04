@@ -16,6 +16,9 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
 
     public static final String NAME = "dailyStoreToPeriodStoresJob";
 
+    @JsonProperty
+    public Boolean repartition;
+
     @JsonProperty("streams")
     public List<AtlasStream> streams;
 

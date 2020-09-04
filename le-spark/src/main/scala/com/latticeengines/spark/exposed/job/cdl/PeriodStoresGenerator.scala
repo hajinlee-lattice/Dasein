@@ -15,6 +15,7 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils.VERSION_COL
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
 import org.apache.commons.collections4.CollectionUtils
+import org.apache.commons.lang3.BooleanUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, LongType, StringType}
@@ -59,7 +60,14 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     for (index <- periodStores.indices) {
       setPartitionTargets(index, Seq(PeriodId.name), lattice)
     }
-    lattice.output = periodStores.toList
+    val result = {
+      if (BooleanUtils.isTrue(lattice.config.repartition)) {
+        periodStores.map(_.repartition(200, col(PeriodId.name)))
+      } else {
+        periodStores
+      }
+    }
+    lattice.output = result.toList
     lattice.outputStr = serializeJson(outputMetadata)
   }
 

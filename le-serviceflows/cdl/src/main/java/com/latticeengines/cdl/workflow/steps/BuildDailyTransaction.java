@@ -90,7 +90,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
                     TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
         } else {
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
-                    getSparkConfig(txnDayPeriod, null, dailyTxnStream, retainTypes));
+                    getSparkConfig(txnDayPeriod, txnDayPeriod, dailyTxnStream, retainTypes));
             saveBatchStore(result.getTargets().get(0));
         }
     }

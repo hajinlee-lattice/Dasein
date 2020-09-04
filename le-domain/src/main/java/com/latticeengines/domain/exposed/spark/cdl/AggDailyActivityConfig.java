@@ -20,6 +20,9 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     public static final String NAME = "aggDailyActivity";
     private static final long serialVersionUID = 2423144672398876823L;
 
+    @JsonProperty
+    public Boolean repartition;
+
     // streamId -> date attribute name
     @JsonProperty
     public Map<String, String> streamDateAttrs = new HashMap<>();
