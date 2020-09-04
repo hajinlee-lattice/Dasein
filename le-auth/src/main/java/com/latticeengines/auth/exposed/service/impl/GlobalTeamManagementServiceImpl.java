@@ -88,7 +88,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     private GlobalAuthTenant getTenantData(String tenantId) {
-        log.info(String.format("Getting all teams for tenant %s.", tenantId));
+        log.info(String.format("Getting global auth tenant with id %s.", tenantId));
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             throw new IllegalArgumentException(String.format("cannot find GlobalAuthTenant using tenantId %s.", tenantId));
@@ -156,8 +156,9 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
             log.info("Default global team already exists in tenant {}.", MultiTenantContext.getShortTenantId());
             return defaultTeam;
         }
-        log.info("Create global team for tenant: " + MultiTenantContext.getShortTenantId());
+        log.info("Create default team for tenant: " + MultiTenantContext.getShortTenantId());
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
+        defaultTeam = new GlobalAuthTeam();
         defaultTeam.setCreatedByUser(tenantData.getUser());
         defaultTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
         defaultTeam.setName(TeamUtils.GLOBAL_TEAM);
