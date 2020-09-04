@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.util.ActivityStoreUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
 import org.apache.commons.collections4.CollectionUtils
-import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.{BooleanUtils, StringUtils}
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, LongType, StringType, StructField}
@@ -71,7 +71,14 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     for (index <- output.indices) {
       setPartitionTargets(index, Seq(StreamDateId.name), lattice)
     }
-    lattice.output = output.toList
+    val result = {
+      if (BooleanUtils.isTrue(lattice.config.repartition)) {
+        output.map(_.repartition(200, col(StreamDateId.name)))
+      } else {
+        output
+      }
+    }
+    lattice.output = result.toList
     lattice.outputStr = serializeJson(outputMetadata)
   }
 

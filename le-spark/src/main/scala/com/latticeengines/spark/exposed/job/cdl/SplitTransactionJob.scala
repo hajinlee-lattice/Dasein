@@ -43,6 +43,7 @@ class SplitTransactionJob extends AbstractSparkJob[SplitTransactionConfig] {
         .withColumn(InterfaceName.StreamDateId.name, getDateIdUdf(col(TXN_DATE_ATTR))) // int date id
         .withColumn(InterfaceName.__StreamDate.name, getDateUdf(col(TXN_DATE_ATTR))) // yy-mm-dd
         .withColumn(InterfaceName.ProductType.name, lit(typeName))
+        .repartition(200, col(InterfaceName.StreamDateId.name))
     }
     outputMetadata.setMetadata(detailsMap)
 
