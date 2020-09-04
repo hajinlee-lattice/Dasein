@@ -411,6 +411,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CONTACT_PROFILE_TABLE_NAME, //
             CONTACT_STATS_TABLE_NAME, //
             CONTACT_STATS_DIFF_TABLE_NAME, //
+            ROLLUP_PRODUCT_TABLE, //
             DAILY_TRXN_TABLE_NAME, //
             AGG_DAILY_TRXN_TABLE_NAME, //
             AGG_PERIOD_TRXN_TABLE_NAME, //
