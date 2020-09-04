@@ -257,7 +257,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         globalTenantManagementService.discardTenant(tenant);
     }
 
-    protected Tenant createTenant(String tenantId, String tenantName) {
+    protected Tenant createTenant(String tenantId, String tenantName, String userName) {
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
         tenant.setName(tenantName);
@@ -266,7 +266,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         if (tenantToDelete != null) {
             tenantEntityMgr.delete(tenantToDelete);
         }
-        globalTenantManagementService.registerTenant(tenant);
+        globalTenantManagementService.registerTenant(tenant, userName);
         tenantEntityMgr.create(tenant);
         return tenant;
     }
