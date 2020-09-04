@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -60,6 +61,7 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     public static final String DCP_PRODUCT = "DnB Connect";
     public static final String DCP_ROLE = "DNB_CONNECT_ACCESS";
+    private static final int MAX_RETRIES = 3;
 
     private final RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
@@ -131,7 +133,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         IDaaSCredentials iDaaSCreds = new IDaaSCredentials();
         iDaaSCreds.setUserName(credentials.getUsername());
         iDaaSCreds.setPassword(credentials.getPassword());
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
         try {
             return retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("Authenticate user against IDaaS.")) {
@@ -158,7 +160,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         refreshToken();
         IDaaSUser user = null;
         try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             user = retryTemplate.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
                     log.info("Attempt={} retrying to get IDaaS user for {}", ctx.getRetryCount() + 1,
@@ -186,7 +188,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         String email = user.getEmailAddress();
         IDaaSUser returnedUser = null;
         try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             returnedUser = retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
                     HttpEntity<IDaaSUser> entity = new HttpEntity<>(user);
@@ -215,7 +217,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         String email = user.getEmailAddress();
         IDaaSUser returnedUser = null;
         try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             returnedUser = retryTemplate.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
                     log.info("Attempt={} retrying to create IDaaS user for {}", ctx.getRetryCount() + 1, email,
@@ -255,7 +257,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         IDaaSResponse response = null;
         String email = request.getEmailAddress();
         try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             response = retryTemplate.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
                     log.info("Attempt={} retrying to add product access to IDaaS user {}", ctx.getRetryCount() + 1,
@@ -287,7 +289,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         IDaaSResponse response = null;
         String email = request.getEmailAddress();
         try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             response = retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("add role to user.")){
                     HttpEntity<RoleRequest> entity = new HttpEntity<>(request);
@@ -310,7 +312,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     public InvitationLinkResponse getUserInvitationLink(String email) {
         InvitationLinkResponse response = null;
         try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             response = retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("get user invitation link")) {
                     URI invitationLinkURI = createInvitationLink(email, DCP_PRODUCT);
@@ -326,6 +328,11 @@ public class IDaaSServiceImpl implements IDaaSService {
             log.warn("Failed to get invitation link", e);
         }
         return response;
+    }
+
+    @Override
+    public boolean validateSubscriberNumber(VboRequest vboRequest, String userName) {
+        return false;
     }
 
     @Override
@@ -351,7 +358,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         String headerValue = String.format("client_id:%s,client_secret:%s", clientId, clientSecret);
         ClientHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
         JsonNode jsonNode = retryTemplate.execute(ctx -> {
             try(PerformanceTimer timer = new PerformanceTimer("Get OAuth2 token from IDaaS.")) {
                 ResponseEntity<JsonNode> response = restTemplate.postForEntity(oauthTokenUri(), payload, JsonNode.class);

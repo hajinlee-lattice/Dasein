@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -18,6 +19,8 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
     @Inject
@@ -134,5 +137,18 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         }
         Assert.assertNotNull(products);
         Assert.assertEquals(products.size(), LatticeProduct.values().length);
+    }
+
+    @Test(groups = "functional")
+    public void testCreateTenant () {
+        VboRequest vboRequest;
+        Boolean callback = Boolean.TRUE;
+        Boolean useMock = Boolean.FALSE;
+        MockHttpServletRequest request;
+
+        TenantResource tenantResource = new TenantResource();
+        tenantResource.createTenant(vboRequest, callback, useMock, request);
+
+        Assert.fail("Not finished");
     }
 }

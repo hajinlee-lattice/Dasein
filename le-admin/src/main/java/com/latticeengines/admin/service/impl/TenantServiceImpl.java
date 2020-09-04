@@ -704,7 +704,16 @@ public class TenantServiceImpl implements TenantService {
             log.error("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
             VboResponse response = generateVBOResponse("failed",
-                    "A tenant has already existed for this subscriber number");
+                    "A tenant already exists for this subscriber number.");
+            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            return response;
+        }
+
+        // TODO First check if this is a CUSTOMER tenant.
+        if (!iDaaSService.validateSubscriberNumber(vboRequest, userName)) {
+            log.error("the subscriber number {} is not valid for user {}", subNumber, userName);
+            VboResponse response = generateVBOResponse("failed",
+                    "The subscriber number is not valid for the user.");
             vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
             return response;
         }
