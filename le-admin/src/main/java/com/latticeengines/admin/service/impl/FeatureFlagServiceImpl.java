@@ -165,7 +165,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.MIGRATION_TENANT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_FILTERING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ATTRIBUTE_TOGGLING, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ACXIOM, cg).setDefaultValue(false);
 
         // DCP & CG

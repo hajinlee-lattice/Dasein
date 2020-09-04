@@ -101,7 +101,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
-                LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT, //
                 LatticeFeatureFlag.ADVANCED_FILTERING, //
                 LatticeFeatureFlag.ENABLE_ACXIOM //
         );
@@ -137,7 +136,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
                 LatticeFeatureFlag.TEAM_FEATURE, //
-                LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT, //
                 LatticeFeatureFlag.ENABLE_ACXIOM);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);

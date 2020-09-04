@@ -24,10 +24,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.Status;
@@ -67,9 +64,6 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Mock
     private CDLAttrConfigProxy cdlAttrConfigProxy;
-
-    @Mock
-    private BatonService batonService;
 
     @Mock
     private UserService userService;
@@ -138,28 +132,27 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Test(groups = "unit", dependsOnMethods = { "testGetOverallAttrConfigActivationOverview" })
     public void testGetOverallAttrConfigUsageOverview() {
+        String[] usageProperties = {ColumnSelection.Predefined.Segment.getName(), ColumnSelection.Predefined.Model.getName(),
+                ColumnSelection.Predefined.TalkingPoint.getName(), ColumnSelection.Predefined.CompanyProfile.getName()};
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                Arrays.asList(ColumnSelection.Predefined.usageProperties), true, null))
+                Arrays.asList(usageProperties), true, null))
                 .thenReturn(AttrConfigServiceImplTestUtils.generatePropertyAttrConfigOverviewForUsage(
-                        Arrays.asList(ColumnSelection.Predefined.usageProperties)));
+                        Arrays.asList(usageProperties)));
         when(appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(anyString(), anyString()))
                 .thenReturn(1000);
-        when(batonService.isEnabled(CustomerSpace.parse(tenant.getId()), LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT)).thenReturn(false);
         AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
         log.info("overall usageOverview is " + usageOverview);
         List<AttrConfigSelection> selections = usageOverview.getSelections();
-        Assert.assertEquals(selections.size(), ColumnSelection.Predefined.usageProperties.length);
-        for (int i = 0; i < ColumnSelection.Predefined.usageProperties.length; i++) {
+        Assert.assertEquals(selections.size(), usageProperties.length);
+        for (int i = 0; i < usageProperties.length; i++) {
             Assert.assertEquals(selections.get(i).getDisplayName(),
-                    AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.usageProperties[i]));
+                    AttrConfigServiceImpl.mapUsageToDisplayName(usageProperties[i]));
             Assert.assertEquals(selections.get(i).getSelected() - 3677, 0);
             Assert.assertEquals(selections.get(i).getCategories().size(), 7);
             Assert.assertNotNull(selections.get(i).getCategories().values());
         }
-        // Export
-        Assert.assertNotNull(selections.get(1).getLimit());
         // Company Profile
-        Assert.assertNotNull(selections.get(4).getLimit());
+        Assert.assertNotNull(selections.get(3).getLimit());
     }
 
     @Test(groups = "unit")
