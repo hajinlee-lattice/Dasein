@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -23,6 +24,7 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -121,15 +123,23 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources, List<String> teamIds) {
-        ProjectInfo projectInfo;
-        if (teamIds == null){
-            projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
-        } else {
-            if (teamIds.isEmpty()) {
-                teamIds.add("");
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRY,
+                Collections.singleton(IllegalArgumentException.class), null);
+        ProjectInfo projectInfo = retryTemplate.execute(context -> {
+            ProjectInfo info;
+            if (teamIds == null){
+                info = projectEntityMgr.findProjectInfoByProjectId(projectId);
+            } else {
+                if (teamIds.isEmpty()) {
+                    teamIds.add("");
+                }
+                info = projectEntityMgr.findProjectInfoByProjectIdInTeamIds(projectId, teamIds);
             }
-            projectInfo = projectEntityMgr.findProjectInfoByProjectIdInTeamIds(projectId, teamIds);
-        }
+            if (info == null) {
+                throw new IllegalArgumentException("Cannot find project with id: " + projectId);
+            }
+            return info;
+        });
         if (projectInfo == null) {
             log.warn("No project found with id: " + projectId);
             return null;
