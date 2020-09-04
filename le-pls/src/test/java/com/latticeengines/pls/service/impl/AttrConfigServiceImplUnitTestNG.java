@@ -153,6 +153,22 @@ public class AttrConfigServiceImplUnitTestNG {
         }
         // Company Profile
         Assert.assertNotNull(selections.get(3).getLimit());
+
+        String attributeSetName = "attributeSetName";
+        List<String> enrichmentGroupList = Collections.singletonList(ColumnSelection.Predefined.Enrichment.name());
+        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null, enrichmentGroupList, true, attributeSetName))
+                .thenReturn(AttrConfigServiceImplTestUtils.generatePropertyAttrConfigOverviewForUsage(enrichmentGroupList));
+        usageOverview = attrConfigService.getOverallAttrConfigUsageOverview(attributeSetName);
+        log.info("usageOverview is " + usageOverview);
+        selections = usageOverview.getSelections();
+        Assert.assertEquals(selections.size(), 1);
+        Assert.assertEquals(selections.get(0).getDisplayName(),
+                AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.Enrichment.name()));
+        Assert.assertEquals(selections.get(0).getSelected() - 3677, 0);
+        Assert.assertEquals(selections.get(0).getCategories().size(), 7);
+        Assert.assertNotNull(selections.get(0).getCategories().values());
+        // Export
+        Assert.assertNotNull(selections.get(0).getLimit());
     }
 
     @Test(groups = "unit")
