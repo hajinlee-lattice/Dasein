@@ -30,9 +30,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
+import com.latticeengines.domain.exposed.datacloud.contactmaster.LiveRampDestination;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -122,9 +124,12 @@ public class ContactMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         matchInput.setTargetEntity(ContactMasterConstants.MATCH_ENTITY_TPS);
 
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.DUNS, Collections.singletonList("SiteDuns"));
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("LDC_DUNS"));
         matchInput.setKeyMap(keyMap);
         matchInput.setSkipKeyResolution(true);
+        TpsMatchConfig matchConfig = new TpsMatchConfig();
+        matchConfig.setDestination(LiveRampDestination.Adobe);
+        matchInput.setTpsMatchConfig(matchConfig);
 
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);

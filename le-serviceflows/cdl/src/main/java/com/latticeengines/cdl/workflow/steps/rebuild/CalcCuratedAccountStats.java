@@ -37,7 +37,7 @@ public class CalcCuratedAccountStats extends BaseCalcStatsStep<CuratedAccountAtt
     @Override
     protected List<ProfileParameters.Attribute> getDeclaredAttrs() {
         List<ProfileParameters.Attribute> catAttrs = new ArrayList<>(
-                CuratedAttributeUtils.getCategoricalAttributes(Account, getSystemMap().keySet()));
+                CuratedAttributeUtils.getCategoricalAttributes(Account, getCreatedSourceNames()));
         catAttrs.addAll(CollectionUtils.emptyIfNull(super.getDeclaredAttrs()));
         return catAttrs;
     }

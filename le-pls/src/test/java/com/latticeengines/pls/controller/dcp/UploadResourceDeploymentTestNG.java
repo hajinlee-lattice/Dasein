@@ -122,6 +122,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadDetails uploadDetails = testUploadProxy.startImport(dcpImportRequest);
         Assert.assertNotNull(uploadDetails);
         System.out.println("Before Job Complete - UploadDetails:\n" + JsonUtils.pprint(uploadDetails));
+        Assert.assertNotNull(uploadDetails.getUploadDiagnostics());
 
         JobStatus completedStatus = waitForWorkflowStatus(uploadDetails.getUploadDiagnostics().getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);

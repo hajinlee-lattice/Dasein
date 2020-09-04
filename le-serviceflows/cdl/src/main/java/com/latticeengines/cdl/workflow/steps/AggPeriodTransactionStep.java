@@ -134,6 +134,7 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
         config.setInput(inputs);
         metadataWrapper.setMetadata(inputMetadata);
         config.inputMetadata = metadataWrapper;
+        config.repartition = true;
         return config;
     }
 

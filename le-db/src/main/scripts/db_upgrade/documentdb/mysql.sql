@@ -10,6 +10,15 @@ USE `DocumentDB`;
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 DELIMITER //
 
+CREATE TABLE IF NOT EXISTS `DanteConfiguration` (
+    UUID varchar(36) primary key,
+    TenantId varchar(255),
+    CreatedDate datetime,
+    LastModifiedDate datetime,
+    Document json
+)
+
+
 -- ##############################################################
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN

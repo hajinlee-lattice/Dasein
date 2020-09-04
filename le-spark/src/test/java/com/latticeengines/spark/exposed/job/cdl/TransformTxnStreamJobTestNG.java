@@ -80,6 +80,7 @@ public class TransformTxnStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         config.renameMapping = constructPeriodRename();
         config.inputPeriods = Collections.singletonList(PeriodStrategy.Template.Week.name());
         config.targetColumns = PERIOD_TXN_FIELDS;
+        config.repartitionKey = periodId;
         SparkJobResult result = runSparkJob(TransformTxnStreamJob.class, config, inputs, getWorkspace());
         verify(result, Collections.singletonList(this::verifyOutputPeriodFields));
     }

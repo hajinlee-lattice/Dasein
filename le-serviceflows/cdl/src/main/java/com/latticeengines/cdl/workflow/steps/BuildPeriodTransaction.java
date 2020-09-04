@@ -82,22 +82,38 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
     public void execute() {
         bootstrap();
         Map<String, Table> periodTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, PERIOD_TXN_STREAMS);
-        log.info("Retrieved period streams: {}", periodTransactionTables.entrySet().stream()
-                .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        log.info("Retrieved period streams: {}",
+                periodTransactionTables.entrySet().stream()
+                        .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName()))
+                        .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
         List<String> retainTypes = getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class);
         if (CollectionUtils.isEmpty(retainTypes)) {
             throw new IllegalStateException("No retain types found in context");
         }
         log.info("Retaining transactions of product type: {}", retainTypes);
-        buildConsolidatedPeriodTransaction(periodTransactionTables, retainTypes); // no partition
-        buildAggregatedPeriodTransaction(periodTransactionTables, retainTypes); // no partition
+        buildConsolidatedPeriodTransaction(periodTransactionTables, retainTypes); // repartitioned by PeriodId
+        buildAggregatedPeriodTransaction(periodTransactionTables, retainTypes); // repartitioned by PeriodId
 
         setTransactionRebuiltFlag();
     }
 
     private void buildConsolidatedPeriodTransaction(Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         log.info("Building consolidated period transaction");
+        Map<String, Table> batchStores = getTablesFromMapCtxKey(customerSpaceStr,
+                PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME);
+        if (isShortcutMode(batchStores)) {
+            log.info("Retrieved period transaction batch stores: {}. Going through shortcut mode.",
+                    batchStores.entrySet().stream().map(entry -> {
+                        String periodName = entry.getKey();
+                        Table table = entry.getValue();
+                        return Pair.of(periodName, table.getName());
+                    }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
+            dataCollectionProxy.upsertTables(customerSpaceStr,
+                    batchStores.values().stream().map(Table::getName).collect(Collectors.toList()),
+                    TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+            return;
+        }
+
         Map<String, Table> consolidatedPeriodTxnTables = periodStrategies.stream().map(periodName -> {
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
                     buildConsolidatedPeriodTxnConfig(periodName, periodTransactionTables, retainTypes));
@@ -111,13 +127,21 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         List<String> tableNames = consolidatedPeriodTxnTables.values().stream().map(Table::getName)
                 .collect(Collectors.toList());
         log.info("Generated consolidated period stores: {}", tableNames);
-        dataCollectionProxy.upsertTables(customerSpaceStr, tableNames,
-                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+        dataCollectionProxy.upsertTables(customerSpaceStr, tableNames, TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
         exportToS3AndAddToContext(consolidatedPeriodTxnTables, PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME);
     }
 
     private void buildAggregatedPeriodTransaction(Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         log.info("Building aggregated period transaction");
+        Table servingStore = getTableSummaryFromKey(customerSpaceStr, AGG_PERIOD_TRXN_TABLE_NAME);
+        if (isShortcutMode(servingStore)) {
+            String tableName = servingStore.getName();
+            log.info("Retrieved period transaction serving store: {}. Going through shortcut mode.", tableName);
+            dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedPeriodTransaction, inactive);
+            exportTableRoleToRedshift(servingStore, TableRoleInCollection.AggregatedPeriodTransaction);
+            return;
+        }
+
         SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
                 buildAggregatedPeriodTxnConfig(periodTransactionTables, retainTypes));
         String prefix = String.format(AGG_PREFIX_FORMAT, customerSpace.getTenantId());
@@ -126,20 +150,19 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         Table table = toTable(tableName, compositeKey, result.getTargets().get(0));
         metadataProxy.createTable(customerSpaceStr, tableName, table);
         log.info("Generated aggregated period store: {}", table.getName());
-        dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedPeriodTransaction,
-                inactive);
+        dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedPeriodTransaction, inactive);
         exportToS3AndAddToContext(table, AGG_PERIOD_TRXN_TABLE_NAME);
         exportTableRoleToRedshift(table, TableRoleInCollection.AggregatedPeriodTransaction);
     }
 
-    private TransformTxnStreamConfig buildConsolidatedPeriodTxnConfig(String period,
-                                                                      Map<String, Table> periodTransactionTables, List<String> retainTypes) {
+    private TransformTxnStreamConfig buildConsolidatedPeriodTxnConfig(String period, Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         TransformTxnStreamConfig config = new TransformTxnStreamConfig();
         config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
         config.renameMapping = constructPeriodRename();
         config.inputPeriods = Collections.singletonList(period);
         config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
         config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
+        config.repartitionKey = periodId;
         List<DataUnit> inputs = new ArrayList<>();
         retainTypes.forEach(type -> {
             String periodStreamPrefix = String.format(PERIOD_STREAM_PREFIX, type, period);
@@ -157,7 +180,7 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         config.inputPeriods = periodStrategies;
         config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
         config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
-
+        config.repartitionKey = periodId;
         List<DataUnit> inputs = new ArrayList<>();
         periodStrategies.forEach(periodName -> {
             retainTypes.forEach(type -> {

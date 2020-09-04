@@ -143,6 +143,10 @@ public class ProjectServiceImpl implements ProjectService {
         if (project == null || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
             return false;
         }
+
+        log.info("soft delete the data report under {}", projectId);
+        dataReportService.deleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
+                projectId);
         project.setDeleted(Boolean.TRUE);
         projectEntityMgr.update(project);
         return true;

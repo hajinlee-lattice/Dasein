@@ -43,4 +43,8 @@ public interface DataReportService {
     void updateDataReport(String customerSpace, DataReportRecord.Level level, String ownerId, DataReport.DuplicationReport duplicationReport);
 
     void copyDataReportToParent(String customerSpace, DataReportRecord.Level level, String ownerId);
+
+    DataReport getReadyForRollupDataReport(String customerSpace, DataReportRecord.Level level, String ownerId);
+
+    void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
 }

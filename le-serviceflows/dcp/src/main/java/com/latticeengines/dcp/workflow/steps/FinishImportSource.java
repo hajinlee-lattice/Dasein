@@ -77,12 +77,6 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
 
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 uploadId, basicStats);
-
-        DataReport.InputPresenceReport inputPresenceReport = getObjectFromContext(INPUT_PRESENCE_REPORT, DataReport.InputPresenceReport.class);
-        dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
-                configuration.getUploadId(), inputPresenceReport);
-
-        dataReportProxy.copyDataReportToParent(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload, configuration.getUploadId());
     }
 
 }

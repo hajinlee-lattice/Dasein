@@ -62,6 +62,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLDanteConfigProxy;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -82,6 +83,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Inject
     private ZKConfigService zkConfigService;
+
+    @Inject
+    private CDLDanteConfigProxy cdlDanteConfigProxy;
 
     @Inject
     protected BatonService batonService;
@@ -551,6 +555,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 // clear serving metadata cache
                 String keyPrefix = shortTenantId + "|" + entity.name();
                 cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
+                String customerSpace = MultiTenantContext.getShortTenantId();
+                cdlDanteConfigProxy.getDanteConfiguration(customerSpace);
             });
             cacheService.refreshKeysByPattern(MultiTenantContext.getShortTenantId(), CacheName.DataLakeStatsCubesCache);
         }

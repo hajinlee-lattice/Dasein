@@ -292,20 +292,25 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
     }
 
     /*-
-     * system name -> system object
+     * get all possible values for EntityCreatedSource attribute
      */
-    protected Map<String, S3ImportSystem> getSystemMap() {
+    protected Set<String> getCreatedSourceNames() {
         List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace.toString());
         return CollectionUtils.emptyIfNull(systems) //
                 .stream() //
                 .filter(Objects::nonNull) //
-                .filter(sys -> StringUtils.isNotBlank(sys.getName())) //
-                .collect(Collectors.toMap(S3ImportSystem::getName, sys -> sys));
+                .filter(sys -> StringUtils.isNotBlank(sys.getDisplayName())) //
+                .map(S3ImportSystem::getDisplayName) //
+                .collect(Collectors.toSet());
     }
 
     protected void addShortRetentionToTable(String tableName) {
         RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.DAY);
         metadataProxy.updateDataTablePolicy(customerSpace.toString(), tableName, retentionPolicy);
+    }
+
+    protected boolean isShortcutMode(Table table) {
+        return table != null;
     }
 
     protected boolean isShortcutMode(Map<String, Table> tables) {

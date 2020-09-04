@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -128,6 +129,45 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertTrue(userService.upsertSamlIntegrationUser(null, samlUser, tenant.getId()));
         level = userService.getAccessLevel(tenant.getId(), samlUser.getUserId());
         assertEquals(level, AccessLevel.EXTERNAL_ADMIN);
+    }
+
+    @Test(groups = "functional")
+    public void testListUsers() {
+        createTestUser(AccessLevel.BUSINESS_ANALYST);
+        createTestUser(AccessLevel.EXTERNAL_USER);
+        createTestUser(AccessLevel.EXTERNAL_ADMIN);
+
+        List<User> users = userService.getUsers(tenant.getId(), UserFilter.EXTERNAL_FILTER);
+        User businessAnalystUser = null;
+
+        for (User user: users) {
+            if (user.getAccessLevel() == AccessLevel.BUSINESS_ANALYST.toString()) {
+                businessAnalystUser = user;
+                break;
+            }
+        }
+        assertNotNull(businessAnalystUser);
+    }
+
+    private void createTestUser(AccessLevel accessLevel) {
+        UserRegistration userReg = new UserRegistration();
+        User user = new User();
+        user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
+        user.setAccessLevel(accessLevel.toString());
+
+        Credentials creds = new Credentials();
+        creds.setUsername(user.getEmail());
+        creds.setPassword("WillBeModifiedImmediately");
+
+        user.setUsername(creds.getUsername());
+
+        userReg.setUser(user);
+        userReg.setCredentials(creds);
+
+        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
+
+        createUser(userReg.getCredentials().getUsername(), userReg.getUser().getEmail(),
+                userReg.getUser().getFirstName(), userReg.getUser().getLastName());
     }
 
     private UserRegistration createUserRegistration() {

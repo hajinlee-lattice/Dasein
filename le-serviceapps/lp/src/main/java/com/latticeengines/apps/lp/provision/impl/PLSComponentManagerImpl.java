@@ -364,9 +364,11 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
 
-        String usersInJson ;
+        String usersInJson;
+        boolean hasNode = false;
         try {
             usersInJson = configDir.get("/IDaaSUsers").getDocument().getData();
+            hasNode = true;
         } catch (Exception e) {
             usersInJson = "[]";
         }
@@ -376,8 +378,10 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
 
         // Update IDaaS users node with email sent times; to be stored in Camille
-        String usersWithEmailTime = JsonUtils.serialize(retrievedUsers);
-        configDir.get("/IDaaSUsers").getDocument().setData(usersWithEmailTime);
+        if (hasNode) {
+            String usersWithEmailTime = JsonUtils.serialize(retrievedUsers);
+            configDir.get("/IDaaSUsers").getDocument().setData(usersWithEmailTime);
+        }
 
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
@@ -480,22 +484,26 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             createUserData.setPhoneNumber(user.getPhoneNumber());
             IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber());
 
-            String welcomeUrl = dcpPublicUrl;
-            if (createdUser.getInvitationLink() != null) {
-                welcomeUrl = createdUser.getInvitationLink();
-            }
-
-            // Add info needed for VBO callback
-            createdUser.setInvitationSentTime(emailService.sendDCPWelcomeEmail(createdUser, tenantName, welcomeUrl));
-            createdUser.setSubscriberNumber(user.getSubscriberNumber());
-
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());
             } else {
                 externalAdminEmails.add(email.toLowerCase());
             }
 
-            createdUsers.add(createdUser);
+            if (createdUser != null) {
+                String welcomeUrl = dcpPublicUrl;
+                if (createdUser.getInvitationLink() != null) {
+                    welcomeUrl = createdUser.getInvitationLink();
+                }
+
+                // Add info needed for VBO callback
+                createdUser.setInvitationSentTime(emailService.sendDCPWelcomeEmail(createdUser, tenantName, welcomeUrl));
+                createdUser.setSubscriberNumber(user.getSubscriberNumber());
+
+                createdUsers.add(createdUser);
+            } else {
+                createdUsers.add(user);
+            }
         }
         return createdUsers;
     }

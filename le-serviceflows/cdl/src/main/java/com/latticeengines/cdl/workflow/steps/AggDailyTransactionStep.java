@@ -117,6 +117,7 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
         config.currentEpochMilli = getLongValueFromContext(PA_TIMESTAMP);
         config.inputMetadata = metadataWrapper;
         config.setInput(inputs);
+        config.repartition = true;
         return config;
     }
 

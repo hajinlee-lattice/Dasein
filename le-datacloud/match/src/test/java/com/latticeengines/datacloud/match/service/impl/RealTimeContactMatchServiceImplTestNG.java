@@ -43,7 +43,8 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
     @Test(groups = "functional")
     public void testSimpleTpsMatch() {
         Object[][] data = new Object[][] { //
-                { 1, "039596507" }, //
+                { 1, "039596507" }, // Existing duns
+                { 2, "918536814"} // Non-existing duns
         };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         input.setFields(Arrays.asList("ID", "SiteDuns"));
@@ -73,5 +74,6 @@ public class RealTimeContactMatchServiceImplTestNG extends DataCloudMatchFunctio
             Assert.assertTrue(Arrays.asList("Administrative", "Engineering").contains(list.get(14)));
             Assert.assertTrue(Arrays.asList("CXO", "VP").contains(list.get(13)));
         }
+        Assert.assertEquals(output.getResult().get(1).getCandidateOutput().size(), 0);
     }
 }
