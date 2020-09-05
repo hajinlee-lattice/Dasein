@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -51,7 +51,7 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
     }
 
     private void attemptPlayLaunchStateCorrection() {
-        List<PlayLaunch> launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+        List<PlayLaunch> launchingPlayLaunches = playLaunchService.findByStateAcrossTenants(LaunchState.Launching, null);
 
         log.info("Found " + launchingPlayLaunches.size() + " launches currently launching");
 
@@ -64,40 +64,62 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
                                     .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(24)))
                             .count()
                     + " launches running for more than 24 hours. Attempting Launch status cleanup");
-            clearStuckOrFailedLaunches(launchingPlayLaunches);
+            try {
+                clearStuckOrFailedLaunches(launchingPlayLaunches);
+            } catch (Exception e) {
+                log.error("Failed to clear stuck launches", e);
+            }
         }
     }
 
     private boolean clearStuckOrFailedLaunches(List<PlayLaunch> launchingPlayLaunches) {
         boolean launchesProcessed = false;
 
-        // Case 1) Launches are Launching state but have no applicationId -> set
+        // Case 1) Launches are Launching state but have no WorkflowJob id's for launch
+        // or delta workflows -> set
         // pl to cancelled
         List<PlayLaunch> launchesToProcess = launchingPlayLaunches.stream()
-                .filter(launch -> StringUtils.isBlank(launch.getApplicationId())).collect(Collectors.toList());
-        if (launchesToProcess.size() > 0) {
-            log.info(launchesToProcess.size()
-                    + " PlayLaunches found with state Launching but no ApplicationId assigned, marking them Cancelled");
-            launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
-        }
-
-        // Case 2) Launches have an ApplicationId but applicationId doesn't
-        // exist in Workflowjob -> set pl to cancelled
-        launchesToProcess = launchingPlayLaunches.stream()
-                .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId()))
-                .filter(launch -> workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId()) == null)
+                .filter(launch -> launch.getLaunchWorkflowId() == null && launch.getParentDeltaWorkflowId() == null)
                 .collect(Collectors.toList());
         if (launchesToProcess.size() > 0) {
             log.info(launchesToProcess.size()
-                    + " PlayLaunches found with state Launching but orphan ApplicationIds assigned, marking them Cancelled");
+                    + " PlayLaunches found with state Launching but no Launch workflows assigned, marking them Cancelled");
             launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
         }
 
-        // Case 3) Launches are Launching State but WorkflowJob has terminated
+        // Case 2.a) Launches have an DeltaWorkflowId set no Workflowjob exists for that
+        // pid -> set pl to cancelled
+        launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getParentDeltaWorkflowId() != null)
+                .filter(launch -> workflowProxy.getWorkflowJobByWorkflowJobPid(
+                        CustomerSpace.shortenCustomerSpace(launch.getTenant().getId()),
+                        launch.getParentDeltaWorkflowId()) == null)
+                .collect(Collectors.toList());
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found with state Launching but orphan ParentDeltaWorkflowId assigned, marking them Cancelled");
+            launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
+        }
+
+        // Case 2.b) Launches have an LaunchWorkflowId set no Workflowjob exists for
+        // that pid -> set pl to cancelled
+        launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getLaunchWorkflowId() != null)
+                .filter(launch -> workflowProxy.getWorkflowJobByWorkflowJobPid(
+                        CustomerSpace.shortenCustomerSpace(launch.getTenant().getId()),
+                        launch.getLaunchWorkflowId()) == null)
+                .collect(Collectors.toList());
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found with state Launching but orphan LaunchWorkflowId assigned, marking them Cancelled");
+            launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
+        }
+
+        // Case 3.a) Launches are Launching State but Delta WorkflowJob has terminated
         // -> set pl to Failed
-        launchesToProcess = launchingPlayLaunches.stream()
-                .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId())).filter(launch -> {
-                    Job job = workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId());
+        launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getParentDeltaWorkflowId() != null)
+                .filter(launch -> {
+                    Job job = workflowProxy.getJobByWorkflowJobPid(
+                            CustomerSpace.shortenCustomerSpace(launch.getTenant().getId()),
+                            launch.getParentDeltaWorkflowId());
                     if (job != null && job.getJobStatus().isTerminated()) {
                         launch.setLaunchState(LaunchState.translateFromJobStatus(job.getJobStatus()));
                         return true;
@@ -107,11 +129,31 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
 
         if (launchesToProcess.size() > 0) {
             log.info(launchesToProcess.size()
-                    + " PlayLaunches found with state Launching but a terminated workflowjob status");
+                    + " PlayLaunches found with state Launching but a terminated delta workflowjob status");
             launchesProcessed = processInvalidLaunches(launchesToProcess, null);
         }
 
-        // Case 4) Launches are queued but the play has been soft deleted ->
+        // Case 3.b) Launches are Launching State but Launch WorkflowJob has terminated
+        // -> set pl to Failed
+        launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getLaunchWorkflowId() != null)
+                .filter(launch -> {
+                    Job job = workflowProxy.getJobByWorkflowJobPid(
+                            CustomerSpace.shortenCustomerSpace(launch.getTenant().getId()),
+                            launch.getLaunchWorkflowId());
+                    if (job != null && job.getJobStatus().isTerminated()) {
+                        launch.setLaunchState(LaunchState.translateFromJobStatus(job.getJobStatus()));
+                        return true;
+                    }
+                    return false;
+                }).collect(Collectors.toList());
+
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found with state Launching but a terminated launch workflowjob status");
+            launchesProcessed = processInvalidLaunches(launchesToProcess, null);
+        }
+
+        // Case 4) Launches are launching but the play has been soft deleted ->
         // mark pl to Cancelled
         launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getPlay().getDeleted())
                 .collect(Collectors.toList());
