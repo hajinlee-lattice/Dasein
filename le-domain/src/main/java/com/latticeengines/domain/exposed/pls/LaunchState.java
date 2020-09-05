@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -69,37 +71,12 @@ public enum LaunchState {
         transitionMap.put(Syncing, statesAfterSyncing);
     }
 
-    public static boolean canTransit(LaunchState srcState, LaunchState dstState) {
-        return transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
-    }
-
     private boolean initial;
     private boolean terminal;
 
     LaunchState(boolean initial, boolean terminal) {
         this.initial = initial;
         this.terminal = terminal;
-    }
-
-    public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
-        switch (jobStatus) {
-        case FAILED:
-            return Failed;
-        case READY:
-        case PENDING:
-        case RUNNING:
-        case ENQUEUED:
-        case PENDING_RETRY:
-        case RETRIED:
-            return Launching;
-        case SKIPPED:
-        case CANCELLED:
-            return Canceled;
-        case COMPLETED:
-            return Launched;
-        default:
-            return Canceled;
-        }
     }
 
     public String toUILaunchState(CDLExternalSystemName channel) {
@@ -139,6 +116,35 @@ public enum LaunchState {
 
     public Boolean isTerminal() {
         return this.terminal;
+    }
+
+    public static List<LaunchState> terminalStates() {
+        return Arrays.stream(LaunchState.values()).filter(LaunchState::isTerminal).collect(Collectors.toList());
+    }
+
+    public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
+        switch (jobStatus) {
+        case FAILED:
+            return Failed;
+        case READY:
+        case PENDING:
+        case RUNNING:
+        case ENQUEUED:
+        case PENDING_RETRY:
+        case RETRIED:
+            return Launching;
+        case SKIPPED:
+        case CANCELLED:
+            return Canceled;
+        case COMPLETED:
+            return Launched;
+        default:
+            return Canceled;
+        }
+    }
+
+    public static boolean canTransit(LaunchState srcState, LaunchState dstState) {
+        return transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
     }
 
     private static final String UNLAUNCHED = "Unlaunched";

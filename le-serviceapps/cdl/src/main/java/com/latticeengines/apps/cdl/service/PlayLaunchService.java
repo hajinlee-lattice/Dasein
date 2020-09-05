@@ -28,9 +28,11 @@ public interface PlayLaunchService {
 
     PlayLaunch findLatestByChannel(Long playLaunchChannelId);
 
+    PlayLaunch findLatestTerminalLaunchByChannel(Long playLaunchChannelId);
+
     List<PlayLaunch> findByState(LaunchState state);
 
-    List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);
+    List<PlayLaunch> findByStateAcrossTenants(LaunchState state, Long max);
 
     PlayLaunch update(PlayLaunch existingPlayLaunch);
 
