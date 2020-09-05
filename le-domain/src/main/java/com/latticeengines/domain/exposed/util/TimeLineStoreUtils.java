@@ -110,7 +110,7 @@ public final class TimeLineStoreUtils {
         case DnbIntentData:
             timelineStandardMapping.put(TimelineStandardColumn.EventDate.getColumnName(),
                     new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
-                            .withMappingValue(InterfaceName.ActivityDate.name()).build());
+                            .withMappingValue(InterfaceName.LastModifiedDate.name()).build());
             timelineStandardMapping.put(TimelineStandardColumn.AccountId.getColumnName(),
                     new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
                             .withMappingValue(InterfaceName.AccountId.name()).build());
