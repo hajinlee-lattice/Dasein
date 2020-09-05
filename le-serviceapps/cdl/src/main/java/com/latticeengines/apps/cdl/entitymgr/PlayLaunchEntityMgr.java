@@ -37,9 +37,11 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
 
     PlayLaunch findLatestByChannel(Long playLaunchChannelId);
 
+    PlayLaunch findLatestTerminalLaunchByChannel(Long playLaunchChannelId);
+
     List<PlayLaunch> findByState(LaunchState state);
 
-    List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);
+    List<PlayLaunch> findByStateAcrossTenants(LaunchState state, Long max);
 
     List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType);

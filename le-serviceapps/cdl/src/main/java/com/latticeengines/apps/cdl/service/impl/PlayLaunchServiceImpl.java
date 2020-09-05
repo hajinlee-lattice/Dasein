@@ -132,13 +132,18 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
+    public PlayLaunch findLatestTerminalLaunchByChannel(Long playLaunchChannelId) {
+        return playLaunchEntityMgr.findLatestTerminalLaunchByChannel(playLaunchChannelId);
+    }
+
+    @Override
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchEntityMgr.findByState(state);
     }
 
     @Override
-    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
-        return playLaunchEntityMgr.getByStateAcrossTenants(state, max);
+    public List<PlayLaunch> findByStateAcrossTenants(LaunchState state, Long max) {
+        return playLaunchEntityMgr.findByStateAcrossTenants(state, max);
     }
 
     @Override
