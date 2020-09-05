@@ -179,7 +179,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         Query query = session.createQuery(queryStr);
         query.setParameter("playLaunchChannelId", playLaunchChannelId);
-        query.setParameter("states", LaunchState.terminalStates());
+        query.setParameter("states",
+                LaunchState.terminalStates().stream().map(LaunchState::name).collect(Collectors.toList()));
         query.setMaxResults(1);
         List list = query.list();
         if (list.size() == 0) {
