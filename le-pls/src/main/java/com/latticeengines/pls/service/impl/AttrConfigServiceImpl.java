@@ -35,9 +35,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.app.exposed.service.DataLakeService;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -149,9 +147,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Inject
     private CommonTenantConfigService appTenantConfigService;
 
-    @Inject
-    private BatonService batonService;
-
     @SuppressWarnings("unchecked")
     @Override
     public AttrConfigStateOverview getOverallAttrConfigActivationOverview() {
@@ -180,8 +175,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Override
     public AttrConfigUsageOverview getOverallAttrConfigUsageOverview() {
-        boolean configSegmentExport = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT);
-        return getOverallAttrConfigUsageOverview(null, configSegmentExport ? usageWithoutEnrichment : usagePropertyList);
+        return getOverallAttrConfigUsageOverview(null, usageWithoutEnrichment);
     }
 
     // right now attribute set is only supported with enrichment group
