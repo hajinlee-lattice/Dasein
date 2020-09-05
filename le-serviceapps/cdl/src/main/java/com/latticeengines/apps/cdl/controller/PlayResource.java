@@ -361,6 +361,23 @@ public class PlayResource {
 
     }
 
+    @GetMapping("/{playName}/channels/{channelId}/last-terminal-launch")
+    @ResponseBody
+    @ApiOperation(value = "Get the play launch channel by the given play id and channel id")
+    public PlayLaunch getLastTerminalPlayLaunchByChannelId(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId) {
+        if (StringUtils.isEmpty(channelId)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank channel Id" });
+        }
+        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
+        if (channel == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    String.format("No channel found for PlayId: %s and CHannelId: %s", playName, channelId) });
+        }
+        return playLaunchService.findLatestTerminalLaunchByChannel(channel.getPid());
+    }
+
     // -------------
     // Play Launches
     // -------------

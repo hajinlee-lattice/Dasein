@@ -111,14 +111,20 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunch findLatestTerminalLaunchByChannel(Long playLaunchChannelId) {
+        return playLaunchDao.findLatestTerminalLaunchByChannel(playLaunchChannelId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchDao.findByState(state);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
-        List<PlayLaunch> launches = playLaunchDao.getByStateAcrossTenants(state, max);
+    public List<PlayLaunch> findByStateAcrossTenants(LaunchState state, Long max) {
+        List<PlayLaunch> launches = playLaunchDao.findByStateAcrossTenants(state, max);
 
         launches.forEach(launch -> {
             Hibernate.initialize(launch.getPlay());

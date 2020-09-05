@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.campaign;
 
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,9 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CalculateDeltaStepConfiguration;
@@ -81,12 +84,16 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         evaluationDate = parseEvaluationDateStr(configuration);
 
         HdfsDataUnit previousLaunchUniverse;
-        boolean isAccountEntity = false;
+        boolean isAccountEntity = false, lastLaunchSucceeded = didPreviousLaunchSucceed(customerSpace.getTenantId(),
+                config.getPlayId(), config.getChannelId());
+
+        log.info(lastLaunchSucceeded ? "Last Launch succeeded, using Delta data from previous launch"
+                : "Last Launch has failed, ignoring the Delta data from previous launch");
 
         if (channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
             isAccountEntity = true;
             Table previousAccountUniverseTable = StringUtils
-                    .isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
+                    .isNotBlank(channel.getCurrentLaunchedAccountUniverseTable()) && lastLaunchSucceeded
                             ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
                                     channel.getCurrentLaunchedAccountUniverseTable())
                             : null;
@@ -97,7 +104,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             log.info(getHDFSDataUnitLogEntry("PreviousAccountLaunchUniverse_", previousLaunchUniverse));
         } else {
             Table previousContactUniverseTable = StringUtils
-                    .isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
+                    .isNotBlank(channel.getCurrentLaunchedContactUniverseTable()) && lastLaunchSucceeded
                             ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
                                     channel.getCurrentLaunchedContactUniverseTable())
                             : null;
@@ -125,6 +132,20 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
         // 3) Generate Metadata tables for delta results
         processDeltaCalculationResult(channel.getChannelConfig().getAudienceType(), deltaCalculationResult);
+    }
+
+    private boolean didPreviousLaunchSucceed(String customerSpace, String playId, String channelId) {
+        PlayLaunch lastTerminalLaunch = playProxy.findLatestTerminalLaunchByChannel(customerSpace, playId, channelId);
+        if (lastTerminalLaunch == null) { // i.e. this is the first launch
+            log.info(String.format("No previous terminal launch found for Channel: %s", channelId));
+            return true;
+        }
+
+        log.info(String.format("Last Terminal launch for Channel: %s has LaunchId: %s with LaunchState: %s", channelId,
+                lastTerminalLaunch.getId(), lastTerminalLaunch.getLaunchState().name()));
+
+        return !Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.SyncFailed)
+                .contains(lastTerminalLaunch.getLaunchState());
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
