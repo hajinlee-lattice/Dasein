@@ -287,8 +287,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String, onlyPopulateOneContact: Boolean): DataFrame = {
     var contactTableToUse: DataFrame = contactTable;
     if (onlyPopulateOneContact) {
-      val contactUniqueAccountIdTable: DataFrame = contactTableToUse.select(contactTableToUse(joinKey)).distinct()
-      contactTableToUse = contactTableToUse.join(contactUniqueAccountIdTable, Seq(joinKey), "right")
+      contactTableToUse = contactTableToUse.dropDuplicates(Seq(joinKey))
     }
     val contactWithoutJoinKey = contactTableToUse.drop(joinKey)
     val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)
