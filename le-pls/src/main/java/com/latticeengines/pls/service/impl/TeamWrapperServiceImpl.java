@@ -110,7 +110,7 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         String tenantId = MultiTenantContext.getTenant().getId();
         List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember);
         TeamEntityList teamEntityList = teamProxy.getTeamEntities(tenantId);
-        List<MetadataSegment> metadataSegments = teamEntityList.getMetadataSegments();
+        List<MetadataSegment> metadataSegments = teamEntityList.getMetadataSegments().stream().filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())).collect(Collectors.toList());
         List<RatingEngineSummary> ratingEngineSummaries = teamEntityList.getRatingEngineSummaries();
         List<Play> plays = teamEntityList.getPlays();
         Map<String, TeamInfo> teamMapForSegment = extractTeamMap(metadataSegments);
