@@ -32,10 +32,6 @@ public final class TeamUtils {
     private static final List<String> TEAM_REGARDLESS_ROLES_DCP = Arrays.asList( //
             "SUPER_ADMIN", "INTERNAL_ADMIN");
 
-    public static boolean isGlobalTeam(String teamId) {
-        return StringUtils.isEmpty(teamId) || teamId.equals(GLOBAL_TEAM_ID);
-    }
-
     private static final Logger log = LoggerFactory.getLogger(TeamUtils.class);
 
     public static boolean isMyTeam(String teamId) {
