@@ -66,7 +66,7 @@ public final class TeamUtils {
     }
 
     public static void fillTeamId(HasTeamId hasTeamId) {
-        if (StringUtils.isEmpty(hasTeamId.getTeamId())) {
+        if (hasTeamId != null && StringUtils.isEmpty(hasTeamId.getTeamId())) {
             hasTeamId.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
         }
     }
