@@ -250,7 +250,7 @@ public class DeltaCampaignLaunchInitStep
             // the first element is the contact num for add csv
             launchedContactNum = JsonUtils
                     .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
-        } else if (!createAddCsvDataFrame && createDeleteCsvDataFrame) {
+        } else if (createDeleteCsvDataFrame) {
             String deleteCsvTargetPath = result.getTargets().get(0).getPath();
             log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
