@@ -79,8 +79,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         if (!completeContactTable.rdd.isEmpty) {
           val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, sfdcContactId, joinKey,
             CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName))
-          recommendations = addRecDf.join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
+          recommendations = addRecDf.join(aggregatedContacts, joinKey :: Nil, "left")
           logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CONTACT_NUM"), limit = 100)
+          recommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
           val recContactCount = recommendations.agg(sum("CONTACT_NUM")).first.get(0)
           contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
           recommendations = recommendations.drop("CONTACT_NUM")

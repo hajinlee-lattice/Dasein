@@ -127,7 +127,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             targetNum = 3;
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
             targetNum = 1;
-        } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
+        } else if (createRecommendationDataFrame && createAddCsvDataFrame) {
             targetNum = 2;
         }
         CreateDeltaRecommendationConfig sparkConfig = new CreateDeltaRecommendationConfig();
@@ -159,16 +159,14 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                         PathUtils.toAvroGlob(recDf.getPath()));
                 GenericRecord record = recDfIter.next();
                 Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-                ObjectMapper jsonParser = new ObjectMapper();
-                JsonNode jsonObject = jsonParser.readTree(contactObject.toString());
-                Assert.assertTrue(jsonObject.isArray());
-                Assert.assertEquals(jsonObject.size(), completeContactPerAccount);
+                Assert.assertNull(contactObject);
 
                 Iterator<GenericRecord> addCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
                         PathUtils.toAvroGlob(addCsvDf.getPath()));
                 record = addCsvDfIter.next();
+                ObjectMapper jsonParser = new ObjectMapper();
                 contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-                jsonObject = jsonParser.readTree(contactObject.toString());
+                JsonNode jsonObject = jsonParser.readTree(contactObject.toString());
                 Assert.assertTrue(jsonObject.isArray());
                 Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
 
@@ -287,7 +285,6 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
-
         return deltaCampaignLaunchSparkContext;
     }
 
