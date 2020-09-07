@@ -444,10 +444,20 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(tenantCache.getSnapshotTimestamp());
         Assert.assertNotNull(tenantCache.getDunsCountTableName());
 
+        DataReport tenantReport = dataReportProxy.getReadyForRollupDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Tenant,
+                CustomerSpace.parse(mainCustomerSpace).toString());
+        Assert.assertNotNull(tenantReport);
         // test archive the project, then verify no child report in tenant level
         projectProxy.deleteProject(mainCustomerSpace, projectDetails.getProjectId(), null);
         Set<String> childrenIds = dataReportProxy.getChildrenIds(mainCustomerSpace, DataReportRecord.Level.Tenant,
                 mainCustomerSpace);
         Assert.assertTrue(CollectionUtils.isEmpty(childrenIds));
+
+        // verify the corner case: ready for rollup is false for tenant after archiving project
+        tenantReport = dataReportProxy.getReadyForRollupDataReport(mainCustomerSpace,
+                DataReportRecord.Level.Tenant,
+                CustomerSpace.parse(mainCustomerSpace).toString());
+        Assert.assertNull(tenantReport);
     }
 }
