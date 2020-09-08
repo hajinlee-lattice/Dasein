@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 
 public interface TenantService {
 
-    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration, String userName, VboCallback callback);
+    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration, String userName, VboCallback callback, String traceId);
 
     boolean createTenantV2(String contractId, String tenantId, TenantRegistration tenantRegistration,  String userName);
 
