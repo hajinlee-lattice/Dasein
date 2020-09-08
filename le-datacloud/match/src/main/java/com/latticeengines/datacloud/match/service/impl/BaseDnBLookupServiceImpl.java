@@ -84,7 +84,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     private String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
         if (apiType == DnBAPIType.REALTIME_ENTITY || apiType == DnBAPIType.REALTIME_EMAIL) {
-            return self().sendCacheableRequest(url, entity);
+            return dnbClient.get(entity, url);
         } else if (DnBAPIType.BATCH_FETCH.equals(apiType) || DnBAPIType.BATCH_STATUS.equals(apiType)) {
             return dnbClient.get(entity, url);
         } else {

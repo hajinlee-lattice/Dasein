@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -35,7 +34,6 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
-import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
@@ -117,12 +115,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         return DirectPlusUtils.parseDataBlock(resp, request.getReqColumns());
     }
 
-    private String sendRequest(String url) {
-        return _self.sendCacheableRequest(url);
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.DnBRealTimeLookup, key = "T(java.lang.String).format(\"%s\", #url)")
-    public String sendCacheableRequest(String url) {
+    public String sendRequest(String url) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(10);
         return retry.execute(ctx -> {
             while (System.currentTimeMillis() < stopUntil.get()) {
