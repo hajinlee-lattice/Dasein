@@ -48,6 +48,7 @@ import reactor.core.publisher.Flux;
 public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     static final String CRM_ID = "CrmAccount_External_ID";
+    static final String CRM_CONTACT_ID = "ContactId";
     static final String ACCOUNT_SYSTEM_ID = "ACCT_INTESTCASE8_D8D0DCAADB";
     static final String OTHERSYSTEM_ACCOUNT_SYSTEM_ID = "Fax";
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
@@ -117,20 +118,28 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         Assert.assertFalse(zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(mainCustomerSpace)));
 
         // setup external id attrs
-        createExternalSystem();
+        createExternalSystems();
         updateDefaultSystemAndCreateNew();
 
         // TODO: setup rating engines and rating attrs
     }
 
-    private void createExternalSystem() {
-        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+    private void createExternalSystems() {
+        CDLExternalSystem cdlExternalSystemAccount = new CDLExternalSystem();
         List<String> crmIds = new ArrayList<>();
         crmIds.add(CRM_ID);
-        cdlExternalSystem.setCRMIdList(crmIds);
-        cdlExternalSystem.setEntity(BusinessEntity.Account);
-        externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystem,
+        cdlExternalSystemAccount.setCRMIdList(crmIds);
+        cdlExternalSystemAccount.setEntity(BusinessEntity.Account);
+        externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystemAccount,
                 BusinessEntity.Account);
+
+        CDLExternalSystem cdlExternalSystemContact = new CDLExternalSystem();
+        List<String> crmContactIds = new ArrayList<>();
+        crmContactIds.add(CRM_CONTACT_ID);
+        cdlExternalSystemContact.setCRMIdList(crmContactIds);
+        cdlExternalSystemContact.setEntity(BusinessEntity.Contact);
+        externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystemContact,
+                BusinessEntity.Contact);
     }
 
     private void updateDefaultSystemAndCreateNew() {
