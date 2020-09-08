@@ -1915,7 +1915,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         List<Integer> dayPeriods;
         try {
             List<String> partitionPaths = HdfsUtils.getFilesForDir(yarnConfiguration, batchStore.getExtracts().get(0).getPath());
-            dayPeriods = partitionPaths.stream().map(path -> {
+            dayPeriods = partitionPaths.stream().filter(path -> !path.endsWith("_SUCCESS")).map(path -> {
                 String periodId = path.substring(path.lastIndexOf("=") + 1);
                 return Integer.parseInt(periodId);
             }).collect(Collectors.toList());
