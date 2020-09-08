@@ -89,7 +89,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
             periodTransaction.setTotalQuantity((double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
             periodTransaction
-                    .setTransactionCount((double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
+                    .setTransactionCount(castToDouble(row.get(InterfaceName.TransactionCount.toString().toLowerCase())));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
             periodTransaction.setPeriodId((int) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
@@ -143,12 +143,17 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
             periodTransaction.setTotalQuantity((double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
             periodTransaction
-                    .setTransactionCount((double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
+                    .setTransactionCount(castToDouble(row.get(InterfaceName.TransactionCount.toString().toLowerCase())));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
             periodTransaction.setPeriodId((int) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
         return resultList;
+    }
+
+    private double castToDouble(Object obj) {
+        Preconditions.checkNotNull(obj);
+        return Double.parseDouble(obj.toString());
     }
 
     @SuppressWarnings("rawtypes")
