@@ -144,7 +144,7 @@ public class AttributeSetEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createDefaultAttributeSet() {
-        AttributeSet defaultSet = findByName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+        AttributeSet defaultSet = _self.findByName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
         if (defaultSet != null) {
             log.info("Default attribute set already exists in tenant {}.", defaultSet.getTenant().getName());
             return defaultSet;
