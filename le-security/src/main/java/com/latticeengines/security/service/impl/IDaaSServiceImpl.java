@@ -333,7 +333,15 @@ public class IDaaSServiceImpl implements IDaaSService {
         refreshToken();
         log.info("Sending callback to " + url);
         log.info(responseBody.toString());
-        restTemplate.postForLocation(URI.create(url), responseBody);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(URI.create(url), responseBody, String.class);
+            log.info("Callback finished with response code " + response.getStatusCodeValue());
+            log.info("Callback response body:" + response.getBody());
+        } catch (Exception e) {
+            log.error(e.toString());
+            throw e;
+        }
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {
