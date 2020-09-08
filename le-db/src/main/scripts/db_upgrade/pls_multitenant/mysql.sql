@@ -14,7 +14,10 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-
+      UPDATE `PLS_MultiTenant`.`METADATA_SEGMENT`
+        SET TEAM_ID='Global_Team' WHERE TEAM_ID is NULL;
+      UPDATE `PLS_MultiTenant`.`RATING_ENGINE`
+        SET TEAM_ID='Global_Team' WHERE TEAM_ID is NULL;
   END //
 -- ##############################################################
 

@@ -62,9 +62,6 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
             throw new LedpException(LedpCode.LEDP_18242);
         }
         Map<String, Object> paramsMap = ImmutableMap.of("teamName", teamName, "tenantName", globalAuthTenant.getName());
-        if (teamName.equals(TeamUtils.GLOBAL_TEAM)) {
-            throw new LedpException(LedpCode.LEDP_18241, paramsMap);
-        }
         globalTeamData.setTeamName(teamName);
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
                 globalTeamData.getTeamName());
