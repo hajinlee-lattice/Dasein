@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.auth.exposed.service.impl.GlobalAuthDependencyChecker;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -136,7 +137,12 @@ public class TeamServiceImpl implements TeamService {
         List<GlobalTeam> globalTeams = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(globalAuthTeams)) {
             for (GlobalAuthTeam globalAuthTeam : globalAuthTeams) {
-                globalTeams.add(getGlobalTeam(globalAuthTeam, withTeamMember, userMap, loginUser));
+                GlobalTeam globalTeam = getGlobalTeam(globalAuthTeam, withTeamMember, userMap, loginUser);
+                if (TeamUtils.GLOBAL_TEAM_ID.equals(globalTeam.getTeamId())) {
+                    globalTeams.add(0, globalTeam);
+                } else {
+                    globalTeams.add(globalTeam);
+                }
             }
         }
         return globalTeams;
