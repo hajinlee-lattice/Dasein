@@ -649,8 +649,11 @@ public abstract class BaseCalcStatsStep<T extends BaseProcessEntityStepConfigura
     private AttributeStats mergeAttrStat(AttributeStats baseStat, AttributeStats statDiff) {
         if (statDiff.getBuckets() != null && CollectionUtils.isNotEmpty(statDiff.getBuckets().getBucketList())) {
             Buckets buckets = baseStat.getBuckets();
-            Map<Long, Bucket> bucketMap = buckets.getBucketList().stream()
-                    .collect(Collectors.toMap(Bucket::getId, Function.identity()));
+            Map<Long, Bucket> bucketMap = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(buckets.getBucketList())) {
+                bucketMap.putAll(buckets.getBucketList().stream()
+                        .collect(Collectors.toMap(Bucket::getId, Function.identity())));
+            }
             statDiff.getBuckets().getBucketList().forEach(bktDiff -> {
                 long bktId = bktDiff.getId();
                 if (bucketMap.containsKey(bktId)) {
