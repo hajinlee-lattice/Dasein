@@ -237,33 +237,17 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails3.getUploadId(),
                 report3);
 
-        // register duns count table for different level
+        // register duns count table only for upload level, for other level above the upload,
+        // the logic will validate from bottom to up direction, then generate the duns count for
+        // the parent as long as it has valid children
         String tableName = setupTables();
         DunsCountCache cache = new DunsCountCache();
         cache.setSnapshotTimestamp(new Date());
         cache.setDunsCountTableName(tableName);
 
-        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Project,
-                projectDetails.getProjectId(), cache);
-        SleepUtils.sleep(1000);
-        cache.setSnapshotTimestamp(new Date());
-        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source.getSourceId(),
-                cache);
-
-        SleepUtils.sleep(1000);
-        cache.setSnapshotTimestamp(new Date());
-        reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Source, source1.getSourceId(),
-                cache);
-
-        SleepUtils.sleep(1000);
-        cache.setSnapshotTimestamp(new Date());
         reportProxy.registerDunsCount(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId(),
                 cache);
-        DataReport reportBeforeSetReadyForRollup = reportProxy.getReadyForRollupDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
-        Assert.assertNull(reportBeforeSetReadyForRollup);
         reportProxy.updateDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
-        reportBeforeSetReadyForRollup = reportProxy.getReadyForRollupDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadDetails.getUploadId());
-        Assert.assertNotNull(reportBeforeSetReadyForRollup);
 
         SleepUtils.sleep(1000);
         cache.setSnapshotTimestamp(new Date());

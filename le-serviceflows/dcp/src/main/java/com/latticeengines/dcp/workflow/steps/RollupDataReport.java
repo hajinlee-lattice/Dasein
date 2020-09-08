@@ -2,6 +2,7 @@ package com.latticeengines.dcp.workflow.steps;
 
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -136,16 +137,20 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 Map<String, DataReport> childOwnerIdToReport = new HashMap<>();
                 for (String childId : childIds) {
                     DataReport childReport = childMap.get(childId);
+                    Preconditions.checkNotNull(childReport, String.format("no report found for %s and %s.", childId,
+                            childLevel));
                     childOwnerIdToReport.put(childId, childReport);
                 }
                 DataReport parentReport = parentMap.get(parentOwnerId);
 
+                // try to generate parent report from its adjacent child node
                 Pair<Date, DataReport> result = constructParentReport(parentOwnerId, parentLevel, parentReport,
                         childLevel, childOwnerIdToReport, updatedOwnerIdToLevelAndDate, ownerIdToDunsCount,
                         mode);
 
                 // write report back if needed
                 if (result != null && result.getLeft() != null) {
+                    log.info("update date report for {} in parent map", parentOwnerId);
                     parentMap.put(parentOwnerId, result.getRight());
                     // update whether the parental owner id needs to be updated
                     updatedOwnerIds.add(parentOwnerId);
@@ -157,6 +162,18 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
         } while(childLevel != level);
     }
 
+    /**
+     *
+     * @param parentOwnerId
+     * @param parentLevel
+     * @param parentReport
+     * @param childLevel
+     * @param childOwnerIdToReport
+     * @param updatedOwnerIdToLevelAndDate this records the ownerId whose dunscount needs to be computed in job
+     * @param ownerIdToDunsCount this records the dunscount table that needs to be input in scala job in the mode
+     * @param mode
+     * @return
+     */
     private Pair<Date, DataReport> constructParentReport(String parentOwnerId,
                                                          DataReportRecord.Level parentLevel,
                                                          DataReport parentReport, DataReportRecord.Level childLevel,
@@ -173,8 +190,9 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             // this shouldn't happen if everything is ok
             log.info(String.format("the duns count is not registered for rootId %s and level %s", parentOwnerId,
                     parentLevel));
-            throw new RuntimeException(String.format("the duns count is not registered for rootId %s and " +
-                    "level %s", parentOwnerId, parentLevel));
+            // set parentTime to epoch time, then walk through the remaining logic, no need to validate here as long
+            // as it has valid children node
+            parentTime = new Date(Instant.EPOCH.toEpochMilli());
         }
         Date maxChildDate = parentTime;
         switch (mode) {
@@ -324,14 +342,12 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             case Tenant:
                 DataReport tenantReport = dataReportProxy.getDataReport(customerSpace.toString(),
                         DataReportRecord.Level.Tenant, rootId);
-                Preconditions.checkNotNull(tenantReport, String.format("no report found for %s", rootId));
                 tenantIdToReport.put(rootId, tenantReport);
                 Set<String> projectIds = dataReportProxy.getChildrenIds(customerSpace.toString(), level, rootId);
                 parentIdToChildren.put(rootId, projectIds);
                 projectIds.forEach(projectId -> {
                     DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
-                    Preconditions.checkNotNull(projectReport, String.format("no report found for %s ", projectId));
                     projectIdToReport.put(projectId, projectReport);
                     Set<String> sourceIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                             DataReportRecord.Level.Project, projectId);
@@ -339,7 +355,6 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                     sourceIds.forEach(sourceId -> {
                         DataReport sourceReport = dataReportProxy.getDataReport(customerSpace.toString(),
                                 DataReportRecord.Level.Source, sourceId);
-                        Preconditions.checkNotNull(sourceReport, String.format("no report found for %s ", sourceId));
                         sourceIdToReport.put(sourceId, sourceReport);
                         Set<String> uploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                                 DataReportRecord.Level.Source, sourceId);
@@ -347,7 +362,6 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                         uploadIds.forEach(uploadId -> {
                             DataReport report = dataReportProxy.getDataReport(customerSpace.toString(),
                                     DataReportRecord.Level.Upload, uploadId);
-                            Preconditions.checkNotNull(report, String.format("no report found for %s ", uploadId));
                             uploadIdToReport.put(uploadId, report);
                         });
                     });
@@ -359,12 +373,10 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 parentIdToChildren.put(rootId, sourceIds);
                 DataReport projectReport = dataReportProxy.getDataReport(customerSpace.toString(),
                         DataReportRecord.Level.Project, rootId);
-                Preconditions.checkNotNull(projectReport, String.format("no report found for %s", rootId));
                 projectIdToReport.put(rootId, projectReport);
                 sourceIds.forEach(sourceId -> {
                     DataReport sourceReport = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Source, sourceId);
-                    Preconditions.checkNotNull(sourceReport, String.format("no report found for %s ", sourceId));
                     sourceIdToReport.put(sourceId, sourceReport);
                     Set<String> uploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                             DataReportRecord.Level.Source, sourceId);
@@ -372,7 +384,6 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                     uploadIds.forEach(uploadId -> {
                         DataReport report = dataReportProxy.getDataReport(customerSpace.toString(),
                                 DataReportRecord.Level.Upload, uploadId);
-                        Preconditions.checkNotNull(report, String.format("no report found for %s ", uploadId));
                         uploadIdToReport.put(uploadId, report);
                     });
                 });
@@ -380,7 +391,6 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             case Source:
                 DataReport sourceReport = dataReportProxy.getDataReport(customerSpace.toString(),
                         DataReportRecord.Level.Source, rootId);
-                Preconditions.checkNotNull(sourceReport, String.format("no report found for %s ", rootId));
                 sourceIdToReport.put(rootId, sourceReport);
                 Set<String> uploadIds = dataReportProxy.getChildrenIds(customerSpace.toString(),
                         DataReportRecord.Level.Source, rootId);
@@ -388,7 +398,6 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
                 uploadIds.forEach(uploadId -> {
                     DataReport report = dataReportProxy.getDataReport(customerSpace.toString(),
                             DataReportRecord.Level.Upload, uploadId);
-                    Preconditions.checkNotNull(report, String.format("no report found for %s ", uploadId));
                     uploadIdToReport.put(uploadId, report);
 
                 });
