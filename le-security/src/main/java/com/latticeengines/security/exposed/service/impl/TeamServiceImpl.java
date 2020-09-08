@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -172,8 +173,22 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public String createDefaultTeam() {
-        GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createDefaultTeam();
-        return globalAuthTeam.getTeamId();
+        List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId());
+        if (CollectionUtils.isNotEmpty(users)) {
+            Optional<User> superAdmin = users.stream().filter(user1 -> AccessLevel.SUPER_ADMIN.equals(AccessLevel.valueOf(user1.getAccessLevel()))).findFirst();
+            if (superAdmin.isPresent()) {
+                GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createDefaultTeam(superAdmin.get().getEmail());
+                return globalAuthTeam.getTeamId();
+            }
+            Optional<User> internalAdmin = users.stream().filter(user1 -> AccessLevel.INTERNAL_ADMIN.equals(AccessLevel.valueOf(user1.getAccessLevel()))).findFirst();
+            if (internalAdmin.isPresent()) {
+                GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createDefaultTeam(internalAdmin.get().getEmail());
+                return globalAuthTeam.getTeamId();
+            }
+            return null;
+        } else {
+            return null;
+        }
     }
 
     private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {

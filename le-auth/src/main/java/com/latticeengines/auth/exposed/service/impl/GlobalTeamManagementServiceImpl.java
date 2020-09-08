@@ -147,7 +147,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     @Override
-    public GlobalAuthTeam createDefaultTeam() {
+    public GlobalAuthTeam createDefaultTeam(String createdByUser) {
         GlobalAuthTeam defaultTeam = getTeamById(TeamUtils.GLOBAL_TEAM_ID, false);
         if (defaultTeam != null) {
             log.info("Default global team already exists in tenant {}.", MultiTenantContext.getShortTenantId());
@@ -156,7 +156,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         log.info("Create default team for tenant: " + MultiTenantContext.getShortTenantId());
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         defaultTeam = new GlobalAuthTeam();
-        defaultTeam.setCreatedByUser(tenantData.getUser());
+        defaultTeam.setCreatedByUser(createdByUser);
         defaultTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
         defaultTeam.setName(TeamUtils.GLOBAL_TEAM);
         defaultTeam.setGlobalAuthTenant(tenantData);

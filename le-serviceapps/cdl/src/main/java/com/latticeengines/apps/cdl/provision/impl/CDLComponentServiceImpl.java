@@ -14,11 +14,9 @@ import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.DropBoxService;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.component.exposed.service.ComponentServiceBase;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
@@ -26,7 +24,6 @@ import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.DataUnitCrossTenantService;
-import com.latticeengines.security.exposed.service.TeamService;
 
 @Component("cdlComponentService")
 public class CDLComponentServiceImpl extends ComponentServiceBase {
@@ -60,12 +57,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     @Inject
     private DropBoxCrossTenantService dropBoxCrossTenantService;
 
-    @Inject
-    private BatonService batonService;
-
-    @Inject
-    private TeamService teamService;
-
     @Value("${aws.customer.s3.bucket}")
     private String customersBucket;
 
@@ -87,9 +78,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             s3ImportSystemService.createDefaultImportSystem(cs.toString());
             dropBoxService.createTenantDefaultFolder(cs.toString());
             attributeSetEntityMgr.createDefaultAttributeSet();
-            if (batonService.isEnabled(cs, LatticeFeatureFlag.TEAM_FEATURE)) {
-                teamService.createDefaultTeam();
-            }
         } catch (Exception e) {
             log.error(String.format("Install CDL component for %s failed. %s", customerSpace, e.toString()));
             return false;

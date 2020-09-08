@@ -23,6 +23,6 @@ public interface GlobalTeamManagementService {
 
     boolean userBelongsToTeam(String username, String teamId);
 
-    GlobalAuthTeam createDefaultTeam();
+    GlobalAuthTeam createDefaultTeam(String createdByUser);
 
 }
