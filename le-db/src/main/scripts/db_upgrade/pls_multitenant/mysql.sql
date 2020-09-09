@@ -21,10 +21,10 @@ CREATE PROCEDURE `UpdateSchema`()
 
 
       alter table `PLS_MultiTenant`.`DCP_DATA_REPORT`
-         drop FOREIGN KEY `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`;
+        drop FOREIGN KEY `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`;
       alter table `PLS_MultiTenant`.`DCP_DATA_REPORT`
-	 add constraint `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`
-	 foreign key (`FK_DUNS_COUNT`) references `METADATA_TABLE` (`PID`) on delete cascade;
+	add constraint `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`
+	foreign key (`FK_DUNS_COUNT`) references `PLS_MultiTenant`.`METADATA_TABLE` (`PID`) on delete cascade;
 
 
 
