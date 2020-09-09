@@ -208,11 +208,12 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 "matchTransaction", //
                 "profileProductHierarchy", //
                 "mergeTransaction", //
-                "profileTransaction", //
-                "profileTransaction", //
-                "profileTransaction", //
-                "profileTransaction", //
-                "profileTransaction", //
+                "rollupProductStepWrapper", //
+                "splitTransactionStep", //
+                "aggDailyTransactionStep", //
+                "aggPeriodTransactionStep", //
+                "buildDailyTransaction", //
+                "buildPeriodTransaction", //
                 "profilePurchaseHistory", //
                 "apsGeneration", //
                 "curatedAccountAttributesStep", //
