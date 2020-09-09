@@ -18,7 +18,7 @@ import com.latticeengines.security.exposed.service.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "export-field-metadata", description = "Rest resource for export field metadata")
+@Api(value = "Team Management")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/teams")
 public class TeamResource {
