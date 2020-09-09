@@ -108,8 +108,12 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
           if (!needRebuild) {
             val masterStoreTableName = timelineRelatedMasterTables.getOrElse(timelineId, "")
             val idx: Integer = masterStoreInputIdx.getOrElse(masterStoreTableName, -1)
-            val masterStoreTable: DataFrame = lattice.input(idx)
-            val mergedMasterTable = MergeUtils.concat2(masterStoreTable, timelineRawStreamTable)
+            val mergedMasterTable = if (idx != -1) {
+              val masterStoreTable: DataFrame = lattice.input(idx)
+              MergeUtils.concat2(masterStoreTable, timelineRawStreamTable)
+            } else {
+              timelineRawStreamTable
+            }
             (roleTimelineId, mergedMasterTable)
           }else {
             (roleTimelineId, timelineRawStreamTable)
@@ -217,6 +221,10 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     if (!dfColumnNameMaps.contains(requiredCol.toLowerCase)) {
       if (requiredCol.toLowerCase.equals(TimelineStandardColumn.StreamType.getColumnName.toLowerCase)) {
         return df.withColumn(requiredCol, lit(streamType))
+      }
+      if (requiredCol.toLowerCase.equals(TimelineStandardColumn.EventDate.getColumnName.toLowerCase) || requiredCol
+        .toLowerCase.equals(TimelineStandardColumn.EventType.getColumnName.toLowerCase)) {
+        throw new IllegalStateException(s"table missing required column eventTime/eventType. please check it.")
       }
       return df.withColumn(requiredCol, lit(null).cast(colType))
     }
