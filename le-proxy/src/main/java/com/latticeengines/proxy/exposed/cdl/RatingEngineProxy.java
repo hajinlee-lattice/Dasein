@@ -92,6 +92,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return get("get rating engine", url, RatingEngine.class);
     }
 
+    public RatingEngineSummary getRatingEngineSummary(String customerSpace, String ratingEngineId) {
+        String url = constructUrl(URL_PREFIX + "/summary/{ratingEngineId}", shortenCustomerSpace(customerSpace),
+                ratingEngineId);
+        return get("get rating engine summary", url, RatingEngineSummary.class);
+    }
+
     public void deleteRatingEngine(String customerSpace, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}", shortenCustomerSpace(customerSpace),
                 ratingEngineId);

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -79,6 +80,7 @@ abstract class RatingEngineTemplate {
         ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
         ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
+        TeamUtils.fillTeamId(ratingEngineSummary);
         return ratingEngineSummary;
     }
 
@@ -111,6 +113,7 @@ abstract class RatingEngineTemplate {
         ratingEngineSummary.setPublishedIterationId(
                 ratingEngine.getPublishedIteration() != null ? ratingEngine.getPublishedIteration().getId() : null);
         ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
+        TeamUtils.fillTeamId(ratingEngineSummary);
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
                 || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
             Boolean completed = ratingEngine.getLatestIteration().getIteration() != 1
