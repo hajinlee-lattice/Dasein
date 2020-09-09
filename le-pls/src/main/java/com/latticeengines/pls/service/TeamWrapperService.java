@@ -17,11 +17,11 @@ public interface TeamWrapperService {
 
     String createTeam(String createdByUser, GlobalTeamData globalTeamData);
 
-    List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam);
+    List<GlobalTeam> getTeams(boolean withTeamMember);
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember);
 
-    List<GlobalTeam> getMyTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam);
+    List<GlobalTeam> getMyTeams(boolean withTeamMember);
 
     Set<String> getMyTeamIds();
 

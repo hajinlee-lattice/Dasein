@@ -46,6 +46,7 @@ import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflow
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ZKConfigService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -289,12 +290,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (populateRefreshedDate) {
             updateLastRefreshedDate(tenant.getId(), ratingEngine);
         }
+        TeamUtils.fillTeamId(ratingEngine);
         return ratingEngine;
     }
 
     @Override
     public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate) {
         return getRatingEngineById(ratingEngineId, populateRefreshedDate, false);
+    }
+
+    @Override
+    public RatingEngineSummary getRatingEngineSummaryById(String ratingEngineId) {
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
+        RatingEngineSummary ratingEngineSummary = null;
+        if (ratingEngine != null) {
+            ratingEngineSummary = new RatingEngineSummary();
+            ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
+            ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
+        }
+        return ratingEngineSummary;
     }
 
     @Override

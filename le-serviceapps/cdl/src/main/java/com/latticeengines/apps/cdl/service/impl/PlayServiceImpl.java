@@ -32,6 +32,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -138,7 +139,7 @@ public class PlayServiceImpl implements PlayService {
     @Override
     public List<Play> getAllPlays() {
         List<Play> plays = playEntityMgr.findAll();
-        updateLastRefreshedDate(plays);
+        updatePlay(plays);
         return plays;
     }
 
@@ -155,7 +156,6 @@ public class PlayServiceImpl implements PlayService {
     @Override
     public Play getPlayByName(String name, Boolean considerDeleted) {
         Tenant tenant = MultiTenantContext.getTenant();
-
         if (StringUtils.isBlank(name)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
@@ -164,9 +164,12 @@ public class PlayServiceImpl implements PlayService {
             log.warn(String.format("Error finding play by name %s in tenant %s", name,
                     tenant != null ? tenant.getName() : "null"));
         }
-        if (play != null && play.getRatingEngine() != null) {
-            updateLastRefreshedDate(play.getRatingEngine());
-            setBucketMetadata(tenant, play);
+        if (play != null) {
+            if (play.getRatingEngine() != null) {
+                updateLastRefreshedDate(play.getRatingEngine());
+                setBucketMetadata(tenant, play);
+            }
+            TeamUtils.fillTeamId(play);
         }
         return play;
     }
@@ -211,6 +214,7 @@ public class PlayServiceImpl implements PlayService {
         } else {
             RatingEngine ratingEngine = validateRatingEngineId(tenant, ratingEngineId);
             plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid());
+            plays.stream().forEach(play -> TeamUtils.fillTeamId(play));
         }
 
         if (shouldLoadCoverage && CollectionUtils.isNotEmpty(plays)) {
@@ -477,7 +481,7 @@ public class PlayServiceImpl implements PlayService {
         ratingEngine.setLastRefreshedDate(lastRefreshedDate);
     }
 
-    private void updateLastRefreshedDate(List<Play> plays) {
+    private void updatePlay(List<Play> plays) {
         if (CollectionUtils.isNotEmpty(plays)) {
             Date lastRefreshedDate = findLastRefreshedDate();
             plays //
@@ -485,6 +489,7 @@ public class PlayServiceImpl implements PlayService {
                         if (play.getRatingEngine() != null) {
                             play.getRatingEngine().setLastRefreshedDate(lastRefreshedDate);
                         }
+                        TeamUtils.fillTeamId(play);
                     });
         }
     }

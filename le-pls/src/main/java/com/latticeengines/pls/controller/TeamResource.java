@@ -52,9 +52,8 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsFromSession(
-            @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember,
-            @RequestParam(value = "appendDefaultGlobalTeam", required = false, defaultValue = "true") boolean appendDefaultGlobalTeam) {
-        List<GlobalTeam> globalTeams = teamWrapperService.getMyTeams(withTeamMember, appendDefaultGlobalTeam);
+            @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember) {
+        List<GlobalTeam> globalTeams = teamWrapperService.getMyTeams(withTeamMember);
         return globalTeams;
     }
 
@@ -62,7 +61,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "List all teams")
     public List<GlobalTeam> getAllTeams() {
-        return teamWrapperService.getTeams(true, false);
+        return teamWrapperService.getTeams(true);
     }
 
     @PostMapping("")

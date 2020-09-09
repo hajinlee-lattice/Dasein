@@ -41,8 +41,9 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        tenant = createTenant(CustomerSpace.parse("TeamServiceTestTenant").toString(), "TeamServiceTestTenant");
-        anotherTenant = createTenant(CustomerSpace.parse("TeamServiceTestAnotherTenant").toString(), "TeamServiceTestAnotherTenant");
+        tenant = createTenant(CustomerSpace.parse("TeamServiceTestTenant").toString(), "TeamServiceTestTenant", username1InTenant);
+        anotherTenant = createTenant(CustomerSpace.parse("TeamServiceTestAnotherTenant").toString(),
+                "TeamServiceTestAnotherTenant", usernameInAnotherTenant);
         createUser(username1InTenant);
         createUser(username2InTenant);
         createUser(usernameInAnotherTenant);
@@ -87,7 +88,7 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         GlobalTeam globalTeam = teamService.getTeamByTeamId(teamId, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         validateTeamInfo(globalTeam, teamName1InTenant, username2InTenant, 2);
         // create
-        createTeam(username2InTenant, teamName2InTenant, Sets.newHashSet(username1InTenant));
+        String teamId2 = createTeam(username2InTenant, teamName2InTenant, Sets.newHashSet(username1InTenant));
         List<GlobalTeam> globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 2);
         globalTeams = teamService.getTeamsByUserName(username1InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()), true);
@@ -104,6 +105,13 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         teamService.deleteTeam(teamId);
         globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
+
+        teamService.deleteTeam(teamId2);
+        teamService.createDefaultTeam();
+        globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
+        assertEquals(globalTeams.size(), 1);
+        assertEquals(globalTeams.get(0).getTeamMembers().size(), 2);
+
         MultiTenantContext.setTenant(anotherTenant);
         createTeam(usernameInAnotherTenant, teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));

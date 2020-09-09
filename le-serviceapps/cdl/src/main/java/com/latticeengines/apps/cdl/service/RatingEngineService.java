@@ -46,6 +46,8 @@ public interface RatingEngineService {
 
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);
 
+    RatingEngineSummary getRatingEngineSummaryById(String id);
+
     RatingEngine createOrUpdate(RatingEngine ratingEngine);
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, Boolean unlinkSegment);

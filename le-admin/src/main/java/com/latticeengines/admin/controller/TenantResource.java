@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMa
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
-import com.latticeengines.proxy.exposed.component.ComponentProxy;
 import com.latticeengines.security.exposed.Constants;
 
 import io.swagger.annotations.Api;
@@ -56,9 +55,6 @@ public class TenantResource {
 
     @Inject
     private DynamicOptionsService dynamicOptionsService;
-
-    @Inject
-    private ComponentProxy componentProxy;
 
     @PostMapping("/{tenantId}")
     @ResponseBody

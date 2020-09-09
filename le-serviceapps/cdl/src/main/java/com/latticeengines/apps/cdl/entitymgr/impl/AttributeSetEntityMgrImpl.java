@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,8 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 public class AttributeSetEntityMgrImpl
         extends BaseReadWriteRepoEntityMgrImpl<AttributeSetRepository, AttributeSet, Long>
         implements AttributeSetEntityMgr {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseReadWriteRepoEntityMgrImpl.class);
 
     @Inject
     private AttributeSetEntityMgrImpl _self;
@@ -140,7 +144,13 @@ public class AttributeSetEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createDefaultAttributeSet() {
-        AttributeSet defaultSet = getDefaultAttributeSet();
+        AttributeSet defaultSet = _self.findByName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+        if (defaultSet != null) {
+            log.info("Default attribute set already exists in tenant {}.", defaultSet.getTenant().getName());
+            return defaultSet;
+        }
+        log.info("Create default attribute set for tenant: " + MultiTenantContext.getShortTenantId());
+        defaultSet = getDefaultAttributeSet();
         attributeSetDao.create(defaultSet);
         return defaultSet;
     }
