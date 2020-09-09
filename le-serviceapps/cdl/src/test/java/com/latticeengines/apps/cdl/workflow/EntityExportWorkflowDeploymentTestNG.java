@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
 import com.amazonaws.services.s3.model.Tag;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
+import com.latticeengines.apps.cdl.end2end.UpdateTransactionWithAdvancedMatchDeploymentTestNG;
 import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.S3ExportFolderService;
@@ -106,8 +107,9 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
-        checkpointService.resumeCheckpoint( //
-                "update3", //
+        checkpointAutoService.setMainTestTenant(mainTestTenant);
+        checkpointAutoService.resumeCheckpoint( //
+                UpdateTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT, //
                 CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
         configExportAttrs();
         saveCsvToLocal = false;
