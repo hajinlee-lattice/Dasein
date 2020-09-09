@@ -38,6 +38,7 @@ public class  FacebookChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
+    @Override
     public boolean isSuppressContactsWithoutEmails() {
         return suppressContactsWithoutEmails;
     }
@@ -46,6 +47,7 @@ public class  FacebookChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
+    @Override
     public boolean isSuppressAccountsWithoutContacts() {
         return suppressAccountsWithoutContacts;
     }
@@ -60,22 +62,27 @@ public class  FacebookChannelConfig implements ChannelConfig {
         return false;
     }
 
+    @Override
     public String getAudienceId() {
         return audienceId;
     }
 
+    @Override
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
     }
 
+    @Override
     public String getAudienceName() {
         return audienceName;
     }
 
+    @Override
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
     }
 
+    @Override
     public AudienceType getAudienceType() {
         return audienceType;
     }
@@ -91,6 +98,10 @@ public class  FacebookChannelConfig implements ChannelConfig {
             return false;
         }
         FacebookChannelConfig updatedConfig = (FacebookChannelConfig) channelConfig;
+        
+        if (StringUtils.isBlank(updatedConfig.getAudienceId())) {
+            return true;
+        }
 
         return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
                 : !this.audienceName.equals(updatedConfig.audienceName);

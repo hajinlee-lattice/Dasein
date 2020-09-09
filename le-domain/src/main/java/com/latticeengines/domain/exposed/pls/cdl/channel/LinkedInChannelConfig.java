@@ -37,11 +37,13 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
+    @Override
     @JsonProperty("suppressContactsWithoutEmails")
     public boolean isSuppressContactsWithoutEmails() {
         return audienceType == AudienceType.CONTACTS;
     }
 
+    @Override
     @JsonProperty("suppressAccountsWithoutContacts")
     public boolean isSuppressAccountsWithoutContacts() { return audienceType != AudienceType.ACCOUNTS; }
 
@@ -59,18 +61,22 @@ public class LinkedInChannelConfig implements ChannelConfig {
         return false;
     }
 
+    @Override
     public String getAudienceId() {
         return audienceId;
     }
 
+    @Override
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
     }
 
+    @Override
     public String getAudienceName() {
         return audienceName;
     }
 
+    @Override
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
     }
@@ -99,6 +105,10 @@ public class LinkedInChannelConfig implements ChannelConfig {
             return false;
         }
         LinkedInChannelConfig updatedConfig = (LinkedInChannelConfig) channelConfig;
+
+        if (StringUtils.isBlank(updatedConfig.getAudienceId())) {
+            return true;
+        }
 
         return (this.audienceType == null ? updatedConfig.audienceType != null //
                 : !this.audienceType.equals(updatedConfig.audienceType)) //
