@@ -209,7 +209,7 @@ public class DataLakeAccountResource {
         try {
             List<TalkingPointDTO> tps;
             try (PerformanceTimer timer = new PerformanceTimer(
-                    "AccountPlayLookup: Retrieve TalkingPoints by PlayId | Tenant "
+                    "AccountPlayLookup: Retrieve TalkingPoints by PlayId | Tenant="
                             + CustomerSpace.shortenCustomerSpace(customerSpace))) {
                 tps = talkingPointProxy.findAllByPlayName(customerSpace, playId, !isPreview);
             }
@@ -227,7 +227,7 @@ public class DataLakeAccountResource {
             DataPage accountRawData;
             try (PerformanceTimer timer = new PerformanceTimer(
                     "AccountPlayLookup: Retrieve Account data for " + requiredAccountAttributes.size()
-                            + " attributes | Tenant " + CustomerSpace.shortenCustomerSpace(customerSpace))) {
+                            + " attributes | Tenant=" + CustomerSpace.shortenCustomerSpace(customerSpace))) {
                 accountRawData = dataLakeService.getAccountById(accountId, new ArrayList<>(requiredAccountAttributes),
                         getOrgInfo(authToken));
             }
