@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.dante.metadata;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Association extends BaseObjectMetadata {
+public class Association extends BaseObjectMetadata implements Serializable {
     @JsonProperty("Cardinality")
     private int cardinality;
 

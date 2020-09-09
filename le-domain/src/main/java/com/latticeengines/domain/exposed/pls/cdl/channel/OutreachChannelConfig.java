@@ -105,6 +105,10 @@ public class OutreachChannelConfig implements ChannelConfig {
         }
         OutreachChannelConfig updatedConfig = (OutreachChannelConfig) channelConfig;
 
+        if (StringUtils.isBlank(updatedConfig.getAudienceId())) {
+            return true;
+        }
+
         return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
                 : !this.audienceName.equals(updatedConfig.audienceName);
     }

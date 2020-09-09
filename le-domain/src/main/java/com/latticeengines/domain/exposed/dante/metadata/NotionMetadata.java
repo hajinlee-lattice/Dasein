@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.dante.metadata;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /// <summary>
 /// Class for defining metadata about objects (e.g. Account, Lead)
 /// </summary>
-public class NotionMetadata extends BaseObjectMetadata {
+public class NotionMetadata extends BaseObjectMetadata implements Serializable {
 
     @JsonProperty("DescriptionKey")
     private String descriptionKey;

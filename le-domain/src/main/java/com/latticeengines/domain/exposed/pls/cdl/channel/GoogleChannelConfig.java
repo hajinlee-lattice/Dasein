@@ -38,6 +38,7 @@ public class GoogleChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
+    @Override
     public boolean isSuppressContactsWithoutEmails() {
         return suppressContactsWithoutEmails;
     }
@@ -46,6 +47,7 @@ public class GoogleChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
+    @Override
     public boolean isSuppressAccountsWithoutContacts() {
         return suppressAccountsWithoutContacts;
     }
@@ -60,22 +62,27 @@ public class GoogleChannelConfig implements ChannelConfig {
         return false;
     }
 
+    @Override
     public String getAudienceId() {
         return audienceId;
     }
 
+    @Override
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
     }
 
+    @Override
     public String getAudienceName() {
         return audienceName;
     }
 
+    @Override
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
     }
 
+    @Override
     public AudienceType getAudienceType() {
         return audienceType;
     }
@@ -91,6 +98,10 @@ public class GoogleChannelConfig implements ChannelConfig {
             return false;
         }
         GoogleChannelConfig updatedConfig = (GoogleChannelConfig) channelConfig;
+
+        if (StringUtils.isBlank(updatedConfig.getAudienceId())) {
+            return true;
+        }
 
         return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
                 : !this.audienceName.equals(updatedConfig.audienceName);
