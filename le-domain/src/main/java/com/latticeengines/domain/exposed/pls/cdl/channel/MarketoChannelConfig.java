@@ -44,6 +44,7 @@ public class MarketoChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
+    @Override
     public boolean isSuppressContactsWithoutEmails() {
         return suppressContactsWithoutEmails;
     }
@@ -52,6 +53,7 @@ public class MarketoChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
+    @Override
     public boolean isSuppressAccountsWithoutContacts() {
         return suppressAccountsWithoutContacts;
     }
@@ -66,18 +68,22 @@ public class MarketoChannelConfig implements ChannelConfig {
         return false;
     }
 
+    @Override
     public String getAudienceId() {
         return audienceId;
     }
 
+    @Override
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
     }
 
+    @Override
     public String getAudienceName() {
         return audienceName;
     }
 
+    @Override
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
     }
@@ -122,6 +128,11 @@ public class MarketoChannelConfig implements ChannelConfig {
             return false;
         }
         MarketoChannelConfig updatedConfig = (MarketoChannelConfig) channelConfig;
+
+        if (StringUtils.isBlank(updatedConfig.getAudienceId())) {
+            return true;
+        }
+
         return (StringUtils.isBlank(this.audienceId) ? StringUtils.isNotBlank(updatedConfig.audienceId) //
                 : !this.audienceId.equals(updatedConfig.audienceId)) //
                 || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
