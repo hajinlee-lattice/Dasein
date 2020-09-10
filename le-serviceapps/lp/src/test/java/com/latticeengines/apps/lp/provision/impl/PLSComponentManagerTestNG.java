@@ -30,6 +30,11 @@ public class PLSComponentManagerTestNG extends LPFunctionalTestNGBase {
     @Test(groups = {"functional"})
     public void testProvisionTenant() {
         Tenant tenant = createTestTenant();
+        Tenant tenantToDelete = tenantService.findByTenantId(tenant.getId());
+        if (tenantToDelete != null) {
+            tenantService.discardTenant(tenantToDelete);
+        }
+        tenant = createTestTenant();
         List<String> superAdmins = Collections.singletonList(
                 NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
         // wait 1s, generate different name
@@ -63,9 +68,10 @@ public class PLSComponentManagerTestNG extends LPFunctionalTestNGBase {
             AccessLevel level = userService.getAccessLevel(tenant.getId(), email);
             Assert.assertEquals(level, AccessLevel.THIRD_PARTY_USER);
         }
-
+        long tenantPid = tenant.getPid();
         tenant = createTestTenant();
         tenant.setName("new name");
+        tenant.setPid(tenantPid);
         componentManager.provisionTenant(tenant, Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList(), Collections.emptyList(), null,
                 "PLSComponentManagerTest");
