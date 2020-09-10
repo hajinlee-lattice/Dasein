@@ -210,7 +210,6 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return post("update play launch", url, pLayLaunch, PlayLaunch.class);
     }
 
-
     @SuppressWarnings("rawtypes")
     public List<PlayLaunch> getPlayLaunches(String customerSpace, String playName, List<LaunchState> launchStates) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches", shortenCustomerSpace(customerSpace), playName);
@@ -433,7 +432,15 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}", shortenCustomerSpace(customerSpace),
                 playName, channelId);
         log.info("url is " + url);
-        return get("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunchChannel.class);
+        return get("Get a Channel by playId and channelId ", url, null, PlayLaunchChannel.class);
+    }
+
+    public PlayLaunch findLatestTerminalLaunchByChannel(String customerSpace, String playName, String channelId) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/last-terminal-launch",
+                shortenCustomerSpace(customerSpace), playName, channelId);
+        log.info("url is " + url);
+        return get("Get last PlayLaunch with terminal Launchstate for a given play and channel ", url, null,
+                PlayLaunch.class);
     }
 
     public PlayLaunchChannel setNextScheduledTimeForChannel(String customerSpace, String playName, String channelId) {

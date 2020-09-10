@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -52,12 +51,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         globalAuthTeam.setCreatedByUser(createdByUser);
         globalAuthTeam.setTeamId(GlobalTeam.generateId());
         globalAuthTeam.setGlobalAuthTenant(tenantData);
-        Set<String> teamMembers = globalTeamData.getTeamMembers();
-        if (CollectionUtils.isNotEmpty(teamMembers)) {
-            List<GlobalAuthUserTenantRight> globalAuthUserTenantRights =
-                    globalAuthUserTenantRightEntityMgr.findByEmailsAndTenantId(teamMembers, tenantData.getPid());
-            globalAuthTeam.setUserTenantRights(globalAuthUserTenantRights);
-        }
+        setTeamMember(globalTeamData, globalAuthTeam, tenantData);
         globalAuthTeamEntityMgr.create(globalAuthTeam);
         return globalAuthTeam;
     }
@@ -68,9 +62,6 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
             throw new LedpException(LedpCode.LEDP_18242);
         }
         Map<String, Object> paramsMap = ImmutableMap.of("teamName", teamName, "tenantName", globalAuthTenant.getName());
-        if (teamName.equals(TeamUtils.GLOBAL_TEAM)) {
-            throw new LedpException(LedpCode.LEDP_18241, paramsMap);
-        }
         globalTeamData.setTeamName(teamName);
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
                 globalTeamData.getTeamName());
@@ -94,7 +85,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     private GlobalAuthTenant getTenantData(String tenantId) {
-        log.info(String.format("Getting all teams for tenant %s.", tenantId));
+        log.info(String.format("Getting global auth tenant with id %s.", tenantId));
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             throw new IllegalArgumentException(String.format("cannot find GlobalAuthTenant using tenantId %s.", tenantId));
@@ -105,29 +96,23 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     @Override
     public List<GlobalAuthTeam> getTeams(boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        return globalAuthTeamEntityMgr.findByTenantId(tenantData.getPid(), withTeamMember).stream()
-                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getTeamId())).collect(Collectors.toList());
+        return globalAuthTeamEntityMgr.findByTenantId(tenantData.getPid(), withTeamMember);
     }
 
     @Override
     public List<GlobalAuthTeam> getTeamsByTeamIds(List<String> teamIds, boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        return globalAuthTeamEntityMgr.findByTeamIdsAndTenantId(tenantData.getPid(), teamIds, withTeamMember).stream()
-                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getTeamId())).collect(Collectors.toList());
+        return globalAuthTeamEntityMgr.findByTeamIdsAndTenantId(tenantData.getPid(), teamIds, withTeamMember);
     }
 
     @Override
     public List<GlobalAuthTeam> getTeamsByUserName(String username, boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        return globalAuthTeamEntityMgr.findByUsernameAndTenantId(tenantData.getPid(), username, withTeamMember).stream()
-                .filter(globalAuthTeam -> !TeamUtils.GLOBAL_TEAM_ID.equals(globalAuthTeam.getTeamId())).collect(Collectors.toList());
+        return globalAuthTeamEntityMgr.findByUsernameAndTenantId(tenantData.getPid(), username, withTeamMember);
     }
 
     @Override
     public GlobalAuthTeam getTeamById(String teamId, boolean withTeamMember) {
-        if (TeamUtils.GLOBAL_TEAM_ID.equals(teamId)) {
-            return null;
-        }
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         return globalAuthTeamEntityMgr.findByTeamIdAndTenantId(tenantData.getPid(), teamId, withTeamMember);
     }
@@ -159,5 +144,35 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     public boolean userBelongsToTeam(String username, String teamId) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         return globalAuthTeamEntityMgr.userBelongsToTeam(tenantData.getPid(), username, teamId);
+    }
+
+    @Override
+    public GlobalAuthTeam createDefaultTeam(String createdByUser) {
+        GlobalAuthTeam defaultTeam = getTeamById(TeamUtils.GLOBAL_TEAM_ID, false);
+        if (defaultTeam != null) {
+            log.info("Default global team already exists in tenant {}.", MultiTenantContext.getShortTenantId());
+            return defaultTeam;
+        }
+        log.info("Create default team for tenant: " + MultiTenantContext.getShortTenantId());
+        GlobalAuthTenant tenantData = getGlobalAuthTenant();
+        defaultTeam = new GlobalAuthTeam();
+        defaultTeam.setCreatedByUser(createdByUser);
+        defaultTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
+        defaultTeam.setName(TeamUtils.GLOBAL_TEAM);
+        defaultTeam.setGlobalAuthTenant(tenantData);
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthUserTenantRightEntityMgr.findByTenantId(tenantData.getPid());
+        defaultTeam.setUserTenantRights(globalAuthUserTenantRights);
+        globalAuthTeamEntityMgr.create(defaultTeam);
+        return defaultTeam;
+    }
+
+    private void setTeamMember(GlobalTeamData globalTeamData, GlobalAuthTeam globalAuthTeam, GlobalAuthTenant tenantData) {
+        Set<String> teamMembers = globalTeamData.getTeamMembers();
+        if (CollectionUtils.isNotEmpty(teamMembers)) {
+            List<GlobalAuthUserTenantRight> globalAuthUserTenantRights =
+                    globalAuthUserTenantRightEntityMgr.findByEmailsAndTenantId(teamMembers, tenantData.getPid());
+            globalAuthTeam.setUserTenantRights(globalAuthUserTenantRights);
+        }
+
     }
 }

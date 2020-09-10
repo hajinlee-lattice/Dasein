@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -29,9 +27,6 @@ public class LifecycleValidatorUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(LifecycleValidatorUnitTestNG.class);
     @InjectMocks
     private LifecycleValidator lifecycleValidator;
-
-    @Mock
-    private BatonService batonService;
 
     @BeforeClass(groups = "unit")
     private void setup() throws IOException {

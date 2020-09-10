@@ -42,6 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
             globalTeamData.setTeamMembers(Sets.newHashSet(user));
             String teamId = teamWrapperService.createTeam(user, globalTeamData);
             projectProxy.updateTeamId(customerSpace, project.getProjectId(), teamId);
+            project.setTeamId(teamId);
         }
         return project;
     }

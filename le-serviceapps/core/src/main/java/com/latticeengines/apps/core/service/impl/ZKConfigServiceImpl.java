@@ -165,7 +165,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             try {
                 maxPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
             } catch (Exception e) {
-                throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
+                log.warn("Cannot get default value for maximum premium lead enrichment attributes. Using default 32");
+                maxPremiumLeadEnrichmentAttributes = "32";
             }
             try {
                 Integer attrNumber = Integer.parseInt(maxPremiumLeadEnrichmentAttributes);

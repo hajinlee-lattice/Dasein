@@ -322,7 +322,7 @@ public class RatingEngineResource {
     @GetMapping("/{ratingEngineId}/dependencies/modelAndView")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
+    public Map<String, UIAction> getRatingEngineDependenciesModelAndView(@PathVariable String ratingEngineId) {
         Map<String, List<String>> dependencies = ratingEngineService.getRatingEngineDependencies(ratingEngineId);
         RatingEngineSummary ratingEngineSummary = ratingEngineService.getRatingEngineSummary(ratingEngineId);
         UIAction uiAction = graphDependencyToUIActionUtil.generateModelDependenciesAction(dependencies, ratingEngineSummary);

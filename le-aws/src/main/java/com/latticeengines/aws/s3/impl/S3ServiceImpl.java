@@ -88,7 +88,7 @@ public class S3ServiceImpl implements S3Service {
 
     private static final long MB = 1024L * 1024L;
 
-    private static final int DEFAULT_ITEM_COUNTS = 3000;
+    private static final int DEFAULT_ITEM_COUNTS = 4000;
     private static final int MAX_ITEM_COUNTS = 30000;
 
     @Inject

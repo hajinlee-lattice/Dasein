@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -335,11 +336,20 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     @Override
-    public void callbackWithAuth(String url, Object responseBody) {
+    public void callbackWithAuth(String url, VboCallback responseBody) {
         refreshToken();
         log.info("Sending callback to " + url);
         log.info(responseBody.toString());
-        restTemplate.postForLocation(URI.create(url), responseBody);
+        String traceId = responseBody.customerCreation.transactionDetail.ackRefId;
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(URI.create(url), responseBody, String.class);
+            log.info("Callback {} finished with response code {}", traceId, response.getStatusCodeValue());
+            log.info("Callback {} response body: {}", traceId, response.getBody());
+        } catch (Exception e) {
+            log.error(traceId + " Exception in callback:" + e.toString());
+            throw e;
+        }
     }
 
     @Override
@@ -450,7 +460,7 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    static public class SuperSubscriberDetails {
+    public static class SuperSubscriberDetails {
 
         @JsonProperty("subscriber_details")
         private SubscriberDetails subscriberDetails;

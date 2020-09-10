@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.dante;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -7,17 +9,19 @@ import com.latticeengines.domain.exposed.dante.metadata.MetadataDocument;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize()
-public class DanteConfigurationDocument {
-
-    private MetadataDocument metadataDocument;
-    private String widgetConfigurationDocument;
+public class DanteConfigurationDocument implements Serializable{
 
     @JsonProperty("metadataDocument")
+    private MetadataDocument metadataDocument;
+
+    @JsonProperty("widgetConfigurationDocument")
+    private String widgetConfigurationDocument;
+
+
     public MetadataDocument getMetadataDocument() {
         return metadataDocument;
     }
 
-    @JsonProperty("widgetConfigurationDocument")
     public String getWidgetConfigurationDocument() {
         return widgetConfigurationDocument;
     }

@@ -239,14 +239,14 @@ public class DataLakeServiceImpl implements DataLakeService {
     public DataPage getAccountById(String accountId, List<String> lookupAttributes, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         String internalAccountId;
-        try (PerformanceTimer timer = new PerformanceTimer("AccountPlayLookup: Lookup Internal Account id | Tenant "
+        try (PerformanceTimer timer = new PerformanceTimer("AccountPlayLookup: Lookup Internal Account id | Tenant="
                 + CustomerSpace.shortenCustomerSpace(customerSpace))) {
             internalAccountId = getInternalAccountId(accountId, orgInfo);
         }
         DataPage dataPage;
         if (StringUtils.isNotBlank(internalAccountId)) {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    "AccountPlayLookup: Account match for " + lookupAttributes.size() + " attributes | Tenant "
+                    "AccountPlayLookup: Account match for " + lookupAttributes.size() + " attributes | Tenant="
                             + CustomerSpace.shortenCustomerSpace(customerSpace))) {
                 dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId,
                         lookupAttributes.stream().map(Column::new).collect(Collectors.toList()));
@@ -529,8 +529,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         // }
         // });
         MatchOutput matchOutput;
-        try (PerformanceTimer timer = new PerformanceTimer(String.format(
-                "AccountPlayLookup: Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)))) {
+        try (PerformanceTimer timer = new PerformanceTimer(
+                String.format("AccountPlayLookup: Calling matchapi for Tenant=%s with request payload: %s",
+                        customerSpace, JsonUtils.serialize(matchInput)))) {
             matchOutput = matchProxy.matchRealTime(matchInput);
         }
         DataPage datapage;

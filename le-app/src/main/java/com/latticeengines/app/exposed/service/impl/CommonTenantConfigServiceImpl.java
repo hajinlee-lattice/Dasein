@@ -104,7 +104,8 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
             try {
                 defaultPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
             } catch (Exception e) {
-                throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
+                log.warn("Cannot get default value for maximum premium lead enrichment attributes. Using default 32");
+                defaultPremiumLeadEnrichmentAttributes = "32";
             }
             try {
                 Integer attrNumber = Integer.parseInt(defaultPremiumLeadEnrichmentAttributes);
@@ -153,7 +154,8 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
             try {
                 defaultPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
             } catch (Exception e) {
-                throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
+                log.warn("Cannot get default value for maximum premium lead enrichment attributes. Using default 32");
+                defaultPremiumLeadEnrichmentAttributes = "32";
             }
             try {
                 Integer attrNumber = Integer.parseInt(defaultPremiumLeadEnrichmentAttributes);

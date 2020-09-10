@@ -78,13 +78,11 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         Map<String, TeamInfo> teamMap = new HashMap<>();
         for (HasTeamInfo hasTeamInfo : hasTeamInfoList) {
             String teamId = hasTeamInfo.getTeamId();
-            if (!TeamUtils.isGlobalTeam(teamId)) {
-                teamMap.putIfAbsent(teamId, new TeamInfo(Long.MIN_VALUE, new ArrayList<>()));
-                teamMap.get(teamId).getHasTeamInfos().add(hasTeamInfo);
-                long updated = getLastUsed(hasTeamInfo);
-                if (teamMap.get(teamId).getLastUsed() < updated) {
-                    teamMap.get(teamId).setLastUsed(updated);
-                }
+            teamMap.putIfAbsent(teamId, new TeamInfo(Long.MIN_VALUE, new ArrayList<>()));
+            teamMap.get(teamId).getHasTeamInfos().add(hasTeamInfo);
+            long updated = getLastUsed(hasTeamInfo);
+            if (teamMap.get(teamId).getLastUsed() < updated) {
+                teamMap.get(teamId).setLastUsed(updated);
             }
         }
         return teamMap;
@@ -108,11 +106,11 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     }
 
     @Override
-    public List<GlobalTeam> getTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
+    public List<GlobalTeam> getTeams(boolean withTeamMember) {
         String tenantId = MultiTenantContext.getTenant().getId();
-        List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember, appendDefaultGlobalTeam);
+        List<GlobalTeam> globalTeams = teamService.getTeamsInContext(withTeamMember);
         TeamEntityList teamEntityList = teamProxy.getTeamEntities(tenantId);
-        List<MetadataSegment> metadataSegments = teamEntityList.getMetadataSegments();
+        List<MetadataSegment> metadataSegments = teamEntityList.getMetadataSegments().stream().filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())).collect(Collectors.toList());
         List<RatingEngineSummary> ratingEngineSummaries = teamEntityList.getRatingEngineSummaries();
         List<Play> plays = teamEntityList.getPlays();
         Map<String, TeamInfo> teamMapForSegment = extractTeamMap(metadataSegments);
@@ -142,8 +140,8 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     }
 
     @Override
-    public List<GlobalTeam> getMyTeams(boolean withTeamMember, boolean appendDefaultGlobalTeam) {
-        return teamService.getMyTeams(withTeamMember, appendDefaultGlobalTeam);
+    public List<GlobalTeam> getMyTeams(boolean withTeamMember) {
+        return teamService.getMyTeams(withTeamMember);
     }
 
     @Override
@@ -168,7 +166,6 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         }
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         if (teamFeatureEnabled) {
-            TeamUtils.fillTeamId(hasTeamInfo);
             if (setAllTeamFields) {
                 TeamUtils.fillTeamInfo(hasTeamInfo, getTeamInContext(hasTeamInfo.getTeamId()), getMyTeamIds());
             } else {
@@ -181,11 +178,10 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
     public void fillTeamInfoForList(List<? extends HasTeamInfo> hasTeamInfos) {
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         if (teamFeatureEnabled) {
-            Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false, true)
+            Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false)
                     .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
             Set<String> teamIds = getMyTeamIds();
             for (HasTeamInfo hasTeamInfo : hasTeamInfos) {
-                TeamUtils.fillTeamId(hasTeamInfo);
                 TeamUtils.fillTeamInfo(hasTeamInfo, globalTeamMap.get(hasTeamInfo.getTeamId()), teamIds);
             }
         }

@@ -26,11 +26,13 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
     PlayLaunch findLatestByChannel(Long playLaunchChannelId);
 
+    PlayLaunch findLatestTerminalLaunchByChannel(Long playLaunchChannelId);
+
     PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
 
     List<PlayLaunch> findByState(LaunchState state);
 
-    List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);
+    List<PlayLaunch> findByStateAcrossTenants(LaunchState state, Long max);
 
     List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,

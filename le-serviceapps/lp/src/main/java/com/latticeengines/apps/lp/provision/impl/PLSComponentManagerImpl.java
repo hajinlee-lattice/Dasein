@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -50,6 +51,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.TeamService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
@@ -81,6 +83,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @Inject
     private IDaaSService iDaaSService;
+
+    @Inject
+    private TeamService teamService;
 
     @Inject
     private S3Service s3Service;
@@ -194,6 +199,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId(), iDaaSUsers);
         assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId(), iDaaSUsers);
         assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId(), null);
+        MultiTenantContext.setTenant(tenant);
+        teamService.createDefaultTeam();
     }
 
     private void assignAccessLevelByEmails(String userName, Collection<String> emails, AccessLevel accessLevel,

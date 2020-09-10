@@ -31,15 +31,15 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject
         implements HasName, HasId<String>, HasPid {
 
     @JsonProperty("deployment_id")
-    @Column(name = "Deployment_ID", nullable = true, unique = true)
+    @Column(name = "Deployment_ID", unique = true)
     private String id;
 
     @JsonProperty("display_name")
-    @Column(name = "Display_Name", nullable = true)
+    @Column(name = "Display_Name")
     private String name;
 
     @JsonProperty("created_by_user")
-    @Column(name = "Created_By_User", nullable = true)
+    @Column(name = "Created_By_User")
     private String user;
 
     @Id
