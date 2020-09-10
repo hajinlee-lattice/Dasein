@@ -519,15 +519,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         matchInput.setUseRemoteDnB(false);
         matchInput.setDataCloudVersion(dataCloudVersion);
-
-        // Future<List<ColumnMetadata>> dateAttrsFuture = getWorkers().submit(() -> {
-        //
-        // "Get date attributes for " +
-        // CustomerSpace.shortenCustomerSpace(customerSpace))) {
-        // return servingStoreProxy.getDateAttrsFromCache(customerSpace,
-        // BusinessEntity.Account);
-        // }
-        // });
         MatchOutput matchOutput;
         try (PerformanceTimer timer = new PerformanceTimer(
                 String.format("AccountPlayLookup: Calling matchapi for Tenant=%s with request payload: %s",
@@ -535,37 +526,10 @@ public class DataLakeServiceImpl implements DataLakeService {
             matchOutput = matchProxy.matchRealTime(matchInput);
         }
         DataPage datapage;
-        if (wasMatchFound(matchOutput)) {
-            // avoiding expensive metadata retrieval if match failed
-            // try (PerformanceTimer timer = new PerformanceTimer()) {
-            // List<ColumnMetadata> dateAttributesMetadata = new ArrayList<>();
-            // if (batonService.shouldWaitDataAttrs(customerSpace)) {
-            // try {
-            // dateAttributesMetadata = dateAttrsFuture.get();
-            // } catch (InterruptedException | ExecutionException e) {
-            // throw new RuntimeException("Failed to get date attributes metadata");
-            // }
-            // } else {
-            // try {
-            // dateAttributesMetadata = dateAttrsFuture.get(1, TimeUnit.SECONDS);
-            // } catch (TimeoutException e) {
-            // log.warn("Time out to get date attributes from a background thread.", e);
-            // } catch (Exception e) {
-            // log.warn("Failed to get date attributes from a background thread.", e);
-            // }
-            // }
-            // datapage = AccountExtensionUtil.processMatchOutputResults(customerSpace,
-            // dateAttributesMetadata,
-            // matchOutput);
-            // timer.setTimerMessage("Processed Date Attributes for account: " +
-            // internalAccountId + " for tenant: "
-            // + customerSpace);
-            // }
-            datapage = convertToDataPage(matchOutput);
-        } else {
+        if (!wasMatchFound(matchOutput)) {
             log.info("No match on MatchApi, for Id: " + internalAccountId + " on CustomerSpace: " + customerSpace);
-            datapage = convertToDataPage(matchOutput);
         }
+        datapage = convertToDataPage(matchOutput);
         return datapage;
     }
 
