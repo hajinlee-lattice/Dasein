@@ -234,7 +234,14 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         // Only create LatticeAccount changelist when rebuildDownstream is set to false,
         // which means LatticeAccount changelist will be used in downstream
         if (!rebuildDownstream) {
-            createLatticeAccountChangelist(newLatticeAccount);
+            try {
+                createLatticeAccountChangelist(newLatticeAccount);
+            } catch (Exception e) {
+                log.warn("Failed to generate change list for full LatticeAccount table, " + //
+                        "force downstream to rebuild: {}", e.getMessage());
+                rebuildDownstream = true;
+                latticeAccountChangeListTable = null;
+            }
         }
 
         // save LatticeAccount table
@@ -321,7 +328,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 joinKey, //
                 InterfaceName.LatticeAccountId.name() //
         ));
-        setPartitionMultiplier(4);
+        setPartitionMultiplier(8);
         SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
         setPartitionMultiplier(1);
 
