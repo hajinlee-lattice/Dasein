@@ -48,7 +48,7 @@ import reactor.core.publisher.Flux;
 public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     static final String CRM_ID = "CrmAccount_External_ID";
-    static final String CRM_CONTACT_ID = "ContactId";
+    static final String CRM_CONTACT_ID = "InternalId";
     static final String ACCOUNT_SYSTEM_ID = "ACCT_INTESTCASE8_D8D0DCAADB";
     static final String OTHERSYSTEM_ACCOUNT_SYSTEM_ID = "Fax";
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
