@@ -154,11 +154,15 @@ public final class TimeLineStoreUtils {
         private String dataType;
 
         private static List<String> columnNames;
+        private static List<String> requiredColumnNames;//will failed timelinejob, if the table haven't contains.
         static {
             columnNames = new ArrayList<>();
             for (TimelineStandardColumn entry : values()) {
                 columnNames.add(entry.getColumnName());
             }
+            requiredColumnNames = new ArrayList<>();
+            requiredColumnNames.add(TimelineStandardColumn.EventDate.columnName.toLowerCase());
+            requiredColumnNames.add(TimelineStandardColumn.EventType.columnName.toLowerCase());
         }
 
         TimelineStandardColumn(String columnName, String dataType) {
@@ -168,6 +172,10 @@ public final class TimeLineStoreUtils {
 
         public static List<String> getColumnNames() {
             return columnNames;
+        }
+
+        public static List<String> getRequiredColumnNames() {
+            return requiredColumnNames;
         }
 
         public static String getDataTypeFromColumnName(String columnName) {
