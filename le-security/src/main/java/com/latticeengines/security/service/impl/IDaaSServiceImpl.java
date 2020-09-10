@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -376,6 +377,23 @@ public class IDaaSServiceImpl implements IDaaSService {
             log.error(msg, e);
         }
         return subscriberDetails;
+    }
+
+    /**
+     * Check if this subscriber_number is in IDaaS and returns subscriber_details when requested.
+     * @param vboRequest
+     * @return
+     */
+    @Override
+    public boolean doesSubscriberNumberExist(VboRequest vboRequest) {
+        String subscriptionNumber = vboRequest.getSubscriber().getSubscriberNumber();
+        if (!StringUtils.isEmpty(subscriptionNumber)) {
+            SubscriberDetails subscriberDetails = getSubscriberDetails(subscriptionNumber);
+            return null != subscriberDetails;
+        }
+        else {
+            return false; // no subscriber number in the VBO request.
+        }
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {

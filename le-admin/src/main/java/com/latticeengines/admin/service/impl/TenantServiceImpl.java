@@ -87,7 +87,6 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionReque
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
-import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
@@ -118,7 +117,8 @@ public class TenantServiceImpl implements TenantService {
 
     private final BatonService batonService = new BatonServiceImpl();
 
-    private String DEFAULT_SUBSCRIPTION_NUMBER = "DEFAULT_SUBSCRIBER_NUMBER";
+    @Value("${default.subscription.number}")
+    private String DEFAULT_SUBSCRIPTION_NUMBER;
 
     @Inject
     private DanteComponent danteComponent;
@@ -712,7 +712,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         // If a tenantType == TenantType.CUSTOMER tenant (the default) then check that the subscriber number is valid.
-        if ("customer".equals(vboRequest.getSubscriber().getTenantType()) && !validateSubscriberNumber(vboRequest)) {
+        if ("customer".equals(vboRequest.getSubscriber().getTenantType()) && !iDaaSService.doesSubscriberNumberExist(vboRequest)) {
             log.error("the subscriber number {} is not valid", subNumber);
             VboResponse response = generateVBOResponse("failed",
                     "The subscriber number is not valid, unable to create tenant.");
@@ -984,17 +984,6 @@ public class TenantServiceImpl implements TenantService {
         Set<LatticeProduct> productsBelongTo = new HashSet<>(latticeComponent.getAssociatedProducts());
         productsBelongTo.retainAll(products);
         return !productsBelongTo.isEmpty();
-    }
-
-    private boolean validateSubscriberNumber(VboRequest vboRequest) {
-        String subscriptionNumber = vboRequest.getSubscriber().getSubscriberNumber();
-        if (!StringUtils.isEmpty(subscriptionNumber)) {
-            SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subscriptionNumber);
-            return null != subscriberDetails;
-        }
-        else {
-            return false; // no subscriber number in the VBO request.
-        }
     }
 
     private FeatureFlagValueMap overlayDefaultValues(FeatureFlagValueMap flagValueMap) {
