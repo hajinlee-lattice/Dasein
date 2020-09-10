@@ -822,6 +822,8 @@ public class TenantServiceImpl implements TenantService {
 
             VboCallback vboCallback = null;
             if (callback) {
+                log.info("Generating callback for call to " + requestUrl);
+
                 vboCallback = new VboCallback();
                 vboCallback.customerCreation = new VboCallback.CustomerCreation();
                 vboCallback.customerCreation.transactionDetail = new VboCallback.TransactionDetail();
@@ -839,7 +841,7 @@ public class TenantServiceImpl implements TenantService {
                 vboCallback.customerCreation.customerDetail.emailSent = Boolean.toString(false);
 
                 vboCallback.timeout = Boolean.FALSE;
-                vboCallback.targetUrl = (canMock && useMock) ? (requestUrl.substring(0, requestUrl.indexOf("/tenants")) + "/vbomock") : callbackUrl;
+                vboCallback.targetUrl = (canMock && useMock) ? ("https" + requestUrl.substring(requestUrl.indexOf(':'), requestUrl.indexOf("/tenants")) + "/vbomock") : callbackUrl;
             }
 
             boolean result = createTenant(tenantName, tenantName, registration, userName, vboCallback);
