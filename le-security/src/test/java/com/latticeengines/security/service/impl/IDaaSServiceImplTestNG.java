@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
@@ -69,6 +70,15 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         userRegistration.setCredentials(credentials);
 
         userService.createUser(TEST_EMAIL, userRegistration);
+    }
+
+    @Test(groups = "functional")
+    public void testGetSubscriberDetails () {
+
+        String subscriptionNumber = "800118741";
+        SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subscriptionNumber);
+        Assert.assertNotNull(subscriberDetails);
+        Assert.assertEquals("167734092", subscriberDetails.getDunsNumber(), "DUNS number not equal.");
     }
 
 }
