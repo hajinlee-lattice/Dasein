@@ -5,6 +5,7 @@ import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -25,7 +26,7 @@ public interface IDaaSService {
 
     InvitationLinkResponse getUserInvitationLink(String email);
 
-    boolean validateSubscriberNumber(VboRequest vboRequest, String userName);
-
     void callbackWithAuth(String url, Object responseBody);
+
+    SubscriberDetails getSubscriberDetails (String subscriberNumber);
 }

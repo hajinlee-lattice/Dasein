@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -36,6 +39,7 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
@@ -43,7 +47,7 @@ import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
-import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -331,16 +335,37 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     @Override
-    public boolean validateSubscriberNumber(VboRequest vboRequest, String userName) {
-        return false;
-    }
-
-    @Override
     public void callbackWithAuth(String url, Object responseBody) {
         refreshToken();
         log.info("Sending callback to " + url);
         log.info(responseBody.toString());
         restTemplate.postForLocation(URI.create(url), responseBody);
+    }
+
+    @Override
+    public SubscriberDetails getSubscriberDetails (@NotNull String subscriberNumber)  {
+        refreshToken();
+        SubscriberDetails subscriberDetails=null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
+            subscriberDetails = retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("Get subscriber_details from IDaaS.")) {
+                    URI subscriberDetailsV1URI = createSubscriberDetailsV1Link(subscriberNumber);
+                    ResponseEntity<SuperSubscriberDetails> responseEntity = restTemplate.getForEntity(subscriberDetailsV1URI,
+                            SuperSubscriberDetails.class);
+                    return responseEntity.getBody().getSubscriberDetails();
+                }
+            });
+        }
+        catch (HttpClientErrorException hcee) {
+            String msg = String.format("HttpClientErrorException while trying to get subscriber_details " +
+                    "from IDaaS. Error Code %d\nMsg %s", hcee.getRawStatusCode(), hcee.getStatusText());
+        }
+        catch (Exception e) {
+            String msg = "Exception while trying to get subscription_details from IDaaS.";
+            log.error(msg, e);
+        }
+        return subscriberDetails;
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {
@@ -419,4 +444,23 @@ public class IDaaSServiceImpl implements IDaaSService {
         return URI.create(apiUrl + "/user/" + email + "/" + source.replaceAll(" ", "%20") + "/invitation");
     }
 
+    private URI createSubscriberDetailsV1Link(String subscriberNumber) {
+        return URI.create(apiUrl + String.format("/subscriber/v1?subscriber_number=%s", subscriberNumber));
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    static public class SuperSubscriberDetails {
+
+        @JsonProperty("subscriber_details")
+        private SubscriberDetails subscriberDetails;
+
+        public SubscriberDetails getSubscriberDetails() {
+            return subscriberDetails;
+        }
+
+        public void setSubscriberDetails(SubscriberDetails subscriberDetails) {
+            this.subscriberDetails = subscriberDetails;
+        }
+    }
 }

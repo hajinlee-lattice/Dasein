@@ -87,6 +87,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionReque
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
@@ -116,6 +117,8 @@ public class TenantServiceImpl implements TenantService {
     private static final String danteFeatureFlag = "Dante";
 
     private final BatonService batonService = new BatonServiceImpl();
+
+    private String DEFAULT_SUBSCRIPTION_NUMBER = "DEFAULT_SUBSCRIBER_NUMBER";
 
     @Inject
     private DanteComponent danteComponent;
@@ -193,7 +196,6 @@ public class TenantServiceImpl implements TenantService {
             LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
             overwriter.overwriteDefaultSpaceConfig();
         }
-
     }
 
     @Override
@@ -709,13 +711,16 @@ public class TenantServiceImpl implements TenantService {
             return response;
         }
 
-        // TODO First check if this is a CUSTOMER tenant.
-        if (!iDaaSService.validateSubscriberNumber(vboRequest, userName)) {
-            log.error("the subscriber number {} is not valid for user {}", subNumber, userName);
+        // If a tenantType == TenantType.CUSTOMER tenant (the default) then check that the subscriber number is valid.
+        if ("customer".equals(vboRequest.getSubscriber().getTenantType()) && !validateSubscriberNumber(vboRequest)) {
+            log.error("the subscriber number {} is not valid", subNumber);
             VboResponse response = generateVBOResponse("failed",
-                    "The subscriber number is not valid for the user.");
+                    "The subscriber number is not valid, unable to create tenant.");
             vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
             return response;
+        }
+        else {
+            subNumber = (null != subNumber) ? subNumber : DEFAULT_SUBSCRIPTION_NUMBER;
         }
 
         String subName = vboRequest.getSubscriber().getName();
@@ -979,6 +984,13 @@ public class TenantServiceImpl implements TenantService {
         Set<LatticeProduct> productsBelongTo = new HashSet<>(latticeComponent.getAssociatedProducts());
         productsBelongTo.retainAll(products);
         return !productsBelongTo.isEmpty();
+    }
+
+    private boolean validateSubscriberNumber(VboRequest vboRequest) {
+        String subscriptionNumber = vboRequest.getSubscriber().getSubscriberNumber();
+        SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subscriptionNumber);
+
+        return null != subscriberDetails;
     }
 
     private FeatureFlagValueMap overlayDefaultValues(FeatureFlagValueMap flagValueMap) {

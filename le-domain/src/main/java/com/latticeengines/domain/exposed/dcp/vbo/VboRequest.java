@@ -148,6 +148,9 @@ public class VboRequest {
         @JsonProperty("name")
         private String name;
 
+        @JsonProperty("customer")
+        private String tenantType = "customer";
+
         public String getSubscriberNumber() {
             return subscriberNumber;
         }
@@ -178,6 +181,14 @@ public class VboRequest {
 
         public void setCountryCode(String countryCode) {
             this.countryCode = countryCode;
+        }
+
+        public String getTenantType() {
+            return tenantType;
+        }
+
+        public void setTenantType(String tenantType) {
+            this.tenantType = tenantType;
         }
     }
 
