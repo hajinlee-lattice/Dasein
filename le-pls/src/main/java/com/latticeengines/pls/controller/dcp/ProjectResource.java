@@ -160,9 +160,6 @@ public class ProjectResource {
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
     void updateDescription(@PathVariable String projectId, @RequestBody String description) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
-        }
         try {
             projectService.updateDescription(customerSpace.toString(), projectId, description);
         } catch (Exception e) {
