@@ -141,6 +141,9 @@ public class RemoveOrphanContact extends BaseProcessAnalyzeSparkStep<ProcessCont
         } else if (hasAccountChange()) {
             log.info("Should refresh contact serving store, because there are account changes.");
             shouldRefresh = true;
+        } else if (Boolean.TRUE.equals(configuration.getRebuild())) {
+            log.info("Should refresh contact serving store, because it is enforced to rebuild.");
+            shouldRefresh = true;
         }
         return shouldRefresh;
     }
