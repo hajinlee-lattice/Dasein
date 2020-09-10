@@ -222,8 +222,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
       if (requiredCol.toLowerCase.equals(TimelineStandardColumn.StreamType.getColumnName.toLowerCase)) {
         return df.withColumn(requiredCol, lit(streamType))
       }
-      if (requiredCol.toLowerCase.equals(TimelineStandardColumn.EventDate.getColumnName.toLowerCase) || requiredCol
-        .toLowerCase.equals(TimelineStandardColumn.EventType.getColumnName.toLowerCase)) {
+      if (TimelineStandardColumn.getRequiredColumnNames.contains(requiredCol.toLowerCase)) {
         throw new IllegalStateException(s"table missing required column eventTime/eventType. please check it.")
       }
       return df.withColumn(requiredCol, lit(null).cast(colType))
