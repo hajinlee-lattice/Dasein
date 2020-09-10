@@ -988,9 +988,13 @@ public class TenantServiceImpl implements TenantService {
 
     private boolean validateSubscriberNumber(VboRequest vboRequest) {
         String subscriptionNumber = vboRequest.getSubscriber().getSubscriberNumber();
-        SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subscriptionNumber);
-
-        return null != subscriberDetails;
+        if (!StringUtils.isEmpty(subscriptionNumber)) {
+            SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subscriptionNumber);
+            return null != subscriberDetails;
+        }
+        else {
+            return false; // no subscriber number in the VBO request.
+        }
     }
 
     private FeatureFlagValueMap overlayDefaultValues(FeatureFlagValueMap flagValueMap) {
