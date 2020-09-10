@@ -25,6 +25,10 @@ public class ProjectRequest {
     @ApiModelProperty(required = true, value = "purposeOfUse")
     private PurposeOfUse purposeOfUse;
 
+    @JsonProperty("projectDescription")
+    @ApiModelProperty(required = false, value = "projectDescription")
+    private String projectDescription;
+
     public String getDisplayName() {
         return displayName;
     }
@@ -51,5 +55,13 @@ public class ProjectRequest {
 
     public void setPurposeOfUse(PurposeOfUse purposeOfUse) {
         this.purposeOfUse = purposeOfUse;
+    }
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
     }
 }

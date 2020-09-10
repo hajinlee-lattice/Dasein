@@ -84,4 +84,10 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId, teamId);
         put("update teamId", url);
     }
+
+    public void updateDescription(String customerSpace, String projectId, String description) {
+        String baseUrl = "/customerspaces/{customerSpace}/project/projectId/{projectId}/description";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId);
+        put("update description", url, description);
+    }
 }

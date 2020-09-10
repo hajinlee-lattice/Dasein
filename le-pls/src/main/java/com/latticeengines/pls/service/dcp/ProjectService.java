@@ -20,5 +20,7 @@ public interface ProjectService {
 
     void deleteProject(String customerSpace, String projectId);
 
+    void updateDescription(String customerSpace, String projectId, String description);
+
     GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String toString, String projectId);
 }

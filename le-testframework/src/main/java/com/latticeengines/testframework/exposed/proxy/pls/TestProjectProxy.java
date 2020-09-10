@@ -19,21 +19,25 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         super("pls/projects");
     }
 
-    public ProjectDetails createProjectWithProjectId(String displayName, String projectId, Project.ProjectType projectType) {
+    public ProjectDetails createProjectWithProjectId(String displayName, String projectId,
+                                                     Project.ProjectType projectType, String desciption) {
         ProjectRequest request = new ProjectRequest();
         request.setDisplayName(displayName);
         request.setProjectId(projectId);
         request.setProjectType(projectType);
         request.setPurposeOfUse(getPurposeOfUse());
+        request.setProjectDescription(desciption);
         String url = constructUrl("/");
         return post("createProject", url, request, ProjectDetails.class);
     }
 
-    public ProjectDetails createProjectWithOutProjectId(String displayName, Project.ProjectType projectType) {
+    public ProjectDetails createProjectWithOutProjectId(String displayName, Project.ProjectType projectType,
+                                                        String description) {
         ProjectRequest request = new ProjectRequest();
         request.setDisplayName(displayName);
         request.setProjectType(projectType);
         request.setPurposeOfUse(getPurposeOfUse());
+        request.setProjectDescription(description);
         String url = constructUrl("/");
         return post("createProject", url, request, ProjectDetails.class);
     }
@@ -62,6 +66,12 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         String urlPattern = "/{projectId}";
         String url = constructUrl(urlPattern, projectId);
         delete("deleteProject", url);
+    }
+
+    public void updateDescription(String projectId, String description) {
+        String urlPattern = "/projectId/{projectId}/description";
+        String url = constructUrl(urlPattern, projectId);
+        put("update description", url, description);
     }
 
     public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String projectId) {

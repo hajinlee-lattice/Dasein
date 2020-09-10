@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller.dcp;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +36,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final String DISPLAY_NAME = "testProject";
     private static final String PROJECT_ID = "testProject";
+    private static final String DESCRIPTION = "test project description";
 
     @Inject
     TestProjectProxy testProjectProxy;
@@ -51,9 +53,15 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testCreateDCPProjectWithProjectId() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME, PROJECT_ID,
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, null);
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectId(), PROJECT_ID);
+        assertNull(projectDetail.getProjectDescription());
+        testProjectProxy.updateDescription(PROJECT_ID, DESCRIPTION);
+
+        projectDetail = testProjectProxy.getProjectByProjectId(projectDetail.getProjectId());
+        Assert.assertNotNull(projectDetail);
+        Assert.assertEquals(projectDetail.getProjectDescription(), DESCRIPTION);
     }
 
     // Test creating a project without a provided ID and making sure that deleting the project moves it to archived
@@ -61,9 +69,10 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testCreateDCPProjectWithOutProjectId() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, DESCRIPTION);
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectDisplayName(), DISPLAY_NAME);
+        assertEquals(projectDetail.getProjectDescription(), DESCRIPTION);
         testProjectProxy.deleteProject(projectDetail.getProjectId());
 
         projectDetail = testProjectProxy.getProjectByProjectId(projectDetail.getProjectId());
@@ -76,10 +85,10 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             "testCreateDCPProjectWithOutProjectId"})
     public void testGetAllDCPProject() {
         ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, DESCRIPTION);
         assertNotNull(projectDetail1);
         ProjectDetails projectDetail2 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, DESCRIPTION);
         assertNotNull(projectDetail2);
 
         // Check only non-archived projects.
@@ -132,7 +141,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         // Add a project as an External Admin.
         ProjectDetails projectDetail3 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, DESCRIPTION);
         assertNotNull(projectDetail3);
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(5,

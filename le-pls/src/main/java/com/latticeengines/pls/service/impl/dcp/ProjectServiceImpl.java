@@ -70,6 +70,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void updateDescription(String customerSpace, String projectId, String description) {
+        projectProxy.updateDescription(customerSpace, projectId, description);
+    }
+
+    @Override
     public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String customerSpace, String projectId) {
         return projectProxy.getDropFolderAccessByProjectId(customerSpace, projectId, TeamUtils.getTeamIds());
     }

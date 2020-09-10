@@ -63,10 +63,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
-                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse) {
+                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, purposeOfUse));
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath,
+                purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -77,10 +78,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse) {
+                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
         validateProjectId(projectId);
         String rootPath = generateRootPath(projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, purposeOfUse));
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath,
+                purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -274,7 +276,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private Project generateProjectObject(String projectId, String displayName,
                                           Project.ProjectType projectType, String user, String rootPath,
-                                          PurposeOfUse purposeOfUse) {
+                                          PurposeOfUse purposeOfUse, String description) {
         Project project = new Project();
         project.setCreatedBy(user);
         project.setProjectDisplayName(displayName);
@@ -285,6 +287,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setRootPath(rootPath);
         project.setRecipientList(Collections.singletonList(user));
         project.setPurposeOfUse(purposeOfUse);
+        project.setProjectDescription(description);
         return project;
     }
 

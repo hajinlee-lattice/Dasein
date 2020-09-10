@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -153,4 +154,20 @@ public class ProjectResource {
         }
     }
 
+    @PutMapping("/projectId/{projectId}/description")
+    @ResponseBody
+    @ApiOperation("update project description")
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
+    void updateDescription(@PathVariable String projectId, @RequestBody String description) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            projectService.updateDescription(customerSpace.toString(), projectId, description);
+        } catch (Exception e) {
+            log.error("Failed to update project description by projectId: " + e.getMessage());
+            throw UIActionUtils.handleException(e);
+        }
+    }
 }
