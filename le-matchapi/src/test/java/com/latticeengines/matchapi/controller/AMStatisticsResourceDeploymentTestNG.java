@@ -30,7 +30,7 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     private static final Logger log = LoggerFactory.getLogger(AMStatisticsResourceDeploymentTestNG.class);
     private int enrichmentOnlyCubeFieldsCount = 0;
 
-    private List<Category> amCats = Arrays.asList(Category.FIRMOGRAPHICS, Category.COVID_19, Category.INTENT,
+    private List<Category> amCats = Arrays.asList(Category.FIRMOGRAPHICS, Category.INTENT,
             Category.ONLINE_PRESENCE, Category.TECHNOLOGY_PROFILE, Category.WEBSITE_KEYWORDS, Category.WEBSITE_PROFILE);
 
     @Test(groups = { "deployment" }, enabled = true)
@@ -54,7 +54,11 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     @Test(groups = { "deployment" })
     public void testGetTopNTree() {
         TopNTree topnTree = columnMetadataProxy.getTopNTree();
-        amCats.forEach(c -> Assert.assertTrue(topnTree.getCategories().containsKey(c)));
+        log.info("Category total=" + topnTree.getCategories().size());
+        amCats.forEach(c -> {
+            log.info("Category=" + c);
+            Assert.assertTrue(topnTree.getCategories().containsKey(c));
+        });
         TopNTree topnTreeExcludeInternal = columnMetadataProxy.getTopNTree(true);
         amCats.forEach(c -> Assert.assertTrue(topnTreeExcludeInternal.getCategories().containsKey(c)));
     }
