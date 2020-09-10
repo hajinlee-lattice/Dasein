@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.admin.entitymgr.VboRequestLogEntityMgr;
 import com.latticeengines.admin.service.VboRequestLogService;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
@@ -19,18 +20,24 @@ public class VboRequestLogServiceImpl implements VboRequestLogService {
     private VboRequestLogEntityMgr vboRequestLogEntityMgr;
 
     @Override
-    public void createVboRequestLog(String traceId, String tenantId, VboRequest vboRequest, VboResponse vboResponse) {
+    public void createVboRequestLog(String traceId, String tenantId, Long receiveTime, VboRequest vboRequest, VboResponse vboResponse) {
         VboRequestLog vboRequestLog = new VboRequestLog();
         vboRequestLog.setTraceId(traceId);
         vboRequestLog.setTenantId(tenantId);
         vboRequestLog.setVboRequest(vboRequest);
         vboRequestLog.setVboResponse(vboResponse);
+        vboRequestLog.setRequestTime(receiveTime);
         vboRequestLogEntityMgr.save(vboRequestLog);
     }
 
     @Override
     public void updateVboResponse(String traceId, VboResponse vboResponse) {
         vboRequestLogEntityMgr.updateVboResponse(traceId, vboResponse);
+    }
+
+    @Override
+    public void updateVboCallback(String traceId, VboCallback vboCallback, Long sendTime) {
+        vboRequestLogEntityMgr.updateVboCallback(traceId, vboCallback, sendTime);
     }
 
     @Override

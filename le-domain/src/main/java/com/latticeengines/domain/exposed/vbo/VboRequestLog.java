@@ -15,6 +15,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -50,6 +51,16 @@ public class VboRequestLog implements HasPid {
     @Column(name = "VBO_RESPONSE", columnDefinition = "'JSON'")
     @Type(type = "json")
     private VboResponse vboResponse;
+
+    @Column(name = "CALLBACK_REQUEST", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private VboCallback callbackRequest;
+
+    @Column(name = "REQUEST_TIME")
+    private Long requestTime;
+
+    @Column(name = "CALLBACK_TIME")
+    private Long callbackTime;
 
     @Override
     public Long getPid() {
@@ -91,5 +102,29 @@ public class VboRequestLog implements HasPid {
 
     public void setVboResponse(VboResponse vboResponse) {
         this.vboResponse = vboResponse;
+    }
+
+    public VboCallback getCallbackRequest() {
+        return callbackRequest;
+    }
+
+    public void setCallbackRequest(VboCallback callbackRequest) {
+        this.callbackRequest = callbackRequest;
+    }
+
+    public Long getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(Long requestTime) {
+        this.requestTime = requestTime;
+    }
+
+    public Long getCallbackTime() {
+        return callbackTime;
+    }
+
+    public void setCallbackTime(Long callbackTime) {
+        this.callbackTime = callbackTime;
     }
 }

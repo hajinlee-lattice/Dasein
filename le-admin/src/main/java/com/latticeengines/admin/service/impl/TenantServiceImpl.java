@@ -198,7 +198,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean createTenant(final String contractId, final String tenantId, TenantRegistration tenantRegistration,
-            String userName, VboCallback callback) {
+            String userName, VboCallback callback, String traceId) {
         final ContractInfo contractInfo = tenantRegistration.getContractInfo();
         final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -249,7 +249,7 @@ public class TenantServiceImpl implements TenantService {
             CallbackTimeoutThread timeoutThread = null;
             Semaphore timeoutSemaphore = new Semaphore(1); // only to be used when updating timeout status
             if (callback != null) {
-                timeoutThread = new CallbackTimeoutThread(callback, timeoutSemaphore);
+                timeoutThread = new CallbackTimeoutThread(callback, traceId, timeoutSemaphore);
                 timeoutThread.start();
             }
 
@@ -272,6 +272,8 @@ public class TenantServiceImpl implements TenantService {
                         callback.timeout = true;
                         timeoutThread.interrupt();
                         timeoutSemaphore.release();
+
+                        vboRequestLogService.updateVboCallback(traceId, callback, System.currentTimeMillis());
 
                         // VBO needs OAuth token/Authorization header
                         iDaaSService.callbackWithAuth(callback.targetUrl, callback);
@@ -697,6 +699,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public VboResponse createVboTenant(VboRequest vboRequest, String userName, String requestUrl, Boolean callback, Boolean useMock) {
+        Long receiveTime = System.currentTimeMillis();
         String subNumber  = vboRequest.getSubscriber().getSubscriberNumber();
         Tenant existingTenant = tenantService.findBySubscriberNumber(subNumber);
         if (existingTenant != null) {
@@ -705,7 +708,7 @@ public class TenantServiceImpl implements TenantService {
                     subNumber, existingName);
             VboResponse response = generateVBOResponse("failed",
                     "A tenant has already existed for this subscriber number");
-            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
             return response;
         }
 
@@ -715,7 +718,7 @@ public class TenantServiceImpl implements TenantService {
             log.error("system can't construct tenant name from subscriber name {}.", subName);
             VboResponse response = generateVBOResponse("failed",
                     "system can't construct tenant name from subscriber name.");
-            vboRequestLogService.createVboRequestLog(null, null, vboRequest, response);
+            vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
             return response;
         }
         Tracer tracer = GlobalTracer.get();
@@ -725,7 +728,7 @@ public class TenantServiceImpl implements TenantService {
             adminSpan = tracer.activeSpan();
             Map<String, String> tracingCtx = TracingUtils.getActiveTracingContext();
             String traceId = adminSpan.context().toTraceId();
-            vboRequestLogService.createVboRequestLog(traceId, tenantName, vboRequest, null);
+            vboRequestLogService.createVboRequestLog(traceId, tenantName, receiveTime, vboRequest, null);
 
             List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
 
@@ -842,7 +845,7 @@ public class TenantServiceImpl implements TenantService {
                 vboCallback.targetUrl = (canMock && useMock) ? (requestUrl.substring(0, requestUrl.indexOf("/tenants")) + "/vbomock") : callbackUrl;
             }
 
-            boolean result = createTenant(tenantName, tenantName, registration, userName, vboCallback);
+            boolean result = createTenant(tenantName, tenantName, registration, userName, vboCallback, traceId);
             String status = result ? "success" : "failed";
             String message = result ? "tenant created successfully via Vbo request" :
                     "tenant created failed via Vbo request";
@@ -1011,12 +1014,14 @@ public class TenantServiceImpl implements TenantService {
 
     private class CallbackTimeoutThread extends Thread {
         private final VboCallback callback;
+        private final String traceId;
         private final Semaphore semaphore;
 
         private final long WAIT_TIME = TimeUnit.MINUTES.toMillis(30);
 
-        CallbackTimeoutThread(final VboCallback callback, Semaphore semaphore) {
+        CallbackTimeoutThread(final VboCallback callback, final String traceId, Semaphore semaphore) {
             this.callback = callback;
+            this.traceId = traceId;
             this.semaphore = semaphore;
         }
 
@@ -1029,6 +1034,8 @@ public class TenantServiceImpl implements TenantService {
                     callback.timeout = true;
                     log.info("Callback timed out: sending callback as-is");
                     iDaaSService.callbackWithAuth(callback.targetUrl, callback);
+
+                    vboRequestLogService.updateVboCallback(traceId, callback, System.currentTimeMillis());
                 }
                 semaphore.release();
             } catch (InterruptedException e) {
