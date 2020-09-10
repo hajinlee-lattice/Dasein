@@ -11,7 +11,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -61,6 +63,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
 public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
 
@@ -124,11 +127,17 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_sfdc_id"));
+        // user_sfdc__{}_external_id
+        Pattern pattern = Pattern.compile("user_sfdc__[a-z0-9]{8}_external_id");
+        Optional<String> attrName = extrenalAccount.getImportTemplate().getAttributes()
+                .stream().map(Attribute::getName)
+                .filter(name -> pattern.matcher(name).matches())
+                .findAny();
+        Assert.assertTrue(attrName.isPresent());
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("user_sfdc_id"));
-        Assert.assertEquals(system.getDisplayNameById("user_sfdc_id"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains(attrName.get()));
+        Assert.assertEquals(system.getDisplayNameById(attrName.get()), "SFDC ID");
     }
 
     @Test(groups = "deployment")
@@ -346,11 +355,17 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_CONTACT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_sfdc_id"));
+
+        Pattern pattern = Pattern.compile("user_sfdc__[a-z0-9]{8}_external_id");
+        Optional<String> attrName = extrenalAccount.getImportTemplate().getAttributes()
+                .stream().map(Attribute::getName)
+                .filter(name -> pattern.matcher(name).matches())
+                .findAny();
+        Assert.assertTrue(attrName.isPresent());
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_CONTACT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("user_sfdc_id"));
-        Assert.assertEquals(system.getDisplayNameById("user_sfdc_id"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains(attrName.get()));
+        Assert.assertEquals(system.getDisplayNameById(attrName.get()), "SFDC ID");
     }
 
     private void validateImportAction(List<Action> actions) {
