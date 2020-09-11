@@ -13,6 +13,7 @@ import com.latticeengines.admin.repository.reader.VboRequestLogReaderRepository;
 import com.latticeengines.admin.repository.writer.VboRequestLogWriterRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
 
@@ -41,6 +42,15 @@ public class VboRequestLogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<VboRe
     public void updateVboResponse(String traceId, VboResponse vboResponse) {
         VboRequestLog requestLog = writerRepository.findByTraceId(traceId);
         requestLog.setVboResponse(vboResponse);
+        writerRepository.save(requestLog);
+    }
+
+    @Override
+    @Transactional(transactionManager = "vboJpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateVboCallback(String traceId, VboCallback vboCallback, Long sendTime) {
+        VboRequestLog requestLog = writerRepository.findByTraceId(traceId);
+        requestLog.setCallbackRequest(vboCallback);
+        requestLog.setCallbackTime(sendTime);
         writerRepository.save(requestLog);
     }
 

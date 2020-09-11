@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.domain.exposed.ulysses.formatters.AccountDanteFormatter;
 import com.latticeengines.domain.exposed.ulysses.formatters.DanteFormatter;
+import com.latticeengines.domain.exposed.ulysses.formatters.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.ulysses.formatters.TalkingPointDanteFormatter;
 import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
@@ -295,11 +296,11 @@ public class DataLakeAccountResource {
 
     private class AccountAndTalkingPoints {
         private Map<String, Object> account;
-        private List<TalkingPointDTO> talkingPoints;
+        private List<DanteTalkingPoint> talkingPoints;
 
         AccountAndTalkingPoints(Map<String, Object> account, List<TalkingPointDTO> talkingPoints) {
             this.account = account;
-            this.talkingPoints = talkingPoints;
+            this.talkingPoints = talkingPoints.stream().map(DanteTalkingPoint::new).collect(Collectors.toList());
         }
 
         @JsonProperty("account")
@@ -308,7 +309,7 @@ public class DataLakeAccountResource {
         }
 
         @JsonProperty("talkingPoints")
-        public List<TalkingPointDTO> getTalkingPoints() {
+        public List<DanteTalkingPoint> getTalkingPoints() {
             return talkingPoints;
         }
 

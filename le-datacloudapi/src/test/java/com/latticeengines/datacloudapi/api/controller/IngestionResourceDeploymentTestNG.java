@@ -64,8 +64,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2019_05_001.OUT.gz";
     private static final String ORB_INGESTION = "OrbTest";
     private static final String BOMBORA_INGESTION = "BomboraTest";
-    private static final String BOMBORA_FILE_VERSION1 = "20190714";
-    private static final String BOMBORA_FILE_VERSION2 = "20190721";
+    private static final String BOMBORA_FILE_VERSION1 = "20200108";
+    private static final String BOMBORA_FILE_VERSION2 = "20200115";
     private static String bomboraTestVersion1;
     private static String bomboraTestVersion2;
 
@@ -97,43 +97,38 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     // split into groups, to avoid too many jobs to congest yarn RM
     // IngestionName, Config, IngestionType
     private Object[][] getIngestions1() {
-        return new Object[][] {
-                { ORB_INGESTION,
-                        "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,"
-                                + "\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\","
-                                + "\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\","
-                                + "\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\","
-                                + "\"FileName\":\"orb-db2-export-sample.zip\"}",
-                        IngestionType.API } //
+        return new Object[][] { { ORB_INGESTION, "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,"
+                + "\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\","
+                + "\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\","
+                + "\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\","
+                + "\"FileName\":\"orb-db2-export-sample.zip\"}", IngestionType.API } //
         };
     }
 
     private Object[][] getIngestions2() {
-        return new Object[][] {
-                { DNB_INGESTION,
-                        String.format(
-                                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,"
-                                        + "\"SftpHost\":\"%s\",\"SftpPort\":%d,\"SftpUsername\":\"%s\",\"SftpPassword\":\"%s\","
-                                        + "\"SftpDir\":\"ingest_test/IngestionResourceDeploymentTestNG/DnB\","
-                                        + "\"CheckVersion\":1,\"CheckStrategy\":\"ALL\","
-                                        + "\"HasSubfolder\":false,\"FileRegexPattern\":\"LE_SEED_OUTPUT_(.+).OUT.gz\","
-                                        + "\"FileTSPattern\":\"yyyy_MM\"}",
-                                sftpProvider.getSftpHost(), sftpProvider.getSftpPort(), sftpProvider.getSftpUserName(),
-                                sftpProvider.getSftpPassword()),
-                        IngestionType.SFTP },
-        };
+        return new Object[][] { { DNB_INGESTION,
+                String.format(
+                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,"
+                                + "\"SftpHost\":\"%s\",\"SftpPort\":%d,\"SftpUsername\":\"%s\",\"SftpPassword\":\"%s\","
+                                + "\"SftpDir\":\"ingest_test/SftpUtilsTestNG/DnB\","
+                                + "\"CheckVersion\":1,\"CheckStrategy\":\"ALL\","
+                                + "\"HasSubfolder\":false,\"FileRegexPattern\":\"LE_SEED_OUTPUT_(.+).OUT.gz\","
+                                + "\"FileTSPattern\":\"yyyy_MM\"}",
+                        sftpProvider.getSftpHost(), sftpProvider.getSftpPort(), sftpProvider.getSftpUserName(),
+                        sftpProvider.getSftpPassword()),
+                IngestionType.SFTP }, };
     }
 
     private Object[][] getIngestions3() {
-        return new Object[][] { { BOMBORA_INGESTION, String.format(
-                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":1,"
+        return new Object[][] { { BOMBORA_INGESTION,
+                String.format("{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":1,"
                         + "\"SftpHost\":\"%s\",\"SftpPort\":%d,\"SftpUsername\":\"%s\",\"SftpPassword\":\"%s\","
-                        + "\"SftpDir\":\"ingest_test/IngestionResourceDeploymentTestNG/Bombora/bombora-clientfiles-adat_zip\","
+                        + "\"SftpDir\":\"ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip\","
                         + "\"CheckVersion\":1,\"CheckStrategy\":\"WEEK\","
                         + "\"HasSubfolder\":true,\"SubfolderRegexPattern\":\"\\\\d{8}\",\"SubfolderTSPattern\":\"yyyyMMdd\","
-                        + "\"FileRegexPattern\":\"AllDomainsAllTopicsZips_(.+).csv.gz\"}",
-                sftpProvider.getSftpHost(), sftpProvider.getSftpPort(), sftpProvider.getSftpUserName(),
-                sftpProvider.getSftpPassword()), IngestionType.SFTP }, };
+                        + "\"FileRegexPattern\":\"AllDomainsAllTopicsZips_(.+).csv.gz\"}", sftpProvider.getSftpHost(),
+                        sftpProvider.getSftpPort(), sftpProvider.getSftpUserName(), sftpProvider.getSftpPassword()),
+                IngestionType.SFTP }, };
     }
 
     // IngestionName, ExpectedCreatedProgressNum, Version, Size
@@ -146,8 +141,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     // IngestionName, ExpectedCreatedProgressNum, Version, Size
     private static Object[][] getExpectedResult2() {
         return new Object[][] { //
-                { DNB_INGESTION, 3, DNB_VERSION, null }
-        };
+                { DNB_INGESTION, 3, DNB_VERSION, null } };
     }
 
     // IngestionName, ExpectedCreatedProgressNum, Version, Size

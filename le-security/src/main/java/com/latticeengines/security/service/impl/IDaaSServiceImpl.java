@@ -316,6 +316,7 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     @Override
     public InvitationLinkResponse getUserInvitationLink(String email) {
+        refreshToken();
         InvitationLinkResponse response = null;
         try {
             RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);

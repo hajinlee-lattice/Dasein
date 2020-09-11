@@ -63,7 +63,7 @@ public class TenantResource {
             @RequestParam(value = "contractId") String contractId, //
             @RequestBody TenantRegistration registration, HttpServletRequest request) {
         String userName = getUserName(request);
-        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName, null);
+        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName, null, null);
     }
 
     @PostMapping("/{tenantId}/V2")

@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.service.VboRequestLogService;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
@@ -47,10 +48,12 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
+import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.vbo.VboRequestLog;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
@@ -87,6 +90,9 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Inject
     private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
+
+    @Inject
+    private VboRequestLogService vboRequestLogService;
 
     @Value("${admin.test.contract}")
     private String testContract;
@@ -140,12 +146,12 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testVboEnd2End() throws Exception {
         String subNumber = String.valueOf(System.currentTimeMillis());
-        provisionEndToEndVboTestTenants(subNumber);
+        String traceId = provisionEndToEndVboTestTenants(subNumber);
         log.info("Verify installation");
         verifyZKState();
         verifyPLSTenantExists();
         verifyIDaasUserExists();
-        verifyVboCallback();
+        verifyVboCallback(traceId);
 
         testExistingSubNumberViolation(subNumber);
 
@@ -183,7 +189,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         return req;
     }
 
-    private void provisionEndToEndVboTestTenants(String subNumber) {
+    private String provisionEndToEndVboTestTenants(String subNumber) {
         String url = getRestHostPort() + "/admin/tenants/vboadmin?useMock=true";
         VboRequest req = generateVBORequest(subNumber);
 
@@ -191,6 +197,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
 
+        return result.getAckReferenceId();
     }
 
     private void testExistingSubNumberViolation(String subNumber) {
@@ -428,7 +435,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         }
     }
 
-    private void verifyVboCallback() throws Exception {
+    private void verifyVboCallback(String traceId) throws Exception {
         boolean verified = false;
         Tenant tenant = null;
         for(int i = 0; i < 30; ++i) {
@@ -445,6 +452,12 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         }
         Assert.assertTrue(verified);
         Assert.assertEquals(tenant.getJobNotificationLevels().get("mock@vbo"), TenantEmailNotificationLevel.NONE);
+
+        VboRequestLog requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
+        Assert.assertNotNull(requestLog);
+        Assert.assertNotNull(requestLog.getCallbackRequest());
+        Assert.assertEquals(traceId, requestLog.getCallbackRequest().customerCreation.transactionDetail.ackRefId);
+        Assert.assertEquals(requestLog.getCallbackRequest().customerCreation.transactionDetail.status, VboStatus.SUCCESS);
     }
 
     // ==================================================
