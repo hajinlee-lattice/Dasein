@@ -4,14 +4,12 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Assert;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -100,7 +99,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         generateLiveRampLaunchArtifacts.setConfiguration(configuration);
 
         MockitoAnnotations.initMocks(this);
-        
+
         Table fakeTable = Mockito.mock(Table.class);
 
         HdfsDataUnit addDataUnit = new HdfsDataUnit();
@@ -174,13 +173,13 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         }
     }
 
-    private void setupHdfs() throws IOException, URISyntaxException {
+    private void setupHdfs() throws IOException {
         String tableAvroPath = PathBuilder.buildDataTablePath(podId, customerSpace).toString();
         createDirsIfDoesntExist(tableAvroPath);
         moveAvroFilesToHDFS();
     }
 
-    private void moveAvroFilesToHDFS() throws IOException, URISyntaxException {
+    private void moveAvroFilesToHDFS() throws IOException {
         createDirsIfDoesntExist("/tmp/addLiveRampResult/");
         createDirsIfDoesntExist("/tmp/removeLiveRampResult/");
 
@@ -192,7 +191,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, addContactsAvroLocation));
         log.info("Added Match Block uploaded to: " + addContactsAvroLocation);
-       
+
         url = ClassLoader.getSystemResource("com/latticeengines/cdl/workflow/campaign/removeLiverampBlock.avro");
         localFile = new File(url.getFile());
         log.info("Taking file from: " + localFile.getAbsolutePath());
