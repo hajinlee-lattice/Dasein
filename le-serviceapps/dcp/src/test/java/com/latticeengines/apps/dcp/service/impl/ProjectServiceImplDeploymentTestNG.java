@@ -31,20 +31,20 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void testCreate() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com");
+                Project.ProjectType.Type1, "test@dnb.com", getPurposeOfUse());
         Assert.assertNotNull(details);
         Assert.assertNotNull(details.getProjectId());
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, details.getProjectId(),
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", getPurposeOfUse()));
 
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, "project id",
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", getPurposeOfUse()));
 
         Assert.assertThrows(() -> projectService.createProject(mainCustomerSpace, "Project%id",
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com"));
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", getPurposeOfUse()));
 
         ProjectDetails details2 = projectService.createProject(mainCustomerSpace, "Project_id",
-                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com");
+                "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com", getPurposeOfUse());
         Assert.assertNotNull(details2);
 
     }
@@ -52,7 +52,7 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void testUpdateRecipient() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
-                Project.ProjectType.Type1, "test@dnb.com");
+                Project.ProjectType.Type1, "test@dnb.com", getPurposeOfUse());
         Assert.assertNotNull(details);
         Assert.assertNotNull(details.getProjectId());
         Assert.assertNotNull(details.getRecipientList());
