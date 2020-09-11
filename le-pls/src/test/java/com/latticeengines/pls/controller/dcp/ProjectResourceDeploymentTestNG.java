@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -57,7 +58,9 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectId(), PROJECT_ID);
         assertNull(projectDetail.getProjectDescription());
-        testProjectProxy.updateDescription(PROJECT_ID, DESCRIPTION);
+        ProjectUpdateRequest request = new ProjectUpdateRequest();
+        request.setProjectDescription(DESCRIPTION);
+        testProjectProxy.updateProject(PROJECT_ID, request);
 
         projectDetail = testProjectProxy.getProjectByProjectId(projectDetail.getProjectId());
         Assert.assertNotNull(projectDetail);

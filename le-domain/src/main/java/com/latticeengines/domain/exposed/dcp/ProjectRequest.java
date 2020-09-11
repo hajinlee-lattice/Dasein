@@ -26,7 +26,7 @@ public class ProjectRequest {
     private PurposeOfUse purposeOfUse;
 
     @JsonProperty("projectDescription")
-    @ApiModelProperty(required = false, value = "projectDescription")
+    @ApiModelProperty(value = "projectDescription")
     private String projectDescription;
 
     public String getDisplayName() {

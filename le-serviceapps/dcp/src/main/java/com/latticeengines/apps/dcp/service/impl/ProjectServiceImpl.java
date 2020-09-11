@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 
 @Service("projectService")
 public class ProjectServiceImpl implements ProjectService {
@@ -201,13 +202,25 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void updateDescription(String customerSpace, String projectId, String description) {
+    public void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request) {
         Project project = projectEntityMgr.findByProjectId(projectId);
         if (null == project) {
             return;
         }
-        project.setProjectDescription(description);
-        projectEntityMgr.update(project);
+        boolean needUpdate = false;
+        if (StringUtils.isNotBlank(request.getDisplayName())) {
+            project.setProjectDisplayName(request.getDisplayName());
+            needUpdate = true;
+        }
+        if (StringUtils.isNotBlank(request.getProjectDescription())) {
+            project.setProjectDescription(request.getProjectDescription());
+            needUpdate = true;
+        }
+        if (needUpdate) {
+            projectEntityMgr.update(project);
+        } else {
+            log.info("no non-empty value in the request body for {} in {}", projectId, customerSpace);
+        }
     }
 
     private void validateProjectId(String projectId) {

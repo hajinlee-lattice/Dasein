@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 
 @Component("testProjectProxy")
 public class TestProjectProxy extends PlsRestApiProxyBase {
@@ -68,10 +69,10 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         delete("deleteProject", url);
     }
 
-    public void updateDescription(String projectId, String description) {
-        String urlPattern = "/projectId/{projectId}/description";
+    public void updateProject(String projectId, ProjectUpdateRequest request) {
+        String urlPattern = "/projectId/{projectId}";
         String url = constructUrl(urlPattern, projectId);
-        put("update description", url, description);
+        put("update description", url, request);
     }
 
     public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String projectId) {

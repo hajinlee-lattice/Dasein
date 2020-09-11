@@ -7,7 +7,9 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+
 
 public interface ProjectService {
 
@@ -38,5 +40,5 @@ public interface ProjectService {
 
     void updateTeamId(String customerSpace, String projectId, String teamId);
 
-    void updateDescription (String customerSpace, String projectId, String description);
+    void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request);
 }

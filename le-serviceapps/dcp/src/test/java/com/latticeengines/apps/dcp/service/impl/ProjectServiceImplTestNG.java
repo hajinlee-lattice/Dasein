@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 
 public class ProjectServiceImplTestNG extends DCPFunctionalTestNGBase {
 
@@ -30,22 +31,16 @@ public class ProjectServiceImplTestNG extends DCPFunctionalTestNGBase {
         String displayName = "Display Name " + RandomStringUtils.randomAlphanumeric(4);
         Project.ProjectType projectType = Project.ProjectType.Type1;
         String user = "functional_test@dnb.com";
-<<<<<<< HEAD
-
         PurposeOfUse purposeOfUse = getPurposeOfUse();
-        ProjectDetails details = projectService.createProject(customerSpace, displayName, projectType, user, purposeOfUse);
-||||||| merged common ancestors
-
-        ProjectDetails details = projectService.createProject(customerSpace, displayName, projectType, user);
-=======
         String description = "Test Project Description " + RandomStringUtils.randomAlphanumeric(3);
-        ProjectDetails details = projectService.createProject(customerSpace, displayName, projectType, user, description);
->>>>>>> DCP-1672 BE: Can't add description to a project at creation or later
-        Assert.assertNotNull(details);
+        ProjectDetails details = projectService.createProject(customerSpace, displayName, projectType, user,
+                purposeOfUse, description);
         Assert.assertEquals(description, details.getProjectDescription());
 
         description = "Test Project Description " + RandomStringUtils.randomAlphanumeric(3);
-        projectService.updateDescription(customerSpace, details.getProjectId(), description);
+        ProjectUpdateRequest request = new ProjectUpdateRequest();
+        request.setProjectDescription(description);
+        projectService.updateProject(customerSpace, details.getProjectId(), request);
 
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, details.getProjectId());
         Assert.assertNotNull(projectInfo);

@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 
 public interface ProjectService {
 
@@ -20,7 +21,7 @@ public interface ProjectService {
 
     void deleteProject(String customerSpace, String projectId);
 
-    void updateDescription(String customerSpace, String projectId, String description);
+    void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request);
 
     GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String toString, String projectId);
 }

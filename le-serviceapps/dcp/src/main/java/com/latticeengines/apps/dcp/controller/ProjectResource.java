@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -116,13 +117,13 @@ public class ProjectResource {
         projectService.updateTeamId(customerSpace, projectId, teamId);
     }
 
-    @PutMapping("/projectId/{projectId}/description")
+    @PutMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "update product description")
     public void updateDescription(@PathVariable String customerSpace,
                              @PathVariable String projectId,
-                             @RequestBody String description) {
+                             @RequestBody ProjectUpdateRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        projectService.updateDescription(customerSpace, projectId, description);
+        projectService.updateProject(customerSpace, projectId, request);
     }
 }

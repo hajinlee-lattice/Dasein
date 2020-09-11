@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.Status;
@@ -154,14 +155,14 @@ public class ProjectResource {
         }
     }
 
-    @PutMapping("/projectId/{projectId}/description")
+    @PutMapping("/projectId/{projectId}")
     @ResponseBody
-    @ApiOperation("update project description")
+    @ApiOperation("update project")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    void updateDescription(@PathVariable String projectId, @RequestBody String description) {
+    void updateProject(@PathVariable String projectId, @RequestBody ProjectUpdateRequest request) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            projectService.updateDescription(customerSpace.toString(), projectId, description);
+            projectService.updateProject(customerSpace.toString(), projectId, request);
         } catch (Exception e) {
             log.error("Failed to update project description by projectId: " + e.getMessage());
             throw UIActionUtils.handleException(e);
