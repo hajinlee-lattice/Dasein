@@ -1,0 +1,120 @@
+{
+    "systemType": "Other",
+    "systemObject": "Product Purchases",
+    "fieldDefinitionsRecordsMap": {
+        "Transaction ID": [
+            {
+                "fieldName": "ProductId",
+                "fieldType": "TEXT",
+                "screenName": "Product ID",
+                "matchingColumnNames": [
+                    "ID",
+                    "PRODUCT",
+                    "PRODUCT ID",
+                    "EXTERNAL ID"
+                ],
+                "required": true,
+                "nullable": true,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
+            },
+            {
+                "fieldName": "CustomerAccountId",
+                "fieldType": "TEXT",
+                "screenName": "Account ID",
+                "matchingColumnNames": [
+                    "ACCOUNT",
+                    "ACCOUNT ID",
+                    "ACCOUNT EXTERNAL ID",
+                    "BUSINESS ID",
+                    "CUSTOMER ID"
+                ],
+                "required": true,
+                "nullable": true,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
+            },
+            {
+                "fieldName": "CustomerContactId",
+                "fieldType": "TEXT",
+                "screenName": "Contact ID",
+                "matchingColumnNames": [
+                    "CONTACT",
+                    "CONTACT ID",
+                    "CONTACT EXTERNAL ID"
+                ],
+                "required": true,
+                "nullable": true,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
+            }
+        ],
+        "Lattice Fields": [
+            {
+                "fieldName": "TransactionTime",
+                "fieldType": "TEXT",
+                "screenName": "Transaction Date",
+                "matchingColumnNames": [
+                    "TIME STAMP",
+                    "TRANSACTION TIME STAMP",
+                    "TRANSACTION TIME",
+                    "TRANSACTION DATE",
+                    "TRANSACTION DATE TIME",
+                    "TIME",
+                    "DATE",
+                    "DATE TIME"
+                ],
+                "required": true,
+                "nullable": false,
+                "logicalDataType": "Timestamp",
+                "fundamentalType": "DATE"
+            },
+            {
+                "fieldName": "Amount",
+                "fieldType": "DOUBLE",
+                "screenName": "Amount",
+                "matchingColumnNames": [
+                    "AMOUNT"
+                ],
+                "required": true,
+                "nullable": false,
+                "logicalDataType": "Metric",
+                "fundamentalType": "CURRENCY"
+            },
+            {
+                "fieldName": "Quantity",
+                "fieldType": "DOUBLE",
+                "screenName": "Quantity",
+                "matchingColumnNames": [
+                    "QUANTITY"
+                ],
+                "required": true,
+                "nullable": false,
+                "logicalDataType": "Metric",
+                "fundamentalType": "NUMERIC"
+            },
+            {
+                "fieldName": "Cost",
+                "fieldType": "DOUBLE",
+                "screenName": "Cost",
+                "matchingColumnNames": [
+                    "COST"
+                ],
+                "required": false,
+                "nullable": true,
+                "logicalDataType": "Metric",
+                "fundamentalType": "CURRENCY"
+            }
+        ],
+        "Custom Fields": []
+    }
+}

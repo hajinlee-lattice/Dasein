@@ -1,0 +1,65 @@
+{
+    "systemType": "Other",
+    "systemObject": "Product Hierarchy",
+    "fieldDefinitionsRecordsMap": {
+        "Product Hierarchy ID": [
+            {
+                "fieldName": "ProductId",
+                "fieldType": "TEXT",
+                "screenName": "Product ID",
+                "matchingColumnNames": [
+                    "ID",
+                    "PRODUCT",
+                    "PRODUCT ID",
+                    "EXTERNAL ID"
+                ],
+                "required": true,
+                "nullable": false,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
+            }
+        ],
+        "Product Hierarchy": [
+            {
+                "fieldName": "ProductCategory",
+                "fieldType": "TEXT",
+                "screenName": "Product Level 1",
+                "matchingColumnNames": [
+                    "PRODUCT CATEGORY",
+                    "PRODUCT LEVEL 1"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information"
+            },
+            {
+                "fieldName": "ProductFamily",
+                "fieldType": "TEXT",
+                "screenName": "Product Level 2",
+                "matchingColumnNames": [
+                    "PRODUCT FAMILY",
+                    "PRODUCT LEVEL 2"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information"
+            },
+            {
+                "fieldName": "ProductLine",
+                "fieldType": "TEXT",
+                "screenName": "Product Level 3",
+                "matchingColumnNames": [
+                    "PRODUCT LINE",
+                    "PRODUCT LEVEL 3"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information"
+            }
+        ],
+        "Custom Fields": []
+    }
+}
