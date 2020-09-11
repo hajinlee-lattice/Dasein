@@ -1,46 +1,43 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
+import org.junit.Assert;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.util.StreamUtils;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MediaMathChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLiveRampLaunchArtifactStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-workflow-context.xml",
@@ -52,41 +49,50 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
     @Inject
     private Configuration yarnConfiguration;
 
-    @Inject
-    private MetadataProxy metadataProxy;
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
 
     @Inject
-    @Spy
+    @InjectMocks
     private GenerateLiveRampLaunchArtifacts generateLiveRampLaunchArtifacts;
 
-    private GenerateLiveRampLaunchArtifactStepConfiguration configuration;
+    @Mock
+    private PlayProxy playProxy;
 
+    @Mock
+    private MetadataProxy metadataProxy;
+
+    @Spy
+    private BulkMatchService bulkMatchService;
+
+    private GenerateLiveRampLaunchArtifactStepConfiguration configuration;
     private ExecutionContext executionContext;
     private CustomerSpace customerSpace;
-    private String addedAccountsLocation;
-    private String removedAccountsLocation;
+
+    private String addContactsAvroLocation;
+    private String removeContactsAvroLocation;
 
     private static final String[] TEST_JOB_LEVELS = { "Software Engineer", "CEO", "President" };
     private static final String[] TEST_JOB_FUNCTIONS = { "Marketing", "Research", "HR" };
-    private static final String MOCKED_ADD_ACCOUNTS_TABLE = "ADD_DELTA_TABLE_LOCATION";
-    private static final String MOCKED_REMOVE_ACCOUNTS_TABLE = "REMOVE_DELTA_TABLE_LOCATION";
+    private static final String INPUT_ADD_ACCOUNTS_TABLE = "INPUT_ADD_ACCOUNTS_TABLE";
+    private static final String INPUT_REMOVE_ACCOUNTS_TABLE = "INPUT_REMOVE_ACCOUNTS_TABLE";
+    private static final String MATCHED_ADD_ACCOUNTS_LOCATION = "MATCHED_ADD_ACCOUNTS_LOCATION";
+    private static final String MATCHED_REMOVE_ACCOUNTS_LOCATION = "MATCHED_REMOVE_ACCOUNTS_LOCATION";
+    private static final Integer MATCHED_ADD_ACCOUNTS_ROWS = 123;
+    private static final Integer MATCHED_REMOVED_ACCOUNTS_ROWS = 321;
     private static final String FAKE_EXECUTION_ID = "1234321";
-    private static final String CREATED_ADD_ACCOUNTS_TABLE_NAME = String.format("AddedContacts_%s", FAKE_EXECUTION_ID);
-    private static final String CREATED_REMOVE_ACCOUNTS_TABLE_NAME = String.format(
-            "RemovedContacts_%s",
-            FAKE_EXECUTION_ID);
 
-    @Override
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
-        cleanupBeforeTests();
-        setUpAvroFiles();
+    public void setupTest() throws Exception {
+        customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
+        setupHdfs();
 
         MediaMathChannelConfig testChannelConfig = new MediaMathChannelConfig();
         testChannelConfig.setJobFunctions(TEST_JOB_FUNCTIONS);
         testChannelConfig.setJobLevels(TEST_JOB_LEVELS);
 
-        customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
+        PlayLaunchChannel channel = new PlayLaunchChannel();
+        channel.setChannelConfig(testChannelConfig);
 
         configuration = new GenerateLiveRampLaunchArtifactStepConfiguration();
         configuration.setCustomerSpace(customerSpace);
@@ -94,22 +100,29 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         generateLiveRampLaunchArtifacts.setConfiguration(configuration);
 
         MockitoAnnotations.initMocks(this);
+        
+        Table fakeTable = Mockito.mock(Table.class);
 
-        Mockito.doReturn(testChannelConfig).when(generateLiveRampLaunchArtifacts).getChannelConfig(any());
+        HdfsDataUnit addDataUnit = new HdfsDataUnit();
+        addDataUnit.setPath(MATCHED_ADD_ACCOUNTS_LOCATION);
+        HdfsDataUnit removeDataUnit = new HdfsDataUnit();
+        removeDataUnit.setPath(MATCHED_REMOVE_ACCOUNTS_LOCATION);
 
-        Mockito.doReturn(MOCKED_ADD_ACCOUNTS_TABLE)
-                .when(
-                generateLiveRampLaunchArtifacts)
-                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE, String.class);
-        Mockito.doReturn(
-                MOCKED_REMOVE_ACCOUNTS_TABLE)
-                .when(generateLiveRampLaunchArtifacts)
-                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE, String.class);
+        Mockito.doReturn(addDataUnit, removeDataUnit).when(fakeTable).toHdfsDataUnit(any());
 
-        Mockito.doReturn(addedAccountsLocation).when(generateLiveRampLaunchArtifacts)
-                .getAvroPathFromTable(MOCKED_ADD_ACCOUNTS_TABLE);
-        Mockito.doReturn(removedAccountsLocation).when(generateLiveRampLaunchArtifacts)
-                .getAvroPathFromTable(MOCKED_REMOVE_ACCOUNTS_TABLE);
+        Mockito.doReturn(channel).when(playProxy).getChannelById(any(), any(), any());
+        Mockito.doNothing().when(metadataProxy).createTable(any(), any(), any());
+        Mockito.doReturn(fakeTable).when(metadataProxy).getTable(any(), any());
+
+        MatchCommand fakeAddMatch = new MatchCommand();
+        fakeAddMatch.setResultLocation(addContactsAvroLocation);
+        fakeAddMatch.setRowsMatched(MATCHED_ADD_ACCOUNTS_ROWS);
+
+        MatchCommand fakeRemoveMatch = new MatchCommand();
+        fakeRemoveMatch.setResultLocation(removeContactsAvroLocation);
+        fakeRemoveMatch.setRowsMatched(MATCHED_REMOVED_ACCOUNTS_ROWS);
+
+        Mockito.doReturn(fakeAddMatch, fakeRemoveMatch).when(bulkMatchService).match(any(), any());
 
     }
 
@@ -118,6 +131,13 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         executionContext = new ExecutionContext();
         generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
 
+        generateLiveRampLaunchArtifacts.putObjectInContext(
+                GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE,
+                INPUT_ADD_ACCOUNTS_TABLE);
+        generateLiveRampLaunchArtifacts.putObjectInContext(
+                GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE,
+                INPUT_REMOVE_ACCOUNTS_TABLE);
+
         generateLiveRampLaunchArtifacts.execute();
 
         String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
@@ -125,126 +145,68 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
                 .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
 
-        assertEquals(CREATED_ADD_ACCOUNTS_TABLE_NAME, addedContactsDeltaTable);
-        assertEquals(CREATED_REMOVE_ACCOUNTS_TABLE_NAME, removedContactsDeltaTable);
+        Map<String, Long> counts = generateLiveRampLaunchArtifacts
+                .getMapObjectFromContext(GenerateLiveRampLaunchArtifacts.DELTA_TABLE_COUNTS, String.class, Long.class);
 
-        Table addTable = metadataProxy.getTable(customerSpace.getTenantId(), addedContactsDeltaTable);
-        Table removeTable = metadataProxy.getTable(customerSpace.getTenantId(), removedContactsDeltaTable);
-        assertNotNull(addTable);
-        assertNotNull(removeTable);
-        log.info(JsonUtils.serialize(addTable));
-        log.info(JsonUtils.serialize(removeTable));
+        Assert.assertNotNull(addedContactsDeltaTable);
+        Assert.assertNotNull(removedContactsDeltaTable);
+        log.info(String.format("Table %s was created", addedContactsDeltaTable));
+        log.info(String.format("Table %s was created", removedContactsDeltaTable));
+
+        log.info(counts.toString());
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE),
+                Long.valueOf(MATCHED_ADD_ACCOUNTS_ROWS));
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
+                Long.valueOf(MATCHED_REMOVED_ACCOUNTS_ROWS));
     }
 
     @AfterClass(groups = "functional")
-    public void cleanup() {
-        String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
-                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE, String.class);
-        String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
-                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
-
-        cleanupFromCustomerSpace(addedContactsDeltaTable);
-        cleanupFromCustomerSpace(removedContactsDeltaTable);
-    }
-
-    public void cleanupBeforeTests() {
-        String addedContactsDeltaTable = CREATED_ADD_ACCOUNTS_TABLE_NAME;
-        String removedContactsDeltaTable = CREATED_REMOVE_ACCOUNTS_TABLE_NAME;
-        cleanupFromCustomerSpace(addedContactsDeltaTable);
-        cleanupFromCustomerSpace(removedContactsDeltaTable);
-    }
-
-    public void cleanupFromCustomerSpace(String tableName) {
+    private void cleanupHdfs() {
         try {
-            Table table = metadataProxy.getTable(customerSpace.getTenantId(), tableName);
-
-            if (table != null) {
-                HdfsDataUnit dataUnit = table.toHdfsDataUnit(tableName);
-                log.info("Fetched dataunit for cleanup " + dataUnit.getPath());
-
-                metadataProxy.deleteTable(customerSpace.getTenantId(), tableName);
-                log.info("Removed table " + tableName);
-
-                HdfsUtils.rmdir(yarnConfiguration, dataUnit.getPath());
-                log.info("Removed dataunit at " + dataUnit.getPath());
-            }
-        } catch (Exception e) {
-            log.error(e.toString());
+            String contractPath = PathBuilder.buildContractPath(podId, customerSpace.getContractId()).toString();
+            log.info("Removing dir: " + contractPath);
+            HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            log.info("Removing temp Liveramp dirs");
+            HdfsUtils.rmdir(yarnConfiguration, "/tmp/addLiveRampResult/");
+            HdfsUtils.rmdir(yarnConfiguration, "/tmp/removeLiveRampResult/");
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
     }
 
-    private void setUpAvroFiles() throws Exception {
-        Schema deltaAccountSchema = SchemaBuilder.record("Account").fields() //
-                .name("LDC_DUNS").type()
-                .longType()
-                .noDefault()//
-                .endRecord();
-
-        String fileName = "addedAccounts";
-        addedAccountsLocation = createAvroFromJson(fileName,
-                String.format("com/latticeengines/cdl/workflow/campaign/%s.json", fileName), deltaAccountSchema,
-                DeltaAccount.class, yarnConfiguration);
-        log.info("Positive Delta Accounts uploaded to: " + addedAccountsLocation);
-
-        fileName = "removedAccounts";
-        removedAccountsLocation = createAvroFromJson(fileName,
-                String.format("com/latticeengines/cdl/workflow/campaign/%s.json", fileName), deltaAccountSchema,
-                DeltaAccount.class, yarnConfiguration);
-        log.info("Negative Delta Accounts uploaded to: " + removedAccountsLocation);
+    private void setupHdfs() throws IOException, URISyntaxException {
+        String tableAvroPath = PathBuilder.buildDataTablePath(podId, customerSpace).toString();
+        createDirsIfDoesntExist(tableAvroPath);
+        moveAvroFilesToHDFS();
     }
 
-    static class DeltaAccount implements AvroExportable {
-        public Long getSiteDuns() {
-            return siteDuns;
-        }
+    private void moveAvroFilesToHDFS() throws IOException, URISyntaxException {
+        createDirsIfDoesntExist("/tmp/addLiveRampResult/");
+        createDirsIfDoesntExist("/tmp/removeLiveRampResult/");
 
-        public void setDuns(Long siteDuns) {
-            this.siteDuns = siteDuns;
-        }
+        URL url = ClassLoader.getSystemResource("com/latticeengines/cdl/workflow/campaign/addLiverampBlock.avro");
+        File localFile = new File(url.getFile());
+        log.info("Taking file from: " + localFile.getAbsolutePath());
+        addContactsAvroLocation = "/tmp/addLiveRampResult/addLiverampBlock.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), addContactsAvroLocation);
 
-        @JsonProperty(value = "LDC_DUNS")
-        private Long siteDuns;
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, addContactsAvroLocation));
+        log.info("Added Match Block uploaded to: " + addContactsAvroLocation);
+       
+        url = ClassLoader.getSystemResource("com/latticeengines/cdl/workflow/campaign/removeLiverampBlock.avro");
+        localFile = new File(url.getFile());
+        log.info("Taking file from: " + localFile.getAbsolutePath());
+        removeContactsAvroLocation = "/tmp/removeLiveRampResult/removeLiverampBlock.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), removeContactsAvroLocation);
 
-        @Override
-        public GenericRecord getAsRecord(Schema schema) {
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            builder.set("LDC_DUNS", this.getSiteDuns());
-            return builder.build();
-        }
-
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, removeContactsAvroLocation));
+        log.info("Removed Match Block uploaded to: " + removeContactsAvroLocation);
     }
 
-    interface AvroExportable {
-        GenericRecord getAsRecord(Schema schema);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends AvroExportable> String createAvroFromJson(String fileName, String jsonPath,
-            Schema schema,
-            Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream tableRegistryStream = classLoader.getResourceAsStream(jsonPath);
-        String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
-        List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
-        List<T> accounts = JsonUtils.convertList(raw, elementClazz);
-        String extension = ".avro";
-        String avroPath = "/tmp/liveRampCampaignArtifact" + fileName + extension;
-
-        File localFile = new File(avroPath);
-        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<>(schema))) {
-            dataFileWriter.create(schema, localFile);
-            accounts.forEach(account -> {
-                try {
-                    dataFileWriter.append(account.getAsRecord(schema));
-                } catch (IOException ioe) {
-                    log.warn("failed to write a avro datdum", ioe);
-                }
-            });
-            dataFileWriter.flush();
+    private void createDirsIfDoesntExist(String dir) throws IOException {
+        if (!HdfsUtils.isDirectory(yarnConfiguration, dir)) {
+            log.info("Dir does not exist, creating dir: " + dir);
+            HdfsUtils.mkdir(yarnConfiguration, dir);
         }
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), avroPath);
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath));
-
-        return avroPath;
     }
 }
