@@ -301,7 +301,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setScheduleTime(
                         tenantActivity.isScheduledNow() ? simpleDataFeed.getScheduleTime().getTime() : null);
 
-                ZoneId timezone = batonService.getTenantTimezone(CustomerSpace.parse(tenantId));
+                ZoneId timezone = getTenantTimezone(tenantId);
                 tenantActivity.setNotExceededQuotaNames(
                         getNotExceededQuotaNames(recentlyCompletedPAs.get(CustomerSpace.shortenCustomerSpace(tenantId)),
                                 tenantId, timezone));
@@ -460,6 +460,16 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
         return new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution,
                 retryValidation(execution, customerSpace));
+    }
+
+    private ZoneId getTenantTimezone(@NotNull String tenantId) {
+        try {
+            return batonService.getTenantTimezone(CustomerSpace.parse(tenantId));
+        } catch (Exception e) {
+            String msg = String.format("Failed to get timezone for tenant %s", tenantId);
+            log.error(msg, e);
+            return null;
+        }
     }
 
     // short tenant ID -> list of completed PAs
