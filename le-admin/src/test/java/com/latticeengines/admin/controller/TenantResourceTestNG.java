@@ -138,17 +138,4 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(products);
         Assert.assertEquals(products.size(), LatticeProduct.values().length);
     }
-
-    @Test(groups = "functional")
-    public void testCreateTenant () {
-        VboRequest vboRequest;
-        Boolean callback = Boolean.TRUE;
-        Boolean useMock = Boolean.FALSE;
-        MockHttpServletRequest request;
-
-        TenantResource tenantResource = new TenantResource();
-        tenantResource.createTenant(vboRequest, callback, useMock, request);
-
-        Assert.fail("Not finished");
-    }
 }
