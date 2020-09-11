@@ -25,7 +25,7 @@
     <bean id="sendgridEmailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
         <property name="from" value="${monitor.sendgrid.emailsettings.from}" />
         <property name="server" value="${monitor.sendgrid.emailsettings.server}" />
-        <property name="username" value="apikey" /> <!-- The username with sendgrid is 'apikey' -->
+        <property name="username" value="${monitor.sendgrid.emailsettings.username}" />
         <property name="password" value="${monitor.sendgrid.emailsettings.password.encrypted}" />
         <property name="port" value="${monitor.sendgrid.emailsettings.port}" />
         <property name="useSSL" value="${monitor.sendgrid.emailsettings.useSSL}" />
@@ -34,12 +34,12 @@
 
     <bean id="sendgridLatticeEmailSettings" class="com.latticeengines.domain.exposed.monitor.EmailSettings">
         <property name="from" value="${monitor.sendgridlattice.emailsettings.from}" />
-        <property name="server" value="${monitor.sendgridlattice.emailsettings.server}" />
-        <property name="username" value="apikey" />
-        <property name="password" value="${monitor.sendgridlattice.emailsettings.password.encrypted}" />
-        <property name="port" value="${monitor.sendgridlattice.emailsettings.port}" />
-        <property name="useSSL" value="${monitor.sendgridlattice.emailsettings.useSSL}" />
-        <property name="useSTARTTLS" value="${monitor.sendgridlattice.emailsettings.useSTARTTLS}" />
+        <property name="server" value="${monitor.sendgrid.emailsettings.server}" />
+        <property name="username" value="${monitor.sendgrid.emailsettings.username}" />
+        <property name="password" value="${monitor.sendgrid.emailsettings.password.encrypted}" />
+        <property name="port" value="${monitor.sendgrid.emailsettings.port}" />
+        <property name="useSSL" value="${monitor.sendgrid.emailsettings.useSSL}" />
+        <property name="useSTARTTLS" value="${monitor.sendgrid.emailsettings.useSTARTTLS}" />
     </bean>
 
 </beans>
