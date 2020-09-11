@@ -693,7 +693,9 @@ public class BatonServiceImpl implements BatonService {
         try {
             return ZoneId.of(timezoneStr);
         } catch (DateTimeException e) {
-            log.error("Failed to parse timezone string {}, error = {}", timezoneStr, e);
+            String msg = String.format("Failed to parse timezone string %s for tenant %s", timezoneStr,
+                    customerSpace.toString());
+            log.error(msg, e);
             throw e;
         }
     }
