@@ -31,6 +31,9 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     @Value("${playmaker.recommendations.years.keep:2}")
     private Double YEARS_TO_KEEP_RECOMMENDATIONS;
 
+    @Value("${playmaker.expired.tenants.recommendations.years.keep:1}")
+    private Double YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS;
+
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
@@ -53,6 +56,7 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
                             LatticeFeatureFlag.PLAYBOOK_MODULE))
                     .forEach(tenant -> cleanupForTenant(tenant));
         }
+        cleanupRecommendationForChurnedCustomers();
     }
 
     private void cleanupForTenant(Tenant tenant) {
@@ -104,5 +108,45 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
         }
 
         return totalDeletedCount;
+    }
+
+    void cleanupRecommendationForChurnedCustomers() {
+        int softDeleted = cleanupRecommendationDueToExpiredTeanants(false);
+        int hardDeleted = cleanupRecommendationDueToExpiredTeanants(true);
+        log.info("Deleting recommendations for expired tenants, Soft delete: " + softDeleted + "Hard delete: " + hardDeleted);
+    }
+
+    int cleanupRecommendationDueToExpiredTeanants(boolean isHardDelete) {
+        int totalDeletedCount = 0;
+        Date expiredDate = PlaymakerUtils.dateFromEpochSeconds(System.currentTimeMillis() / 1000L
+                - TimeUnit.DAYS.toSeconds(Math.round(365 * YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS)));
+        List<Long> tenantIdsForCleanup = getExpiredTenants();
+        try {
+            if (CollectionUtils.isNotEmpty(tenantIdsForCleanup)) {
+                if (isHardDelete) {
+                    totalDeletedCount = tenantIdsForCleanup.stream().map(id -> lpiPMRecommendation
+                            .cleanupRecommendationsForChurnedTenant(id, expiredDate, isHardDelete))
+                            .reduce(0, (x, y) -> x + y);
+                } else {
+                    totalDeletedCount = tenantIdsForCleanup.stream().map(id -> lpiPMRecommendation
+                            .cleanupRecommendationsForChurnedTenant(id, expiredDate, isHardDelete))
+                            .reduce(0, (x, y) -> x + y);
+                }
+            }
+        } catch (Exception ex) {
+            log.error(String.format("Failed to cleanup recommendations for Expired tenants"), ex);
+        }
+        return totalDeletedCount;
+    }
+
+    private List<Long> getExpiredTenants() {
+
+        List<Long> existTenants = tenantEntityMgr.getAllTenantPid();
+        List<Long> recommendationTenants = lpiPMRecommendation.getAllTenantIdsFromRecommendation();
+
+        recommendationTenants.removeAll(existTenants);
+        log.info(String.format("Get %d tenants Expired", recommendationTenants.size()));
+
+        return recommendationTenants;
     }
 }

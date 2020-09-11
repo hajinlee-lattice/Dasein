@@ -15,6 +15,10 @@ public interface RecommendationDao extends BaseDao<Recommendation> {
 
     List<Recommendation> findByLaunchIds(List<String> launchIds);
 
+    List<Recommendation> findDeletedRecommendationsByTenantId(Long tenantId);
+
+    List<Long> findAllTenantIds();
+
     int findRecommendationCountByLaunchIds(List<String> launchIds);
 
     List<Recommendation> findRecommendations(Date lastModificationDate, //
@@ -24,8 +28,6 @@ public interface RecommendationDao extends BaseDao<Recommendation> {
             Map<String, String> orgInfo);
 
     List<Map<String, Object>> findAccountIdsByLaunchIds(List<String> launchIds, long start, int offset, int max);
-
-//    List<String> findAccountIdsByLaunchIds(List<String> launchIds);
 
     int findAccountIdCountByLaunchIds(List<String> launchIds, long start);
 
@@ -39,6 +41,8 @@ public interface RecommendationDao extends BaseDao<Recommendation> {
     int deleteInBulkByLaunchId(String launchId, boolean hardDelete, int maxUpdateRows);
 
     int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows);
+
+    int deleteInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows);
 
     List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, List<String> accountIds);
 

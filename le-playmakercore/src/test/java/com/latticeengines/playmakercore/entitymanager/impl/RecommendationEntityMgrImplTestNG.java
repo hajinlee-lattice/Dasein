@@ -6,10 +6,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     private Date T2;
     private Date T3;
     private Date T4;
+    private Date expiredDate;
 
     private List<Recommendation> allRecommendationsAcrossAllLaunches = null;
 
@@ -91,6 +94,9 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         T2 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L + 24 * 3600L);
         T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 24 * 3600L);
         T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 24 * 3600L);
+
+        expiredDate = PlaymakerUtils.dateFromEpochSeconds(System.currentTimeMillis() / 1000L
+                - TimeUnit.DAYS.toSeconds(Math.round(365 * 1)));
 
         System.out.println(String.format(
                 "LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
@@ -160,6 +166,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 .forEach(rec -> testGetRecommendationWithoutPlayId(rec));
     }
 
+
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationWithoutPlayId" })
     public void populateMoreRecommendations() throws InterruptedException {
         IntStream.range(0, 100).forEach(i -> testCreateRecommendation(
@@ -176,6 +183,13 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         allRecommendationsAcrossAllLaunches.stream()//
                 .forEach(rec -> launchIds.add(rec.getLaunchId()));
         testGetAccountIdsByLaunchIds(launchIds);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "populateMoreRecommendations" })
+    public void testGetTenantIds(){
+        List<Long> ids = recommendationEntityMgr.findAllTenantIds();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(ids));
+        Assert.assertEquals(ids.size(),1);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "populateMoreRecommendations" })
@@ -232,6 +246,29 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         verifyRecommendationCount(0, 0, 0);
     }
 
+
+
+    @Test(groups = "functional", dependsOnMethods = { "testDeleteRecommendationByCutoffDate" })
+    public void testDeleteRecommendationByChurnedTenant() throws InterruptedException {
+        populateMoreRecommendations();
+        verifyRecommendationCount(100, 100, 100);
+
+        boolean isHardDelete = false;
+        bulkDeleteByTenantId(TENANT_PID,expiredDate,isHardDelete);
+        verifyRecommendationCount(0, 0, 0);
+        verifyDeletingCount(903);
+
+        isHardDelete =true;
+        bulkDeleteByTenantId(TENANT_PID,expiredDate,isHardDelete);
+        verifyDeletingCount(301);
+
+        Date cur = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (1 * 1000L));
+        bulkDeleteByTenantId(TENANT_PID,cur,isHardDelete);
+        verifyDeletingCount(0);
+    }
+
+
+
     private void bulkDeleteByLaunchId(String launchId, boolean hardDelete) {
         boolean shouldLoop = true;
         while (shouldLoop) {
@@ -251,6 +288,28 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                     String.format("bulkDeleteByPlayId - cutoffTimestamp = %s, maxCount = %d, updatedCount = %d",
                             cutoffTimestamp, maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
+        }
+    }
+
+    private void bulkDeleteByTenantId(Long tenantId, Date expireTimestamp,boolean hardDelete){
+        boolean shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByTenantId(tenantId, hardDelete, expireTimestamp, maxUpdateRows);
+            System.out.println(
+                    String.format("bulkDeleteByPlayId - expireTimestamp = %s, maxCount = %d, updatedCount = %d",
+                            expireTimestamp, maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+    }
+
+    private void verifyDeletingCount(int count){
+        List<Recommendation> recs= recommendationEntityMgr.findDeletedRecommendationsByTenantId(TENANT_PID);
+        log.info("Recommendations soft deleted: "+recs.size());
+        if (count == 0) {
+            Assert.assertFalse(recs.size() > 0);
+        } else {
+            Assert.assertTrue(recs.size() > 0);
+            Assert.assertEquals(recs.size(), count);
         }
     }
 

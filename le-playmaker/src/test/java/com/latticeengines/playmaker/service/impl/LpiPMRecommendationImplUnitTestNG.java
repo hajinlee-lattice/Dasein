@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ public class LpiPMRecommendationImplUnitTestNG {
     private String playLaunchId;
     private List<String> idList;
     private int TOTAL_REC_COUNT;
+    private List<Long> distinctIds;
     private List<Map<String, Object>> resultMaps;
     private Map<String, String> eloquaAppId;
 
@@ -64,6 +66,7 @@ public class LpiPMRecommendationImplUnitTestNG {
         eloquaAppId.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
 
         resultMaps = createDummyRecommendationResult(TOTAL_REC_COUNT);
+        distinctIds = Arrays.asList(10L, 8L);
 
         MockitoAnnotations.initMocks(this);
 
@@ -84,6 +87,14 @@ public class LpiPMRecommendationImplUnitTestNG {
         int count = lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList,
                 new HashMap<String, String>(), eloquaAppId);
         Assert.assertEquals(count, TOTAL_REC_COUNT);
+    }
+
+    @Test(groups = "unit")
+    public void testGetDistinctTenantIds() {
+        List<Long> ids = lpiPMRecommendationImpl.getAllTenantIdsFromRecommendation();
+        Assert.assertEquals(ids.size(), TOTAL_REC_COUNT);
+        Assert.assertEquals(ids.get(0).intValue(), 10);
+        Assert.assertEquals(ids.get(1).intValue(), 8);
     }
 
     @Test(groups = "unit")
@@ -111,7 +122,6 @@ public class LpiPMRecommendationImplUnitTestNG {
 
         }
         System.out.println(JsonUtils.serialize(recommendations));
-
     }
 
     @SuppressWarnings({ "deprecation", "unchecked" })
@@ -131,6 +141,7 @@ public class LpiPMRecommendationImplUnitTestNG {
                         anyString(), //
                         anyListOf(String.class), any(Map.class))) //
                                 .thenReturn(resultMaps);
+        when(recommendationEntityMgr.findAllTenantIds()).thenReturn(distinctIds);
     }
 
     private void mockInternalResourceRestApiProxy() {
