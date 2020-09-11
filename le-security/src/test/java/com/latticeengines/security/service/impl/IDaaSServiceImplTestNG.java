@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
@@ -53,6 +54,13 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isNotEmpty(loginDocument.getErrors()));
+    }
+
+    @Test(groups = "functional")
+    public void testGetUserInvitationLink() {
+        InvitationLinkResponse invitationLink = iDaaSService.getUserInvitationLink(TEST_EMAIL);
+        Assert.assertNotNull(invitationLink);
+        Assert.assertNotNull(invitationLink.getInviteLink());
     }
 
     private void createTestUser() {
