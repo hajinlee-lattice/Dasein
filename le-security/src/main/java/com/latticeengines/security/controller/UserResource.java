@@ -170,11 +170,17 @@ public class UserResource {
         }
         else {
             IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
-            String welcomeUrl = dcpPublicUrl;
-            if (idaasUser.getInvitationLink() != null) {
-                welcomeUrl = idaasUser.getInvitationLink();
+            if (idaasUser == null) {
+                httpResponse.setStatus(500);
+                response.setErrors(Collections.singletonList("Failed to create IDaaS User."));
+                return response;
+            } else {
+                String welcomeUrl = dcpPublicUrl;
+                if (idaasUser.getInvitationLink() != null) {
+                    welcomeUrl = idaasUser.getInvitationLink();
+                }
+                emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
             }
-            emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
         }
         response.setSuccess(true);
         return response;
