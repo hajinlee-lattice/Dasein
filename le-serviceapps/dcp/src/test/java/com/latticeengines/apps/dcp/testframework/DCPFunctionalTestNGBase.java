@@ -14,6 +14,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Listeners;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -63,5 +64,12 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         long pid = jdbcTemplate.queryForObject(sql, Long.class);
         log.info("Created a fake workflow " + pid);
         return pid;
+    }
+
+    protected PurposeOfUse getPurposeOfUse() {
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain("D&B for Finance");
+        purposeOfUse.setRecordType("Domain Use");
+        return purposeOfUse;
     }
 }

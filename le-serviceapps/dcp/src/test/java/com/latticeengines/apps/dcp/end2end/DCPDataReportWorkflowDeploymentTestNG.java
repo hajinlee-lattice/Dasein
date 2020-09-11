@@ -194,6 +194,7 @@ public class DCPDataReportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBa
         ProjectRequest projectRequest = new ProjectRequest();
         projectRequest.setDisplayName("ReportEnd2EndProject");
         projectRequest.setProjectType(Project.ProjectType.Type1);
+        projectRequest.setPurposeOfUse(getPurposeOfUse());
         projectDetails = projectProxy.createDCPProject(mainCustomerSpace, projectRequest, "dcp_deployment@dnb.com");
         // Create Source
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,

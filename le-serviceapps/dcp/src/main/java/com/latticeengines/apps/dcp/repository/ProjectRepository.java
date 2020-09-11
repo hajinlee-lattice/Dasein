@@ -13,22 +13,22 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     Project findByProjectId(String projectId);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            " p.recipientList, p.teamId, p.projectDescription " +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p WHERE p.projectId = ?1")
     List<Object[]> findProjectInfoByProjectId(String projectId);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            " p.recipientList, p.teamId, p.projectDescription " +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p where p.deleted = false")
     List<Object[]> findAllProjects(Pageable pageable);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            " p.recipientList, p.teamId, p.projectDescription " +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p")
     List<Object[]> findAllProjectsIncludingArchived(Pageable pageable);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            " p.recipientList, p.teamId, p.projectDescription " +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p" +
             " JOIN ProjectSystemLink AS ps ON p.pid = ps.project" +
             " JOIN DataFeedTask AS dft ON ps.importSystem = dft.importSystem" +
@@ -36,17 +36,17 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     List<Object[]> findProjectInfoBySourceId(String sourceId);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            " p.recipientList, p.teamId, p.projectDescription" +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p WHERE p.teamId IN (?1) OR p.teamId IS null")
     List<Object[]> findProjectsInTeamIdsIncludingArchived(List<String> teamIds, Pageable pageable);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            " p.recipientList, p.teamId, p.projectDescription " +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p WHERE p.projectId = ?1 AND (p.teamId IN (?2) OR p.teamId IS null)")
     List<Object[]> findProjectInfoByProjectIdInTeamIds(String projectId, List<String> teamIds);
 
     @Query("SELECT p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, " +
-            "p.recipientList, p.teamId, p.projectDescription " +
+            " p.recipientList, p.teamId, p.projectDescription, p.purposeOfUse" +
             " FROM Project AS p WHERE (p.teamId IN (?1) OR p.teamId IS null) and p.deleted = false")
     List<Object[]> findProjectsInTeamIds(List<String> teamIds, Pageable pageable);
 

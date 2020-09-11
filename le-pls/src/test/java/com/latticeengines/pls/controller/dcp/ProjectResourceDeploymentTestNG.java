@@ -86,7 +86,10 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         List<ProjectSummary> projectList = testProjectProxy.getAllProjects(false, false);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 3);
-        projectList.forEach(project -> Assert.assertEquals(project.getArchived(), Boolean.FALSE));
+        projectList.forEach(project -> {
+            Assert.assertEquals(project.getArchived(), Boolean.FALSE);
+            Assert.assertNotNull(project.getPurposeOfUse());
+        });
 
         // Check all projects.  There should be 4.
         projectList = testProjectProxy.getAllProjects(false, true);

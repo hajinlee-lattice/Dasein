@@ -14,12 +14,16 @@ public class ProjectRequest {
     private String displayName;
 
     @JsonProperty("projectId")
-    @ApiModelProperty(required = false, value = "projectId")
+    @ApiModelProperty(value = "projectId")
     private String projectId;
 
     @JsonProperty("projectType")
     @ApiModelProperty(required = true, value = "projectType")
     private Project.ProjectType projectType;
+
+    @JsonProperty("purposeOfUse")
+    @ApiModelProperty(required = true, value = "purposeOfUse")
+    private PurposeOfUse purposeOfUse;
 
     public String getDisplayName() {
         return displayName;
@@ -40,4 +44,12 @@ public class ProjectRequest {
     public Project.ProjectType getProjectType() { return projectType; }
 
     public void setProjectType(Project.ProjectType projectType) { this.projectType = projectType; }
+
+    public PurposeOfUse getPurposeOfUse() {
+        return purposeOfUse;
+    }
+
+    public void setPurposeOfUse(PurposeOfUse purposeOfUse) {
+        this.purposeOfUse = purposeOfUse;
+    }
 }

@@ -46,10 +46,10 @@ public class ProjectResource {
             ProjectDetails result;
             if(projectRequest.getProjectId() == null) {
                 result = projectService.createProject(customerSpace, projectRequest.getDisplayName(),
-                        projectRequest.getProjectType(), user);
+                        projectRequest.getProjectType(), user, projectRequest.getPurposeOfUse());
             } else {
                 result = projectService.createProject(customerSpace, projectRequest.getProjectId(),
-                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user);
+                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user, projectRequest.getPurposeOfUse());
             }
             return ResponseDocument.successResponse(result);
         } catch (LedpException e) {

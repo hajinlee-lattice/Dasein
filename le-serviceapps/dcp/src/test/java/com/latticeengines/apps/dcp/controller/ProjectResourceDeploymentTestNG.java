@@ -37,6 +37,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setDisplayName("createtest");
         projectRequest.setProjectId("createtest");
         projectRequest.setProjectType(Project.ProjectType.Type1);
+        projectRequest.setPurposeOfUse(getPurposeOfUse());
         ProjectDetails result = projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest,"test@lattice-engines.com");
         assertNotNull(result);
         assertEquals(result.getProjectId(), "createtest");
@@ -49,6 +50,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setDisplayName("getalltest1");
         projectRequest.setProjectId("getalltest1");
         projectRequest.setProjectType(Project.ProjectType.Type1);
+        projectRequest.setPurposeOfUse(getPurposeOfUse());
         projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
         projectRequest.setDisplayName("getalltest2");
         projectRequest.setProjectId("getalltest2");

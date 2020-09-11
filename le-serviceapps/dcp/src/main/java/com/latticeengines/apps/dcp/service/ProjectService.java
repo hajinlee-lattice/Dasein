@@ -7,14 +7,15 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
 public interface ProjectService {
 
     ProjectDetails createProject(String customerSpace, String displayName,
-                                 Project.ProjectType projectType, String user);
+                                 Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse);
 
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                 Project.ProjectType projectType, String user);
+                                 Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse);
 
     Project getProjectByProjectId(String customerSpace, String projectId);
 
