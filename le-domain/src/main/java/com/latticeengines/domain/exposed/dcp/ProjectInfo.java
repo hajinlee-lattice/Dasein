@@ -15,6 +15,7 @@ public class ProjectInfo {
     private String createdBy;
     private List<String> recipientList;
     private String teamId;
+    private PurposeOfUse purposeOfUse;
 
     public String getProjectId() {
         return projectId;
@@ -94,5 +95,13 @@ public class ProjectInfo {
 
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    public PurposeOfUse getPurposeOfUse() {
+        return purposeOfUse;
+    }
+
+    public void setPurposeOfUse(PurposeOfUse purposeOfUse) {
+        this.purposeOfUse = purposeOfUse;
     }
 }

@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
 @Component("testProjectProxy")
 public class TestProjectProxy extends PlsRestApiProxyBase {
@@ -23,6 +24,7 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         request.setDisplayName(displayName);
         request.setProjectId(projectId);
         request.setProjectType(projectType);
+        request.setPurposeOfUse(getPurposeOfUse());
         String url = constructUrl("/");
         return post("createProject", url, request, ProjectDetails.class);
     }
@@ -31,6 +33,7 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         ProjectRequest request = new ProjectRequest();
         request.setDisplayName(displayName);
         request.setProjectType(projectType);
+        request.setPurposeOfUse(getPurposeOfUse());
         String url = constructUrl("/");
         return post("createProject", url, request, ProjectDetails.class);
     }
@@ -65,6 +68,13 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         String urlPattern = "/projectId/{projectId}/dropFolderAccess";
         String url = constructUrl(urlPattern, projectId);
         return get("getDropFolderAccessByProjectId", url, null, GrantDropBoxAccessResponse.class);
+    }
+
+    public PurposeOfUse getPurposeOfUse() {
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain("D&B for Enterprise Master Data");
+        purposeOfUse.setRecordType("Domain Master Data Use");
+        return purposeOfUse;
     }
 
 }
