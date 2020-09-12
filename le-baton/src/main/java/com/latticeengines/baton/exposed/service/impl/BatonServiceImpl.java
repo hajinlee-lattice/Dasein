@@ -791,32 +791,6 @@ public class BatonServiceImpl implements BatonService {
         return shouldExclude;
     }
 
-    @Override
-    public boolean shouldWaitDataAttrs(String tenantId) {
-        boolean shouldExclude = false;
-        if (StringUtils.isNotBlank(tenantId)) {
-            tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
-            Camille camille = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-            Path node = PathBuilder.buildPodPath(podId).append("CitrixHotFixTargets");
-            try {
-                if (camille.exists(node)) {
-                    List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
-                    if (targets.contains(tenantId)) {
-                        log.info("{} is an Citrix hotfix target.", tenantId);
-                        shouldExclude = true;
-                    } else {
-                        log.info("{} is not an Citrix hotfix target", tenantId);
-                        shouldExclude = false;
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Failed to retrieve hotfix targets from ZK.", e);
-            }
-        }
-        return shouldExclude;
-    }
-
     /**
      * Lazily instantiate a {@link TreeCache} and wait for the initial data being loaded.
      *
