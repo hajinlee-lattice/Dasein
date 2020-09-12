@@ -101,7 +101,7 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         log.info("Building consolidated period transaction");
         Map<String, Table> batchStores = getTablesFromMapCtxKey(customerSpaceStr,
                 PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME);
-        if (isShortcutMode(batchStores)) {
+        if (tableExist(batchStores) && tableInHdfs(batchStores, false)) {
             log.info("Retrieved period transaction batch stores: {}. Going through shortcut mode.",
                     batchStores.entrySet().stream().map(entry -> {
                         String periodName = entry.getKey();
@@ -134,7 +134,7 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
     private void buildAggregatedPeriodTransaction(Map<String, Table> periodTransactionTables, List<String> retainTypes) {
         log.info("Building aggregated period transaction");
         Table servingStore = getTableSummaryFromKey(customerSpaceStr, AGG_PERIOD_TRXN_TABLE_NAME);
-        if (isShortcutMode(servingStore)) {
+        if (tableExist(servingStore) && tableInHdfs(servingStore, false)) {
             String tableName = servingStore.getName();
             log.info("Retrieved period transaction serving store: {}. Going through shortcut mode.", tableName);
             dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedPeriodTransaction, inactive);

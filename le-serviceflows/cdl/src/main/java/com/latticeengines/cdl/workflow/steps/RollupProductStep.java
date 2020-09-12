@@ -49,7 +49,7 @@ public class RollupProductStep extends ProfileStepBase<ProcessTransactionStepCon
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initConfiguration();
         Table rollupProductTable = getTableSummaryFromKey(customerSpace.toString(), ROLLUP_PRODUCT_TABLE);
-        if (rollupProductTable != null) {
+        if (rollupProductTable != null && tableIsInHdfs(rollupProductTable, false)) {
             log.info("Found rollup product table {} in context, going through shortcut mode", rollupProductTable.getName());
             saveRollupTable(rollupProductTable.getName());
             return null;

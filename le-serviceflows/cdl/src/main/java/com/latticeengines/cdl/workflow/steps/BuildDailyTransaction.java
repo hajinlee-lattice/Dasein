@@ -82,7 +82,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
 
     private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
         Table dailyTxnBatchStoreTable = getTableSummaryFromKey(customerSpaceStr, DAILY_TRXN_TABLE_NAME);
-        if (isShortcutMode(dailyTxnBatchStoreTable)) {
+        if (tableExist(dailyTxnBatchStoreTable) && tableInHdfs(dailyTxnBatchStoreTable, true)) {
             String tableName = dailyTxnBatchStoreTable.getName();
             log.info("Retrieved daily transaction batch store from context: {}. Going through shortcut mode.",
                     tableName);
@@ -107,7 +107,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
 
     private void buildTransactionServingStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
         Table dailyTxnServingStoreTable = getTableSummaryFromKey(customerSpaceStr, AGG_DAILY_TRXN_TABLE_NAME);
-        if (isShortcutMode(dailyTxnServingStoreTable)) {
+        if (tableExist(dailyTxnServingStoreTable) && tableInHdfs(dailyTxnServingStoreTable, false)) {
             String tableName = dailyTxnServingStoreTable.getName();
             log.info("Retrieved daily transaction serving store from context: {}. Going through shortcut mode.",
                     tableName);

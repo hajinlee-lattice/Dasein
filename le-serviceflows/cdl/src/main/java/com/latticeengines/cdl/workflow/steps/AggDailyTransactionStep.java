@@ -47,7 +47,7 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
     public void execute() {
         bootstrap();
         Map<String, Table> dailyTxnStreams = getTablesFromMapCtxKey(customerSpaceStr, DAILY_TXN_STREAMS);
-        if (isShortcutMode(dailyTxnStreams)) {
+        if (tableExist(dailyTxnStreams) && tableInHdfs(dailyTxnStreams, true)) {
             Map<String, String> signatureTableNames = dailyTxnStreams.entrySet().stream().map(entry -> {
                 String productType = entry.getKey();
                 Table table = entry.getValue();
