@@ -52,7 +52,7 @@ public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore 
     }
 
     private void disableGroups(ColumnMetadata cm) {
-        cm.disableGroup(ColumnSelection.Predefined.Segment);
+        cm.enableGroup(ColumnSelection.Predefined.Segment);
         cm.disableGroup(ColumnSelection.Predefined.Enrichment);
         cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
         cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);

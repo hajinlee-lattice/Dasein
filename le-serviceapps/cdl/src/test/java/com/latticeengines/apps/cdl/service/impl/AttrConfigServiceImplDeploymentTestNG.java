@@ -402,7 +402,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             } else {
                 verifyFlags(config, cat, null, //
                         Active, false, //
-                        false, true, //
+                        true, true, //
                         false, true, //
                         true, true, //
                         false, true, //
