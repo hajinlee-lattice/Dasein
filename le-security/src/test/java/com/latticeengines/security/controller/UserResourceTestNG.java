@@ -186,7 +186,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
                 { AccessLevel.SUPER_ADMIN, true, 8 },
                 { AccessLevel.INTERNAL_ADMIN, true, 8 },
                 { AccessLevel.INTERNAL_USER, false, 0 },
-                { AccessLevel.EXTERNAL_ADMIN, true, 2 },
+                { AccessLevel.EXTERNAL_ADMIN, true, 3 },
                 { AccessLevel.EXTERNAL_USER, false, 0 },
                 { AccessLevel.THIRD_PARTY_USER, false, 0 },
         };

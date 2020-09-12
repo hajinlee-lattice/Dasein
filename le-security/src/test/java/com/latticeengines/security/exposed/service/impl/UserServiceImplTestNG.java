@@ -168,6 +168,7 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
         createUser(userReg.getCredentials().getUsername(), userReg.getUser().getEmail(),
                 userReg.getUser().getFirstName(), userReg.getUser().getLastName());
+        userService.assignAccessLevel(accessLevel, tenant.getId(), user.getUsername());
     }
 
     private UserRegistration createUserRegistration() {
