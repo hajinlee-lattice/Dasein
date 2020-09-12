@@ -95,8 +95,8 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Long> findAllTenantIds() {
-        return recommendationDao.findAllTenantIds();
+    public List<Long> getAllTenantIds() {
+        return recommendationDao.getAllTenantIds();
     }
 
 
@@ -183,8 +183,8 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public int deleteInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows) {
-        return recommendationDao.deleteInBulkByTenantId(tenantId, hardDelete, expiredDate, maxUpdateRows);
+    public int cleanupInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows) {
+        return recommendationDao.cleanupInBulkByTenantId(tenantId, hardDelete, expiredDate, maxUpdateRows);
     }
 
     @Override

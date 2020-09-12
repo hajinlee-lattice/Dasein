@@ -282,7 +282,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
             try {
                 long timestamp = System.currentTimeMillis();
                 while (shouldLoop) {
-                    int updatedCount = recommendationEntityMgr.deleteInBulkByTenantId(tenantId,hardDelete,exipredDate,maxUpdateRows);
+                    int updatedCount = recommendationEntityMgr.cleanupInBulkByTenantId(tenantId,hardDelete,exipredDate,maxUpdateRows);
                     shouldLoop = updatedCount > 0;
                     deletedCount += updatedCount;
                     if (shouldLoop) {
@@ -295,7 +295,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 if (deletedCount > 0) {
                     cleanupExecutorLog.info(String.format(
                             "cleanupRecommendationsForChurnedTenant: Tenant = %s, Completed cleanup "
-                                    + "very old recommendations (count = %d) with exipredDate = %s in %d milliseconds",
+                                    + "recommendations for Churned Tenants (count = %d) with exipredDate = %s in %d milliseconds",
                             tenantId, deletedCount, exipredDate, (System.currentTimeMillis() - timestamp)));
                 }
             } catch (Exception ex) {
@@ -331,7 +331,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     public List<Long> getAllTenantIdsFromRecommendation() {
-        List<Long> tenantIds = recommendationEntityMgr.findAllTenantIds();
+        List<Long> tenantIds = recommendationEntityMgr.getAllTenantIds();
         return tenantIds;
     }
 }

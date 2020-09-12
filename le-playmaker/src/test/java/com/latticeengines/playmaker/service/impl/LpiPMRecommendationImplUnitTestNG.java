@@ -141,7 +141,7 @@ public class LpiPMRecommendationImplUnitTestNG {
                         anyString(), //
                         anyListOf(String.class), any(Map.class))) //
                                 .thenReturn(resultMaps);
-        when(recommendationEntityMgr.findAllTenantIds()).thenReturn(distinctIds);
+        when(recommendationEntityMgr.getAllTenantIds()).thenReturn(distinctIds);
     }
 
     private void mockInternalResourceRestApiProxy() {

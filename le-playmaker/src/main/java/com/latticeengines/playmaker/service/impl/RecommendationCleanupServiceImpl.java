@@ -120,18 +120,12 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
         int totalDeletedCount = 0;
         Date expiredDate = PlaymakerUtils.dateFromEpochSeconds(System.currentTimeMillis() / 1000L
                 - TimeUnit.DAYS.toSeconds(Math.round(365 * YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS)));
-        List<Long> tenantIdsForCleanup = getExpiredTenants();
+        List<Long> tenantIdsForCleanup = getChurnedTenants();
         try {
             if (CollectionUtils.isNotEmpty(tenantIdsForCleanup)) {
-                if (isHardDelete) {
-                    totalDeletedCount = tenantIdsForCleanup.stream().map(id -> lpiPMRecommendation
+                totalDeletedCount = tenantIdsForCleanup.stream().map(id -> lpiPMRecommendation
                             .cleanupRecommendationsForChurnedTenant(id, expiredDate, isHardDelete))
                             .reduce(0, (x, y) -> x + y);
-                } else {
-                    totalDeletedCount = tenantIdsForCleanup.stream().map(id -> lpiPMRecommendation
-                            .cleanupRecommendationsForChurnedTenant(id, expiredDate, isHardDelete))
-                            .reduce(0, (x, y) -> x + y);
-                }
             }
         } catch (Exception ex) {
             log.error(String.format("Failed to cleanup recommendations for Expired tenants"), ex);
@@ -139,13 +133,13 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
         return totalDeletedCount;
     }
 
-    private List<Long> getExpiredTenants() {
+    private List<Long> getChurnedTenants() {
 
         List<Long> existTenants = tenantEntityMgr.getAllTenantPid();
         List<Long> recommendationTenants = lpiPMRecommendation.getAllTenantIdsFromRecommendation();
 
         recommendationTenants.removeAll(existTenants);
-        log.info(String.format("Get %d tenants Expired", recommendationTenants.size()));
+        log.info(String.format("Find %d churned tenants from Recommendation", recommendationTenants.size()));
 
         return recommendationTenants;
     }

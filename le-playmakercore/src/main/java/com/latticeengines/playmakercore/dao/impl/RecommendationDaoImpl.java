@@ -373,7 +373,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     }
 
     @Override
-    public int deleteInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows) {
+    public int cleanupInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows) {
         Session session = getSessionFactory().getCurrentSession();
 
         String hardDeleteQueryStr = "DELETE FROM " + getEntityClass().getSimpleName()
@@ -530,7 +530,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     }
 
     @Override
-    public List<Long> findAllTenantIds() {
+    public List<Long> getAllTenantIds() {
 
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = "SELECT DISTINCT tenantId FROM " + getEntityClass().getSimpleName();
