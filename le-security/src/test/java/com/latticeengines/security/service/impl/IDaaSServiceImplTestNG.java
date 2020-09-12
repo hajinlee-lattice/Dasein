@@ -43,7 +43,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void testLogin() {
         Credentials credentials = new Credentials();
         credentials.setUsername(TEST_EMAIL);
-        credentials.setPassword("Lattice123!");
+        credentials.setPassword("Lattice124!");
         LoginDocument loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isEmpty(loginDocument.getErrors()));
