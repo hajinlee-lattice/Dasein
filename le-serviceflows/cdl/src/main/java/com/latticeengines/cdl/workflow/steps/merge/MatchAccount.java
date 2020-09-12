@@ -78,13 +78,8 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 steps.add(filterImports);
             }
         } else {
-            if (batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
-                TransformationStepConfig merge = concatTablesAndSave(InterfaceName.AccountId.name(), matchTargetTablePrefix);
-                steps.add(merge);
-            } else {
-                TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
-                steps.add(merge);
-            }
+            TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
+            steps.add(merge);
         }
 
         if (!batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
