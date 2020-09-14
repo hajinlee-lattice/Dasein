@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.Status;
@@ -153,4 +155,17 @@ public class ProjectResource {
         }
     }
 
+    @PutMapping("/projectId/{projectId}")
+    @ResponseBody
+    @ApiOperation("update project")
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
+    void updateProject(@PathVariable String projectId, @RequestBody ProjectUpdateRequest request) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            projectService.updateProject(customerSpace.toString(), projectId, request);
+        } catch (Exception e) {
+            log.error("Failed to update project description by projectId: " + e.getMessage());
+            throw UIActionUtils.handleException(e);
+        }
+    }
 }

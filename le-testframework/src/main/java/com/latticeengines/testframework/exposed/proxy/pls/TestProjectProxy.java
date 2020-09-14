@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
 @Component("testProjectProxy")
@@ -19,21 +20,25 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         super("pls/projects");
     }
 
-    public ProjectDetails createProjectWithProjectId(String displayName, String projectId, Project.ProjectType projectType) {
+    public ProjectDetails createProjectWithProjectId(String displayName, String projectId,
+                                                     Project.ProjectType projectType, String desciption) {
         ProjectRequest request = new ProjectRequest();
         request.setDisplayName(displayName);
         request.setProjectId(projectId);
         request.setProjectType(projectType);
         request.setPurposeOfUse(getPurposeOfUse());
+        request.setProjectDescription(desciption);
         String url = constructUrl("/");
         return post("createProject", url, request, ProjectDetails.class);
     }
 
-    public ProjectDetails createProjectWithOutProjectId(String displayName, Project.ProjectType projectType) {
+    public ProjectDetails createProjectWithOutProjectId(String displayName, Project.ProjectType projectType,
+                                                        String description) {
         ProjectRequest request = new ProjectRequest();
         request.setDisplayName(displayName);
         request.setProjectType(projectType);
         request.setPurposeOfUse(getPurposeOfUse());
+        request.setProjectDescription(description);
         String url = constructUrl("/");
         return post("createProject", url, request, ProjectDetails.class);
     }
@@ -62,6 +67,12 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         String urlPattern = "/{projectId}";
         String url = constructUrl(urlPattern, projectId);
         delete("deleteProject", url);
+    }
+
+    public void updateProject(String projectId, ProjectUpdateRequest request) {
+        String urlPattern = "/projectId/{projectId}";
+        String url = constructUrl(urlPattern, projectId);
+        put("update description", url, request);
     }
 
     public GrantDropBoxAccessResponse getDropFolderAccessByProjectId(String projectId) {
