@@ -36,8 +36,9 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
-import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+
 
 @Service("projectService")
 public class ProjectServiceImpl implements ProjectService {

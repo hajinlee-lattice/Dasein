@@ -10,8 +10,8 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
-import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
 @Component("testProjectProxy")
 public class TestProjectProxy extends PlsRestApiProxyBase {
