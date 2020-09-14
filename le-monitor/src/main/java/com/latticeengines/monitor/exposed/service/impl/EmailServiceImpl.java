@@ -58,6 +58,10 @@ public class EmailServiceImpl implements EmailService {
     @Qualifier("dnbEmailSettings")
     private EmailSettings dnbEmailSettings;
 
+    @Inject
+    @Qualifier("sendgridLatticeEmailSettings")
+    private EmailSettings sendgridLatticeEmailSettings;
+
     @Value("${monitor.use.sendgrid}")
     private boolean useSendGrid;
 
@@ -95,7 +99,7 @@ public class EmailServiceImpl implements EmailService {
         if (fromAddress == EmailFromAddress.DNB_CONNECT) {
             return useSendGrid ? sendgridEmailSettings : dnbEmailSettings;
         } else {
-            return useDnb ? dnbEmailSettings : smtpEmailSettings;
+            return sendgridLatticeEmailSettings;
         }
     }
 
