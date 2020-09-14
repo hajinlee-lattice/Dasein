@@ -130,11 +130,9 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         executionContext = new ExecutionContext();
         generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
 
-        generateLiveRampLaunchArtifacts.putObjectInContext(
-                GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE,
+        generateLiveRampLaunchArtifacts.putObjectInContext(GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE,
                 INPUT_ADD_ACCOUNTS_TABLE);
-        generateLiveRampLaunchArtifacts.putObjectInContext(
-                GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE,
+        generateLiveRampLaunchArtifacts.putObjectInContext(GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE,
                 INPUT_REMOVE_ACCOUNTS_TABLE);
 
         generateLiveRampLaunchArtifacts.execute();
