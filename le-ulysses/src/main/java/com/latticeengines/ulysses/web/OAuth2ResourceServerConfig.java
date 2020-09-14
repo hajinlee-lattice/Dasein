@@ -71,6 +71,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/ulysses/tenantconfig/**", //
                         "/ulysses/datacollection/attributes/**", //
                         "/ulysses/datacollection/accounts/**", //
+                        "/ulysses/datacollection/status", //
                         "/ulysses/recommendations/**", //
                         "/ulysses/talkingpoints/**", //
                         "/ulysses/api-gateway/**", //
