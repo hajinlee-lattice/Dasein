@@ -33,12 +33,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "EXTERNAL_SYSTEM_AUTHENTICATION")
-@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_LOOKUPMAP_IDS, 
-                query = ExternalSystemAuthentication.SELECT_AUTHS_BY_LOOKUPMAP_IDS)
-@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_AUTH_ID, 
-                query = ExternalSystemAuthentication.SELECT_AUTHS_BY_AUTH_ID)
-@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_ALL_AUTHS, 
-                query = ExternalSystemAuthentication.SELECT_ALL_AUTHS)
+@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_LOOKUPMAP_IDS, query = ExternalSystemAuthentication.SELECT_AUTHS_BY_LOOKUPMAP_IDS)
+@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_AUTH_ID, query = ExternalSystemAuthentication.SELECT_AUTHS_BY_AUTH_ID)
+@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_ALL_AUTHS, query = ExternalSystemAuthentication.SELECT_ALL_AUTHS)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
@@ -49,11 +46,9 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
             + "( esa, esa.lookupIdMap.id ) "
             + "FROM ExternalSystemAuthentication esa WHERE esa.lookupIdMap.id in :lookupMapIds";
     static final String SELECT_AUTHS_BY_AUTH_ID = "SELECT new com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication "
-            + "( esa, esa.lookupIdMap.id ) "
-            + "FROM ExternalSystemAuthentication esa WHERE esa.id = :authId";
+            + "( esa, esa.lookupIdMap.id ) " + "FROM ExternalSystemAuthentication esa WHERE esa.id = :authId";
     static final String SELECT_ALL_AUTHS = "SELECT new com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication "
-            + "( esa, esa.lookupIdMap.id ) "
-            + "FROM ExternalSystemAuthentication esa";
+            + "( esa, esa.lookupIdMap.id ) " + "FROM ExternalSystemAuthentication esa";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,8 +79,8 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
     private String solutionInstanceId;
 
     @JsonProperty("trayWorkflowEnabled")
-    @Column(name = "TRAY_WORKFLOW_ENABLED", nullable = true)
-    private Boolean trayWorkflowEnabled;
+    @Column(name = "TRAY_WORKFLOW_ENABLED", nullable = false)
+    private boolean trayWorkflowEnabled = false;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -169,7 +164,6 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
         this.updated = updated;
     }
 
-
     public String getLookupMapConfigId() {
         return lookupMapConfigId;
     }
@@ -205,13 +199,11 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
         this.solutionInstanceId = solutionInstanceId;
     }
 
-    public Boolean getTrayWorkflowEnabled() {
-        if (trayWorkflowEnabled == null)
-            return false;
+    public boolean getTrayWorkflowEnabled() {
         return trayWorkflowEnabled;
     }
 
-    public void setTrayWorkflowEnabled(Boolean trayWorkflowEnabled) {
+    public void setTrayWorkflowEnabled(boolean trayWorkflowEnabled) {
         this.trayWorkflowEnabled = trayWorkflowEnabled;
     }
 
