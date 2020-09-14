@@ -1,5 +1,7 @@
 function check_aws_creds_expiration() {
-  if [[ -f "${HOME}/.aws/credentials" ]]; then
+  if [[ $(hostname) = *"hlth-slv"* ]]; then
+    echo "This is a trunk health node, no need to check aws creds";
+  elif [[ -f "${HOME}/.aws/credentials" ]]; then
     expiration=$(cat ${HOME}/.aws/credentials | grep -C 6 'default' | grep "expiration" | cut -d ' ' -f 3- | cut -d '+' -f 1)
     echo "Your aws creds is expiring at ${expiration}"
     if [[ "$(uname)" == "Darwin" ]]; then
