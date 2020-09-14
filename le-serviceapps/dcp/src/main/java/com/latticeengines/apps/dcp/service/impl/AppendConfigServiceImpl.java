@@ -318,7 +318,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
             for (JsonNode packageNode: productNode.get("packages")) {
                 String packageName = packageNode.get("name").asText();
                 DataRecordType recordType = parseDataRecordType(packageName);
-                if (recordType != null) {
+                if (recordType != null && recordType != DataRecordType.Analytical) {
                     types.put(recordType, parseEntitlements(packageNode));
                 }
             }
