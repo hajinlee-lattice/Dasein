@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.document.repository.writer.DanteConfigWriterRepository;
@@ -24,7 +25,10 @@ import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 import com.latticeengines.domain.exposed.dante.metadata.MetadataDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
+@Listeners({SimpleRetryListener.class})
 public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DanteConfigEntityMgrTestNG.class);
@@ -32,6 +36,8 @@ public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
     private static final String commonResourcePath = "metadata/";
     private static final String widgetConfigurationDocumentPath = "WidgetConfigurationDocument.json";
     private static final String metadataDocumentTemplatePath = "MetadataDocument.json";
+    private static final String UUID_1 = UUID.randomUUID().toString();
+    private static final String UUID_2 = UUID.randomUUID().toString();
 
     @Inject
     private DanteConfigEntityMgr danteConfigEntityMgr;
@@ -47,16 +53,18 @@ public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
         setupDanteConfiguraiton();
     }
 
-    @Test(groups = "functional")
-    public void testCrud() {
-
-        createAndUpdateDanteConfig();
-        createAndUpdateDanteConfig();
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    public void testSave() {
+        createAndUpdateDanteConfig(UUID_1);
+        createAndUpdateDanteConfig(UUID_2);
         List<DanteConfigurationDocument> configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
         Assert.assertEquals(configs.size(), 2);
+    }
 
+    @Test(groups = "functional", dependsOnMethods = "testSave", retryAnalyzer = SimpleRetryAnalyzer.class)
+    public void testCreate() {
         danteConfigEntityMgr.createOrUpdate(mainCustomerSpace, danteConfig);
-        configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
+        List<DanteConfigurationDocument> configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
         Assert.assertEquals(configs.size(), 1);
     }
 
@@ -78,9 +86,9 @@ public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
         }
     }
 
-    private void createAndUpdateDanteConfig() {
+    private void createAndUpdateDanteConfig(String uuid) {
         DanteConfigEntity danteConfigEntity = new DanteConfigEntity();
-        danteConfigEntity.setUuid(UUID.randomUUID().toString());
+        danteConfigEntity.setUuid(uuid);
         danteConfigEntity.setTenantId(mainCustomerSpace);
         danteConfigEntity.setDocument(danteConfig);
         repository.save(danteConfigEntity);
