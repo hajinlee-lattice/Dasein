@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -157,10 +158,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
     public void getAllLookupIds() {
 
         @SuppressWarnings({ "rawtypes" })
-        Map allLookupIdsRaw = restTemplate
-                .getForObject(
-                        getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids" + "?audienceType=ACCOUNTS",
-                        Map.class);
+        Map allLookupIdsRaw = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids" + "?audienceType=ACCOUNTS",
+                Map.class);
         Assert.assertNotNull(allLookupIdsRaw);
         @SuppressWarnings({ "unchecked" })
         Map<String, List<CDLExternalSystemMapping>> allLookupIds = JsonUtils.convertMapWithListValue(allLookupIdsRaw,
@@ -241,6 +241,8 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         externalAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         externalAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         lookupIdMapWithAuth.setExternalAuthentication(externalAuth);
+        String data = JsonUtils.serialize(lookupIdMapWithAuth);
+        String url = getRestAPIHostPort() + "/pls/lookup-id-mapping/register";
 
         LookupIdMap resultLookupIdMap = restTemplate.postForObject(
                 getRestAPIHostPort() + "/pls/lookup-id-mapping/register", lookupIdMapWithAuth, LookupIdMap.class);
@@ -259,7 +261,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertNotNull(externalAuthFromDB.getId());
         assertNotNull(externalAuthFromDB.getTrayAuthenticationId());
         assertNotNull(externalAuthFromDB.getSolutionInstanceId());
-        assertNull(externalAuthFromDB.getTrayWorkflowEnabled());
+        assertFalse(externalAuthFromDB.getTrayWorkflowEnabled());
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreateWithAuthentication" })
@@ -314,6 +316,6 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertNotNull(updatedExtAuth.getId());
         assertNull(updatedExtAuth.getTrayAuthenticationId());
         assertNull(updatedExtAuth.getSolutionInstanceId());
-        assertNull(updatedExtAuth.getTrayWorkflowEnabled());
+        assertFalse(updatedExtAuth.getTrayWorkflowEnabled());
     }
 }
