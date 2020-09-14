@@ -101,7 +101,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testSubmitImport() {
         // Create Project & Source
         ProjectDetails projectDetails = testProjectProxy.createProjectWithOutProjectId(PROJECT_NAME,
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, null);
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
                 TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);

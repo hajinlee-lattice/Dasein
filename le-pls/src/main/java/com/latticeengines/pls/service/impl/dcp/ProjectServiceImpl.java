@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.pls.service.TeamWrapperService;
 import com.latticeengines.pls.service.dcp.ProjectService;
@@ -67,6 +68,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteProject(String customerSpace, String projectId) {
         projectProxy.deleteProject(customerSpace, projectId, TeamUtils.getTeamIds());
+    }
+
+    @Override
+    public void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request) {
+        projectProxy.updateProject(customerSpace, projectId, request);
     }
 
     @Override

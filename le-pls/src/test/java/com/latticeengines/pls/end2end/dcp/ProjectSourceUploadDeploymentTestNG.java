@@ -104,7 +104,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         List<FieldDefinition> fields = fieldDefinitionsRecord.getFieldDefinitionsRecordsMap().get("Matching Fields");
         fields.get(1).setMatchingColumnNames(Collections.singletonList("Street"));
 
-        ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID, Project.ProjectType.Type1);
+        ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID,
+                Project.ProjectType.Type1, null);
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
 
         GrantDropBoxAccessResponse response = testProjectProxy.getDropFolderAccessByProjectId(PROJECT_ID);

@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -83,5 +84,11 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         String baseUrl = "/customerspaces/{customerSpace}/project/projectId/{projectId}/teamId/{teamId}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId, teamId);
         put("update teamId", url);
+    }
+
+    public void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request) {
+        String baseUrl = "/customerspaces/{customerSpace}/project/projectId/{projectId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId);
+        put("update project", url, request);
     }
 }
