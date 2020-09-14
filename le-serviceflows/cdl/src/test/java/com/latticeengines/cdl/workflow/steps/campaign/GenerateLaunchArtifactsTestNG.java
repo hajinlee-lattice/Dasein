@@ -1,17 +1,25 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-workflow-context.xml",
@@ -20,6 +28,9 @@ public class GenerateLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
     @Inject
     private GenerateLaunchArtifacts generateLaunchArtifacts;
+
+    @Value("${cdl.outreach.max.launch}")
+    private Long outreachMaxLaunch;
 
     @Test(groups = "functional")
     public void testShouldSkipStep() {
@@ -53,6 +64,26 @@ public class GenerateLaunchArtifactsTestNG extends WorkflowTestNGBase {
         counts.put("FULL_CONTACTS_UNIVERSE", 81541L);
         counts.put("REMOVED_CONTACTS_DELTA_TABLE", 81541L);
         Assert.assertFalse(invokeShouldSkipStep(audienceType, channelType, counts));
+    }
+    
+    @Test(groups = "functional")
+    public void testOutreachMaxLaunch() {
+        generateLaunchArtifacts.setExecutionContext(new ExecutionContext());
+        AudienceType audienceType = AudienceType.CONTACTS;
+        CDLExternalSystemName channelType = CDLExternalSystemName.Outreach;
+        
+        SparkJobResult mockResult = new SparkJobResult();
+        HdfsDataUnit contactDataUnit = new HdfsDataUnit();
+        contactDataUnit.setCount(outreachMaxLaunch + 1);
+        List<HdfsDataUnit> dataList = Stream.of(null, null, null, contactDataUnit, null).collect(Collectors.toList());
+        mockResult.setTargets(dataList);
+
+        try {
+            generateLaunchArtifacts.processSparkJobResults(audienceType, channelType, mockResult);
+            Assert.fail(String.format("Outreach launch should fail when count is over %d", outreachMaxLaunch));
+        } catch (LedpException ex) {
+            Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40097);
+        }
     }
 
     private boolean invokeShouldSkipStep(AudienceType audienceType, CDLExternalSystemName channelType,
