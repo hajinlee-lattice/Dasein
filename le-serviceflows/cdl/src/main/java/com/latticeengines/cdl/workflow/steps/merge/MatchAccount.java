@@ -80,6 +80,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         } else {
             TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
             steps.add(merge);
+            if (batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
+                setTargetTable(merge, matchTargetTablePrefix);
+            }
         }
 
         if (!batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
