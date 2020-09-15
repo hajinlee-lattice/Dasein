@@ -114,9 +114,9 @@ public class AggActivityStreamToDaily
         streamsIncrUpdated.addAll(config.incrementalStreams);
         shortCutMode = isShortcutMode(dailyTableNames, dailyDeltaTableNames);
         if (shortCutMode) {
-            log.info(String.format("Found both aggregated daily stream tables %s and delta tables %s, going through shortcut mode.",
+            log.info("Retrieved daily streams {} and delta daily streams {}, going through shortcut mode.",
                     dailyTableNames.values(),
-                    dailyDeltaTableNames.values()));
+                    dailyDeltaTableNames.values());
             dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames, AggregatedActivityStream, inactive);
             return null;
         } else {
@@ -240,9 +240,10 @@ public class AggActivityStreamToDaily
     private boolean isShortcutMode(Map<String, String> dailyTableNames, Map<String, String> dailyDeltaTableNames) {
         // if any stream needs incremental update, make sure delta table exists
         if (CollectionUtils.isNotEmpty(streamsIncrUpdated)) {
-            return allTablesExist(dailyTableNames) && allTablesExist(dailyDeltaTableNames);
+            return allTablesExist(dailyTableNames) && allTablesExist(dailyDeltaTableNames)
+                    && tableInHdfs(dailyTableNames, true) && tableInHdfs(dailyDeltaTableNames, true);
         }
-        return allTablesExist(dailyTableNames);
+        return allTablesExist(dailyTableNames) && tableInHdfs(dailyTableNames, true);
     }
 
     private boolean shouldIncrUpdate(AtlasStream stream) {

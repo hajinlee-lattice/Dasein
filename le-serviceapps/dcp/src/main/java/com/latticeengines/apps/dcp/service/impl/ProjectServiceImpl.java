@@ -12,6 +12,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
@@ -49,7 +50,9 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project path}
     private static final int MAX_RETRY = 3;
-    private static final int MAX_PAGE_SIZE = 100;
+
+    @Value("${dcp.app.project.pagesize}")
+    private int maxPageSize;
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
@@ -338,8 +341,8 @@ public class ProjectServiceImpl implements ProjectService {
     private PageRequest getPageRequest(int pageIndex, int pageSize) {
         Preconditions.checkState(pageIndex >= 0);
         Preconditions.checkState(pageSize > 0);
-        if (pageSize > MAX_PAGE_SIZE) {
-            pageSize = MAX_PAGE_SIZE;
+        if (pageSize > maxPageSize) {
+            pageSize = maxPageSize;
         }
         Sort sort = Sort.by(Sort.Direction.DESC, "updated");
         return PageRequest.of(pageIndex, pageSize, sort);

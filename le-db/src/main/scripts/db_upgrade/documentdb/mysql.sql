@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS `DanteConfiguration` (
     TenantId varchar(255),
     CreatedDate datetime,
     LastModifiedDate datetime,
-    Document json
+    Document json,
+    index IX_ID (TenantId),
+    constraint UX_ID unique(TenantId)
 )
 
 
