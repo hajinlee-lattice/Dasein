@@ -171,6 +171,8 @@ public class UserResource {
         else {
             IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
             if (idaasUser == null) {
+                LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s.",
+                        loginUsername, loginLevel));
                 httpResponse.setStatus(500);
                 response.setErrors(Collections.singletonList("Failed to create IDaaS User."));
                 return response;
@@ -265,11 +267,19 @@ public class UserResource {
         }
         if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
             IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
-            String welcomeUrl = dcpPublicUrl;
-            if (idaasUser.getInvitationLink() != null) {
-                welcomeUrl = idaasUser.getInvitationLink();
+            if (idaasUser == null) {
+                LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
+                        loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
+                response.setStatus(500);
+                return SimpleBooleanResponse.failedResponse(
+                        Collections.singletonList("Failed to create IDaaS user."));
+            } else {
+                String welcomeUrl = dcpPublicUrl;
+                if (idaasUser.getInvitationLink() != null) {
+                    welcomeUrl = idaasUser.getInvitationLink();
+                }
+                emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
             }
-            emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
         }
         return SimpleBooleanResponse.successResponse();
     }
