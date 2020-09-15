@@ -384,7 +384,7 @@ public class IDaaSServiceImpl implements IDaaSService {
             synchronized (this) {
                 if (!token.equals(tokenInUse)) {
                     tokenInUse = token;
-                    String headerValue = "Bearer " + tokenInUse;
+                    String headerValue = "bearer:" + tokenInUse;
                     ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
                     List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
                     interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
