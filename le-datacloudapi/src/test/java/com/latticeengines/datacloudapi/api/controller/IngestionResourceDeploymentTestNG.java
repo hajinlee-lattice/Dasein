@@ -110,7 +110,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
                 String.format(
                         "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,"
                                 + "\"SftpHost\":\"%s\",\"SftpPort\":%d,\"SftpUsername\":\"%s\",\"SftpPassword\":\"%s\","
-                                + "\"SftpDir\":\"ingest_test/SftpUtilsTestNG/DnB\","
+                                + "\"SftpDir\":\"home/sftpdev/ingest_test/SftpUtilsTestNG/DnB\","
                                 + "\"CheckVersion\":1,\"CheckStrategy\":\"ALL\","
                                 + "\"HasSubfolder\":false,\"FileRegexPattern\":\"LE_SEED_OUTPUT_(.+).OUT.gz\","
                                 + "\"FileTSPattern\":\"yyyy_MM\"}",
@@ -123,7 +123,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         return new Object[][] { { BOMBORA_INGESTION,
                 String.format("{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":1,"
                         + "\"SftpHost\":\"%s\",\"SftpPort\":%d,\"SftpUsername\":\"%s\",\"SftpPassword\":\"%s\","
-                        + "\"SftpDir\":\"ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip\","
+                        + "\"SftpDir\":\"home/sftpdev/ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip\","
                         + "\"CheckVersion\":1,\"CheckStrategy\":\"WEEK\","
                         + "\"HasSubfolder\":true,\"SubfolderRegexPattern\":\"\\\\d{8}\",\"SubfolderTSPattern\":\"yyyyMMdd\","
                         + "\"FileRegexPattern\":\"AllDomainsAllTopicsZips_(.+).csv.gz\"}", sftpProvider.getSftpHost(),

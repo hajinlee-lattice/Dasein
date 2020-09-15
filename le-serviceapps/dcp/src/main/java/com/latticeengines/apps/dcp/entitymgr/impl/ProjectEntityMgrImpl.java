@@ -21,6 +21,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
 @Component("projectEntityMgr")
 public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<ProjectRepository, Project, Long>
@@ -149,6 +150,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setRecipientList((List<String>) columns[7]);
         info.setTeamId((String) columns[8]);
         info.setProjectDescription((String) columns[9]);
+        info.setPurposeOfUse((PurposeOfUse) columns[10]);
         return info;
     }
 }

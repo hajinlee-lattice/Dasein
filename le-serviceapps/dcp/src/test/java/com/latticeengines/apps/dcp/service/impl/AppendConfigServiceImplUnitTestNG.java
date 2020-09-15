@@ -1,6 +1,5 @@
 package com.latticeengines.apps.dcp.service.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.Analytical;
 import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.Domain;
 import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.MasterData;
 
@@ -32,7 +31,7 @@ public class AppendConfigServiceImplUnitTestNG {
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
         DataBlockEntitlementContainer container = AppendConfigServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
-        Assert.assertEquals(container.getDomains().size(), 3);
+        Assert.assertEquals(container.getDomains().size(), 2);
         for (DataBlockEntitlementContainer.Domain domain: container.getDomains()) {
             switch (domain.getDomain()) {
                 case SalesMarketing:
@@ -43,9 +42,7 @@ public class AppendConfigServiceImplUnitTestNG {
                     Assert.assertEquals(domain.getRecordTypes().get(MasterData).size(), 5);
                     break;
                 case Finance:
-                    Assert.assertEquals(domain.getRecordTypes().size(), 1);
-                    Assert.assertTrue(domain.getRecordTypes().containsKey(Analytical));
-                    Assert.assertEquals(domain.getRecordTypes().get(Analytical).size(), 11);
+                    Assert.fail("Should not see Finance domain with only Analytical Use entitlement");
                     break;
                 case Supply:
                     Assert.assertEquals(domain.getRecordTypes().size(), 1);

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
@@ -36,6 +37,9 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+
 
 @Service("projectService")
 public class ProjectServiceImpl implements ProjectService {
@@ -46,7 +50,9 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project path}
     private static final int MAX_RETRY = 3;
-    private static final int MAX_PAGE_SIZE = 100;
+
+    @Value("${dcp.app.project.pagesize}")
+    private int maxPageSize;
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
@@ -62,10 +68,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
-                                        Project.ProjectType projectType, String user) {
+                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath,
+                purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -76,10 +83,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                        Project.ProjectType projectType, String user) {
+                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
         validateProjectId(projectId);
         String rootPath = generateRootPath(projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath,
+                purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -198,13 +206,25 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void updateDescription(String customerSpace, String projectId, String description) {
+    public void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request) {
         Project project = projectEntityMgr.findByProjectId(projectId);
         if (null == project) {
             return;
         }
-        project.setProjectDescription(description);
-        projectEntityMgr.update(project);
+        boolean needUpdate = false;
+        if (StringUtils.isNotBlank(request.getDisplayName())) {
+            project.setProjectDisplayName(request.getDisplayName());
+            needUpdate = true;
+        }
+        if (StringUtils.isNotBlank(request.getProjectDescription())) {
+            project.setProjectDescription(request.getProjectDescription());
+            needUpdate = true;
+        }
+        if (needUpdate) {
+            projectEntityMgr.update(project);
+        } else {
+            log.info("no non-empty value in the request body for {} in {}", projectId, customerSpace);
+        }
     }
 
     private void validateProjectId(String projectId) {
@@ -247,6 +267,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setCreatedBy(projectInfo.getCreatedBy());
         details.setTeamId(projectInfo.getTeamId());
         details.setProjectDescription(projectInfo.getProjectDescription());
+        details.setPurposeOfUse(projectInfo.getPurposeOfUse());
         return details;
     }
 
@@ -266,11 +287,13 @@ public class ProjectServiceImpl implements ProjectService {
         summary.setUpdated(projectInfo.getUpdated().getTime());
         summary.setCreatedBy(projectInfo.getCreatedBy());
         summary.setProjectDescription(projectInfo.getProjectDescription());
+        summary.setPurposeOfUse(projectInfo.getPurposeOfUse());
         return summary;
     }
 
     private Project generateProjectObject(String projectId, String displayName,
-                                          Project.ProjectType projectType, String user, String rootPath) {
+                                          Project.ProjectType projectType, String user, String rootPath,
+                                          PurposeOfUse purposeOfUse, String description) {
         Project project = new Project();
         project.setCreatedBy(user);
         project.setProjectDisplayName(displayName);
@@ -280,6 +303,8 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectType(projectType);
         project.setRootPath(rootPath);
         project.setRecipientList(Collections.singletonList(user));
+        project.setPurposeOfUse(purposeOfUse);
+        project.setProjectDescription(description);
         return project;
     }
 
@@ -316,8 +341,8 @@ public class ProjectServiceImpl implements ProjectService {
     private PageRequest getPageRequest(int pageIndex, int pageSize) {
         Preconditions.checkState(pageIndex >= 0);
         Preconditions.checkState(pageSize > 0);
-        if (pageSize > MAX_PAGE_SIZE) {
-            pageSize = MAX_PAGE_SIZE;
+        if (pageSize > maxPageSize) {
+            pageSize = maxPageSize;
         }
         Sort sort = Sort.by(Sort.Direction.DESC, "updated");
         return PageRequest.of(pageIndex, pageSize, sort);

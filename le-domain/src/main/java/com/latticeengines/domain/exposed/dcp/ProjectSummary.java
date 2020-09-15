@@ -45,6 +45,9 @@ public class ProjectSummary {
     @JsonProperty("createdBy")
     private String createdBy;
 
+    @JsonProperty("purposeOfUse")
+    private PurposeOfUse purposeOfUse;
+
     public String getProjectId() {
         return projectId;
     }
@@ -131,5 +134,13 @@ public class ProjectSummary {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public PurposeOfUse getPurposeOfUse() {
+        return purposeOfUse;
+    }
+
+    public void setPurposeOfUse(PurposeOfUse purposeOfUse) {
+        this.purposeOfUse = purposeOfUse;
     }
 }

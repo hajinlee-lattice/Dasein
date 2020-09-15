@@ -96,6 +96,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private String evaluationDate;
     private AttributeRepository attrRepo;
 
+    @Value("${cdl.outreach.max.launch}")
+    private Long outreachMaxLaunch;
+
     @Value("${datacloud.manage.url}")
     private String url;
 
@@ -182,7 +185,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 positiveDeltaDataUnit, negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
                 contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
-        processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
+        processSparkJobResults(channelConfig.getAudienceType(), channelConfig.getSystemName(), sparkJobResult);
     }
 
     private boolean doesContactDataExist(AttributeRepository attrRepo) {
@@ -254,7 +257,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         });
     }
 
-    private void processSparkJobResults(AudienceType audienceType, SparkJobResult sparkJobResult) {
+    @VisibleForTesting
+    void processSparkJobResults(AudienceType audienceType, CDLExternalSystemName sysName,
+            SparkJobResult sparkJobResult) {
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
         long accountsAdded = 0L;
         long accountsDeleted = 0L;
@@ -301,6 +306,12 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             HdfsDataUnit addedContactsDataUnit = sparkJobResult.getTargets().get(3);
             if (addedContactsDataUnit != null && addedContactsDataUnit.getCount() > 0) {
                 contactsAdded = addedContactsDataUnit.getCount();
+                if (sysName == CDLExternalSystemName.Outreach) {
+                    if (contactsAdded > outreachMaxLaunch) {
+                        throw new LedpException(LedpCode.LEDP_40097,
+                                new String[] { outreachMaxLaunch.toString(), sysName.toString() });
+                    }
+                }
                 processHDFSDataUnit(String.format("AddedContacts_%s", config.getExecutionId()), addedContactsDataUnit,
                         audienceType.getInterfaceName(), getAddDeltaTableContextKeyByAudienceType(audienceType));
             } else {

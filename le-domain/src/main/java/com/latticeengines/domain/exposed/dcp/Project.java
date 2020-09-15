@@ -101,6 +101,11 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @JsonProperty("teamId")
     private String teamId;
 
+    @Column(name = "PURPOSE_OF_USE", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    @JsonProperty("purpose_of_use")
+    private PurposeOfUse purposeOfUse;
+
     @Override
     public Long getPid() {
         return pid;
@@ -213,6 +218,14 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
 
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    public PurposeOfUse getPurposeOfUse() {
+        return purposeOfUse;
+    }
+
+    public void setPurposeOfUse(PurposeOfUse purposeOfUse) {
+        this.purposeOfUse = purposeOfUse;
     }
 
     //TODO: define project type
