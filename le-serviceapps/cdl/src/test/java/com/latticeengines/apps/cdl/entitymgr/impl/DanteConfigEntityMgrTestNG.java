@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.document.repository.writer.DanteConfigWriterRepository;
@@ -26,7 +25,6 @@ import com.latticeengines.domain.exposed.dante.metadata.MetadataDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
-import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
