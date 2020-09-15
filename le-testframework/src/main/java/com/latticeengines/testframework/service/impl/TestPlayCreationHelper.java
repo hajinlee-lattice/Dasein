@@ -618,34 +618,9 @@ public class TestPlayCreationHelper {
                 .and(Arrays.asList(innerLogical1, innerLogical2)).build();
     }
 
-    private Restriction createAccountRestriction(List<Restriction> dynRestrictions) {
-
-        Restriction b3 = //
-                createBucketRestriction(2, ComparisonType.LESS_THAN, //
-                        BusinessEntity.Account, "CloudTechnologies_ContactCenterManagement");
-        Restriction b4 = //
-                createBucketRestriction(4, ComparisonType.LESS_THAN, //
-                        BusinessEntity.Account, "BusinessTechnologiesSsl");
-        Restriction b5 = //
-                createBucketRestriction(3, ComparisonType.LESS_THAN, //
-                        BusinessEntity.Account, "BusinessTechnologiesAnalytics");
-
-        List<Restriction> restrictionList = new ArrayList<>(Arrays.asList(b3, b4, b5));
-
-        Restriction innerLogical1 = LogicalRestriction.builder()//
-                .and(restrictionList).build();
-        Restriction innerLogical2;
-        if (dynRestrictions != null) {
-            innerLogical2 = LogicalRestriction.builder()//
-                    .or(dynRestrictions).build();
-        }
-        else {
-            innerLogical2 = LogicalRestriction.builder()//
-                    .or(new ArrayList<>()).build();
-        }
-
+    private Restriction addOrRestriction(Restriction dynRestriction, Restriction orRestriction) {
         return LogicalRestriction.builder() //
-                .and(Arrays.asList(innerLogical1, innerLogical2)).build();
+                .or(Arrays.asList(dynRestriction, orRestriction)).build();
     }
 
     private Restriction createBucketRestriction(Object val, ComparisonType comparisonType, BusinessEntity entityType,
@@ -968,8 +943,8 @@ public class TestPlayCreationHelper {
                 ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction dynRest2 = createBucketRestriction(2, ComparisonType.EQUAL, BusinessEntity.Account,
                 ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
-        List<Restriction> dynRestList = new ArrayList<>(Arrays.asList(dynRest1, dynRest2));
-        Restriction accountRestriction = createAccountRestriction(dynRestList);
+        Restriction accountRestriction = createAccountRestriction(dynRest1);
+        accountRestriction = addOrRestriction(accountRestriction, dynRest2);
         Restriction contactRestriction = createContactRestriction();
         return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
     }
