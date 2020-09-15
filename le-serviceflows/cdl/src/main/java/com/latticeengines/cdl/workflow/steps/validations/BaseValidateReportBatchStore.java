@@ -228,9 +228,11 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
         metadataProxy.createTable(customerSpace.toString(), changeListTableName, changeListTable);
         log.info("Create change list table=" + changeListTableName);
         exportToS3AndAddToContext(changeListTable, getEntityContextKey());
-        exportAccountLookupChangeToDynamo(changeListTableName);
-        addShortRetentionToTable(changeListTableName);
-
+        if (BusinessEntity.Account.equals(entity)) {
+            log.info("Add export {} to dynamo to config list", changeListTableName);
+            exportAccountLookupChangeToDynamo(changeListTableName);
+            addShortRetentionToTable(changeListTableName);
+        }
     }
 
     protected String getEntityKey() {
