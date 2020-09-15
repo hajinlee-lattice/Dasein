@@ -27,6 +27,25 @@ CREATE PROCEDURE `UpdateSchema`()
 	foreign key (`FK_DUNS_COUNT`) references `PLS_MultiTenant`.`METADATA_TABLE` (`PID`) on delete cascade;
 
 
+      CREATE TABLE `DCP_ENRICHMENT_LAYOUT`
+      (
+          `PID`          bigint(20)                              NOT NULL AUTO_INCREMENT,
+          `LAYOUT_ID`    varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `DOMAIN`       varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `RECORD_TYPE`  varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `CREATED`      datetime                                NOT NULL,
+          `CREATED_BY`   varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `DELETED`      bit(1)                                  NOT NULL,
+          `TEAM_ID`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `UPDATED`      datetime                                NOT NULL,
+          `FK_TENANT_ID` bigint(20)                              NOT NULL,
+          PRIMARY KEY (`PID`),
+          UNIQUE KEY `UX_LAYOUT_ID` (`FK_TENANT_ID`,`LAYOUT_ID`),
+          KEY `IX_LAYOUT_ID` (`LAYOUT_ID`),
+          CONSTRAINT `FK_DCPENRICHMENT_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE
+      ) ENGINE = InnoDB
+        DEFAULT CHARSET = utf8mb4
+        COLLATE = utf8mb4_unicode_ci;
 
   END //
 -- ##############################################################
