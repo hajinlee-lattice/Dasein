@@ -72,4 +72,19 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         }
         Assert.assertTrue(projectIds.isEmpty());
     }
+
+    @Test(groups = {"deployment"})
+    public void testTrueDeleteDCPProject() {
+        ProjectRequest projectRequest = new ProjectRequest();
+        projectRequest.setDisplayName("truedeletetest");
+        projectRequest.setProjectId("truedeletetest");
+        projectRequest.setProjectType(Project.ProjectType.Type1);
+        projectRequest.setPurposeOfUse(getPurposeOfUse());
+        ProjectDetails result = projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest,"test@lattice-engines.com");
+        assertNotNull(result);
+        assertEquals(result.getProjectId(), "truedeletetest");
+        projectProxy.trueDeleteProject(mainTestTenant.getId(), "truedeletetest", null);
+        result = projectProxy.getDCPProjectByProjectId(mainTestTenant.getId(), "truedeletetest", Boolean.FALSE, null);
+        Assert.assertNull(result);
+    }
 }

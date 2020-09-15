@@ -91,4 +91,9 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Query("UPDATE DataReportRecord d SET d.dunsCount = ?4, d.refreshTime = ?2, d.dataSnapshotTime=?3 WHERE d.pid = " +
             "?1 and d.dunsCount IS NULL")
     int updateDataReportIfNull(Long pid, Date refreshTime, Date snapshotTime, Table dunsCount);
+
+    @Transactional(transactionManager = "jpaTransactionManager")
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE from DataReportRecord d where d.pid in ?1")
+    void deleteDataReportRecords(Set<Long> pids);
 }

@@ -30,6 +30,8 @@ public interface ProjectService {
 
     Boolean deleteProject(String customerSpace, String projectId, List<String> teamIds);
 
+    Boolean trueDeleteProject(String customerSpace, String projectId, List<String> teamIds);
+
     void updateRecipientList(String customerSpace, String projectId, List<String> recipientList);
 
     ProjectInfo getProjectBySourceId(String customerSpace, String sourceId);
