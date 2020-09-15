@@ -237,6 +237,6 @@ public class GenerateLastActivityDate
         Map<String, String> lastActivityDateTableNames = getMapObjectFromContext(LAST_ACTIVITY_DATE_TABLE_NAME,
                 String.class, String.class);
         log.info("Last activity date table names = {}", lastActivityDateTableNames);
-        return allTablesExist(lastActivityDateTableNames);
+        return allTablesExist(lastActivityDateTableNames) && tableInHdfs(lastActivityDateTableNames, false);
     }
 }

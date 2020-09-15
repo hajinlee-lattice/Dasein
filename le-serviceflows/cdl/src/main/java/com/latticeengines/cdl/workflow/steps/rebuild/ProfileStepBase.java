@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
@@ -383,4 +385,18 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return !skipPublishDynamo && enableTp;
     }
 
+    protected boolean tableIsInHdfs(Table table, boolean partitioned) {
+        String tablePath = partitioned ? table.getExtracts().get(0).getPath() : table.getExtractsDirectory();
+        boolean result = false;
+        try {
+            result = HdfsUtils.fileExists(yarnConfiguration, tablePath);
+        } catch (IOException e) {
+            log.warn("Failed to check if table exists with path {}", tablePath);
+            e.printStackTrace();
+        }
+        if (!result) {
+            log.warn("Found table {} in database but not in hdfs.", table.getName());
+        }
+        return result;
+    }
 }
