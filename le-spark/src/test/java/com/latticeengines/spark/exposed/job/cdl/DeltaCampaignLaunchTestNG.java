@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -19,7 +18,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -147,12 +145,10 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             HdfsDataUnit recDf = result.getTargets().get(0);
             HdfsDataUnit addCsvDf = result.getTargets().get(1);
             HdfsDataUnit deleteCsvDf = result.getTargets().get(2);
-
             // Account number assertion
             Assert.assertEquals(recDf.getCount().intValue(), addAccounts.length);
             Assert.assertEquals(addCsvDf.getCount().intValue(), 51);
             Assert.assertEquals(deleteCsvDf.getCount().intValue(), 10);
-
             // Contact number assertion
             try {
                 Iterator<GenericRecord> recDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
@@ -205,21 +201,13 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     private void verifyContactColumns(Schema schema) {
         List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
-        Set<String> excludeFields = Sets.newHashSet(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
-                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
-                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
         for (String contactColumn : contactColumns) {
             Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
-            if (excludeFields.contains(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn)) {
-                Assert.assertNull(field);
-            } else {
-                Assert.assertNotNull(field);
-            }
+            Assert.assertNotNull(field);
         }
     }
 
     private DeltaCampaignLaunchSparkContext generateDeltaCampaignLaunchSparkContextForS3() {
-
         Tenant tenant = new Tenant("DeltaCampaignLaunchTestNG");
         tenant.setPid(1L);
         PlayLaunch playLaunch = new PlayLaunch();
@@ -247,7 +235,6 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         String saltHint = CipherUtils.generateKey();
         String key = CipherUtils.generateKey();
         String pw = CipherUtils.encrypt(dataDbPassword, key, saltHint);
-
         DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext = new DeltaCampaignLaunchSparkContextBuilder()//
                 .tenant(tenant) //
                 .playName(play.getName()) //
@@ -266,7 +253,6 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 .encryptionKey(key) //
                 .dataDbPassword(pw) //
                 .build();
-
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecIncluded(CampaignLaunchUtils.generateAccountColsRecIncludedForS3());
         deltaCampaignLaunchSparkContext

@@ -58,8 +58,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     if (createRecommendationDataFrame) {
       val recommendationDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable)
       val baseAddRecDf = recommendationDf.checkpoint(eager = true)
-      publishRecommendationsToDB(deltaCampaignLaunchSparkContext, completeContactTable, baseAddRecDf, sfdcContactId, joinKey, contactCols, contactNums, accountContactRatio)
-      finalDfs += baseAddRecDf
+      finalDfs += publishRecommendationsToDB(deltaCampaignLaunchSparkContext, completeContactTable, baseAddRecDf, sfdcContactId, joinKey, contactCols, contactNums, accountContactRatio)
       if (createAddCsvDataFrame) {
         var addRecDf: DataFrame = createFinalRecommendationDf(deltaCampaignLaunchSparkContext, contactCols, contactNums, 0, joinKey, baseAddRecDf, addAccountTable, addContactTable)
         finalDfs += addRecDf
@@ -97,7 +96,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   }
 
   private def publishRecommendationsToDB(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, completeContactTable: DataFrame,
-                                         baseAddRecDf: DataFrame, sfdcContactId: String, joinKey: String, contactCols: Seq[String], contactNums: Array[Long], accountContactRatio: Int) = {
+                                         baseAddRecDf: DataFrame, sfdcContactId: String, joinKey: String, contactCols: Seq[String], contactNums: Array[Long], accountContactRatio: Int): DataFrame = {
     if (deltaCampaignLaunchSparkContext.getPublishRecommendationsForS3Launch) {
       var recommendations: DataFrame = null
       if (!completeContactTable.rdd.isEmpty) {
@@ -116,7 +115,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         contactNums(0) = 0L
       }
       exportToRecommendationTable(deltaCampaignLaunchSparkContext, recommendations)
+      return recommendations
     }
+    baseAddRecDf
   }
 
   private def printTable(tableName: String, joinKey: String, table: DataFrame) = {
@@ -298,9 +299,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         columnsNotExistInContactCols = columnsNotExistInContactCols :+ contactColName
       }
     }
-    val contactTableToJoin: DataFrame = contactTable.select((columnsExistInContactCols ++ joinKeyCol).map(name => col(name)): _*)
+    var contactTableToJoin: DataFrame = contactTable.select((columnsExistInContactCols ++ joinKeyCol).map(name => col(name)): _*)
     for (contactColName <- columnsNotExistInContactCols) {
-      contactTableToJoin.withColumn(contactColName, lit(null).cast(StringType))
+      contactTableToJoin = contactTableToJoin.withColumn(contactColName, lit(null).cast(StringType))
     }
     val newAttrs = contactTableToJoin.columns.map(c => DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + c)
     val contactTableRenamed: DataFrame = contactTableToJoin.toDF(newAttrs: _*)
