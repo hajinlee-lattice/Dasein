@@ -592,7 +592,7 @@ public class TestPlayCreationHelper {
         Assert.assertEquals(play.getRatingEngine().getId(), ruleBasedRatingEngine.getId());
     }
 
-    private Restriction createAccountRestriction(Restriction dynRestriction) {
+    private Restriction createAccountRestriction(Restriction andRestriction, Restriction orRestriction) {
 
         Restriction b3 = //
                 createBucketRestriction(2, ComparisonType.LESS_THAN, //
@@ -604,23 +604,32 @@ public class TestPlayCreationHelper {
                 createBucketRestriction(3, ComparisonType.LESS_THAN, //
                         BusinessEntity.Account, "BusinessTechnologiesAnalytics");
 
-        List<Restriction> restrictionList = new ArrayList<>(Arrays.asList(b3, b4, b5));
-        if (dynRestriction != null) {
-            restrictionList.add(dynRestriction);
+        List<Restriction> andRestrictionList = new ArrayList<>(Arrays.asList(b3, b4, b5));
+        if (andRestriction != null) {
+            andRestrictionList.add(andRestriction);
+        }
+
+        List<Restriction> orRestrictionList = new ArrayList<>();
+        if (orRestriction != null) {
+            orRestrictionList.add(orRestriction);
         }
 
         Restriction innerLogical1 = LogicalRestriction.builder()//
-                .and(restrictionList).build();
+                .and(andRestrictionList).build();
         Restriction innerLogical2 = LogicalRestriction.builder()//
-                .or(new ArrayList<>()).build();
+                .or(orRestrictionList).build();
 
         return LogicalRestriction.builder() //
                 .and(Arrays.asList(innerLogical1, innerLogical2)).build();
     }
 
-    private Restriction addOrRestriction(Restriction dynRestriction, Restriction orRestriction) {
+    private Restriction createAccountRestriction(Restriction andRestriction) {
+        return createAccountRestriction(andRestriction, null);
+    }
+
+    private Restriction createOrRestriction(Restriction restriction1, Restriction restriction2) {
         return LogicalRestriction.builder() //
-                .or(Arrays.asList(dynRestriction, orRestriction)).build();
+                .or(Arrays.asList(restriction1, restriction2)).build();
     }
 
     private Restriction createBucketRestriction(Object val, ComparisonType comparisonType, BusinessEntity entityType,
@@ -943,8 +952,8 @@ public class TestPlayCreationHelper {
                 ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction dynRest2 = createBucketRestriction(2, ComparisonType.EQUAL, BusinessEntity.Account,
                 ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
-        Restriction accountRestriction = createAccountRestriction(dynRest1);
-        accountRestriction = addOrRestriction(accountRestriction, dynRest2);
+        Restriction orRestriction = createOrRestriction(dynRest1, dynRest2);
+        Restriction accountRestriction = createAccountRestriction(null, orRestriction);
         Restriction contactRestriction = createContactRestriction();
         return createSegment(NamingUtils.timestamp("AggregatedSegment"), accountRestriction, contactRestriction);
     }
