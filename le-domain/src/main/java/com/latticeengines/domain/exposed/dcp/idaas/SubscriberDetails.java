@@ -11,6 +11,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubscriberDetails {
 
+    /* This is an example of JSON returned from IDaaS
+
+    {
+    "subscriber_details": {
+        "subscriber_number": "800118741",
+        "duns_number": "167734092",
+        "status": "Active",
+        "company_name": "Test Acct 22",
+        "effective_date": "2020-09-04",
+        "expiration_date": "2021-09-03",
+        "subscriber_type": "External",
+        "service_type": "Paid Service",
+        "address": {
+            "iso2_country_code": "US"
+        },
+        "custom_param_1": null,
+        "custom_param_2": null,
+        "custom_param_3": null,
+        "custom_param_4": null,
+        "is_overage_allowed": null,
+        "mail": "mikenesson@yopmail.com",
+        "products": [
+            "D+ Data Blocks"
+        ]
+    }
+    }
+     */
+
     @JsonProperty("subscriber_number")
     private String subscriberNumber;
 

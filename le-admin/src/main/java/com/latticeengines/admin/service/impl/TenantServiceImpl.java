@@ -117,7 +117,7 @@ public class TenantServiceImpl implements TenantService {
 
     private final BatonService batonService = new BatonServiceImpl();
 
-    @Value("${default.subscription.number}")
+    @Value("${admin.default.subscription.number}")
     private String DEFAULT_SUBSCRIPTION_NUMBER;
 
     @Inject
@@ -715,14 +715,16 @@ public class TenantServiceImpl implements TenantService {
         }
 
         // If a tenantType == TenantType.CUSTOMER tenant (the default) then check that the subscriber number is valid.
-        if ("customer".equals(vboRequest.getSubscriber().getTenantType()) && !iDaaSService.doesSubscriberNumberExist(vboRequest)) {
-            log.error("the subscriber number {} is not valid", subNumber);
-            VboResponse response = generateVBOResponse("failed",
-                    "The subscriber number is not valid, unable to create tenant.");
+        TenantType subscriberTenantType = vboRequest.getSubscriber().getTenantType();
+        if (subscriberTenantType == TenantType.CUSTOMER && !iDaaSService.doesSubscriberNumberExist(vboRequest)) {
+            String msg = String.format("The subscriber number [%s] is not valid, unable to create tenant.", subNumber);
+            log.error(msg);
+            VboResponse response = generateVBOResponse("failed", msg);
             vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
             return response;
         }
         else {
+            // If not a customer TenantType and subscriber number is null then use the default subscription number.
             subNumber = (null != subNumber) ? subNumber : DEFAULT_SUBSCRIPTION_NUMBER;
         }
 

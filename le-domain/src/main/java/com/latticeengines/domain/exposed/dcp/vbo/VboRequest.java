@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -149,7 +150,7 @@ public class VboRequest {
         private String name;
 
         @JsonProperty("customer")
-        private String tenantType = "customer";
+        private TenantType tenantType = TenantType.CUSTOMER;
 
         public String getSubscriberNumber() {
             return subscriberNumber;
@@ -183,11 +184,11 @@ public class VboRequest {
             this.countryCode = countryCode;
         }
 
-        public String getTenantType() {
+        public TenantType getTenantType() {
             return tenantType;
         }
 
-        public void setTenantType(String tenantType) {
+        public void setTenantType(TenantType tenantType) {
             this.tenantType = tenantType;
         }
     }
