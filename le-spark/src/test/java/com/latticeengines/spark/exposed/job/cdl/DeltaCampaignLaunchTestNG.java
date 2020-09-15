@@ -1,16 +1,16 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -40,6 +39,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
 import com.latticeengines.spark.testframework.TestJoinTestNGBase;
@@ -149,38 +149,26 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             HdfsDataUnit deleteCsvDf = result.getTargets().get(2);
 
             // Account number assertion
-            Assert.assertEquals(recDf.getCount(), addCsvDf.getCount());
             Assert.assertEquals(recDf.getCount().intValue(), addAccounts.length);
-            Assert.assertEquals(deleteCsvDf.getCount().intValue(), deleteAccounts.length);
+            Assert.assertEquals(addCsvDf.getCount().intValue(), 51);
+            Assert.assertEquals(deleteCsvDf.getCount().intValue(), 10);
 
             // Contact number assertion
             try {
-                Iterator<GenericRecord> recDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                Iterator<GenericRecord> recDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                         PathUtils.toAvroGlob(recDf.getPath()));
-                GenericRecord record = recDfIter.next();
+                GenericRecord record = recDfIterator.next();
                 Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
                 Assert.assertNull(contactObject);
-
-                Iterator<GenericRecord> addCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                AvroUtils.AvroFilesIterator addCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                         PathUtils.toAvroGlob(addCsvDf.getPath()));
-                record = addCsvDfIter.next();
-                ObjectMapper jsonParser = new ObjectMapper();
-                contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-                JsonNode jsonObject = jsonParser.readTree(contactObject.toString());
-                Assert.assertTrue(jsonObject.isArray());
-                Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
-
-                Iterator<GenericRecord> deleteCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                verifyContactColumns(addCsvDfIterator.getSchema());
+                AvroUtils.AvroFilesIterator deleteCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                         PathUtils.toAvroGlob(deleteCsvDf.getPath()));
-                record = deleteCsvDfIter.next();
-                contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-                jsonObject = jsonParser.readTree(contactObject.toString());
-                Assert.assertTrue(jsonObject.isArray());
-                Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
-            } catch (IOException e) {
+                verifyContactColumns(deleteCsvDfIterator.getSchema());
+            } catch (Exception e) {
                 log.error("Failed to get record from avro file.", e);
             }
-
             // external Id assertion
             Map<String, String> accountIdToExternalIdMap = new HashMap<>();
             verifyAndReadTarget(recDf).forEachRemaining(record -> {
@@ -197,33 +185,37 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             });
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
             HdfsDataUnit deleteCsvDf = result.getTargets().get(0);
-            Assert.assertEquals(deleteCsvDf.getCount().intValue(), deleteAccounts.length);
-            Iterator<GenericRecord> deleteCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+            Assert.assertEquals(deleteCsvDf.getCount().intValue(), 10);
+            AvroUtils.AvroFilesIterator deleteCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                     PathUtils.toAvroGlob(deleteCsvDf.getPath()));
-            GenericRecord record = deleteCsvDfIter.next();
-            record = deleteCsvDfIter.next();
-            Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-            ObjectMapper jsonParser = new ObjectMapper();
-            JsonNode jsonObject;
-            try {
-                jsonObject = jsonParser.readTree(contactObject.toString());
-                Assert.assertTrue(jsonObject.isArray());
-                Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
-            } catch (IOException e) {
-                log.error("Failed to read json data.", e);
-            }
+            verifyContactColumns(deleteCsvDfIterator.getSchema());
         } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             HdfsDataUnit recDf = result.getTargets().get(0);
             HdfsDataUnit addCsvDf = result.getTargets().get(1);
             Assert.assertEquals(recDf.getCount(), addCsvDf.getCount());
-
-            Iterator<GenericRecord> addCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
-                    PathUtils.toAvroGlob(addCsvDf.getPath()));
-            GenericRecord record = addCsvDfIter.next();
-            Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-            Assert.assertTrue(StringUtils.isEmpty(contactObject.toString()));
+            AvroUtils.AvroFilesIterator addCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(addCsvDf.getPath()));
+            Schema schema = addCsvDfIterator.getSchema();
+            List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
+            for (String contactColumn : contactColumns) {
+                Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
+                Assert.assertNull(field);
+            }
         }
+    }
 
+    private void verifyContactColumns(Schema schema) {
+        List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
+        Set<String> excludeFields = Sets.newHashSet(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
+                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
+                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
+        for (String contactColumn : contactColumns) {
+            Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
+            if (excludeFields.contains(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn)) {
+                Assert.assertNull(field);
+            } else {
+                Assert.assertNotNull(field);
+            }
+        }
     }
 
     private DeltaCampaignLaunchSparkContext generateDeltaCampaignLaunchSparkContextForS3() {
@@ -350,7 +342,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         addContacts = new Object[(addAccounts.length - 1) * addOrDeleteContactPerAccount][contactFields.size()];
         for (int i = 0; i < (addAccounts.length - 1); i++) {
             for (int j = 0; j < addOrDeleteContactPerAccount; j++) {
-                addContacts[addOrDeleteContactPerAccount * i + j][0] = String.valueOf(i) + "L";
+                addContacts[addOrDeleteContactPerAccount * i + j][0] = i + "L";
                 addContacts[addOrDeleteContactPerAccount * i + j][1] = String
                         .valueOf(addOrDeleteContactPerAccount * i + j);
                 addContacts[addOrDeleteContactPerAccount * i + j][2] = String.valueOf(addAccounts.length * i + j) + "L";

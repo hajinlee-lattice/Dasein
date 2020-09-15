@@ -39,6 +39,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String CREATE_ADD_CSV_DATA_FRAME = "CREATE_ADD_CSV_DATA_FRAME";
     public static final String CREATE_DELETE_CSV_DATA_FRAME = "CREATE_DELETE_CSV_DATA_FRAME";
 
+    public static final String CONTACT_ATTR_PREFIX = "ContactRenamed_";
+
     public static class Builder {
         private DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration();
         private ImportDeltaCalculationResultsFromS3StepConfiguration importDeltaCalculationResultsFromS3Conf = new ImportDeltaCalculationResultsFromS3StepConfiguration();
@@ -97,6 +99,11 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());
             exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
             exportPublishToSNSConf.setSkipStep(!canBeLaunchedToExternal);
+            return this;
+        }
+
+        public Builder accountContactRatio(int accountContactRatio) {
+            nonLiveRampInitStep.setAccountContactRatio(accountContactRatio);
             return this;
         }
 

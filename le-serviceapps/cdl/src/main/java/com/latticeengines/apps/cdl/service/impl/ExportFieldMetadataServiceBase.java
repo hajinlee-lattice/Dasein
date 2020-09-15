@@ -20,6 +20,7 @@ import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
@@ -292,6 +293,11 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setIsCampaignDerivedField(true);
         cm.setEntity(defaultExportField.getEntity());
+        if (BusinessEntity.Account.equals(defaultExportField.getEntity())) {
+            cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
+        } else if (BusinessEntity.Contact.equals(defaultExportField.getEntity())) {
+            cm.setCategory(Category.CONTACT_ATTRIBUTES);
+        }
         return cm;
     }
 
