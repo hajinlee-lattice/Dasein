@@ -235,9 +235,4 @@ public class DataReportEntityMgrImpl
         return dataReportWriterRepository.updateDataReportIfNull(pid, new Date(), snapShotTime,
                 dunsCountTable);
     }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deleteDataReportRecords(Set<Long> pids) {
-        dataReportWriterRepository.deleteDataReportRecords(pids);
-    }
 }
