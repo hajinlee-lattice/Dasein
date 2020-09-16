@@ -74,8 +74,6 @@ public class CampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigur
             }
 
             if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
-                exportFileGeneratorConf.setSkipStep(true);
-                exportFilesToS3Conf.setSkipStep(true);
                 exportPublishToSNSConf.setSkipStep(true);
                 return this;
             }
