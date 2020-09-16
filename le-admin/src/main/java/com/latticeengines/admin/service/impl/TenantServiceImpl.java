@@ -117,6 +117,9 @@ public class TenantServiceImpl implements TenantService {
 
     private final BatonService batonService = new BatonServiceImpl();
 
+    @Value("${admin.default.subscription.number}")
+    private String DEFAULT_SUBSCRIPTION_NUMBER;
+
     @Inject
     private DanteComponent danteComponent;
 
@@ -193,7 +196,6 @@ public class TenantServiceImpl implements TenantService {
             LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
             overwriter.overwriteDefaultSpaceConfig();
         }
-
     }
 
     @Override
@@ -707,9 +709,23 @@ public class TenantServiceImpl implements TenantService {
             log.error("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
             VboResponse response = generateVBOResponse("failed",
-                    "A tenant has already existed for this subscriber number");
+                    "A tenant already exists for this subscriber number.");
             vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
             return response;
+        }
+
+        // If a tenantType == TenantType.CUSTOMER tenant (the default) then check that the subscriber number is valid.
+        TenantType subscriberTenantType = vboRequest.getSubscriber().getTenantType();
+        if (subscriberTenantType == TenantType.CUSTOMER && !iDaaSService.doesSubscriberNumberExist(vboRequest)) {
+            String msg = String.format("The subscriber number [%s] is not valid, unable to create tenant.", subNumber);
+            log.error(msg);
+            VboResponse response = generateVBOResponse("failed", msg);
+            vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
+            return response;
+        }
+        else {
+            // If not a customer TenantType and subscriber number is null then use the default subscription number.
+            subNumber = (null != subNumber) ? subNumber : DEFAULT_SUBSCRIPTION_NUMBER;
         }
 
         String subName = vboRequest.getSubscriber().getName();
