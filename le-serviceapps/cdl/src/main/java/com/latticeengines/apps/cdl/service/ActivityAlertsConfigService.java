@@ -9,7 +9,7 @@ public interface ActivityAlertsConfigService {
 
     ActivityAlertsConfig createOrUpdate(String customerSpace, ActivityAlertsConfig ActivityAlertsConfig);
 
-    void createDefaultActivityAlertsConfigs(String customerSpace);
+    List<ActivityAlertsConfig> createDefaultActivityAlertsConfigs(String customerSpace);
 
     void delete(String customerSpace, ActivityAlertsConfig ActivityAlertsConfig);
 }
