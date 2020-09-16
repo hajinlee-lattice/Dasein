@@ -54,6 +54,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.LogoutService;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.TeamService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
@@ -103,6 +104,9 @@ public class LoginResource {
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Inject
+    private TeamService teamService;
 
     @PostMapping("/login")
     @ResponseBody
@@ -245,6 +249,11 @@ public class LoginResource {
             user.setTitle(session.getTitle());
             user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
             user.setAccessLevel(session.getAccessLevel());
+            if (!Tenant.atlasTenantVersion.equals(tenant.getUiVersion())) {
+                user.setGlobalTeams(null);
+            } else {
+                user.setGlobalTeams(teamService.getMyTeams(false));
+            }
             result.setUser(user);
             doc.setResult(result);
         } catch (LedpException e) {
