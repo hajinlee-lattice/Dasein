@@ -57,10 +57,17 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Transactional(propagation = Propagation.REQUIRED)
     public DanteConfigurationDocument createOrUpdate(String tenantId, DanteConfigurationDocument danteConfig) {
 
+        DanteConfigEntity existing = readerRepository.findByTenantId(tenantId);
+
         DanteConfigEntity danteConfigEntity = new DanteConfigEntity();
         danteConfigEntity.setUuid(UUID.randomUUID().toString());
         danteConfigEntity.setTenantId(tenantId);
         danteConfigEntity.setDocument(danteConfig);
+
+        if (existing != null) {
+            writerRepository.updateTenantDocument(tenantId,danteConfig);
+            return readerRepository.findByTenantId(tenantId).getDocument();
+        }
 
         DanteConfigEntity saved = writerRepository.save(danteConfigEntity);
         return saved.getDocument();
