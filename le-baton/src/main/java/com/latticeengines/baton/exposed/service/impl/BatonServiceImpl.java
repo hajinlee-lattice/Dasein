@@ -627,8 +627,7 @@ public class BatonServiceImpl implements BatonService {
     @SuppressWarnings("deprecation")
     public boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
         Collection<LatticeProduct> dcp = Collections.singleton(LatticeProduct.DCP);
-        if (hasAtLeastOneProduct(customerSpace, new HashSet<LatticeProduct>(dcp)) &&
-                flag.getName().equalsIgnoreCase(LatticeFeatureFlag.TEAM_FEATURE.getName())) {
+        if (hasAtLeastOneProduct(customerSpace, new HashSet<>(dcp))) {
             return true;
         }
         return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());

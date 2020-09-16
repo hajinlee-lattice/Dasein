@@ -36,8 +36,8 @@ public final class TeamUtils {
 
     public static boolean isMyTeam(String teamId) {
         if (StringUtils.isEmpty(teamId)) {
-            log.info("Team id is null, users can't pass team rights check.");
-            return false;
+            log.info("Team id is null, set it to global team id.");
+            teamId = GLOBAL_TEAM_ID;
         }
         Session session = MultiTenantContext.getSession();
         if (session != null) {
