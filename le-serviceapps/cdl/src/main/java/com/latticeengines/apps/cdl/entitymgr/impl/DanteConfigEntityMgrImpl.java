@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -46,31 +45,26 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<DanteConfigurationDocument> findAllByTenantId(String tenantId) {
-        List<DanteConfigEntity> danteConfigEntities = readerRepository.findByTenantId(tenantId);
-        if (danteConfigEntities.size() > 1) {
-            log.warn(String.format("Found multiple Dante Configurations for tenant: %s", tenantId));
+    public DanteConfigurationDocument findByTenantId(String tenantId) {
+        DanteConfigEntity danteConfigEntity = readerRepository.findByTenantId(tenantId);
+        if (danteConfigEntity != null) {
+            return danteConfigEntity.getDocument();
         }
-        return danteConfigEntities.stream() //
-                .map(DanteConfigEntity::getDocument) //
-                .collect(Collectors.toList());
+        return null;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public DanteConfigurationDocument createOrUpdate(String tenantId, DanteConfigurationDocument danteConfig) {
 
-        List<DanteConfigEntity> existing = readerRepository.findByTenantId(tenantId);
+        DanteConfigEntity existing = readerRepository.findByTenantId(tenantId);
 
         DanteConfigEntity danteConfigEntity = new DanteConfigEntity();
         danteConfigEntity.setUuid(UUID.randomUUID().toString());
         danteConfigEntity.setTenantId(tenantId);
         danteConfigEntity.setDocument(danteConfig);
 
-        if (existing.size() > 0) {
-            if (existing.size() > 1) {
-                log.warn(String.format("Found multiple Dante Configurations for tenant: %s", tenantId));
-            }
+        if (existing != null) {
             writerRepository.removeByTenantId(tenantId);
         }
 
