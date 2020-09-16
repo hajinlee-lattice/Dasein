@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.CategorizeDoubleConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
@@ -99,6 +100,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String MODEL_3_ID = "3";
     private static final String BUYING = "Buying";
     private static final String RESEARCHING = "Researching";
+
+    private static final String ANONYMOUS = DataCloudConstants.ENTITY_ANONYMOUS_ID;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -351,7 +354,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc1", "c1", TWO_WEEKS_AGO, "SendEmail", 10},
                 {"acc1", "c2", ONE_WEEK_AGO, "SendEmail", 20}, // contact c2 wrong accountId, use contact batch store as standard
                 {"acc2", "c2", ONE_WEEK_AGO, "SendEmail", 30},
-                {"invalidAcc", "c4", ONE_WEEK_AGO, "ClickLink", 40}
+                {"invalidAcc", "c4", ONE_WEEK_AGO, "ClickLink", 40},
+                {ANONYMOUS, "c999", ONE_WEEK_AGO, "SendEmail", 100}
         };
         return uploadHdfsDataUnit(data, periodStoreFields);
     }
@@ -399,6 +403,11 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc2", ONE_WEEK_AGO, ONE_WEEK_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.2},
                 {"acc2", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.9},
 
+                // account not in batch store
+                {"acc3", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.9},
+                {"acc3", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.9},
+                {"acc3", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_3_ID, 0L, CURRENT_VERSION, 0.9},
+
                 // empty buying stage as no new data in latest refresh
                 {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_1_ID, 0L, OLD_VERSION, 0.1},
                 {"acc2", FOREVER_AGO, FOREVER_AGO, 22, MODEL_2_ID, 0L, OLD_VERSION, 0.2},
@@ -416,7 +425,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc1"},
                 {"acc2"},
                 {"acc999"},
-                {"missingAccount"} // add one account missing from activity input data
+                {"missingAccount"}, // add one account missing from activity input data
+                {ANONYMOUS}
         };
         return uploadHdfsDataUnit(data, accountBatchStoreField);
     }
@@ -431,7 +441,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc1", "c1"},
                 {"acc1", "c2"},
                 {"acc2", "c3"},
-                {"acc3", "c4"}
+                {"acc3", "c4"},
+                {ANONYMOUS, "c999"} // orphan contact
         };
         return uploadHdfsDataUnit(data, contactBatchStoreField);
     }
@@ -515,7 +526,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setStream(INTENT_STREAM);
         group.setGroupId(BUYING_SCORE_GROUPID);
         group.setGroupName(BUYING_SCORE_GROUPNAME);
-        group.setJavaClass(Boolean.class.getSimpleName());
+        group.setJavaClass(String.class.getSimpleName());
         group.setEntity(BusinessEntity.Account);
         group.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, TIMEFILTER_PERIODS, null));
         group.setRollupDimensions(modelNameId);
