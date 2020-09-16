@@ -18,7 +18,7 @@
         { "Node": "Account", "Data": 500},
         { "Node": "Contact", "Data": 500},
         { "Node": "GrowthTrends", "Data": 16},
-        { "Node": "COVID19", "Data": 16}
+        { "Node": "COVID19", "Data": 0}
       ]
     },
     {"Node": "workflowThrottlingConfig", "Data": ""}

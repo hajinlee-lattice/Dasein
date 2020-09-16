@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -426,10 +425,6 @@ public class MetadataResolver {
             // PLS-14582 use raw csv header to get 100 row values
             unknownColumn.setUserField(headerField);
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
-            String escapedHeader = StringEscapeUtils.escapeHtml4(headerField);
-            if (!headerField.equals(escapedHeader)) {
-                unknownColumn.setUserField(escapedHeader);
-            }
             //unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
             unknownColumn.setMappedToLatticeField(false);
 
@@ -495,10 +490,6 @@ public class MetadataResolver {
 
             unknownColumn.setUserField(headerField);
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
-            String escapedHeader = StringEscapeUtils.escapeHtml4(headerField);
-            if (!headerField.equals(escapedHeader)) {
-                unknownColumn.setUserField(escapedHeader);
-            }
             unknownColumn.setMappedToLatticeField(false);
 
             result.fieldMappings.add(unknownColumn);

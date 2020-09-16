@@ -2,7 +2,7 @@
 
 echo "Setting up Zookeeper"
 
-if [ -d "${ANACONDA_HOME}/envs/p2" ]; then
+if [[ -d "${ANACONDA_HOME}/envs/p2" ]]; then
     source "${ANACONDA_HOME}/bin/activate" p2
 else
     source "${ANACONDA_HOME}/bin/activate" lattice
