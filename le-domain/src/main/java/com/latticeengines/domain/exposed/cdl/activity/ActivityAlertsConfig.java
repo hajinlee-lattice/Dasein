@@ -7,6 +7,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -57,6 +59,7 @@ public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, Ha
 
     @Column(name = "ALERT_CATEGORY", nullable = false)
     @JsonProperty("alert_category")
+    @Enumerated(EnumType.STRING)
     private AlertCategory alertCategory;
 
     @Column(name = "QUALIFICATION_PERIOD_DAYS", nullable = false)

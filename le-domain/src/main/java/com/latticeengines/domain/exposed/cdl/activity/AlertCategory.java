@@ -1,7 +1,8 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 public enum AlertCategory {
-    PRODUCTS("Products");
+    PRODUCTS("Products"), //
+    PEOPLE("People");
 
     private String displayName;
 

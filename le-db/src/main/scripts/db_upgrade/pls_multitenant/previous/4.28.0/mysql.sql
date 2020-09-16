@@ -71,21 +71,6 @@ CREATE PROCEDURE `UpdateSchema`()
         ADD COLUMN `CREATED` datetime not null DEFAULT CURRENT_TIMESTAMP,
         ADD COLUMN `UPDATED` datetime not null DEFAULT CURRENT_TIMESTAMP;
 
-
-      create table `ACTIVITY_ALERTS_CONFIG` (
-        `PID` bigint not null auto_increment,
-        `ALERT_CATEGORY` integer not null,
-        `ALERT_HEADER` varchar(255) not null,
-        `ALERT_MESSAGE_TEMPLATE` varchar(255) not null,
-        `CREATED` datetime not null,
-        `ID` varchar(255) not null,
-        `IS_ACTIVE` bit not null,
-        `QUALIFICATION_PERIOD_DAYS` bigint not null,
-        `UPDATED` datetime not null,
-        `FK_TENANT_ID` bigint not null,
-        primary key (`PID`)
-        ) engine=InnoDB;
-
       Alter table `PLS_MultiTenant`.`ACTIVITY_ALERTS_CONFIG`
       add constraint UK_ebjcmedaqco5pdcdoq476h0v unique (`ID`),
       add constraint `FK_ACTIVITYALERTSCONFIG_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;

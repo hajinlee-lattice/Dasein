@@ -32,6 +32,20 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION`
 	    MODIFY `TRAY_WORKFLOW_ENABLED` BIT NOT NULL DEFAULT 0;
 
+      create table `ACTIVITY_ALERTS_CONFIG` (
+        `PID` bigint not null auto_increment,
+        `ALERT_CATEGORY` varchar(255) not null,
+        `ALERT_HEADER` varchar(255) not null,
+        `ALERT_MESSAGE_TEMPLATE` varchar(255) not null,
+        `CREATED` datetime not null,
+        `ID` varchar(255) not null,
+        `IS_ACTIVE` bit not null,
+        `QUALIFICATION_PERIOD_DAYS` bigint not null,
+        `UPDATED` datetime not null,
+        `FK_TENANT_ID` bigint not null,
+        primary key (`PID`)
+        ) engine=InnoDB;
+
   END //
 -- ##############################################################
 

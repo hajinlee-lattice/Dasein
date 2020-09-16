@@ -9,14 +9,13 @@ import com.latticeengines.domain.exposed.dante.metadata.MetadataDocument;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize()
-public class DanteConfigurationDocument implements Serializable{
+public class DanteConfigurationDocument implements Serializable {
 
-    @JsonProperty("metadataDocument")
+    @JsonProperty("MetadataDocument")
     private MetadataDocument metadataDocument;
 
-    @JsonProperty("widgetConfigurationDocument")
+    @JsonProperty("WidgetConfigurationDocument")
     private String widgetConfigurationDocument;
-
 
     public MetadataDocument getMetadataDocument() {
         return metadataDocument;
@@ -31,8 +30,7 @@ public class DanteConfigurationDocument implements Serializable{
         this.widgetConfigurationDocument = widgetConfigurationDocument;
     }
 
-    public DanteConfigurationDocument()
-    {
+    public DanteConfigurationDocument() {
         super();
     }
 }
