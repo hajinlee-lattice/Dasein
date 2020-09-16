@@ -179,6 +179,11 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 Assert.assertEquals(accountIdToExternalIdMap.get(accountIdObject.toString()),
                         externalIdObject.toString());
             });
+
+            long launchedContactNum = JsonUtils.convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+            Assert.assertEquals(launchedContactNum, 50L);
+            launchedContactNum = JsonUtils.convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+            Assert.assertEquals(launchedContactNum, 10L);
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
             HdfsDataUnit deleteCsvDf = result.getTargets().get(0);
             Assert.assertEquals(deleteCsvDf.getCount().intValue(), 10);

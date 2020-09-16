@@ -20,7 +20,6 @@ import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
@@ -88,21 +87,21 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
      * overwrite the DisplayNames for the attributes chose by user at the field
      * mapping page for the system/connector. If the attribute is not in the
      * serving store, then it is a campaign-derived attribute
-     * 
+     *
      * @param fieldNames Lattice internal name for attributes that are chosen at
      * field mapping page for the system
-     * 
+     *
      * @param accountAttributesMap account attributes from serving store
-     * 
+     *
      * @param contactAttributesMap contact attributes from serving store
-     * 
+     *
      * One important thing to note that since fieldNames only has the
      * information about internal name without the entity, currently PM has
      * agreed that for the csv sheet, there is no situation where the Account
      * and Contact with same internal name are both in it.
      */
     protected List<ColumnMetadata> enrichExportFieldMappings(CDLExternalSystemName systemName, List<String> fieldNames,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
+                                                             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
 
         List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
@@ -154,13 +153,13 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
         return enrichDefaultFieldsMetadata(systemName, accountAttributesMap, contactAttributesMap, audienceType);
     }
-    
+
     /*
      * Enrich the default field metadata based on the entity
      */
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
-            BusinessEntity entity) {
+                                                               Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
+                                                               BusinessEntity entity) {
 
         List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMapForEntity(
@@ -194,14 +193,14 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
         return exportColumnMetadataList;
     }
-    
+
     /*
      * Enrich the default field metadata for both account and contact entity
      * based on Audience Type
      */
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
-            AudienceType audienceType) {
+                                                               Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
+                                                               AudienceType audienceType) {
 
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMapForAudienceType(
                 systemName, audienceType);
@@ -214,7 +213,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
      * Enrich the default field metadata for both account and contact entity
      */
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
+                                                               Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
 
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
 
@@ -293,11 +292,6 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setIsCampaignDerivedField(true);
         cm.setEntity(defaultExportField.getEntity());
-        if (BusinessEntity.Account.equals(defaultExportField.getEntity())) {
-            cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
-        } else if (BusinessEntity.Contact.equals(defaultExportField.getEntity())) {
-            cm.setCategory(Category.CONTACT_ATTRIBUTES);
-        }
         return cm;
     }
 
