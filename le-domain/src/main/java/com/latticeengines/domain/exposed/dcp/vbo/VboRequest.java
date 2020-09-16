@@ -149,7 +149,7 @@ public class VboRequest {
         @JsonProperty("name")
         private String name;
 
-        @JsonProperty("customer")
+        @JsonProperty("tenantType")
         private TenantType tenantType = TenantType.CUSTOMER;
 
         public String getSubscriberNumber() {
