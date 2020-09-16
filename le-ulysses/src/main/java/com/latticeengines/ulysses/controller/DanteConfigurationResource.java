@@ -20,7 +20,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLDanteConfigProxy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "DanteConfiguration", description = "Common REST resource to serve configuration for Dante UI")
+@Api(value = "DanteConfiguration")
 @RestController
 @RequestMapping("/danteconfiguration")
 public class DanteConfigurationResource {
@@ -40,10 +40,10 @@ public class DanteConfigurationResource {
             timer.close();
             return new FrontEndResponse<>(danteConfigurationDocument);
         } catch (LedpException le) {
-            log.error("Failed to get talking point data", le);
+            log.error("Failed to get Dante Configuration document", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to get talking point data", e);
+            log.error("Failed to get Dante Configuration document", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }

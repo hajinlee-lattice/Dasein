@@ -94,7 +94,7 @@ public class DanteConfigServiceImpl implements DanteConfigService {
     private DanteConfigurationDocument createAndUpdateDanteConfig() {
         String tenantId = MultiTenantContext.getShortTenantId();
         try (PerformanceTimer timer = new PerformanceTimer(
-                "Create and update Danteconfiguration for Tenant = " + tenantId, log)) {
+                "Create and update Danteconfiguration for Tenant= " + tenantId, log)) {
             DanteConfigurationDocument danteConfig = generateDanteConfiguration(tenantId);
             return entityMgr.createOrUpdate(tenantId, danteConfig);
         }

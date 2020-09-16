@@ -26,7 +26,7 @@ public class DanteConfigResource {
     private DanteConfigService danteConfigService;
 
 
-    @GetMapping()
+    @GetMapping
     public DanteConfigurationDocument getDanteConfiguration(@PathVariable String customerSpace){
         return danteConfigService.getDanteConfiguration();
     }
