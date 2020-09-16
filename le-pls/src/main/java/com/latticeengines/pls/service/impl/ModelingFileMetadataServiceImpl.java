@@ -756,7 +756,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, boolean isModel,
                                 boolean enableEntityMatch, boolean onlyGA) {
-        decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         SchemaInterpretation schemaInterpretation = sourceFile.getSchemaInterpretation();
         schemaInterpretation = enableEntityMatch && isModel && schemaInterpretation.equals(SchemaInterpretation.Account) ? SchemaInterpretation.ModelAccount : schemaInterpretation;
@@ -766,7 +765,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private Table generateTemplate(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
                                    String source, String feedType) {
-        decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table, schemaTable;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -806,7 +804,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
                                 String source, String feedType) {
-        decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table, schemaTable;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -842,15 +839,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName,
                                             boolean checkHeaderFormat) {
         return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, null);
-    }
-
-    private void decodeFieldMapping(FieldMappingDocument fieldMappingDocument) {
-        if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null) {
-            return;
-        }
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            fieldMapping.setUserField(StringEscapeUtils.unescapeHtml4(fieldMapping.getUserField()));
-        }
     }
 
     private Table getSchemaTable(CustomerSpace customerSpace, BusinessEntity entity, String feedType, boolean withoutId) {
