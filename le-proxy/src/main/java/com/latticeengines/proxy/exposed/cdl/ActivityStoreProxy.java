@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
@@ -147,5 +148,12 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         String url = constructUrl("/customerspaces/{customerSpace}/journeyStages", shortenCustomerSpace(customerSpace));
         List<?> list = get("get_all_journey_stages", url, List.class);
         return JsonUtils.convertList(list, JourneyStage.class);
+    }
+
+    public List<ActivityAlertsConfig> getActivityAlertsConfiguration(@NotNull String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activity-alerts-config",
+                shortenCustomerSpace(customerSpace));
+        List<?> list = get("get_activity_alerts_configuration", url, List.class);
+        return JsonUtils.convertList(list, ActivityAlertsConfig.class);
     }
 }

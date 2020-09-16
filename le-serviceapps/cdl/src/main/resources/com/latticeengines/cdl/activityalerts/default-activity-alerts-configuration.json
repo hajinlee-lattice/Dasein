@@ -1,0 +1,37 @@
+[
+  {
+    "alert_header": "Increased Web Activity",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "There have been ${alert.page_visits} visits to the ${alert.page_name} pages. Check on this interest with your ${alert.active_contacts} active contacts. This may mean they are looking to buy.",
+    "is_active": true
+  },
+  {
+    "alert_header": "Increased Activity on Product Pages",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "There have been ${alert.page_visits} visits to the ${alert.page_name} pages. This means you'll need to prospect more into the personas.",
+    "is_active": true
+  },
+  {
+    "alert_header": "Re-engaged Activity",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "Someone from this account has visited a product page, after not visiting for more than 30 days. This may mean they are looking to reinitiate their search.",
+    "is_active": true
+  },
+  {
+    "alert_header": "Growing Buyer Intent",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "Growing buyer intent happening from this account in the last 10 days with ${alert.page_visits} amount of Product URL clicks. This may mean they are looking to buy.",
+    "is_active": true
+  },
+  {
+    "alert_header": "Growing Research Intent",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "Growing research intent happening from this account in the last 10 days with ${alert.page_visits} amount of Product URL clicks. This may mean they are looking for more product information.",
+    "is_active": true
+  }
+]

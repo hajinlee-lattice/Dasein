@@ -69,7 +69,8 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Pair<Instant, Instant> timeWindow = getTimeWindowFromPeriod(customerSpace, timelinePeriod);
         query.setStartTimeStamp(timeWindow.getLeft());
         query.setEndTimeStamp(timeWindow.getRight());
-        log.info(String.format("Retrieving Account activity data using query: %s", JsonUtils.serialize(query)));
+        log.info(String.format("Retrieving Account activity data using query: %s | tenant=%s",
+                JsonUtils.serialize(query), CustomerSpace.shortenCustomerSpace(customerSpace)));
         return activityProxy.getData(customerSpace, null, query);
     }
 
@@ -96,7 +97,8 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Pair<Instant, Instant> timeWindow = getTimeWindowFromPeriod(customerSpace, timelinePeriod);
         query.setStartTimeStamp(timeWindow.getLeft());
         query.setEndTimeStamp(timeWindow.getRight());
-        log.info(String.format("Retrieving Contact activity data using query: %s", JsonUtils.serialize(query)));
+        log.info(String.format("Retrieving Contact activity data using query: %s | tenant=%s",
+                JsonUtils.serialize(query), CustomerSpace.shortenCustomerSpace(customerSpace)));
         return activityProxy.getData(customerSpace, null, query);
     }
 
