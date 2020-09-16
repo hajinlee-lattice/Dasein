@@ -3,6 +3,8 @@ package com.latticeengines.spark.exposed.job.dcp;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
@@ -48,6 +50,29 @@ public class RollupDataReportJobTestNG extends SparkJobFunctionalTestNGBase {
                 getWorkspace());
         verify(result, Arrays.asList(this::verifySingleTarget, this::verifySingleTarget));
 
+    }
+
+    @Test(groups = "functional")
+    public void testException() {
+        RollupDataReportConfig config = new RollupDataReportConfig();
+        config.setMatchedDunsAttr(MatchedDuns);
+        config.setInputOwnerIdToIndex(new HashMap<>());
+
+        List<String> ownerIds = ImmutableList.of("sourceId1", "projectId1");
+        config.setUpdatedOwnerIds(ownerIds);
+        config.setNumTargets(ownerIds.size());
+        config.setMode(DataReportMode.UPDATE);
+
+        config.setParentIdToChildren(ImmutableMap.of("sourceId1", ImmutableSet.of(), "projectId1",
+                ImmutableSet.of("sourceId1")));
+        boolean hasError = false;
+        try {
+            runSparkJob(RollupDataReportJob.class, config, Collections.emptyList(),
+                    getWorkspace());
+        } catch (Exception e) {
+            hasError = true;
+        }
+        Assert.assertTrue(hasError);
     }
 
     @Override
