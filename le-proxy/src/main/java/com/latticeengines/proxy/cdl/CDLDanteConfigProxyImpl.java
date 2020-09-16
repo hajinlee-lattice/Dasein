@@ -21,7 +21,7 @@ public class CDLDanteConfigProxyImpl extends MicroserviceRestApiProxy implements
 
     @Override
     public DanteConfigurationDocument getDanteConfiguration(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/danteconfig/getDanteConfiguration",
+        String url = constructUrl("/customerspaces/{customerSpace}/dante-configuration",
                 shortenCustomerSpace(customerSpace));
         return get("get generated danta config response", url, DanteConfigurationDocument.class);
     }
