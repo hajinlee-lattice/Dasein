@@ -340,17 +340,33 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public void callbackWithAuth(String url, VboCallback responseBody) {
         refreshToken();
-        log.info("Sending callback to " + url);
-        log.info(responseBody.toString());
-        String traceId = responseBody.customerCreation.transactionDetail.ackRefId;
 
+        // VBO requires a different format for authorization header
+        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        ClientHttpRequestInterceptor previous = interceptors.stream()
+                .filter(interceptor -> interceptor instanceof AuthorizationHeaderHttpRequestInterceptor).findAny().get();
+        interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
+
+        String traceId = "";
         try {
+            String VboToken = "Bearer " + tokenInUse;
+            ClientHttpRequestInterceptor VboAuth = new AuthorizationHeaderHttpRequestInterceptor(VboToken);
+            interceptors.add(VboAuth);
+            restTemplate.setInterceptors(interceptors);
+
+            log.info("Sending callback to " + url);
+            log.info(responseBody.toString());
+            traceId = responseBody.customerCreation.transactionDetail.ackRefId;
+
             ResponseEntity<String> response = restTemplate.postForEntity(URI.create(url), responseBody, String.class);
             log.info("Callback {} finished with response code {}", traceId, response.getStatusCodeValue());
             log.info("Callback {} response body: {}", traceId, response.getBody());
         } catch (Exception e) {
             log.error(traceId + " Exception in callback:" + e.toString());
-            throw e;
+        } finally {
+            interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
+            interceptors.add(previous);
+            restTemplate.setInterceptors(interceptors);
         }
     }
 
