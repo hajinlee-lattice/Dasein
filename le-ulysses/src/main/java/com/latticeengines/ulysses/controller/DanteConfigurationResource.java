@@ -21,7 +21,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLDanteConfigProxy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "DanteConfiguration", description = "Common REST resource to serve configuration for Dante UI")
+@Api(value = "DanteConfiguration")
 @RestController
 @RequestMapping("/danteconfiguration")
 public class DanteConfigurationResource {
