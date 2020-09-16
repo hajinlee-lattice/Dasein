@@ -174,7 +174,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, dcpCg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.TEAM_FEATURE, dcpCg);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
