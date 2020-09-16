@@ -185,8 +185,8 @@ public class ProjectServiceImpl implements ProjectService {
             return false;
         }
 
-        log.info("soft delete the data report under {}", projectId);
-        dataReportService.deleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
+        log.info("true delete the data report under {}", projectId);
+        dataReportService.trueDeleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
                 projectId);
         projectEntityMgr.delete(project);
 

@@ -379,6 +379,22 @@ public class DataReportServiceImpl implements DataReportService {
         }
     }
 
+    public void trueDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        Set<Long> idToBeTrueRemoved = getDataReportUnderOwnerId(level, ownerId);
+        if (CollectionUtils.isNotEmpty(idToBeTrueRemoved)) {
+            log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeTrueRemoved);
+            dataReportEntityMgr.deleteDataReportRecords(idToBeTrueRemoved);
+            // wait the replication log
+            SleepUtils.sleep(200);
+            // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
+            Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
+            if (CollectionUtils.isEmpty(projectIds)) {
+                Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
+                dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
+            }
+        }
+    }
+
     private Set<Long> getDataReportUnderOwnerId(DataReportRecord.Level level, String ownerId){
         Set<Long> idToBeRemoved = new HashSet<>();
         switch (level) {

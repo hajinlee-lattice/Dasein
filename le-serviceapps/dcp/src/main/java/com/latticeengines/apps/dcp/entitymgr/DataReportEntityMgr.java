@@ -66,4 +66,6 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
     DataReportRecord findReadyForRollupDataReportRecord(DataReportRecord.Level level, String ownerId);
   
     int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime);
+
+    void deleteDataReportRecords(Set<Long> pids);
 }
