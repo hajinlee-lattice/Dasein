@@ -71,8 +71,7 @@ public class DanteConfigurationResourceDeplomentTestNG extends UlyssesDeployment
 
     @Test(groups = "deployment")
     public void testGetDanteConfig() throws InterruptedException {
-        danteConfig = getOAuth2RestTemplate().getForObject(getDanteConfigurationResourceUrl(),
-                DanteConfigurationDocument.class);
+        danteConfig = getOAuth2RestTemplate().getForObject(getDanteConfigurationResourceUrl(), DanteConfigurationDocument.class);
         Assert.assertNotNull(danteConfig);
     }
 

@@ -36,8 +36,7 @@ public class DanteConfigurationResource {
         String customerSpace = MultiTenantContext.getShortTenantId();
         try {
             PerformanceTimer timer = new PerformanceTimer("get Dante Configuration", log);
-            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy
-                    .getDanteConfiguration(customerSpace);
+            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy.getDanteConfiguration(customerSpace);
             timer.close();
             return new FrontEndResponse<>(danteConfigurationDocument);
         } catch (LedpException le) {
