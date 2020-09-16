@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "TENANT")
 public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
-    public static final String atlasTenantVersion = "4.0";
+    public static final String cdlTenantVersion = "4.0";
     private static final long serialVersionUID = 3412997313415383107L;
 
     static {

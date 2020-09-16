@@ -249,7 +249,7 @@ public class LoginResource {
             user.setTitle(session.getTitle());
             user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
             user.setAccessLevel(session.getAccessLevel());
-            if (!Tenant.atlasTenantVersion.equals(tenant.getUiVersion())) {
+            if (!Tenant.cdlTenantVersion.equals(tenant.getUiVersion())) {
                 user.setGlobalTeams(null);
             } else {
                 user.setGlobalTeams(teamService.getMyTeams(false));
