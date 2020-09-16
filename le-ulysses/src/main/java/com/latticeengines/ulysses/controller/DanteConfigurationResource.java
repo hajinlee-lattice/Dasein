@@ -42,16 +42,14 @@ public class DanteConfigurationResource {
     @ApiOperation(value = "Get Dante configuration")
     public FrontEndResponse<DanteConfigurationDocument> getDanteConfiguration() {
         String customerSpace = MultiTenantContext.getShortTenantId();
-        try {
-            PerformanceTimer timer = new PerformanceTimer("get Dante Configuration", log);
+        try (PerformanceTimer timer = new PerformanceTimer("Get Dante Configuration | Tenant=" + customerSpace, log)) {
             DanteConfigurationDocument danteConfigurationDocument = getDanteconfigurationByTenantId(customerSpace);
-            timer.close();
             return new FrontEndResponse<>(danteConfigurationDocument);
         } catch (LedpException le) {
-            log.error("Failed to get talking point data", le);
+            log.error("Failed to get Dante Configuration document", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to get talking point data", e);
+            log.error("Failed to get Dante Configuration document", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
