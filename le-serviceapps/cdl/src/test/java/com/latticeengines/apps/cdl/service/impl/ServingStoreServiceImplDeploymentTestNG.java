@@ -69,8 +69,7 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
                 .withAttrName(CRM_CONTACT_ID) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_CONTACT_IDS) //
-                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Segment,
-                        ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.LookupId) //
+                .withGroups(ColumnSelection.Predefined.LookupId) //
                 .canModel(Boolean.FALSE)//
                 .build());
         return cms;

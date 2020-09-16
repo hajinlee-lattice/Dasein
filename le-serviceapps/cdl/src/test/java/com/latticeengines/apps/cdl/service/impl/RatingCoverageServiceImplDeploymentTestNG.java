@@ -415,7 +415,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
         CoverageInfo coverage2 = response.getRatingModelsCoverageMap().get(ratingId1);
 
-        // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN < 3
+        // Check with Segment Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 1
+        // OR Criteria ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = 2
         // And check whether the coverage counts matches with other 2 segment
         // coverages
         currentSegment = testPlayCreationHelper.createAggregatedSegment();
