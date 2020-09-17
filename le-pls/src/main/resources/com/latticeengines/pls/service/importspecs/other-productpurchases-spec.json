@@ -14,7 +14,7 @@
                     "EXTERNAL ID"
                 ],
                 "required": true,
-                "nullable": true,
+                "nullable": false,
                 "logicalDataType": "Id",
                 "fundamentalType": "ALPHA",
                 "approvedUsage": [
@@ -32,8 +32,6 @@
                     "BUSINESS ID",
                     "CUSTOMER ID"
                 ],
-                "required": true,
-                "nullable": true,
                 "logicalDataType": "Id",
                 "fundamentalType": "ALPHA",
                 "approvedUsage": [
@@ -49,8 +47,6 @@
                     "CONTACT ID",
                     "CONTACT EXTERNAL ID"
                 ],
-                "required": true,
-                "nullable": true,
                 "logicalDataType": "Id",
                 "fundamentalType": "ALPHA",
                 "approvedUsage": [
@@ -110,7 +106,6 @@
                     "COST"
                 ],
                 "required": false,
-                "nullable": true,
                 "logicalDataType": "Metric",
                 "fundamentalType": "CURRENCY"
             }
