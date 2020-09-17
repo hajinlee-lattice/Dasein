@@ -379,7 +379,9 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         }
         config.setInput(inputs);
         config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+        setPartitionMultiplier(6);
         SparkJobResult result = runSparkJob(TruncateLatticeAccount.class, config);
+        setPartitionMultiplier(1);
 
         // Update oldLatticeAccountDU as new base
         oldLatticeAccountDU = result.getTargets().get(0);
@@ -493,7 +495,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                     inputData // new table
             ));
             jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-            setPartitionMultiplier(4);
+            setPartitionMultiplier(10);
             result = runSparkJob(MergeLatticeAccount.class, jobConfig);
             setPartitionMultiplier(1);
             output = result.getTargets().get(0);
