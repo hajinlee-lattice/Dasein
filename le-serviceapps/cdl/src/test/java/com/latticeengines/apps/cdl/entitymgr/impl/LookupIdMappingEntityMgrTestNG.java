@@ -5,7 +5,7 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
