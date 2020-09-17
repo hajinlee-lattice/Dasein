@@ -57,9 +57,9 @@ public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(doc);
 
         doc = danteConfigEntityMgr.createOrUpdate(mainCustomerSpace,
-                new DanteConfigurationDocument(danteConfig.getMetadataDocument(), "random shit"));
+                new DanteConfigurationDocument(danteConfig.getMetadataDocument(), "widgetConfigurationDocument"));
         Assert.assertNotNull(doc);
-        Assert.assertEquals(doc.getWidgetConfigurationDocument(), "random shit");
+        Assert.assertEquals(doc.getWidgetConfigurationDocument(), "widgetConfigurationDocument");
     }
 
     private void setupDanteConfiguraiton() {

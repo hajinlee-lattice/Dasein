@@ -60,7 +60,6 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
         if (existing != null) {
             existing.setDocument(danteConfig);
             danteConfigEntity = existing;
-            return writerRepository.findByTenantId(tenantId).getDocument();
         } else {
             danteConfigEntity = new DanteConfigEntity();
             danteConfigEntity.setUuid(UUID.randomUUID().toString());
