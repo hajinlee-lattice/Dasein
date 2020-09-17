@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.apps.cdl.document.repository.reader.DanteConfigReaderRepository;
 import com.latticeengines.apps.cdl.document.repository.writer.DanteConfigWriterRepository;
 import com.latticeengines.apps.cdl.entitymgr.DanteConfigEntityMgr;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -29,9 +27,6 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Inject
     private DanteConfigWriterRepository writerRepository;
 
-    @Inject
-    private DanteConfigReaderRepository readerRepository;
-
     @Override
     public BaseJpaRepository<DanteConfigEntity, String> getRepository() {
         return writerRepository;
@@ -46,32 +41,30 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<DanteConfigurationDocument> findAllByTenantId(String tenantId) {
-        List<DanteConfigEntity> danteConfigEntities = readerRepository.findByTenantId(tenantId);
-        if (danteConfigEntities.size() > 1) {
-            log.warn(String.format("Found multiple Dante Configurations for tenant: %s", tenantId));
+    public DanteConfigurationDocument findByTenantId(String tenantId) {
+        DanteConfigEntity danteConfigEntity = writerRepository.findByTenantId(tenantId);
+        if (danteConfigEntity != null) {
+            return danteConfigEntity.getDocument();
         }
-        return danteConfigEntities.stream() //
-                .map(DanteConfigEntity::getDocument) //
-                .collect(Collectors.toList());
+        return null;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public DanteConfigurationDocument createOrUpdate(String tenantId, DanteConfigurationDocument danteConfig) {
 
-        List<DanteConfigEntity> existing = readerRepository.findByTenantId(tenantId);
+        DanteConfigEntity existing = writerRepository.findByTenantId(tenantId);
 
-        DanteConfigEntity danteConfigEntity = new DanteConfigEntity();
-        danteConfigEntity.setUuid(UUID.randomUUID().toString());
-        danteConfigEntity.setTenantId(tenantId);
-        danteConfigEntity.setDocument(danteConfig);
+        DanteConfigEntity danteConfigEntity;
 
-        if (existing.size() > 0) {
-            if (existing.size() > 1) {
-                log.warn(String.format("Found multiple Dante Configurations for tenant: %s", tenantId));
-            }
-            writerRepository.removeByTenantId(tenantId);
+        if (existing != null) {
+            existing.setDocument(danteConfig);
+            danteConfigEntity = existing;
+        } else {
+            danteConfigEntity = new DanteConfigEntity();
+            danteConfigEntity.setUuid(UUID.randomUUID().toString());
+            danteConfigEntity.setTenantId(tenantId);
+            danteConfigEntity.setDocument(danteConfig);
         }
 
         DanteConfigEntity saved = writerRepository.save(danteConfigEntity);

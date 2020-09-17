@@ -36,7 +36,7 @@ public class DanteConfigurationResourceDeplomentTestNG extends UlyssesDeployment
     private Tenant testTenant;
 
     private String getDanteConfigurationResourceUrl() {
-        return ulyssesHostPort + "/ulysses/danteconfiguration/";
+        return ulyssesHostPort + "/ulysses/danteconfiguration";
     }
 
     @Override
@@ -71,12 +71,8 @@ public class DanteConfigurationResourceDeplomentTestNG extends UlyssesDeployment
 
     @Test(groups = "deployment")
     public void testGetDanteConfig() throws InterruptedException {
-
-        String url = getDanteConfigurationResourceUrl() + customerSpace;
-        danteConfig = getOAuth2RestTemplate().getForObject(url, DanteConfigurationDocument.class);
+        danteConfig = getOAuth2RestTemplate().getForObject(getDanteConfigurationResourceUrl(), DanteConfigurationDocument.class);
         Assert.assertNotNull(danteConfig);
-
-        getOAuth2RestTemplate().getForObject(getDanteConfigurationResourceUrl(), DanteConfigurationDocument.class);
     }
 
 }

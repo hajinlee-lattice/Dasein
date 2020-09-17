@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 import com.latticeengines.domain.exposed.dante.metadata.MetadataDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 
 public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
@@ -48,15 +47,19 @@ public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
         setupDanteConfiguraiton();
     }
 
-    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    @Test(groups = "functional")
     public void testCreate() {
         createAndUpdateDanteConfig();
-        List<DanteConfigurationDocument> configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
-        Assert.assertEquals(configs.size(), 1);
+        DanteConfigurationDocument config = danteConfigEntityMgr.findByTenantId(mainCustomerSpace);
+        Assert.assertNotNull(config);
 
-        danteConfigEntityMgr.createOrUpdate(mainCustomerSpace, danteConfig);
-        configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
-        Assert.assertEquals(configs.size(), 1);
+        DanteConfigurationDocument doc = danteConfigEntityMgr.createOrUpdate(mainCustomerSpace, danteConfig);
+        Assert.assertNotNull(doc);
+
+        doc = danteConfigEntityMgr.createOrUpdate(mainCustomerSpace,
+                new DanteConfigurationDocument(danteConfig.getMetadataDocument(), "widgetConfigurationDocument"));
+        Assert.assertNotNull(doc);
+        Assert.assertEquals(doc.getWidgetConfigurationDocument(), "widgetConfigurationDocument");
     }
 
     private void setupDanteConfiguraiton() {

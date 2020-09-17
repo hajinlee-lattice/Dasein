@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 import io.swagger.annotations.Api;
 
 
-@Api(value = "DanteConfigurationDocument", description = "REST resource for dante configs.")
+@Api(value = "DanteConfigurationDocument", description = "REST resource for dante configurations.")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/danteconfig")
+@RequestMapping("/customerspaces/{customerSpace}/dante-configuration")
 public class DanteConfigResource {
 
     private static final Logger log = LoggerFactory.getLogger(DanteConfigResource.class);
@@ -26,7 +26,7 @@ public class DanteConfigResource {
     private DanteConfigService danteConfigService;
 
 
-    @GetMapping("/getDanteConfiguration")
+    @GetMapping
     public DanteConfigurationDocument getDanteConfiguration(@PathVariable String customerSpace){
         return danteConfigService.getDanteConfiguration();
     }

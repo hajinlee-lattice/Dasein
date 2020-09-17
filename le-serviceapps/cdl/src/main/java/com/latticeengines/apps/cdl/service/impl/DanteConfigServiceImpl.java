@@ -18,6 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.DanteConfigEntityMgr;
 import com.latticeengines.apps.cdl.service.DanteConfigService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
@@ -56,19 +57,14 @@ public class DanteConfigServiceImpl implements DanteConfigService {
     @Override
     public DanteConfigurationDocument getDanteConfiguration() {
         String tenantId = MultiTenantContext.getShortTenantId();
-        List<DanteConfigurationDocument> danteConfigs = entityMgr.findAllByTenantId(tenantId);
-        if (danteConfigs.size() > 1) {
-            log.warn(String.format("Found multiple Dante Configurations cached for tenant: %s", tenantId));
+        DanteConfigurationDocument danteConfig = entityMgr.findByTenantId(tenantId);
+        if (danteConfig == null) {
             return createAndUpdateDanteConfig();
         }
-        if (CollectionUtils.isEmpty(danteConfigs)) {
-            log.warn(String.format("Found no Dante Configurations cached for tenant: %s", tenantId));
-            return createAndUpdateDanteConfig();
-        }
-        return danteConfigs.get(0);
+        return danteConfig;
     }
 
-    private DanteConfigurationDocument getDanteConfiguration(String customerSpace) {
+    private DanteConfigurationDocument generateDanteConfiguration(String customerSpace) {
         String widgetConfigurationDocument = getStaticDocument(commonResourcePath + widgetConfigurationDocumentPath);
         MetadataDocument metadataDocument = JsonUtils.deserialize(
                 getStaticDocument(commonResourcePath + metadataDocumentTemplatePath), MetadataDocument.class);
@@ -97,18 +93,11 @@ public class DanteConfigServiceImpl implements DanteConfigService {
 
     private DanteConfigurationDocument createAndUpdateDanteConfig() {
         String tenantId = MultiTenantContext.getShortTenantId();
-        DanteConfigurationDocument danteConfig = getDanteConfiguration(tenantId);
-        return entityMgr.createOrUpdate(tenantId, danteConfig);
-    }
-
-    private void deleteByTenant() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        entityMgr.deleteByTenantId(tenantId);
-    }
-
-    private List<DanteConfigurationDocument> findByTenant() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return entityMgr.findAllByTenantId(tenantId);
+        try (PerformanceTimer timer = new PerformanceTimer(
+                "Create and update Danteconfiguration for Tenant= " + tenantId, log)) {
+            DanteConfigurationDocument danteConfig = generateDanteConfiguration(tenantId);
+            return entityMgr.createOrUpdate(tenantId, danteConfig);
+        }
     }
 
     private String getStaticDocument(String documentPath) {

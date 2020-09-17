@@ -46,7 +46,7 @@ public class DanteConfigServiceImplFunctionalTestNG extends CDLFunctionalTestNGB
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testGetDanteConfig() throws InterruptedException {
+    public void testGetDanteConfig() {
         danteConfig = danteConfigService.getDanteConfiguration();
         Assert.assertNotNull(danteConfig);
     }
