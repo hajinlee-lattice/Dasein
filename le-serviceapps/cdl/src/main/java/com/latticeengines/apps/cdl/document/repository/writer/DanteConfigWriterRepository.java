@@ -12,8 +12,11 @@ public interface DanteConfigWriterRepository extends MultiTenantDocumentReposito
 
     long countByTenantId(String tenantId);
 
+    DanteConfigEntity findByTenantId(String tenantId);
+
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DanteConfigEntity t SET t.document = ?2 WHERE t.tenantId = ?1")
     void updateTenantDocument(String tenantId, DanteConfigurationDocument danteConfig);
+
 }

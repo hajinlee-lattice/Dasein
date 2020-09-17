@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.apps.cdl.document.repository.reader.DanteConfigReaderRepository;
 import com.latticeengines.apps.cdl.document.repository.writer.DanteConfigWriterRepository;
 import com.latticeengines.apps.cdl.entitymgr.DanteConfigEntityMgr;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -28,9 +27,6 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Inject
     private DanteConfigWriterRepository writerRepository;
 
-    @Inject
-    private DanteConfigReaderRepository readerRepository;
-
     @Override
     public BaseJpaRepository<DanteConfigEntity, String> getRepository() {
         return writerRepository;
@@ -46,7 +42,7 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DanteConfigurationDocument findByTenantId(String tenantId) {
-        DanteConfigEntity danteConfigEntity = readerRepository.findByTenantId(tenantId);
+        DanteConfigEntity danteConfigEntity = writerRepository.findByTenantId(tenantId);
         if (danteConfigEntity != null) {
             return danteConfigEntity.getDocument();
         }
@@ -57,7 +53,7 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Transactional(propagation = Propagation.REQUIRED)
     public DanteConfigurationDocument createOrUpdate(String tenantId, DanteConfigurationDocument danteConfig) {
 
-        DanteConfigEntity existing = readerRepository.findByTenantId(tenantId);
+        DanteConfigEntity existing = writerRepository.findByTenantId(tenantId);
 
         DanteConfigEntity danteConfigEntity = new DanteConfigEntity();
         danteConfigEntity.setUuid(UUID.randomUUID().toString());
@@ -65,8 +61,8 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
         danteConfigEntity.setDocument(danteConfig);
 
         if (existing != null) {
-            writerRepository.updateTenantDocument(tenantId,danteConfig);
-            return readerRepository.findByTenantId(tenantId).getDocument();
+            writerRepository.updateTenantDocument(tenantId, danteConfig);
+            return writerRepository.findByTenantId(tenantId).getDocument();
         }
 
         DanteConfigEntity saved = writerRepository.save(danteConfigEntity);
