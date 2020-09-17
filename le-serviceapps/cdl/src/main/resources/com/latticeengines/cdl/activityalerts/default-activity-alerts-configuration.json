@@ -1,5 +1,6 @@
 [
   {
+    "name": "IncWebActivity",
     "alert_header": "Increased Web Activity",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
@@ -7,6 +8,7 @@
     "is_active": true
   },
   {
+    "name": "IncActivityOnProduct",
     "alert_header": "Increased Activity on Product Pages",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
@@ -14,6 +16,7 @@
     "is_active": true
   },
   {
+    "name": "ReEngagedActivity",
     "alert_header": "Re-engaged Activity",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
@@ -21,6 +24,7 @@
     "is_active": true
   },
   {
+    "name": "GrowingBuyerIntent",
     "alert_header": "Growing Buyer Intent",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
@@ -28,6 +32,7 @@
     "is_active": true
   },
   {
+    "name": "GrowingResearchIntent",
     "alert_header": "Growing Research Intent",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,

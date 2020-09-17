@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -25,6 +24,8 @@ public class ActivityAlertsConfigEntityMgrTestNG extends CDLFunctionalTestNGBase
 
     private static final Logger log = LoggerFactory.getLogger(ActivityAlertsConfigEntityMgrTestNG.class);
 
+    private static final String TEST_ALERT_NAME = "AlertName";
+
     @Inject
     private ActivityAlertsConfigEntityMgr activityAlertsConfigEntityMgr;
 
@@ -36,9 +37,8 @@ public class ActivityAlertsConfigEntityMgrTestNG extends CDLFunctionalTestNGBase
     @Test(groups = "functional")
     public void TestCrud() throws InterruptedException {
         ActivityAlertsConfig testConfig = new ActivityAlertsConfig();
-        String id = UUID.randomUUID().toString();
         testConfig.setActive(true);
-        testConfig.setId(id);
+        testConfig.setName(TEST_ALERT_NAME);
         testConfig.setAlertMessageTemplate("Test ${alert.page_visits} to ${alert.page_name} page.");
         testConfig.setAlertHeader("Alert Header");
         testConfig.setAlertCategory(AlertCategory.PRODUCTS);
@@ -57,11 +57,11 @@ public class ActivityAlertsConfigEntityMgrTestNG extends CDLFunctionalTestNGBase
         List<ActivityAlertsConfig> alerts = activityAlertsConfigEntityMgr.findAllByTenant(mainTestTenant);
         Assert.assertTrue(CollectionUtils.isNotEmpty(alerts));
         Assert.assertEquals(alerts.size(), 1);
-        Assert.assertEquals(alerts.get(0).getId(), id);
+        Assert.assertEquals(alerts.get(0).getName(), TEST_ALERT_NAME);
 
         ActivityAlertsConfig alertsConfig = activityAlertsConfigEntityMgr.findByPid(alerts.get(0).getPid());
         Assert.assertNotNull(alertsConfig);
-        Assert.assertEquals(alertsConfig.getId(), id);
+        Assert.assertEquals(alertsConfig.getName(), TEST_ALERT_NAME);
 
         alertsConfig.setAlertHeader("New Header");
         alertsConfig.setAlertMessageTemplate("New template");
@@ -69,7 +69,7 @@ public class ActivityAlertsConfigEntityMgrTestNG extends CDLFunctionalTestNGBase
 
         alertsConfig = activityAlertsConfigEntityMgr.findByPid(alerts.get(0).getPid());
         Assert.assertNotNull(alertsConfig);
-        Assert.assertEquals(alertsConfig.getId(), id);
+        Assert.assertEquals(alertsConfig.getName(), TEST_ALERT_NAME);
         Assert.assertEquals(alertsConfig.getAlertHeader(), "New Header");
         Assert.assertEquals(alertsConfig.getAlertMessageTemplate(), "New template");
 
