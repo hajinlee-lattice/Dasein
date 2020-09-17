@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInput
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
 import com.latticeengines.domain.exposed.spark.am.MapAttributeTxfmrConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ActivityAlertJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
@@ -154,6 +155,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MergeTimeSeriesDeleteDataConfig.class, name = MergeTimeSeriesDeleteDataConfig.NAME), //
         @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME), //
         @JsonSubTypes.Type(value = JourneyStageJobConfig.class, name = JourneyStageJobConfig.NAME), //
+        @JsonSubTypes.Type(value = ActivityAlertJobConfig.class, name = ActivityAlertJobConfig.NAME), //
         @JsonSubTypes.Type(value = ValidateProductConfig.class, name = ValidateProductConfig.NAME), //
         @JsonSubTypes.Type(value = InputPresenceConfig.class, name = InputPresenceConfig.NAME),
         @JsonSubTypes.Type(value = MergeLatticeAccountConfig.class, name = MergeLatticeAccountConfig.NAME), //
