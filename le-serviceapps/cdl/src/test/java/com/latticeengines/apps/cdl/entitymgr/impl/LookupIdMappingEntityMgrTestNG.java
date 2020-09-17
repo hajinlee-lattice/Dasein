@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,9 +114,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         emptyOrgNameLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
         emptyOrgNameLookupIdMap.setOrgId(orgId + "_different");
         emptyOrgNameLookupIdMap.setOrgName("");
-        TestFrameworkUtils
-                .assertThrowsLedpExceptionWithCode(
-                LedpCode.LEDP_40080,
+        TestFrameworkUtils.assertThrowsLedpExceptionWithCode(LedpCode.LEDP_40080,
                 () -> lookupIdMappingEntityMgr.createExternalSystem(emptyOrgNameLookupIdMap));
     }
 
@@ -126,9 +125,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         duplicateOrgNameLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         duplicateOrgNameLookupIdMap.setOrgId(orgId + "_different");
         duplicateOrgNameLookupIdMap.setOrgName(orgName);
-        TestFrameworkUtils
-                .assertThrowsLedpExceptionWithCode(
-                LedpCode.LEDP_40081,
+        TestFrameworkUtils.assertThrowsLedpExceptionWithCode(LedpCode.LEDP_40081,
                 () -> lookupIdMappingEntityMgr.createExternalSystem(duplicateOrgNameLookupIdMap));
     }
 
@@ -199,9 +196,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
         extractedLookupIdMap.setOrgName("");
 
-        TestFrameworkUtils
-                .assertThrowsLedpExceptionWithCode(
-                LedpCode.LEDP_40080,
+        TestFrameworkUtils.assertThrowsLedpExceptionWithCode(LedpCode.LEDP_40080,
                 () -> lookupIdMappingEntityMgr.updateLookupIdMap(extractedLookupIdMap));
     }
 
@@ -219,9 +214,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
         extractedLookupIdMap.setOrgName(orgNameToCopy);
 
-        TestFrameworkUtils
-                .assertThrowsLedpExceptionWithCode(
-                LedpCode.LEDP_40081,
+        TestFrameworkUtils.assertThrowsLedpExceptionWithCode(LedpCode.LEDP_40081,
                 () -> lookupIdMappingEntityMgr.updateLookupIdMap(extractedLookupIdMap));
     }
 
@@ -269,7 +262,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(externalAuthFromDB.getId());
         assertNotNull(externalAuthFromDB.getTrayAuthenticationId());
         assertNotNull(externalAuthFromDB.getSolutionInstanceId());
-        assertNull(externalAuthFromDB.getTrayWorkflowEnabled());
+        assertFalse(externalAuthFromDB.getTrayWorkflowEnabled());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateWithAuthentication" })
@@ -293,7 +286,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(updatedExtAuth.getId());
         assertNotNull(updatedExtAuth.getTrayAuthenticationId());
         assertNotNull(updatedExtAuth.getSolutionInstanceId());
-        assertNotNull(updatedExtAuth.getTrayWorkflowEnabled());
+        assertTrue(updatedExtAuth.getTrayWorkflowEnabled());
         assertNotEquals(prevExtAuth.getTrayAuthenticationId(), updatedExtAuth.getTrayAuthenticationId());
         assertNotEquals(prevExtAuth.getSolutionInstanceId(), updatedExtAuth.getSolutionInstanceId());
         assertTrue(updatedExtAuth.getTrayWorkflowEnabled());
@@ -318,7 +311,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(updatedExtAuth.getId());
         assertNull(updatedExtAuth.getTrayAuthenticationId());
         assertNull(updatedExtAuth.getSolutionInstanceId());
-        assertNull(updatedExtAuth.getTrayWorkflowEnabled());
+        assertFalse(updatedExtAuth.getTrayWorkflowEnabled());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateWithNull" })
