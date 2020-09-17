@@ -44,7 +44,7 @@ public final class JourneyStageUtils {
     }
 
     private static JourneyStage closedStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Closed", "Opportunity is closed", 6, "#07da63",
+        return stage(tenant, "Closed", "Opportunity is closed", 6, "#05BE63",
                 predicate(Opportunity, 1, closedFilter()));
     }
 
