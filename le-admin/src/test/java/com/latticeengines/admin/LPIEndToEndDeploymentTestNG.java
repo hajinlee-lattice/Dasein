@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
 import com.latticeengines.security.exposed.Constants;
@@ -185,6 +186,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         sub.setLanguage("English");
         sub.setName(tenantId);
         sub.setSubscriberNumber(subNumber);
+        sub.setTenantType(TenantType.QA);
         req.setSubscriber(sub);
         return req;
     }
