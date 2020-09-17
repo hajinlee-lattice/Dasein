@@ -317,8 +317,20 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public InvitationLinkResponse getUserInvitationLink(String email) {
         refreshToken();
+
+        // Special case of authorization header format
+        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        ClientHttpRequestInterceptor previous = interceptors.stream()
+                .filter(interceptor -> interceptor instanceof AuthorizationHeaderHttpRequestInterceptor).findAny().get();
+        interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
+
         InvitationLinkResponse response = null;
         try {
+            String userInviteToken = "bearer:" + tokenInUse;
+            ClientHttpRequestInterceptor inviteAuth = new AuthorizationHeaderHttpRequestInterceptor(userInviteToken);
+            interceptors.add(inviteAuth);
+            restTemplate.setInterceptors(interceptors);
+
             RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             response = retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("get user invitation link")) {
@@ -331,8 +343,13 @@ public class IDaaSServiceImpl implements IDaaSService {
                     return null;
                 }
             });
+
         } catch (Exception e) {
             log.warn("Failed to get invitation link", e);
+        } finally {
+            interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
+            interceptors.add(previous);
+            restTemplate.setInterceptors(interceptors);
         }
         return response;
     }
@@ -340,33 +357,17 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public void callbackWithAuth(String url, VboCallback responseBody) {
         refreshToken();
+        log.info("Sending callback to " + url);
+        log.info(responseBody.toString());
+        String traceId = responseBody.customerCreation.transactionDetail.ackRefId;
 
-        // VBO requires a different format for authorization header
-        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-        ClientHttpRequestInterceptor previous = interceptors.stream()
-                .filter(interceptor -> interceptor instanceof AuthorizationHeaderHttpRequestInterceptor).findAny().get();
-        interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
-
-        String traceId = "";
         try {
-            String VboToken = "Bearer " + tokenInUse;
-            ClientHttpRequestInterceptor VboAuth = new AuthorizationHeaderHttpRequestInterceptor(VboToken);
-            interceptors.add(VboAuth);
-            restTemplate.setInterceptors(interceptors);
-
-            log.info("Sending callback to " + url);
-            log.info(responseBody.toString());
-            traceId = responseBody.customerCreation.transactionDetail.ackRefId;
-
             ResponseEntity<String> response = restTemplate.postForEntity(URI.create(url), responseBody, String.class);
             log.info("Callback {} finished with response code {}", traceId, response.getStatusCodeValue());
             log.info("Callback {} response body: {}", traceId, response.getBody());
         } catch (Exception e) {
             log.error(traceId + " Exception in callback:" + e.toString());
-        } finally {
-            interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
-            interceptors.add(previous);
-            restTemplate.setInterceptors(interceptors);
+            throw e;
         }
     }
 
@@ -450,7 +451,7 @@ public class IDaaSServiceImpl implements IDaaSService {
             synchronized (this) {
                 if (!token.equals(tokenInUse)) {
                     tokenInUse = token;
-                    String headerValue = "bearer:" + tokenInUse;
+                    String headerValue = "Bearer " + tokenInUse;
                     ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
                     List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
                     interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
