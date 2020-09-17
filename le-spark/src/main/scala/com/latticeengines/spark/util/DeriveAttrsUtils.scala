@@ -147,6 +147,7 @@ private[spark] object DeriveAttrsUtils {
     colType match {
       case Type.LONG => df.withColumn(attrName, lit(null).cast(LongType))
       case Type.BOOLEAN => df.withColumn(attrName, lit(null).cast(BooleanType))
+      case Type.STRING => df.withColumn(attrName, lit(null).cast(StringType))
       case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported for appending null columns")
     }
   }
