@@ -297,6 +297,14 @@ public class UserResource {
         }
     }
 
+    @GetMapping("/newuser/levels")
+    @ResponseBody
+    @ApiOperation(value = "Get user levels that an admin can assign when creating a user")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
+    public List<AccessLevel> getNewUserLevels() {
+        return AccessLevel.getDnBConnectNewUserLevels();
+    }
+
     private void checkUser(User user) {
         if (user == null) {
             throw new LedpException(LedpCode.LEDP_18221);
