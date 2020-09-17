@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.StringTemplateConstants
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity._
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{FALSE, NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
@@ -245,7 +246,12 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       case BusinessEntity.Contact => contactBatchStoreTable
       case _ => throw new UnsupportedOperationException(s"entity $entity is not supported for activity store")
     }
-    df.join(batchStore.select(entityIdCol), Seq(entityIdCol), "right")
+    df.join(cleanBatchStore(batchStore, entity), Seq(entityIdCol), "right")
+  }
+
+  def cleanBatchStore(batchStore: DataFrame, entity: BusinessEntity): DataFrame = {
+    batchStore.filter(col(InterfaceName.AccountId.name) =!= DataCloudConstants.ENTITY_ANONYMOUS_ID)
+      .select(DeriveAttrsUtils.getEntityIdColumnNameFromEntity(entity))
   }
 
   def shouldSkipGroup(group: ActivityMetricsGroup, dimensionMetadataMap: util.Map[String, DimensionMetadata]): Boolean = {
