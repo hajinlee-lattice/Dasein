@@ -1,8 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -11,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.GenerateRecommendationCSVContext;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -18,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
+import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.GenerateRecommendationCSVJob;
 
@@ -37,7 +45,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
     }
 
     @Override
-    protected GenerateRecommendationCSVConfig configureJob(DeltaCampaignLaunchExportFilesGeneratorConfiguration stepConfiguration) {
+    protected GenerateRecommendationCSVConfig configureJob(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
         createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
@@ -59,7 +67,47 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         }
         generateRecommendationCSVConfig.setTargetNums(target);
         generateRecommendationCSVConfig.setInput(inputs);
+        Map<String, String> accountDisplayNames = getMapObjectFromContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES,
+                String.class, String.class);
+        Map<String, String> contactDisplayNames = getMapObjectFromContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES,
+                String.class, String.class);
+        log.info("accountDisplayNames map: " + accountDisplayNames);
+        log.info("contactDisplayNames map: " + contactDisplayNames);
+        if (accountDisplayNames != null) {
+            config.setAccountDisplayNames(accountDisplayNames);
+        }
+        if (contactDisplayNames != null) {
+            config.setContactDisplayNames(contactDisplayNames);
+        }
+        generateRecommendationCSVContext.setIgnoreAccountsWithoutContacts(shouldIgnoreAccountsWithoutContacts(config));
+        boolean isLiveRamp = CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName());
+        generateRecommendationCSVContext.setLiveRamp(isLiveRamp);
+        buildFieldsAndDisplayNames(generateRecommendationCSVContext, accountDisplayNames, contactDisplayNames, isLiveRamp);
         return generateRecommendationCSVConfig;
+    }
+
+    private void buildFieldsAndDisplayNames(GenerateRecommendationCSVContext generateRecommendationCSVContext, Map<String, String> accountDisplayNames,
+                                            Map<String, String> contactDisplayNames, boolean isLiveRamp) {
+        Map<String, String> displayNames;
+        List<String> fields;
+        if (isLiveRamp) {
+            displayNames = MapUtils.isNotEmpty(contactDisplayNames) ? contactDisplayNames : new HashMap<>();
+            fields = new ArrayList<>(contactDisplayNames.keySet());
+            Collections.sort(fields);
+        } else {
+            displayNames = MapUtils.isNotEmpty(accountDisplayNames) ? accountDisplayNames : new HashMap<>();
+            fields = new ArrayList<>(displayNames.keySet());
+            Collections.sort(fields);
+            Map<String, String> changedContactDisplayNames = MapUtils.isNotEmpty(contactDisplayNames) ? contactDisplayNames : new HashMap<>();
+            changedContactDisplayNames = changedContactDisplayNames.entrySet().stream().collect(Collectors.toMap(entry -> DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + entry.getKey(),
+                    entry -> entry.getValue()));
+            List<String> contactFields = new ArrayList<>(changedContactDisplayNames.keySet());
+            Collections.sort(contactFields);
+            fields.addAll(contactFields);
+            displayNames.putAll(changedContactDisplayNames);
+        }
+        generateRecommendationCSVContext.setFields(fields);
+        generateRecommendationCSVContext.setDisplayNames(displayNames);
     }
 
     private void createDateUnit(String contextKey, List<DataUnit> inputs) {
@@ -74,6 +122,11 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
             customerSpace = configuration.getCustomerSpace();
         }
         return customerSpace;
+    }
+
+    private boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
+        return config.getDestinationSysType() == CDLExternalSystemType.MAP
+                || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
     @Override

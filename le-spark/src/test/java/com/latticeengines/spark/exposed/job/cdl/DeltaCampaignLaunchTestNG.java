@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -18,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -206,8 +208,16 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     private void verifyContactColumns(Schema schema) {
         List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
+        Set<String> excludeFields = Sets.newHashSet(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
+                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
+                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
         for (String contactColumn : contactColumns) {
             Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
+            if (excludeFields.contains(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn)) {
+                Assert.assertNull(field);
+            } else {
+                Assert.assertNotNull(field);
+            }
             Assert.assertNotNull(field);
         }
     }
