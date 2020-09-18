@@ -1,7 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -38,6 +42,10 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
     private boolean createAddCsvDataFrame;
 
     private boolean createDeleteCsvDataFrame;
+
+    private static final String ADD_FILE_PREFIX = "add";
+
+    private static final String DELETE_FILE_PREFIX = "delete";
 
     @Override
     protected Class<GenerateRecommendationCSVJob> getJobClz() {
@@ -131,13 +139,36 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        String addRenameCSVPath;
+        String deleteRenameCSVPath;
+        Date fileExportTime = new Date();
         if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
-            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(result.getTargets().get(0).getPath()));
-            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(result.getTargets().get(1).getPath()));
+            addRenameCSVPath = renameDataUnit(result.getTargets().get(0), ADD_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(addRenameCSVPath));
+            deleteRenameCSVPath = renameDataUnit(result.getTargets().get(1), DELETE_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(deleteRenameCSVPath));
         } else if (createAddCsvDataFrame) {
-            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(result.getTargets().get(0).getPath()));
+            addRenameCSVPath = renameDataUnit(result.getTargets().get(0), ADD_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(addRenameCSVPath));
         } else {
-            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(result.getTargets().get(0).getPath()));
+            deleteRenameCSVPath = renameDataUnit(result.getTargets().get(0), DELETE_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(deleteRenameCSVPath));
+        }
+    }
+
+    private String renameDataUnit(HdfsDataUnit hdfsDataUnit, String filePrefix, Date fileExportTime) {
+        String fileFormat = "csv";
+        String fileName = String.format("Recommendations_%s_%s.%s", filePrefix, DateTimeUtils.currentTimeAsString(fileExportTime), fileFormat);
+        try {
+            String outputDir = hdfsDataUnit.getPath();
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".csv"));
+            String csvPath = files.get(0);
+            String renamePath = outputDir + "/" + fileName;
+            HdfsUtils.rename(yarnConfiguration, csvPath, renamePath);
+            return renamePath;
+        } catch (IOException e) {
+            log.info("Can't rename CSV file to {}.", fileName);
+            throw new RuntimeException("Unable to rename csv file on HDFS!");
         }
     }
 }
