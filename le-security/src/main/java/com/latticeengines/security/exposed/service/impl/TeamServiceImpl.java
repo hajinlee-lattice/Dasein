@@ -200,6 +200,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<GlobalTeam> getTeamByIds(List<String> teamIds) {
         if (CollectionUtils.isNotEmpty(teamIds)) {
+            log.info("Team id list is {}.", teamIds);
             List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(teamIds, false);
             return getGlobalTeams(globalAuthTeams, false, null);
         } else {
