@@ -250,9 +250,9 @@ public class LoginResource {
             user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
             user.setAccessLevel(session.getAccessLevel());
             if (!Tenant.cdlTenantVersion.equals(tenant.getUiVersion())) {
-                user.setGlobalTeams(null);
+                user.setTeamIds(null);
             } else {
-                user.setGlobalTeams(teamService.getTeamByIds(session.getTeamIds()));
+                user.setTeamIds(session.getTeamIds());
             }
             result.setUser(user);
             doc.setResult(result);

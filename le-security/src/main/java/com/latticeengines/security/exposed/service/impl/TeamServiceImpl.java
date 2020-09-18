@@ -197,17 +197,6 @@ public class TeamServiceImpl implements TeamService {
         return null;
     }
 
-    @Override
-    public List<GlobalTeam> getTeamByIds(List<String> teamIds) {
-        if (CollectionUtils.isNotEmpty(teamIds)) {
-            log.info("Team id list is {}.", teamIds);
-            List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(teamIds, false);
-            return getGlobalTeams(globalAuthTeams, false, null);
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
     private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {
         if (AccessLevel.INTERNAL_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())
                 || AccessLevel.INTERNAL_USER.name().equals(globalAuthUserTenantRight.getOperationName())

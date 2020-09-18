@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
 import com.latticeengines.domain.exposed.security.Ticket;
 
@@ -109,8 +108,8 @@ public class UserDocument {
             private Map<String, EntityAccessRightsData> availableRights;
             @JsonProperty("AccessLevel")
             private String accessLevel;
-            @JsonProperty("globalTeams")
-            private List<GlobalTeam> globalTeams = new ArrayList<>();
+            @JsonProperty("TeamIds")
+            private List<String> teamIds = new ArrayList<>();
 
             public User() {
 
@@ -176,12 +175,12 @@ public class UserDocument {
                 this.availableRights = availableRights;
             }
 
-            public List<GlobalTeam> getGlobalTeams() {
-                return globalTeams;
+            public List<String> getTeamIds() {
+                return teamIds;
             }
 
-            public void setGlobalTeams(List<GlobalTeam> globalTeams) {
-                this.globalTeams = globalTeams;
+            public void setTeamIds(List<String> teamIds) {
+                this.teamIds = teamIds;
             }
         }
 

@@ -44,6 +44,4 @@ public interface TeamService {
 
     String createDefaultTeam();
 
-    List<GlobalTeam> getTeamByIds(List<String> teamIds);
-
 }
