@@ -181,20 +181,20 @@ public class TeamServiceImpl implements TeamService {
     public String createDefaultTeam() {
         List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId());
         if (CollectionUtils.isNotEmpty(users)) {
-            Optional<User> superAdmin = users.stream().filter(user1 -> AccessLevel.SUPER_ADMIN.equals(AccessLevel.valueOf(user1.getAccessLevel()))).findFirst();
+            Optional<User> superAdmin =
+                    users.stream().filter(user1 -> AccessLevel.SUPER_ADMIN.name().equals((user1.getAccessLevel()))).findFirst();
             if (superAdmin.isPresent()) {
                 GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createDefaultTeam(superAdmin.get().getEmail());
                 return globalAuthTeam.getTeamId();
             }
-            Optional<User> internalAdmin = users.stream().filter(user1 -> AccessLevel.INTERNAL_ADMIN.equals(AccessLevel.valueOf(user1.getAccessLevel()))).findFirst();
+            Optional<User> internalAdmin =
+                    users.stream().filter(user1 -> AccessLevel.INTERNAL_ADMIN.name().equals(user1.getAccessLevel())).findFirst();
             if (internalAdmin.isPresent()) {
                 GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createDefaultTeam(internalAdmin.get().getEmail());
                 return globalAuthTeam.getTeamId();
             }
-            return null;
-        } else {
-            return null;
         }
+        return null;
     }
 
     private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {
