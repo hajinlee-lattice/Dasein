@@ -16,6 +16,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -35,6 +37,8 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 @Component("updateContactProfile")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class UpdateContactProfile extends UpdateProfileBase<ProcessContactStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateContactProfile.class);
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
@@ -101,6 +105,10 @@ public class UpdateContactProfile extends UpdateProfileBase<ProcessContactStepCo
     @Override
     public void execute() {
         bootstrap();
+        if (isToReset(getServingEntity())) {
+            log.info("Should reset contact serving store, skip updating contact profile.");
+            return;
+        }
         autoDetectCategorical = true;
         autoDetectDiscrete = true;
         updateProfile();

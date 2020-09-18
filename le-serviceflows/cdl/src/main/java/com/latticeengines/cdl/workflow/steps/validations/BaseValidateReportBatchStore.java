@@ -55,8 +55,6 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
     private String reportChangeListTablePrefix;
     private Table changeListTable;
     private Table reportChangeListTable;
-    private String activeName;
-    private String inactiveName;
 
     private long totalRecords;
 
@@ -203,7 +201,7 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
             return;
         }
         Table inactiveTable = dataCollectionProxy.getTable(customerSpace.toString(), role, inactive);
-        if (activeTable == null) {
+        if (inactiveTable == null) {
             log.info("There's no inactive batch store!");
             return;
         }
@@ -266,8 +264,8 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
     }
 
     private void syncBatchStoreOrResetServingStore() {
-        activeName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
-        inactiveName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
+        String activeName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
+        String inactiveName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
         if (StringUtils.isNotBlank(activeName) && StringUtils.isBlank(inactiveName)) {
             linkInactiveTable(role);
         } else if (StringUtils.isBlank(activeName) && StringUtils.isBlank(inactiveName)) {
