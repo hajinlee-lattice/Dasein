@@ -13,7 +13,12 @@
                     "ACCOUNT ID",
                     "EXTERNAL ID"
                 ],
-                "required": false
+                "required": false,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Match IDs": [],
@@ -27,7 +32,11 @@
                     "WEBSITE",
                     "DOMAIN"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "DUNS",
@@ -37,7 +46,11 @@
                     "DUNS",
                     "DUNS NUMBER"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "CompanyName",
@@ -50,7 +63,11 @@
                     "ACCOUNT NAME",
                     "DISPLAY NAME"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "PhoneNumber",
@@ -60,7 +77,11 @@
                     "PHONE",
                     "PHONE NUMBER"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "City",
@@ -70,7 +91,11 @@
                     "CITY",
                     "BILLING CITY"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "Country",
@@ -80,7 +105,11 @@
                     "COUNTRY",
                     "BILLING COUNTRY"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "State",
@@ -94,7 +123,11 @@
                     "BILLING STATE",
                     "BILLING PROVINCE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "PostalCode",
@@ -108,7 +141,11 @@
                     "BILLING ZIP CODE",
                     "BILLING POSTAL CODE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Analysis Fields": [
@@ -119,7 +156,11 @@
                 "matchingColumnNames": [
                     "TYPE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "Industry",
@@ -128,7 +169,11 @@
                 "matchingColumnNames": [
                     "INDUSTRY"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "Model"
+                ]
             },
             {
                 "fieldName": "SpendAnalyticsSegment",
@@ -138,7 +183,24 @@
                     "SPEND ANALYTICS SEGMENT",
                     "ACCOUNT BUSINESS SEGMENT"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "Model"
+                ]
+            },
+            {
+                "fieldName": "Longitude",
+                "fieldType": "TEXT",
+                "screenName": "Longitude",
+                "matchingColumnNames": [
+                    "LONGITUDE"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "Model"
+                ]
             },
             {
                 "fieldName": "AnnualRevenue",
@@ -148,25 +210,38 @@
                     "ANNUAL REVENUE",
                     "REVENUE"
                 ],
-                "required": false
-            },
-            {
-                "fieldName": "Longitude",
-                "fieldType": "TEXT",
-                "screenName": "Longitude",
-                "matchingColumnNames": [
-                    "LONGITUDE"
-                ],
-                "required": false
+                "required": false,
+                "fundamentalType": "NUMERIC",
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ]
             },
             {
                 "fieldName": "Latitude",
                 "fieldType": "TEXT",
-                "screenName": "Latitidue",
+                "screenName": "Latitude",
                 "matchingColumnNames": [
                     "LATITUDE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "Model"
+                ]
+            },
+            {
+                "fieldName": "AnnualRevenueCurrency",
+                "fieldType": "TEXT",
+                "screenName": "Estimated Yearly Revenue Currency",
+                "matchingColumnNames": [
+                    "ANNUAL REVENUE CURRENCY",
+                    "REVENUE CURRENCY"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "Model"
+                ]
             }
         ],
         "Custom Fields": []
