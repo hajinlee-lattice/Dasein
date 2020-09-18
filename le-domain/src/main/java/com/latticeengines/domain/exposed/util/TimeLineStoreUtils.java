@@ -117,6 +117,12 @@ public final class TimeLineStoreUtils {
             timelineStandardMapping.put(TimelineStandardColumn.EventType.getColumnName(),
                     new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Constant)
                             .withMappingValue("DnB Intent").build());
+            timelineStandardMapping.put(TimelineStandardColumn.Detail1.getColumnName(),
+                    new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
+                            .withMappingValue(InterfaceName.IntentScore.name()).build());
+            timelineStandardMapping.put(TimelineStandardColumn.Detail2.getColumnName(),
+                    new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
+                            .withMappingValue(InterfaceName.BuyingScore.name()).build());
             break;
         default:
             break;

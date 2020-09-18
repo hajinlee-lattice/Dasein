@@ -208,7 +208,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
           return df.withColumn(requiredCol, lit(mapping.getMappingValue))
         case MappingType.Attribute =>
           if (dfColumnNames.contains(mappingValue)) {
-            return df.withColumn(requiredCol, df.col(mappingValue))
+            return df.withColumn(requiredCol, df.col(mappingValue).cast(colType))
           }
         case MappingType.AttributeWithMapping =>
           if (dfColumnNames.contains(mappingValue)) {
