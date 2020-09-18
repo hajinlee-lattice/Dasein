@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -80,6 +82,7 @@ public class GenerateActivityAlert extends RunSparkJob<TimeLineSparkStepConfigur
 
         Table timeLineMasterTable = getAccount360TimeLineMasterTable();
         Table activityAlertMasterTable = getActivityAlertMasterTable();
+        String activityAlertVersion = getOrCreateActivityAlertVersion();
         Preconditions.checkNotNull(timeLineMasterTable, "should have account timeline master table");
 
         List<DataUnit> inputs = new ArrayList<>();
@@ -101,10 +104,10 @@ public class GenerateActivityAlert extends RunSparkJob<TimeLineSparkStepConfigur
 
         log.info(
                 "Generating activity alerts. timeline table = {},"
-                        + " alert master table = {}, alert configs = {}, spark config = {}",
+                        + " alert master table = {}, alert configs = {}, spark config = {}, alert version = {}",
                 timeLineMasterTable.getName(),
                 activityAlertMasterTable == null ? null : activityAlertMasterTable.getName(),
-                JsonUtils.serialize(alertConfigs), JsonUtils.serialize(config));
+                JsonUtils.serialize(alertConfigs), JsonUtils.serialize(config), activityAlertVersion);
         return config;
     }
 
@@ -233,6 +236,23 @@ public class GenerateActivityAlert extends RunSparkJob<TimeLineSparkStepConfigur
             log.info("Found {} (role={}) in inactive version {}", name, role, inactive);
         }
         return tableName;
+    }
+
+    private String getOrCreateActivityAlertVersion() {
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        String version = dcStatus.getActivityAlertVersion();
+        // TODO make sure UUID is acceptable as version (i.e., - is an valid character
+        // in serving store of alerts)
+        if (StringUtils.isBlank(version)) {
+            version = UUID.randomUUID().toString();
+            log.info("No existing activity alert version, creating a new one {}", version);
+        } else if (configuration.isShouldRebuild()) {
+            version = UUID.randomUUID().toString();
+            log.info("In rebuild mode, creating a new activity alert version {}", version);
+        }
+        dcStatus.setActivityAlertVersion(version);
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
+        return version;
     }
 
     private boolean isShortCutMode() {

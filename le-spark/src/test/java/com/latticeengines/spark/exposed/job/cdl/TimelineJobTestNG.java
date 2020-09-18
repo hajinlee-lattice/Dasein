@@ -41,6 +41,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -248,8 +249,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         timeline2RelatedStreamTables.put(BusinessEntity.Contact.name(), Collections.singleton(ctkTableName));
 
         Map<String, Set<String>> timeline3RelatedStreamTables = new HashMap<>();
-        timeline3RelatedStreamTables.put(BusinessEntity.Account.name(), Collections.singleton(oppTableName));
-        timeline3RelatedStreamTables.put(BusinessEntity.Account.name(), Collections.singleton(webTableName));
+        timeline3RelatedStreamTables.put(BusinessEntity.Account.name(), Sets.newHashSet(oppTableName, webTableName));
 
         timelineRelatedStreamTables.put(timeLine1.getTimelineId(), timeline1RelatedStreamTables);
         timelineRelatedStreamTables.put(timeLine2.getTimelineId(), timeline2RelatedStreamTables);
@@ -369,8 +369,14 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
 
         mappingMap.put(AtlasStream.StreamType.WebVisit.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.WebVisit));
-        mappingMap.put(AtlasStream.StreamType.Opportunity.name(),
+        Map<String, EventFieldExtractor> oppMappings = new HashMap<>(
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.Opportunity));
+        // add detail2 to testing casting from long to string
+        oppMappings.put(TimeLineStoreUtils.TimelineStandardColumn.Detail2.getColumnName(),
+                new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
+                        .withMappingValue(InterfaceName.LastModifiedDate.name()).build());
+        mappingMap.put(AtlasStream.StreamType.Opportunity.name(),
+                oppMappings);
 
         timeLine3.setEventMappings(mappingMap);
     }
