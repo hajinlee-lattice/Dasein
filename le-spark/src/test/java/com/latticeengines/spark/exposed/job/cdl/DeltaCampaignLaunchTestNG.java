@@ -218,7 +218,6 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             } else {
                 Assert.assertNotNull(field);
             }
-            Assert.assertNotNull(field);
         }
     }
 
