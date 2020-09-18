@@ -88,7 +88,9 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
 
     val mergedAlertDf = alertIdx.map(idx => lattice.input(idx).unionByName(alertDf)).getOrElse(alertDf)
     lattice.output = mergedAlertDf :: alertDf :: Nil
-    // TODO count and output whether there are new alert or not
+    // count and output whether there are new alert or not
+    // TODO change to json object if needed
+    lattice.outputStr = alertDf.count.toString
   }
 
   def generateIncreasedWebActivityAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
