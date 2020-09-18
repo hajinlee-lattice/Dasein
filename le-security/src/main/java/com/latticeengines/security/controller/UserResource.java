@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.domain.exposed.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +30,6 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -173,9 +171,10 @@ public class UserResource {
             if (idaasUser == null) {
                 LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s.",
                         loginUsername, loginLevel));
-                httpResponse.setStatus(500);
-                response.setErrors(Collections.singletonList("Failed to create IDaaS User."));
-                return response;
+                String title = "Failed to create IDaaS User.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
             } else {
                 String welcomeUrl = dcpPublicUrl;
                 if (idaasUser.getInvitationLink() != null) {
@@ -270,9 +269,10 @@ public class UserResource {
             if (idaasUser == null) {
                 LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
                         loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
-                response.setStatus(500);
-                return SimpleBooleanResponse.failedResponse(
-                        Collections.singletonList("Failed to create IDaaS user."));
+                String title = "Failed to create IDaaS User.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
             } else {
                 String welcomeUrl = dcpPublicUrl;
                 if (idaasUser.getInvitationLink() != null) {
