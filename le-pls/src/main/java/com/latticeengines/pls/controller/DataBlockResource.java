@@ -1,9 +1,16 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.datacloud.manage.*;
+import com.latticeengines.domain.exposed.exception.*;
+import org.springframework.batch.core.configuration.xml.ExceptionElementParser;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,9 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.proxy.exposed.dcp.AppendConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
@@ -50,8 +54,27 @@ public class DataBlockResource {
     @ResponseBody
     @ApiOperation(value = "Get block drt entitlement")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public DataBlockEntitlementContainer getEntitlement() {
-        return appendConfigProxy.getEntitlement(MultiTenantContext.getShortTenantId());
-    }
+    public DataBlockEntitlementContainer getEntitlement(
+            @RequestParam(value = "domainName", required = false, defaultValue = "") String domainName,
+            @RequestParam(value = "recordType", required = false, defaultValue = "") String recordType,
+            @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
+        try {
+            DataBlockEntitlementContainer dataBlockEntitlementContainer =
+                appendConfigProxy.getEntitlement(MultiTenantContext.getShortTenantId(), domainName, recordType);
 
+            if ((!domainName.isEmpty() || !recordType.isEmpty()) && dataBlockEntitlementContainer.getDomains().isEmpty()) {
+                String title = "Subscriber not entitled to the given domain and record type combination.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
+            } else {
+                if(includeElements) {
+                    return primeMetadataProxy.enrichEntitlementContainerWithElements(dataBlockEntitlementContainer);
+                }
+                return dataBlockEntitlementContainer;
+            }
+        } catch (Exception ex) {
+            throw UIActionUtils.handleException(ex);
+        }
+    }
 }

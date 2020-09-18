@@ -83,6 +83,9 @@ public class DataBlockEntitlementContainer {
         @JsonProperty("levels")
         private List<DataBlockLevel> levels;
 
+        @JsonProperty("dataBlock")
+        private DataBlock dataBlock;
+
         // for jackson
         private Block() {}
 
@@ -94,6 +97,10 @@ public class DataBlockEntitlementContainer {
         public Block(String blockId, DataBlockLevel... levels) {
             this.blockId = blockId;
             this.levels = Arrays.asList(levels);
+        }
+
+        public void setDataBlock(DataBlock dataBlock) {
+            this.dataBlock = dataBlock;
         }
 
         public String getBlockId() {

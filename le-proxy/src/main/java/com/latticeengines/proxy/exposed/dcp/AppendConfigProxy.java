@@ -4,6 +4,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementCo
 
 public interface AppendConfigProxy {
 
-    DataBlockEntitlementContainer getEntitlement(String customerSpace);
+    DataBlockEntitlementContainer getEntitlement(String customerSpace, String domainName, String recordType);
 
 }
