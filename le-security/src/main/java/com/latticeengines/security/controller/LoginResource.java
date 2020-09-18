@@ -252,7 +252,7 @@ public class LoginResource {
             if (!Tenant.cdlTenantVersion.equals(tenant.getUiVersion())) {
                 user.setGlobalTeams(null);
             } else {
-                user.setGlobalTeams(teamService.getMyTeams(false));
+                user.setGlobalTeams(teamService.getTeamByIds(session.getTeamIds()));
             }
             result.setUser(user);
             doc.setResult(result);
