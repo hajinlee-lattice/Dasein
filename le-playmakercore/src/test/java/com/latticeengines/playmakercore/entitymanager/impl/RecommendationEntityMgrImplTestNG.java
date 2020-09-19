@@ -1,5 +1,8 @@
 package com.latticeengines.playmakercore.entitymanager.impl;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -97,8 +100,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 24 * 3600L);
         T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 24 * 3600L);
 
-        expiredDate = PlaymakerUtils.dateFromEpochSeconds(System.currentTimeMillis() / 1000L
-                - TimeUnit.DAYS.toSeconds(Math.round(365 * 1)));
+        expiredDate = Date
+                .from(Instant.now().atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).minusYears(1).toInstant());
 
         tenantCnt = recommendationEntityMgr.getAllTenantIds().size();
 
@@ -138,7 +141,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     public void testCreateRecommendation() {
         allRecommendationsAcrossAllLaunches.stream()//
                 .forEach(rec -> testCreateRecommendation(rec));
-        testGetTenantIds(tenantCnt+1);
+        testGetTenantIds(tenantCnt + 1);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
@@ -252,27 +255,27 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         verifyRecommendationCount(100, 100, 100);
 
         boolean isHardDelete = false;
-        bulkDeleteByTenantId(TENANT_PID,expiredDate,isHardDelete);
+        bulkDeleteByTenantId(TENANT_PID, expiredDate, isHardDelete);
         verifyRecommendationCount(0, 0, 0);
         verifyDeletingCount(903);
 
-        isHardDelete =true;
-        bulkDeleteByTenantId(TENANT_PID,expiredDate,isHardDelete);
+        isHardDelete = true;
+        bulkDeleteByTenantId(TENANT_PID, expiredDate, isHardDelete);
         verifyDeletingCount(301);
 
         Date current = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (1 * 1000L));
-        bulkDeleteByTenantId(TENANT_PID,current,isHardDelete);
+        bulkDeleteByTenantId(TENANT_PID, current, isHardDelete);
         verifyDeletingCount(0);
         testGetTenantIds(tenantCnt);
     }
 
 
 
-    private void testGetTenantIds(int count){
+    private void testGetTenantIds(int count) {
         List<Long> tenantIds = recommendationEntityMgr.getAllTenantIds();
-        if (count ==  0){
+        if (count == 0){
             Assert.assertTrue(CollectionUtils.isEmpty(tenantIds));
-        }else {
+        } else {
             Assert.assertTrue(CollectionUtils.isNotEmpty(tenantIds));
             Assert.assertEquals(tenantIds.size(), count);
         }
@@ -300,10 +303,11 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         }
     }
 
-    private void bulkDeleteByTenantId(Long tenantId, Date expireTimestamp,boolean hardDelete){
+    private void bulkDeleteByTenantId(Long tenantId, Date expireTimestamp,boolean hardDelete) {
         boolean shouldLoop = true;
         while (shouldLoop) {
-            int updatedCount = recommendationEntityMgr.cleanupInBulkByTenantId(tenantId, hardDelete, expireTimestamp, maxUpdateRows);
+            int updatedCount = recommendationEntityMgr.cleanupInBulkByTenantId(tenantId, hardDelete, expireTimestamp,
+                    maxUpdateRows);
             System.out.println(
                     String.format("bulkDeleteByPlayId - expireTimestamp = %s, maxCount = %d, updatedCount = %d",
                             expireTimestamp, maxUpdateRows, updatedCount));
@@ -311,14 +315,14 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         }
     }
 
-    private void verifyDeletingCount(int count){
-        List<Recommendation> recs= recommendationEntityMgr.findDeletedRecommendationsByTenantId(TENANT_PID);
-        log.info("Recommendations soft deleted: "+recs.size());
+    private void verifyDeletingCount(int count) {
+        int result = recommendationEntityMgr.findDeletedRecommendationsByTenantId(TENANT_PID).size();
+        log.info("Recommendations soft deleted: "+ result);
         if (count == 0) {
-            Assert.assertFalse(recs.size() > 0);
+            Assert.assertFalse(result > 0);
         } else {
-            Assert.assertTrue(recs.size() > 0);
-            Assert.assertEquals(recs.size(), count);
+            Assert.assertTrue(result > 0);
+            Assert.assertEquals(result, count);
         }
     }
 

@@ -1,5 +1,9 @@
 package com.latticeengines.playmaker.service.impl;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +36,7 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     private Double YEARS_TO_KEEP_RECOMMENDATIONS;
 
     @Value("${playmaker.expired.tenants.recommendations.years.keep:1}")
-    private Double YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS;
+    private Long YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -111,21 +115,22 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     }
 
     void cleanupRecommendationForChurnedCustomers() {
-        int softDeleted = cleanupRecommendationDueToExpiredTeanants(false);
-        int hardDeleted = cleanupRecommendationDueToExpiredTeanants(true);
-        log.info("Deleting recommendations for expired tenants, Soft delete: " + softDeleted + "Hard delete: " + hardDeleted);
+        int softDeleted = cleanupRecommendationDueToExpiredTenants(false);
+        int hardDeleted = cleanupRecommendationDueToExpiredTenants(true);
+        log.info("Deleting recommendations for expired tenants, Soft delete: " + softDeleted + "Hard delete: "
+                + hardDeleted);
     }
 
-    int cleanupRecommendationDueToExpiredTeanants(boolean isHardDelete) {
+    int cleanupRecommendationDueToExpiredTenants(boolean isHardDelete) {
         int totalDeletedCount = 0;
-        Date expiredDate = PlaymakerUtils.dateFromEpochSeconds(System.currentTimeMillis() / 1000L
-                - TimeUnit.DAYS.toSeconds(Math.round(365 * YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS)));
+        Date expiredDate = Date.from(Instant.now().atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS)
+                .minusYears(YEARS_TO_KEEP_RECOMMENDATIONS_FOR_EXPIRED_TENANTS).toInstant());
         List<Long> tenantIdsForCleanup = getChurnedTenants();
         try {
             if (CollectionUtils.isNotEmpty(tenantIdsForCleanup)) {
-                totalDeletedCount = tenantIdsForCleanup.stream().map(id -> lpiPMRecommendation
-                            .cleanupRecommendationsForChurnedTenant(id, expiredDate, isHardDelete))
-                            .reduce(0, (x, y) -> x + y);
+                totalDeletedCount = tenantIdsForCleanup.stream().map(
+                        id -> lpiPMRecommendation.cleanupRecommendationsForChurnedTenant(id, expiredDate, isHardDelete))
+                        .reduce(0, (x, y) -> x + y);
             }
         } catch (Exception ex) {
             log.error(String.format("Failed to cleanup recommendations for Expired tenants"), ex);
@@ -140,6 +145,7 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
 
         recommendationTenants.removeAll(existTenants);
         log.info(String.format("Find %d churned tenants from Recommendation", recommendationTenants.size()));
+        log.info("Get pid of churned tenants: " + Arrays.toString(existTenants.toArray()));
 
         return recommendationTenants;
     }

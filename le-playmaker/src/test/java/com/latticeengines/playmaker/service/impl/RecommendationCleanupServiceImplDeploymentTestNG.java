@@ -191,12 +191,12 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         validateRecommendations(maxUpdateRows * 2);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
-                .cleanupRecommendationDueToExpiredTeanants(false);
+                .cleanupRecommendationDueToExpiredTenants(false);
         Assert.assertEquals(count, maxUpdateRows * 2);
         validateRecommendations(0);
 
         count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
-                .cleanupRecommendationDueToExpiredTeanants(true);
+                .cleanupRecommendationDueToExpiredTenants(true);
         Assert.assertEquals(count, maxUpdateRows * 2);
         validateRecommendations(0);
     }
@@ -205,12 +205,12 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
     public void cleanupAfterCleanupRecommendationsForExpiredTenants() throws Exception {
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
-                .cleanupRecommendationDueToExpiredTeanants(false);
+                .cleanupRecommendationDueToExpiredTenants(false);
         Assert.assertEquals(count, 0);
         validateRecommendations(0);
 
         count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
-                .cleanupRecommendationDueToExpiredTeanants(true);
+                .cleanupRecommendationDueToExpiredTenants(true);
         Assert.assertEquals(count, 0);
     }
 
