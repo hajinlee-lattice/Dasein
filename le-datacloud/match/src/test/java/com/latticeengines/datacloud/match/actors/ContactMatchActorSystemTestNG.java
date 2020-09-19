@@ -114,10 +114,10 @@ public class ContactMatchActorSystemTestNG extends DataCloudMatchFunctionalTestN
             InternalOutputRecord matchRecord = new InternalOutputRecord();
             matchRecord.setParsedTenant(EntityMatchUtils.newStandardizedTenant(TENANT));
             // raw input
-            Object[] rawData = new Object[] { 1, "1234" };
+            Object[] rawData = new Object[] { 1, "028675958" };
             matchRecord.setInput(Arrays.asList(rawData));
             // parsed input
-            matchRecord.setParsedDuns("1234");
+            matchRecord.setParsedDuns("028675958");
             matchRecords.add(matchRecord);
         }
         return matchRecords;
