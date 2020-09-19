@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -29,6 +31,8 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConf
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(GenerateRecommendationCSVJobTestNG.class);
 
     private Object[][] recommendations;
     private Object[][] accounts;
@@ -77,6 +81,7 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
             Reader in = new InputStreamReader(inputStream);
             CSVParser records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             Map<String, Integer> headerMap = records.getHeaderMap();
+            log.info("Recommendation header map is {}.", headerMap);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read " + outputDir);
         }
@@ -87,7 +92,7 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
         String playId = "play_" + UUID.randomUUID().toString();
         String launchId = "launch_" + UUID.randomUUID().toString();
         String syncDestination = CDLExternalSystemType.FILE_SYSTEM.name();
-        List<Pair<String, Class<?>>> recommendationFields = Arrays.asList( //
+        recommendationFields = Arrays.asList( //
                 Pair.of(InterfaceName.AccountId.name(), String.class), //
                 Pair.of(InterfaceName.CustomerAccountId.name(), String.class), //
                 Pair.of(destinationAccountId, String.class), //
