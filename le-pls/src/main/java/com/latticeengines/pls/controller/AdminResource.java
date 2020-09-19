@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,14 +25,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.InternalResourceBase;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -104,7 +109,23 @@ public class AdminResource extends InternalResourceBase {
             HttpServletRequest request) {
         LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
+        manufactureSecurityContextForInternalAccess(userRegistrationWithTenant);
         return userService.addAdminUser(MultiTenantContext.getEmailAddress(), userRegistrationWithTenant);
+    }
+
+    private void manufactureSecurityContextForInternalAccess(UserRegistrationWithTenant userRegistrationWithTenant) {
+        if (userRegistrationWithTenant.getTenant() != null) {
+            String tenantId = userRegistrationWithTenant.getTenant();
+            Tenant tenant = tenantService.findByTenantId(tenantId);
+            if (tenant == null) {
+                throw new LedpException(LedpCode.LEDP_18074, new String[]{tenantId});
+            }
+            TicketAuthenticationToken auth = new TicketAuthenticationToken(null, "x.y");
+            Session session = new Session();
+            session.setTenant(tenant);
+            auth.setSession(session);
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        }
     }
 
     @PutMapping("/users")
