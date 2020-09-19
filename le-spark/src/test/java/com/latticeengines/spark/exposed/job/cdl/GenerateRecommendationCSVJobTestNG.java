@@ -15,6 +15,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -39,7 +40,8 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
     private static final String destinationAccountId = "D41000001Q3z4EAC";
     private static final String ratingId = RatingEngine.generateIdStr();
     private static final int addOrDeleteContactPerAccount = 5;
-    List<Pair<String, Class<?>>> recommendationFields;
+    private List<Pair<String, Class<?>>> recommendationFields;
+    private List<String> fields;
 
     @Test(groups = "functional")
     public void testGenerateRecommendationCSV() {
@@ -53,7 +55,7 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
         GenerateRecommendationCSVConfig generateRecommendationCSVConfig = new GenerateRecommendationCSVConfig();
         GenerateRecommendationCSVContext generateRecommendationCSVContext = new GenerateRecommendationCSVContext();
         generateRecommendationCSVContext.setIgnoreAccountsWithoutContacts(true);
-        List<String> fields = recommendationFields.stream().map(pair -> pair.getLeft()).collect(Collectors.toList());
+        fields = recommendationFields.stream().map(pair -> pair.getLeft()).collect(Collectors.toList());
         fields.add(2, InterfaceName.DUNS.name());
         fields.add(27, InterfaceName.DoNotMail.name());
         generateRecommendationCSVContext.setFields(fields);
@@ -67,6 +69,7 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
                 }));
         generateRecommendationCSVContext.setDisplayNames(displayNames);
         generateRecommendationCSVConfig.setGenerateRecommendationCSVContext(generateRecommendationCSVContext);
+        generateRecommendationCSVConfig.setTargetNums(1);
         return generateRecommendationCSVConfig;
     }
 
@@ -82,6 +85,13 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
             CSVParser records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             Map<String, Integer> headerMap = records.getHeaderMap();
             log.info("Recommendation header map is {}.", headerMap);
+            Assert.assertEquals(headerMap.size(), fields.size());
+            Assert.assertEquals(records.getRecords().size(), 50L);
+            Assert.assertTrue(headerMap.containsKey(InterfaceName.DUNS.name()));
+            Assert.assertTrue(headerMap.containsKey(InterfaceName.DoNotMail.name()));
+            Assert.assertTrue(headerMap.get(InterfaceName.DoNotMail.name()) < headerMap.get(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.CreatedDate.name()));
+            Assert.assertTrue(headerMap.get(InterfaceName.DUNS.name()) < headerMap.get(InterfaceName.DoNotMail.name()));
+            Assert.assertTrue(headerMap.containsKey("Customer" + InterfaceName.CompanyName.name()));
         } catch (IOException e) {
             throw new RuntimeException("Failed to read " + outputDir);
         }
