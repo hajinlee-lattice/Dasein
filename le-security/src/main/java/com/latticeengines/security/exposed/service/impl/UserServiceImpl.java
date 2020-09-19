@@ -164,7 +164,8 @@ public class UserServiceImpl implements UserService {
         }
 
         String username = userRegistration.getUser().getUsername();
-        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser, null, true);
+        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser, null, true, false,
+                userRegistration.getUser().getUserTeams());
 
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
