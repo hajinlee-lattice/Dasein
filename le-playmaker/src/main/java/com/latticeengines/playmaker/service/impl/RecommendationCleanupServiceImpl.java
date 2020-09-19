@@ -144,8 +144,8 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
         List<Long> recommendationTenants = lpiPMRecommendation.getAllTenantIdsFromRecommendation();
 
         recommendationTenants.removeAll(existTenants);
-        log.info(String.format("Find %d churned tenants from Recommendation", recommendationTenants.size()));
-        log.info("Get pid of churned tenants: " + Arrays.toString(existTenants.toArray()));
+        log.info(String.format("Find %d churned tenants from Recommendation: ", recommendationTenants.size())
+                + Arrays.toString(existTenants.toArray()));
 
         return recommendationTenants;
     }
