@@ -46,6 +46,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.VboUsageEvent;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -214,6 +216,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
         boolean isPrimeMatch = BusinessEntity.PrimeAccount.name().equals(matchContext.getInput().getTargetEntity());
+        DplusUsageReportConfig usageReportConfig = matchContext.getInput().getDplusUsageReportConfig();
+        boolean shouldReportUsage = usageReportConfig != null && usageReportConfig.isEnabled();
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -335,6 +339,32 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             if (isPrimeMatch) {
                 populateCandidateData(outputRecord, internalRecord);
+            }
+
+            if (shouldReportUsage) {
+                String poaeIdField = usageReportConfig.getPoaeIdField();
+                if (StringUtils.isNotBlank(poaeIdField)) {
+                    int poaeIdIdx = inputFields.indexOf(poaeIdField);
+                    if (poaeIdIdx >= 0) {
+                        Object poaeIdVal = internalRecord.getInput().get(poaeIdIdx);
+                        String poaeIdStr = null;
+                        try {
+                            if (poaeIdVal != null) {
+                                poaeIdStr = String.valueOf(poaeIdVal);
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to parse POAEID from object " + poaeIdVal);
+                        }
+                        if (poaeIdVal == null) {
+                            poaeIdStr = UUID.randomUUID().toString().toLowerCase();
+                            log.warn("Not able to parse POAEID from input, use random uuid instead: " + poaeIdStr);
+                        }
+                        populateUsageEvents(outputRecord, internalRecord, poaeIdStr);
+                    } else {
+                        throw new IllegalArgumentException("Cannot find POAEID field " + poaeIdField //
+                                + " from input fields.");
+                    }
+                }
             }
 
             outputRecord.setRowNumber(internalRecord.getRowNumber());
@@ -528,6 +558,16 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             candidateData.add(data);
         }
         outputRecord.setCandidateOutput(candidateData);
+    }
+
+    private void populateUsageEvents(OutputRecord outputRecord, InternalOutputRecord internalRecord, String poaeIdStr) {
+        if (CollectionUtils.isNotEmpty(internalRecord.getUsageEvents())) {
+            List<VboUsageEvent> usageEvents = new ArrayList<>(internalRecord.getUsageEvents());
+            for (VboUsageEvent event: usageEvents) {
+                event.setPoaeId(poaeIdStr);
+            }
+            outputRecord.setUsageEvents(usageEvents);
+        }
     }
 
     private List<String> candidateOutputFields() {

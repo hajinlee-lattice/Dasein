@@ -3,6 +3,17 @@ package com.latticeengines.datacloud.yarn.runtime;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.CREATED_TEMPLATE_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_EVENT_TYPE;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_FEATURE;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_POAEID;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_RESPONSE_TIME;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_SUBJECT_CITY;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_SUBJECT_COUNTRY;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_SUBJECT_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_SUBJECT_NAME;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_SUBJECT_STATE;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_TIMESTAMP;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.RAW_USAGE_SCHEMA;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +74,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.VboUsageEvent;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -175,6 +188,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
+            writeUsageDataToAvro(processorContext, groupOutput.getResult());
             writeNewEntityDataToAvro(processorContext, groupOutput.getResult());
             writeCandidateDataToAvro(processorContext, groupOutput.getResult(), groupOutput.getInputFields());
         } catch (IOException e) {
@@ -418,6 +432,79 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             AvroUtils.appendToHdfsFile(yarnConfiguration, newEntityAvroFile, records, useSnappy);
         }
         log.info("Write {} newly allocated entity records to {}", records.size(), newEntityAvroFile);
+    }
+
+    private void writeUsageDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords) //
+            throws IOException {
+        if (processorContext == null || CollectionUtils.isEmpty(outputRecords)) {
+            return;
+        }
+        DplusUsageReportConfig usageReportConfig = processorContext.getOriginalInput().getDplusUsageReportConfig();
+        if (usageReportConfig == null || !usageReportConfig.isEnabled()) {
+            return;
+        }
+
+        List<GenericRecord> records = new ArrayList<>();
+        Schema schema = AvroUtils.constructSchema("UsageReport", RAW_USAGE_SCHEMA);
+        for (OutputRecord outputRecord : outputRecords) {
+            List<VboUsageEvent> events = outputRecord.getUsageEvents();
+            if (CollectionUtils.isEmpty(events)) {
+                continue;
+            }
+            for (VboUsageEvent event: events) {
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                List<Schema.Field> fields = schema.getFields();
+                for (Schema.Field field : fields) {
+                    Object val = null;
+                    switch (field.name()) {
+                        case AVRO_ATTR_POAEID:
+                            val = event.getPoaeId();
+                            break;
+                        case AVRO_ATTR_TIMESTAMP:
+                            val = event.getEventTime();
+                            break;
+                        case AVRO_ATTR_EVENT_TYPE:
+                            val = event.getEventType();
+                            break;
+                        case AVRO_ATTR_FEATURE:
+                            val = event.getFeatureUri();
+                            break;
+                        case AVRO_ATTR_RESPONSE_TIME:
+                            val = event.getResponseTime();
+                            break;
+                        case AVRO_ATTR_SUBJECT_DUNS:
+                            val = event.getSubjectDuns();
+                            break;
+                        case AVRO_ATTR_SUBJECT_NAME:
+                            val = event.getSubjectName();
+                            break;
+                        case AVRO_ATTR_SUBJECT_CITY:
+                            val = event.getSubjectCity();
+                            break;
+                        case AVRO_ATTR_SUBJECT_STATE:
+                            val = event.getSubjectState();
+                            break;
+                        case AVRO_ATTR_SUBJECT_COUNTRY:
+                            val = event.getSubjectCountry();
+                            break;
+                        default:
+                            log.warn("Unknown usage data field {}", field.name());
+                    }
+                    builder.set(field, val);
+                }
+                records.add(builder.build());
+            }
+        }
+
+        // write to hdfs
+        int randomSplit = random.nextInt(processorContext.getSplits());
+        String usageAvroFile = processorContext.getUsageOutputAvro(randomSplit);
+        if (!HdfsUtils.fileExists(yarnConfiguration, usageAvroFile)) {
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, usageAvroFile, records, useSnappy);
+        } else {
+            AvroUtils.appendToHdfsFile(yarnConfiguration, usageAvroFile, records, useSnappy);
+        }
+        log.info("Write {} D+ usage records to {}", records.size(), usageAvroFile);
     }
 
     private void writeCandidateDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords,

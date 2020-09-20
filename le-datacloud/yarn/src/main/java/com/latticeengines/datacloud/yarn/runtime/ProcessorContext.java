@@ -232,6 +232,10 @@ public class ProcessorContext {
         return hdfsPathBuilder.constructMatchBlockErrorSplitAvro(rootOperationUid, blockOperationUid, split).toString();
     }
 
+    public String getUsageOutputAvro(int split) {
+        return hdfsPathBuilder.constructMatchBlockUsageSplitAvro(rootOperationUid, blockOperationUid, split).toString();
+    }
+
     public String getNewEntityOutputAvro(int split) {
         return hdfsPathBuilder.constructMatchBlockNewEntitySplitAvro(rootOperationUid, blockOperationUid, split)
                 .toString();

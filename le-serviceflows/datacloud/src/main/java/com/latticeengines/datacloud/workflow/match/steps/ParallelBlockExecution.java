@@ -100,6 +100,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     // directory to store all newly allocated entity list of this match
     private String matchNewEntityDir;
     private String matchCandidateDir;
+    private String matchUsageDir;
     private Map<String, Long> newEntityCountsFromFailedBlocks = new HashMap<>();
 
     @Override
@@ -130,6 +131,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
             matchNewEntityDir = hdfsPathBuilder.constructMatchNewEntityDir(rootOperationUid).toString();
             matchCandidateDir = hdfsPathBuilder.constructMatchCandidateDir(rootOperationUid).toString();
+            matchUsageDir = hdfsPathBuilder.constructMatchUsageDir(rootOperationUid).toString();
             remainingJobs = new ArrayList<>(jobConfigurations);
             // TODO trace block submission
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
@@ -403,6 +405,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     mergeBlockErrorResult(appId);
                     mergeBlockNewEntityResult(appId);
                     mergeBlockCandidateResult(appId);
+                    mergeBlockUsageResult(appId);
                     matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                 } else {
                     log.error("Unknown teminal status " + status + " for Application [" + appId
@@ -623,6 +626,30 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 String msg = String.format(
                         "Failed to move block avro for match candidates to match dir %s. ApplicationId=%s, error=%s",
                         matchCandidateDir, appId, e.getMessage());
+                throw new RuntimeException(msg, e);
+            }
+        }
+    }
+
+    /*
+     * Move all match usage avro files from target block directory to directory of
+     * the entire match
+     */
+    private void mergeBlockUsageResult(ApplicationId appId) {
+        if (appId == null || StringUtils.isBlank(matchUsageDir)) {
+            return;
+        }
+        MatchInput input = jobConfigurations.get(0).getMatchInput();
+        if (input.getDplusUsageReportConfig() != null && input.getDplusUsageReportConfig().isEnabled()) {
+            String blockOperationUid = blockUuidMap.get(appId.toString());
+            String blockAvroGlob = hdfsPathBuilder.constructMatchBlockUsageAvroGlob(rootOperationUid,
+                    blockOperationUid);
+            try {
+                moveBlockAvro(blockAvroGlob, matchUsageDir);
+            } catch (Exception e) {
+                String msg = String.format(
+                        "Failed to move block avro for usage events to match dir %s. ApplicationId=%s, error=%s",
+                        matchUsageDir, appId, e.getMessage());
                 throw new RuntimeException(msg, e);
             }
         }

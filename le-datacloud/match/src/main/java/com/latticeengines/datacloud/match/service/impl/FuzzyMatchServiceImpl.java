@@ -2,9 +2,13 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.datacloud.match.util.EntityMatchUtils.restoreInvalidMatchFieldCharacters;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.EVENT_MATCH;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.FEATURE_MATCH;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.USAGE_EVENT_TIME_FORMAT;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +43,7 @@ import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.datacloud.match.util.MatchHistoryUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
@@ -50,6 +55,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.VboUsageEvent;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -196,6 +202,15 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             matchRecord.setMatched(false);
             matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
         }
+        if (CollectionUtils.isNotEmpty(traveler.getCandidates())) {
+            List<VboUsageEvent> usageEvents = new ArrayList<>();
+            for (DnBMatchCandidate candidate: traveler.getCandidates()) {
+                if (StringUtils.isNotBlank(candidate.getDuns())) {
+                    usageEvents.add(parseMatchEvent(candidate));
+                }
+            }
+            matchRecord.addUsageEvents(usageEvents);
+        }
         if (multiCandidates) {
             matchRecord.setCandidates(traveler.getCandidates());
         } else if (CollectionUtils.isNotEmpty(traveler.getCandidates())) {
@@ -242,6 +257,23 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         } else {
             matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
         }
+    }
+
+    private VboUsageEvent parseMatchEvent(DnBMatchCandidate candidate) {
+        VboUsageEvent event = new VboUsageEvent();
+        String duns = candidate.getDuns();
+        event.setSubjectDuns(duns);
+        event.setEventType(EVENT_MATCH);
+        event.setFeatureUri(FEATURE_MATCH);
+        NameLocation nl = candidate.getNameLocation();
+        if (nl != null) {
+            event.setSubjectName(nl.getName());
+            event.setSubjectCity(nl.getCity());
+            event.setSubjectState(nl.getState());
+            event.setSubjectCountry(nl.getCountryCode());
+        }
+        event.setEventTime(USAGE_EVENT_TIME_FORMAT.format(new Date()));
+        return event;
     }
 
     private MatchHistory getDnbMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler,
