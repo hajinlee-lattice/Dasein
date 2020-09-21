@@ -3,17 +3,26 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.ENRICH;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +35,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.xerial.snappy.Snappy;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
@@ -34,6 +47,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
@@ -43,14 +57,14 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private static final Logger log = LoggerFactory.getLogger(DirectPlusEnrichServiceImpl.class);
 
+    private static final String ATTR_KEY = "key";
+    private static final String ATTR_TTL = "ttl";
+
     @Inject
     private DnBAuthenticationService dnBAuthenticationService;
 
     @Inject
     private ApplicationContext appCtx;
-
-    @Inject
-    private DirectPlusEnrichServiceImpl _self;
 
     @Value("${datacloud.dnb.direct.plus.data.block.chunk.size}")
     private int chunkSize;
@@ -58,10 +72,24 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     @Value("${datacloud.dnb.direct.plus.enrich.url}")
     private String enrichUrl;
 
+    @Value("${datacloud.dnb.direct.plus.enrich.cache.dynamo.table}")
+    private String cacheTableName;
+
+    @Value("${datacloud.dnb.direct.plus.enrich.cache.ttl.min.days}")
+    private int cacheTtlMinDays;
+
+    @Value("${datacloud.dnb.direct.plus.enrich.cache.ttl.max.days}")
+    private int cacheTtlMaxDays;
+
+    @Inject
+    private DynamoItemService dynamoItemService;
+
     private volatile RestApiClient apiClient;
     private volatile ExecutorService fetchers;
+    private volatile ExecutorService cacheWriters;
 
     private AtomicLong stopUntil = new AtomicLong(0);
+    private Random random = new Random(System.currentTimeMillis());
 
     @Override
     public List<PrimeAccount> fetch(Collection<DirectPlusEnrichRequest> requests) {
@@ -109,10 +137,52 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     }
 
     private Map<String, Object> fetch(DirectPlusEnrichRequest request) {
-        String url = enrichUrl + "/duns/" + request.getDunsNumber() + "?blockIDs=";
-        url += StringUtils.join(request.getBlockIds(), ",");
-        String resp = sendRequest(url);
-        return DirectPlusUtils.parseDataBlock(resp, request.getReqColumns());
+        String duns = request.getDunsNumber();
+        Map<String, List<PrimeColumn>> reqColumnsByBlock = new HashMap<>(request.getReqColumnsByBlockId());
+        Map<String, Object> result = new HashMap<>();
+
+        if (!request.isBypassDplusCache()) {
+            Set<String> blockIds = consolidateFetchBlocks(reqColumnsByBlock.keySet());
+            Map<String, String> respFromCache = readDplusCache(duns, blockIds);
+            AtomicBoolean processedBaseInfo = new AtomicBoolean(false);
+            respFromCache.forEach((blockId, blockResp) -> {
+                List<PrimeColumn> reqColumnsInBlock = reqColumnsByBlock.get(blockId);
+                if (!processedBaseInfo.get() && reqColumnsByBlock.containsKey("baseinfo_L1_v1")) {
+                    reqColumnsInBlock.addAll(reqColumnsByBlock.get("baseinfo_L1_v1"));
+                }
+                Map<String, Object> blockResult = DirectPlusUtils.parseDataBlock(blockResp, reqColumnsInBlock);
+                result.putAll(blockResult);
+                reqColumnsByBlock.remove(blockId);
+                if (!processedBaseInfo.get()) {
+                    reqColumnsByBlock.remove("baseinfo_L1_v1");
+                    processedBaseInfo.set(true);
+                }
+            });
+        }
+
+        if (!reqColumnsByBlock.isEmpty()) {
+            Set<String> blockIds = consolidateFetchBlocks(reqColumnsByBlock.keySet());
+            String url = enrichUrl + "/duns/" + duns + "?blockIDs=" + StringUtils.join(blockIds, ",");
+            String resp = sendRequest(url);
+            cacheDplusResponse(resp, request.getDunsNumber());
+            List<PrimeColumn> reqColumns = new ArrayList<>();
+            reqColumnsByBlock.values().forEach(reqColumns::addAll);
+            Map<String, Object> fetchResult = DirectPlusUtils.parseDataBlock(resp, reqColumns);
+            result.putAll(fetchResult);
+        }
+
+        return result;
+    }
+
+    private Set<String> consolidateFetchBlocks(Collection<String> blockIds) {
+        if (CollectionUtils.isNotEmpty(blockIds)) {
+            Set<String> toReturn = blockIds.stream().filter(block -> !block.startsWith("baseinfo"))
+                    .collect(Collectors.toSet());
+            if (!toReturn.isEmpty()) {
+                return toReturn;
+            }
+        }
+        return Collections.singleton("companyinfo_L1_v1");
     }
 
     public String sendRequest(String url) {
@@ -147,6 +217,64 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         });
     }
 
+    private void cacheDplusResponse(String resp, String duns) {
+        ExecutorService writers = catchWriters();
+        writers.submit(() -> {
+            byte[] bytes;
+            try {
+                bytes = Snappy.compress(resp);
+            } catch (IOException e) {
+                log.error("Failed to compress D+ response: {}", resp, e);
+                return;
+            }
+
+            Set<String> blockIds = DirectPlusUtils.parseCacheableBlockIds(resp);
+            PrimaryKey primaryKey = new PrimaryKey(ATTR_KEY, duns);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            Item item = retry.execute(ctx -> dynamoItemService.getItem(cacheTableName, primaryKey));
+            if (item == null) {
+                item = new Item().withPrimaryKey(primaryKey);
+                log.info("Going to create cache for duns={}, blockIds={}", duns, //
+                        StringUtils.join(blockIds, ","));
+            } else {
+                log.info("Going to update cache for duns={}, blockIds={}", duns, //
+                        StringUtils.join(blockIds, ","));
+            }
+            for (String blockId: blockIds) {
+                item = item.withBinary(blockId, bytes);
+            }
+
+            int ttlDays = cacheTtlMinDays + random.nextInt(Math.abs(cacheTtlMaxDays - cacheTtlMinDays));
+            long expiredAt = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(ttlDays);
+            item = item.withNumber(ATTR_TTL, expiredAt);
+            dynamoItemService.putItem(cacheTableName, item);
+        });
+    }
+
+    private Map<String, String> readDplusCache(String duns, Collection<String> blockIds) {
+        Map<String, String> result = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(blockIds)) {
+            PrimaryKey primaryKey = new PrimaryKey(ATTR_KEY, duns);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            Item item = retry.execute(ctx -> dynamoItemService.getItem(cacheTableName, primaryKey));
+            if (item != null) {
+                for (String blockId: blockIds) {
+                    if (item.hasAttribute(blockId)) {
+                        try {
+                            String resp = new String(Snappy.uncompress(item.getBinary(blockId)), //
+                                    Charset.defaultCharset());
+                            result.put(blockId, resp);
+                        } catch (IOException e) {
+                            log.error("Failed to extract D+ response from cache with key={}, attr={}", //
+                                    duns, blockId, e);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     private HttpEntity<String> constructEntity(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
@@ -178,6 +306,19 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     private synchronized void initFetchers() {
         if (fetchers == null) {
             fetchers = ThreadPoolUtils.getFixedSizeThreadPool("data-block-fetcher", 4);
+        }
+    }
+
+    private ExecutorService catchWriters() {
+        if (cacheWriters == null) {
+            initCacheWriters();
+        }
+        return cacheWriters;
+    }
+
+    private synchronized void initCacheWriters() {
+        if (cacheWriters == null) {
+            cacheWriters = ThreadPoolUtils.getFixedSizeThreadPool("data-block-cache-writer", 4);
         }
     }
 

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
@@ -22,6 +23,8 @@ public interface PrimeMetadataService {
     List<DataBlock> getDataBlocks();
 
     Set<String> getBlocksContainingElements(Collection<String> elementIds);
+
+    Map<String, List<PrimeColumn>> divideIntoBlocks(Collection<PrimeColumn> primeColumns);
 
     List<PrimeColumn> getPrimeColumns(Collection<String> elementIds);
 

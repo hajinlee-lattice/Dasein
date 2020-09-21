@@ -371,7 +371,8 @@ public class FuzzyMatchHelper implements DbHelper {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(5);
         List<PrimeColumn> reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
-        Set<String> blockIds = retry.execute(ctx -> primeMetadataService.getBlocksContainingElements(elementIds));
+        Map<String, List<PrimeColumn>> reqColumnsByBlockId = //
+                retry.execute(ctx -> primeMetadataService.divideIntoBlocks(reqColumns));
         // these are from compnayinfo_L1_v1 block, need to be excluded from usage tracking if not required by user
         List<String> extraCompanyInfoElements = new ArrayList<>();
         for (String requiredElement: Arrays.asList( //
@@ -383,11 +384,11 @@ public class FuzzyMatchHelper implements DbHelper {
                 extraCompanyInfoElements.add(requiredElement);
             }
         }
-        Set<String> trackingBlockIds = new HashSet<>(blockIds); // for usage tracking
+        Set<String> trackingBlockIds = new HashSet<>(reqColumnsByBlockId.keySet()); // for usage tracking
         if (CollectionUtils.isNotEmpty(extraCompanyInfoElements)) {
             elementIds.addAll(extraCompanyInfoElements);
-            reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
-            blockIds = retry.execute(ctx -> primeMetadataService.getBlocksContainingElements(elementIds));
+            List<PrimeColumn> reqColumns2 = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
+            reqColumnsByBlockId = retry.execute(ctx -> primeMetadataService.divideIntoBlocks(reqColumns2));
         }
 
         List<PrimeAccount> accounts;
@@ -397,8 +398,7 @@ public class FuzzyMatchHelper implements DbHelper {
             for (String duns: ids) {
                 DirectPlusEnrichRequest request = new DirectPlusEnrichRequest();
                 request.setDunsNumber(duns);
-                request.setReqColumns(reqColumns);
-                request.setBlockIds(blockIds);
+                request.setReqColumnsByBlockId(reqColumnsByBlockId);
                 requests.add(request);
             }
             accounts = directPlusEnrichService.fetch(requests);
