@@ -124,7 +124,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             String ratio = c.get(PathBuilder.buildAccountContactRatioPath(CamilleEnvironment.getPodId())).getData();
             return Integer.valueOf(ratio);
         } catch (Exception e) {
-            log.error("Failed to account contact ratio with exception: ", e);
+            log.error("Failed to get account contact ratio with exception: ", e);
             return defaultRatio;
         }
     }

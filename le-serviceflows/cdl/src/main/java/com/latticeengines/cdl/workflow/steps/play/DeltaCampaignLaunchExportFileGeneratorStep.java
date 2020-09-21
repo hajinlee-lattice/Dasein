@@ -89,7 +89,6 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         }
         generateRecommendationCSVContext.setIgnoreAccountsWithoutContacts(shouldIgnoreAccountsWithoutContacts(config));
         boolean isLiveRamp = CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName());
-        generateRecommendationCSVContext.setLiveRamp(isLiveRamp);
         buildFieldsAndDisplayNames(generateRecommendationCSVContext, accountDisplayNames, contactDisplayNames, isLiveRamp);
         return generateRecommendationCSVConfig;
     }

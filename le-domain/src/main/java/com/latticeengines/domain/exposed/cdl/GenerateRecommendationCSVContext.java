@@ -28,9 +28,6 @@ public class GenerateRecommendationCSVContext implements Serializable {
     @JsonProperty("IgnoreAccountsWithoutContacts")
     private boolean ignoreAccountsWithoutContacts;
 
-    @JsonProperty("LiveRamp")
-    private boolean liveRamp;
-
     @JsonProperty("Fields")
     private List<String> fields;
 
@@ -43,14 +40,6 @@ public class GenerateRecommendationCSVContext implements Serializable {
 
     public void setIgnoreAccountsWithoutContacts(boolean ignoreAccountsWithoutContacts) {
         this.ignoreAccountsWithoutContacts = ignoreAccountsWithoutContacts;
-    }
-
-    public boolean isLiveRamp() {
-        return liveRamp;
-    }
-
-    public void setLiveRamp(boolean liveRamp) {
-        this.liveRamp = liveRamp;
     }
 
     public List<String> getFields() {
