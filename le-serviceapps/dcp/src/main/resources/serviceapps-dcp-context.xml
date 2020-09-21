@@ -11,6 +11,7 @@
     <import resource="classpath:remote-context.xml" />
     <import resource="classpath:serviceapps-core-context.xml"/>
     <import resource="classpath:serviceapps-dcp-aspect-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.apps.dcp">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.dcp.controller.*" />

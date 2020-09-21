@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
@@ -186,6 +188,10 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         // update ready for rollup for uploadUID2
         dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID2");
 
+        List<Pair<String, Date>> ownerIdToRefreshTime =
+                dataReportEntityMgr.getOwnerIdAndTime(DataReportRecord.Level.Tenant, "REFRESH_TIME",
+                        4);
+        Assert.assertTrue(ownerIdToRefreshTime.size() >= 1);
 
         dataReportService.deleteDataReportUnderOwnerId(mainCustomerSpace, DataReportRecord.Level.Project, "projectUID");
         Set<String> childrenIdsForProject = dataReportService.getChildrenIds(mainCustomerSpace,
@@ -195,6 +201,8 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Set<String> childrenIdsForTenant = dataReportService.getChildrenIds(mainCustomerSpace,
                 DataReportRecord.Level.Tenant, mainCustomerSpace);
         Assert.assertTrue(CollectionUtils.isEmpty(childrenIdsForTenant));
+
+
     }
 
     public static DataReport getDataReport() {

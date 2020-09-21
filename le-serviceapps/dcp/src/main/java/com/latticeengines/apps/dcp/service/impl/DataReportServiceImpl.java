@@ -11,7 +11,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,15 +19,11 @@ import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
-import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
-import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
@@ -57,9 +52,6 @@ public class DataReportServiceImpl implements DataReportService {
 
     @Inject
     private MetadataService metadataService;
-
-    @Inject
-    private DCPDataReportWorkflowSubmitter dataReportWorkflowSubmitter;
 
     @Override
     public DataReport getDataReport(String customerSpace, DataReportRecord.Level level, String ownerId) {
@@ -409,15 +401,6 @@ public class DataReportServiceImpl implements DataReportService {
                 log.info("mark ready for rollup to false for {}", customerSpace);
                 Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
                 dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
-            } else {
-                log.info("manually trigger rollup workflow for {}", customerSpace);
-                CustomerSpace space = CustomerSpace.parse(customerSpace);
-                DCPReportRequest request = new DCPReportRequest();
-                request.setRootId(space.toString());
-                request.setLevel(DataReportRecord.Level.Tenant);
-                request.setMode(DataReportMode.UPDATE);
-                ApplicationId appId = dataReportWorkflowSubmitter.submit(space, request, new WorkflowPidWrapper(-1L));
-                log.info("the appId for rollup workflow is {}", appId);
             }
         }
     }

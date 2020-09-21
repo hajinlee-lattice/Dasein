@@ -47,4 +47,8 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
     Set<String> findChildrenIdsByParentLevelAndOwnerId(DataReportRecord.Level parentLevel, String parentOwnerId);
 
     DataReportRecord findByLevelAndOwnerIdAndReadyForRollup(DataReportRecord.Level level, String ownerId, boolean readyForRollup);
+
+    @Query(nativeQuery = true, value = "SELECT OWNER_ID, REFRESH_TIME from DCP_DATA_REPORT where level = ?1 order by " +
+            "?2 limit ?3")
+    List<Object[]> findOwnerIdAndRefreshDate(String level, String orderBy, Integer limit);
 }
