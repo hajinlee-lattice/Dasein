@@ -88,7 +88,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             result = projectProxy.getDCPProjectByProjectId(mainTestTenant.getId(), "harddeletetest", Boolean.FALSE, null);
             Assert.assertNull(result);
         } catch (Exception e){
-            Assert.assertEquals(e.getMessage(), "");
+            Assert.assertEquals(e.getMessage(), "LEDP_00002: Cannot find project with id: harddeletetest");
         }
 
     }
