@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.GenerateRecommendationCSVJob;
 
-@Component("deltaCampaignLaunchInitStep")
+@Component("deltaCampaignLaunchExportFileGeneratorStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeltaCampaignLaunchExportFileGeneratorStep
         extends RunSparkJob<DeltaCampaignLaunchExportFilesGeneratorConfiguration, GenerateRecommendationCSVConfig> {
