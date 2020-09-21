@@ -45,7 +45,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
     val config = lattice.config
     val alertIdx = Option(config.masterAlertIdx)
     val timelineDf = lattice.input(config.masterAccountTimeLineIdx)
-    val lookbackDays = config.alertNameLookbackDays.asScala
+    val qualificationPeriods = config.alertNameToQualificationPeriodDays.asScala
 
     val schema = StructType(
       StructField(accountId, StringType, nullable = false) ::
@@ -55,7 +55,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
 
     val endTimestamp = config.currentEpochMilli
 
-    val alertDf = lookbackDays.foldLeft(emptyAlertDf) { (mergedAlertDf, alertNameDays) =>
+    val alertDf = qualificationPeriods.foldLeft(emptyAlertDf) { (mergedAlertDf, alertNameDays) =>
       val (alertName, periodInDays) = alertNameDays
       val startTimestamp = Instant
         .ofEpochMilli(endTimestamp)

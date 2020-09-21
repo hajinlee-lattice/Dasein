@@ -73,11 +73,11 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         prepareData();
 
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
-        config.alertNameLookbackDays.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, 10L);
-        config.alertNameLookbackDays.put(INC_WEB_ACTIVITY_ON_PRODUCT, 10L);
-        config.alertNameLookbackDays.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, 10L);
-        config.alertNameLookbackDays.put(ActivityStoreConstants.Alert.GROWING_BUYER_INTENT, 10L);
-        config.alertNameLookbackDays.put(ActivityStoreConstants.Alert.GROWING_RESEARCH_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, 10L);
+        config.alertNameToQualificationPeriodDays.put(INC_WEB_ACTIVITY_ON_PRODUCT, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.GROWING_BUYER_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.GROWING_RESEARCH_INTENT, 10L);
         config.currentEpochMilli = 10L;
         config.masterAccountTimeLineIdx = 0;
 

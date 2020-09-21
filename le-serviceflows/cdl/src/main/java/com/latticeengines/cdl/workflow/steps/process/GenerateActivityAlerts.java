@@ -49,14 +49,14 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.GenerateActivityAlertJob;
 
-@Component(GenerateActivityAlert.BEAN_NAME)
+@Component(GenerateActivityAlerts.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Lazy
-public class GenerateActivityAlert extends RunSparkJob<TimeLineSparkStepConfiguration, ActivityAlertJobConfig> {
+public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfiguration, ActivityAlertJobConfig> {
 
-    private static final Logger log = LoggerFactory.getLogger(GenerateActivityAlert.class);
+    private static final Logger log = LoggerFactory.getLogger(GenerateActivityAlerts.class);
 
-    static final String BEAN_NAME = "generateActivityAlert";
+    static final String BEAN_NAME = "generateActivityAlerts";
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
@@ -91,7 +91,7 @@ public class GenerateActivityAlert extends RunSparkJob<TimeLineSparkStepConfigur
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
         config.currentEpochMilli = getCurrentTimestamp();
         config.masterAccountTimeLineIdx = 0;
-        config.alertNameLookbackDays.putAll(alertConfigs.stream() //
+        config.alertNameToQualificationPeriodDays.putAll(alertConfigs.stream() //
                 .filter(Objects::nonNull) //
                 .filter(ActivityAlertsConfig::isActive) //
                 .map(alertConfig -> Pair.of(alertConfig.getName(), alertConfig.getQualificationPeriodDays())) //
@@ -113,9 +113,9 @@ public class GenerateActivityAlert extends RunSparkJob<TimeLineSparkStepConfigur
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        boolean hasNewAlert = Long.parseLong(result.getOutput()) > 0L;
+        boolean hasNewAlerts = Long.parseLong(result.getOutput()) > 0L;
         putObjectInContext(ACTIVITY_ALERT_GENERATED, true);
-        if (!hasNewAlert) {
+        if (!hasNewAlerts) {
             log.info("No new activity alert generated, no need to create/link alert table. count = {}",
                     result.getOutput());
         } else {

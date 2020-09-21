@@ -13,7 +13,7 @@ import com.latticeengines.cdl.workflow.steps.merge.MigrateActivityPartitionKey;
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
 import com.latticeengines.cdl.workflow.steps.process.FinishActivityStreamProcessing;
-import com.latticeengines.cdl.workflow.steps.process.GenerateActivityAlert;
+import com.latticeengines.cdl.workflow.steps.process.GenerateActivityAlerts;
 import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
 import com.latticeengines.cdl.workflow.steps.process.GenerateJourneyStage;
 import com.latticeengines.cdl.workflow.steps.process.GenerateLastActivityDate;
@@ -78,7 +78,7 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     private GenerateJourneyStage generateJourneyStage;
 
     @Inject
-    private GenerateActivityAlert generateActivityAlert;
+    private GenerateActivityAlerts generateActivityAlert;
 
     @Inject
     private FinishActivityStreamProcessing finishActivityStreamProcessing;
