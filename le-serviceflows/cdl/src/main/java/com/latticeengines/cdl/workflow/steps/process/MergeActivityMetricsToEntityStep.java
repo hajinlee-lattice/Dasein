@@ -321,7 +321,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                     String[] rollupDimVals = tokens.get(1).split("_");
                     String timeRange = tokens.get(2);
 
-                    String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+                    String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
                     BusinessCalendar calendar = periodProxy.getBusinessCalendar(customerSpace.toString());
                     TimeFilterTranslator translator = new TimeFilterTranslator(getPeriodStrategies(calendar), evaluationDate);
                     enrichAttribute(attr, groupId, rollupDimVals, timeRange, translator);
