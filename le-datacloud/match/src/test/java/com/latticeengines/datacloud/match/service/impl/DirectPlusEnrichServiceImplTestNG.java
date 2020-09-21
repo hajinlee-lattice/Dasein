@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -32,7 +31,6 @@ public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalT
         List<PrimeColumn> reqColumns = primeMetadataService.getPrimeColumns(defaultSelection());
         request.setReqColumnsByBlockId(primeMetadataService.divideIntoBlocks(reqColumns));
         PrimeAccount result = enrichService.fetch(Collections.singleton(request)).get(0);
-        SleepUtils.sleep(5000);
         Assert.assertTrue(StringUtils.isNotBlank(result.getId()));
         Assert.assertNotNull(result.getResult().get("duns_number"));
         Assert.assertNotNull(result.getResult().get("primaryname"));
@@ -40,7 +38,6 @@ public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalT
         reqColumns = primeMetadataService.getPrimeColumns(expandedSelection());
         request.setReqColumnsByBlockId(primeMetadataService.divideIntoBlocks(reqColumns));
         result = enrichService.fetch(Collections.singleton(request)).get(0);
-        SleepUtils.sleep(5000);
         Assert.assertTrue(StringUtils.isNotBlank(result.getId()));
         Assert.assertNotNull(result.getResult().get("latestfin_currency"));
 
