@@ -109,8 +109,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         contactNums += (if (recContactCount != null) recContactCount.toString.toLong else 0L)
         recommendations = recommendations.drop("CONTACT_NUM")
       } else {
-        // join
-        recommendations = baseAddRecDf.withColumn("CONTACTS", lit("")).withColumn("CONTACT_NUM", lit(0))
+        recommendations = baseAddRecDf.withColumn("CONTACTS", lit(""))
           .withColumnRenamed(joinKey, "ACCOUNT_ID")
         contactNums += 0L
       }
