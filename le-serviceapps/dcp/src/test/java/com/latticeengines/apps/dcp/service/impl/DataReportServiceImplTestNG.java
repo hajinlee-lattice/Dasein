@@ -201,8 +201,6 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Set<String> childrenIdsForTenant = dataReportService.getChildrenIds(mainCustomerSpace,
                 DataReportRecord.Level.Tenant, mainCustomerSpace);
         Assert.assertTrue(CollectionUtils.isEmpty(childrenIdsForTenant));
-
-
     }
 
     public static DataReport getDataReport() {
