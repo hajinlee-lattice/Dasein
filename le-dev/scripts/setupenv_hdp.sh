@@ -77,6 +77,9 @@ else
     sudo sed -i.orig "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
 fi
 
+sudo sed -i".orig" "s|[$][{]HADOOP_NAMENODE_DATA_DIR[}]|${HADOOP_NAMENODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
+sudo sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
+
 cp $WSHOME/le-dev/hadoop/tez-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/log4j2-tez.xml $HADOOP_CONF_DIR
 

@@ -236,8 +236,9 @@ public class DataReportEntityMgrImpl
                 dunsCountTable);
     }
 
-    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteDataReportRecords(Set<Long> pids) {
-        dataReportWriterRepository.deleteDataReportRecords(pids);
+        dataReportDao.deleteDataReportRecords(pids);
     }
 }

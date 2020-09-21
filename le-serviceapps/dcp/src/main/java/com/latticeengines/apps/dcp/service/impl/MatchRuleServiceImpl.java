@@ -378,6 +378,21 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         }
     }
 
+    @Override
+    public void hardDeleteMatchRuleBySourceId(String customerSpace, String sourceId) {
+        List<MatchRuleRecord.State> states = new ArrayList<>();
+        states.add(MatchRuleRecord.State.ACTIVE);
+        states.add(MatchRuleRecord.State.INACTIVE);
+        states.add(MatchRuleRecord.State.ARCHIVED);
+        List<MatchRuleRecord> matchRuleRecords;
+        matchRuleRecords = matchRuleEntityMgr.findMatchRules(sourceId, states);
+        if (CollectionUtils.isNotEmpty(matchRuleRecords)) {
+            matchRuleRecords.forEach(matchRuleRecord -> {
+                matchRuleEntityMgr.delete(matchRuleRecord);
+            });
+        }
+    }
+
     private MatchRule convertMatchRuleRecord(MatchRuleRecord record) {
         MatchRule matchRule = new MatchRule();
         matchRule.setSourceId(record.getSourceId());

@@ -92,9 +92,9 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         put("update project", url, request);
     }
 
-    public void trueDeleteProject(String customerSpace, String projectId, List<String> teamIds) {
-        String url = "/customerspaces/{customerSpace}/project/{projectId}/truedelete";
+    public void hardDeleteProject(String customerSpace, String projectId, List<String> teamIds) {
+        String url = "/customerspaces/{customerSpace}/project/{projectId}/harddelete";
         url = constructUrl(url, customerSpace, projectId);
-        delete("true delete dcp project by projectId", url, teamIds);
+        delete("hard delete dcp project by projectId", url, teamIds);
     }
 }

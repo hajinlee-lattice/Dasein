@@ -74,17 +74,22 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     @Test(groups = {"deployment"})
-    public void testTrueDeleteDCPProject() {
+    public void testHardDeleteDCPProject() {
         ProjectRequest projectRequest = new ProjectRequest();
-        projectRequest.setDisplayName("truedeletetest");
-        projectRequest.setProjectId("truedeletetest");
+        projectRequest.setDisplayName("harddeletetest");
+        projectRequest.setProjectId("harddeletetest");
         projectRequest.setProjectType(Project.ProjectType.Type1);
         projectRequest.setPurposeOfUse(getPurposeOfUse());
         ProjectDetails result = projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest,"test@lattice-engines.com");
         assertNotNull(result);
-        assertEquals(result.getProjectId(), "truedeletetest");
-        projectProxy.trueDeleteProject(mainTestTenant.getId(), "truedeletetest", null);
-        result = projectProxy.getDCPProjectByProjectId(mainTestTenant.getId(), "truedeletetest", Boolean.FALSE, null);
-        Assert.assertNull(result);
+        assertEquals(result.getProjectId(), "harddeletetest");
+        projectProxy.hardDeleteProject(mainTestTenant.getId(), "harddeletetest", null);
+        try {
+            result = projectProxy.getDCPProjectByProjectId(mainTestTenant.getId(), "harddeletetest", Boolean.FALSE, null);
+            Assert.assertNull(result);
+        } catch (Exception e){
+            Assert.assertEquals(e.getMessage(), "");
+        }
+
     }
 }

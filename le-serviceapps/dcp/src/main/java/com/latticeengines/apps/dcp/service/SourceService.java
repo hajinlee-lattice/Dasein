@@ -34,4 +34,6 @@ public interface SourceService {
     Boolean pauseSource(String customerSpace, String sourceId);
 
     Boolean reactivateSource(String customerSpace, String sourceId);
+
+    Boolean hardDeleteSourceUnderProject(String customerSpace, String projectId);
 }

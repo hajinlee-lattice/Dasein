@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
-
 @Service("projectService")
 public class ProjectServiceImpl implements ProjectService {
 
@@ -179,16 +178,20 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Boolean trueDeleteProject(String customerSpace, String projectId, List<String> teamIds) {
+    public Boolean hardDeleteProject(String customerSpace, String projectId, List<String> teamIds) {
         Project project = projectEntityMgr.findByProjectId(projectId);
         if (project == null || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
             return false;
         }
 
-        log.info("true delete the data report under {}", projectId);
-        dataReportService.trueDeleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
+        sourceService.hardDeleteSourceUnderProject(customerSpace, projectId);
+
+        log.info("hard delete the data report under {}", projectId);
+        dataReportService.hardDeleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
                 projectId);
         projectEntityMgr.delete(project);
+
+        dropBoxService.removeFolder(project.getRootPath());
 
         log.info("trigger roll up for tenant {} after true delete project", customerSpace);
         DCPReportRequest request = new DCPReportRequest();

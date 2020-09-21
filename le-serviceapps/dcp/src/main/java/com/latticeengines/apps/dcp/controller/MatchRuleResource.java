@@ -74,4 +74,11 @@ public class MatchRuleResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return matchRuleService.getMatchConfig(customerSpace, sourceId);
     }
+
+    @DeleteMapping("/sourceId/{sourceId}")
+    @ApiOperation(value = "Create Match Rule")
+    public void hardDeleteMatchRuleBySourceId(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        matchRuleService.hardDeleteMatchRuleBySourceId(customerSpace, sourceId);
+    }
 }

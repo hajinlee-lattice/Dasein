@@ -379,7 +379,7 @@ public class DataReportServiceImpl implements DataReportService {
         }
     }
 
-    public void trueDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
+    public void hardDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
         Set<Long> idToBeTrueRemoved = getDataReportUnderOwnerId(level, ownerId);
         if (CollectionUtils.isNotEmpty(idToBeTrueRemoved)) {
             log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeTrueRemoved);

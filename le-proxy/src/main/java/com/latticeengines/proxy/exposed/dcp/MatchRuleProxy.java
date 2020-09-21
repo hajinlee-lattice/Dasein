@@ -58,4 +58,9 @@ public class MatchRuleProxy extends MicroserviceRestApiProxy implements ProxyInt
         return get("Get match config", url, MatchRuleConfiguration.class);
     }
 
+    public void hardDeleteMatchRuleBySourceId(String customerSpace, String sourceId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/matchrules/sourceId/{sourceId}",
+                shortenCustomerSpace(customerSpace), sourceId);
+        delete("hard delete match rule by sourceId", url);
+    }
 }

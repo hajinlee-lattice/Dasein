@@ -25,4 +25,6 @@ public interface S3ImportSystemService {
     boolean hasSystemMapToLatticeContact(String customerSpace);
 
     List<String> getAllS3ImportSystemIds(String customerSpace);
+
+    void deleteS3ImportSystem(S3ImportSystem importSystem);
 }

@@ -437,4 +437,10 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         }
         return Collections.emptyMap();
     }
+
+    public void deleteDataFeedTaskUnderProjectId(String customerSpace, String projectId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/projectId/{projectId}",
+                shortenCustomerSpace(customerSpace), projectId);
+        delete("deleteDataFeedTaskUnderProjectId", url);
+    }
 }

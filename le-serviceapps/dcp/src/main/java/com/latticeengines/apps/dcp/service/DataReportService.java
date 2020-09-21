@@ -48,5 +48,5 @@ public interface DataReportService {
 
     void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
 
-    void trueDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
+    void hardDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
 }

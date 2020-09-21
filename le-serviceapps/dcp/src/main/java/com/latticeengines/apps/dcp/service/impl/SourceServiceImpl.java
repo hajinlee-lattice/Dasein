@@ -22,6 +22,7 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.ProjectSystemLinkService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -69,6 +70,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private ProjectService projectService;
+
+    @Inject
+    private UploadService uploadService;
 
     @Inject
     private ProjectSystemLinkService projectSystemLinkService;
@@ -187,6 +191,18 @@ public class SourceServiceImpl implements SourceService {
             throw new RuntimeException(String.format("Cannot find source %s for delete!", sourceId));
         }
         dataFeedProxy.setDataFeedTaskDeletedStatus(customerSpace, sourceInfo.getPid(), Boolean.TRUE);
+        return true;
+    }
+
+    @Override
+    public Boolean hardDeleteSourceUnderProject(String customerSpace, String projectId) {
+        List<SourceInfo> sourceInfos = dataFeedProxy.getSourcesByProjectId(customerSpace, projectId, 0, 100);
+        dataFeedProxy.deleteDataFeedTaskUnderProjectId(customerSpace, projectId);
+        sourceInfos.forEach(sourceInfo -> {
+            uploadService.hardDeleteUploadUnderSource(customerSpace, sourceInfo.getSourceId());
+            matchRuleProxy.hardDeleteMatchRuleBySourceId(customerSpace, sourceInfo.getSourceId());
+        });
+
         return true;
     }
 

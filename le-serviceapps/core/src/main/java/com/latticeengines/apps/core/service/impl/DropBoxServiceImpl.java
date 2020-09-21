@@ -545,6 +545,14 @@ public class DropBoxServiceImpl implements DropBoxService {
         }
     }
 
+    @Override
+    public void removeFolder(String path) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+        s3Service.cleanupDirectory(dropBoxBucket, dropBoxPrefix + SLASH + path);
+
+    }
+
     private String getDropBoxId() {
         String prefix = getDropBoxPrefix();
         return prefix.substring(prefix.indexOf(SLASH) + 1);

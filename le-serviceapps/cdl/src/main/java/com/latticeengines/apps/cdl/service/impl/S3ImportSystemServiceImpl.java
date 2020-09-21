@@ -311,4 +311,9 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         });
         return idList;
     }
+
+    @Override
+    public void deleteS3ImportSystem(S3ImportSystem importSystem) {
+        s3ImportSystemEntityMgr.delete(importSystem);
+    }
 }

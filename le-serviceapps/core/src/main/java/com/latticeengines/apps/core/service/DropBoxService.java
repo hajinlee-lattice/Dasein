@@ -72,4 +72,6 @@ public interface DropBoxService {
      * @param feedType: (Same as remove)
      */
     void restoreTemplatePath(String customerSpace, String feedType);
+
+    void removeFolder(String path);
 }
