@@ -17,12 +17,5 @@ fi
 UNAME=`uname`
 
 echo "Using hostname:${db_hostname} user:${db_user} password:*******"
-if [[ "${UNAME}" == 'Darwin' ]]; then
-    echo "You are on Mac"
-    MYSQL_COMMAND="mysql -h ${db_hostname} -u ${db_user} -p${db_password} --local-infile=1"
-else
-    echo "You are on ${UNAME}"
-    MYSQL_COMMAND="mysql -h ${db_hostname} -u ${db_user} -p${db_password}"
-fi
-
+MYSQL_COMMAND="mysql -h ${db_hostname} -u ${db_user} -p${db_password} --local-infile=1"
 echo "MYSQL_COMMAND=$MYSQL_COMMAND"

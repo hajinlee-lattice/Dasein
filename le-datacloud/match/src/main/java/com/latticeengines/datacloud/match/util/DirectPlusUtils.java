@@ -5,8 +5,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -116,6 +118,24 @@ public final class DirectPlusUtils {
             parts.add(String.format("streetAddressLine2=%s", urlEncode(nl.getStreet2())));
         }
         return parts;
+    }
+
+    public static Set<String> parseCacheableBlockIds(String response) {
+        JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
+        JsonNode blockStatusList = JsonUtils.tryGetJsonNode(root,"blockStatus");
+        Set<String> blockIds = new HashSet<>();
+        if (blockStatusList != null) {
+            for (JsonNode blockStatus: blockStatusList) {
+                String status = JsonUtils.parseStringValueAtPath(blockStatus, "status");
+                if ("ok".equalsIgnoreCase(status)) {
+                    String blockId = JsonUtils.parseStringValueAtPath(blockStatus, "blockID");
+                    if (!blockId.startsWith("baseinfo")) {
+                        blockIds.add(blockId);
+                    }
+                }
+            }
+        }
+        return blockIds;
     }
 
     public static Map<String, Object> parseDataBlock(String response, List<PrimeColumn> metadata) {
