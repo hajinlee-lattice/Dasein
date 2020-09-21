@@ -1,15 +1,15 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 public class DirectPlusEnrichRequest {
 
     private String dunsNumber;
-    private Set<String> blockIds;
-    private List<PrimeColumn> reqColumns;
+    private Map<String, List<PrimeColumn>> reqColumnsByBlockId;
+    private boolean bypassDplusCache;
 
     public String getDunsNumber() {
         return dunsNumber;
@@ -19,19 +19,20 @@ public class DirectPlusEnrichRequest {
         this.dunsNumber = dunsNumber;
     }
 
-    public Set<String> getBlockIds() {
-        return blockIds;
+    public Map<String, List<PrimeColumn>> getReqColumnsByBlockId() {
+        return reqColumnsByBlockId;
     }
 
-    public void setBlockIds(Set<String> blockIds) {
-        this.blockIds = blockIds;
+    public void setReqColumnsByBlockId(Map<String, List<PrimeColumn>> reqColumnsByBlockId) {
+        this.reqColumnsByBlockId = reqColumnsByBlockId;
     }
 
-    public List<PrimeColumn> getReqColumns() {
-        return reqColumns;
+    public boolean isBypassDplusCache() {
+        return bypassDplusCache;
     }
 
-    public void setReqColumns(List<PrimeColumn> reqColumns) {
-        this.reqColumns = reqColumns;
+    public void setBypassDplusCache(boolean bypassDplusCache) {
+        this.bypassDplusCache = bypassDplusCache;
     }
+
 }

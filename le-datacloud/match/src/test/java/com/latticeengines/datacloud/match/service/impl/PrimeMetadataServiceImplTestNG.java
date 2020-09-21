@@ -5,7 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.manage.DataBlock.BLOCK
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -60,8 +60,9 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional", dataProvider = "blockElements")
     private void testResolveBlocks(List<String> elementIds, int expectedBlocks) {
-        Set<String> blockIds = primeMetadataService.getBlocksContainingElements(elementIds);
-        Assert.assertEquals(blockIds.size(), expectedBlocks);
+        List<PrimeColumn> primeColumns = primeMetadataService.getPrimeColumns(elementIds);
+        Map<String, List<PrimeColumn>> columnsByBlock = primeMetadataService.divideIntoBlocks(primeColumns);
+        Assert.assertEquals(columnsByBlock.size(), expectedBlocks);
     }
 
     @DataProvider(name = "blockElements")
@@ -103,9 +104,9 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
                 "non_exist_element_2"
         );
         return new Object[][] {
-                { lst1, 1 }, //
+                { lst1, 2 }, //
                 { lst2, 2 }, //
-                { lst3, 1 }, //
+                { lst3, 0 }, //
                 { lst4, 1 }, //
         };
     }
