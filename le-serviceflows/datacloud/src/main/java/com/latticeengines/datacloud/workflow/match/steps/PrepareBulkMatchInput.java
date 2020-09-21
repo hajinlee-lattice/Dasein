@@ -86,6 +86,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Value("${datacloud.match.stream.idonly.concurrent.blocks.max}")
     private Integer maxIdOnlyStreamConcurrentBlocks;
 
+    @Value("${datacloud.match.dcp.concurrent.blocks.max}")
+    private Integer maxDcpConcurrentBlocks;
+
     @Value("${datacloud.match.fuzzy.block.size.min}")
     private Integer minFuzzyBlockSize;
 
@@ -97,6 +100,12 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     @Value("${datacloud.match.fetch.block.size.max}")
     private Integer maxFetchBlockSize;
+
+    @Value("${datacloud.match.dcp.block.size.min}")
+    private Integer minDcpBlockSize;
+
+    @Value("${datacloud.match.dcp.block.size.max}")
+    private Integer maxDcpBlockSize;
 
     private String avroGlobs;
 
@@ -187,7 +196,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                         Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxTxnConcurrentBlocks)); //
                 // Prime Match - DCP
                 put(BusinessEntity.PrimeAccount.name(),
-                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxAccountConcurrentBlocks)); //
+                        Triple.of(minDcpBlockSize, maxDcpBlockSize, maxDcpConcurrentBlocks)); //
 
                 // Activity streams that only have ID
                 // TODO use stream type as key for now, consolidate later if number of entity

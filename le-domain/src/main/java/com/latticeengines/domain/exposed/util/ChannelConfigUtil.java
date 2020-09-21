@@ -20,10 +20,17 @@ public final class ChannelConfigUtil {
 
     public static Boolean isContactAudienceType(CDLExternalSystemName destinationSystemName,
             ChannelConfig channelConfig) {
+        if (CDLExternalSystemName.LIVERAMP.contains(destinationSystemName)) {
+            return false;
+        }
         switch (destinationSystemName) {
         case Marketo:
         case Outreach:
             return true;
+        case Eloqua:
+            return true;
+        case Salesforce:
+            return false;
         case LinkedIn:
             if (channelConfig == null) {
                 log.info("Channel config object is null. Returning false by default");
