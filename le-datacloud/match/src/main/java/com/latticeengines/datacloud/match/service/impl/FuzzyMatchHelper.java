@@ -1,7 +1,13 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.EVENT_DATA;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.USAGE_EVENT_TIME_FORMAT;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +57,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
+import com.latticeengines.domain.exposed.datacloud.match.VboUsageEvent;
 import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -347,12 +354,41 @@ public class FuzzyMatchHelper implements DbHelper {
         }
 
         List<String> elementIds = context.getColumnSelection().getColumnIds();
+        // these are from baseinfo_L1_v1 block, ok to always fetch
+        for (String requiredElement: Arrays.asList( //
+                PrimeMetadataService.DunsNumber, //
+                PrimeMetadataService.SubjectName, //
+                PrimeMetadataService.SubjectCountry //
+        )) {
+            if (!elementIds.contains(requiredElement)) {
+                elementIds.add(requiredElement);
+            }
+        }
+
         if (!elementIds.contains(PrimeMetadataService.DunsNumber)) {
             elementIds.add(PrimeMetadataService.DunsNumber);
         }
+
         RetryTemplate retry = RetryUtils.getRetryTemplate(5);
         List<PrimeColumn> reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
         Set<String> blockIds = retry.execute(ctx -> primeMetadataService.getBlocksContainingElements(elementIds));
+        // these are from compnayinfo_L1_v1 block, need to be excluded from usage tracking if not required by user
+        List<String> extraCompanyInfoElements = new ArrayList<>();
+        for (String requiredElement: Arrays.asList( //
+                PrimeMetadataService.SubjectCity, //
+                PrimeMetadataService.SubjectState, //
+                PrimeMetadataService.SubjectState2 //
+        )) {
+            if (!elementIds.contains(requiredElement)) {
+                extraCompanyInfoElements.add(requiredElement);
+            }
+        }
+        Set<String> trackingBlockIds = new HashSet<>(blockIds); // for usage tracking
+        if (CollectionUtils.isNotEmpty(extraCompanyInfoElements)) {
+            elementIds.addAll(extraCompanyInfoElements);
+            reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
+            blockIds = retry.execute(ctx -> primeMetadataService.getBlocksContainingElements(elementIds));
+        }
 
         List<PrimeAccount> accounts;
         try (PerformanceTimer timer = //
@@ -383,9 +419,36 @@ public class FuzzyMatchHelper implements DbHelper {
                     fetchResult.setResult(copy.getResult());
                     fetchResult.setRecordId(copy.getId());
                     record.setFetchResult(fetchResult);
+                    List<VboUsageEvent> usageEvents = parseEnrichEvents(primeAccount, trackingBlockIds);
+                    record.addUsageEvents(usageEvents);
                 }
             }
         }
+    }
+
+    private List<VboUsageEvent> parseEnrichEvents(PrimeAccount account, Collection<String> blockIds) {
+        Set<String> reportBlocks = new HashSet<>();
+        reportBlocks.add("baseinfo_L1_v1");
+        reportBlocks.addAll(blockIds);
+        String duns = account.getId();
+        List<VboUsageEvent> events = new ArrayList<>();
+        for (String blockId: reportBlocks) {
+            VboUsageEvent event = new VboUsageEvent();
+            event.setSubjectDuns(duns);
+            event.setEventType(EVENT_DATA);
+            event.setFeatureUri(blockId);
+            event.setSubjectName((String) account.getResult().get("primaryname"));
+            event.setSubjectCity((String) account.getResult().get("primaryaddr_addrlocality_name"));
+            String state = (String) account.getResult().get("primaryaddr_addrregion_abbreviatedname");
+            if (StringUtils.isBlank(state)) {
+                state = (String) account.getResult().get("primaryaddr_addrregion_name");
+            }
+            event.setSubjectState(state);
+            event.setSubjectCountry((String) account.getResult().get("countryisoalpha2code"));
+            event.setEventTime(USAGE_EVENT_TIME_FORMAT.format(new Date()));
+            events.add(event);
+        }
+        return events;
     }
 
     /*

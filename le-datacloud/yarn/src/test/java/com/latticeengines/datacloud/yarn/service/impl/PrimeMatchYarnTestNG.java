@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.yarn.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_EVENT_TYPE;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_FEATURE;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_POAEID;
+import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.AVRO_ATTR_SUBJECT_DUNS;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
 
 import java.util.Collections;
@@ -42,6 +46,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -84,7 +89,7 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
+        String avroGlob = getBlockOutputAvroGlob(jobConfiguration);
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         log.info("Fields: {}", StringUtils.join(schema.getFields().stream() //
                 .map(Schema.Field::name).collect(Collectors.toList()), ","));
@@ -105,12 +110,36 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
             count++;
         }
         Assert.assertTrue(count > 0);
+
+        avroGlob = getBlockUsageDir(jobConfiguration);
+        schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
+        log.info("Usage fields: {}", StringUtils.join(schema.getFields().stream() //
+                .map(Schema.Field::name).collect(Collectors.toList()), ","));
+        records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
+        count = 0L;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            // System.out.println(record);
+            Assert.assertNotNull(record.get(AVRO_ATTR_POAEID));
+            Assert.assertNotNull(record.get(AVRO_ATTR_EVENT_TYPE));
+            Assert.assertNotNull(record.get(AVRO_ATTR_FEATURE));
+            Assert.assertNotNull(record.get(AVRO_ATTR_SUBJECT_DUNS));
+            count++;
+        }
+        log.info("There are {} usage events", count);
+        Assert.assertTrue(count > 200);
     }
 
-    private String getBlockOutputDir(DataCloudJobConfiguration jobConfiguration) {
+    private String getBlockOutputAvroGlob(DataCloudJobConfiguration jobConfiguration) {
         String rootUid = jobConfiguration.getRootOperationUid();
         String blockUid = jobConfiguration.getBlockOperationUid();
-        return hdfsPathBuilder.constructMatchBlockDir(rootUid, blockUid).toString();
+        return hdfsPathBuilder.constructMatchBlockAvroGlob(rootUid, blockUid);
+    }
+
+    private String getBlockUsageDir(DataCloudJobConfiguration jobConfiguration) {
+        String rootUid = jobConfiguration.getRootOperationUid();
+        String blockUid = jobConfiguration.getBlockOperationUid();
+        return hdfsPathBuilder.constructMatchBlockUsageAvroGlob(rootUid, blockUid);
     }
 
     private DataCloudJobConfiguration jobConfiguration(String avroPath) {
@@ -137,6 +166,11 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         DplusMatchConfig dplusMatchConfig = new DplusMatchConfig(baseRule);
         matchInput.setDplusMatchConfig(dplusMatchConfig);
         matchInput.setUseDirectPlus(true);
+
+        DplusUsageReportConfig usageReportConfig = new DplusUsageReportConfig();
+        usageReportConfig.setEnabled(true);
+        usageReportConfig.setPoaeIdField(InterfaceName.InternalId.name());
+        matchInput.setDplusUsageReportConfig(usageReportConfig);
 
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);

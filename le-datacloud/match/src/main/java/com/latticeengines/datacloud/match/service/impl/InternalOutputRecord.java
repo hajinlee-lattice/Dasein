@@ -2,6 +2,8 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
+import com.latticeengines.domain.exposed.datacloud.match.VboUsageEvent;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class InternalOutputRecord extends OutputRecord {
@@ -73,6 +76,9 @@ public class InternalOutputRecord extends OutputRecord {
 
     // for prime match
     private List<DnBMatchCandidate> candidates;
+
+    // for vbo usage tracking
+    private List<VboUsageEvent> usageEvents;
 
     // for multi-fetch match, e.g. tps
     private List<String> fetchIds;
@@ -433,6 +439,24 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setCandidates(List<DnBMatchCandidate> candidates) {
         this.candidates = candidates;
+    }
+
+    public List<VboUsageEvent> getUsageEvents() {
+        return usageEvents;
+    }
+
+    public void setUsageEvents(List<VboUsageEvent> usageEvents) {
+        this.usageEvents = new ArrayList<>(usageEvents);
+    }
+
+    public void addUsageEvents(Collection<VboUsageEvent> usageEvents) {
+        if (CollectionUtils.isNotEmpty(usageEvents)) {
+            if (this.usageEvents == null) {
+                this.usageEvents = new ArrayList<>(usageEvents);
+            } else {
+                this.usageEvents.addAll(usageEvents);
+            }
+        }
     }
 
     // ====================

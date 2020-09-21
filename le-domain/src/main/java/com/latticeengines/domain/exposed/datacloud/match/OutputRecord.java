@@ -67,6 +67,9 @@ public class OutputRecord {
     @JsonProperty("Candidates")
     private List<List<Object>> candidateOutput; // also use as multi-result output
 
+    @JsonProperty("UsageEvents")
+    private List<VboUsageEvent> usageEvents;
+
     @JsonProperty("MatchLogs")
     private List<String> matchLogs;
 
@@ -204,6 +207,14 @@ public class OutputRecord {
 
     public void setCandidateOutput(List<List<Object>> candidateOutput) {
         this.candidateOutput = candidateOutput;
+    }
+
+    public List<VboUsageEvent> getUsageEvents() {
+        return usageEvents;
+    }
+
+    public void setUsageEvents(List<VboUsageEvent> usageEvents) {
+        this.usageEvents = usageEvents;
     }
 
     public List<String> getMatchLogs() {
