@@ -76,9 +76,7 @@ public class PlsValidateTeamMemberRightsAspect {
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentExportServiceImpl.createSegmentExportJob(..))")
     public void createSegmentExportJob(JoinPoint joinPoint) {
         MetadataSegmentExport metadataSegmentExport = (MetadataSegmentExport) joinPoint.getArgs()[0];
-
         checkTeamInContext(metadataSegmentExport.getTeamId());
-
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.createOrUpdate(..))")
@@ -93,12 +91,10 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithPlayName(String playName) {
-
         Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
         if (play != null) {
             checkTeamInContext(play.getTeamId());
         }
-
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.delete(..))" +
