@@ -152,32 +152,38 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     @Override
     public void switchToSuperAdmin(Tenant tenant) {
-        switchToTheSessionWithAccessLevel(AccessLevel.SUPER_ADMIN, tenant);
+        switchToTheSessionWithAccessLevel(AccessLevel.SUPER_ADMIN, tenant, true);
     }
 
     @Override
     public void switchToInternalAdmin(Tenant tenant) {
-        switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant);
+        switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_ADMIN, tenant, true);
     }
 
     @Override
     public void switchToInternalUser(Tenant tenant) {
-        switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_USER, tenant);
+        switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_USER, tenant, true);
     }
 
     @Override
     public void switchToExternalAdmin(Tenant tenant) {
-        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN, tenant);
+        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN, tenant, true);
     }
 
     @Override
+    public void switchToExternalAdmin(Tenant tenant, boolean overWriteTeams) {
+        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN, tenant, overWriteTeams);
+    }
+
+
+    @Override
     public void switchToExternalUser(Tenant tenant) {
-        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER, tenant);
+        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER, tenant, true);
     }
 
     @Override
     public void switchToThirdPartyUser(Tenant tenant) {
-        switchToTheSessionWithAccessLevel(AccessLevel.THIRD_PARTY_USER, tenant);
+        switchToTheSessionWithAccessLevel(AccessLevel.THIRD_PARTY_USER, tenant, true);
     }
 
     @Override
@@ -281,7 +287,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         String fullTenantId = CustomerSpace.parse(tenantName).toString();
         Tenant tenant = addTestTenant(fullTenantId);
         for (AccessLevel accessLevel : AccessLevel.values()) {
-            bootstrapUser(accessLevel, tenant);
+            bootstrapUser(accessLevel, tenant, true);
         }
         return tenant;
     }
@@ -297,7 +303,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         Tenant tenant = new Tenant(fullTenantId);
         setMainTestTenant(tenant);
         for (AccessLevel accessLevel : AccessLevel.values()) {
-            bootstrapUser(accessLevel, tenant);
+            bootstrapUser(accessLevel, tenant, true);
         }
         if (excludedCleanupTenantIds == null) {
             excludedCleanupTenantIds = new ArrayList<>();
@@ -406,21 +412,21 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         }
     }
 
-    private void switchToTheSessionWithAccessLevel(AccessLevel level, Tenant tenant) {
+    private void switchToTheSessionWithAccessLevel(AccessLevel level, Tenant tenant, boolean overWriteTeams) {
         for (int i = 0; i < testTenants.size(); i++) {
             if (tenant.getId().equals(testTenants.get(i).getId())) {
-                switchToTheSessionWithAccessLevel(level, i);
+                switchToTheSessionWithAccessLevel(level, i, overWriteTeams);
                 return;
             }
         }
         throw new RuntimeException("Tenant " + tenant.getId() + " is not registered as a test tenant");
     }
 
-    private void switchToTheSessionWithAccessLevel(AccessLevel level, Integer tenantIdx) {
+    private void switchToTheSessionWithAccessLevel(AccessLevel level, Integer tenantIdx, boolean overWriteTeams) {
         Tenant tenant = testTenants.get(tenantIdx);
         String key = getCacheKey(level, tenant);
         if (!userTenantSessions.containsKey(key)) {
-            bootstrapUser(level, tenant);
+            bootstrapUser(level, tenant, overWriteTeams);
             log.info("Login " + level + " user to the testing tenant " + tenant.getId());
             String username = TestFrameworkUtils.usernameForAccessLevel(level);
             String password = TestFrameworkUtils.GENERAL_PASSWORD;
@@ -442,7 +448,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     protected abstract void logout(UserDocument userDocument);
 
-    protected abstract void bootstrapUser(AccessLevel accessLevel, Tenant tenant);
+    protected abstract void bootstrapUser(AccessLevel accessLevel, Tenant tenant, boolean overWriteTeams);
 
     public UserDocument getCurrentUser() {
         return currentUser;

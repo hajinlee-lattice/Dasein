@@ -215,7 +215,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    protected void bootstrapUser(AccessLevel accessLevel, Tenant tenant) {
+    protected void bootstrapUser(AccessLevel accessLevel, Tenant tenant, boolean overWriteTeams) {
         String username = TestFrameworkUtils.usernameForAccessLevel(accessLevel);
 
         UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
@@ -231,11 +231,13 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         Credentials creds = new Credentials();
         creds.setUsername(username);
         creds.setPassword(TestFrameworkUtils.GENERAL_PASSWORD_HASH);
-        List<GlobalTeam> globalTeams = new ArrayList<>();
-        GlobalTeam globalTeam = new GlobalTeam();
-        globalTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
-        globalTeams.add(globalTeam);
-        user.setUserTeams(globalTeams);
+        if (overWriteTeams) {
+            List<GlobalTeam> globalTeams = new ArrayList<>();
+            GlobalTeam globalTeam = new GlobalTeam();
+            globalTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
+            globalTeams.add(globalTeam);
+            user.setUserTeams(globalTeams);
+        }
         userRegistration.setUser(user);
         userRegistration.setCredentials(creds);
         Boolean success = magicRestTemplate.postForObject(plsApiHostPort + "/pls/admin/users",
