@@ -28,10 +28,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.util.BucketedMetadataTestUtils;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -44,7 +45,10 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     private String modelGuid;
 
     @Inject
-    private MetadataSegmentService metadataSegmentService;
+    private CDLTestDataService cdlTestDataService;
+
+    @Inject
+    private TestMetadataSegmentProxy testSegmentProxy;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -56,13 +60,15 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        attachProtectedProxy(testSegmentProxy);
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
         MetadataSegment segment = RatingEngineResourceDeploymentTestNG.constructSegment(SEGMENT_NAME);
-        MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
+        MetadataSegment createdSegment = testSegmentProxy.createOrUpdate(segment);
         Assert.assertNotNull(createdSegment);
-        MetadataSegment retrievedSegment = metadataSegmentService.getSegmentByName(createdSegment.getName(), false);
+        MetadataSegment retrievedSegment = testSegmentProxy.getSegment(createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
 
         re1 = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),

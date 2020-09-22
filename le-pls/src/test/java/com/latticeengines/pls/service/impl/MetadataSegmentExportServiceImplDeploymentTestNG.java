@@ -12,25 +12,28 @@ import javax.inject.Inject;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
-import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({GlobalAuthCleanupTestListener.class})
 @TestExecutionListeners({DirtiesContextTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:test-pls-context.xml"})
-public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
+public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
@@ -38,15 +41,22 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
     private MetadataSegmentExportService metadataSegmentExportService;
 
     @Inject
+    private CDLTestDataService cdlTestDataService;
+
+    @Inject
     private AtlasExportProxy atlasExportProxy;
 
     @Inject
-    private TestPlayCreationHelper testPlayCreationHelper;
+    private TestMetadataSegmentProxy testSegmentProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndData();
-
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        attachProtectedProxy(testSegmentProxy);
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
+        mainTestTenant = testBed.getMainTestTenant();
+        switchToSuperAdmin();
+        MultiTenantContext.setTenant(mainTestTenant);
     }
 
     @Test(groups = "deployment")
@@ -62,7 +72,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
         metadataSegmentExport.setAttributeSetName(attributeSetName);
-        metadataSegmentExport = metadataSegmentExportService.createSegmentExportJob(metadataSegmentExport);
+        metadataSegmentExport = testSegmentProxy.createSegmentExport(metadataSegmentExport);
 
         assertNotNull(metadataSegmentExport.getExportId());
         String exportId = metadataSegmentExport.getExportId();
@@ -80,7 +90,6 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         assertNotNull(metadataSegmentExport.getCreated());
         assertNotNull(metadataSegmentExport.getUpdated());
         assertEquals(metadataSegmentExport.getAttributeSetName(), attributeSetName);
-        metadataSegmentExportService.deleteSegmentExportByExportId(exportId);
     }
 
     private AtlasExport createAtlasExport(AtlasExportType atlasExportType, String attributeSetName) {
@@ -91,7 +100,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         atlasExport.setApplicationId(UUID.randomUUID().toString());
         atlasExport.setExportType(atlasExportType);
         atlasExport.setAttributeSetName(attributeSetName);
-        atlasExport = atlasExportProxy.createAtlasExport(testPlayCreationHelper.getTenant().getId(), atlasExport);
+        atlasExport = atlasExportProxy.createAtlasExport(mainTestTenant.getId(), atlasExport);
         return atlasExport;
     }
 }
