@@ -3,6 +3,7 @@ package com.latticeengines.apps.dcp.repository;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -48,7 +49,7 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
 
     DataReportRecord findByLevelAndOwnerIdAndReadyForRollup(DataReportRecord.Level level, String ownerId, boolean readyForRollup);
 
-    @Query(nativeQuery = true, value = "SELECT OWNER_ID, REFRESH_TIME from DCP_DATA_REPORT where level = ?1 order by " +
-            "?2 limit ?3")
-    List<Object[]> findOwnerIdAndRefreshDate(String level, String orderBy, Integer limit);
+    @Query(value = "SELECT ownerId, refreshTime from DataReportRecord where level = ?1 order by " +
+            "?2")
+    List<Object[]> findOwnerIdAndRefreshDate(DataReportRecord.Level level, String orderBy, Pageable page);
 }

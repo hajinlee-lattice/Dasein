@@ -24,4 +24,6 @@ public interface ZKConfigService {
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, ProductType type);
 
     String getCampaignLaunchEndPointUrl(CustomerSpace customerSpace, String componentName);
+
+    Boolean getDisableRollupFlag(CustomerSpace customerSpace, String componentName);
 }

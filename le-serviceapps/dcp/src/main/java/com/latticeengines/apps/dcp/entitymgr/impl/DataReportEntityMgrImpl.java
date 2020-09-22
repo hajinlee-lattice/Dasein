@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,9 +132,8 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, String orderBy,
-                                                      Integer limit) {
-        List<Object[]> result = getReadOrWriteRepository().findOwnerIdAndRefreshDate(level.toString(), orderBy, limit);
+    public List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, String orderBy, Pageable pageable) {
+        List<Object[]> result = getReadOrWriteRepository().findOwnerIdAndRefreshDate(level, orderBy, pageable);
         log.info("result is " + result.size());
         List<Pair<String, Date>> pairList = new ArrayList<>();
         for (Object[] objects : result) {

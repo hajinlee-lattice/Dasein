@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.impl.DCPRollupDataReportJobCallable;
 import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
@@ -24,13 +25,17 @@ public class DCPRollupDataReportJobBean implements QuartzJobBean {
     @Inject
     private DCPDataReportWorkflowSubmitter dcpDataReportWorkflowSubmitter;
 
+    @Inject
+    private ZKConfigService zkConfigService;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         log.info(String.format("Got callback with job arguments = %s", jobArguments));
 
         DCPRollupDataReportJobCallable.Builder builder  = new DCPRollupDataReportJobCallable.Builder();
         builder.jobArguments(jobArguments).dataReportEntityMgr(dataReportEntityMgr)
-                .dcpDataReportWorkflowSubmitter(dcpDataReportWorkflowSubmitter);
+                .dcpDataReportWorkflowSubmitter(dcpDataReportWorkflowSubmitter)
+                .ZKConfigService(zkConfigService);
         return new DCPRollupDataReportJobCallable(builder);
     }
 }

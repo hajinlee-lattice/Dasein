@@ -31,6 +31,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final String ACTIVE_MODEL_QUOTA = "ActiveModelQuotaLimit";
     private static final String CAMPAIGN_LAUNCH_END_POINT_URL = "CampaignLaunchEndPointUrl";
+    private static final String DCP_DISABLE_ROLLUP = "DisableRollup";
     private static final String PLS = "PLS";
 
     @Inject
@@ -240,4 +241,19 @@ public class ZKConfigServiceImpl implements ZKConfigService {
         }
     }
 
+    @Override
+    public Boolean getDisableRollupFlag(CustomerSpace customerSpace, String componentName) {
+        Boolean rollupReport = null;
+        try {
+            Path rollupPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    componentName).append(DCP_DISABLE_ROLLUP);
+            Camille camille = CamilleEnvironment.getCamille();
+            if (rollupPath != null && camille.exists(rollupPath)) {
+                rollupReport = Boolean.parseBoolean(camille.get(rollupPath).getData());
+            }
+        } catch (Exception e) {
+            log.info("failed to get rollup flag from zk {} ", customerSpace);
+        }
+        return rollupReport;
+    }
 }
