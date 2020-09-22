@@ -25,6 +25,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
 import com.latticeengines.domain.exposed.pls.VdbQueryResultColumn;
 import com.latticeengines.eai.routes.DataContainer;
@@ -47,6 +49,7 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
     private boolean needDedup;
     private Set<String> uniqueIds;
     private Configuration yarnConfiguration;
+    private DataFeedTaskConfig taskConfig;
 
     private DataContainer dataContainer;
     HashMap<String, Attribute> attributeMap;
@@ -74,6 +77,7 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         this.needDedup = builder.getNeedDedup();
         this.uniqueIds = builder.getUniqueIds();
         this.yarnConfiguration = builder.getYarnConfiguration();
+        this.taskConfig = builder.getTaskConfig();
     }
 
     @Override
@@ -256,8 +260,10 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
 
     private boolean validateRecord(VdbQueryDataResult vdbQueryDataResult, int index) {
         boolean result = true;
+        Map<String, String> recordForValidation = new HashMap<>();
         for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
             if (attributeMap.containsKey(column.getColumnName())) {
+                recordForValidation.put(attributeMap.get(column.getColumnName()).getName(), column.getValues().get(index));
                 if (!attributeMap.get(column.getColumnName()).isNullable()) {
                     if (StringUtils.isEmpty(column.getValues().get(index))) { //check null value column
                         if (attributeMap.get(column.getColumnName()).getDefaultValueStr() != null) {
@@ -290,7 +296,21 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
                 }
             }
         }
-        return result;
+        if (result) {
+            return executeValidators(recordForValidation);
+        }
+        return false;
+    }
+
+    private boolean executeValidators(Map<String, String> recordForValidation) {
+        if (taskConfig != null && taskConfig.getTemplateValidators() != null) {
+            for (TemplateValidator validator : taskConfig.getTemplateValidators()) {
+                if (!validator.accept(recordForValidation, errorMap)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private String getVdbRecord(VdbQueryDataResult vdbQueryDataResult, int index) {
@@ -325,6 +345,7 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         private boolean needDedup;
         private Set<String> uniqueIds;
         private Configuration yarnConfiguration;
+        private DataFeedTaskConfig taskConfig;
 
         public Builder () {
 
@@ -380,6 +401,11 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
             return this;
         }
 
+        public Builder dataFeedTaskConfig(DataFeedTaskConfig taskConfig) {
+            this.taskConfig = taskConfig;
+            return this;
+        }
+
         public String getProcessorId() {
             return processorId;
         }
@@ -418,6 +444,10 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
 
         public Configuration getYarnConfiguration() {
             return yarnConfiguration;
+        }
+
+        public DataFeedTaskConfig getTaskConfig() {
+            return taskConfig;
         }
     }
 }

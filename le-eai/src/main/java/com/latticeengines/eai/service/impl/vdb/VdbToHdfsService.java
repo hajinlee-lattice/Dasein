@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
@@ -109,9 +110,10 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                     log.info("Initialize import job detail record");
                     initJobDetail(jobDetailId, vdbConnectorConfiguration);
                     log.info("Import metadata");
+                    Map<String, DataFeedTaskConfig> taskConfigMap = new HashMap<>();
                     HashMap<Long, Table> tableTemplates = getTableMap(config.getCustomerSpace().toString(),
-                            eaiJobDetailIds);
-
+                            eaiJobDetailIds, taskConfigMap);
+                    importContext.setProperty(ImportProperty.IMPORT_VALIDATORS, taskConfigMap);
                     List<Table> metadata = importService.prepareMetadata(new ArrayList<>(tableTemplates.values()),
                             config.getDefaultColumnMap());
                     metadata = sortTable(metadata, vdbConnectorConfiguration);
@@ -247,7 +249,8 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     }
 
 
-    private HashMap<Long, Table> getTableMap(String customerSpace, List<Long> jobDetailIds) {
+    private HashMap<Long, Table> getTableMap(String customerSpace, List<Long> jobDetailIds,
+                                             Map<String, DataFeedTaskConfig> taskConfigMap) {
         HashMap<Long, Table> tables = new HashMap<>();
         for (Long jobId : jobDetailIds) {
             String taskId = getTaskIdFromJobId(jobId);
@@ -255,6 +258,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
                 if (dataFeedTask != null) {
                     tables.put(jobId, dataFeedTask.getImportTemplate());
+                    taskConfigMap.put(dataFeedTask.getImportTemplate().getName(), dataFeedTask.getDataFeedTaskConfig());
                 }
             }
         }
