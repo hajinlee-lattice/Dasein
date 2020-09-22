@@ -166,6 +166,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_FILTERING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ATTRIBUTE_TOGGLING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ACXIOM, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IMPORT_V2, cg).setDefaultValue(false);
 
         // DCP & CG
         Collection<LatticeProduct> dcpCg = Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP);
