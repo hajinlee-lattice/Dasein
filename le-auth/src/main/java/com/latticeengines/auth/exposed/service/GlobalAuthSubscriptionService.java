@@ -1,0 +1,19 @@
+package com.latticeengines.auth.exposed.service;
+
+import java.util.List;
+import java.util.Set;
+
+import com.latticeengines.domain.exposed.auth.GlobalAuthSubscription;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+
+public interface GlobalAuthSubscriptionService {
+
+    List<GlobalAuthUser> getUsersByTenantId(String tenantId);
+
+    List<String> getEmailsByTenantId(String tenantId);
+
+    List<String> createByEmailsAndTenantId(Set<String> emails, String tenantId);
+
+    GlobalAuthSubscription deleteByEmailAndTenantId(String email, String tenantId);
+
+}
