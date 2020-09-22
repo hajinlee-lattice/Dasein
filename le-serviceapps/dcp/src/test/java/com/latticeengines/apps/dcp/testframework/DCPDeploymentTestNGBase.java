@@ -23,6 +23,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
@@ -187,8 +189,8 @@ public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected PurposeOfUse getPurposeOfUse() {
         PurposeOfUse purposeOfUse = new PurposeOfUse();
-        purposeOfUse.setDomain("D&B for Finance");
-        purposeOfUse.setRecordType("Domain Use");
+        purposeOfUse.setDomain(DataDomain.Finance.getDisplayName());
+        purposeOfUse.setRecordType(DataRecordType.Domain.getDisplayName());
         return purposeOfUse;
     }
 }
