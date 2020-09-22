@@ -126,7 +126,7 @@ public class DirectPlusBulkLookupDispatcherImpl extends BaseDnBBulkLookupDispatc
     protected HttpEntity<String> constructEntity(DnBBatchMatchContext batchContext, String token) {
         ObjectNode objectNode = JsonUtils.createObjectNode();
         objectNode.put("customerKey", s3Key);
-        objectNode.put("processId", "match");
+        objectNode.put("processId", "hvmatch");
         objectNode.put("processVersion", "v1");
         objectNode.put("inputFileName", NamingUtils.randomSuffix("lattice_", 6));
         HttpHeaders headers = new HttpHeaders();
