@@ -6,4 +6,6 @@ public interface CDLDanteConfigProxy {
 
     DanteConfigurationDocument getDanteConfiguration(String customerSpace);
 
+    void refreshDanteConfiguration(String customerSpace);
+
 }

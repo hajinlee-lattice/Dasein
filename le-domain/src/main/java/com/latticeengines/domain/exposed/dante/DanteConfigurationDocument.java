@@ -1,15 +1,12 @@
 package com.latticeengines.domain.exposed.dante;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.latticeengines.domain.exposed.dante.metadata.MetadataDocument;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonDeserialize()
-public class DanteConfigurationDocument implements Serializable {
+
+public class DanteConfigurationDocument {
 
     @JsonProperty("MetadataDocument")
     private MetadataDocument metadataDocument;

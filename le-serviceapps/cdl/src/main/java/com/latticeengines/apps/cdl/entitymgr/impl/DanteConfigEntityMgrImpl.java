@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.cdl.document.repository.reader.DanteConfigReaderRepository;
 import com.latticeengines.apps.cdl.document.repository.writer.DanteConfigWriterRepository;
 import com.latticeengines.apps.cdl.entitymgr.DanteConfigEntityMgr;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -27,6 +28,9 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Inject
     private DanteConfigWriterRepository writerRepository;
 
+    @Inject
+    private DanteConfigReaderRepository readerRepository;
+
     @Override
     public BaseJpaRepository<DanteConfigEntity, String> getRepository() {
         return writerRepository;
@@ -42,7 +46,7 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DanteConfigurationDocument findByTenantId(String tenantId) {
-        DanteConfigEntity danteConfigEntity = writerRepository.findByTenantId(tenantId);
+        DanteConfigEntity danteConfigEntity = readerRepository.findByTenantId(tenantId);
         if (danteConfigEntity != null) {
             return danteConfigEntity.getDocument();
         }
@@ -52,21 +56,19 @@ public class DanteConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<DanteCon
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public DanteConfigurationDocument createOrUpdate(String tenantId, DanteConfigurationDocument danteConfig) {
-
-        DanteConfigEntity existing = writerRepository.findByTenantId(tenantId);
+        DanteConfigEntity existing = readerRepository.findByTenantId(tenantId);
 
         DanteConfigEntity danteConfigEntity;
 
         if (existing != null) {
-            existing.setDocument(danteConfig);
             danteConfigEntity = existing;
         } else {
             danteConfigEntity = new DanteConfigEntity();
             danteConfigEntity.setUuid(UUID.randomUUID().toString());
             danteConfigEntity.setTenantId(tenantId);
-            danteConfigEntity.setDocument(danteConfig);
         }
 
+        danteConfigEntity.setDocument(danteConfig);
         DanteConfigEntity saved = writerRepository.save(danteConfigEntity);
         return saved.getDocument();
     }

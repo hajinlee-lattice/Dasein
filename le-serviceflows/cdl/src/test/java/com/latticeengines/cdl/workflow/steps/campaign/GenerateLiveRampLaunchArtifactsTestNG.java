@@ -179,6 +179,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
     private void moveAvroFilesToHDFS() throws IOException {
         createDirsIfDoesntExist("/tmp/addLiveRampResult/");
+
         createDirsIfDoesntExist("/tmp/removeLiveRampResult/");
 
         URL url = ClassLoader.getSystemResource("com/latticeengines/cdl/workflow/campaign/addLiverampBlock.avro");
