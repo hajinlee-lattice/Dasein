@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DataRecordType {
 
-    Domain("Domain"), //
-    MasterData("MasterData"), //
-    Analytical("Analytical");
+    Domain("Domain Use"), //
+    MasterData("Domain Master Data Use"), //
+    Analytical("Analytical Use");
 
     private final String displayName;
 
