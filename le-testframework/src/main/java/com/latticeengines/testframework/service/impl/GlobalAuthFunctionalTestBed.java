@@ -112,7 +112,7 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    protected void bootstrapUser(AccessLevel accessLevel, Tenant tenant) {
+    protected void bootstrapUser(AccessLevel accessLevel, Tenant tenant, boolean overWriteTeams) {
         String username = TestFrameworkUtils.usernameForAccessLevel(accessLevel);
         if (userService.findByUsername(username) == null) {
             UserRegistration userReg = TestFrameworkUtils.createUserRegistration(accessLevel);

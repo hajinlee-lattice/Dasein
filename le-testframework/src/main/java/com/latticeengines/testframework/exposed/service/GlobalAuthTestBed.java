@@ -68,6 +68,8 @@ public interface GlobalAuthTestBed {
 
     void switchToExternalAdmin(Tenant tenant);
 
+    void switchToExternalAdmin(Tenant tenant, boolean overWriteTeams);
+
     void switchToExternalUser(Tenant tenant);
 
     void switchToThirdPartyUser(Tenant tenant);
