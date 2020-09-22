@@ -390,7 +390,7 @@ public class DataReportServiceImpl implements DataReportService {
             retryTemplate.execute(ctx -> {
                 Set<Long> remainIds = getDataReportUnderOwnerId(level, ownerId);
                 if(CollectionUtils.isNotEmpty(remainIds)  && (remainIds.size() != 1 || !remainIds.contains(null))) {
-                    throw new RuntimeException("Get empty response from oauth request.");
+                    throw new RuntimeException("report under ownerid still exist.");
                 }
                 return true;
             });
