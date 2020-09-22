@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -51,11 +52,14 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
         customerSpace = job.getTenant().getId();
         String playName = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_NAME);
         String playLaunchId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID);
+        String channelId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_CHANNEL_ID);
+
         try {
             if (jobExecution.getStatus().isUnsuccessful()) {
                 log.warn(String.format("DeltaCampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
                 updateFailedPlayLaunch(playName, playLaunchId);
+                recoverLaunchUniverses(customerSpace, playName, channelId);
             } else {
                 log.info(String.format(
                         "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
@@ -94,7 +98,22 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
         launch.setContactsErrored(contactsAdded + contactsDeleted);
 
         PlayLaunch playLaunch = playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, launch);
-        log.info("After updat, PlayLauunch = " + JsonUtils.serialize(playLaunch));
+        log.info("After update, PlayLaunch = " + JsonUtils.serialize(playLaunch));
+    }
+
+    private void recoverLaunchUniverses(String customerSpace, String playName, String channelId) {
+        log.info("Recovering LaunchUniverses for PlayLaunchChannel ID: " + channelId);
+
+        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, playName, channelId);
+        log.info("PlayLaunchChannel CurrentAccountUniverse before recovery: " + channel.getCurrentLaunchedAccountUniverseTable());
+        log.info("PlayLaunchChannel CurrentContactUniverse before recovery: " + channel.getCurrentLaunchedContactUniverseTable());
+
+        channel.setCurrentLaunchedAccountUniverseTable(channel.getPreviousLaunchedAccountUniverseTable());
+        channel.setCurrentLaunchedContactUniverseTable(channel.getPreviousLaunchedContactUniverseTable());
+        playProxy.updatePlayLaunchChannel(customerSpace, playName, channelId, channel, false);
+
+        log.info("PlayLaunchChannel CurrentAccountUniverse after recovery: " + channel.getCurrentLaunchedAccountUniverseTable());
+        log.info("PlayLaunchChannel CurrentContactUniverse after recovery: " + channel.getCurrentLaunchedContactUniverseTable());
     }
 
     private long getCount(Long object) {

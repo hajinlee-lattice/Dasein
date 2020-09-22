@@ -12,11 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -26,6 +28,9 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
 
     @Inject
     private PlayLaunchService playLaunchService;
+
+    @Inject
+    private PlayLaunchChannelService playLaunchChannelService;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -173,6 +178,7 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
                 }
                 MultiTenantContext.setTenant(l.getTenant());
                 playLaunchService.update(l);
+                recoverLaunchUniverse(l.getLaunchId());
                 MultiTenantContext.clearTenant();
             });
             return true;
@@ -180,4 +186,9 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
         return false;
     }
 
+    private void recoverLaunchUniverse(String launchId) {
+        PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
+        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(channel);
+        playLaunchChannelService.updateCurrentLaunchedContactUniverseWithPrevious(channel);
+    }
 }

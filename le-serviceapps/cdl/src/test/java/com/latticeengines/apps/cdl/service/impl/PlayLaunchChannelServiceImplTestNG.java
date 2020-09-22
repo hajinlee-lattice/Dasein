@@ -232,6 +232,30 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(retrieved.getExpirationDate());
     }
 
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateFromChannel" })
+    public void testRecoverLaunchUniverses() throws InterruptedException {
+        String current = "CURRENT";
+        String previous = "PREVIOUS";
+
+        playLaunchChannel1.setCurrentLaunchedAccountUniverseTable(current);
+        playLaunchChannel1.setPreviousLaunchedAccountUniverseTable(previous);
+        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(playLaunchChannel1);
+        Thread.sleep(1000);
+
+        Assert.assertNotNull(playLaunchChannel1);
+        Assert.assertEquals(playLaunchChannel1.getCurrentLaunchedAccountUniverseTable(), previous);
+        Assert.assertEquals(playLaunchChannel1.getPreviousLaunchedAccountUniverseTable(), previous);
+
+        playLaunchChannel2.setCurrentLaunchedContactUniverseTable(current);
+        playLaunchChannel2.setPreviousLaunchedContactUniverseTable(previous);
+        playLaunchChannelService.updatePreviousLaunchedContactUniverseWithCurrent(playLaunchChannel2);
+        Thread.sleep(1000);
+
+        Assert.assertNotNull(playLaunchChannel2);
+        Assert.assertEquals(playLaunchChannel2.getCurrentLaunchedContactUniverseTable(), current);
+        Assert.assertEquals(playLaunchChannel2.getPreviousLaunchedContactUniverseTable(), current);
+    }
+
     @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);

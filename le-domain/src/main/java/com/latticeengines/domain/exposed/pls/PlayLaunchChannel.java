@@ -181,6 +181,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "CURRENT_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID")
     private String currentLaunchedContactUniverseTable;
 
+    @JsonProperty("previousLaunchedAccountUniverseTable")
+    @Column(name = "PREVIOUS_LAUNCHED_ACCOUNT_UNIVERSE_TABLE_ID")
+    private String previousLaunchedAccountUniverseTable;
+
+    @JsonProperty("previousLaunchedContactUniverseTable")
+    @Column(name = "PREVIOUS_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID")
+    private String previousLaunchedContactUniverseTable;
+
     public PlayLaunchChannel() {
     }
 
@@ -444,5 +452,21 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setCurrentLaunchedContactUniverseTable(String currentLaunchedContactUniverseTable) {
         this.currentLaunchedContactUniverseTable = currentLaunchedContactUniverseTable;
+    }
+
+    public String getPreviousLaunchedAccountUniverseTable() {
+        return previousLaunchedAccountUniverseTable;
+    }
+
+    public void setPreviousLaunchedAccountUniverseTable(String previousLaunchedAccountUniverseTable) {
+        this.previousLaunchedAccountUniverseTable = previousLaunchedAccountUniverseTable;
+    }
+
+    public String getPreviousLaunchedContactUniverseTable() {
+        return previousLaunchedContactUniverseTable;
+    }
+
+    public void setPreviousLaunchedContactUniverseTable(String previousLaunchedContactUniverseTable) {
+        this.previousLaunchedContactUniverseTable = previousLaunchedContactUniverseTable;
     }
 }
