@@ -233,7 +233,9 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             Item item = retry.execute(ctx -> dynamoItemService.getItem(cacheTableName, primaryKey));
             if (item == null) {
-                item = new Item().withPrimaryKey(primaryKey);
+                int ttlDays = cacheTtlMinDays + random.nextInt(Math.abs(cacheTtlMaxDays - cacheTtlMinDays));
+                long expiredAt = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(ttlDays);
+                item = new Item().withPrimaryKey(primaryKey).withNumber(ATTR_TTL, expiredAt);
                 log.info("Going to create cache for duns={}, blockIds={}", duns, //
                         StringUtils.join(blockIds, ","));
             } else {
@@ -243,10 +245,6 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
             for (String blockId: blockIds) {
                 item = item.withBinary(blockId, bytes);
             }
-
-            int ttlDays = cacheTtlMinDays + random.nextInt(Math.abs(cacheTtlMaxDays - cacheTtlMinDays));
-            long expiredAt = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(ttlDays);
-            item = item.withNumber(ATTR_TTL, expiredAt);
             dynamoItemService.putItem(cacheTableName, item);
         });
     }
