@@ -40,6 +40,7 @@ public class ImportProperty extends BaseProperty {
     public static final String S3_FILE_SIZE = "s3FileSize";
     public static final String ERROR_FILE = "error.csv";
     public static final String NEED_DETAIL_ERROR = "needDetailError";
+    public static final String IMPORT_VALIDATORS = "importValidators";
     public static final String DEFAULT_COLUMN_MAP = "defaultColumnMap";
     public static final String[] ERROR_HEADER = new String[] { "LineNumber", "Id", "ErrorMessage" };
 }

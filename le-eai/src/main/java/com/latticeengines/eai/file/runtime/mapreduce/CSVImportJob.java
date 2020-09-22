@@ -61,10 +61,6 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
             config.set("eai.id.column.name", properties.getProperty("eai.id.column.name"));
 
-            config.set("eai.redis.local", properties.getProperty("eai.redis.local"));
-            config.set("eai.redis.endpoint", properties.getProperty("eai.redis.endpoint"));
-            config.set("eai.redis.timeout", properties.getProperty("eai.redis.timeout"));
-
             config.set("eai.import.aws.region", properties.getProperty("eai.import.aws.region"));
             config.set("eai.import.aws.access.key", properties.getProperty("eai.import.aws.access.key"));
             config.set("eai.import.aws.secret.key", properties.getProperty("eai.import.aws.secret.key"));

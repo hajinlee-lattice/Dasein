@@ -100,6 +100,7 @@ import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
@@ -168,6 +169,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private boolean detailError = false;
 
+    private List<TemplateValidator> validatorList = null;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
@@ -196,6 +199,13 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsKey, awsSecret)))
                     .withRegion(Regions.fromName(region))
                     .build();
+        }
+        String serializedValidator = conf.get("eai.import.validators", "");
+        if (StringUtils.isNotBlank(serializedValidator)) {
+            validatorList = JsonUtils.convertList(JsonUtils.deserialize(serializedValidator, List.class),
+                    TemplateValidator.class);
+        } else {
+            validatorList = new ArrayList<>();
         }
     }
 
@@ -566,11 +576,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private class ConvertCSVToAvro {
 
-        private Map<String, String> errorMap = new HashMap<>();
+        private final Map<String, String> errorMap = new HashMap<>();
 
-        private Map<String, String> duplicateMap = new HashMap<>();
+        private final Map<String, String> duplicateMap = new HashMap<>();
 
-        private CSVPrinter csvFilePrinter;
+        private final CSVPrinter csvFilePrinter;
 
         private boolean missingRequiredColValue = Boolean.FALSE;
 
@@ -578,11 +588,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         private boolean rowError = Boolean.FALSE;
 
-        private GenericRecord avroRecord;
+        private final GenericRecord avroRecord;
 
         private String id;
 
-        private DataFileWriter<GenericRecord> dataFileWriter;
+        private final DataFileWriter<GenericRecord> dataFileWriter;
 
         private boolean hasErrorRecord = false;
 
@@ -675,6 +685,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
             Map<String, String> headerCaseMapping = headerMap.keySet().stream()
                                                     .collect(Collectors.toMap(String::toLowerCase, header -> header));
+            Map<String, String> recordMapForValidation = new HashMap<>();
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;
                 String csvColumnNameInLowerCase = attr.getSourceAttrName() == null ?
@@ -712,6 +723,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                                 csvFieldValue = attr.getDefaultValueStr();
                             }
+                            recordMapForValidation.put(attr.getName(), csvFieldValue);
                             avroFieldValue = toAvro(csvFieldValue, avroType, attr, attr.getName().equals(idColumnName));
                             if (attr.getName().equals(idColumnName)) {
                                 id = String.valueOf(avroFieldValue);
@@ -754,8 +766,15 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                 }
             }
+            executeValidators(recordMapForValidation);
             avroRecord.put(InterfaceName.InternalId.name(), getInternalIdObj(lineNum));
             return avroRecord;
+        }
+
+        private void executeValidators(Map<String, String> recordForValidation) {
+            for (TemplateValidator validator : validatorList) {
+                validator.accept(recordForValidation, errorMap);
+            }
         }
 
         private Object getInternalIdObj(long lineNum) {

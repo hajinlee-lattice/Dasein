@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -457,5 +459,25 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Get all template UUIDs consumed by PA")
     public List<String> getAllPAConsumedTemplates(@PathVariable String customerSpace) {
         return dataFeedTaskTemplateService.getPAConsumedTemplates(customerSpace);
+    }
+
+    @PutMapping("/appendLengthValidator/{uniqueTaskId}")
+    @ResponseBody
+    @ApiOperation(value = "Add attribute length validator")
+    public void addAttributeLengthValidator(@PathVariable String customerSpace,
+                                            @PathVariable String uniqueTaskId,
+                                            @RequestParam String attrName,
+                                            @RequestParam int length,
+                                            @RequestParam(required = false, defaultValue = "false") boolean nullable) {
+        dataFeedTaskTemplateService.addAttributeLengthValidator(customerSpace, uniqueTaskId, attrName, length, nullable);
+    }
+
+    @PostMapping("/appendSimpleValueFilter/{uniqueTaskId}")
+    @ResponseBody
+    @ApiOperation(value = "Add attribute length validator")
+    public void addSimpleValueFilter(@PathVariable String customerSpace,
+                                            @PathVariable String uniqueTaskId,
+                                            @RequestBody SimpleValueFilter simpleValueFilter) {
+        dataFeedTaskTemplateService.addSimpleValueFilter(customerSpace, uniqueTaskId, simpleValueFilter);
     }
 }

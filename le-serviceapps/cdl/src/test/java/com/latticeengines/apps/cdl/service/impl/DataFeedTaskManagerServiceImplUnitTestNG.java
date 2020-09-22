@@ -14,10 +14,14 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.AttributeLengthValidator;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -44,6 +48,22 @@ public class DataFeedTaskManagerServiceImplUnitTestNG {
         Assert.assertNull(metaTable.getAttribute("testATTR"));
         Assert.assertNotNull(metaTable.getAttribute("AccountId"));
         Assert.assertNotNull(metaTable.getAttribute("TestAttr"));
+    }
+
+    @Test
+    public void testConfig() {
+        DataFeedTaskConfig config = new DataFeedTaskConfig();
+        AttributeLengthValidator lengthValidator = new AttributeLengthValidator();
+        lengthValidator.setAttributeName("attrName1");
+        lengthValidator.setLength(12);
+        lengthValidator.setNullable(false);
+        config.addTemplateValidator(lengthValidator);
+        System.out.println(JsonUtils.pprint(lengthValidator));
+        String serialized = JsonUtils.serialize(config.getTemplateValidators());
+        System.out.println(serialized);
+        List<TemplateValidator> x = JsonUtils.convertList(JsonUtils.deserialize(serialized, List.class),
+                TemplateValidator.class);
+
     }
 
     @Test(groups = "unit")

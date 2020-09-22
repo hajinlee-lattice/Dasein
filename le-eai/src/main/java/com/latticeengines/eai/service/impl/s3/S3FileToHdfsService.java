@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -189,6 +190,10 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             log.info(String.format("Modeling metadata for template: %s",
                     JsonUtils.serialize(template.getModelingMetadata())));
             context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
+            if (dataFeedTask.getDataFeedTaskConfig() != null
+                    && CollectionUtils.isNotEmpty(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators())) {
+                context.setProperty(ImportProperty.IMPORT_VALIDATORS, JsonUtils.serialize(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()));
+            }
             String targetPath = createTargetPath(config.getCustomerSpace(), config.getBusinessEntity(), SourceType.FILE);
             List<Table> tableMetadata = new ArrayList<>();
             for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
