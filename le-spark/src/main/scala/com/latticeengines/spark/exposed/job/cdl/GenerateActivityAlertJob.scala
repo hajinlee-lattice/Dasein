@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.spark.cdl.ActivityAlertJobConfig
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{coalesce, _}
 import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 
@@ -29,6 +29,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   private val contactId = InterfaceName.ContactId.name
   private val eventTime = TimelineStandardColumn.EventDate.getColumnName
   private val streamType = TimelineStandardColumn.StreamType.getColumnName
+  private val detail1 = TimelineStandardColumn.Detail1.getColumnName
   private val detail2 = TimelineStandardColumn.Detail2.getColumnName
   private val pageVisit = ActivityStoreConstants.Alert.COL_PAGE_VISITS
   private val pageName = ActivityStoreConstants.Alert.COL_PAGE_NAME
@@ -73,10 +74,10 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
         case Alert.RE_ENGAGED_ACTIVITY =>
           Some(generateReEngagedActivity(timelineDf, startTimestamp, endTimestamp))
         // intent need data in all time range
-        case Alert.GROWING_BUYER_INTENT =>
-          Some(generateGrowingIntentAlerts(timelineDf, startTimestamp, endTimestamp, buyingStage = true))
-        case Alert.GROWING_RESEARCH_INTENT =>
-          Some(generateGrowingIntentAlerts(timelineDf, startTimestamp, endTimestamp, buyingStage = false))
+        case Alert.SHOWN_BUYER_INTENT =>
+          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp, buyingStage = true))
+        case Alert.SHOWN_RESEARCH_INTENT =>
+          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp, buyingStage = false))
         case _ => None
       }
 
@@ -149,41 +150,55 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .select(col(accountId), packAlertData(pageName, pageVisitTime, prevPageVisitTime))
   }
 
-  def generateGrowingIntentAlerts(
-                                   timelineDf: DataFrame, startTime: Long, endTime: Long, buyingStage: Boolean): DataFrame = {
+  def generateShownIntentAlerts(
+                                 timelineDf: DataFrame, startTime: Long, endTime: Long, buyingStage: Boolean): DataFrame = {
     val accWithVisitDf = timelineDf
       .filter(timelineDf.col(streamType).equalTo(WebVisit.name))
       .groupBy(accountId)
       .agg(count("*").as(pageVisit))
 
+    // latest intent per model
     val window = Window
-      .partitionBy(accountId)
+      .partitionBy(accountId, detail1)
       .orderBy(col(eventTime).desc)
-    val prevBuyingScoreCol = lead(col(detail2), 1).over(window)
 
-    // get latest intent and previous buying score (in detail2)
+    val countCol = "__CNT"
+    // get max buying score per model (detail1)
     val latestIntentDf = timelineDf
       .filter(timelineDf.col(streamType).equalTo(DnbIntentData.name))
       .withColumn(internalRankCol, row_number.over(window))
-      .withColumn(internalPrevCol, prevBuyingScoreCol.cast(DoubleType))
+      .filter(col(internalRankCol).equalTo(1))
       .withColumn(internalCurrCol, col(detail2).cast(DoubleType))
-      .filter(col(internalRankCol) === 1)
-      .filter(col(eventTime).geq(startTime).and(col(eventTime).leq(endTime)))
+      .filter(col(internalCurrCol).isNotNull)
+      .filter(col(detail1).isNotNull)
 
-    val trendingDf = if (buyingStage) {
-      // latest intent in buying stage, previous one
-      latestIntentDf.filter(
-        col(internalCurrCol).geq(buyingStageThreshold)
-          .and(col(internalPrevCol).lt(buyingStageThreshold).or(col(internalPrevCol).isNull)))
+    // find models in each stage
+    val buyingIntentCntDf = latestIntentDf
+      .filter(col(internalCurrCol).geq(buyingStageThreshold))
+      .groupBy(accountId)
+      .agg(count("*").as(countCol))
+    val researchingIntentCntDf = latestIntentDf
+      .filter(col(internalCurrCol).lt(buyingStageThreshold))
+      .groupBy(accountId)
+      .agg(count("*").as(countCol))
+
+    // decide whether to show buying or researching stage in entire alert
+    val buyingIntentCntCol = coalesce(buyingIntentCntDf.col(countCol), lit(0))
+    val researchingIntentCntCol = coalesce(researchingIntentCntDf.col(countCol), lit(0))
+    // TODO change this formula based on product requirements
+    val showIntentFilter = if (buyingStage) {
+      buyingIntentCntCol.geq(researchingIntentCntCol)
     } else {
-      latestIntentDf.filter(
-        col(internalCurrCol).lt(buyingStageThreshold)
-          .and(col(internalCurrCol).isNotNull)
-          .and(col(internalPrevCol).isNull))
+      researchingIntentCntCol.gt(buyingIntentCntCol)
     }
 
+    val alertDf = buyingIntentCntDf
+      .join(researchingIntentCntDf, Seq(accountId), "outer")
+      .filter(showIntentFilter)
+      .select(accountId)
+
     // find all with product visit
-    addTimeRange(trendingDf.join(accWithVisitDf, accountId), startTime, endTime)
+    addTimeRange(alertDf.join(accWithVisitDf, accountId), startTime, endTime)
       .select(col(accountId), packAlertData(pageVisit))
   }
 

@@ -134,7 +134,7 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
             // create diff table and set to context only
             String alertDiffTableName = customerSpace.getTenantId() + "_"
                     + NamingUtils.timestamp(ActivityAlert.name() + "Diff");
-            createTableAndPersist(outputs.get(0), alertDiffTableName, ACTIVITY_ALERT_DIFF_TABLE_NAME);
+            createTableAndPersist(outputs.get(1), alertDiffTableName, ACTIVITY_ALERT_DIFF_TABLE_NAME);
         }
     }
 

@@ -1,9 +1,9 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.GROWING_BUYER_INTENT;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.GROWING_RESEARCH_INTENT;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_BUYER_INTENT;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_RESEARCH_INTENT;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.DnbIntentData;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.WebVisit;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
@@ -76,8 +76,8 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, 10L);
         config.alertNameToQualificationPeriodDays.put(INC_WEB_ACTIVITY_ON_PRODUCT, 10L);
         config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, 10L);
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.GROWING_BUYER_INTENT, 10L);
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.GROWING_RESEARCH_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.SHOWN_BUYER_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.SHOWN_RESEARCH_INTENT, 10L);
         config.currentEpochMilli = 10L;
         config.masterAccountTimeLineIdx = 0;
 
@@ -146,30 +146,30 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                 /*-
                  * from researching stage to buying stage
                  */
-                newIntentRecord("a3", 2L, "0.88", "0.49"), //
-                newIntentRecord("a3", 3L, "0.88", "0.55"), //
+                newIntentRecord("a3", 2L, "m1", "0.49"), //
+                newIntentRecord("a3", 3L, "m2", "0.55"), //
                 /*-
                  * first intent is in researching stage
                  */
-                newIntentRecord("a4", 3L, "0.88", "0.45"), //
+                newIntentRecord("a4", 3L, "m1", "0.45"), //
                 /*-
                  * first intent is in buying stage => growing buying intent alert
                  */
-                newIntentRecord("a5", 3L, "0.88", "0.90"), //
+                newIntentRecord("a5", 3L, "m3", "0.90"), //
                 /*-
                  * latest two intents are both in buying stage => no alert
                  */
-                newIntentRecord("a6", 2L, "0.88", "0.80"), //
-                newIntentRecord("a6", 3L, "0.88", "0.90"), //
+                newIntentRecord("a6", 2L, "m2", "0.80"), //
+                newIntentRecord("a6", 3L, "m2", "0.90"), //
                 /*-
                  * latest intent has invalid buying score => no alert
                  */
-                newIntentRecord("a7", 3L, "0.88", "abc"), //
+                newIntentRecord("a7", 3L, "m3", "abc"), //
                 /*-
                  * latest two intents are both in researching stage => no alert
                  */
-                newIntentRecord("a8", 2L, "0.88", "0.45"), //
-                newIntentRecord("a8", 3L, "0.88", "0.46"), //
+                newIntentRecord("a8", 2L, "m1", "0.45"), //
+                newIntentRecord("a8", 3L, "m4", "0.46"), //
         };
         uploadHdfsDataUnit(masterData, TIMELINE_FIELDS);
     }
@@ -189,9 +189,11 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
 
         counts.put(Pair.of("a8", RE_ENGAGED_ACTIVITY), 1);
 
-        counts.put(Pair.of("a4", GROWING_RESEARCH_INTENT), 1);
-        counts.put(Pair.of("a3", GROWING_BUYER_INTENT), 1);
-        counts.put(Pair.of("a5", GROWING_BUYER_INTENT), 1);
+        counts.put(Pair.of("a4", SHOWN_RESEARCH_INTENT), 1);
+        counts.put(Pair.of("a8", SHOWN_RESEARCH_INTENT), 1);
+        counts.put(Pair.of("a3", SHOWN_BUYER_INTENT), 1);
+        counts.put(Pair.of("a5", SHOWN_BUYER_INTENT), 1);
+        counts.put(Pair.of("a6", SHOWN_BUYER_INTENT), 1);
 
         return counts;
     }
