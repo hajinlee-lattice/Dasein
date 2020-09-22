@@ -3,6 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityType;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.BuyingScore;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLTemplateName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +105,8 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(Stage, String.class), //
             Pair.of(LastModifiedDate.name(), Long.class), //
             Pair.of(__StreamDate.name(), String.class), //
-            Pair.of(StreamDateId.name(), Integer.class),
+            Pair.of(StreamDateId.name(), Integer.class), //
+            Pair.of(BuyingScore.name(), Double.class), //
             Pair.of(CDLTemplateName.name(), String.class));
 
     private static final List<Pair<String, Class<?>>> CTK_STREAM_IMPORT_FIELDS = Arrays.asList( //
@@ -292,8 +295,10 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         Integer datePeriod = DateTimeUtils.dateToDayPeriod(dateStr);
         String accountId = String.format("a%d", id);
         String templateName = String.format("tempalte_%s", dateStr);
+        double score = RandomUtils.nextDouble(0.0, 1.0);
         templateToSystemTypeMap.put(templateName, S3ImportSystem.SystemType.Salesforce.name());
-        List<Object> row = Lists.newArrayList(id, oppId, accountId, stage, time, dateStr, datePeriod, templateName);
+        List<Object> row = Lists.newArrayList(id, oppId, accountId, stage, time, dateStr, datePeriod, score,
+                templateName);
         return row.toArray();
     }
 
@@ -374,7 +379,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         // add detail2 to testing casting from long to string
         oppMappings.put(TimeLineStoreUtils.TimelineStandardColumn.Detail2.getColumnName(),
                 new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
-                        .withMappingValue(InterfaceName.LastModifiedDate.name()).build());
+                        .withMappingValue(BuyingScore.name()).build());
         mappingMap.put(AtlasStream.StreamType.Opportunity.name(),
                 oppMappings);
 
