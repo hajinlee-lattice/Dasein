@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DataDomain {
 
-    SalesMarketing("Sales and Marketing"), //
-    Finance("Finance"), //
-    Supply("Supply"),
-    Compliance("Compliance"),
-    EnterpriseMasterData("Enterprise Master Data");
+    SalesMarketing("D&B for Sales & Marketing"), //
+    Finance("D&B for Finance"), //
+    Supply("D&B for Supply"),
+    Compliance("D&B for Compliance"),
+    EnterpriseMasterData("D&B for Enterprise Master Data");
 
     private final String displayName;
 
