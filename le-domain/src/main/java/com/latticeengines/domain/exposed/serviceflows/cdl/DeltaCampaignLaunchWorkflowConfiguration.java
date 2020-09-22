@@ -111,11 +111,9 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             if (lookupIdMap == null) {
                 return this;
             }
-
             if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
                 exportPublishToSNSConf.setSkipStep(true);
             }
-
             exportFileGeneratorConf.setDestinationSysType(lookupIdMap.getExternalSystemType());
             exportFileGeneratorConf.setDestinationOrgId(lookupIdMap.getOrgId());
             exportFileGeneratorConf.setDestinationSysName(lookupIdMap.getExternalSystemName());
