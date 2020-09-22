@@ -138,7 +138,9 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private Map<String, Object> fetch(DirectPlusEnrichRequest request) {
         String duns = request.getDunsNumber();
-        Map<String, List<PrimeColumn>> reqColumnsByBlock = new HashMap<>(request.getReqColumnsByBlockId());
+        Map<String, List<PrimeColumn>> reqColumnsByBlock = new HashMap<>();
+        // avoid alternating original List
+        request.getReqColumnsByBlockId().forEach((k, v) -> reqColumnsByBlock.put(k, new ArrayList<>(v)));
         Map<String, Object> result = new HashMap<>();
 
         if (!request.isBypassDplusCache()) {
