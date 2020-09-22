@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.dcp.service.DataReportService;
+import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.ProjectSystemLinkService;
 import com.latticeengines.apps.dcp.service.SourceService;
@@ -44,7 +45,6 @@ import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -93,7 +93,7 @@ public class SourceServiceImpl implements SourceService {
     private DataReportService dataReportService;
 
     @Inject
-    private MatchRuleProxy matchRuleProxy;
+    private MatchRuleService matchRuleService;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -148,7 +148,7 @@ public class SourceServiceImpl implements SourceService {
         defaultRule.setRuleType(MatchRuleRecord.RuleType.BASE_RULE);
         defaultRule.setState(MatchRuleRecord.State.ACTIVE);
         defaultRule.setAcceptCriterion(DplusMatchRule.getDefaultAcceptCriterion());
-        matchRuleProxy.createMatchRule(customerSpace, defaultRule);
+        matchRuleService.createMatchRule(customerSpace, defaultRule);
 
         return source;
     }
@@ -200,7 +200,7 @@ public class SourceServiceImpl implements SourceService {
         dataFeedProxy.deleteDataFeedTaskUnderProjectId(customerSpace, projectId);
         sourceInfos.forEach(sourceInfo -> {
             uploadService.hardDeleteUploadUnderSource(customerSpace, sourceInfo.getSourceId());
-            matchRuleProxy.hardDeleteMatchRuleBySourceId(customerSpace, sourceInfo.getSourceId());
+            matchRuleService.hardDeleteMatchRuleBySourceId(customerSpace, sourceInfo.getSourceId());
         });
 
         return true;
