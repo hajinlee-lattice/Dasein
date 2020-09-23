@@ -43,7 +43,8 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 @Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceapps-dcp-context.xml" })
-public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class
+DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(DCPDeploymentTestNGBase.class);
 
@@ -189,8 +190,8 @@ public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected PurposeOfUse getPurposeOfUse() {
         PurposeOfUse purposeOfUse = new PurposeOfUse();
-        purposeOfUse.setDomain(DataDomain.Finance.getDisplayName());
-        purposeOfUse.setRecordType(DataRecordType.Domain.getDisplayName());
+        purposeOfUse.setDomain(DataDomain.Finance);
+        purposeOfUse.setRecordType(DataRecordType.Domain);
         return purposeOfUse;
     }
 }
