@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -83,8 +85,8 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
 
     public PurposeOfUse getPurposeOfUse() {
         PurposeOfUse purposeOfUse = new PurposeOfUse();
-        purposeOfUse.setDomain("D&B for Enterprise Master Data");
-        purposeOfUse.setRecordType("Domain Master Data Use");
+        purposeOfUse.setDomain(DataDomain.EnterpriseMasterData);
+        purposeOfUse.setRecordType(DataRecordType.MasterData);
         return purposeOfUse;
     }
 
