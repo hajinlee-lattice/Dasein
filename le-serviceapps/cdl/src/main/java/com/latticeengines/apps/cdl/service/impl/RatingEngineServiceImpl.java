@@ -214,8 +214,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public List<RatingEngineSummary> getRatingEngineSummaries() {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("Get all the rating engine summaries for tenant %s.", tenant.getId()));
-        return ratingEngineEntityMgr.findAllByTypeAndStatus(null, null).stream()
-                .map(ratingEngine -> constructRatingEngineSummary(ratingEngine)).collect(Collectors.toList());
+        return ratingEngineEntityMgr.findAllByTypeAndStatus(null, null) //
+                .stream().map(this::constructRatingEngineSummary).collect(Collectors.toList());
     }
 
     @Override
@@ -857,7 +857,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     returnMap.get(bucket.getCreationTimestamp()).getPublishedMetadata().add(bucket);
                 }).block();
 
-        return new ArrayList(bucketsGroupedByTime.values());
+        return new ArrayList<>(bucketsGroupedByTime.values());
     }
 
     @VisibleForTesting
@@ -943,7 +943,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
         servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
-        danteConfigService.getDanteConfiguration();
     }
 
     @SuppressWarnings("unchecked")
@@ -1105,7 +1104,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 ratingEngineId, aiModelId, newStatus);
     }
 
-    @SuppressWarnings({ "unchecked", "unused" })
+    @SuppressWarnings("unchecked")
     private Map<Long, String> ratingEngineCyclicDependency(RatingEngine ratingEngine, LinkedHashMap<Long, String> map) {
         LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>) map.clone();
         ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());
