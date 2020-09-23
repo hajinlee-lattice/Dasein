@@ -11,4 +11,12 @@ public interface ActivityTimelineService {
     DataPage getContactActivities(String accountId, String contactId, String timelinePeriod,
             Map<String, String> orgInfo);
 
+    int getNewWebActivitiesCount(String accountId, String timelinePeriod, Map<String, String> orgInfo);
+
+    int getIdentifiedContactsCount(String accountId, String timelinePeriod, Map<String, String> orgInfo);
+
+    int getNewEngagementsCount(String accountId, String timelinePeriod, Map<String, String> orgInfo);
+
+    int getNewOpportunitiesCount(String accountId, String timelinePeriod, Map<String, String> orgInfo);
+
 }

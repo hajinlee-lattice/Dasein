@@ -7,7 +7,9 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -28,6 +30,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
@@ -48,6 +52,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     @Value("${app.timeline.default.period}")
     private String defaultTimelinePeriod;
 
+    @Value("${app.timeline.activity.metrics.period}")
+    private String defaultActivityMetricsPeriod;
+
     private static final String componentName = "CDL";
 
     @Override
@@ -63,14 +70,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                             accountId, customerSpace) });
         }
 
-        ActivityTimelineQuery query = new ActivityTimelineQuery();
-        query.setMainEntity(BusinessEntity.Account);
-        query.setEntityId(internalAccountId);
-        Pair<Instant, Instant> timeWindow = getTimeWindowFromPeriod(customerSpace, timelinePeriod);
-        query.setStartTimeStamp(timeWindow.getLeft());
-        query.setEndTimeStamp(timeWindow.getRight());
-        log.info(String.format("Retrieving Account activity data using query: %s | tenant=%s",
-                JsonUtils.serialize(query), CustomerSpace.shortenCustomerSpace(customerSpace)));
+        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Account, internalAccountId, customerSpace,
+                timelinePeriod);
+
         return activityProxy.getData(customerSpace, null, query);
     }
 
@@ -91,15 +93,117 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                             accountId, customerSpace) });
         }
 
+        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Contact, contactId, customerSpace,
+                timelinePeriod);
+
+        return activityProxy.getData(customerSpace, null, query);
+    }
+
+    @Override
+    public int getNewWebActivitiesCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
+
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
+
+        log.info(String.format("Retrieving new Web Activities Metric| accountId=%s", accountId));
+        List<Map<String, Object>> webActivities = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
+                AtlasStream.StreamType.WebVisit, null);
+
+        return webActivities.size();
+    }
+
+    @Override
+    public int getIdentifiedContactsCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
+
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
+
+        log.info(String.format("Retrieving new Identified Contacts Metric| accountId=%s", accountId));
+        List<Map<String, Object>> newContactRecords = getLatestAccountData(internalAccountId, customerSpace,
+                timelinePeriod, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO);
+        newContactRecords = newContactRecords.stream().filter(t -> t.get("EventType").equals("New Lead"))
+                .collect(Collectors.toList());
+
+        return newContactRecords.stream().map(t -> t.get("ContactId")).distinct().collect(Collectors.toList()).size();
+    }
+
+    @Override
+    public int getNewEngagementsCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
+
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
+
+        log.info(String.format("Retrieving new Engagements Metric| accountId=%s", accountId));
+        List<Map<String, Object>> opportunities = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
+                AtlasStream.StreamType.Opportunity, null);
+        List<Map<String, Object>> marketing = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
+                AtlasStream.StreamType.MarketingActivity, null);
+
+        return opportunities.size() + marketing.size();
+    }
+
+    @Override
+    public int getNewOpportunitiesCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
+
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
+
+        log.info(String.format("Retrieving new Opportunities Metric| tenant=%s",
+                CustomerSpace.shortenCustomerSpace(customerSpace)));
+        List<Map<String, Object>> opportunities = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
+                AtlasStream.StreamType.Opportunity, null);
+        opportunities = opportunities.stream()
+                .filter(t -> !t.get("Detail1").equals("Closed") && !t.get("Detail1").equals("Closed Won"))
+                .collect(Collectors.toList());
+
+        return opportunities.size();
+    }
+
+    private String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
+
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
+
+        String internalAccountId = dataLakeService.getInternalAccountId(accountId, orgInfo);
+        if (StringUtils.isBlank(internalAccountId)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { String.format(
+                            "Unable to find any account in Atlas by accountid/lookupid of %s, customerSpace: %s",
+                            accountId, customerSpace) });
+        }
+        return internalAccountId;
+    }
+
+    private List<Map<String, Object>> getLatestAccountData(String accountId, String customerSpace,
+            String timelinePeriod, AtlasStream.StreamType streamType, SourceType sourceType) {
+        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
+        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Account, accountId, customerSpace,
+                timelinePeriod);
+        List<Map<String, Object>> result = activityProxy.getData(customerSpace, null, query).getData();
+        if (streamType != null) {
+            result = result.stream().filter(t -> t.get("StreamType").equals(streamType.name()))
+                    .collect(Collectors.toList());
+        }
+        if (sourceType != null) {
+            result = result.stream().filter(t -> t.get("Source").equals(sourceType.getName()))
+                    .collect(Collectors.toList());
+        }
+        return result;
+    }
+
+    private ActivityTimelineQuery getActivityTimelineQuery(BusinessEntity entity, String entityId, String customerSpace,
+            String timelinePeriod) {
+
         ActivityTimelineQuery query = new ActivityTimelineQuery();
-        query.setMainEntity(BusinessEntity.Contact);
-        query.setEntityId(contactId);
+        query.setMainEntity(entity);
+        query.setEntityId(entityId);
         Pair<Instant, Instant> timeWindow = getTimeWindowFromPeriod(customerSpace, timelinePeriod);
         query.setStartTimeStamp(timeWindow.getLeft());
         query.setEndTimeStamp(timeWindow.getRight());
-        log.info(String.format("Retrieving Contact activity data using query: %s | tenant=%s",
+
+        log.info(String.format("Retrieving %s activity data using query: %s | tenant=%s", entity.name(),
                 JsonUtils.serialize(query), CustomerSpace.shortenCustomerSpace(customerSpace)));
-        return activityProxy.getData(customerSpace, null, query);
+
+        return query;
     }
 
     private Pair<Instant, Instant> getTimeWindowFromPeriod(String customerSpace, String timelinePeriod) {
