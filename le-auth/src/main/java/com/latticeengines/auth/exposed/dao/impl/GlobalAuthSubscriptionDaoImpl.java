@@ -10,10 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.dao.GlobalAuthSubscriptionDao;
-import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSubscription;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 
 @Component("globalAuthSubscriptionDao")
 public class GlobalAuthSubscriptionDaoImpl extends BaseDaoImpl<GlobalAuthSubscription>
@@ -40,29 +38,6 @@ public class GlobalAuthSubscriptionDaoImpl extends BaseDaoImpl<GlobalAuthSubscri
             return null;
         } else {
             return (GlobalAuthSubscription) list.get(0);
-        }
-    }
-
-    @Override
-    public List<GlobalAuthUser> findUsersByTenantId(String tenantId) {
-
-        Session session = sessionFactory.getCurrentSession();
-        Class<GlobalAuthSubscription> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where Tenant_ID = :tenantId", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setParameter("tenantId", tenantId);
-        List list = query.list();
-        List<GlobalAuthUser> users = new ArrayList<>();
-        if (list.size() == 0) {
-            return null;
-        } else {
-            for (int i = 0; i < list.size(); i++) {
-                GlobalAuthSubscription subscription = (GlobalAuthSubscription) list.get(i);
-                GlobalAuthUser gaUser = HibernateUtils
-                        .inflateDetails(subscription.getUserTenantRight().getGlobalAuthUser());
-                users.add(gaUser);
-            }
-            return users;
         }
     }
 

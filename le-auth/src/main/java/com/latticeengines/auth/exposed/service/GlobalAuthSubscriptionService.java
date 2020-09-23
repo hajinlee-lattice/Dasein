@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthSubscription;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 
 public interface GlobalAuthSubscriptionService {
-
-    List<GlobalAuthUser> getUsersByTenantId(String tenantId);
 
     List<String> getEmailsByTenantId(String tenantId);
 

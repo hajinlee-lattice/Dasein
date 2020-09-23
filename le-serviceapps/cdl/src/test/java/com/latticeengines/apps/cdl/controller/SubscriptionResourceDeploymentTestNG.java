@@ -15,7 +15,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.proxy.exposed.cdl.SubscriptionProxy;
 
@@ -26,9 +25,6 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Inject
     private SubscriptionProxy subscriptionProxy;
 
-    @Inject
-    private GlobalAuthSubscriptionService subscriptionService;
-
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
@@ -37,54 +33,52 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Test(groups = "deployment-app")
     public void testGet() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        List<String> emails = getEmails(customerSpace);
-        Assert.assertEquals(emails.size(), 0);
+        Assert.assertEquals(0, getEmailsCount(customerSpace));
 
         Set<String> validEmails = initEmailSet(new String[] { "ga_dev@lattice-engines.com" });
         subscriptionProxy.saveByEmailsAndTenantId(validEmails, customerSpace.getTenantId(),
                 customerSpace.getContractId());
-        emails = getEmails(customerSpace);
-        Assert.assertEquals(emails.size(), 1);
+        Assert.assertEquals(1, getEmailsCount(customerSpace));
     }
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGet" })
     public void testCreate() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String[] validEmailArray = { "pls-super-admin-tester@lattice-engines.com", "ysong@lattice-engines.com",
                 "bross@lattice-engines.com" };
-        List<String> emails = getEmails(customerSpace);
-        int count = emails == null ? 0 : emails.size();
         Set<String> validEmails = initEmailSet(validEmailArray);
-        int savedCount = subscriptionProxy
-                .saveByEmailsAndTenantId(validEmails, customerSpace.getTenantId(), customerSpace.getSpaceId()).size();
-        Assert.assertEquals(savedCount, 3);
-        emails = getEmails(customerSpace);
-        count += savedCount;
-        Assert.assertEquals(emails.size(), count);
+        int expectedCount = getEmailsCount(customerSpace);
 
-        Set<String> inValidEmailList = initEmailSet(new String[] { "invalid@lattice-engines.com" });
-        savedCount = subscriptionProxy
-                .saveByEmailsAndTenantId(inValidEmailList, customerSpace.getTenantId(), customerSpace.getSpaceId())
-                .size();
-        Assert.assertEquals(savedCount, 0);
-        emails = getEmails(customerSpace);
-        Assert.assertEquals(emails.size(), count);
+        List<String> savedEmails = subscriptionProxy.saveByEmailsAndTenantId(validEmails, customerSpace.getTenantId(),
+                customerSpace.getContractId());
+        Assert.assertEquals(savedEmails.size(), validEmailArray.length);
+        expectedCount += savedEmails.size();
+        Assert.assertEquals(expectedCount, getEmailsCount(customerSpace));
+
+        Set<String> inValidEmails = initEmailSet(new String[] { "invalid@lattice-engines.com" });
+        savedEmails = subscriptionProxy.saveByEmailsAndTenantId(inValidEmails, customerSpace.getTenantId(),
+                customerSpace.getContractId());
+        Assert.assertEquals(0, savedEmails.size());
+        Assert.assertEquals(expectedCount, getEmailsCount(customerSpace));
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testCreate")
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreate" })
     public void testDelete() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        List<String> emails = getEmails(customerSpace);
+        List<String> emails = subscriptionProxy.getEmailsByTenantId(customerSpace.getTenantId(),
+                customerSpace.getContractId());
         Assert.assertTrue(CollectionUtils.isNotEmpty(emails));
         for (String email : emails) {
-            subscriptionProxy.deleteByEmailAndTenantId(email, customerSpace.getTenantId(), customerSpace.getSpaceId());
+            subscriptionProxy.deleteByEmailAndTenantId(email, customerSpace.getTenantId(),
+                    customerSpace.getContractId());
         }
-        emails = getEmails(customerSpace);
-        Assert.assertTrue(CollectionUtils.isEmpty(emails));
+        Assert.assertEquals(0, getEmailsCount(customerSpace));
     }
 
-    private List<String> getEmails(CustomerSpace customerSpace) {
-        return subscriptionProxy.getEmailsByTenantId(customerSpace.getTenantId(), customerSpace.getContractId());
+    private int getEmailsCount(CustomerSpace customerSpace) {
+        List<String> emails = subscriptionProxy.getEmailsByTenantId(customerSpace.getTenantId(),
+                customerSpace.getContractId());
+        return CollectionUtils.isEmpty(emails) ? 0 : emails.size();
     }
 
     private Set<String> initEmailSet(String[] array) {

@@ -14,7 +14,6 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSubscriptionEntit
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSubscription;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 @Component("globalAuthSubscription")
@@ -39,12 +38,6 @@ public class GlobalAuthSubscriptionEntityMgrImpl extends BaseEntityMgrImpl<Globa
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthSubscription findByUserTenantRight(GlobalAuthUserTenantRight userTenantRight) {
         return gaSubscriptionDao.findByField("UserTenantRight_ID", userTenantRight.getPid());
-    }
-
-    @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<GlobalAuthUser> findUsersByTenantId(String tenantId) {
-        return gaSubscriptionDao.findUsersByTenantId(tenantId);
     }
 
     @Override

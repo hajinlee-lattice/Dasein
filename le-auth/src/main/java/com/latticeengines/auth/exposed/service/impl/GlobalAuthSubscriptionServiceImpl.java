@@ -17,7 +17,6 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEn
 import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSubscription;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 @Component("globalAuthSubscriptionService")
@@ -35,21 +34,16 @@ public class GlobalAuthSubscriptionServiceImpl implements GlobalAuthSubscription
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Override
-    public List<GlobalAuthUser> getUsersByTenantId(String tenantId) {
-        return globalAuthSubscriptionEntityMgr.findUsersByTenantId(tenantId);
-    }
-
-    @Override
     public List<String> getEmailsByTenantId(String tenantId) {
         return globalAuthSubscriptionEntityMgr.findEmailsByTenantId(tenantId);
     }
 
     @Override
-    // return emails that are not valid
+    // return emails that are successfully created or already subscribed
     public List<String> createByEmailsAndTenantId(Set<String> emails, String tenantId) {
         List<String> successEmail = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(emails)) {
-            GlobalAuthTenant gaTenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        GlobalAuthTenant gaTenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        if (CollectionUtils.isNotEmpty(emails) && gaTenantData != null) {
             List<GlobalAuthSubscription> subscriptionList = new ArrayList<>();
             List<GlobalAuthUserTenantRight> userTenantRightLists = globalAuthUserTenantRightEntityMgr
                     .findByEmailsAndTenantId(emails, gaTenantData.getPid());

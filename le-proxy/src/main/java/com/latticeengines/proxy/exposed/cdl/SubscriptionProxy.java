@@ -33,10 +33,10 @@ public class SubscriptionProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public void deleteByEmailAndTenantId(String email, String tenantId, String contractId) {
-        String url = constructUrl("/tenant/{tenantId}", tenantId);
+        String url = constructUrl("/subscription/tenant/{tenantId}", tenantId);
         List<String> params = new ArrayList<>();
-        params.add("contractId=" + email);
-        params.add("email=" + contractId);
+        params.add("contractId=" + contractId);
+        params.add("email=" + email);
         url += "?" + StringUtils.join(params, "&");
         delete("Delete subscription by email and tenantId", url);
     }
