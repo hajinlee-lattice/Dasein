@@ -313,7 +313,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
     }
 
     @Override
-    public void deleteS3ImportSystem(S3ImportSystem importSystem) {
+    public void deleteS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
         s3ImportSystemEntityMgr.delete(importSystem);
     }
 }

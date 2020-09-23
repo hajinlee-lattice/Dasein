@@ -26,5 +26,5 @@ public interface S3ImportSystemService {
 
     List<String> getAllS3ImportSystemIds(String customerSpace);
 
-    void deleteS3ImportSystem(S3ImportSystem importSystem);
+    void deleteS3ImportSystem(String customerSpace, S3ImportSystem importSystem);
 }

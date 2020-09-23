@@ -503,7 +503,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         sourceInfos.forEach(sourceInfo -> {
             DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, sourceInfo.getPid());
             mdService.deleteImportTableAndCleanup(CustomerSpace.parse(customerSpace), dataFeedTask.getImportTemplate().getName());
-            s3ImportSystemService.deleteS3ImportSystem(dataFeedTask.getImportSystem());
+            s3ImportSystemService.deleteS3ImportSystem(customerSpace, dataFeedTask.getImportSystem());
             dataFeedTaskEntityMgr.delete(dataFeedTask);
         });
     }
