@@ -37,7 +37,8 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     private static final String[] FIELDS1 = { InterfaceName.Id.name(), "AID1", "__template__" };
     private static final String[] FIELDS1_EXPECTED = { InterfaceName.Id.name(), "AID1", "__template__" };
     private static final String[] FIELDS3 = { InterfaceName.Id.name(), "AID1", "AID2" };
-    private static final String[] FIELDS4 = { InterfaceName.Id.name(), InterfaceName.AccountId.name(), "AID1", "AID2" };
+    private static final String[] FIELDS4 = { InterfaceName.Id.name(), "prefix__" + InterfaceName.AccountId.name(),
+            "AID1", "AID2" };
 
     @Test(groups = "functional")
     public void test() {
@@ -100,6 +101,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
+            System.out.println(record);
             verifyTargetData(FIELDS1_EXPECTED, expectedMap, record, "__template__");
             rows++;
         }
@@ -249,7 +251,9 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         return true;
     }
 
-    // Test dedup imports -- not overwrite by null
+    // Test
+    // 1: dedup imports -- not overwrite by null
+    // 2: Id columns with a template prefix and ANONYMOUS value
     private void test4() {
         List<String> orderedInput = uploadDataTest4();
         log.info("Inputs for test4: {}", String.join(",", orderedInput));
@@ -301,14 +305,15 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         orderedInput.add(uploadHdfsDataUnit(data, fields));
 
         data = new Object[][] { //
-                // Dedup across multi imports
+                // Dedup across multi imports, test ANONYMOUS for non-id column
                 { "6", null, null, null }, //
-                { "6", DataCloudConstants.ENTITY_ANONYMOUS_ID, null, null }, //
+                { "6", DataCloudConstants.ENTITY_ANONYMOUS_ID, DataCloudConstants.ENTITY_ANONYMOUS_ID, null }, //
 
                 { "7", null, "B", null }, //
                 { "7", "A", null, 7 }, //
 
-                { "8", null, null, null }, //
+                // test ANONYMOUS for non-id column
+                { "8", null, DataCloudConstants.ENTITY_ANONYMOUS_ID, 8 }, //
         };
         orderedInput.add(uploadHdfsDataUnit(data, fields));
         return orderedInput;
@@ -326,9 +331,9 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
                 { "3", "A", "B", 3 }, //
                 { "4", "A", "B", 4 }, //
                 { "5", DataCloudConstants.ENTITY_ANONYMOUS_ID, null, null }, //
-                { "6", "A", "B", 6 }, //
+                { "6", "A", DataCloudConstants.ENTITY_ANONYMOUS_ID, 6 }, //
                 { "7", "A", "B", 7 }, //
-                { "8", DataCloudConstants.ENTITY_ANONYMOUS_ID, null, null }, //
+                { "8", DataCloudConstants.ENTITY_ANONYMOUS_ID, DataCloudConstants.ENTITY_ANONYMOUS_ID, 8 }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));

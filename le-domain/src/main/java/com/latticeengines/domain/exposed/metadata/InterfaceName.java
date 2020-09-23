@@ -175,13 +175,13 @@ public enum InterfaceName {
     __Row_Count__, // total row count in activity store aggregation
     __Composite_Key__; // primary key for internal use
 
-    private static final Set<String> EntityIds = ImmutableSet.of( //
+    private static final Set<String> KeyIds = ImmutableSet.of( //
             InterfaceName.EntityId.name(), //
             InterfaceName.AccountId.name(), //
             InterfaceName.ContactId.name() //
     );
 
-    private static final Set<String> EntityIdsUC = ImmutableSet.of( //
+    private static final Set<String> KeyIdsUC = ImmutableSet.of( //
             InterfaceName.EntityId.name().toUpperCase(), //
             InterfaceName.AccountId.name().toUpperCase(), //
             InterfaceName.ContactId.name().toUpperCase() //
@@ -193,11 +193,13 @@ public enum InterfaceName {
      * @param id
      * @return
      */
-    public static boolean isEntityId(String id, boolean caseSensitive) {
+    public static boolean isKeyId(String id, boolean caseSensitive) {
         if (caseSensitive) {
-            return EntityIds.contains(id);
+            // Stripe out the prefix, if it exists
+            String[] strs = id.split("__");
+            return KeyIds.contains(strs[strs.length - 1]);
         } else {
-            return id != null && EntityIdsUC.contains(id.toUpperCase());
+            return id != null && KeyIdsUC.contains(id.toUpperCase());
         }
     }
 }
