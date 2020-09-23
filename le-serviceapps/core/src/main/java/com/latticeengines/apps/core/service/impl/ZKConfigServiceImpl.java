@@ -242,8 +242,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public Boolean getDisableRollupFlag(CustomerSpace customerSpace, String componentName) {
-        Boolean rollupReport = null;
+    public boolean isRollupDisabled(CustomerSpace customerSpace, String componentName) {
+        boolean rollupReport = false;
         try {
             Path rollupPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     componentName).append(DCP_DISABLE_ROLLUP);

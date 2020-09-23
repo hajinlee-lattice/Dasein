@@ -35,7 +35,7 @@ public class DCPRollupDataReportJobBean implements QuartzJobBean {
         DCPRollupDataReportJobCallable.Builder builder  = new DCPRollupDataReportJobCallable.Builder();
         builder.jobArguments(jobArguments).dataReportEntityMgr(dataReportEntityMgr)
                 .dcpDataReportWorkflowSubmitter(dcpDataReportWorkflowSubmitter)
-                .ZKConfigService(zkConfigService);
+                .zkConfigService(zkConfigService);
         return new DCPRollupDataReportJobCallable(builder);
     }
 }

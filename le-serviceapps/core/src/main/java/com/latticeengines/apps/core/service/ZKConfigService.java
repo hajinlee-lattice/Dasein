@@ -25,5 +25,5 @@ public interface ZKConfigService {
 
     String getCampaignLaunchEndPointUrl(CustomerSpace customerSpace, String componentName);
 
-    Boolean getDisableRollupFlag(CustomerSpace customerSpace, String componentName);
+    boolean isRollupDisabled(CustomerSpace customerSpace, String componentName);
 }
