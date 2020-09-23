@@ -23,7 +23,7 @@ public class AppendConfigProxyImpl extends MicroserviceRestApiProxy implements A
 
     private DataBlockEntitlementContainer filterDataBlockContainer(DataBlockEntitlementContainer container,
             String domainName, String recordType) {
-        if (domainName.isEmpty() && recordType.isEmpty()) {
+        if (container == null || (domainName.isEmpty() && recordType.isEmpty())) {
             return container;
         } else {
             List<DataBlockEntitlementContainer.Domain> resultDomains = new ArrayList();
