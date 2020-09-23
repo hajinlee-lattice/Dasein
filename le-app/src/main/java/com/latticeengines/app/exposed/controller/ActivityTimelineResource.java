@@ -132,9 +132,9 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving total new web activities count of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        int newWebActivitiiesCount = activityTimelineService.getNewWebActivitiesCount(accountId, timelinePeriod,
+        int total = activityTimelineService.getNewWebActivitiesCount(accountId, timelinePeriod,
                 getOrgInfo(authToken));
-        return newWebActivitiiesCount;
+        return total;
     }
 
     @GetMapping("/accounts/{accountId:.+}/newIdentifiedContacts")
@@ -151,9 +151,9 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving total new identified contacts count of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        int newIdentifiedContacts = activityTimelineService.getIdentifiedContactsCount(accountId, timelinePeriod,
+        int total = activityTimelineService.getIdentifiedContactsCount(accountId, timelinePeriod,
                 getOrgInfo(authToken));
-        return newIdentifiedContacts;
+        return total;
     }
 
     @GetMapping("/accounts/{accountId:.+}/newEngagements")
@@ -170,9 +170,9 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving total new engagements count of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        int newEngagements = activityTimelineService.getNewEngagementsCount(accountId, timelinePeriod,
+        int total = activityTimelineService.getNewEngagementsCount(accountId, timelinePeriod,
                 getOrgInfo(authToken));
-        return newEngagements;
+        return total;
     }
 
     @GetMapping("/accounts/{accountId:.+}/newOpportunities")
@@ -189,9 +189,9 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving total new opportunities count of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        int newOpportunities = activityTimelineService.getNewOpportunitiesCount(accountId, timelinePeriod,
+        int total = activityTimelineService.getNewOpportunitiesCount(accountId, timelinePeriod,
                 getOrgInfo(authToken));
-        return newOpportunities;
+        return total;
     }
 
     private Map<String, String> getOrgInfo(String token) {
