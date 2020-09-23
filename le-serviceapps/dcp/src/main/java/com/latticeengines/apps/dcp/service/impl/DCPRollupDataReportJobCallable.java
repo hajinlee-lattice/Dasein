@@ -69,8 +69,8 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
                     Date refreshDate = pair.getRight();
                     CustomerSpace space = CustomerSpace.parse(ownerId);
                     // check the config in zk
-                    Boolean disableRollup = zkConfigService.isRollupDisabled(space, DCPComponent.componentName);
-                    if (Boolean.TRUE.equals(disableRollup)) {
+                    boolean disableRollup = zkConfigService.isRollupDisabled(space, DCPComponent.componentName);
+                    if (disableRollup) {
                         log.info("disable rollup for tenant {}", ownerId);
                         continue;
                     }
