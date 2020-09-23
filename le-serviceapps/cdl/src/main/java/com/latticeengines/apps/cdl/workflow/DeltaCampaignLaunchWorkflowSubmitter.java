@@ -91,9 +91,6 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
-            return null;
-        }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
                 ? "com/latticeengines/cdl/play/launch/s3/contact_display_names.csv"
                 : "com/latticeengines/cdl/play/launch/default/contact_display_names.csv";
@@ -102,9 +99,6 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
-            return null;
-        }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
                 ? "com/latticeengines/cdl/play/launch/s3/account_display_names.csv"
                 : "com/latticeengines/cdl/play/launch/default/account_display_names.csv";
