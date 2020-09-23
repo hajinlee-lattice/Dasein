@@ -4,9 +4,7 @@ import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImport
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.INGESTION_PERCENTAGE;
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.MATCH_PERCENTAGE;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -20,9 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
-import com.latticeengines.domain.exposed.dcp.DataReport;
-import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
@@ -191,23 +186,24 @@ public class SourceImportListener extends LEJobListener {
             dataReportProxy.copyDataReportToParent(tenantId, DataReportRecord.Level.Upload, uploadId);
             // update the report to be ready for rollup
             reportProxy.updateDataReport(tenantId, DataReportRecord.Level.Upload, uploadId);
-            Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(tenantId, uploadId);
-            DataReport report = reportProxy.getDataReport(tenantId, DataReportRecord.Level.Tenant, rootId);
-            long refreshTime = report.getRefreshTimestamp() == null ? 0L : report.getRefreshTimestamp();
-            long now = Instant.now().toEpochMilli();
-            boolean moreThan4HoursSinceRefresh = now - refreshTime > TimeUnit.HOURS.toMillis(4);
-            boolean shouldTriggerRollup = moreThan4HoursSinceRefresh && Boolean.FALSE.equals(hasUnterminalUploads);
-            log.info("last refresh time is {}, current time is {}, " + //
-                            "moreThan4HoursSinceRefresh={}, hasUnterminalUploads={}: shouldTriggerRollup={}", //
-                    refreshTime, now, moreThan4HoursSinceRefresh, hasUnterminalUploads, shouldTriggerRollup);
-            if (shouldTriggerRollup) {
-                DCPReportRequest request = new DCPReportRequest();
-                request.setMode(DataReportMode.UPDATE);
-                request.setLevel(DataReportRecord.Level.Tenant);
-                request.setRootId(rootId);
-                log.info("Sending request to rollup data report.");
-                reportProxy.rollupDataReport(tenantId, request);
-            }
+            // comment out the data report logic for now
+//            Boolean hasUnterminalUploads = uploadProxy.hasUnterminalUploads(tenantId, uploadId);
+//            DataReport report = reportProxy.getDataReport(tenantId, DataReportRecord.Level.Tenant, rootId);
+//            long refreshTime = report.getRefreshTimestamp() == null ? 0L : report.getRefreshTimestamp();
+//            long now = Instant.now().toEpochMilli();
+//            boolean moreThan4HoursSinceRefresh = now - refreshTime > TimeUnit.HOURS.toMillis(4);
+//            boolean shouldTriggerRollup = moreThan4HoursSinceRefresh && Boolean.FALSE.equals(hasUnterminalUploads);
+//            log.info("last refresh time is {}, current time is {}, " + //
+//                            "moreThan4HoursSinceRefresh={}, hasUnterminalUploads={}: shouldTriggerRollup={}", //
+//                    refreshTime, now, moreThan4HoursSinceRefresh, hasUnterminalUploads, shouldTriggerRollup);
+//            if (shouldTriggerRollup) {
+//                DCPReportRequest request = new DCPReportRequest();
+//                request.setMode(DataReportMode.UPDATE);
+//                request.setLevel(DataReportRecord.Level.Tenant);
+//                request.setRootId(rootId);
+//                log.info("Sending request to rollup data report.");
+//                reportProxy.rollupDataReport(tenantId, request);
+//            }
         }
     }
 }

@@ -1,5 +1,9 @@
 {
   "RootPath": "/",
   "Nodes": [
+    {
+      "Node": "DisableRollup",
+      "Data": false
+    }
   ]
 }
