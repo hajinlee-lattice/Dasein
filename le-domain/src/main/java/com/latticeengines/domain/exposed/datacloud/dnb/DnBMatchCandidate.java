@@ -26,6 +26,8 @@ public class DnBMatchCandidate {
         public static final String MatchDataProfile = "MatchDataProfile";
         public static final String NameMatchScore = "NameMatchScore";
         public static final String OperatingStatusText = "OperatingStatusText";
+        public static final String MatchPrimaryBusinessName = "MatchPrimaryBusinessName";
+        public static final String MatchIso2CountryCode = "MatchIso2CountryCode";
     }
 
     @JsonProperty("MatchType")
