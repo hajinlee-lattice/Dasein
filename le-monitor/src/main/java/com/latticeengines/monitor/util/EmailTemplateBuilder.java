@@ -109,6 +109,8 @@ public class EmailTemplateBuilder {
         PLS_EXPORT_ORPHAN_SUCCESS("pls_export_orphan_success.html"), //
 
         PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION("pls_always_on_campaign_expiration.html"), //
+        PLS_CAMPAIGN_FAILED("pls_campaign_failed.html"), //
+        PLS_CAMPAIGN_CANCELED("pls_campaign_canceled.html"), //
 
         PLS_CANCEL_ACTION_SUCCESS("pls_cancel_action_success.html"), //
         CDL_JOB_SUCCESS("cdl_job_success.html"), //

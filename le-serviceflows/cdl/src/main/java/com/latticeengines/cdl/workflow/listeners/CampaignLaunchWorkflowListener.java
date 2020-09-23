@@ -15,10 +15,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -29,6 +32,9 @@ public class CampaignLaunchWorkflowListener extends LEJobListener {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -52,6 +58,15 @@ public class CampaignLaunchWorkflowListener extends LEJobListener {
                 log.warn(String.format("CampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+                PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+                PlayLaunchChannel channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, playName,
+                        playLaunch.getId());
+                try {
+                    emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(), customerSpace,
+                            channel.getUpdatedBy(), playLaunch);
+                } catch (Exception e) {
+                    log.error("Can not send play launch failed email: " + e.getMessage());
+                }
             } else {
                 log.info(String.format("CampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));

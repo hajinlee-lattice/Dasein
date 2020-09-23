@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEnti
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 
 @Component
 public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
@@ -31,6 +33,9 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
@@ -89,6 +94,17 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         } else {
             if (recordsProcessed.equals(totalRecords)) {
                 playLaunch.setLaunchState(LaunchState.Synced);
+            } else if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
+                playLaunch.setLaunchState(LaunchState.SyncFailed);
+            } else if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
+                playLaunch.setLaunchState(LaunchState.SyncFailed);
+                PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
+                try {
+                    emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(),
+                            MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
+                } catch (Exception e) {
+                    log.error("Can not send play launch failed email: " + e.getMessage());
+                }
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
             }

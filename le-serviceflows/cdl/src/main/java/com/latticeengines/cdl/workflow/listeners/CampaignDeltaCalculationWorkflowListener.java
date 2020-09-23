@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -27,6 +28,9 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Inject
 
@@ -73,6 +77,14 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                         channel.getCurrentLaunchedAccountUniverseTable(),
                         channel.getCurrentLaunchedContactUniverseTable()));
                 playProxy.updatePlayLaunchChannel(customerSpace, playId, channelId, channel, false);
+
+                PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playId, launchId);
+                try {
+                    emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(), customerSpace,
+                            channel.getUpdatedBy(), playLaunch);
+                } catch (Exception e) {
+                    log.error("Can not send play launch failed email: " + e.getMessage());
+                }
             }
         } catch (Exception e) {
             log.error("Failed to execute Listener for CampaignDeltaCalculationWorkflow successfully", e);

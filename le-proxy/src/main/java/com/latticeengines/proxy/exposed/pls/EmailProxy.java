@@ -6,6 +6,8 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface EmailProxy {
 
@@ -31,4 +33,8 @@ public interface EmailProxy {
     void sendPlsCreateModelEmail(String result, String tenantId, AdditionalEmailInfo info);
 
     void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
+
+    void sendPlayLaunchErrorEmail(String result, String tenantId, String user, PlayLaunch playLaunch);
+
+    boolean sendPlayLaunchChannelExpiringEmail(String tenantId, PlayLaunchChannel playLaunchChannel);
 }

@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Campaign Expiration</title>
+    <title>Campaign Failed</title>
 
 
     <style type="text/css">
@@ -76,7 +76,7 @@
                                     <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
                                         <p style="margin: 20px;">Hi {{firstname}},</p>
                                         <p style="margin: 20px;">
-                                            We failed to launch your campaign due to a technical issue. If you would like to continue the launch, please go back to Lattice and update your <a href={{launchSettingsLink}}>launch settings</a>.
+                                           We failed to launch your campaign due to a technical issue. Please contact your D&B Customer Success Manager to resolve the issue. The detailed launch report is available from <a href={{launchHistoryLink}}>Launch History</a>.
                                         </p>
                                         <p style="margin: 40px;">
                                             Campaign Name: <b>{{playDisplayName}}</b>
@@ -85,7 +85,13 @@
                                             Channel: <b>{{externalSystemName}}</b>
                                         </p>
                                         <p style="margin: 40px;">
-                                            Last Scheduled Launch Time: <b>{{nextScheduledLaunch}}</b>
+                                            Status: <b>{{playLaunchState}}</b>
+                                        </p>
+                                        <p style="margin: 40px;">
+                                            Campaign Start Date: <b>{{playLaunchCreated}}</b>
+                                        </p>
+                                        <p style="margin: 40px;">
+                                            Campaign Completion Date: <b>{{currentTime}}</b>
                                         </p>
                                         </br><p style="margin: 20px;">Best regards, </p>
                                         <p style="margin: 20px;">D&B Lattice Team</p>

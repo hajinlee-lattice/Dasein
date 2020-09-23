@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("entityStateCorrectionService")
@@ -31,6 +32,9 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
 
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -172,13 +176,20 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
 
     private boolean processInvalidLaunches(List<PlayLaunch> launchesToProcess, LaunchState launchState) {
         if (launchesToProcess.size() > 0) {
-            launchesToProcess.forEach(l -> {
+            launchesToProcess.forEach(launch -> {
                 if (launchState != null) {
-                    l.setLaunchState(launchState);
+                    launch.setLaunchState(launchState);
                 }
-                MultiTenantContext.setTenant(l.getTenant());
-                recoverLaunchUniverse(l.getLaunchId());
-                playLaunchService.update(l);
+                MultiTenantContext.setTenant(launch.getTenant());
+                recoverLaunchUniverse(launch.getLaunchId());
+                playLaunchService.update(launch);
+                PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launch.getId());
+                try {
+                    emailProxy.sendPlayLaunchErrorEmail(launch.getLaunchState().name(), launch.getTenant().getId(),
+                            channel.getUpdatedBy(), launch);
+                } catch (Exception e) {
+                    log.error("Can not send play launch failed email: " + e.getMessage());
+                }
                 MultiTenantContext.clearTenant();
             });
             return true;
