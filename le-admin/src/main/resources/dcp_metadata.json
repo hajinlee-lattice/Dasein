@@ -1,2 +1,6 @@
 {
+  "RootPath": "/",
+  "Nodes": [
+    { "Node": "DisableRollup", "Data": {"Type": "boolean", "Required": false}}
+    ]
 }

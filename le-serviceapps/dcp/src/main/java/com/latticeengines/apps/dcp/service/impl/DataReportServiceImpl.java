@@ -363,6 +363,7 @@ public class DataReportServiceImpl implements DataReportService {
         return convertRecordToDataReport(dataReportRecord);
     }
 
+    @Override
     public void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
         Set<Long> idToBeRemoved = new HashSet<>();
         switch (level) {
@@ -397,6 +398,7 @@ public class DataReportServiceImpl implements DataReportService {
             // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
             Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
             if (CollectionUtils.isEmpty(projectIds)) {
+                log.info("mark ready for rollup to false for {}", customerSpace);
                 Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
                 dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
             }
