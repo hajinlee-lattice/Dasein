@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -39,11 +39,8 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         List<String> blockIds = new ArrayList();
         Map<String, DataBlock> blockIdToDataBlock = new HashMap<>();
 
-        for(DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-            List<String> domains = domain.getRecordTypes()
-                    .entrySet()
-                    .stream()
-                    .map(entry -> entry.getValue())
+        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+            List<String> domains = domain.getRecordTypes().entrySet().stream().map(entry -> entry.getValue())
                     .map(blockList -> blockList.stream().map(block -> block.getBlockId()).collect(Collectors.toList()))
                     .collect(ArrayList::new, List::addAll, List::addAll);
 
@@ -59,18 +56,13 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         return blockIdToDataBlock;
     }
 
-    private DataBlockEntitlementContainer enrichContainerWithDataBlocks(
-            DataBlockEntitlementContainer container,
+    private DataBlockEntitlementContainer enrichContainerWithDataBlocks(DataBlockEntitlementContainer container,
             Map<String, DataBlock> blockIdToDataBlock) {
-        for(DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-            List<DataBlockEntitlementContainer.Block> blocks = domain
-                    .getRecordTypes()
-                    .entrySet()
-                    .stream()
-                    .map(entry -> entry.getValue())
-                    .collect(ArrayList::new, List::addAll, List::addAll);
+        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+            List<DataBlockEntitlementContainer.Block> blocks = domain.getRecordTypes().entrySet().stream()
+                    .map(entry -> entry.getValue()).collect(ArrayList::new, List::addAll, List::addAll);
 
-            for(DataBlockEntitlementContainer.Block block : blocks) {
+            for (DataBlockEntitlementContainer.Block block : blocks) {
                 block.setDataBlock(blockIdToDataBlock.get(block.getBlockId()));
             }
         }
@@ -79,7 +71,8 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     }
 
     @Override
-    public DataBlockEntitlementContainer enrichEntitlementContainerWithElements(DataBlockEntitlementContainer container) {
+    public DataBlockEntitlementContainer enrichEntitlementContainerWithElements(
+            DataBlockEntitlementContainer container) {
         Map<String, DataBlock> blockIdToDataBlock = getContainerDataBlocks(container);
         return enrichContainerWithDataBlocks(container, blockIdToDataBlock);
     }
@@ -100,7 +93,8 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     public List<DataBlock> getBlockElements(List<String> blockIds) {
         List<DataBlock> blockList = _self.getBlockElementsFromDistributedCache();
         if (CollectionUtils.isNotEmpty(blockIds)) {
-            return blockList.stream().filter(block -> blockIds.contains(block.getBlockId())).collect(Collectors.toList());
+            return blockList.stream().filter(block -> blockIds.contains(block.getBlockId()))
+                    .collect(Collectors.toList());
         } else {
             return blockList;
         }
