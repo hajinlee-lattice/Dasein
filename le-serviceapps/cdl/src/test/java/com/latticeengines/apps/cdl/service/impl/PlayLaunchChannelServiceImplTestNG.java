@@ -252,10 +252,10 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
             return true;
         });
 
-        // Remove test launch univers IDs since they don't actually exist
+        // Remove test launch universe IDs since they don't actually exist
         playLaunchChannel1.setCurrentLaunchedAccountUniverseTable(null);
         playLaunchChannel1.setPreviousLaunchedAccountUniverseTable(null);
-        playLaunchChannelService.update(play.getName(), playLaunchChannel1)
+        playLaunchChannelService.update(play.getName(), playLaunchChannel1);
 
         retry.execute(ctx -> {
             Assert.assertNull(playLaunchChannel1.getCurrentLaunchedAccountUniverseTable());
