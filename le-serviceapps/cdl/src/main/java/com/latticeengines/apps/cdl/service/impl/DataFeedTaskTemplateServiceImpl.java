@@ -2,10 +2,10 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityTypeId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelNameId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +73,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.AttributeLengthValidator;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -608,6 +612,59 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             });
         }
         return new ArrayList<>(templateUUIDs);
+    }
+
+    @Override
+    public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
+                                            boolean nullable) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
+        if (dataFeedTask == null) {
+            throw new IllegalArgumentException("Cannot find data feed task with uniqueId " + uniqueTaskId);
+        }
+        if (dataFeedTask.getDataFeedTaskConfig() == null) {
+            DataFeedTaskConfig config = new DataFeedTaskConfig();
+            config.addTemplateValidator(getAttributeLengthValidator(attrName, length, nullable));
+            dataFeedTask.setDataFeedTaskConfig(config);
+
+        } else {
+            if (CollectionUtils.isNotEmpty(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators())) {
+                for (TemplateValidator validator : dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()) {
+                    if (validator instanceof AttributeLengthValidator) {
+                        AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
+                        if (lengthValidator.getAttributeName().equalsIgnoreCase(attrName)) {
+                            throw new IllegalArgumentException("Already set length validator for attribute " + attrName);
+                        }
+                    }
+                }
+            }
+            dataFeedTask.getDataFeedTaskConfig().addTemplateValidator(getAttributeLengthValidator(attrName, length, nullable));
+        }
+        dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, true);
+    }
+
+    @Override
+    public void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter) {
+        Preconditions.checkNotNull(simpleValueFilter);
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
+        if (dataFeedTask == null) {
+            throw new IllegalArgumentException("Cannot find data feed task with uniqueId " + uniqueTaskId);
+        }
+        if (dataFeedTask.getDataFeedTaskConfig() == null) {
+            DataFeedTaskConfig config = new DataFeedTaskConfig();
+            config.addTemplateValidator(simpleValueFilter);
+            dataFeedTask.setDataFeedTaskConfig(config);
+        } else {
+            dataFeedTask.getDataFeedTaskConfig().addTemplateValidator(simpleValueFilter);
+        }
+        dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, true);
+    }
+
+    private AttributeLengthValidator getAttributeLengthValidator(String attrName, int length, boolean nullable) {
+        AttributeLengthValidator lengthValidator = new AttributeLengthValidator();
+        lengthValidator.setAttributeName(attrName);
+        lengthValidator.setLength(length);
+        lengthValidator.setNullable(nullable);
+        return lengthValidator;
     }
 
     private List<String> getDependingTemplate(String customerSpace, String uniqueTaskId, Set<String> systemIdSet) {

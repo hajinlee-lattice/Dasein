@@ -58,6 +58,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
 import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
@@ -431,7 +432,10 @@ public class VdbTableImportServiceImpl extends ImportService {
                 context.getProperty(ImportProperty.DUPLICATE_ROWS, Map.class).put(table.getName(), 0L);
                 continue;
             }
-
+            DataFeedTaskConfig taskConfig = null;
+            if (context.getProperty(ImportProperty.IMPORT_VALIDATORS, Map.class).containsKey(table.getName())) {
+                taskConfig = (DataFeedTaskConfig) context.getProperty(ImportProperty.IMPORT_VALIDATORS, Map.class).get(table.getName());
+            }
             long startTime = System.currentTimeMillis();
             try {
                 String queryDataUrl = vdbConnectorConfiguration.getGetQueryDataEndpoint();
@@ -498,7 +502,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                                     yarnConfiguration, businessEntity);
                             VdbDataProcessCallable callable = getDataProcessCallable(startRow,
                                     recordsPerExtractByEntity, avroFileName, targetPath,
-                                    businessEntity != BusinessEntity.Transaction, table, yarnConfiguration);
+                                    businessEntity != BusinessEntity.Transaction, table, yarnConfiguration, taskConfig);
                             callable.addDataFile(dataFileName);
                             log.info(String.format("Add %s datafile in queue. ", dataFileName));
                             startRow += rowsToGet;
@@ -610,7 +614,7 @@ public class VdbTableImportServiceImpl extends ImportService {
 
     private VdbDataProcessCallable getDataProcessCallable(int startRow, int recordsPerExtract, String avroFileName,
                                                           String extractPath, boolean needDedup, Table table,
-                                                          Configuration yarnConfiguration) {
+                                                          Configuration yarnConfiguration, DataFeedTaskConfig taskConfig) {
         int index = startRow / recordsPerExtract;
         if (callableMap.containsKey(index)) {
             return callableMap.get(index);
@@ -619,7 +623,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 callableMap.get(index - 1).setStop(true);
             }
             VdbDataProcessCallable callable = getDataProcessCallable(avroFileName, extractPath, needDedup, table,
-                    yarnConfiguration);
+                    yarnConfiguration, taskConfig);
             callableMap.put(index, callable);
             processFutureMap.put(index, taskExecutor.submit(callable));
             return callable;
@@ -627,7 +631,8 @@ public class VdbTableImportServiceImpl extends ImportService {
     }
 
     private VdbDataProcessCallable getDataProcessCallable(String avroFileName, String extractPath, boolean needDedup,
-                                                        Table table, Configuration yarnConfiguration) {
+                                                          Table table, Configuration yarnConfiguration,
+                                                          DataFeedTaskConfig taskConfig) {
         VdbDataProcessCallable.Builder builder = new VdbDataProcessCallable.Builder();
         Queue<String> fileQueue = new ConcurrentLinkedDeque<>();
         builder.processorId(NamingUtils.uuid("VdbDataProcessor"))
@@ -639,7 +644,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                 .table(table)
                 .uniqueIds(uniqueIds)
                 .vdbValueConverter(new VdbValueConverter())
-                .yarnConfiguration(yarnConfiguration);
+                .yarnConfiguration(yarnConfiguration)
+                .dataFeedTaskConfig(taskConfig);
         return new VdbDataProcessCallable(builder);
     }
 }
