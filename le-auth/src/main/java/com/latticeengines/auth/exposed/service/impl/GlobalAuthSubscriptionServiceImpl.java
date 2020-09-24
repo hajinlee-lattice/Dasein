@@ -1,6 +1,7 @@
 package com.latticeengines.auth.exposed.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,20 +45,28 @@ public class GlobalAuthSubscriptionServiceImpl implements GlobalAuthSubscription
         List<String> successEmail = new ArrayList<>();
         GlobalAuthTenant gaTenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (CollectionUtils.isNotEmpty(emails) && gaTenantData != null) {
-            List<GlobalAuthSubscription> subscriptionList = new ArrayList<>();
-            List<GlobalAuthUserTenantRight> userTenantRightLists = globalAuthUserTenantRightEntityMgr
-                    .findByEmailsAndTenantId(emails, gaTenantData.getPid());
-            GlobalAuthSubscription subscription;
-            for (GlobalAuthUserTenantRight userTenantRight : userTenantRightLists) {
-                if (globalAuthSubscriptionEntityMgr.findByUserTenantRight(userTenantRight) == null) {
-                    subscription = new GlobalAuthSubscription();
+            Set<String> existEmailSet = new HashSet<>(getEmailsByTenantId(tenantId));
+            Set<String> newEmailSet = new HashSet<>();
+            for (String email : emails) {
+                if (existEmailSet.contains(email)) {
+                    successEmail.add(email);
+                } else {
+                    newEmailSet.add(email);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(newEmailSet)) {
+                List<GlobalAuthSubscription> subscriptionList = new ArrayList<>();
+                List<GlobalAuthUserTenantRight> userTenantRightLists = globalAuthUserTenantRightEntityMgr
+                        .findByEmailsAndTenantId(newEmailSet, gaTenantData.getPid());
+                for (GlobalAuthUserTenantRight userTenantRight : userTenantRightLists) {
+                    GlobalAuthSubscription subscription = new GlobalAuthSubscription();
                     subscription.setTenantId(tenantId);
                     subscription.setUserTenantRight(userTenantRight);
                     subscriptionList.add(subscription);
+                    successEmail.add(userTenantRight.getGlobalAuthUser().getEmail());
                 }
-                successEmail.add(userTenantRight.getGlobalAuthUser().getEmail());
+                globalAuthSubscriptionEntityMgr.create(subscriptionList);
             }
-            globalAuthSubscriptionEntityMgr.create(subscriptionList);
         }
         return successEmail;
     }

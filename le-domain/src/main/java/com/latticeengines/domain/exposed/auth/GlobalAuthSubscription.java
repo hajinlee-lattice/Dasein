@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -23,7 +24,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalSubscription")
+@Table(name = "GlobalSubscription", indexes = { @Index(name = "IX_TENANT_ID", columnList = "Tenant_ID") })
 public class GlobalAuthSubscription extends BaseGlobalAuthObject implements HasPid {
 
     @Id
@@ -35,7 +36,7 @@ public class GlobalAuthSubscription extends BaseGlobalAuthObject implements HasP
 
     @JsonProperty("ga_user_tenant_right")
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "UserTenantRight_ID", nullable = false)
+    @JoinColumn(name = "UserTenantRight_ID", nullable = false, unique = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private GlobalAuthUserTenantRight gaUserTenantRight;
 

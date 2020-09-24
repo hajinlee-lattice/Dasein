@@ -17,7 +17,7 @@ CREATE PROCEDURE `UpdateSchema`()
       DROP TABLE if EXISTS `GlobalSubscription`;
       CREATE TABLE `GlobalSubscription` (
         `GlobalSubscription_ID` bigint(20) NOT NULL AUTO_INCREMENT,
-        `UserTenantRight_ID` bigint(20) NOT NULL,
+        `UserTenantRight_ID` bigint(20) NOT NULL UNIQUE,
         `Tenant_ID` VARCHAR(255) NOT NULL,
         `Creation_Date` datetime NOT NULL,
         `Last_Modification_Date` datetime NOT NULL,
@@ -25,6 +25,7 @@ CREATE PROCEDURE `UpdateSchema`()
         `Last_Modified_By` INT(11) NOT NULL,
         PRIMARY KEY (`GlobalSubscription_ID`)
       ) ENGINE=InnoDB;
+      CREATE INDEX IX_TENANT_ID on `GlobalSubscription` (`Tenant_ID`);
       ALTER TABLE `GlobalSubscription` ADD CONSTRAINT `FK_GlobalSubscription_UserTenantRightID_GlobalUserTenantRight` FOREIGN KEY (`UserTenantRight_ID`) REFERENCES `GlobalUserTenantRight` (`GlobalUserTenantRight_ID`) ON DELETE CASCADE;
   END //
 -- ##############################################################

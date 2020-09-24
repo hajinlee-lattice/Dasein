@@ -18,27 +18,23 @@ public class SubscriptionProxy extends MicroserviceRestApiProxy implements Proxy
         super("cdl");
     }
 
-    public List<String> getEmailsByTenantId(String tenantId, String contractId) {
+    public List<String> getEmailsByTenantId(String tenantId) {
         String url = constructUrl("/subscription/tenant/{tenantId}", tenantId);
-        url += String.format("?contractId=%s", contractId);
         List<?> list = get("Get subscription emails by tenantId", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }
 
-    public List<String> saveByEmailsAndTenantId(Set<String> emails, String tenantId, String contractId) {
+    public List<String> saveByEmailsAndTenantId(Set<String> emails, String tenantId) {
         String url = constructUrl("/subscription/tenant/{tenantId}", tenantId);
-        url += String.format("?contractId=%s", contractId);
         List<?> list = post("Create subscription by email list and tenantId", url, emails, List.class);
         return JsonUtils.convertList(list, String.class);
     }
 
-    public void deleteByEmailAndTenantId(String email, String tenantId, String contractId) {
+    public void deleteByEmailAndTenantId(String email, String tenantId) {
         String url = constructUrl("/subscription/tenant/{tenantId}", tenantId);
         List<String> params = new ArrayList<>();
-        params.add("contractId=" + contractId);
         params.add("email=" + email);
         url += "?" + StringUtils.join(params, "&");
         delete("Delete subscription by email and tenantId", url);
     }
-
 }

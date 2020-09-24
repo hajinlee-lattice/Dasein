@@ -50,17 +50,12 @@ public class GlobalAuthSubscriptionDaoImpl extends BaseDaoImpl<GlobalAuthSubscri
         query.setParameter("tenantId", tenantId);
         List list = query.list();
         List<String> emails = new ArrayList<>();
-        if (list.size() == 0) {
-            return null;
-        } else {
-            String email;
-            for (int i = 0; i < list.size(); i++) {
-                GlobalAuthSubscription subscription = (GlobalAuthSubscription) list.get(i);
-                email = subscription.getUserTenantRight().getGlobalAuthUser().getEmail();
-                emails.add(email);
-            }
-            return emails;
+        for (int i = 0; i < list.size(); i++) {
+            GlobalAuthSubscription subscription = (GlobalAuthSubscription) list.get(i);
+            String email = subscription.getUserTenantRight().getGlobalAuthUser().getEmail();
+            emails.add(email);
         }
+        return emails;
     }
 
 }

@@ -32,53 +32,54 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     @Test(groups = "deployment-app")
     public void testGet() {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        Assert.assertEquals(0, getEmailsCount(customerSpace));
-
+        String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
+        Assert.assertEquals(0, getEmailsCount(tenantId));
         Set<String> validEmails = initEmailSet(new String[] { "ga_dev@lattice-engines.com" });
-        subscriptionProxy.saveByEmailsAndTenantId(validEmails, customerSpace.getTenantId(),
-                customerSpace.getContractId());
-        Assert.assertEquals(1, getEmailsCount(customerSpace));
+        subscriptionProxy.saveByEmailsAndTenantId(validEmails, tenantId);
+        Assert.assertEquals(validEmails.size(), getEmailsCount(tenantId));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGet" })
     public void testCreate() {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         String[] validEmailArray = { "pls-super-admin-tester@lattice-engines.com", "ysong@lattice-engines.com",
                 "bross@lattice-engines.com" };
         Set<String> validEmails = initEmailSet(validEmailArray);
-        int expectedCount = getEmailsCount(customerSpace);
+        int expectedCount = getEmailsCount(tenantId);
 
-        List<String> savedEmails = subscriptionProxy.saveByEmailsAndTenantId(validEmails, customerSpace.getTenantId(),
-                customerSpace.getContractId());
-        Assert.assertEquals(savedEmails.size(), validEmailArray.length);
+        List<String> savedEmails = subscriptionProxy.saveByEmailsAndTenantId(validEmails, tenantId);
+        Assert.assertTrue(verityEmailsSaved(validEmails, tenantId));
         expectedCount += savedEmails.size();
-        Assert.assertEquals(expectedCount, getEmailsCount(customerSpace));
 
         Set<String> inValidEmails = initEmailSet(new String[] { "invalid@lattice-engines.com" });
-        savedEmails = subscriptionProxy.saveByEmailsAndTenantId(inValidEmails, customerSpace.getTenantId(),
-                customerSpace.getContractId());
+        savedEmails = subscriptionProxy.saveByEmailsAndTenantId(inValidEmails, tenantId);
         Assert.assertEquals(0, savedEmails.size());
-        Assert.assertEquals(expectedCount, getEmailsCount(customerSpace));
+        Assert.assertEquals(expectedCount, getEmailsCount(tenantId));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreate" })
     public void testDelete() {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        List<String> emails = subscriptionProxy.getEmailsByTenantId(customerSpace.getTenantId(),
-                customerSpace.getContractId());
+        String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
+        List<String> emails = subscriptionProxy.getEmailsByTenantId(tenantId);
         Assert.assertTrue(CollectionUtils.isNotEmpty(emails));
         for (String email : emails) {
-            subscriptionProxy.deleteByEmailAndTenantId(email, customerSpace.getTenantId(),
-                    customerSpace.getContractId());
+            subscriptionProxy.deleteByEmailAndTenantId(email, tenantId);
         }
-        Assert.assertEquals(0, getEmailsCount(customerSpace));
+        Assert.assertEquals(0, getEmailsCount(tenantId));
     }
 
-    private int getEmailsCount(CustomerSpace customerSpace) {
-        List<String> emails = subscriptionProxy.getEmailsByTenantId(customerSpace.getTenantId(),
-                customerSpace.getContractId());
+    private int getEmailsCount(String tenantId) {
+        List<String> emails = subscriptionProxy.getEmailsByTenantId(tenantId);
         return CollectionUtils.isEmpty(emails) ? 0 : emails.size();
+    }
+
+    private boolean verityEmailsSaved(Set<String> inputEmails, String tenantId) {
+        Set<String> subscriptEmails = new HashSet<>(subscriptionProxy.getEmailsByTenantId(tenantId));
+        for (String email : inputEmails) {
+            if (!subscriptEmails.contains(email))
+                return false;
+        }
+        return true;
     }
 
     private Set<String> initEmailSet(String[] array) {
