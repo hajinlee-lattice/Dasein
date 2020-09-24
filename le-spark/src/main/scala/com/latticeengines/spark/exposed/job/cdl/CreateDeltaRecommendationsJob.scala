@@ -82,6 +82,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       result = joinContacts(result, contactTable, contactCols, joinKey)
       contactNums += result.filter(col(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name()).isNotNull).count()
     } else {
+      result = result.withColumn(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name(), lit(null).cast(StringType))
       contactNums += 0L
     }
     dropJoinKeyIfNeeded(deltaCampaignLaunchSparkContext, joinKey, result)
