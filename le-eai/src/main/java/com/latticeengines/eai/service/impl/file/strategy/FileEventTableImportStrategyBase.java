@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.aws.elasticache.ElasticCacheService;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
@@ -65,12 +64,6 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Value("${cache.redis.command.timeout.min}")
-    private int redisTimeout;
-
-    @Value("${cache.local.redis}")
-    private boolean localRedis;
-
     @Value("${eai.import.csv.mappers.cores}")
     private int csvImportMapperCores;
 
@@ -82,9 +75,6 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Value("${aws.default.secret.key.encrypted}")
     private String awsSecretKey;
-
-    @Inject
-    private ElasticCacheService elastiCacheService;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -133,14 +123,12 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         } else {
             props.put("eai.id.column.name", idColumnName);
         }
-        props.put("eai.redis.timeout", String.valueOf(redisTimeout));
-        props.put("eai.redis.endpoint", elastiCacheService.getPrimaryEndpointAddress());
-        props.put("eai.redis.local", String.valueOf(localRedis));
         props.put("eai.import.use.s3.input", ctx.getProperty(ImportProperty.USE_S3_INPUT, String.class, "false"));
         props.put("eai.import.aws.s3.bucket", ctx.getProperty(ImportProperty.S3_BUCKET, String.class, ""));
         props.put("eai.import.aws.s3.object.key", ctx.getProperty(ImportProperty.S3_OBJECT_KEY, String.class, ""));
         props.put("eai.import.aws.s3.file.size", ctx.getProperty(ImportProperty.S3_FILE_SIZE, String.class, "0"));
         props.put("eai.import.detail.error", ctx.getProperty(ImportProperty.NEED_DETAIL_ERROR, String.class, "false"));
+        props.put("eai.import.validators", ctx.getProperty(ImportProperty.IMPORT_VALIDATORS, String.class, ""));
         props.put("eai.import.aws.region", awsRegion);
         props.put("eai.import.aws.access.key", CipherUtils.encrypt(awsAccessKey));
         props.put("eai.import.aws.secret.key", CipherUtils.encrypt(awsSecretKey));

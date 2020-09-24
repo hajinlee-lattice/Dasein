@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
 import com.latticeengines.domain.exposed.query.EntityType;
 
 public interface DataFeedTaskTemplateService {
@@ -152,4 +153,9 @@ public interface DataFeedTaskTemplateService {
      * @return All template UUIDs that being used by PA
      */
     List<String> getPAConsumedTemplates(String customerSpace);
+
+    void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
+                                     boolean nullable);
+
+    void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter);
 }
