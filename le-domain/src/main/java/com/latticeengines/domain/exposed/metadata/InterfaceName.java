@@ -167,7 +167,7 @@ public enum InterfaceName {
     Detail2, Detail1, EventTimestamp, EventType, StreamType, Source,
 
     // activity alert
-    AlertData, AlertName, //
+    AlertData, AlertName, CreationTimestamp, //
 
     PartitionKey, SortKey,
 

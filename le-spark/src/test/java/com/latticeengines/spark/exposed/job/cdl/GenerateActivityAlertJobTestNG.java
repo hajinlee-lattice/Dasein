@@ -2,14 +2,14 @@ package com.latticeengines.spark.exposed.job.cdl;
 
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_BUYER_INTENT;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_RESEARCH_INTENT;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_INTENT;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.DnbIntentData;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.WebVisit;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AlertData;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AlertName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CreationTimestamp;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PartitionKey;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SortKey;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.Detail1;
@@ -65,6 +65,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
     private static final List<Pair<String, Class<?>>> ALERT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(AlertName.name(), String.class), //
+            Pair.of(CreationTimestamp.name(), Long.class), //
             Pair.of(AlertData.name(), String.class) //
     );
 
@@ -76,8 +77,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, 10L);
         config.alertNameToQualificationPeriodDays.put(INC_WEB_ACTIVITY_ON_PRODUCT, 10L);
         config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, 10L);
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.SHOWN_BUYER_INTENT, 10L);
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.SHOWN_RESEARCH_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.SHOWN_INTENT, 10L);
         config.currentEpochMilli = 10L;
         config.masterAccountTimeLineIdx = 0;
 
@@ -189,11 +189,11 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
 
         counts.put(Pair.of("a8", RE_ENGAGED_ACTIVITY), 1);
 
-        counts.put(Pair.of("a4", SHOWN_RESEARCH_INTENT), 1);
-        counts.put(Pair.of("a8", SHOWN_RESEARCH_INTENT), 1);
-        counts.put(Pair.of("a3", SHOWN_BUYER_INTENT), 1);
-        counts.put(Pair.of("a5", SHOWN_BUYER_INTENT), 1);
-        counts.put(Pair.of("a6", SHOWN_BUYER_INTENT), 1);
+        counts.put(Pair.of("a3", SHOWN_INTENT), 1);
+        counts.put(Pair.of("a4", SHOWN_INTENT), 1);
+        counts.put(Pair.of("a5", SHOWN_INTENT), 1);
+        counts.put(Pair.of("a6", SHOWN_INTENT), 1);
+        counts.put(Pair.of("a8", SHOWN_INTENT), 1);
 
         return counts;
     }

@@ -36,16 +36,16 @@ CREATE PROCEDURE `UpdateSchema`()
 
       CREATE TABLE `ACTIVITY_ALERTS_CONFIG`
       (
-          `PID`                       bigint       not null auto_increment,
-          `ALERT_CATEGORY`            varchar(255) not null,
-          `ALERT_HEADER`              varchar(255) not null,
-          `ALERT_MESSAGE_TEMPLATE`    varchar(255) not null,
-          `CREATED`                   datetime     not null,
-          `NAME`                      varchar(255) not null,
-          `IS_ACTIVE`                 bit          not null,
-          `QUALIFICATION_PERIOD_DAYS` bigint       not null,
-          `UPDATED`                   datetime     not null,
-          `FK_TENANT_ID`              bigint       not null,
+          `PID`                       bigint        not null auto_increment,
+          `ALERT_CATEGORY`            varchar(255)  not null,
+          `ALERT_HEADER`              varchar(255)  not null,
+          `ALERT_MESSAGE_TEMPLATE`    varchar(1000) not null,
+          `CREATED`                   datetime      not null,
+          `NAME`                      varchar(255)  not null,
+          `IS_ACTIVE`                 bit           not null,
+          `QUALIFICATION_PERIOD_DAYS` bigint        not null,
+          `UPDATED`                   datetime      not null,
+          `FK_TENANT_ID`              bigint        not null,
           PRIMARY KEY (`PID`),
           UNIQUE KEY `UK_ALERT_NAME_TENANT` (`NAME`, `FK_TENANT_ID`)
       ) ENGINE = InnoDB;

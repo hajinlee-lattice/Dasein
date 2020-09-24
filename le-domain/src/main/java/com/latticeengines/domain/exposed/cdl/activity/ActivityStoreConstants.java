@@ -25,18 +25,18 @@ public final class ActivityStoreConstants {
         public static final String INC_WEB_ACTIVITY = "IncWebActivity";
         public static final String INC_WEB_ACTIVITY_ON_PRODUCT = "IncActivityOnProduct";
         public static final String RE_ENGAGED_ACTIVITY = "ReEngagedActivity";
-        public static final String SHOWN_BUYER_INTENT = "HasShownBuyIntent";
-        public static final String SHOWN_RESEARCH_INTENT = "HasShownResearchIntent";
+        public static final String SHOWN_INTENT = "HasShownIntent";
 
-        public static final String COL_ALERT_DATA = "alert";
-        public static final String COL_START_TIMESTAMP = "start_timestamp";
-        public static final String COL_END_TIMESTAMP = "end_timestamp";
-        public static final String COL_PAGE_VISITS = "page_visits";
-        public static final String COL_PAGE_NAME = "page_name";
-        public static final String COL_MODEL_NAME = "model_name";
-        public static final String COL_ACTIVE_CONTACTS = "active_contacts";
-        public static final String COL_PAGE_VISIT_TIME = "page_visit_time";
-        public static final String COL_PREV_PAGE_VISIT_TIME = "prev_page_visit_time";
+        public static final String COL_ALERT_DATA = "Data";
+        public static final String COL_START_TIMESTAMP = "StartTimestamp";
+        public static final String COL_END_TIMESTAMP = "EndTimestamp";
+        public static final String COL_PAGE_VISITS = "PageVisits";
+        public static final String COL_PAGE_NAME = "PageName";
+        public static final String COL_ACTIVE_CONTACTS = "ActiveContacts";
+        public static final String COL_PAGE_VISIT_TIME = "PageVisitTime";
+        public static final String COL_PREV_PAGE_VISIT_TIME = "PrevPageVisitTime";
+        public static final String COL_NUM_RESEARCH_INTENTS = "NumResearchIntents";
+        public static final String COL_NUM_BUY_INTENTS = "NumBuyIntents";
 
         public static final long RE_ENGAGED_QUIET_PERIOD_IN_DAYS = 30L;
     }

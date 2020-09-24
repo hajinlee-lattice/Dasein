@@ -9,13 +9,13 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Ale
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.{DnbIntentData, WebVisit}
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{AlertData, AlertName}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{AlertData, AlertName, CreationTimestamp}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityAlertJobConfig
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{coalesce, _}
-import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -50,6 +50,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
 
     val schema = StructType(
       StructField(accountId, StringType, nullable = false) ::
+        StructField(CreationTimestamp.name, LongType, nullable = false) ::
         StructField(AlertName.name, StringType, nullable = false) ::
         StructField(AlertData.name, StringType, nullable = false) :: Nil)
     val emptyAlertDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
@@ -74,10 +75,8 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
         case Alert.RE_ENGAGED_ACTIVITY =>
           Some(generateReEngagedActivity(timelineDf, startTimestamp, endTimestamp))
         // intent need data in all time range
-        case Alert.SHOWN_BUYER_INTENT =>
-          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp, buyingStage = true))
-        case Alert.SHOWN_RESEARCH_INTENT =>
-          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp, buyingStage = false))
+        case Alert.SHOWN_INTENT =>
+          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case _ => None
       }
 
@@ -104,7 +103,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
     addTimeRange(topPageVisitDf
       .join(contactCntDf, Seq(accountId))
       .filter(contactCntDf.col(activeContacts).gt(0)), startTime, endTime)
-      .select(col(accountId), packAlertData(activeContacts, pageVisit, pageName))
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, pageVisit, pageName))
   }
 
   def generateIncreasedWebActivityOnProductAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
@@ -114,7 +113,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
 
     // ones without any active contact
     addTimeRange(topPageVisitDf.join(contactCntDf, Seq(accountId), "leftanti"), startTime, endTime)
-      .select(col(accountId), packAlertData(pageVisit, pageName))
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageVisit, pageName))
   }
 
   def generateReEngagedActivity(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
@@ -147,11 +146,11 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
 
     // TODO maybe group by account and only issue one alert
     addTimeRange(reEngagedDf, startTime, endTime)
-      .select(col(accountId), packAlertData(pageName, pageVisitTime, prevPageVisitTime))
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageName, pageVisitTime, prevPageVisitTime))
   }
 
-  def generateShownIntentAlerts(
-                                 timelineDf: DataFrame, startTime: Long, endTime: Long, buyingStage: Boolean): DataFrame = {
+  def generateShownIntentAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
+    // FIXME remove when we are sure we don't need this
     val accWithVisitDf = timelineDf
       .filter(timelineDf.col(streamType).equalTo(WebVisit.name))
       .groupBy(accountId)
@@ -182,24 +181,21 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .groupBy(accountId)
       .agg(count("*").as(countCol))
 
+    val buyIntentCntCol = ActivityStoreConstants.Alert.COL_NUM_BUY_INTENTS
+    val researchIntentCntCol = ActivityStoreConstants.Alert.COL_NUM_RESEARCH_INTENTS
     // decide whether to show buying or researching stage in entire alert
-    val buyingIntentCntCol = coalesce(buyingIntentCntDf.col(countCol), lit(0))
-    val researchingIntentCntCol = coalesce(researchingIntentCntDf.col(countCol), lit(0))
-    // TODO change this formula based on product requirements
-    val showIntentFilter = if (buyingStage) {
-      buyingIntentCntCol.geq(researchingIntentCntCol)
-    } else {
-      researchingIntentCntCol.gt(buyingIntentCntCol)
-    }
+    val buyingIntentCntCol = coalesce(buyingIntentCntDf.col(countCol), lit(0).cast(LongType))
+    val researchingIntentCntCol = coalesce(researchingIntentCntDf.col(countCol), lit(0).cast(LongType))
 
     val alertDf = buyingIntentCntDf
       .join(researchingIntentCntDf, Seq(accountId), "outer")
-      .filter(showIntentFilter)
-      .select(accountId)
+      .withColumn(buyIntentCntCol, buyingIntentCntCol)
+      .withColumn(researchIntentCntCol, researchingIntentCntCol)
+      .select(accountId, buyIntentCntCol, researchIntentCntCol)
 
     // find all with product visit
-    addTimeRange(alertDf.join(accWithVisitDf, accountId), startTime, endTime)
-      .select(col(accountId), packAlertData(pageVisit))
+    addTimeRange(alertDf, startTime, endTime)
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(buyIntentCntCol, researchIntentCntCol))
   }
 
   def getPageVisitCountInTimeRange(timelineDf: DataFrame): DataFrame = {
@@ -237,6 +233,8 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   def addTimeRange(df: DataFrame, startTime: Long, endTime: Long): DataFrame = {
     df.withColumn(COL_START_TIMESTAMP, lit(startTime))
       .withColumn(COL_END_TIMESTAMP, lit(endTime))
+      // NOTE currently endTime is always current timestamp
+      .withColumn(CreationTimestamp.name, lit(endTime))
   }
 
   def packAlertData(cols: String*): Column = {
