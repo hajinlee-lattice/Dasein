@@ -271,7 +271,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
             }
         } else {
             log.warn("Tenant {} does not have a subscriber number", subscriberNumber);
-            return false;
+            return true;
         }
     }
 
