@@ -58,8 +58,8 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
             if (jobExecution.getStatus().isUnsuccessful()) {
                 log.warn(String.format("DeltaCampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
-                updateFailedPlayLaunch(playName, playLaunchId);
                 recoverLaunchUniverses(customerSpace, playName, channelId);
+                updateFailedPlayLaunch(playName, playLaunchId);
             } else {
                 log.info(String.format(
                         "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",

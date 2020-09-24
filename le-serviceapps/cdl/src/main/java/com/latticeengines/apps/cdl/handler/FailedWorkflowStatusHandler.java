@@ -63,7 +63,6 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         String launchId = statusMonitor.getEntityId();
         updatePlayLaunch(launchId);
-        recoverLaunchUniverse(launchId);
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
@@ -104,6 +103,7 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
     private void updatePlayLaunch(String launchId) {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         playLaunch.setLaunchState(LaunchState.SyncFailed);
+        recoverLaunchUniverse(launchId);
         playLaunchService.update(playLaunch);
     }
 
