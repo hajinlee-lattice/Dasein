@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -35,15 +36,15 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
     @Inject
     private PlayLaunchService playLaunchService;
 
+    @Inject
+    private PlayService playService;
+
     private Play play;
     private PlayLaunch playLaunch;
     private LookupIdMap lookupIdMap;
     private DataIntegrationStatusMonitorMessage statusMessage;
     private DataIntegrationStatusMonitor statusMonitor;
     private PlayLaunchChannel channel;
-
-    private String CURRENT_TABLE = "Current_table";
-    private String PREVIOUS_TABLE = "Previous_table";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -167,6 +168,10 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
 
         if (channel != null) {
             playLaunchChannelService.deleteByChannelId(channel.getId(), false);
+        }
+
+        if (play != null) {
+            playService.deleteByName(play.getName(), false);
         }
     }
 }

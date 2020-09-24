@@ -177,8 +177,8 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
                     l.setLaunchState(launchState);
                 }
                 MultiTenantContext.setTenant(l.getTenant());
-                playLaunchService.update(l);
                 recoverLaunchUniverse(l.getLaunchId());
+                playLaunchService.update(l);
                 MultiTenantContext.clearTenant();
             });
             return true;

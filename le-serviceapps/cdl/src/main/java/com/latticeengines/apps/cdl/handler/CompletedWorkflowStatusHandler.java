@@ -57,10 +57,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         checkStatusMonitorExists(statusMonitor, status);
 
-        if (!statusMonitor.getEntityName().equals("PlayLaunch")) {
-            return statusMonitor;
-        }
-
         statusMonitor.setEventCompletedTime(status.getEventTime());
 
         updateMonitoringStatus(statusMonitor, status.getEventType());
@@ -74,14 +70,13 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         }
 
         ProgressEventDetail eventDetail = (ProgressEventDetail) status.getEventDetail();
-        updatePlayLaunch(playLaunch, eventDetail);
-        saveErrorFile(statusMonitor, eventDetail);
-        updateLaunchUniverse(playLaunch.getLaunchState(), launchId);
+        updatePlayLaunch(playLaunch, eventDetail, launchId);
+        saveErrorFile(statusMonitor, eventDetail, playLaunch.getLaunchState());
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
 
-    private void updatePlayLaunch(PlayLaunch playLaunch, ProgressEventDetail eventDetail) {
+    private void updatePlayLaunch(PlayLaunch playLaunch, ProgressEventDetail eventDetail, String launchId) {
         if (eventDetail == null) {
             return;
         }
@@ -113,10 +108,15 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             playLaunch.setContactsDuplicated(duplicatedRecords);
         }
 
+        updateLaunchUniverse(playLaunch.getLaunchState(), launchId);
         playLaunchService.update(playLaunch);
     }
 
-    private void saveErrorFile(DataIntegrationStatusMonitor statusMonitor, ProgressEventDetail eventDetail) {
+    private void saveErrorFile(DataIntegrationStatusMonitor statusMonitor, ProgressEventDetail eventDetail, LaunchState launchState) {
+        if (!launchState.equals(LaunchState.PartialSync)) {
+            return;
+        }
+
         Map<String, String> errorFileMap = eventDetail.getErrorFile();
 
         if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains(FOLDER)) {

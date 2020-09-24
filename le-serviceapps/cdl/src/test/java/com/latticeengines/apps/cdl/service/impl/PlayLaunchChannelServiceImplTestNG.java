@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -20,6 +22,7 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -240,20 +243,25 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannel1.setCurrentLaunchedAccountUniverseTable(current);
         playLaunchChannel1.setPreviousLaunchedAccountUniverseTable(previous);
         playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(playLaunchChannel1);
-        Thread.sleep(1000);
 
-        Assert.assertNotNull(playLaunchChannel1);
-        Assert.assertEquals(playLaunchChannel1.getCurrentLaunchedAccountUniverseTable(), previous);
-        Assert.assertEquals(playLaunchChannel1.getPreviousLaunchedAccountUniverseTable(), previous);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            Assert.assertNotNull(playLaunchChannel1);
+            Assert.assertEquals(playLaunchChannel1.getCurrentLaunchedAccountUniverseTable(), previous);
+            Assert.assertEquals(playLaunchChannel1.getPreviousLaunchedAccountUniverseTable(), previous);
+            return true;
+        });
 
         playLaunchChannel2.setCurrentLaunchedContactUniverseTable(current);
         playLaunchChannel2.setPreviousLaunchedContactUniverseTable(previous);
         playLaunchChannelService.updatePreviousLaunchedContactUniverseWithCurrent(playLaunchChannel2);
-        Thread.sleep(1000);
 
-        Assert.assertNotNull(playLaunchChannel2);
-        Assert.assertEquals(playLaunchChannel2.getCurrentLaunchedContactUniverseTable(), current);
-        Assert.assertEquals(playLaunchChannel2.getPreviousLaunchedContactUniverseTable(), current);
+        retry.execute(ctx -> {
+            Assert.assertNotNull(playLaunchChannel2);
+            Assert.assertEquals(playLaunchChannel2.getCurrentLaunchedContactUniverseTable(), current);
+            Assert.assertEquals(playLaunchChannel2.getPreviousLaunchedContactUniverseTable(), current);
+            return true;
+        });
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
