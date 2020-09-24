@@ -3,6 +3,7 @@ package com.latticeengines.apps.lp.provision.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.lp.provision.PLSComponentManager;
+import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
@@ -89,6 +91,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private GlobalAuthSubscriptionService subscriptionService;
 
     @Inject
     private EmailService emailService;
@@ -451,6 +456,14 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } finally {
             TracingUtils.finish(provisionSpan);
         }
+
+        try {
+            emailListInJson = configDir.get("/SubscriptionEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        List<String> subscriptionEmails = EmailUtils.parseEmails(emailListInJson);
+        subscriptionService.createByEmailsAndTenantId(new HashSet<>(subscriptionEmails), tenant.getId());
     }
 
     private Scope startProvisionSpan(SpanContext parentContext, String tenantId, long startTimeStamp) {
