@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
@@ -20,6 +21,7 @@ import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -365,6 +367,46 @@ public class DataReportServiceImpl implements DataReportService {
 
     @Override
     public void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        Set<Long> idToBeRemoved = getDataReportUnderOwnerId(level, ownerId);
+        if (CollectionUtils.isNotEmpty(idToBeRemoved) && (idToBeRemoved.size() != 1 || !idToBeRemoved.contains(null))) {
+            log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeRemoved);
+            dataReportEntityMgr.updateReadyForRollupToFalse(idToBeRemoved);
+            // wait the replication log
+            SleepUtils.sleep(200);
+            // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
+            Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
+            if (CollectionUtils.isEmpty(projectIds)) {
+                log.info("mark ready for rollup to false for {}", customerSpace);
+                Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
+                dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
+            }
+        }
+    }
+
+    public void hardDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId) {
+        Set<Long> idToBeTrueRemoved = getDataReportUnderOwnerId(level, ownerId);
+        if (CollectionUtils.isNotEmpty(idToBeTrueRemoved) && (idToBeTrueRemoved.size() != 1 || !idToBeTrueRemoved.contains(null))) {
+            log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeTrueRemoved);
+            dataReportEntityMgr.deleteDataReportRecords(idToBeTrueRemoved);
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
+            retryTemplate.execute(ctx -> {
+                Set<Long> remainIds = getDataReportUnderOwnerId(level, ownerId);
+                if(CollectionUtils.isNotEmpty(remainIds)  && (remainIds.size() != 1 || !remainIds.contains(null))) {
+                    throw new RuntimeException("report under ownerid still exist.");
+                }
+                return true;
+            });
+            // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
+            Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
+            if (CollectionUtils.isEmpty(projectIds)) {
+                log.info("mark ready for rollup to false for {}", customerSpace);
+                Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
+                dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
+            }
+        }
+    }
+
+    private Set<Long> getDataReportUnderOwnerId(DataReportRecord.Level level, String ownerId){
         Set<Long> idToBeRemoved = new HashSet<>();
         switch (level) {
             case Project:
@@ -390,19 +432,7 @@ public class DataReportServiceImpl implements DataReportService {
             default:
                 break;
         }
-        if (CollectionUtils.isNotEmpty(idToBeRemoved)) {
-            log.info("the is under report with level {} and ownerId {} are {}", level, ownerId, idToBeRemoved);
-            dataReportEntityMgr.updateReadyForRollupToFalse(idToBeRemoved);
-            // wait the replication log
-            SleepUtils.sleep(200);
-            // corner case: if no report in project level are ready for rollup, mark flag for tenant report to false
-            Set<String> projectIds = dataReportEntityMgr.findChildrenIds(DataReportRecord.Level.Tenant, customerSpace);
-            if (CollectionUtils.isEmpty(projectIds)) {
-                log.info("mark ready for rollup to false for {}", customerSpace);
-                Long tenantPid = dataReportEntityMgr.findDataReportPid(DataReportRecord.Level.Tenant, customerSpace);
-                dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
-            }
-        }
+        return idToBeRemoved;
     }
 
     private DataReportRecord getEmptyReportRecord(DataReportRecord.Level level, String ownerId) {

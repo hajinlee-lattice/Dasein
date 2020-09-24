@@ -129,4 +129,6 @@ public interface DataFeedTaskService {
     List<DataFeedTaskSummary> getSummaryBySourceAndDataFeed(String customerSpace, String source);
 
     boolean existsBySourceAndFeedType(String customerSpace, String source, String feedType);
+
+    void deleteDataFeedTaskByProjectId(String customerSpace, String projectId);
 }

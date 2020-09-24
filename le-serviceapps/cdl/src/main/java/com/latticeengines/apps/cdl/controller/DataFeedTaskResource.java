@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -320,5 +321,13 @@ public class DataFeedTaskResource {
     public Boolean existsDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
                                       @PathVariable String dataFeedType) {
         return dataFeedTaskService.existsBySourceAndFeedType(customerSpace, source, dataFeedType);
+    }
+
+    @DeleteMapping("/projectId/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "Delete DataFeedTask by projectId")
+    public void deleteDataFeedTaskByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.deleteDataFeedTaskByProjectId(customerSpace, projectId);
     }
 }

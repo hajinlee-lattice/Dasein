@@ -184,6 +184,29 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload.getUploadDiagnostics().getLastErrorMessage());
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "testMissingRequired")
+    public void testHardDeleteProject() {
+
+        projectProxy.hardDeleteProject(mainCustomerSpace, projectDetails.getProjectId(), null);
+
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+
+        Assert.assertFalse(s3Service.objectExist(dropBoxSummary.getBucket(), projectDetails.getProjectRootPath()));
+        try {
+            Assert.assertNull(sourceProxy.getSource(mainCustomerSpace, source.getSourceId()));
+            Assert.assertTrue(CollectionUtils.isEmpty(uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
+                    Boolean.FALSE, 0, 99)));
+            DataReport report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Project, projectDetails.getProjectId());
+            Assert.assertNull(report);
+            report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Source, source.getSourceId());
+            Assert.assertNull(report);
+            report = dataReportProxy.getDataReport(mainCustomerSpace, DataReportRecord.Level.Upload, uploadId);
+            Assert.assertNull(report);
+        }catch (Exception e){
+            log.info("got exception if source or upload have been deleted");
+        }
+    }
+
     private void verifyImport() {
         UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId, Boolean.TRUE);
         log.info(JsonUtils.serialize(upload));

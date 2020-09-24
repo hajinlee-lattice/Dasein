@@ -19,9 +19,11 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.dcp.service.DataReportService;
+import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.ProjectSystemLinkService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -43,7 +45,6 @@ import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -71,6 +72,9 @@ public class SourceServiceImpl implements SourceService {
     private ProjectService projectService;
 
     @Inject
+    private UploadService uploadService;
+
+    @Inject
     private ProjectSystemLinkService projectSystemLinkService;
 
     @Inject
@@ -89,7 +93,7 @@ public class SourceServiceImpl implements SourceService {
     private DataReportService dataReportService;
 
     @Inject
-    private MatchRuleProxy matchRuleProxy;
+    private MatchRuleService matchRuleService;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -144,7 +148,7 @@ public class SourceServiceImpl implements SourceService {
         defaultRule.setRuleType(MatchRuleRecord.RuleType.BASE_RULE);
         defaultRule.setState(MatchRuleRecord.State.ACTIVE);
         defaultRule.setAcceptCriterion(DplusMatchRule.getDefaultAcceptCriterion());
-        matchRuleProxy.createMatchRule(customerSpace, defaultRule);
+        matchRuleService.createMatchRule(customerSpace, defaultRule);
 
         return source;
     }
@@ -187,6 +191,18 @@ public class SourceServiceImpl implements SourceService {
             throw new RuntimeException(String.format("Cannot find source %s for delete!", sourceId));
         }
         dataFeedProxy.setDataFeedTaskDeletedStatus(customerSpace, sourceInfo.getPid(), Boolean.TRUE);
+        return true;
+    }
+
+    @Override
+    public Boolean hardDeleteSourceUnderProject(String customerSpace, String projectId) {
+        List<SourceInfo> sourceInfos = dataFeedProxy.getSourcesByProjectId(customerSpace, projectId, 0, 100);
+        dataFeedProxy.deleteDataFeedTaskUnderProjectId(customerSpace, projectId);
+        sourceInfos.forEach(sourceInfo -> {
+            uploadService.hardDeleteUploadUnderSource(customerSpace, sourceInfo.getSourceId());
+            matchRuleService.hardDeleteMatchRuleBySourceId(customerSpace, sourceInfo.getSourceId());
+        });
+
         return true;
     }
 

@@ -24,14 +24,19 @@ import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
@@ -39,7 +44,6 @@ import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
-
 
 @Service("projectService")
 public class ProjectServiceImpl implements ProjectService {
@@ -65,6 +69,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Inject
     private DataReportService dataReportService;
+
+    @Inject
+    private DCPDataReportWorkflowSubmitter dataReportWorkflowSubmitter;
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
@@ -167,6 +174,33 @@ public class ProjectServiceImpl implements ProjectService {
                 projectId);
         project.setDeleted(Boolean.TRUE);
         projectEntityMgr.update(project);
+        return true;
+    }
+
+    @Override
+    public Boolean hardDeleteProject(String customerSpace, String projectId, List<String> teamIds) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        if (project == null || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
+            return false;
+        }
+
+        sourceService.hardDeleteSourceUnderProject(customerSpace, projectId);
+
+        log.info("hard delete the data report under {}", projectId);
+        dataReportService.hardDeleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
+                projectId);
+        projectEntityMgr.delete(project);
+
+        dropBoxService.removeFolder(project.getRootPath());
+
+        log.info("trigger roll up for tenant {} after true delete project", customerSpace);
+        DCPReportRequest request = new DCPReportRequest();
+        request.setLevel(DataReportRecord.Level.Tenant);
+        request.setMode(DataReportMode.UPDATE);
+        request.setRootId(CustomerSpace.parse(customerSpace).toString());
+
+        dataReportWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), request, new WorkflowPidWrapper(-1L));
+
         return true;
     }
 

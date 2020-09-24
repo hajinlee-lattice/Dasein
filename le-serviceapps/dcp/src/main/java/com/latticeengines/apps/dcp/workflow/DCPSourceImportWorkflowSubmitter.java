@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
@@ -16,6 +17,7 @@ import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.apps.dcp.service.AppendConfigService;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -37,6 +39,7 @@ import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final String DEFAULT_DCP_S3_USER = "Default_DCP_S3_User";
+    private static final int MAX_RETRY = 3;
 
     @Inject
     private UploadService uploadService;
@@ -56,8 +59,12 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         UploadConfig uploadConfig = generateUploadConfig(customerSpace, importRequest);
         UploadDetails upload = uploadService.createUpload(customerSpace.toString(), importRequest.getSourceId(),
                 uploadConfig, importRequest.getUserId());
-        UploadStatsContainer container = new UploadStatsContainer();
-        container = uploadService.appendStatistics(upload.getUploadId(), container);
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRY);
+        UploadStatsContainer container = retryTemplate.execute(context -> {
+            UploadStatsContainer containerTmp = new UploadStatsContainer();
+            containerTmp = uploadService.appendStatistics(upload.getUploadId(), containerTmp);
+            return containerTmp;
+        });
         DCPSourceImportWorkflowConfiguration configuration =
                 generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getUploadId(),
                         container.getPid());
