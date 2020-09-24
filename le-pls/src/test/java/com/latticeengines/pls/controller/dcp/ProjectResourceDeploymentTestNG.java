@@ -173,9 +173,8 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         teamData.setTeamMembers(Sets.newHashSet(externalAdminUser, superAdminUser));
         String url = getRestAPIHostPort() + "/pls/teams/teamId/" + project.getTeamId();
         restTemplate.put(url, teamData);
-
         cleanupSession(AccessLevel.EXTERNAL_ADMIN);
-        switchToExternalAdmin();
+        switchToExternalAdmin(false);
         projectList = testProjectProxy.getAllProjects(false, true);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         // The External Admin should now be able to see 2 projects.

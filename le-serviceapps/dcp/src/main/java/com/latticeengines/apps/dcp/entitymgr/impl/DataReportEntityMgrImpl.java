@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,6 +11,11 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +47,8 @@ public class DataReportEntityMgrImpl
 
     @Inject
     private DataReportWriterRepository dataReportWriterRepository;
+
+    private static Logger log = LoggerFactory.getLogger(DataReportEntityMgrImpl.class);
 
     @Override
     protected DataReportRepository getReaderRepo() {
@@ -120,6 +128,19 @@ public class DataReportEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Set<String> findChildrenIds(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findChildrenIdsByParentLevelAndOwnerId(level, ownerId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, String orderBy, Pageable pageable) {
+        List<Object[]> result = getReadOrWriteRepository().findOwnerIdAndRefreshDate(level, orderBy, pageable);
+        log.info("result is " + result.size());
+        List<Pair<String, Date>> pairList = new ArrayList<>();
+        for (Object[] objects : result) {
+            Pair<String, Date> pair = ImmutablePair.of((String)objects[0], (Date)objects[1]);
+            pairList.add(pair);
+        }
+        return pairList;
     }
 
     @Override

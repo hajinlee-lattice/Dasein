@@ -34,10 +34,10 @@ public class DanteConfigurationResource {
     @ApiOperation(value = "Get Dante configuration")
     public FrontEndResponse<DanteConfigurationDocument> getDanteConfiguration() {
         String customerSpace = MultiTenantContext.getShortTenantId();
-        try {
-            PerformanceTimer timer = new PerformanceTimer("get Dante Configuration", log);
-            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy.getDanteConfiguration(customerSpace);
-            timer.close();
+        try (PerformanceTimer timer = new PerformanceTimer("Retrieve Dante Configuration for Tenant=" + customerSpace,
+                log)) {
+            DanteConfigurationDocument danteConfigurationDocument = cdlDanteConfigProxy
+                    .getDanteConfiguration(customerSpace);
             return new FrontEndResponse<>(danteConfigurationDocument);
         } catch (LedpException le) {
             log.error("Failed to get Dante Configuration document", le);

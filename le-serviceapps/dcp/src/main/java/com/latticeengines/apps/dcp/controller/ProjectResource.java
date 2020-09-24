@@ -128,7 +128,7 @@ public class ProjectResource {
     @PutMapping("/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "update product description")
-    public void updateDescription(@PathVariable String customerSpace,
+    public void updateProject(@PathVariable String customerSpace,
                              @PathVariable String projectId,
                              @RequestBody ProjectUpdateRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();

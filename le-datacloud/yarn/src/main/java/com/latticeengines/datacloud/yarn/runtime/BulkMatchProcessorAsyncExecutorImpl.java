@@ -231,7 +231,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             return;
         }
         if (batchCompletedRecords.size() != batchCompletedFutures.size()) {
-            String msg = "Input records and future records do have the same number!";
+            String msg = "Input records and future records do not have the same size!";
             log.error(msg);
             throw new RuntimeException(msg);
         }

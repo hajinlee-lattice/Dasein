@@ -47,6 +47,7 @@ public enum LatticeFeatureFlag {
     ENABLE_ACCOUNT360("EnableAccount360", "Enable Account360 features"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //
     ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
+    ENABLE_IMPORT_V2("EnableImportV2", "Enable Import UI 2.0"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

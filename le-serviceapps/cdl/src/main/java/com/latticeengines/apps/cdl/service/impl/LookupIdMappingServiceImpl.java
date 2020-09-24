@@ -142,6 +142,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 existingLookupIdMap.setDescription(lookupIdMap.getDescription());
                 existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
                 existingLookupIdMap.setExportFieldMappings(lookupIdMap.getExportFieldMetadataMappings());
+                existingLookupIdMap.setIsRegistered(lookupIdMap.getIsRegistered());
             } else {
                 throw new RuntimeException(
                         "Incorrect input payload. Will replace this exception with proper LEDP exception.");
