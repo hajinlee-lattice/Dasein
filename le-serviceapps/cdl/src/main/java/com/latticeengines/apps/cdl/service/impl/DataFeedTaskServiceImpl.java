@@ -497,6 +497,17 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         return dataFeedTaskEntityMgr.existsBySourceAndFeedType(source, feedType, CustomerSpace.parse(customerSpace).toString());
     }
 
+    @Override
+    public void deleteDataFeedTaskByProjectId(String customerSpace, String projectId) {
+        List<SourceInfo> sourceInfos = getSourcesByProjectId(customerSpace, projectId, 0, 1000);
+        sourceInfos.forEach(sourceInfo -> {
+            DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, sourceInfo.getPid());
+            mdService.deleteImportTableAndCleanup(CustomerSpace.parse(customerSpace), dataFeedTask.getImportTemplate().getName());
+            s3ImportSystemService.deleteS3ImportSystem(customerSpace, dataFeedTask.getImportSystem());
+            dataFeedTaskEntityMgr.delete(dataFeedTask);
+        });
+    }
+
     private String getSystemNameFromFeedType(String feedType) {
         if (StringUtils.isNotEmpty(feedType) && feedType.contains(SYSTEM_SPLITTER)) {
             return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));

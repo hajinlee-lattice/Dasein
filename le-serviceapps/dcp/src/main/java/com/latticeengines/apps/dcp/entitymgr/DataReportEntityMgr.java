@@ -72,4 +72,5 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
   
     int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime);
 
+    void deleteDataReportRecords(Set<Long> pids);
 }

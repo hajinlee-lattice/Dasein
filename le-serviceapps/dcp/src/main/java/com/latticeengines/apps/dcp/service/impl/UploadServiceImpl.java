@@ -253,6 +253,15 @@ public class UploadServiceImpl implements UploadService {
         uploadEntityMgr.update(upload);
     }
 
+    @Override
+    public void hardDeleteUploadUnderSource(String customerSpace, String sourceId) {
+        PageRequest pageRequest = getPageRequest(0, MAX_PAGE_SIZE);
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId, pageRequest));
+        uploads.forEach(upload -> {
+            uploadEntityMgr.delete(upload);
+        });
+    }
+
     private UploadStatsContainer findStats(String uploadId, Long statsId) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {

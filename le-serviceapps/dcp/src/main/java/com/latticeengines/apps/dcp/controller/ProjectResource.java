@@ -99,6 +99,14 @@ public class ProjectResource {
         return projectService.deleteProject(customerSpace, projectId, teamIds);
     }
 
+    @DeleteMapping("/{projectId}/harddelete")
+    @ResponseBody
+    @ApiOperation(value = "True delete project by projectId")
+    public Boolean hardDeleteProject(@PathVariable String customerSpace, @PathVariable String projectId,
+                                 @RequestBody(required = false) List<String> teamIds) {
+        return projectService.hardDeleteProject(customerSpace, projectId, teamIds);
+    }
+
     @GetMapping("/projectId/{projectId}/dropFolderAccess")
     @ResponseBody
     @ApiOperation(value = "Get dropFolderAccess by projectId")
