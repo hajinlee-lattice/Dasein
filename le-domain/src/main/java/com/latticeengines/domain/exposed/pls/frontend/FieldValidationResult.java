@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,6 +13,9 @@ public class FieldValidationResult {
 
     @JsonProperty
     private List<FieldValidation> fieldValidations;
+
+    @JsonProperty
+    Map<ValidationCategory, List<FieldValidation>> groupedValidations;
 
     @JsonProperty
     private String errorMessage;
@@ -34,6 +38,14 @@ public class FieldValidationResult {
 
     public void setFieldValidations(List<FieldValidation> fieldValidations) {
         this.fieldValidations = fieldValidations;
+    }
+
+    public Map<ValidationCategory, List<FieldValidation>> getGroupedValidations() {
+        return groupedValidations;
+    }
+
+    public void setGroupedValidations(Map<ValidationCategory, List<FieldValidation>> groupedValidations) {
+        this.groupedValidations = groupedValidations;
     }
 
     public String getErrorMessage() {
