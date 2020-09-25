@@ -34,6 +34,8 @@ import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -77,7 +79,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
             throw new IllegalArgumentException("Cannot find project with projectId: " + importRequest.getProjectId());
         }
         if (!verifyPurposeOfUse(customerSpace, project.getPurposeOfUse())) {
-            throw new UnsupportedOperationException("Project is not entitled to use company entity resolution data block!");
+            throw new LedpException(LedpCode.LEDP_60011);
         }
         DCPSourceImportWorkflowConfiguration configuration =
                 generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getUploadId(),
