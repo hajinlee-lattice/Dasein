@@ -1,6 +1,9 @@
 package com.latticeengines.proxy.matchapi;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -29,6 +33,48 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     public PrimeMetadataProxyImpl(PrimeMetadataProxyImpl _self) {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/prime-metadata");
         this._self = _self;
+    }
+
+    private Map<String, DataBlock> getContainerDataBlocks(DataBlockEntitlementContainer container) {
+        List<String> blockIds = new ArrayList();
+        Map<String, DataBlock> blockIdToDataBlock = new HashMap<>();
+
+        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+            List<String> domains = domain.getRecordTypes().entrySet().stream().map(entry -> entry.getValue())
+                    .map(blockList -> blockList.stream().map(block -> block.getBlockId()).collect(Collectors.toList()))
+                    .collect(ArrayList::new, List::addAll, List::addAll);
+
+            blockIds.addAll(domains);
+        }
+
+        List<DataBlock> dataBlocks = _self.getBlockElements(blockIds);
+
+        for (DataBlock dataBlock : dataBlocks) {
+            blockIdToDataBlock.put(dataBlock.getBlockId(), dataBlock);
+        }
+
+        return blockIdToDataBlock;
+    }
+
+    private DataBlockEntitlementContainer enrichContainerWithDataBlocks(DataBlockEntitlementContainer container,
+            Map<String, DataBlock> blockIdToDataBlock) {
+        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+            List<DataBlockEntitlementContainer.Block> blocks = domain.getRecordTypes().entrySet().stream()
+                    .map(entry -> entry.getValue()).collect(ArrayList::new, List::addAll, List::addAll);
+
+            for (DataBlockEntitlementContainer.Block block : blocks) {
+                block.setDataBlock(blockIdToDataBlock.get(block.getBlockId()));
+            }
+        }
+
+        return container;
+    }
+
+    @Override
+    public DataBlockEntitlementContainer enrichEntitlementContainerWithElements(
+            DataBlockEntitlementContainer container) {
+        Map<String, DataBlock> blockIdToDataBlock = getContainerDataBlocks(container);
+        return enrichContainerWithDataBlocks(container, blockIdToDataBlock);
     }
 
     @Override
@@ -47,7 +93,8 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     public List<DataBlock> getBlockElements(List<String> blockIds) {
         List<DataBlock> blockList = _self.getBlockElementsFromDistributedCache();
         if (CollectionUtils.isNotEmpty(blockIds)) {
-            return blockList.stream().filter(block -> blockIds.contains(block.getBlockId())).collect(Collectors.toList());
+            return blockList.stream().filter(block -> blockIds.contains(block.getBlockId()))
+                    .collect(Collectors.toList());
         } else {
             return blockList;
         }

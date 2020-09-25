@@ -15,6 +15,12 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionCode;
+import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.proxy.exposed.dcp.AppendConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
@@ -50,8 +56,28 @@ public class DataBlockResource {
     @ResponseBody
     @ApiOperation(value = "Get block drt entitlement")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public DataBlockEntitlementContainer getEntitlement() {
-        return appendConfigProxy.getEntitlement(MultiTenantContext.getShortTenantId());
-    }
+    public DataBlockEntitlementContainer getEntitlement(
+            @RequestParam(value = "domainName", required = false, defaultValue = "") String domainName,
+            @RequestParam(value = "recordType", required = false, defaultValue = "") String recordType,
+            @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
+        try {
+            DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigProxy
+                    .getEntitlement(MultiTenantContext.getShortTenantId(), domainName, recordType);
 
+            if ((!domainName.isEmpty() || !recordType.isEmpty())
+                    && dataBlockEntitlementContainer.getDomains().isEmpty()) {
+                String title = "Subscriber not entitled to the given domain and record type combination.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
+            } else {
+                if (includeElements) {
+                    return primeMetadataProxy.enrichEntitlementContainerWithElements(dataBlockEntitlementContainer);
+                }
+                return dataBlockEntitlementContainer;
+            }
+        } catch (Exception ex) {
+            throw UIActionUtils.handleException(ex);
+        }
+    }
 }
