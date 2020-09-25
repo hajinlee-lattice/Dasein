@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.ActivityAlertsConfigEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
@@ -29,13 +31,15 @@ public class ActivityAlertsConfigEntityMgrTestNG extends CDLFunctionalTestNGBase
     @Inject
     private ActivityAlertsConfigEntityMgr activityAlertsConfigEntityMgr;
 
+    private RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
     }
 
     @Test(groups = "functional")
-    public void TestCrud() throws InterruptedException {
+    public void testCreate() throws InterruptedException {
         ActivityAlertsConfig testConfig = new ActivityAlertsConfig();
         testConfig.setActive(true);
         testConfig.setName(TEST_ALERT_NAME);
@@ -67,16 +71,22 @@ public class ActivityAlertsConfigEntityMgrTestNG extends CDLFunctionalTestNGBase
         alertsConfig.setAlertMessageTemplate("New template");
         activityAlertsConfigEntityMgr.createOrUpdate(alertsConfig);
 
-        alertsConfig = activityAlertsConfigEntityMgr.findByPid(alerts.get(0).getPid());
-        Assert.assertNotNull(alertsConfig);
-        Assert.assertEquals(alertsConfig.getName(), TEST_ALERT_NAME);
-        Assert.assertEquals(alertsConfig.getAlertHeader(), "New Header");
-        Assert.assertEquals(alertsConfig.getAlertMessageTemplate(), "New template");
+        Thread.sleep(1000L);
+        retryTemplate.execute(ctx -> {
+            ActivityAlertsConfig updatedConfig = activityAlertsConfigEntityMgr.findByPid(alerts.get(0).getPid());
+            Assert.assertNotNull(updatedConfig);
+            Assert.assertEquals(updatedConfig.getName(), TEST_ALERT_NAME);
+            Assert.assertEquals(updatedConfig.getAlertHeader(), "New Header");
+            Assert.assertEquals(updatedConfig.getAlertMessageTemplate(), "New template");
+            return null;
+        });
 
         activityAlertsConfigEntityMgr.delete(alertsConfig);
-        alertsConfig = activityAlertsConfigEntityMgr.findByPid(alerts.get(0).getPid());
-        Thread.sleep(2000L);
-        Assert.assertNull(alertsConfig);
-
+        Thread.sleep(1000L);
+        retryTemplate.execute(ctx -> {
+            ActivityAlertsConfig deletedConfig = activityAlertsConfigEntityMgr.findByPid(alerts.get(0).getPid());
+            Assert.assertNull(deletedConfig);
+            return null;
+        });
     }
 }
