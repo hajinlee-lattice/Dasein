@@ -17,7 +17,7 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
 
     DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId);
 
-    List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, String orderBy, Pageable pageable);
+    List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, Pageable pageable);
 
     DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId);
 
