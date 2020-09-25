@@ -196,7 +196,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         Pageable page = PageRequest.of(0, 10);
         List<Pair<String, Date>> ownerIdToRefreshTime =
-                dataReportEntityMgr.getOwnerIdAndTime(DataReportRecord.Level.Tenant, "refreshTime", page);
+                dataReportEntityMgr.getOwnerIdAndTime(DataReportRecord.Level.Tenant, page);
         log.info("data is " + JsonUtils.serialize(ownerIdToRefreshTime));
         Assert.assertTrue(ownerIdToRefreshTime.size() >= 1);
 
