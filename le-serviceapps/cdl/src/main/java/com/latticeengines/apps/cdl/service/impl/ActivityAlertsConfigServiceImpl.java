@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -81,9 +80,8 @@ public class ActivityAlertsConfigServiceImpl implements ActivityAlertsConfigServ
         }
         if (existingAlertConfig == null) {
             existingAlertConfig = activityAlertsConfig;
-            existingAlertConfig.setId(UUID.randomUUID().toString());
-
         } else {
+            existingAlertConfig.setName(activityAlertsConfig.getName());
             existingAlertConfig.setAlertCategory(activityAlertsConfig.getAlertCategory());
             existingAlertConfig.setAlertHeader(activityAlertsConfig.getAlertHeader());
             existingAlertConfig.setAlertMessageTemplate(activityAlertsConfig.getAlertMessageTemplate());
@@ -100,8 +98,8 @@ public class ActivityAlertsConfigServiceImpl implements ActivityAlertsConfigServ
         ActivityAlertsConfig oldActivityAlertsConfig = activityAlertsConfigEntityMgr
                 .findByPid(activityAlertsConfig.getPid());
         if (oldActivityAlertsConfig == null) {
-            log.warn("Unable to find ActivityAlertsConfig (Header:{}, Id:{}) in tenant {}",
-                    activityAlertsConfig.getAlertHeader(), activityAlertsConfig.getId(), customerSpace);
+            log.warn("Unable to find ActivityAlertsConfig (Header:{}, Name:{}) in tenant {}",
+                    activityAlertsConfig.getAlertHeader(), activityAlertsConfig.getName(), customerSpace);
             return;
         }
         activityAlertsConfigEntityMgr.delete(oldActivityAlertsConfig);

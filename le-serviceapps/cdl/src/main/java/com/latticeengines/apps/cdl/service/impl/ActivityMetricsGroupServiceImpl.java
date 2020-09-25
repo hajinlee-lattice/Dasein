@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.BUYING_STAGE;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.BUYING_STAGE_THRESHOLD;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.RESEARCHING_STAGE;
 import static com.latticeengines.domain.exposed.util.WebVisitUtils.SOURCE_MEDIUM_GROUPNAME;
 import static com.latticeengines.domain.exposed.util.WebVisitUtils.TOTAL_VISIT_GROUPNAME;
 
@@ -299,8 +302,10 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
 
     private CategorizeDoubleConfig constructCategorizeDoubleConfig() {
         CategorizeDoubleConfig config = new CategorizeDoubleConfig();
-        config.getCategories().put("Buying", Collections.singletonMap(CategorizeDoubleConfig.Comparator.GE, 0.5));
-        config.getCategories().put("Researching", Collections.singletonMap(CategorizeDoubleConfig.Comparator.LT, 0.5));
+        config.getCategories().put(BUYING_STAGE,
+                Collections.singletonMap(CategorizeDoubleConfig.Comparator.GE, BUYING_STAGE_THRESHOLD));
+        config.getCategories().put(RESEARCHING_STAGE,
+                Collections.singletonMap(CategorizeDoubleConfig.Comparator.LT, BUYING_STAGE_THRESHOLD));
         return config;
     }
 

@@ -15,36 +15,40 @@ CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
       UPDATE `PLS_MultiTenant`.`METADATA_SEGMENT`
-        SET TEAM_ID='Global_Team' WHERE TEAM_ID is NULL;
+      SET TEAM_ID='Global_Team'
+      WHERE TEAM_ID is NULL;
       UPDATE `PLS_MultiTenant`.`RATING_ENGINE`
-        SET TEAM_ID='Global_Team' WHERE TEAM_ID is NULL;
+      SET TEAM_ID='Global_Team'
+      WHERE TEAM_ID is NULL;
 
       ALTER TABLE `PLS_MultiTenant`.`DCP_PROJECT`
-        ADD COLUMN `PURPOSE_OF_USE` JSON;
+          ADD COLUMN `PURPOSE_OF_USE` JSON;
 
       ALTER TABLE `PLS_MultiTenant`.`DCP_DATA_REPORT`
-        DROP FOREIGN KEY `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`;
+          DROP FOREIGN KEY `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`;
 
       ALTER TABLE `PLS_MultiTenant`.`DCP_DATA_REPORT`
-        ADD CONSTRAINT `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE` FOREIGN KEY (`FK_DUNS_COUNT`)
-        REFERENCES `PLS_MultiTenant`.`METADATA_TABLE` (`PID`) ON DELETE CASCADE;
+          ADD CONSTRAINT `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE` FOREIGN KEY (`FK_DUNS_COUNT`)
+              REFERENCES `PLS_MultiTenant`.`METADATA_TABLE` (`PID`) ON DELETE CASCADE;
 
       ALTER TABLE `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION`
-	    MODIFY `TRAY_WORKFLOW_ENABLED` BIT NOT NULL DEFAULT 0;
+          MODIFY `TRAY_WORKFLOW_ENABLED` BIT NOT NULL DEFAULT 0;
 
-      create table `ACTIVITY_ALERTS_CONFIG` (
-        `PID` bigint not null auto_increment,
-        `ALERT_CATEGORY` varchar(255) not null,
-        `ALERT_HEADER` varchar(255) not null,
-        `ALERT_MESSAGE_TEMPLATE` varchar(255) not null,
-        `CREATED` datetime not null,
-        `ID` varchar(255) not null,
-        `IS_ACTIVE` bit not null,
-        `QUALIFICATION_PERIOD_DAYS` bigint not null,
-        `UPDATED` datetime not null,
-        `FK_TENANT_ID` bigint not null,
-        primary key (`PID`)
-        ) engine=InnoDB;
+      CREATE TABLE `ACTIVITY_ALERTS_CONFIG`
+      (
+          `PID`                       bigint        not null auto_increment,
+          `ALERT_CATEGORY`            varchar(255)  not null,
+          `ALERT_HEADER`              varchar(255)  not null,
+          `ALERT_MESSAGE_TEMPLATE`    varchar(1000) not null,
+          `CREATED`                   datetime      not null,
+          `NAME`                      varchar(255)  not null,
+          `IS_ACTIVE`                 bit           not null,
+          `QUALIFICATION_PERIOD_DAYS` bigint        not null,
+          `UPDATED`                   datetime      not null,
+          `FK_TENANT_ID`              bigint        not null,
+          PRIMARY KEY (`PID`),
+          UNIQUE KEY `UK_ALERT_NAME_TENANT` (`NAME`, `FK_TENANT_ID`)
+      ) ENGINE = InnoDB;
 
   END //
 -- ##############################################################

@@ -161,10 +161,13 @@ public enum InterfaceName {
 
     OpportunityId,
 
-    ModelName, ModelNameId, HasIntent, BuyingScore,
+    ModelName, ModelNameId, HasIntent, IntentScore, BuyingScore, //
 
-    //timeline column
+    // timeline column
     Detail2, Detail1, EventTimestamp, EventType, StreamType, Source,
+
+    // activity alert
+    AlertData, AlertName, CreationTimestamp, //
 
     PartitionKey, SortKey,
 

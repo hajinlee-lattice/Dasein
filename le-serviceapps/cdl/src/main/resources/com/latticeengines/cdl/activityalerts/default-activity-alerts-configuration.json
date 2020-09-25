@@ -1,19 +1,22 @@
 [
   {
+    "name": "IncWebActivity",
     "alert_header": "Increased Web Activity",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
-    "alert_message_template": "There have been ${alert.page_visits} visits to the ${alert.page_name} pages. Check on this interest with your ${alert.active_contacts} active contacts. This may mean they are looking to buy.",
+    "alert_message_template": "There have been ${Data.PageVisits} visits to the ${Data.PageName} pages. Check on this interest with your ${Data.ActiveContacts} active contacts. This may mean they are looking to buy.",
     "is_active": true
   },
   {
+    "name": "IncActivityOnProduct",
     "alert_header": "Increased Activity on Product Pages",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
-    "alert_message_template": "There have been ${alert.page_visits} visits to the ${alert.page_name} pages. This means you'll need to prospect more into the personas.",
+    "alert_message_template": "There have been ${Data.PageVisits} visits to the ${Data.PageName} pages. This means you'll need to prospect more into the personas.",
     "is_active": true
   },
   {
+    "name": "ReEngagedActivity",
     "alert_header": "Re-engaged Activity",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
@@ -21,17 +24,11 @@
     "is_active": true
   },
   {
-    "alert_header": "Growing Buyer Intent",
+    "name": "HasShownIntent",
+    "alert_header": "Has Shown Intent",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "Growing buyer intent happening from this account in the last 10 days with ${alert.page_visits} amount of Product URL clicks. This may mean they are looking to buy.",
-    "is_active": true
-  },
-  {
-    "alert_header": "Growing Research Intent",
-    "alert_category": "PEOPLE",
-    "qualification_period_days": 10,
-    "alert_message_template": "Growing research intent happening from this account in the last 10 days with ${alert.page_visits} amount of Product URL clicks. This may mean they are looking for more product information.",
+    "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)>research intent on ${Data.NumResearchIntents} products </#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)>and </#if><#if (Data.NumBuyIntents > 0)>buy intent on ${Data.NumBuyIntents} Products </#if>within the last 10 days. Check out which models in the Recent Activity section.",
     "is_active": true
   }
 ]
