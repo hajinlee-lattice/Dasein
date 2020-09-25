@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.cdl.FailedEventDetail;
 import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 @Component
 public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {

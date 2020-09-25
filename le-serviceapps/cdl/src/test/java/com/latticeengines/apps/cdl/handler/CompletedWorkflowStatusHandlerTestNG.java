@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -78,7 +77,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
-        teardown();
+        teardown(launchId, channel.getId(), play.getName());
     }
 
     @Test(groups = "functional")
@@ -108,7 +107,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
-        teardown();
+        teardown(launchId, channel.getId(), play.getName());
     }
 
     @Test(groups = "functional")
@@ -138,7 +137,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
-        teardown();
+        teardown(launchId, channel.getId(), play.getName());
     }
 
     private void createAll() {
@@ -161,19 +160,5 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         eventDetail.setDuplicates(duplicates);
         statusMessage.setEventDetail(eventDetail);
         log.info("Created eventDetail");
-    }
-
-    private void teardown() {
-        if (playLaunch != null) {
-            playLaunchService.deleteByLaunchId(playLaunch.getLaunchId(), false);
-        }
-
-        if (channel != null) {
-            playLaunchChannelService.deleteByChannelId(channel.getId(), false);
-        }
-
-        if (play != null) {
-            playService.deleteByName(play.getName(), false);
-        }
     }
 }

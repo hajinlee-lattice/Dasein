@@ -196,4 +196,17 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
         }
     }
 
+    protected void teardown(String launchId, String channelId, String playName) {
+        if (launchId != null) {
+            playLaunchService.deleteByLaunchId(launchId, false);
+        }
+
+        if (channelId != null) {
+            playLaunchChannelService.deleteByChannelId(channelId, false);
+        }
+
+        if (playName != null) {
+            playService.deleteByName(playName, false);
+        }
+    }
 }

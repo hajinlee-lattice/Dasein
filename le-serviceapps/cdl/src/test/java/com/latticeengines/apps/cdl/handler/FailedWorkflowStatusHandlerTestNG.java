@@ -5,14 +5,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
-import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -34,9 +32,6 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
 
     @Inject
     private PlayLaunchService playLaunchService;
-
-    @Inject
-    private PlayService playService;
 
     private Play play;
     private PlayLaunch playLaunch;
@@ -79,20 +74,6 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
         Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() {
-        if (playLaunch != null) {
-            playLaunchService.deleteByLaunchId(playLaunch.getLaunchId(), false);
-        }
-
-        if (channel != null) {
-            playLaunchChannelService.deleteByChannelId(channel.getId(), false);
-        }
-
-        if (play != null) {
-            playService.deleteByName(play.getName(), false);
-        }
+        teardown(launchId, channel.getId(), play.getName());
     }
 }

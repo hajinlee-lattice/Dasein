@@ -2,16 +2,14 @@ package com.latticeengines.apps.cdl.handler;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface WorkflowStatusHandler {
 
