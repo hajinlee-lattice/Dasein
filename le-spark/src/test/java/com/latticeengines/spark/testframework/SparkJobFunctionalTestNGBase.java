@@ -467,9 +467,13 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     protected String debugStr(GenericRecord record, Collection<String> fields) {
         List<String> nameValues = fields.stream() //
-                .map(field -> String.format("%s=%s", field, record.get(field))) //
+                .map(field -> String.format("%s=%s (%s)", field, record.get(field), getClass(record.get(field)))) //
                 .collect(Collectors.toList());
         return String.join(",", nameValues);
+    }
+
+    private String getClass(Object obj) {
+        return obj == null ? "" : obj.getClass().getSimpleName();
     }
 
 }
