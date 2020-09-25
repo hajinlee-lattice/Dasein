@@ -50,6 +50,6 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
     DataReportRecord findByLevelAndOwnerIdAndReadyForRollup(DataReportRecord.Level level, String ownerId, boolean readyForRollup);
 
     @Query(value = "SELECT ownerId, refreshTime from DataReportRecord where level = ?1 order by " +
-            "?2")
-    List<Object[]> findOwnerIdAndRefreshDate(DataReportRecord.Level level, String orderBy, Pageable page);
+            "refreshTime")
+    List<Object[]> findOwnerIdAndRefreshDate(DataReportRecord.Level level, Pageable page);
 }

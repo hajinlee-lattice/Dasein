@@ -132,8 +132,8 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, String orderBy, Pageable pageable) {
-        List<Object[]> result = getReadOrWriteRepository().findOwnerIdAndRefreshDate(level, orderBy, pageable);
+    public List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, Pageable pageable) {
+        List<Object[]> result = getReadOrWriteRepository().findOwnerIdAndRefreshDate(level, pageable);
         log.info("result is " + result.size());
         List<Pair<String, Date>> pairList = new ArrayList<>();
         for (Object[] objects : result) {

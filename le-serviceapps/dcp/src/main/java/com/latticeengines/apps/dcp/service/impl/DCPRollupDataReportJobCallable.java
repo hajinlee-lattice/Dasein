@@ -58,7 +58,7 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
         List<Pair<String, Date>> ownerIdToDate = null;
         do {
             PageRequest pageRequest = PageRequest.of(pageIndex, PAGE_SIZE);
-            ownerIdToDate = dataReportEntityMgr.getOwnerIdAndTime(DataReportRecord.Level.Tenant, "refreshTime",
+            ownerIdToDate = dataReportEntityMgr.getOwnerIdAndTime(DataReportRecord.Level.Tenant,
                     pageRequest);
             log.info("data is " + JsonUtils.serialize(ownerIdToDate));
             if (CollectionUtils.isNotEmpty(ownerIdToDate)) {
