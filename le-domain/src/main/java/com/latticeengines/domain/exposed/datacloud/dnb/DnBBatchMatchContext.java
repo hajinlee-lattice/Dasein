@@ -49,6 +49,8 @@ public class DnBBatchMatchContext extends DnBMatchContextBase implements Fact, D
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
             DnBMatchContext context = new DnBMatchContext();
             context.copyMatchInput(batchContext.getContexts().get(lookupRequestId));
+            context.setUseDirectPlus(batchContext.isUserDirectPlus()); // somehow this flag is null in context
+            context.setRootOperationUid(batchContext.getRootOperationUid());
             contexts.put(lookupRequestId, context);
         }
     }

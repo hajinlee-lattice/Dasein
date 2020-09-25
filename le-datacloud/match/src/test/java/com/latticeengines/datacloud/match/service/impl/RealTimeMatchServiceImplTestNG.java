@@ -77,6 +77,7 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -231,9 +232,15 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         columnSelection.setColumns(columns);
         input.setCustomSelection(columnSelection);
         input.setPredefinedSelection(null);
+
+        DplusUsageReportConfig usageReportConfig = new DplusUsageReportConfig();
+        usageReportConfig.setEnabled(true);
+        usageReportConfig.setPoaeIdField("ID");
+        input.setDplusUsageReportConfig(usageReportConfig);
+
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
-        // System.out.println(JsonUtils.pprint(output));
+        System.out.println(JsonUtils.pprint(output));
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         verifyOutputFieldsAlignment(columnSelection, output);
@@ -241,6 +248,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         String matchGrade = getCandidateField(output.getResult().get(0), MatchGrade).toString();
         Assert.assertEquals(matchGrade.charAt(1), 'A'); // Street Number
         Assert.assertEquals(matchGrade.charAt(2), 'A'); // Street Name
+        Assert.assertTrue(CollectionUtils.isNotEmpty(output.getResult().get(0).getUsageEvents()));
     }
 
     @Test(groups = "functional", dataProvider = "urlToDunsTestCases")
@@ -272,7 +280,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         verifyOutputFieldsAlignment(columnSelection, output);
-        System.out.println(JsonUtils.pprint(output));
+        // System.out.println(JsonUtils.pprint(output));
         Assert.assertTrue(output.getResult().size() > 0);
         if (StringUtils.isNotBlank(expectedDuns)) {
             Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);

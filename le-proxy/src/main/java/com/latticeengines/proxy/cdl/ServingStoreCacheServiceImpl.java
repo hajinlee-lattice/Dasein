@@ -136,7 +136,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         String keyPrefix = tenantId + "|" + entity.name();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
-        cdlDanteConfigProxy.getDanteConfiguration(customerSpace);
+        cdlDanteConfigProxy.refreshDanteConfiguration(customerSpace);
     }
 
     private List<ColumnMetadata> getDateAttrsFromApi(String key) {

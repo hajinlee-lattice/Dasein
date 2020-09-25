@@ -36,6 +36,14 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
                 .build());
+        cms.put(CRM_ID, new ColumnMetadataBuilder() //
+                .withAttrName(CRM_ID) //
+                .withCategory(Category.ACCOUNT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
+                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Segment,
+                        ColumnSelection.Predefined.LookupId) //
+                .canModel(Boolean.FALSE)//
+                .build());
         return cms;
     }
 
@@ -45,7 +53,7 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
     protected Map<String, ColumnMetadata> getContactMetadataToVerify() {
         Map<String, ColumnMetadata> cms = new HashMap<>();
         cms.put(InterfaceName.ContactId.name(), new ColumnMetadataBuilder() //
-                .withAttrName(InterfaceName.AccountId.name()) //
+                .withAttrName(InterfaceName.ContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory("Other") //
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
@@ -53,9 +61,16 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
                 .canModel(Boolean.FALSE) //
                 .build());
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
-                .withAttrName(InterfaceName.ContactId.name()) //
+                .withAttrName(InterfaceName.AccountId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory("Other") //
+                .build());
+        cms.put(CRM_CONTACT_ID, new ColumnMetadataBuilder() //
+                .withAttrName(CRM_CONTACT_ID) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_CONTACT_IDS) //
+                .withGroups(ColumnSelection.Predefined.LookupId) //
+                .canModel(Boolean.FALSE)//
                 .build());
         return cms;
     }

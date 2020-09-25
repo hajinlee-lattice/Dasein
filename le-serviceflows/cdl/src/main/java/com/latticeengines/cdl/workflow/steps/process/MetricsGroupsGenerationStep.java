@@ -135,9 +135,9 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             return null;
         }
         Map<String, String> groupTableNames = getMapObjectFromContext(METRICS_GROUP_TABLE_NAME, String.class, String.class);
-        shortCutMode = allTablesExist(groupTableNames);
+        shortCutMode = allTablesExist(groupTableNames) && tableInHdfs(groupTableNames, false);
         if (shortCutMode) {
-            log.info(String.format("Found metrics group tables: %s in context, going thru short-cut mode.", groupTableNames.values()));
+            log.info("Retrieved metrics {}. Going through shortcut mode.", groupTableNames);
             dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), groupTableNames, TableRoleInCollection.MetricsGroup, inactive);
             return null;
         } else {

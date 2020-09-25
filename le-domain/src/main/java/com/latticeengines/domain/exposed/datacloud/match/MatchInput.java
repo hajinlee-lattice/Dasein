@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -213,6 +214,9 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("DPlusMatchConfig")
     private DplusMatchConfig dplusMatchConfig;
+
+    @JsonProperty("DplusUsageReportConfig")
+    private DplusUsageReportConfig dplusUsageReportConfig;
 
     // ====================
     // END DIRECT+
@@ -651,6 +655,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDplusMatchConfig(DplusMatchConfig dplusMatchConfig) {
         this.dplusMatchConfig = dplusMatchConfig;
+    }
+
+    public DplusUsageReportConfig getDplusUsageReportConfig() {
+        return dplusUsageReportConfig;
+    }
+
+    public void setDplusUsageReportConfig(DplusUsageReportConfig dplusUsageReportConfig) {
+        this.dplusUsageReportConfig = dplusUsageReportConfig;
     }
 
     public boolean isMatchDebugEnabled() {

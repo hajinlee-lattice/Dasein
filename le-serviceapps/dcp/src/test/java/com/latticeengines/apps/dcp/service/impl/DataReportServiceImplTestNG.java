@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +14,12 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -39,6 +45,8 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     @Inject
     private DataReportEntityMgr dataReportEntityMgr;
+
+    private static final Logger log = LoggerFactory.getLogger(DataReportServiceImplTestNG.class);
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -186,6 +194,11 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         // update ready for rollup for uploadUID2
         dataReportService.updateReadyForRollup(mainCustomerSpace, DataReportRecord.Level.Upload, "uploadUID2");
 
+        Pageable page = PageRequest.of(0, 10);
+        List<Pair<String, Date>> ownerIdToRefreshTime =
+                dataReportEntityMgr.getOwnerIdAndTime(DataReportRecord.Level.Tenant, page);
+        log.info("data is " + JsonUtils.serialize(ownerIdToRefreshTime));
+        Assert.assertTrue(ownerIdToRefreshTime.size() >= 1);
 
         dataReportService.deleteDataReportUnderOwnerId(mainCustomerSpace, DataReportRecord.Level.Project, "projectUID");
         Set<String> childrenIdsForProject = dataReportService.getChildrenIds(mainCustomerSpace,

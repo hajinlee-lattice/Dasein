@@ -11,6 +11,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
@@ -42,7 +44,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void testLogin() {
         Credentials credentials = new Credentials();
         credentials.setUsername(TEST_EMAIL);
-        credentials.setPassword("Lattice123!");
+        credentials.setPassword("Lattice124!");
         LoginDocument loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isEmpty(loginDocument.getErrors()));
@@ -53,6 +55,13 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isNotEmpty(loginDocument.getErrors()));
+    }
+
+    @Test(groups = "functional")
+    public void testGetUserInvitationLink() {
+        InvitationLinkResponse invitationLink = iDaaSService.getUserInvitationLink(TEST_EMAIL);
+        Assert.assertNotNull(invitationLink);
+        Assert.assertNotNull(invitationLink.getInviteLink());
     }
 
     private void createTestUser() {
@@ -69,6 +78,15 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         userRegistration.setCredentials(credentials);
 
         userService.createUser(TEST_EMAIL, userRegistration);
+    }
+
+    @Test(groups = "functional")
+    public void testGetSubscriberDetails () {
+
+        String subscriptionNumber = "800118741";
+        SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subscriptionNumber);
+        Assert.assertNotNull(subscriberDetails);
+        Assert.assertEquals("167734092", subscriberDetails.getDunsNumber(), "DUNS number not equal.");
     }
 
 }

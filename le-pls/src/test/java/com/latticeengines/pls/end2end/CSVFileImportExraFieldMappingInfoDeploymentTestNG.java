@@ -44,7 +44,7 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
         boolean columnExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             // html special character in user field is escaped
-            if (fieldMapping.getUserField().equals("Test_HTML_&amp;")) {
+            if (fieldMapping.getUserField().equals("Test_HTML_&")) {
                 columnExist = true;
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.INTEGER);
             }

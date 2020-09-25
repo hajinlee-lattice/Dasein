@@ -232,6 +232,10 @@ public class ProcessorContext {
         return hdfsPathBuilder.constructMatchBlockErrorSplitAvro(rootOperationUid, blockOperationUid, split).toString();
     }
 
+    public String getUsageOutputAvro(int split) {
+        return hdfsPathBuilder.constructMatchBlockUsageSplitAvro(rootOperationUid, blockOperationUid, split).toString();
+    }
+
     public String getNewEntityOutputAvro(int split) {
         return hdfsPathBuilder.constructMatchBlockNewEntitySplitAvro(rootOperationUid, blockOperationUid, split)
                 .toString();
@@ -652,7 +656,7 @@ public class ProcessorContext {
         List<String> fields = input.getFields();
         // get all indices in input that is an entity ID field
         return IntStream.range(0, fields.size()) //
-                .filter(idx -> InterfaceName.isEntityId(fields.get(idx), false)) //
+                .filter(idx -> InterfaceName.isKeyId(fields.get(idx), false)) //
                 .filter(idx -> outputFields.contains(fields.get(idx))) //
                 .boxed() //
                 .collect(Collectors.toSet());
@@ -752,7 +756,7 @@ public class ProcessorContext {
             // If input attributes have reserved ID fields (AccountId, ContactId
             // and EntityId) conflicting output attributes, drop the ones from
             // input in the output instead of renaming
-            if (offendingFields.contains(field.name().toUpperCase()) && InterfaceName.isEntityId(field.name(), false)) {
+            if (offendingFields.contains(field.name().toUpperCase()) && InterfaceName.isKeyId(field.name(), false)) {
                 continue;
             }
             if (offendingFields.contains(field.name().toUpperCase())) {

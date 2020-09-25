@@ -7,6 +7,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,7 +31,8 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "ACTIVITY_ALERTS_CONFIG")
+@Table(name = "ACTIVITY_ALERTS_CONFIG", uniqueConstraints = { //
+        @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, HasAuditingFields {
@@ -47,9 +51,9 @@ public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, Ha
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @Column(name = "ID", nullable = false, unique = true)
-    @JsonProperty("Id")
-    private String id;
+    @Column(name = "NAME", nullable = false)
+    @JsonProperty("name")
+    private String name;
 
     @Column(name = "ALERT_HEADER", nullable = false)
     @JsonProperty("alert_header")
@@ -57,6 +61,7 @@ public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, Ha
 
     @Column(name = "ALERT_CATEGORY", nullable = false)
     @JsonProperty("alert_category")
+    @Enumerated(EnumType.STRING)
     private AlertCategory alertCategory;
 
     @Column(name = "QUALIFICATION_PERIOD_DAYS", nullable = false)
@@ -101,12 +106,12 @@ public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, Ha
         this.tenant = tenant;
     }
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAlertHeader() {

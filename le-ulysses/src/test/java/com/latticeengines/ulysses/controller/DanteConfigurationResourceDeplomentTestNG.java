@@ -1,6 +1,5 @@
 package com.latticeengines.ulysses.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,12 +35,12 @@ public class DanteConfigurationResourceDeplomentTestNG extends UlyssesDeployment
     private Tenant testTenant;
 
     private String getDanteConfigurationResourceUrl() {
-        return ulyssesHostPort + "/ulysses/danteconfiguration/";
+        return ulyssesHostPort + "/ulysses/danteconfiguration";
     }
 
     @Override
     @BeforeClass(groups = "deployment")
-    public void beforeClass() throws IOException, InterruptedException {
+    public void beforeClass() throws InterruptedException {
 
         String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -70,13 +69,10 @@ public class DanteConfigurationResourceDeplomentTestNG extends UlyssesDeployment
     }
 
     @Test(groups = "deployment")
-    public void testGetDanteConfig() throws InterruptedException {
-
-        String url = getDanteConfigurationResourceUrl() + customerSpace;
-        danteConfig = getOAuth2RestTemplate().getForObject(url, DanteConfigurationDocument.class);
+    public void testGetDanteConfig() {
+        danteConfig = getOAuth2RestTemplate().getForObject(getDanteConfigurationResourceUrl(),
+                DanteConfigurationDocument.class);
         Assert.assertNotNull(danteConfig);
-
-        getOAuth2RestTemplate().getForObject(getDanteConfigurationResourceUrl(), DanteConfigurationDocument.class);
     }
 
 }

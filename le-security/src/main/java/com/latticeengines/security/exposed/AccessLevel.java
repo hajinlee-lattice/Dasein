@@ -288,4 +288,13 @@ public enum AccessLevel implements GrantedAuthority {
                 AccessLevel.INTERNAL_ANALYST,
                 AccessLevel.SUPER_ADMIN);
     }
+
+    public static List<AccessLevel> getDnBConnectNewUserLevels() {
+        return Arrays.asList(
+                AccessLevel.INTERNAL_ADMIN,
+                AccessLevel.INTERNAL_ANALYST,
+                AccessLevel.EXTERNAL_ADMIN,
+                AccessLevel.BUSINESS_ANALYST
+        );
+    }
 }

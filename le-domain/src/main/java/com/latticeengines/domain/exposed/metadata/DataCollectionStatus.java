@@ -412,4 +412,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public void setActivityStreamLastRefresh(Map<String, Integer> activityStreamLastRefresh) {
         this.detail.setActivityStreamLastRefresh(activityStreamLastRefresh);
     }
+
+    @JsonProperty("ActivityAlertVersion")
+    public String getActivityAlertVersion() {
+        return this.detail.getActivityAlertVersion();
+    }
+
+    @JsonProperty("ActivityAlertVersion")
+    public void setActivityAlertVersion(String activityAlertVersion) {
+        this.detail.setActivityAlertVersion(activityAlertVersion);
+    }
 }

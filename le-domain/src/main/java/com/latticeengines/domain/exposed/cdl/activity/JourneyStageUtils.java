@@ -44,7 +44,7 @@ public final class JourneyStageUtils {
     }
 
     private static JourneyStage closedStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Closed", "Opportunity is closed", 6, "#07da63",
+        return stage(tenant, "Closed", "Opportunity is closed", 6, "#05BE63",
                 predicate(Opportunity, 1, closedFilter()));
     }
 
@@ -68,7 +68,7 @@ public final class JourneyStageUtils {
 
     private static JourneyStage darkStage(@NotNull Tenant tenant) {
         // default, can have empty predicate
-        return stage(tenant, "Dark", "No Activity", 1, "#0c3953", new JourneyStagePredicate());
+        return stage(tenant, "Dark", "No Activity", 1, "#059142", new JourneyStagePredicate());
     }
 
     private static JourneyStage stage(@NotNull Tenant tenant, @NotNull String stageName, String description,

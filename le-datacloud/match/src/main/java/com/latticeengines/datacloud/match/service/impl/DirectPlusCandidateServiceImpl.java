@@ -4,6 +4,8 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchDataProfile;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchGrade;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchIso2CountryCode;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchPrimaryBusinessName;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchType;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.NameMatchScore;
@@ -20,6 +22,7 @@ import com.latticeengines.datacloud.match.service.DirectPlusCandidateService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 @Service
 public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateService {
@@ -28,9 +31,17 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<Object> parseCandidate(DnBMatchCandidate candidate) {
         List<Object> data = new ArrayList<>();
         data.add(candidate.getClassification().name()); // classification
-        data.add(candidate.getMatchType()); // match type
         String duns = candidate.getDuns();
         data.add(duns); // duns
+        if (candidate.getNameLocation() != null) {
+            NameLocation location = candidate.getNameLocation();
+            data.add(location.getName());
+            data.add(location.getCountryCode());
+        } else {
+            data.add(null); // primary name
+            data.add(null); // country code
+        }
+        data.add(candidate.getMatchType()); // match type
         if (candidate.getMatchInsight() != null) {
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
             data.add(matchInsight.getConfidenceCode());
@@ -61,8 +72,10 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
         // hard coded for now, need to in sync with SplitImportMatchResult
         return Arrays.asList( //
                 Classification, //
-                MatchType, //
                 MatchedDuns, //
+                MatchPrimaryBusinessName, //
+                MatchIso2CountryCode, //
+                MatchType, //
                 ConfidenceCode, //
                 MatchGrade, //
                 MatchDataProfile, //
@@ -75,8 +88,10 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<Pair<String, Class<?>>> candidateSchema() {
         return Arrays.asList( //
                 Pair.of(Classification, String.class), //
-                Pair.of(MatchType, String.class), //
                 Pair.of(MatchedDuns, String.class), //
+                Pair.of(MatchPrimaryBusinessName, String.class), //
+                Pair.of(MatchIso2CountryCode, String.class), //
+                Pair.of(MatchType, String.class), //
                 Pair.of(ConfidenceCode, Integer.class), //
                 Pair.of(MatchGrade, String.class), //
                 Pair.of(MatchDataProfile, String.class), //
@@ -88,10 +103,14 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     @Override
     public List<PrimeColumn> candidateColumns() {
         return Arrays.asList( //
-                new PrimeColumn(MatchType, "Match Type", //
-                        "matchDataCriteria"), //
                 new PrimeColumn(MatchedDuns, "Matched D-U-N-S Number", //
                         "matchCandidates.organization.duns"), //
+                new PrimeColumn(MatchPrimaryBusinessName, "Match Primary Business Name", //
+                        "matchCandidates.organization.primaryName"), //
+                new PrimeColumn(MatchIso2CountryCode, "Match ISO Alpha 2 Char Country Code", //
+                        "matchCandidates.organization.primaryAddress.addressCountry.isoAlpha2Code"), //
+                new PrimeColumn(MatchType, "Match Type", //
+                        "matchDataCriteria"), //
                 new PrimeColumn(ConfidenceCode, "Match Confidence Code", //
                         "matchCandidates.matchQualityInformation.confidenceCode"), //
                 new PrimeColumn(MatchGrade, "Match Grade", //

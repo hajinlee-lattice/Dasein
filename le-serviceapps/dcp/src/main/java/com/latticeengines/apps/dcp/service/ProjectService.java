@@ -7,14 +7,17 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+
 
 public interface ProjectService {
 
     ProjectDetails createProject(String customerSpace, String displayName,
-                                 Project.ProjectType projectType, String user);
+                                 Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description);
 
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                 Project.ProjectType projectType, String user);
+                                 Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description);
 
     Project getProjectByProjectId(String customerSpace, String projectId);
 
@@ -27,6 +30,8 @@ public interface ProjectService {
 
     Boolean deleteProject(String customerSpace, String projectId, List<String> teamIds);
 
+    Boolean hardDeleteProject(String customerSpace, String projectId, List<String> teamIds);
+
     void updateRecipientList(String customerSpace, String projectId, List<String> recipientList);
 
     ProjectInfo getProjectBySourceId(String customerSpace, String sourceId);
@@ -37,5 +42,5 @@ public interface ProjectService {
 
     void updateTeamId(String customerSpace, String projectId, String teamId);
 
-    void updateDescription (String customerSpace, String projectId, String description);
+    void updateProject(String customerSpace, String projectId, ProjectUpdateRequest request);
 }

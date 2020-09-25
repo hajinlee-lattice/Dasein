@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -22,11 +23,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroRecordIterator;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.statistics.ProfileArgument;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -90,8 +93,20 @@ public class StatsProfiler {
         Map<String, ProfileParameters.Attribute> declaredAttrsConfig = parseDeclaredAttrs(jobConfig);
         Map<String, ProfileArgument> amAttrsConfig;
         if (Boolean.TRUE.equals(jobConfig.getConsiderAMAttrs())) {
-            amAttrsConfig = findAMAttrsConfig(dataCloudVersion);
-            log.info("Found {} AM attributes config", amAttrsConfig.size());
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            String finalDataCloudVersion = dataCloudVersion;
+            amAttrsConfig = retry.execute(context -> {
+                Map<String, ProfileArgument> attrsConfig = findAMAttrsConfig(finalDataCloudVersion);
+                if (MapUtils.isEmpty(attrsConfig)) {
+                    throw new RuntimeException("Fail to get AM attributes config...");
+                }
+                return attrsConfig;
+            });
+            if (MapUtils.isNotEmpty(amAttrsConfig)) {
+                log.info("Found {} AM attributes config", amAttrsConfig.size());
+            } else {
+                throw new RuntimeException("Fail to get AM attributes config after multiple tries");
+            }
         } else {
             amAttrsConfig = new HashMap<>();
         }
@@ -117,12 +132,12 @@ public class StatsProfiler {
     }
 
     public void appendResult(HdfsDataUnit profileData, HdfsDataUnit updateProfileData, HdfsDataUnit oldProfileData, //
-                             Collection<String> removeAttrs) {
+            Collection<String> removeAttrs) {
         List<GenericRecord> previousRecords = new ArrayList<>();
         Set<String> updatedAttrs = new HashSet<>();
         if (updateProfileData != null) {
             AvroRecordIterator itr = iterateProfileData(updateProfileData);
-            while(itr.hasNext()) {
+            while (itr.hasNext()) {
                 GenericRecord record = itr.next();
                 String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
                 if (!removeAttrs.contains(attrName)) {
@@ -134,7 +149,7 @@ public class StatsProfiler {
         }
         if (oldProfileData != null) {
             AvroRecordIterator itr = iterateProfileData(oldProfileData);
-            while(itr.hasNext()) {
+            while (itr.hasNext()) {
                 GenericRecord record = itr.next();
                 String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
                 if (!removeAttrs.contains(attrName) && !updatedAttrs.contains(attrName)) {
@@ -154,7 +169,7 @@ public class StatsProfiler {
         }
         Set<String> savedAttrs = new HashSet<>();
         AvroRecordIterator itr = iterateProfileData(profileData);
-        while(itr.hasNext()) {
+        while (itr.hasNext()) {
             GenericRecord record = itr.next();
             String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
             savedAttrs.add(attrName);
@@ -162,7 +177,7 @@ public class StatsProfiler {
         if (CollectionUtils.isNotEmpty(previousRecords)) {
             try {
                 List<Object[]> alignedRecords = new ArrayList<>();
-                for (GenericRecord record: previousRecords) {
+                for (GenericRecord record : previousRecords) {
                     Object[] row = ProfileUtils.convertAvroRecord(record);
                     String attrName = row[0].toString();
                     if (!savedAttrs.contains(attrName)) {

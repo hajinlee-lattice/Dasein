@@ -69,7 +69,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testCreateAndGetSource() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject",
-                Project.ProjectType.Type1);
+                Project.ProjectType.Type1, null);
         Assert.assertNotNull(projectDetail);
         String projectId = projectDetail.getProjectId();
 

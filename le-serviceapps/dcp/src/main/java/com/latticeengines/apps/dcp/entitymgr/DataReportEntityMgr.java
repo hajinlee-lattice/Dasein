@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.data.domain.Pageable;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
@@ -13,6 +16,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportRecord, Long> {
 
     DataReportRecord findDataReportRecord(DataReportRecord.Level level, String ownerId);
+
+    List<Pair<String, Date>> getOwnerIdAndTime(DataReportRecord.Level level, Pageable pageable);
 
     DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId);
 
@@ -67,4 +72,5 @@ public interface DataReportEntityMgr extends BaseEntityMgrRepository<DataReportR
   
     int updateDataReportRecordIfNull(Long pid, Table dunsCountTable, Date snapShotTime);
 
+    void deleteDataReportRecords(Set<Long> pids);
 }

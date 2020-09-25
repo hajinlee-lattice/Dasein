@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 
 public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -26,14 +27,26 @@ public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalT
     @Test(groups = "functional")
     public void testFetchCompInfo() {
         DirectPlusEnrichRequest request = new DirectPlusEnrichRequest();
-        request.setDunsNumber("060902413");
-        List<String> selection = defaultSelection();
-        request.setReqColumns(primeMetadataService.getPrimeColumns(selection));
-        request.setBlockIds(primeMetadataService.getBlocksContainingElements(selection));
+        request.setDunsNumber("651911195");
+        List<PrimeColumn> reqColumns = primeMetadataService.getPrimeColumns(defaultSelection());
+        request.setReqColumnsByBlockId(primeMetadataService.divideIntoBlocks(reqColumns));
         PrimeAccount result = enrichService.fetch(Collections.singleton(request)).get(0);
         Assert.assertTrue(StringUtils.isNotBlank(result.getId()));
         Assert.assertNotNull(result.getResult().get("duns_number"));
         Assert.assertNotNull(result.getResult().get("primaryname"));
+
+        reqColumns = primeMetadataService.getPrimeColumns(expandedSelection());
+        request.setReqColumnsByBlockId(primeMetadataService.divideIntoBlocks(reqColumns));
+        result = enrichService.fetch(Collections.singleton(request)).get(0);
+        Assert.assertTrue(StringUtils.isNotBlank(result.getId()));
+        Assert.assertNotNull(result.getResult().get("latestfin_currency"));
+
+        request.setBypassDplusCache(true);
+        result = enrichService.fetch(Collections.singleton(request)).get(0);
+        Assert.assertTrue(StringUtils.isNotBlank(result.getId()));
+        Assert.assertNotNull(result.getResult().get("duns_number"));
+        Assert.assertNotNull(result.getResult().get("primaryname"));
+        Assert.assertNotNull(result.getResult().get("latestfin_currency"));
     }
 
     private List<String> defaultSelection() {
@@ -49,6 +62,15 @@ public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalT
                 "primaryaddr_country_name", //
                 "telephone_telephonenumber", //
                 "primaryindcode_ussicv4" //
+        );
+    }
+
+    private List<String> expandedSelection() {
+        return Arrays.asList( //
+                "duns_number", //
+                "primaryname", //
+                "tradestylenames_name", //
+                "latestfin_currency"
         );
     }
 

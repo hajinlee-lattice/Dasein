@@ -15,9 +15,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.util.TeamUtils;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.auth.TeamEntityList;
@@ -35,9 +33,6 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
 
     @Inject
     private TeamService teamService;
-
-    @Inject
-    private BatonService batonService;
 
     @Inject
     private TeamProxy teamProxy;
@@ -164,26 +159,20 @@ public class TeamWrapperServiceImpl implements TeamWrapperService {
         if (hasTeamInfo == null) {
             return;
         }
-        boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-        if (teamFeatureEnabled) {
-            if (setAllTeamFields) {
-                TeamUtils.fillTeamInfo(hasTeamInfo, getTeamInContext(hasTeamInfo.getTeamId()), getMyTeamIds());
-            } else {
-                hasTeamInfo.setViewOnly(!TeamUtils.isMyTeam(hasTeamInfo.getTeamId()));
-            }
+        if (setAllTeamFields) {
+            TeamUtils.fillTeamInfo(hasTeamInfo, getTeamInContext(hasTeamInfo.getTeamId()), getMyTeamIds());
+        } else {
+            hasTeamInfo.setViewOnly(!TeamUtils.isMyTeam(hasTeamInfo.getTeamId()));
         }
     }
 
     @Override
     public void fillTeamInfoForList(List<? extends HasTeamInfo> hasTeamInfos) {
-        boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-        if (teamFeatureEnabled) {
-            Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false)
-                    .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-            Set<String> teamIds = getMyTeamIds();
-            for (HasTeamInfo hasTeamInfo : hasTeamInfos) {
-                TeamUtils.fillTeamInfo(hasTeamInfo, globalTeamMap.get(hasTeamInfo.getTeamId()), teamIds);
-            }
+        Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false)
+                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
+        Set<String> teamIds = getMyTeamIds();
+        for (HasTeamInfo hasTeamInfo : hasTeamInfos) {
+            TeamUtils.fillTeamInfo(hasTeamInfo, globalTeamMap.get(hasTeamInfo.getTeamId()), teamIds);
         }
     }
 

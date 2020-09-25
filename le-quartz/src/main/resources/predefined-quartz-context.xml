@@ -237,6 +237,17 @@
         <property name="jobTimeout" value="${quartz.metadata.migratedynamo.job.timeout:3600}"/>
     </bean>
 
+    <bean name="dcpRollupDataReportJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="dcpRollupDataReportJob"/>
+        <property name="cronTrigger" value="${quartz.dcp.execution.rollupReport.job.cron:0 */10 * * * ?}"/>
+        <property name="destUrl" value="${quartz.dcp.predefined.job.primary.url:}"/>
+        <property name="secondaryDestUrl" value="${quartz.dcp.predefined.job.secondary.url:}"/>
+        <property name="queryApi" value="${quartz.dcp.predefined.job.query.api:}"/>
+        <property name="checkJobBeanUrl" value="${quartz.dcp.predefined.job.check.bean.url:}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dcpRollupDataReportJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.dcp.rollupReport.job.timeout:3600}"/>
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
@@ -259,6 +270,7 @@
         <ref bean="workflowJobStatusChangeJob"/>
         <ref bean="metadataTableCleanupJob"/>
         <ref bean="metadataMigrateDynamoJob"/>
+        <ref bean="dcpRollupDataReportJob" />
     </util:list>
 
 </beans>

@@ -104,7 +104,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         List<FieldDefinition> fields = fieldDefinitionsRecord.getFieldDefinitionsRecordsMap().get("Matching Fields");
         fields.get(1).setMatchingColumnNames(Collections.singletonList("Street"));
 
-        ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID, Project.ProjectType.Type1);
+        ProjectDetails details = testProjectProxy.createProjectWithProjectId(PROJECT_NAME, PROJECT_ID,
+                Project.ProjectType.Type1, null);
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
 
         GrantDropBoxAccessResponse response = testProjectProxy.getDropFolderAccessByProjectId(PROJECT_ID);
@@ -186,8 +187,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         Assert.assertNotNull(uploadJobDetails.getStatistics().getMatchStats());
         UploadStats.MatchStats matchStats = uploadJobDetails.getStatistics().getMatchStats();
-        Assert.assertEquals(matchStats.getMatched().longValue(), 19L);
-        Assert.assertEquals(matchStats.getUnmatched().longValue(), 1L);
+        Assert.assertEquals(matchStats.getMatched().longValue(), 18L);
+        Assert.assertEquals(matchStats.getUnmatched().longValue(), 2L);
         Assert.assertEquals(matchStats.getPendingReviewCnt().longValue(), 0L);
 
         Assert.assertNotNull(uploadJobDetails.getUploadDiagnostics());

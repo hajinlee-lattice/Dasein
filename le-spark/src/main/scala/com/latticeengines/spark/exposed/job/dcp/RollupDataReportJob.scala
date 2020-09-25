@@ -46,6 +46,9 @@ class RollupDataReportJob extends AbstractSparkJob[RollupDataReportConfig] {
             logSpark(s"this shouldn't happen for $childOwnerId")
           }
         }
+        if (childSet.isEmpty) {
+          throw new RuntimeException("data issue when roll up " + updatedOwnerId + " from " + childIds)
+        }
         val (dupReport, dunsCntDF) = generateDunsCount(childSet, matchedDunsAttr)
         updatedOwnerIdToTarget.put(updatedOwnerId, dunsCntDF)
         dupReports.append(dupReport)

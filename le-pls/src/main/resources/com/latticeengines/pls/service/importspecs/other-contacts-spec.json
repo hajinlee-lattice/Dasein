@@ -13,7 +13,12 @@
                     "CONTACT ID",
                     "EXTERNAL ID"
                 ],
-                "required": false
+                "required": false,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Match IDs": [],
@@ -26,7 +31,12 @@
                 "matchingColumnNames": [
                     "FIRST NAME"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "LastName",
@@ -35,7 +45,12 @@
                 "matchingColumnNames": [
                     "LAST NAME"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "Title",
@@ -44,7 +59,12 @@
                 "matchingColumnNames": [
                     "TITLE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information",
+                "approvedUsage": [
+                    "Model"
+                ]
             },
             {
                 "fieldName": "Email",
@@ -54,7 +74,11 @@
                     "EMAIL",
                     "EMAIL ADDRESS"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "EMAIL",
+                "approvedUsage": [
+                    "Model"
+                ]
             }
         ],
         "Analysis Fields": [
@@ -65,7 +89,11 @@
                 "matchingColumnNames": [
                     "LEAD STATUS"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "LeadSource",
@@ -74,7 +102,12 @@
                 "matchingColumnNames": [
                     "LEAD SOURCE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "subcategory": "Account Information",
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ]
             },
             {
                 "fieldName": "LeadType",
@@ -83,7 +116,11 @@
                 "matchingColumnNames": [
                     "LEAD TYPE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "DoNotMail",
@@ -93,7 +130,11 @@
                     "DO NOT MAIL",
                     "EMAIL OPT OUT"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "BOOLEAN",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "DoNotCall",
@@ -102,7 +143,11 @@
                 "matchingColumnNames": [
                     "DO NOT CALL"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "BOOLEAN",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "CreatedDate",
@@ -111,7 +156,12 @@
                 "matchingColumnNames": [
                     "CREATED DATE"
                 ],
-                "required": false
+                "required": false,
+                "logicalDataType": "Date",
+                "fundamentalType": "DATE",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "LastModifiedDate",
@@ -121,7 +171,12 @@
                     "LAST MODIFIED DATE",
                     "LAST MODIFIED"
                 ],
-                "required": false
+                "required": false,
+                "logicalDataType": "Date",
+                "fundamentalType": "DATE",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Match to Accounts - ID": [
@@ -134,7 +189,12 @@
                     "ACCOUNT EXTERNAL ID",
                     "ACCOUNT"
                 ],
-                "required": false
+                "required": false,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Match to Accounts - Fields": [
@@ -146,7 +206,11 @@
                     "WEBSITE",
                     "DOMAIN"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "CompanyName",
@@ -157,7 +221,11 @@
                     "COMPANY NAME",
                     "ACCOUNT NAME"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "DUNS",
@@ -167,7 +235,11 @@
                     "DUNS",
                     "DUNS NUMBER"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "City",
@@ -177,7 +249,11 @@
                     "CITY",
                     "BILLING CITY"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "State",
@@ -191,7 +267,11 @@
                     "BILLING STATE",
                     "BILLING PROVINCE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "Country",
@@ -201,7 +281,11 @@
                     "COUNTRY",
                     "BILLING COUNTRY"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "PostalCode",
@@ -215,7 +299,11 @@
                     "BILLING ZIP CODE",
                     "BILLING POSTAL CODE"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             },
             {
                 "fieldName": "PhoneNumber",
@@ -225,7 +313,11 @@
                     "PHONE",
                     "PHONE NUMBER"
                 ],
-                "required": false
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Custom Fields": []

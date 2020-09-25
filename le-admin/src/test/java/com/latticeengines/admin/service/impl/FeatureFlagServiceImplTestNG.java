@@ -79,7 +79,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
-                LatticeFeatureFlag.TEAM_FEATURE, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, //
                 LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, //
@@ -102,7 +101,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
                 LatticeFeatureFlag.ADVANCED_FILTERING, //
-                LatticeFeatureFlag.ENABLE_ACXIOM //
+                LatticeFeatureFlag.ENABLE_ACXIOM, //
+                LatticeFeatureFlag.ENABLE_IMPORT_V2 //
         );
 
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
@@ -135,8 +135,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
-                LatticeFeatureFlag.TEAM_FEATURE, //
-                LatticeFeatureFlag.ENABLE_ACXIOM);
+                LatticeFeatureFlag.ENABLE_ACXIOM, //
+                LatticeFeatureFlag.ENABLE_IMPORT_V2);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);

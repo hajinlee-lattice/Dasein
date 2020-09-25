@@ -1,0 +1,55 @@
+{
+    "systemType": "Other",
+    "systemObject": "Product Bundles",
+    "fieldDefinitionsRecordsMap": {
+        "Product ID": [
+            {
+                "fieldName": "ProductId",
+                "fieldType": "TEXT",
+                "screenName": "Product ID",
+                "matchingColumnNames": [
+                    "ID",
+                    "PRODUCT",
+                    "PRODUCT ID",
+                    "EXTERNAL ID"
+                ],
+                "required": true,
+                "nullable": false,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [
+                    "None"
+                ]
+            }
+        ],
+        "Lattice Fields": [
+            {
+                "fieldName": "ProductBundle",
+                "fieldType": "TEXT",
+                "screenName": "Product Bundle Name",
+                "matchingColumnNames": [
+                    "BUNDLE",
+                    "BUNDLE NAME",
+                    "PRODUCT BUNDLE",
+                    "PRODUCT BUNDLE NAME"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information"
+            },
+            {
+                "fieldName": "Description",
+                "fieldType": "TEXT",
+                "screenName": "Product Description",
+                "matchingColumnNames": [
+                    "DESCRIPTION",
+                    "PRODUCT DESCRIPTION"
+                ],
+                "required": false,
+                "fundamentalType": "ALPHA",
+                "category": "Account Information"
+            }
+        ],
+        "Custom Fields": []
+    }
+}

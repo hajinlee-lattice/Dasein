@@ -63,7 +63,7 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
     public void execute() {
         bootstrap();
         Map<String, Table> periodStreams = getTablesFromMapCtxKey(customerSpaceStr, PERIOD_TXN_STREAMS);
-        if (isShortcutMode(periodStreams)) {
+        if (tableExist(periodStreams) && tableInHdfs(periodStreams, true)) {
             Map<String, String> signatureTableNames = periodStreams.entrySet().stream().map(entry -> {
                         String productType = entry.getKey();
                         Table table = entry.getValue();

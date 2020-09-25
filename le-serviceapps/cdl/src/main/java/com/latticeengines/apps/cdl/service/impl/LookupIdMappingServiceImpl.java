@@ -142,6 +142,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 existingLookupIdMap.setDescription(lookupIdMap.getDescription());
                 existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
                 existingLookupIdMap.setExportFieldMappings(lookupIdMap.getExportFieldMetadataMappings());
+                existingLookupIdMap.setIsRegistered(lookupIdMap.getIsRegistered());
             } else {
                 throw new RuntimeException(
                         "Incorrect input payload. Will replace this exception with proper LEDP exception.");
@@ -164,25 +165,25 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         try{
             LookupIdMap map = getLookupIdMap(lookupIdMapId);
             ExternalSystemAuthentication trayAuth = map.getExternalAuthentication();
-            // remove solution instance
-            if (trayAuth.getSolutionInstanceId() != null) {
-                trayService.removeSolutionInstance(traySettings);
-                trayAuth.setSolutionInstanceId(null);
-                map.setExternalAuthentication(trayAuth);
-                map.setIsRegistered(false);
-                updateLookupIdMap(lookupIdMapId, map);
-            }
-            // remove authentication
-            if (trayAuth.getTrayAuthenticationId() != null) {
-                trayService.removeAuthentication(traySettings);
-                trayAuth.setTrayAuthenticationId(null);
-                map.setExternalAuthentication(trayAuth);
-                map.setIsRegistered(false);
-                updateLookupIdMap(lookupIdMapId, map);
+            if (trayAuth != null) {
+                if (trayAuth.getSolutionInstanceId() != null) {
+                    trayService.removeSolutionInstance(traySettings);
+                    trayAuth.setSolutionInstanceId(null);
+                    map.setExternalAuthentication(trayAuth);
+                    map.setIsRegistered(false);
+                    updateLookupIdMap(lookupIdMapId, map);
+                }
+                if (trayAuth.getTrayAuthenticationId() != null) {
+                    trayService.removeAuthentication(traySettings);
+                    trayAuth.setTrayAuthenticationId(null);
+                    map.setExternalAuthentication(trayAuth);
+                    map.setIsRegistered(false);
+                    updateLookupIdMap(lookupIdMapId, map);
+                }
             }
             deleteLookupIdMap(lookupIdMapId);
         } catch (Exception ex) {
-            log.error("Errors while deleting connection: ", ex.getMessage());
+            log.error("Errors while deleting connection: ", ex);
             throw new LedpException(LedpCode.LEDP_40096, new String[] { lookupIdMapId, ex.getMessage() });
         }
     }

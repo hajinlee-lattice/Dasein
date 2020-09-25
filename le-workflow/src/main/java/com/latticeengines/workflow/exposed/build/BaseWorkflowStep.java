@@ -224,7 +224,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PREVIOUS_ACCOUNTS_UNIVERSE = "PREVIOUS_ACCOUNTS_UNIVERSE";
     protected static final String PREVIOUS_CONTACTS_UNIVERSE = "PREVIOUS_CONTACTS_UNIVERSE";
     protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
-    protected static final String DELTA_TABLE_COUNTS = "DELTA_TABLE_COUNTS";
+    public static final String DELTA_TABLE_COUNTS = "DELTA_TABLE_COUNTS";
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
     public static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
@@ -308,7 +308,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE = "ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE";
     protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME = "RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME";
-    protected static final String RAW_ACTIVITY_STREAM_RELINKED_TABLE_NAME = "RAW_ACTIVITY_STREAM_RELINKED_TABLE_NAME";
     protected static final String AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME = "AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME = "DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME";
     protected static final String LAST_ACTIVITY_DATE_TABLE_NAME = "LAST_ACTIVITY_DATE_TABLE_NAME";
@@ -318,6 +317,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
+    protected static final String ACTIVITY_ALERT_GENERATED = "ALERT_GENERATED";
+    protected static final String ACTIVITY_ALERT_MASTER_TABLE_NAME = "ALERT_MASTER_TABLE_NAME";
+    protected static final String ACTIVITY_ALERT_DIFF_TABLE_NAME = "ALERT_DIFF_TABLE_NAME";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -330,8 +332,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String REMATCHED_ACCOUNT_TABLE_NAME = "REMATCHED_ACCOUNT_TABLE_NAME";
     protected static final String ENRICHED_ACCOUNT_DIFF_TABLE_NAME = "ENRICHED_ACCOUNT_DIFF_TABLE_NAME";
 
-    // store set of entities that are already published
-    protected static final String PUBLISHED_ENTITIES = "PUBLISHED_ENTITIES";
     public static final String EXISTING_RECORDS = "EXISTING_RECORDS";
     public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
     public static final String NEW_RECORDS = "NEW_RECORDS";
@@ -420,6 +420,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_PROFILE_TABLE_NAME, //
             PH_STATS_TABLE_NAME, //
             JOURNEY_STAGE_TABLE_NAME, //
+            ACTIVITY_ALERT_MASTER_TABLE_NAME, //
+            ACTIVITY_ALERT_DIFF_TABLE_NAME, //
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME, //
             CURATED_CONTACT_SERVING_TABLE_NAME, //
@@ -472,6 +474,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACTIVITY_STREAMS_RELINK, //
             ACTIVITY_METRICS_CATEGORICAL_ATTR, //
             ACTIVITY_METRICS_CATEGORIES, //
+            ACTIVITY_ALERT_GENERATED, //
             RETAIN_PRODUCT_TYPE
     );
 

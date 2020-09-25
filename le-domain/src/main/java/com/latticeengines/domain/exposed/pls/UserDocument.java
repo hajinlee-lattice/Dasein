@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -77,103 +78,109 @@ public class UserDocument {
 
     public class UserResult {
 
+        @JsonProperty("User")
         private User user;
 
         public UserResult() {
 
         }
 
-        @JsonProperty("User")
         public User getUser() {
             return user;
         }
 
-        @JsonProperty("User")
         public void setUser(User user) {
             this.user = user;
         }
 
         public class User {
+            @JsonProperty("DisplayName")
             private String displayName;
+            @JsonProperty("Identifier")
             private String identifier;
+            @JsonProperty("EmailAddress")
             private String emailAddress;
+            @JsonProperty("Locale")
             private String locale;
+            @JsonProperty("Title")
             private String title;
+            @JsonProperty("AvailableRights")
             private Map<String, EntityAccessRightsData> availableRights;
+            @JsonProperty("AccessLevel")
             private String accessLevel;
+            @JsonProperty("TeamIds")
+            private List<String> teamIds = new ArrayList<>();
 
             public User() {
 
             }
 
-            @JsonProperty("DisplayName")
             public String getDisplayName() {
                 return displayName;
             }
 
-            @JsonProperty("DisplayName")
             public void setDisplayName(String displayName) {
                 this.displayName = displayName;
             }
 
-            @JsonProperty("Identifier")
             public String getIdentifier() {
                 return identifier;
             }
 
-            @JsonProperty("Identifier")
             public void setIdentifier(String identifier) {
                 this.identifier = identifier;
             }
 
-            @JsonProperty("EmailAddress")
+
             public String getEmailAddress() {
                 return emailAddress;
             }
 
-            @JsonProperty("EmailAddress")
             public void setEmailAddress(String emailAddress) {
                 this.emailAddress = emailAddress;
             }
 
-            @JsonProperty("Locale")
+
             public String getLocale() {
                 return locale;
             }
 
-            @JsonProperty("Locale")
             public void setLocale(String locale) {
                 this.locale = locale;
             }
 
-            @JsonProperty("Title")
+
             public String getTitle() {
                 return title;
             }
 
-            @JsonProperty("Title")
             public void setTitle(String title) {
                 this.title = title;
             }
 
-            @JsonProperty("AccessLevel")
             public String getAccessLevel() {
                 return accessLevel;
             }
 
-            @JsonProperty("AccessLevel")
+
             public void setAccessLevel(String accessLevel) {
                 this.accessLevel = accessLevel;
             }
 
-            @JsonProperty("AvailableRights")
             public Map<String, EntityAccessRightsData> getAvailableRights() {
                 return availableRights;
             }
 
-            @JsonProperty("AvailableRights")
             public void setAvailableRights(Map<String, EntityAccessRightsData> availableRights) {
                 this.availableRights = availableRights;
+            }
+
+            public List<String> getTeamIds() {
+                return teamIds;
+            }
+
+            public void setTeamIds(List<String> teamIds) {
+                this.teamIds = teamIds;
             }
         }
 

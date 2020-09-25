@@ -14,9 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.latticeengines.auth.exposed.util.TeamUtils;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -40,9 +38,6 @@ public class PlsValidateTeamMemberRightsAspect {
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Inject
-    private BatonService batonService;
-
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentServiceImpl.createOrUpdateSegment(..))")
     public void createOrUpdateSegment(JoinPoint joinPoint) {
         MetadataSegment segment = (MetadataSegment) joinPoint.getArgs()[0];
@@ -50,7 +45,7 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithSegment(MetadataSegment segment) {
-        if (teamFeatureEnabled() && segment != null) {
+        if (segment != null) {
             if (StringUtils.isNotEmpty(segment.getName()) && segment.getTeamId() != null &&
                     TeamUtils.shouldFailWhenAssignTeam(segment.getName(), ((id) -> segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), id)), segment)) {
                 throw new AccessDeniedException("Access denied.");
@@ -60,11 +55,9 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithSegmentName(String segmentName) {
-        if (teamFeatureEnabled()) {
-            MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
-            if (metadataSegment != null) {
-                checkTeamInContext(metadataSegment.getTeamId());
-            }
+        MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
+        if (metadataSegment != null) {
+            checkTeamInContext(metadataSegment.getTeamId());
         }
     }
 
@@ -83,9 +76,7 @@ public class PlsValidateTeamMemberRightsAspect {
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentExportServiceImpl.createSegmentExportJob(..))")
     public void createSegmentExportJob(JoinPoint joinPoint) {
         MetadataSegmentExport metadataSegmentExport = (MetadataSegmentExport) joinPoint.getArgs()[0];
-        if (teamFeatureEnabled()) {
-            checkTeamInContext(metadataSegmentExport.getTeamId());
-        }
+        checkTeamInContext(metadataSegmentExport.getTeamId());
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.createOrUpdate(..))")
@@ -100,11 +91,9 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithPlayName(String playName) {
-        if (teamFeatureEnabled()) {
-            Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
-            if (play != null) {
-                checkTeamInContext(play.getTeamId());
-            }
+        Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
+        if (play != null) {
+            checkTeamInContext(play.getTeamId());
         }
     }
 
@@ -149,21 +138,13 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamWithRatingEngine(RatingEngine ratingEngine) {
-        if (teamFeatureEnabled()) {
-            checkTeamInContext(ratingEngine.getTeamId());
-        }
+        checkTeamInContext(ratingEngine.getTeamId());
     }
 
     private void checkTeamWithRatingEngineId(String ratingEngineId) {
-        if (teamFeatureEnabled()) {
-            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getTenant().getId(), ratingEngineId);
-            if (ratingEngine != null) {
-                checkTeamInContext(ratingEngine.getTeamId());
-            }
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getTenant().getId(), ratingEngineId);
+        if (ratingEngine != null) {
+            checkTeamInContext(ratingEngine.getTeamId());
         }
-    }
-
-    private boolean teamFeatureEnabled() {
-        return batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
     }
 }

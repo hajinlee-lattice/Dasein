@@ -32,6 +32,11 @@ import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
+import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionCode;
+import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.exception.UIActionUtils;
+import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -170,11 +175,20 @@ public class UserResource {
         }
         else {
             IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
-            String welcomeUrl = dcpPublicUrl;
-            if (idaasUser.getInvitationLink() != null) {
-                welcomeUrl = idaasUser.getInvitationLink();
+            if (idaasUser == null) {
+                LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s.",
+                        loginUsername, loginLevel));
+                String title = "Failed to create IDaaS User.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
+            } else {
+                String welcomeUrl = dcpPublicUrl;
+                if (idaasUser.getInvitationLink() != null) {
+                    welcomeUrl = idaasUser.getInvitationLink();
+                }
+                emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
             }
-            emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
         }
         response.setSuccess(true);
         return response;
@@ -259,11 +273,20 @@ public class UserResource {
         }
         if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
             IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
-            String welcomeUrl = dcpPublicUrl;
-            if (idaasUser.getInvitationLink() != null) {
-                welcomeUrl = idaasUser.getInvitationLink();
+            if (idaasUser == null) {
+                LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
+                        loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
+                String title = "Failed to create IDaaS User.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
+            } else {
+                String welcomeUrl = dcpPublicUrl;
+                if (idaasUser.getInvitationLink() != null) {
+                    welcomeUrl = idaasUser.getInvitationLink();
+                }
+                emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
             }
-            emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
         }
         return SimpleBooleanResponse.successResponse();
     }
@@ -295,6 +318,14 @@ public class UserResource {
             return SimpleBooleanResponse.failedResponse(
                     Collections.singletonList("Could not delete a user that is not in the current tenant"));
         }
+    }
+
+    @GetMapping("/newuser/levels")
+    @ResponseBody
+    @ApiOperation(value = "Get user levels that an admin can assign when creating a user")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
+    public List<AccessLevel> getNewUserLevels() {
+        return AccessLevel.getDnBConnectNewUserLevels();
     }
 
     private void checkUser(User user) {

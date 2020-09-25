@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
@@ -786,6 +787,21 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/allPAConsumedTemplates", shortenCustomerSpace(customerSpace));
         List<?> rawList = get("reset template", url, List.class);
         return JsonUtils.convertList(rawList, String.class);
+    }
+
+    public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
+                                            boolean nullable) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks" +
+                "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&length={length}&nullable={nullable}",
+                shortenCustomerSpace(customerSpace), uniqueTaskId, attrName, length, nullable);
+        put("Add attribute length validator", url);
+    }
+
+    public void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks" +
+                        "/appendSimpleValueFilter/{uniqueTaskId}",
+                shortenCustomerSpace(customerSpace), uniqueTaskId);
+        post("Add simple value filter", url, simpleValueFilter, Void.class);
     }
 }
 

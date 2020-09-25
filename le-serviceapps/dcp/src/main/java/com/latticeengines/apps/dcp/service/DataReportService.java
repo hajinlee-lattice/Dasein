@@ -47,4 +47,6 @@ public interface DataReportService {
     DataReport getReadyForRollupDataReport(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
+
+    void hardDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
 }

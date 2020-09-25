@@ -627,8 +627,7 @@ public class BatonServiceImpl implements BatonService {
     @SuppressWarnings("deprecation")
     public boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
         Collection<LatticeProduct> dcp = Collections.singleton(LatticeProduct.DCP);
-        if (hasAtLeastOneProduct(customerSpace, new HashSet<LatticeProduct>(dcp)) &&
-                flag.getName().equalsIgnoreCase(LatticeFeatureFlag.TEAM_FEATURE.getName())) {
+        if (hasAtLeastOneProduct(customerSpace, new HashSet<>(dcp))) {
             return true;
         }
         return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());
@@ -693,7 +692,9 @@ public class BatonServiceImpl implements BatonService {
         try {
             return ZoneId.of(timezoneStr);
         } catch (DateTimeException e) {
-            log.error("Failed to parse timezone string {}, error = {}", timezoneStr, e);
+            String msg = String.format("Failed to parse timezone string %s for tenant %s", timezoneStr,
+                    customerSpace.toString());
+            log.error(msg, e);
             throw e;
         }
     }
@@ -779,32 +780,6 @@ public class BatonServiceImpl implements BatonService {
                         shouldExclude = true;
                     } else {
                         log.info("{} is not an ATT hotfix target", tenantId);
-                        shouldExclude = false;
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Failed to retrieve hotfix targets from ZK.", e);
-            }
-        }
-        return shouldExclude;
-    }
-
-    @Override
-    public boolean shouldWaitDataAttrs(String tenantId) {
-        boolean shouldExclude = false;
-        if (StringUtils.isNotBlank(tenantId)) {
-            tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
-            Camille camille = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-            Path node = PathBuilder.buildPodPath(podId).append("CitrixHotFixTargets");
-            try {
-                if (camille.exists(node)) {
-                    List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
-                    if (targets.contains(tenantId)) {
-                        log.info("{} is an Citrix hotfix target.", tenantId);
-                        shouldExclude = true;
-                    } else {
-                        log.info("{} is not an Citrix hotfix target", tenantId);
                         shouldExclude = false;
                     }
                 }

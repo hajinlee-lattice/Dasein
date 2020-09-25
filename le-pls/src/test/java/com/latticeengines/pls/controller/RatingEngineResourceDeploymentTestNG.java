@@ -40,9 +40,9 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -66,7 +66,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     private final boolean shouldCreateActionWithRatingEngine2 = false;
 
     @Inject
-    private MetadataSegmentService metadataSegmentService;
+    private TestMetadataSegmentProxy testSegmentProxy;
 
     @Inject
     private ActionProxy actionProxy;
@@ -87,14 +87,15 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        attachProtectedProxy(testSegmentProxy);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
         cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         segment = constructSegment(SEGMENT_NAME);
-        MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
+        MetadataSegment createdSegment = testSegmentProxy.createOrUpdate(segment);
         Assert.assertNotNull(createdSegment);
-        MetadataSegment retrievedSegment = metadataSegmentService.getSegmentByName(createdSegment.getName(), false);
+        MetadataSegment retrievedSegment = testSegmentProxy.getSegment(createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
 
         re1 = createRuleBasedRatingEngine(retrievedSegment);

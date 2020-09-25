@@ -110,6 +110,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("timeline_rebuild_flag")
     private Boolean timelineRebuildFlag;
 
+    @JsonProperty("ActivityAlertVersion")
+    private String activityAlertVersion;
+
     public Integer getMinTxnDate() {
         return minTxnDate;
     }
@@ -312,5 +315,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setTimelineRebuildFlag(Boolean timelineRebuildFlag) {
         this.timelineRebuildFlag = timelineRebuildFlag;
+    }
+
+    public String getActivityAlertVersion() {
+        return activityAlertVersion;
+    }
+
+    public void setActivityAlertVersion(String activityAlertVersion) {
+        this.activityAlertVersion = activityAlertVersion;
     }
 }

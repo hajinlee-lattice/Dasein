@@ -5,7 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel.
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -19,7 +19,7 @@ public class PrimeMetadataServiceImplUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "blockElements")
     private void testConsolidateBlocks(List<DataBlockElement> blockElements, int expectedBlocks) {
-         Set<String> blockIds = PrimeMetadataServiceImpl.consolidateBlocks(blockElements);
+         Map<String, List<String>> blockIds = PrimeMetadataServiceImpl.consolidateBlocks(blockElements);
          Assert.assertEquals(blockIds.size(), expectedBlocks);
     }
 

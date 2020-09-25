@@ -51,6 +51,9 @@ public class ProjectDetails {
     @JsonProperty("teamId")
     private String teamId;
 
+    @JsonProperty("purposeOfUse")
+    private PurposeOfUse purposeOfUse;
+
     public String getProjectId() {
         return projectId;
     }
@@ -153,5 +156,13 @@ public class ProjectDetails {
 
     public void setProjectDescription(String projectDescription) {
         this.projectDescription = projectDescription;
+    }
+
+    public PurposeOfUse getPurposeOfUse() {
+        return purposeOfUse;
+    }
+
+    public void setPurposeOfUse(PurposeOfUse purposeOfUse) {
+        this.purposeOfUse = purposeOfUse;
     }
 }

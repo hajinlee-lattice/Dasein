@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
+import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -46,10 +47,12 @@ public class ProjectResource {
             ProjectDetails result;
             if(projectRequest.getProjectId() == null) {
                 result = projectService.createProject(customerSpace, projectRequest.getDisplayName(),
-                        projectRequest.getProjectType(), user);
+                        projectRequest.getProjectType(), user, projectRequest.getPurposeOfUse(),
+                        projectRequest.getProjectDescription());
             } else {
                 result = projectService.createProject(customerSpace, projectRequest.getProjectId(),
-                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user);
+                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user,
+                                projectRequest.getPurposeOfUse(), projectRequest.getProjectDescription());
             }
             return ResponseDocument.successResponse(result);
         } catch (LedpException e) {
@@ -96,6 +99,14 @@ public class ProjectResource {
         return projectService.deleteProject(customerSpace, projectId, teamIds);
     }
 
+    @DeleteMapping("/{projectId}/harddelete")
+    @ResponseBody
+    @ApiOperation(value = "True delete project by projectId")
+    public Boolean hardDeleteProject(@PathVariable String customerSpace, @PathVariable String projectId,
+                                 @RequestBody(required = false) List<String> teamIds) {
+        return projectService.hardDeleteProject(customerSpace, projectId, teamIds);
+    }
+
     @GetMapping("/projectId/{projectId}/dropFolderAccess")
     @ResponseBody
     @ApiOperation(value = "Get dropFolderAccess by projectId")
@@ -112,5 +123,15 @@ public class ProjectResource {
                                          @PathVariable String teamId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         projectService.updateTeamId(customerSpace, projectId, teamId);
+    }
+
+    @PutMapping("/projectId/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "update product description")
+    public void updateProject(@PathVariable String customerSpace,
+                             @PathVariable String projectId,
+                             @RequestBody ProjectUpdateRequest request) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        projectService.updateProject(customerSpace, projectId, request);
     }
 }

@@ -105,8 +105,7 @@ public class DataReportResource {
     @ApiOperation(value = "Get sub owner ids")
     public Set<String> getChildrenIds(@PathVariable String customerSpace,
                                       @RequestParam DataReportRecord.Level level,
-                                      @RequestParam(required = false) String ownerId,
-                                      @RequestParam(required = false, defaultValue = "false") Boolean readyForRollup) {
+                                      @RequestParam(required = false) String ownerId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataReportService.getChildrenIds(customerSpace, level, ownerId);
     }

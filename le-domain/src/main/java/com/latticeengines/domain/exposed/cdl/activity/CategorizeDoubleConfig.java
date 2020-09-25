@@ -46,6 +46,9 @@ public class CategorizeDoubleConfig extends CategorizeValConfig {
     }
 
     private boolean anyConditionMet(Map<Comparator, Double> conditions, Double val) {
+        if (val == null) {
+            return false;
+        }
         return conditions.entrySet().stream().anyMatch(entry -> {
             Comparator comp = entry.getKey();
             double bound = entry.getValue();

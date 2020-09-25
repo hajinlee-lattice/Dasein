@@ -3,6 +3,7 @@ package com.latticeengines.apps.lp.provision.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.lp.provision.PLSComponentManager;
+import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
@@ -28,7 +30,6 @@ import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -90,6 +91,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private GlobalAuthSubscriptionService subscriptionService;
 
     @Inject
     private EmailService emailService;
@@ -200,10 +204,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId(), iDaaSUsers);
         assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId(), iDaaSUsers);
         assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId(), null);
-        if (batonService.isEnabled(CustomerSpace.parse(tenant.getId()), LatticeFeatureFlag.TEAM_FEATURE)) {
-            MultiTenantContext.setTenant(tenant);
-            teamService.createDefaultTeam();
-        }
+        MultiTenantContext.setTenant(tenant);
+        teamService.createDefaultTeam();
     }
 
     private void assignAccessLevelByEmails(String userName, Collection<String> emails, AccessLevel accessLevel,
@@ -454,6 +456,13 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } finally {
             TracingUtils.finish(provisionSpan);
         }
+        try {
+            emailListInJson = configDir.get("/SubscriptionEmails").getDocument().getData();
+        } catch (Exception e) {
+            log.info("no SubscriptionEmails node exist {}.", e.getMessage());
+        }
+        List<String> subscriptionEmails = EmailUtils.parseEmails(emailListInJson);
+        subscriptionService.createByEmailsAndTenantId(new HashSet<>(subscriptionEmails), tenant.getId());
     }
 
     private Scope startProvisionSpan(SpanContext parentContext, String tenantId, long startTimeStamp) {

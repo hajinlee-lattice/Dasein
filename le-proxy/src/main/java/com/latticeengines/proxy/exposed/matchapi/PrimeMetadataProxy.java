@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
@@ -14,4 +15,6 @@ public interface PrimeMetadataProxy {
     List<PrimeColumn> getPrimeColumns(List<String> elementIds);
     List<PrimeColumn> getCandidateColumns();
     Set<String> getBlocksContainingElements(List<String> elementIds);
+    DataBlockEntitlementContainer enrichEntitlementContainerWithElements(DataBlockEntitlementContainer container);
+
 }

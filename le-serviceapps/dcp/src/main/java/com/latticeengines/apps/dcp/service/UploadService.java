@@ -51,4 +51,6 @@ public interface UploadService {
     void updateDropFileTime(String customerSpace, String uploadId, long dropFileTime);
 
     void updateProgressPercentage(String customerSpace, String uploadId, String progressPercentage);
+
+    void hardDeleteUploadUnderSource(String customerSpace, String sourceId);
 }

@@ -143,8 +143,8 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
     public Set<String> getBlocksContainingElements(Collection<String> elementIds) {
         List<DataBlockElement> blockElements = //
                 dataBlockElementRepository.findAllByPrimeColumn_PrimeColumnIdIn(elementIds);
-        Set<String> blockIds = consolidateBlocks(blockElements);
-        Set<String> toReturn = blockIds.stream().filter(block -> !block.startsWith("baseinfo"))
+        Map<String, List<String>> blockIds = consolidateBlocks(blockElements);
+        Set<String> toReturn = blockIds.keySet().stream().filter(block -> !block.startsWith("baseinfo"))
                 .collect(Collectors.toSet());
         if (toReturn.isEmpty()) {
             return Collections.singleton("companyinfo_L1_v1");
@@ -153,7 +153,27 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         }
     }
 
-    static Set<String> consolidateBlocks(Collection<DataBlockElement> blockElements) {
+    /**
+     * Find minimum and lowest level blocks containing all elements requested
+     */
+    @Override
+    public Map<String, List<PrimeColumn>> divideIntoBlocks(Collection<PrimeColumn> primeColumns) {
+        Map<String, PrimeColumn> idToPcMap = primeColumns.stream() //
+                .collect(Collectors.toMap(PrimeColumn::getPrimeColumnId, Function.identity()));
+        List<DataBlockElement> blockElements = //
+                dataBlockElementRepository.findAllByPrimeColumn_PrimeColumnIdIn(idToPcMap.keySet());
+        Map<String, List<String>> blockIds = consolidateBlocks(blockElements);
+        Map<String, List<PrimeColumn>> toReturn = new HashMap<>();
+        blockIds.forEach((blockId, elementIdsInBlock) -> {
+            List<PrimeColumn> primeColumnsInBlock = elementIdsInBlock.stream() //
+                    .map(idToPcMap::get).collect(Collectors.toList());
+            toReturn.put(blockId, primeColumnsInBlock);
+        });
+        return toReturn;
+    }
+
+    // blockId -> list(elementId)
+    static Map<String, List<String>> consolidateBlocks(Collection<DataBlockElement> blockElements) {
         // elementId -> list(dbe)
         Map<String, List<DataBlockElement>> elementIdToBlockElementMap = new HashMap<>();
         // blockId -> list(dbe) : result
@@ -197,12 +217,18 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 takeBlock(maxCoverageBlockId, elementIdToBlockElementMap, blockIdToBlockElementMap);
             }
         } while (StringUtils.isNotBlank(maxCoverageBlockId));
-        return blockIdToBlockElementMap.values().stream().map(dataBlockElements -> {
+        // blockId -> list(elementId)
+        Map<String, List<String>> blockElementMap = new HashMap<>();
+        blockIdToBlockElementMap.values().forEach(dataBlockElements -> {
             DataBlockElement maxLevel = dataBlockElements.stream() //
                     .max(Comparator.comparing(DataBlockElement::getLevel)).orElse(null);
             Preconditions.checkNotNull(maxLevel);
-            return maxLevel.getFqBlockId();
-        }).collect(Collectors.toSet());
+            String blockId = maxLevel.getFqBlockId();
+            List<String> elementIds = dataBlockElements.stream() //
+                    .map(dbe -> dbe.getPrimeColumn().getPrimeColumnId()).collect(Collectors.toList());
+            blockElementMap.put(blockId, elementIds);
+        });
+        return blockElementMap;
     }
 
     private static void takeBlock(String blockId, Map<String, //

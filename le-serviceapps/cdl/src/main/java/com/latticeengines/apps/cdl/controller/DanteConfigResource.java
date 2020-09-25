@@ -6,18 +6,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DanteConfigService;
 import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
-
-@Api(value = "DanteConfigurationDocument", description = "REST resource for dante configs.")
+@Api(value = "DanteConfigurationDocument")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/danteconfig")
+@RequestMapping("/customerspaces/{customerSpace}/dante-configuration")
 public class DanteConfigResource {
 
     private static final Logger log = LoggerFactory.getLogger(DanteConfigResource.class);
@@ -25,9 +27,17 @@ public class DanteConfigResource {
     @Inject
     private DanteConfigService danteConfigService;
 
-
-    @GetMapping("/getDanteConfiguration")
-    public DanteConfigurationDocument getDanteConfiguration(@PathVariable String customerSpace){
+    @GetMapping
+    @ResponseBody
+    @ApiOperation(value = "Get the dante configuration document for the customer space")
+    public DanteConfigurationDocument getDanteConfiguration(@PathVariable String customerSpace) {
         return danteConfigService.getDanteConfiguration();
+    }
+
+    @PostMapping("/refresh")
+    @ResponseBody
+    @ApiOperation(value = "Refresh the dante configuration document for the customer space")
+    public DanteConfigurationDocument refreshDanteConfiguration(@PathVariable String customerSpace) {
+        return danteConfigService.refreshDanteConfiguration();
     }
 }

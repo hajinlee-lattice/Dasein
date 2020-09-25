@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -18,11 +19,11 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -309,11 +310,38 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         metadataProxy.updateDataTablePolicy(customerSpace.toString(), tableName, retentionPolicy);
     }
 
-    protected boolean isShortcutMode(Table table) {
+    protected boolean tableExist(Map<String, Table> tables) {
+        return tableExist(new ArrayList<>(tables.values()));
+    }
+
+    protected boolean tableExist(List<Table> tables) {
+        return CollectionUtils.isNotEmpty(tables) && tables.stream().allMatch(this::tableExist);
+    }
+
+    protected boolean tableExist(Table table) {
         return table != null;
     }
 
-    protected boolean isShortcutMode(Map<String, Table> tables) {
-        return MapUtils.isNotEmpty(tables) && tables.values().stream().noneMatch(Objects::isNull);
+    protected boolean tableInHdfs(Map<String, Table> tables, boolean partitioned) {
+        return tableInHdfs(new ArrayList<>(tables.values()), partitioned);
+    }
+
+    protected boolean tableInHdfs(List<Table> tables, boolean partitioned) {
+        return CollectionUtils.isNotEmpty(tables) && tables.stream().allMatch(table -> tableInHdfs(table, partitioned));
+    }
+
+    protected boolean tableInHdfs(Table table, boolean partitioned) {
+        String tablePath = partitioned ? table.getExtracts().get(0).getPath() : table.getExtractsDirectory();
+        boolean result = false;
+        try {
+            result = HdfsUtils.fileExists(yarnConfiguration, tablePath);
+        } catch (IOException e) {
+            log.warn("Failed to check if table exists with path {}", tablePath);
+            e.printStackTrace();
+        }
+        if (!result) {
+            log.warn("Found table {} in database but not in hdfs.", table.getName());
+        }
+        return result;
     }
 }

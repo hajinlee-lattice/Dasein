@@ -115,8 +115,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         }
         Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_TABLE_NAME, String.class, String.class);
         if (periodStoreTableNames != null) {
-            if (allTablesExist(periodStoreTableNames)) {
-                log.info("[{}] Period stores have been created before retry. Skip generating period stores", customerSpace);
+            if (allTablesExist(periodStoreTableNames) && tableInHdfs(periodStoreTableNames, true)) {
+                log.info("Retrieved period streams {}. Going through shortcut mode.", periodStoreTableNames);
                 dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, PeriodStores, inactive);
                 return null;
             }

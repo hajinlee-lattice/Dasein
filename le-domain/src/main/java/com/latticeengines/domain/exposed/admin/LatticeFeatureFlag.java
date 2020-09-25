@@ -11,7 +11,6 @@ public enum LatticeFeatureFlag {
     BETA_FEATURE("BetaFeature", "Allows beta features"), //
     PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
 
-    TEAM_FEATURE("TeamFeature", "Allows team features"), //
     DANTE("Dante", "Dante"), //
     ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
     ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable data encryption"), //
@@ -48,6 +47,7 @@ public enum LatticeFeatureFlag {
     ENABLE_ACCOUNT360("EnableAccount360", "Enable Account360 features"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //
     ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
+    ENABLE_IMPORT_V2("EnableImportV2", "Enable Import UI 2.0"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

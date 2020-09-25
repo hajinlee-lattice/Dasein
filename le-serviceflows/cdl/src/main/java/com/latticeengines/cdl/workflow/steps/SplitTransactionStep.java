@@ -50,7 +50,7 @@ public class SplitTransactionStep extends BaseProcessAnalyzeSparkStep<ProcessTra
     public void execute() {
         bootstrap();
         Map<String, Table> splitTables = getTablesFromMapCtxKey(customerSpaceStr, Raw_TXN_STREAMS);
-        if (isShortcutMode(splitTables) && hasKeyInContext(RETAIN_PRODUCT_TYPE)) {
+        if (tableExist(splitTables) && tableInHdfs(splitTables, true) && hasKeyInContext(RETAIN_PRODUCT_TYPE)) {
             Map<String, String> signatureTableNames = splitTables.entrySet().stream().map(entry -> {
                 String productType = entry.getKey();
                 Table table = entry.getValue();

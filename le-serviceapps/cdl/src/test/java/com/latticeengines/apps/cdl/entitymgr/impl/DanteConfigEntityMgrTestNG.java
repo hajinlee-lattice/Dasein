@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -48,16 +47,18 @@ public class DanteConfigEntityMgrTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCrud() {
-
+    public void testCreate() {
         createAndUpdateDanteConfig();
-        createAndUpdateDanteConfig();
-        List<DanteConfigurationDocument> configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
-        Assert.assertEquals(configs.size(), 2);
+        DanteConfigurationDocument config = danteConfigEntityMgr.findByTenantId(mainCustomerSpace);
+        Assert.assertNotNull(config);
 
-        danteConfigEntityMgr.createOrUpdate(mainCustomerSpace, danteConfig);
-        configs = danteConfigEntityMgr.findAllByTenantId(mainCustomerSpace);
-        Assert.assertEquals(configs.size(), 1);
+        DanteConfigurationDocument doc = danteConfigEntityMgr.createOrUpdate(mainCustomerSpace, danteConfig);
+        Assert.assertNotNull(doc);
+
+        doc = danteConfigEntityMgr.createOrUpdate(mainCustomerSpace,
+                new DanteConfigurationDocument(danteConfig.getMetadataDocument(), "widgetConfigurationDocument"));
+        Assert.assertNotNull(doc);
+        Assert.assertEquals(doc.getWidgetConfigurationDocument(), "widgetConfigurationDocument");
     }
 
     private void setupDanteConfiguraiton() {

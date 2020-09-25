@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -213,7 +215,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    protected void bootstrapUser(AccessLevel accessLevel, Tenant tenant) {
+    protected void bootstrapUser(AccessLevel accessLevel, Tenant tenant, boolean overWriteTeams) {
         String username = TestFrameworkUtils.usernameForAccessLevel(accessLevel);
 
         UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
@@ -229,6 +231,13 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         Credentials creds = new Credentials();
         creds.setUsername(username);
         creds.setPassword(TestFrameworkUtils.GENERAL_PASSWORD_HASH);
+        if (overWriteTeams) {
+            List<GlobalTeam> globalTeams = new ArrayList<>();
+            GlobalTeam globalTeam = new GlobalTeam();
+            globalTeam.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
+            globalTeams.add(globalTeam);
+            user.setUserTeams(globalTeams);
+        }
         userRegistration.setUser(user);
         userRegistration.setCredentials(creds);
         Boolean success = magicRestTemplate.postForObject(plsApiHostPort + "/pls/admin/users",

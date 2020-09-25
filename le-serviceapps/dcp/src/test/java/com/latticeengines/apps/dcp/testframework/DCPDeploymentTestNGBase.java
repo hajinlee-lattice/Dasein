@@ -23,6 +23,9 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -40,7 +43,8 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 @Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceapps-dcp-context.xml" })
-public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class
+DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(DCPDeploymentTestNGBase.class);
 
@@ -182,5 +186,12 @@ public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     public void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
+    }
+
+    protected PurposeOfUse getPurposeOfUse() {
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain(DataDomain.Finance);
+        purposeOfUse.setRecordType(DataRecordType.Domain);
+        return purposeOfUse;
     }
 }

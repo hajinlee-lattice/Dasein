@@ -131,7 +131,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         // for profiling merged tables
         putObjectInContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, activityMetricsServingEntities);
         Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
-        shortCutMode = allTablesExist(mergedMetricsGroupTableNames);
+        shortCutMode = allTablesExist(mergedMetricsGroupTableNames) && tableInHdfs(mergedMetricsGroupTableNames, false);
         if (shortCutMode) {
             Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
             for (Map.Entry<String, String> entry : mergedMetricsGroupTableNames.entrySet()) {
@@ -141,7 +141,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 signatureTableNames.putIfAbsent(servingStore, new HashMap<>());
                 signatureTableNames.get(servingStore).put(getEntityInLabel(mergedTableLabel).name(), tableName);
             }
-            log.info(String.format("Found merge activity metrics tables: %s in context, going thru short-cut mode.", mergedMetricsGroupTableNames.values()));
+            log.info("Retrieved merged metrics: {}. Going through shortcut mode.", mergedMetricsGroupTableNames);
             signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
             return null;
         } else {
@@ -321,7 +321,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                     String[] rollupDimVals = tokens.get(1).split("_");
                     String timeRange = tokens.get(2);
 
-                    String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+                    String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
                     BusinessCalendar calendar = periodProxy.getBusinessCalendar(customerSpace.toString());
                     TimeFilterTranslator translator = new TimeFilterTranslator(getPeriodStrategies(calendar), evaluationDate);
                     enrichAttribute(attr, groupId, rollupDimVals, timeRange, translator);
