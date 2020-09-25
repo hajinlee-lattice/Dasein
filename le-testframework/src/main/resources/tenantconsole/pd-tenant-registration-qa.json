@@ -54,6 +54,10 @@
         {
           "Node": "ThirdPartyUserEmails",
           "Data": "[]"
+        },
+        {
+          "Node": "SubscriptionEmails",
+          "Data": "[]"
         }
       ]
     },
