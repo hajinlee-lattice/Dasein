@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -49,17 +50,14 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
 
     @Test(groups = "functional")
     public void testGetMetrics(){
-        int result = activityTimelineService.getNewWebActivitiesCount(TEST_ACCOUNT_ID,null,null);
-        Assert.assertEquals(result,139);
+        Map<String,Integer> metrics = activityTimelineService.getActivityTimelineMetrics(TEST_ACCOUNT_ID,null,null);
+        Assert.assertEquals(metrics.get("newActivities").intValue(),139);
 
-        result = activityTimelineService.getIdentifiedContactsCount(TEST_ACCOUNT_ID,null,null);
-        Assert.assertEquals(result,0);
+        Assert.assertEquals(metrics.get("newIdentifiedContacts").intValue(),0);
 
-        result = activityTimelineService.getNewEngagementsCount(TEST_ACCOUNT_ID,null,null);
-        Assert.assertEquals(result,207);
+        Assert.assertEquals(metrics.get("newEngagements").intValue(),207);
 
-        result = activityTimelineService.getNewOpportunitiesCount(TEST_ACCOUNT_ID,null,null);
-        Assert.assertEquals(result,97);
+        Assert.assertEquals(metrics.get("newOpportunities").intValue(),97);
     }
 
     private DataPage generateTestData(String filePath) {

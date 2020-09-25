@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -100,63 +101,30 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     }
 
     @Override
-    public int getNewWebActivitiesCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
+    public Map<String, Integer> getActivityTimelineMetrics(String accountId, String timelinePeriod,
+            Map<String, String> orgInfo) {
+
+        Map<String, Integer> metrics = new HashMap<String, Integer>();
 
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        String internalAccountId = getInternalAccountId(accountId, orgInfo);
-
-        log.info(String.format("Retrieving new Web Activities Metric| accountId=%s", accountId));
-        List<Map<String, Object>> webActivities = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
-                AtlasStream.StreamType.WebVisit, null);
-
-        return webActivities.size();
-    }
-
-    @Override
-    public int getIdentifiedContactsCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
-
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        String internalAccountId = getInternalAccountId(accountId, orgInfo);
-
-        log.info(String.format("Retrieving new Identified Contacts Metric| accountId=%s", accountId));
-        List<Map<String, Object>> newContactRecords = getLatestAccountData(internalAccountId, customerSpace,
-                timelinePeriod, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO);
-        newContactRecords = newContactRecords.stream().filter(t -> t.get("EventType").equals("New Lead"))
-                .collect(Collectors.toList());
-
-        return newContactRecords.stream().map(t -> t.get("ContactId")).distinct().collect(Collectors.toList()).size();
-    }
-
-    @Override
-    public int getNewEngagementsCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
-
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        String internalAccountId = getInternalAccountId(accountId, orgInfo);
-
-        log.info(String.format("Retrieving new Engagements Metric| accountId=%s", accountId));
-        List<Map<String, Object>> opportunities = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
-                AtlasStream.StreamType.Opportunity, null);
-        List<Map<String, Object>> marketing = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
-                AtlasStream.StreamType.MarketingActivity, null);
-
-        return opportunities.size() + marketing.size();
-    }
-
-    @Override
-    public int getNewOpportunitiesCount(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
-
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        String internalAccountId = getInternalAccountId(accountId, orgInfo);
-
-        log.info(String.format("Retrieving new Opportunities Metric| tenant=%s",
+        log.info(String.format("Retrieving Activity Timeline Metrics | tenant=%s",
                 CustomerSpace.shortenCustomerSpace(customerSpace)));
-        List<Map<String, Object>> opportunities = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod,
-                AtlasStream.StreamType.Opportunity, null);
-        opportunities = opportunities.stream()
-                .filter(t -> !t.get("Detail1").equals("Closed") && !t.get("Detail1").equals("Closed Won"))
-                .collect(Collectors.toList());
 
-        return opportunities.size();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
+        DataPage data = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod);
+
+        metrics.put("newActivities", dataFilter(data, AtlasStream.StreamType.WebVisit, null).size());
+        metrics.put("newIdentifiedContacts",
+                dataFilter(data, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO).stream()
+                        .filter(t -> t.get("EventType").equals("New Lead")).map(t -> t.get("ContactId")).distinct()
+                        .collect(Collectors.toList()).size());
+        metrics.put("newEngagements", dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
+                + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size());
+        metrics.put("newOpportunities",
+                dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
+                        .filter(t -> !t.get("Detail1").equals("Closed") && !t.get("Detail1").equals("Closed Won"))
+                        .collect(Collectors.toList()).size());
+        return metrics;
     }
 
     private String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
@@ -173,12 +141,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         return internalAccountId;
     }
 
-    private List<Map<String, Object>> getLatestAccountData(String accountId, String customerSpace,
-            String timelinePeriod, AtlasStream.StreamType streamType, SourceType sourceType) {
-        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
-        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Account, accountId, customerSpace,
-                timelinePeriod);
-        List<Map<String, Object>> result = activityProxy.getData(customerSpace, null, query).getData();
+    private List<Map<String, Object>> dataFilter(DataPage dataPage, AtlasStream.StreamType streamType,
+            SourceType sourceType) {
+        List<Map<String, Object>> result = dataPage.getData();
         if (streamType != null) {
             result = result.stream().filter(t -> t.get("StreamType").equals(streamType.name()))
                     .collect(Collectors.toList());
@@ -188,6 +153,13 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                     .collect(Collectors.toList());
         }
         return result;
+    }
+
+    private DataPage getLatestAccountData(String accountId, String customerSpace, String timelinePeriod) {
+        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
+        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Account, accountId, customerSpace,
+                timelinePeriod);
+        return activityProxy.getData(customerSpace, null, query);
     }
 
     private ActivityTimelineQuery getActivityTimelineQuery(BusinessEntity entity, String entityId, String customerSpace,

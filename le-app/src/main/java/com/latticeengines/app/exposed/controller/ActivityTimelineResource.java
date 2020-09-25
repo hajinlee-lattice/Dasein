@@ -118,80 +118,23 @@ public class ActivityTimelineResource {
         return activityStoreProxy.getJourneyStages(customerSpace.getTenantId());
     }
 
-    @GetMapping("/accounts/{accountId:.+}/newWebActivities")
+    @GetMapping("/accounts/{accountId:.+}/metrics")
     @ResponseBody
-    @ApiOperation(value = "Retrieve total number of new web activities for an account")
+    @ApiOperation(value = "Retrieve metrics for an account")
     @SuppressWarnings("ConstantConditions")
-    public int getNewActivitiesCount(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+    public Map<String, Integer> getMetrics(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId,
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
-        }
-        log.info(String.format("Retrieving total new web activities count of accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-        int total = activityTimelineService.getNewWebActivitiesCount(accountId, timelinePeriod,
-                getOrgInfo(authToken));
-        return total;
-    }
 
-    @GetMapping("/accounts/{accountId:.+}/newIdentifiedContacts")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve total number of new identified contacts from Marketo for an account")
-    @SuppressWarnings("ConstantConditions")
-    public int getIdentifiedContactsCount(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
-            @PathVariable String accountId,
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
             throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
         }
-        log.info(String.format("Retrieving total new identified contacts count of accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-        int total = activityTimelineService.getIdentifiedContactsCount(accountId, timelinePeriod,
-                getOrgInfo(authToken));
-        return total;
-    }
 
-    @GetMapping("/accounts/{accountId:.+}/newEngagements")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve total number of new engagements for an account")
-    @SuppressWarnings("ConstantConditions")
-    public int getNewEngagementsCount(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
-            @PathVariable String accountId,
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
-        }
-        log.info(String.format("Retrieving total new engagements count of accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-        int total = activityTimelineService.getNewEngagementsCount(accountId, timelinePeriod,
-                getOrgInfo(authToken));
-        return total;
-    }
+        log.info(String.format("Retrieving metrics of accountId(ID: %s) for %s period, ( tenantId: %s )", accountId,
+                StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod, customerSpace.getTenantId()));
 
-    @GetMapping("/accounts/{accountId:.+}/newOpportunities")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve total number of new opportunities for an account")
-    @SuppressWarnings("ConstantConditions")
-    public int getNewOpportunitiesCount(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
-            @PathVariable String accountId,
-            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
-            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
-        }
-        log.info(String.format("Retrieving total new opportunities count of accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                customerSpace.getTenantId()));
-        int total = activityTimelineService.getNewOpportunitiesCount(accountId, timelinePeriod,
-                getOrgInfo(authToken));
-        return total;
+        return activityTimelineService.getActivityTimelineMetrics(accountId, timelinePeriod, getOrgInfo(authToken));
     }
 
     private Map<String, String> getOrgInfo(String token) {
