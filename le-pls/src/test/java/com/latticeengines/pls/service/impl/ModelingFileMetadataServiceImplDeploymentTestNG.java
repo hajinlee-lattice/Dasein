@@ -88,9 +88,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         FieldValidationResult fieldValidationResult = modelingFileMetadataService
                 .validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION, SOURCE, feedType);
         List<FieldValidation> validations = fieldValidationResult.getFieldValidations();
-        log.info("result is " + JsonUtils.serialize(validations));
-        Map<ValidationCategory, List<FieldValidation>> groupedValidations =
-                fieldValidationResult.getGroupedValidations();
+        log.info("result is " + JsonUtils.pprint(validations));
         Assert.assertNotNull(validations);
         List<FieldValidation> errorValidations = validations.stream()
                 .filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus()))
@@ -101,6 +99,9 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
         Assert.assertEquals(warningValidations.size(), 1);
+        Map<ValidationCategory, List<FieldValidation>> groupedValidations =
+                fieldValidationResult.getGroupedValidations();
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataFormat).size(), 1);
     }
 
     @Test(groups = "deployment")
@@ -242,6 +243,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         Assert.assertEquals(errorValidations.size(), 1);
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataType).size(), 1);
+        // one consistency error, the other is data type warning
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataType), 2);
     }
 }
