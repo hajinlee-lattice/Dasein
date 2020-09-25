@@ -420,4 +420,28 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannelEntityMgr.updateAttributeSetNameToDefault(attributeSetName);
     }
 
+    @Override
+    public void updateCurrentLaunchedAccountUniverseWithPrevious(PlayLaunchChannel channel) {
+        channel.setCurrentLaunchedAccountUniverseTable(channel.getPreviousLaunchedAccountUniverseTable());
+        playLaunchChannelEntityMgr.update(channel);
+    }
+
+    @Override
+    public void updatePreviousLaunchedAccountUniverseWithCurrent(PlayLaunchChannel channel) {
+        channel.setPreviousLaunchedAccountUniverseTable(channel.getCurrentLaunchedAccountUniverseTable());
+        playLaunchChannelEntityMgr.update(channel);
+    }
+
+    @Override
+    public void updateCurrentLaunchedContactUniverseWithPrevious(PlayLaunchChannel channel) {
+        channel.setCurrentLaunchedContactUniverseTable(channel.getPreviousLaunchedContactUniverseTable());
+        playLaunchChannelEntityMgr.update(channel);
+    }
+
+    @Override
+    public void updatePreviousLaunchedContactUniverseWithCurrent(PlayLaunchChannel channel) {
+        channel.setPreviousLaunchedContactUniverseTable(channel.getCurrentLaunchedContactUniverseTable());
+        playLaunchChannelEntityMgr.update(channel);
+    }
+
 }
