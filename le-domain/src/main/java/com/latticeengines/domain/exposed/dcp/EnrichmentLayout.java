@@ -24,6 +24,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.pls.SoftDeletable;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -41,18 +43,22 @@ public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
     private Long pid;
 
     @Column(name = "LAYOUT_ID", nullable = false)
-    @JsonProperty("layout_id")
+    @JsonProperty("layoutId")
     private String layoutId;
+
+    @Column(name = "SOURCE_ID", nullable = false)
+    @JsonProperty("sourceId")
+    private String sourceId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "domain")
     @JsonProperty("domain")
-    private Domain domain;
+    private DataDomain domain;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "RECORD_TYPE")
-    @JsonProperty("record_type")
-    private RecordType recordType;
+    @JsonProperty("recordType")
+    private DataRecordType recordType;
 
     @Column(name = "CREATED", nullable = false)
     @JsonProperty("created")
@@ -60,7 +66,7 @@ public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
     private Date created = new Date();
 
     @Column(name = "CREATED_BY", nullable = false)
-    @JsonProperty("created_by")
+    @JsonProperty("createdBy")
     private String createdBy;
 
     @Column(name = "DELETED", nullable = false)
@@ -104,19 +110,27 @@ public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
         this.layoutId = layoutId;
     }
 
-    public Domain getDomain() {
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public DataDomain getDomain() {
         return domain;
     }
 
-    public void setDomain(Domain domain) {
+    public void setDomain(DataDomain domain) {
         this.domain = domain;
     }
 
-    public RecordType getRecordType() {
+    public DataRecordType getRecordType() {
         return recordType;
     }
 
-    public void setRecordType(RecordType recordType) {
+    public void setRecordType(DataRecordType recordType) {
         this.recordType = recordType;
     }
 
@@ -180,13 +194,4 @@ public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
         this.elements = elements;
     }
 
-    // TODO: change to actual types
-    public enum RecordType { // These are some made up types
-        RecType0, RecType1, RecType2, RecType3
-    }
-
-    // TODO: change to actual domain names
-    public enum Domain {
-        d0, d1, d2
-    }
 }

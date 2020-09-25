@@ -261,7 +261,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         if (StringUtils.isNotBlank(subsriberNumber)) {
             container = getSubscriberEntitlement(subsriberNumber);
         } else {
-            log.warn("Tenant {} does not have a subscriber number", subsriberNumber);
+            log.warn("Tenant {} does not have a subscriber number", tenantId);
         }
         return (container == null) ? getDefaultEntitlement() : container;
     }

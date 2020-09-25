@@ -77,6 +77,7 @@ public class TenantServiceImpl implements TenantService {
         if (!globalTenantManagementService.tenantExists(tenant)) {
             globalTenantManagementService.registerTenant(tenant);
         }
+        oldTenant.setSubscriberNumber(tenant.getSubscriberNumber());
         tenantEntityMgr.update(oldTenant);
     }
 

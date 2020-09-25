@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.matchapi;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,6 +37,13 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         String url = constructUrl("/columns?elementIds={elementIds}", //
                 StringUtils.join(elementIds, ","));
         return getList("get prime columns", url, PrimeColumn.class);
+    }
+
+    @Override
+    public Set<String> getBlocksContainingElements(List<String> elementIds) {
+        String url = constructUrl("/blocks-containing?elementIds={elementIds}", //
+                StringUtils.join(elementIds, ","));
+        return getSet("get blocks containing elements", url, String.class);
     }
 
     @Override
