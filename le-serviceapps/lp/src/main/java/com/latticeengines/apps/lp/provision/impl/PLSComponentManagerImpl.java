@@ -456,11 +456,10 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } finally {
             TracingUtils.finish(provisionSpan);
         }
-
         try {
             emailListInJson = configDir.get("/SubscriptionEmails").getDocument().getData();
-        } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        } catch (Exception e) {
+            log.info("no SubscriptionEmails node exist {}.", e.getMessage());
         }
         List<String> subscriptionEmails = EmailUtils.parseEmails(emailListInJson);
         subscriptionService.createByEmailsAndTenantId(new HashSet<>(subscriptionEmails), tenant.getId());
