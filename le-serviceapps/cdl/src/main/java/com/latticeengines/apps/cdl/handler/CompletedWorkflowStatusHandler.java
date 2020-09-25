@@ -26,9 +26,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CompletedWorkflowStatusHandler.class);
 
-    private String URL = "url";
-    private String FOLDER = "dropfolder";
-
     @Inject
     private PlayLaunchService playLaunchService;
 
@@ -118,16 +115,12 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         }
 
         Map<String, String> errorFileMap = eventDetail.getErrorFile();
-
-        if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains(FOLDER)) {
-            String errorFile = errorFileMap.get(URL);
-            statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf(FOLDER)));
-        }
+        saveErrorFileInMonitor(statusMonitor, errorFileMap);
     }
 
     private void updateLaunchUniverse(LaunchState launchState, String launchId) {
         if (launchState.equals(LaunchState.SyncFailed)) {
-            recoverLaunchUniverse(launchId);
+            recoverLaunchUniverse(launchId, playLaunchChannelService, playLaunchService);
         } else {
             updatePreviousLaunchUniverse(launchId);
         }
@@ -137,11 +130,5 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
         playLaunchChannelService.updatePreviousLaunchedAccountUniverseWithCurrent(channel);
         playLaunchChannelService.updatePreviousLaunchedContactUniverseWithCurrent(channel);
-    }
-
-    private void recoverLaunchUniverse(String launchId) {
-        PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
-        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(channel);
-        playLaunchChannelService.updateCurrentLaunchedContactUniverseWithPrevious(channel);
     }
 }

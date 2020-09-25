@@ -1,8 +1,15 @@
 package com.latticeengines.apps.cdl.handler;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -14,6 +21,9 @@ public interface WorkflowStatusHandler {
     }
 
     DataIntegrationEventType getEventType();
+
+    String URL = "url";
+    String FOLDER = "dropfolder";
 
     default void checkStatusMonitorExists(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {
@@ -27,5 +37,18 @@ public interface WorkflowStatusHandler {
                 DataIntegrationEventType.valueOf(messageEventType))) {
             statusMonitor.setStatus(messageEventType);
         }
+    }
+
+    default void saveErrorFileInMonitor(DataIntegrationStatusMonitor statusMonitor, Map<String, String> errorFileMap) {
+        if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains(FOLDER)) {
+            String errorFile = errorFileMap.get(URL);
+            statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf(FOLDER)));
+        }
+    }
+
+    default void recoverLaunchUniverse(String launchId, PlayLaunchChannelService playLaunchChannelService, PlayLaunchService playLaunchService) {
+        PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
+        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(channel);
+        playLaunchChannelService.updateCurrentLaunchedContactUniverseWithPrevious(channel);
     }
 }

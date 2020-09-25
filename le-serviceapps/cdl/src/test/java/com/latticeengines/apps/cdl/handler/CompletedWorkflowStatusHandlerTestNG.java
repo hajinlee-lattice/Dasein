@@ -78,6 +78,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        teardown();
     }
 
     @Test(groups = "functional")
@@ -107,6 +108,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        teardown();
     }
 
     @Test(groups = "functional")
@@ -136,6 +138,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+        teardown();
     }
 
     private void createAll() {
@@ -160,8 +163,7 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         log.info("Created eventDetail");
     }
 
-    @AfterClass(groups = "functional")
-    public void teardown() {
+    private void teardown() {
         if (playLaunch != null) {
             playLaunchService.deleteByLaunchId(playLaunch.getLaunchId(), false);
         }
