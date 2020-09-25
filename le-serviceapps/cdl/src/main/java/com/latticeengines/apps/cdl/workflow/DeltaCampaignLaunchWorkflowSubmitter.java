@@ -51,11 +51,12 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private WorkflowProxy workflowProxy;
 
-    public Long submit(PlayLaunch playLaunch) {
+    public Long submit(PlayLaunch playLaunch, String channelId) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "deltaCampaignLaunchWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playLaunch.getPlay().getName());
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID, playLaunch.getLaunchId());
+        inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_CHANNEL_ID, channelId);
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
 
