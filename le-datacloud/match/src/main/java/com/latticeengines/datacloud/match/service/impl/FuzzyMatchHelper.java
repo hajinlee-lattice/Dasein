@@ -406,7 +406,10 @@ public class FuzzyMatchHelper implements DbHelper {
 
         Map<String, PrimeAccount> dunsAccountMap = accounts.stream() //
                 .filter(pa -> pa != null && StringUtils.isNotBlank(pa.getId())) //
-                .collect(Collectors.toMap(PrimeAccount::getId, pa -> pa));
+                .collect(Collectors.toMap(PrimeAccount::getId, pa -> pa, (duns1, duns2) -> {
+                    log.warn("Found duplicated duns in fetch result: " + duns1);
+                    return duns1;
+                }));
 
         for (InternalOutputRecord record : context.getInternalResults()) {
             String duns = record.getPrimeDuns();

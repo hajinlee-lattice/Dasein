@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -88,6 +89,16 @@ public class DirectPlusUtilsUnitTestNG {
         Set<String> blockIds = DirectPlusUtils.parseCacheableBlockIds(response);
         // System.out.println(blockIds);
         Assert.assertEquals(blockIds.size(), 1);
+    }
+
+    @Test
+    public void parseErrorCode() {
+        String response = readMockResponse("compinfo");
+        String errorCode = DirectPlusUtils.parseErrorCode(response);
+        Assert.assertTrue(StringUtils.isBlank(errorCode));
+        response = readMockResponse("not_found");
+        errorCode = DirectPlusUtils.parseErrorCode(response);
+        Assert.assertEquals(errorCode, "10001");
     }
 
     private String readMockResponse(String name) {
