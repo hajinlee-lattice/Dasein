@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -527,6 +528,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         crosscheckDataType(customerSpace, entity, source, finalTemplate, dataFeedTaskUniqueId, validations, groupedValidations);
         fieldValidationResult.setFieldValidations(validations);
         fieldValidationResult.setGroupedValidations(groupedValidations);
+        fieldValidationResult.setValidationMessages(
+                Stream.of(ValidationCategory.values()).collect(Collectors.toMap(e -> e, ValidationCategory::getValidMessage)));
         return fieldValidationResult;
     }
 

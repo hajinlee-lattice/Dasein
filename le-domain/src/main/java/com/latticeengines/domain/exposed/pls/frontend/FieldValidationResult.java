@@ -18,6 +18,9 @@ public class FieldValidationResult {
     Map<ValidationCategory, List<FieldValidation>> groupedValidations;
 
     @JsonProperty
+    Map<ValidationCategory, String> validationMessages;
+
+    @JsonProperty
     private String errorMessage;
 
     @JsonProperty
@@ -54,5 +57,13 @@ public class FieldValidationResult {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public Map<ValidationCategory, String> getValidationMessages() {
+        return validationMessages;
+    }
+
+    public void setValidationMessages(Map<ValidationCategory, String> validationMessages) {
+        this.validationMessages = validationMessages;
     }
 }

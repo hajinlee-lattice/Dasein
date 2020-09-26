@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.pls.frontend;
 public enum ValidationCategory {
     DataType("Data Type","It doesn't look like you have changed any data types."),
     DataFormat("Data Format","Time zone and format appears to be fine"),
-    ColumnMapping("Column Mapping",""),
+    ColumnMapping("Column Mapping","All column mappings checked out."),
     RequiredField("Required Field","All required fields checked out."),
     Others("Others","It doesn’t look like the file you upload has any consistency issues.");
 
@@ -15,4 +15,11 @@ public enum ValidationCategory {
         this.validMessage = validMessage;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getValidMessage() {
+        return validMessage;
+    }
 }
