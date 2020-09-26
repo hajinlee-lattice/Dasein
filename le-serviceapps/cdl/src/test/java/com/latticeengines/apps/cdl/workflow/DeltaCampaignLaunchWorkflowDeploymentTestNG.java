@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -16,6 +17,9 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +61,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
     private static final Logger log = LoggerFactory.getLogger(DeltaCampaignLaunchWorkflowDeploymentTestNG.class);
 
     @Inject
+    @Spy
     private DeltaCampaignLaunchWorkflowSubmitter deltaCampaignWorkflowSubmitter;
 
     @Inject
@@ -87,6 +92,10 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        Mockito.doReturn(false).when(deltaCampaignWorkflowSubmitter).enableExternalLaunch(any(), any());
+
         testPlayCreationHelper.setupTenantAndData();
         moveAvroFilesToHDFS();
 

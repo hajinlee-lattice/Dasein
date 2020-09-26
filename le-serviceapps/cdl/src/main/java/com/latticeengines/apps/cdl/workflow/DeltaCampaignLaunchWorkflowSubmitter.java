@@ -125,7 +125,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     }
 
-    private boolean enableExternalLaunch(PlayLaunch playLaunch, LookupIdMap lookupIdMap) {
+    protected boolean enableExternalLaunch(PlayLaunch playLaunch, LookupIdMap lookupIdMap) {
         if (StringUtils.isAllBlank(playLaunch.getDestinationOrgId()) || playLaunch.getDestinationSysType() == null) {
             log.info("Skipping Data Export as Destination Org-{} or Destination Type-{} is empty",
                     playLaunch.getDestinationOrgId(), playLaunch.getDestinationSysType());
