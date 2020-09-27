@@ -75,6 +75,7 @@ import com.latticeengines.domain.exposed.spark.common.GetColumnChangesConfig;
 import com.latticeengines.domain.exposed.spark.common.GetRowChangesConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
+import com.latticeengines.domain.exposed.spark.dcp.AnalyzeUsageConfig;
 import com.latticeengines.domain.exposed.spark.dcp.InputPresenceConfig;
 import com.latticeengines.domain.exposed.spark.dcp.PrepareDataReportConfig;
 import com.latticeengines.domain.exposed.spark.dcp.RollupDataReportConfig;
@@ -139,6 +140,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = LegacyDeleteJobConfig.class, name = LegacyDeleteJobConfig.NAME),
         @JsonSubTypes.Type(value = SelectByColumnConfig.class, name = SelectByColumnConfig.NAME), //
         @JsonSubTypes.Type(value = MergeCSVConfig.class, name = MergeCSVConfig.NAME), //
+        @JsonSubTypes.Type(value = AnalyzeUsageConfig.class, name = AnalyzeUsageConfig.NAME), //
         @JsonSubTypes.Type(value = SplitImportMatchResultConfig.class, name = SplitImportMatchResultConfig.NAME), //
         @JsonSubTypes.Type(value = SplitSystemBatchStoreConfig.class, name = SplitSystemBatchStoreConfig.NAME), //
         @JsonSubTypes.Type(value = ProfileJobConfig.class, name = ProfileJobConfig.NAME), //
