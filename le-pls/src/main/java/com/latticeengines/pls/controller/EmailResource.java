@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -421,23 +422,19 @@ public class EmailResource {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String launchHistoryUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
                             appPublicUrl, tenantName, play.getName());
-                    switch (result.toUpperCase()) {
-                    case "FAILED":
+                    if (result.equals(LaunchState.Failed.name())) {
                         emailService.sendPlsCampaignFailedEmail(user, launchHistoryUrl, playDisplayName,
                                 externalSystemName,
                                 playLaunchState, playLaunchCreated, currentTime);
-                        break;
-                    case "CANCELED":
+                    } else if (result.equals(LaunchState.Canceled.name())) {
                         emailService.sendPlsCampaignCanceledEmail(user, launchHistoryUrl, playDisplayName,
                                 externalSystemName,
                                 playLaunchState, playLaunchCreated, currentTime);
-                        break;
-                    default:
+                    } else {
                         log.warn(String.format(
                                 "Non-failed nor canceled playLaunch triggered email logic. playLaunch status: %s, "
                                         + "Tenant ID: %s, Details: %s",
                                 result, tenantId, JsonUtils.serialize(playLaunch)));
-                        break;
                     }
                 }
             }

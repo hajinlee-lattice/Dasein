@@ -96,19 +96,11 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
                 playLaunch.setLaunchState(LaunchState.Synced);
             } else if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
                 playLaunch.setLaunchState(LaunchState.SyncFailed);
-            } else if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
-                playLaunch.setLaunchState(LaunchState.SyncFailed);
-                PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
-                try {
-                    emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(),
-                            MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
-                } catch (Exception e) {
-                    log.error("Can not send play launch failed email: " + e.getMessage());
-                }
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
             }
         }
+        sendEmailIfSyncFailed(playLaunch);
 
         log.info("Channel Config for launch ID " + playLaunch.getLaunchId() + ": "
                 + JsonUtils.serialize(playLaunch.getChannelConfig()));
@@ -146,5 +138,18 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
         playLaunchChannelService.updatePreviousLaunchedAccountUniverseWithCurrent(channel);
         playLaunchChannelService.updatePreviousLaunchedContactUniverseWithCurrent(channel);
+    }
+
+    private void sendEmailIfSyncFailed(PlayLaunch playLaunch) {
+        if (playLaunch.getLaunchState().equals(LaunchState.SyncFailed)) {
+            PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
+            try {
+                emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(),
+                        MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
+            } catch (Exception e) {
+                log.error("Can not send play launch failed email: " + e.getMessage());
+            }
+        }
+
     }
 }
