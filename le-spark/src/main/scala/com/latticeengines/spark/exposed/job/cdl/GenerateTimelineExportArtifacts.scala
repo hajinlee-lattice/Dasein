@@ -4,8 +4,9 @@ import com.latticeengines.common.exposed.util.DateTimeUtils.toDataOnlyFromMillis
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName._
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineExportColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.functions.{col, first, lit, udf}
+import org.apache.spark.sql.functions.{col, first, lit, udf, max, sum, map}
 import org.apache.spark.sql.{DataFrame, SparkSession, functions}
 import org.json4s.jackson.Serialization
 
@@ -59,14 +60,14 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
         if (rollupToDaily) {
           timelineFilterTable = timelineFilterTable.withColumn(__StreamDate.name, getDate(col
           (InterfaceName.EventTimestamp.name), lit(timeZone)))
-          val groupTable = timelineFilterTable.groupBy(AccountId.name, ContactId
+          timelineFilterTable = timelineFilterTable.groupBy(AccountId.name, ContactId
             .name, EventType.name, __StreamDate.name).agg(functions.max(EventTimestamp.name).as(EventTimestamp.name),
-            functions.sum(Count.name).as(Count.name))
-          timelineFilterTable = timelineFilterTable.join(groupTable.select(AccountId.name, Count.name, EventTimestamp
-            .name), Seq(AccountId.name), "inner")
+            functions.sum(Count.name).as(Count.name), first(StreamType.name))
+          timelineFilterTable = timelineFilterTable.drop(InterfaceName.__StreamDate.name)
         }
-        timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, DUNS.name, DU_DUNS.name,
-          GU_DUNS.name, Domain.name, IsPrimaryDomain.name), Seq(AccountId.name))
+        timelineFilterTable = timelineFilterTable.drop(InterfaceName.Detail1.name).drop(InterfaceName.Detail2.name)
+        timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, DUNS.name, GlobalUltimateDuns.name,
+          DomesticUltimateDuns.name, Domain.name, IsPrimaryDomain.name), Seq(AccountId.name))
         (timelineId, timelineFilterTable)
     }.toSeq: _*
     )
