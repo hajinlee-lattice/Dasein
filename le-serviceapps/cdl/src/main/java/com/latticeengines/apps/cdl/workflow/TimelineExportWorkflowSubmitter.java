@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -29,6 +30,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
 
+@Component
 public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(TimelineExportWorkflowSubmitter.class);
