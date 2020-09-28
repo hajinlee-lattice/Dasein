@@ -501,7 +501,7 @@ public class EmailServiceImpl implements EmailService {
             EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION);
             builder.replaceToken("{{firstname}}", creator.getFirstName());
             builder.replaceToken("{{launchInterval}}", launchInterval);
-            builder.replaceToken("{{launchSettingsLink}}", launchSettingsUrl);
+            builder.replaceToken("{{launchSettingsUrl}}", launchSettingsUrl);
             builder.replaceToken("{{playDisplayName}}", playDisplayName);
             builder.replaceToken("{{externalSystemName}}", externalSystemName);
             builder.replaceToken("{{nextScheduledLaunch}}", nextScheduledLaunch);

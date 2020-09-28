@@ -392,7 +392,7 @@ public class EmailResource {
             if (playLaunchChannel.getExpirationPeriodString().endsWith("W")) {
                 launchInterval = "Week";
             } else if (playLaunchChannel.getExpirationPeriodString().endsWith("M")) {
-                launchInterval = "'Month";
+                launchInterval = "Month";
             } else {
                 log.warn("Unknown period String");
                 return false;
