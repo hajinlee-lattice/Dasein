@@ -32,6 +32,10 @@
           "Node": "ThirdPartyUserEmails",
           "Data": "[]"
         },
+        {
+          "Node": "SubscriptionEmails",
+          "Data": "[]"
+        },
         { "Node": "DataCloudLicense",
           "Children" : [
             { "Node": "Account", "Data": 47},

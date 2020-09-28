@@ -42,6 +42,7 @@ public class DataBlock {
 
     public static final String BLOCK_BASE_INFO = "baseinfo";
     public static final String BLOCK_ENTITY_RESOLUTION = "entityresolution";
+    public static final String BLOCK_COMPANY_ENTITY_RESOLUTION = "companyentityresolution";
 
     public static final ImmutableMap<String, String> blockNameMap = ImmutableMap.<String, String>builder() //
             .put(Id.baseinfo, "Base Information") //
