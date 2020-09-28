@@ -30,7 +30,7 @@ public class LiveRampCampaignLaunchInitStep
         extends BaseWorkflowStep<LiveRampCampaignLaunchInitStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(LiveRampCampaignLaunchInitStep.class);
 
-    protected static final String RECORD_ID_DISPLAY_NAME = "Record ID";
+    public static final String RECORD_ID_DISPLAY_NAME = "Record ID";
 
     @Inject
     private PlayProxy playProxy;

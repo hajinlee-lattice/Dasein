@@ -35,6 +35,7 @@ import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentT
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportFileGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.play.LiveRampCampaignLaunchInitStep;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -95,7 +96,8 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     private DropBoxSummary dropboxSummary;
 
-    private static final List<String> LIVERAMP_COL_NAME = Arrays.asList("Record ID");
+    private static final List<String> LIVERAMP_COL_NAME = Arrays
+            .asList(LiveRampCampaignLaunchInitStep.RECORD_ID_DISPLAY_NAME);
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
