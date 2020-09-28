@@ -128,7 +128,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<Predefined> groups, Version version, StoreFilter filter) {
-        return getDecoratedMetadata(customerSpace, entity, groups, version, null, null);
+        return getDecoratedMetadata(customerSpace, entity, groups, version, null, filter);
     }
 
     @Override
