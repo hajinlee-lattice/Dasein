@@ -39,7 +39,7 @@ public class AnalyzeUsageConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return 3;
+        return 1;
     }
 
     public List<String> getOutputFields() {

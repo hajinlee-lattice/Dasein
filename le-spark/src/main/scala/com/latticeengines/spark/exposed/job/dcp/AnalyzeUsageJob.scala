@@ -5,7 +5,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.AnalyzeUsageConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{CSVUtils}
-import org.apache.commons.collections4.MapUtils
 import org.apache.spark.sql.functions.{col, count, lit, sum}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -22,10 +21,11 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
 
     val rawFields: List[String] = config.getRawOutputMap.values().asScala.toList
 
-    val renamed = changeToDisplayName(input, config)
+    val renamed = selectAndRename(input, config)
 
     var outputWithAllFields: DataFrame = null
-    outputWithAllFields = renamed;
+    outputWithAllFields = renamed
+
     if (outputFields.nonEmpty) {
       for (field <- outputFields) {
         if (field == VboUsageConstants.ATTR_DRT) {
@@ -57,15 +57,12 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
     lattice.output = outputWithAllFields :: Nil
   }
 
-  private def changeToDisplayName(input: DataFrame, config: AnalyzeUsageConfig): DataFrame = {
-    if (MapUtils.isEmpty(config.getRawOutputMap)) {
-      input
-    } else {
-      val attrsToRename: Map[String, String] = config.getRawOutputMap.asScala.toMap
-        .filterKeys(input.columns.contains(_))
-      val newAttrs = input.columns.map(c => attrsToRename.getOrElse(c, c))
-      input.toDF(newAttrs: _*)
-    }
+  private def selectAndRename(input: DataFrame, config: AnalyzeUsageConfig): DataFrame = {
+    val attrNames = config.getRawOutputMap.asScala.toMap
+    val selected = input.columns.filter(attrNames.keySet)
+    val filtered = input.select(selected map col: _*)
+    val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
+    filtered.toDF(newNames: _*)
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[AnalyzeUsageConfig]): List[HdfsDataUnit] = {
