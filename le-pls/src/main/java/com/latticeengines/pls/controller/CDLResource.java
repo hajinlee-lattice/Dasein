@@ -573,6 +573,8 @@ public class CDLResource {
                          new PerformanceTimer("GetDecoratedDisplayNameMapping: Tenant=" + customerSpace.getTenantId() + " entity=" + entityType)) {
                 Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
 
+                log.info(String.format("Total %d decorated display name pair.", nameMapping.size()));
+
                 log.info("5. Update display name with decorated value.");
                 fieldPreviews.forEach(preview -> {
                     if (nameMapping.containsKey(preview.getNameInTemplate())) {
