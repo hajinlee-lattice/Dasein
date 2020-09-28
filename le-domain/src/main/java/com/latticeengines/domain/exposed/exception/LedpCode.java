@@ -932,6 +932,7 @@ public enum LedpCode {
     LEDP_60008("Invalid CSV file: {0}"), //
     LEDP_60009("Error when updating source"),//
     LEDP_60010("Upload failed because no records could be ingested successfully"),
+    LEDP_60011("Project is not entitled to use company entity resolution data block!"),
 
     // le-serviceflows
     LEDP_70000("No Add or Delete file");

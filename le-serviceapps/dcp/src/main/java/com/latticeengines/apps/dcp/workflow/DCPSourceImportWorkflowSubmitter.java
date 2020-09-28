@@ -16,20 +16,26 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.apps.dcp.service.AppendConfigService;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
+import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusAppendConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.Project;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -43,6 +49,9 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private UploadService uploadService;
+
+    @Inject
+    private ProjectService projectService;
 
     @Inject
     private SourceFileProxy sourceFileProxy;
@@ -65,6 +74,13 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
             containerTmp = uploadService.appendStatistics(upload.getUploadId(), containerTmp);
             return containerTmp;
         });
+        Project project = projectService.getProjectByProjectId(customerSpace.toString(), importRequest.getProjectId());
+        if (project == null) {
+            throw new IllegalArgumentException("Cannot find project with projectId: " + importRequest.getProjectId());
+        }
+        if (!verifyPurposeOfUse(customerSpace, project.getPurposeOfUse())) {
+            throw new LedpException(LedpCode.LEDP_60011);
+        }
         DCPSourceImportWorkflowConfiguration configuration =
                 generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getUploadId(),
                         container.getPid());
@@ -75,6 +91,14 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         uploadDiagnostics.setApplicationId(applicationId.toString());
         uploadService.updateUploadStatus(customerSpace.toString(), upload.getUploadId(), upload.getStatus(), uploadDiagnostics);
         return applicationId;
+    }
+
+    private boolean verifyPurposeOfUse(CustomerSpace customerSpace, PurposeOfUse purposeOfUse) {
+        if (purposeOfUse == null) {
+            return true;
+        }
+        return appendConfigService.checkEntitledWith(customerSpace.toString(), purposeOfUse.getDomain(),
+                purposeOfUse.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION);
     }
 
     private UploadConfig generateUploadConfig(CustomerSpace customerSpace, DCPImportRequest importRequest) {
