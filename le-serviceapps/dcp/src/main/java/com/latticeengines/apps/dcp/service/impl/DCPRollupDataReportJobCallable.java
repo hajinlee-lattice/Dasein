@@ -2,6 +2,8 @@ package com.latticeengines.apps.dcp.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -24,6 +26,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
@@ -43,18 +48,30 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
     private ZKConfigService zkConfigService;
 
+    private WorkflowProxy workflowProxy;
+
     public DCPRollupDataReportJobCallable(Builder builder) {
         this.jobArguments = builder.jobArguments;
         this.dataReportEntityMgr = builder.dataReportEntityMgr;
         this.dcpDataReportWorkflowSubmitter = builder.dcpDataReportWorkflowSubmitter;
         this.zkConfigService = builder.zkConfigService;
+        this.workflowProxy = builder.workflowProxy;
     }
 
     @Override
     public Boolean call() throws Exception {
         log.info("begin to rollup tenant level data report");
         int pageIndex = 0;
-        int number = 0;
+        // check currently running dcp rollup workflow number
+        List<Job> jobs = workflowProxy.getJobs(null, Collections.singletonList("dcpDataReportWorkflow"),
+                Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName()),
+                false);
+        int number = CollectionUtils.size(jobs);
+        if (number > LIMIT) {
+            log.info("the number of current running dcpDataReportWorkflow are {}", number);
+            return null;
+        }
+
         List<Pair<String, Date>> ownerIdToDate = null;
         do {
             PageRequest pageRequest = PageRequest.of(pageIndex, PAGE_SIZE);
@@ -106,6 +123,8 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
         private ZKConfigService zkConfigService;
 
+        private WorkflowProxy workflowProxy;
+
         public Builder() {
         }
 
@@ -126,6 +145,11 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
         public Builder dcpDataReportWorkflowSubmitter(DCPDataReportWorkflowSubmitter dcpDataReportWorkflowSubmitter) {
             this.dcpDataReportWorkflowSubmitter = dcpDataReportWorkflowSubmitter;
+            return this;
+        }
+
+        public Builder workflowProxy(WorkflowProxy workflowProxy) {
+            this.workflowProxy = workflowProxy;
             return this;
         }
     }
