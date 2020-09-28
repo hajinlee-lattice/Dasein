@@ -95,12 +95,7 @@ public class TimelineExportJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verify(HdfsDataUnit tgt) {
         AtomicInteger counter = new AtomicInteger(0);
-        List<String> verifyColumns = new ArrayList<>(TimeLineStoreUtils.TimelineStandardColumn.getColumnNames());
-        verifyColumns.add("DUNS");
-        verifyColumns.add("DU_DUNS");
-        verifyColumns.add("Domain");
-        verifyColumns.add("GU_DUNS");
-        verifyColumns.add("IsPrimaryDomain");
+        List<String> verifyColumns = new ArrayList<>(TimeLineStoreUtils.TimelineExportColumn.getColumnNames());
         Map<String, List<String>> expectedDetail2Map = prepareExpectedDetail2Result();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
             log.info(debugStr(record, verifyColumns));
