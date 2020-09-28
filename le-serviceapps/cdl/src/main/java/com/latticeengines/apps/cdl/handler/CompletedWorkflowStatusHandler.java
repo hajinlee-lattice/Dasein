@@ -144,7 +144,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         if (playLaunch.getLaunchState().equals(LaunchState.SyncFailed)) {
             PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
             try {
-                emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(),
+                emailProxy.sendPlayLaunchErrorEmail(
                         MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
             } catch (Exception e) {
                 log.error("Can not send play launch failed email: " + e.getMessage());

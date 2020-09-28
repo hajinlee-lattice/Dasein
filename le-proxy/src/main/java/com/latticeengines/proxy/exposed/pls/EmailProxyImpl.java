@@ -156,7 +156,7 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
     public boolean sendPlayLaunchChannelExpiringEmail(String tenantId,
             PlayLaunchChannel playLaunchChannel) {
         try {
-            String url = constructUrl(combine("/playlaunch/channel/expiring", tenantId));
+            String url = constructUrl(combine("/playlaunchchannel/expiring", tenantId));
             log.info(String.format("Putting to %s", url));
             return put("sendPlayLaunchChannelExpiringEmail", url, playLaunchChannel, Boolean.class);
         } catch (Exception e) {
@@ -165,9 +165,9 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
     }
 
     @Override
-    public void sendPlayLaunchErrorEmail(String result, String tenantId, String user, PlayLaunch playLaunch) {
+    public void sendPlayLaunchErrorEmail(String tenantId, String user, PlayLaunch playLaunch) {
         try {
-            String url = constructUrl(combine("/playlaunch/result/", result, tenantId));
+            String url = constructUrl(combine("/playlaunch/failed/", tenantId));
             log.info(String.format("Putting to %s", url));
             List<String> params = new ArrayList<>();
             params.add("user=" + user);

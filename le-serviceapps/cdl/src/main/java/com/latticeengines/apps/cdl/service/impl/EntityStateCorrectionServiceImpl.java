@@ -185,7 +185,7 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
                 playLaunchService.update(launch);
                 PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launch.getId());
                 try {
-                    emailProxy.sendPlayLaunchErrorEmail(launch.getLaunchState().name(), launch.getTenant().getId(),
+                    emailProxy.sendPlayLaunchErrorEmail(launch.getTenant().getId(),
                             channel.getUpdatedBy(), launch);
                 } catch (Exception e) {
                     log.error("Can not send play launch failed email: " + e.getMessage());

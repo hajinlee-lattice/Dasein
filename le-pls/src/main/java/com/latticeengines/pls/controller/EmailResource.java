@@ -375,7 +375,7 @@ public class EmailResource {
         return isSendEmail;
     }
 
-    @PutMapping("/playlaunch/channel/expiring" + TENANT_ID_PATH)
+    @PutMapping("/playlaunchchannel/expiring" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email warning Always On Campaign will expire soon")
     public boolean sendPlayLaunchChannelExpiringEmail(@PathVariable("tenantId") String tenantId,
@@ -402,10 +402,10 @@ public class EmailResource {
         return isSendEmail;
     }
 
-    @PutMapping("/playlaunch/result/{result}/" + TENANT_ID_PATH)
+    @PutMapping("/playlaunch/failed" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after Campaign launch error")
-    public void sendPlayLaunchErrorEmail(@PathVariable("result") String result,
+    public void sendPlayLaunchErrorEmail(
             @PathVariable("tenantId") String tenantId, @RequestBody PlayLaunch playLaunch,
             @RequestParam(value = "user", required = true) String userEmail) {
         List<User> users = userService.getUsers(tenantId);
@@ -422,11 +422,11 @@ public class EmailResource {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String launchHistoryUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
                             appPublicUrl, tenantName, play.getName());
-                    if (result.equals(LaunchState.Failed.name())) {
+                    if (playLaunchState.equals(LaunchState.Failed.name())) {
                         emailService.sendPlsCampaignFailedEmail(user, launchHistoryUrl, playDisplayName,
                                 externalSystemName,
                                 playLaunchState, playLaunchCreated, currentTime);
-                    } else if (result.equals(LaunchState.Canceled.name())) {
+                    } else if (playLaunchState.equals(LaunchState.Canceled.name())) {
                         emailService.sendPlsCampaignCanceledEmail(user, launchHistoryUrl, playDisplayName,
                                 externalSystemName,
                                 playLaunchState, playLaunchCreated, currentTime);
@@ -434,7 +434,7 @@ public class EmailResource {
                         log.warn(String.format(
                                 "Non-failed nor canceled playLaunch triggered email logic. playLaunch status: %s, "
                                         + "Tenant ID: %s, Details: %s",
-                                result, tenantId, JsonUtils.serialize(playLaunch)));
+                                playLaunchState, tenantId, JsonUtils.serialize(playLaunch)));
                     }
                 }
             }

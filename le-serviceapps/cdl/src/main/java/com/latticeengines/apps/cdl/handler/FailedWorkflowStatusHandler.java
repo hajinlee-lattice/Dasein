@@ -108,7 +108,7 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
         playLaunchService.update(playLaunch);
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
         try {
-            emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(),
+            emailProxy.sendPlayLaunchErrorEmail(
                     MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
         } catch (Exception e) {
             log.error("Can not send play launch failed email: " + e.getMessage());

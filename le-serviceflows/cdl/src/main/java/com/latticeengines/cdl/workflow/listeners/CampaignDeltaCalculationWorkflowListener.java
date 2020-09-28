@@ -80,7 +80,7 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
 
                 PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playId, launchId);
                 try {
-                    emailProxy.sendPlayLaunchErrorEmail(playLaunch.getLaunchState().name(), customerSpace,
+                    emailProxy.sendPlayLaunchErrorEmail(customerSpace,
                             channel.getUpdatedBy(), playLaunch);
                 } catch (Exception e) {
                     log.error("Can not send play launch failed email: " + e.getMessage());

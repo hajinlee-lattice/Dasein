@@ -34,7 +34,7 @@ public interface EmailProxy {
 
     void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 
-    void sendPlayLaunchErrorEmail(String result, String tenantId, String user, PlayLaunch playLaunch);
+    void sendPlayLaunchErrorEmail(String tenantId, String user, PlayLaunch playLaunch);
 
     boolean sendPlayLaunchChannelExpiringEmail(String tenantId, PlayLaunchChannel playLaunchChannel);
 }
