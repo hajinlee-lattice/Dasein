@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -240,15 +241,28 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
-        Map<String, String> dispNames = cms.stream().collect(Collectors.toMap(ColumnMetadata::getAttrName, cm -> {
-            if (dataBlockDispNames.containsKey(cm.getAttrName())) {
-                return dataBlockDispNames.get(cm.getAttrName());
-            } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
-                return candidateFieldDispNames.get(cm.getAttrName());
+        Map<String, String> dispNames = new LinkedHashMap<>();
+
+        List<ColumnMetadata> customerAttrs = new ArrayList<>();
+        List<ColumnMetadata> appendedAttrs = new ArrayList<>();
+        ColumnMetadata duns = null;
+        for (ColumnMetadata cm : cms) {
+            if (MatchedDuns.equals(cm.getAttrName())) {
+                duns = cm;
+            } else if (dataBlockDispNames.containsKey(cm.getAttrName()) ||
+                    candidateFieldDispNames.containsKey(cm.getAttrName())) {
+                appendedAttrs.add(cm);
             } else {
-                return cm.getDisplayName();
+                customerAttrs.add(cm);
             }
-        }));
+        }
+        customerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        if (duns != null) {
+            dispNames.put(duns.getAttrName(), duns.getDisplayName());
+        }
+        appendedAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        log.info("the generated map are " + JsonUtils.serialize(dispNames));
+
         Map<String, List<String>> reversMap = dispNames.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, e -> new ArrayList<>(Collections.singleton(e.getKey())),
                         (l1, l2) -> {
