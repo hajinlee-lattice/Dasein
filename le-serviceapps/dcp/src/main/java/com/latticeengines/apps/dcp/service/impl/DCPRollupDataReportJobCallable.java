@@ -64,7 +64,8 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
         int pageIndex = 0;
         // check currently running dcp rollup workflow number
         List<Job> jobs = workflowProxy.getJobs(null, Collections.singletonList("dcpDataReportWorkflow"),
-                Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName()),
+                Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName(), JobStatus.ENQUEUED.getName(),
+                        JobStatus.READY.getName()),
                 false);
         int number = CollectionUtils.size(jobs);
         if (number > LIMIT) {
