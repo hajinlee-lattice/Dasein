@@ -13,12 +13,15 @@ public class PrimeAccount {
 
     public static final String DunsNumber = "duns_number";
 
-    private Map<String, Object> result;
+    private final String id;
+    private final Map<String, Object> result;
 
     private PrimeAccount() {
+        throw new UnsupportedOperationException();
     }
 
-    public PrimeAccount(Map<String, Object> result) {
+    public PrimeAccount(String id, Map<String, Object> result) {
+        this.id = id;
         if (MapUtils.isEmpty(result)) {
             this.result = new HashMap<>();
         } else {
@@ -27,15 +30,11 @@ public class PrimeAccount {
     }
 
     public String getId() {
-        return (String) result.get(DunsNumber);
+        return id;
     }
 
     public Map<String, Object> getResult() {
         return result;
-    }
-
-    public void setResult(Map<String, Object> result) {
-        this.result = result;
     }
 
     public PrimeAccount getDeepCopy() {
