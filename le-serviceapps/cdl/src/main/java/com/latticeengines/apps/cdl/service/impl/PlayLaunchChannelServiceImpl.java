@@ -421,7 +421,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private void sendEmailIfSecondToLastLaunch(PlayLaunchChannel channel) {
-        Date nextNextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel);
+        Date nextNextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel,
+                channel.getNextScheduledLaunch());
         if (channel.getExpirationDate() != null && nextNextLaunchDate.after(channel.getExpirationDate())) {
             try {
                 emailProxy.sendPlayLaunchChannelExpiringEmail(MultiTenantContext.getTenant().getId(), channel);

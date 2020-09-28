@@ -388,12 +388,23 @@ public class EmailResource {
             String playDisplayName = play.getDisplayName();
             String externalSystemName = playLaunchChannel.getLookupIdMap().getExternalSystemName().getDisplayName();
             String nextScheduledLaunch = format.format(playLaunchChannel.getNextScheduledLaunch());
+            String launchInterval;
+            if (playLaunchChannel.getExpirationPeriodString().endsWith("W")) {
+                launchInterval = "Week";
+            } else if (playLaunchChannel.getExpirationPeriodString().endsWith("M")) {
+                launchInterval = "'Month";
+            } else {
+                log.warn("Unknown period String");
+                return false;
+            }
+
             for (User user : users) {
                 if (user.getEmail().equals(playLaunchChannel.getUpdatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String launchSettingsUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
                             appPublicUrl, tenantName, play.getName());
-                    emailService.sendPlsAlwaysOnCampaignExpirationEmail(user, launchSettingsUrl, playDisplayName,
+                    emailService.sendPlsAlwaysOnCampaignExpirationEmail(user, launchInterval, launchSettingsUrl,
+                            playDisplayName,
                             externalSystemName, nextScheduledLaunch);
                     isSendEmail = true;
                 }

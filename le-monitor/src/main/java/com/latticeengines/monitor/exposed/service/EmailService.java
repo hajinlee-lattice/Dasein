@@ -73,7 +73,8 @@ public interface EmailService {
     void sendPlsExportOrphanRecordsSuccessEmail(User user, String tenantName, String hostport, String url,
             String exportID, String type);
 
-    void sendPlsAlwaysOnCampaignExpirationEmail(User creator, String launchHistoryUrl, String playDisplayName,
+    void sendPlsAlwaysOnCampaignExpirationEmail(User creator, String launchInterval, String launchSettingsUrl,
+            String playDisplayName,
             String externalSystemName, String nextScheduledLaunch);
 
     void sendPlsCampaignFailedEmail(User creator, String launchHistoryUrl, String playDisplayName,

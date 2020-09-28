@@ -100,7 +100,7 @@ public enum LaunchState {
         case SyncFailed:
             return FAILED;
         case Canceled:
-            return CANCELLED;
+            return CANCELED;
         case Synced:
             return LAUNCHED;
         case PartialSync:
@@ -152,7 +152,7 @@ public enum LaunchState {
     private static final String SKIPPED = "Skipped";
     private static final String LAUNCHED = "Launched";
     private static final String FAILED = "Failed";
-    private static final String CANCELLED = "Cancelled";
+    private static final String CANCELED = "Canceled";
     private static final String PARTIALLAUNCH = "Partial Launch";
 
 }

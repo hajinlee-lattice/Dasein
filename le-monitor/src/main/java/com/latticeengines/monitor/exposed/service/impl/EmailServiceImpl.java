@@ -492,14 +492,16 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsAlwaysOnCampaignExpirationEmail(User creator, String launchSettingsLink, String playDisplayName,
+    public void sendPlsAlwaysOnCampaignExpirationEmail(User creator, String launchInterval, String launchSettingsUrl,
+            String playDisplayName,
             String externalSystemName, String nextScheduledLaunch) {
         try {
             log.info(
                     String.format("Sending PLS Always On expiration email to creator %s started.", creator.getEmail()));
             EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION);
             builder.replaceToken("{{firstname}}", creator.getFirstName());
-            builder.replaceToken("{{launchSettingsLink}}", launchSettingsLink);
+            builder.replaceToken("{{launchInterval}}", launchInterval);
+            builder.replaceToken("{{launchSettingsLink}}", launchSettingsUrl);
             builder.replaceToken("{{playDisplayName}}", playDisplayName);
             builder.replaceToken("{{externalSystemName}}", externalSystemName);
             builder.replaceToken("{{nextScheduledLaunch}}", nextScheduledLaunch);

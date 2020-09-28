@@ -418,9 +418,13 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     }
 
     public static Date getNextDateFromCronExpression(PlayLaunchChannel channel) {
+        return getNextDateFromCronExpression(channel, new Date());
+    }
+
+    public static Date getNextDateFromCronExpression(PlayLaunchChannel channel, Date existingDate) {
         try {
             CronExpression cronExp = new CronExpression(channel.getCronScheduleExpression());
-            return cronExp.getNextValidTimeAfter(new Date());
+            return cronExp.getNextValidTimeAfter(existingDate);
         } catch (ParseException e) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { String.format("Invalid Cron Schedule %s set for channel id: %s",
