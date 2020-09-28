@@ -25,6 +25,7 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setCustomerSpace(customerSpace);
             exportTimelineSparkStepConfiguration.setCustomer(customerSpace.toString());
             timelineUniverseStepConfiguration.setCustomerSpace(customerSpace);
+            importExportS3.setCustomerSpace(customerSpace);
             return this;
         }
 
