@@ -7,7 +7,10 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +59,8 @@ import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
 import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
+import au.com.bytecode.opencsv.CSVReader;
+
 public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DeltaCampaignLaunchWorkflowDeploymentTestNG.class);
@@ -90,6 +95,8 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     private DropBoxSummary dropboxSummary;
 
+    private static final List<String> LIVERAMP_COL_NAME = Arrays.asList("Record ID");
+
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -111,7 +118,8 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
                 .destinationSystemId("LiveRamp_" + System
                         .currentTimeMillis())
                 .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B))).topNCount(160L)
-                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
+                .audienceId(UUID.randomUUID()
+                        .toString())
                 .audienceType(AudienceType.ACCOUNTS).addContactsTable(addContactsTable)
                 .removeContactsTable(removeContactsTable).build();
 
@@ -134,8 +142,19 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         defaultPlayLaunch.setPlay(defaultPlay);
     }
 
+    @Override
     @Test(groups = "deployment-app")
-    public void testLiveRampPlayLaunchWorkflow() throws Exception {
+    public void testWorkflow() throws Exception {
+        testLiveRampPlayLaunchWorkflow();
+        verifyTest();
+    }
+
+    @Override
+    protected void verifyTest() {
+        testVerifyAndCleanupLiveRampUploadedS3File();
+    }
+
+    public void testLiveRampPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         Long pid = deltaCampaignWorkflowSubmitter.submit(defaultPlayLaunch);
         assertNotNull(pid);
@@ -148,7 +167,6 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testLiveRampPlayLaunchWorkflow")
     public void testVerifyAndCleanupLiveRampUploadedS3File() {
         DeltaCampaignLaunchExportFilesGeneratorConfiguration config = new DeltaCampaignLaunchExportFilesGeneratorConfiguration();
         config.setPlayName(defaultPlay.getName());
@@ -165,7 +183,8 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
         log.info("Verifying S3 Folder Path " + s3FolderPath);
 
-        assertS3FileCount(s3FolderPath, 3);
+        List<String> s3CsvObjectKeys = assertS3FileCountAndGetS3CsvObj(s3FolderPath, 3);
+        assertS3CsvContents(s3CsvObjectKeys, LIVERAMP_COL_NAME, 22, 15);
         cleanupS3Files(s3FolderPath);
     }
 
@@ -223,15 +242,18 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         return tableName;
     }
 
-    private void assertS3FileCount(String s3FolderPath, int count) {
+    private List<String> assertS3FileCountAndGetS3CsvObj(String s3FolderPath, int fileCount) {
+        List<String> s3CsvObjectKeys = new ArrayList<String>();
+
         List<S3ObjectSummary> s3Objects = s3Service.listObjects(exportS3Bucket, s3FolderPath);
 
         assertNotNull(s3Objects);
-        assertEquals(s3Objects.size(), count);
+        assertEquals(s3Objects.size(), fileCount);
         boolean csvFileExists = false, jsonFileExists = false;
-        for (S3ObjectSummary s3Obj : s3Objects) {
+        for (S3ObjectSummary s3Obj : s3Objects) {            
             if (s3Obj.getKey().contains(".csv")) {
                 csvFileExists = true;
+                s3CsvObjectKeys.add(s3Obj.getKey());
             }
             if (s3Obj.getKey().contains(".json")) {
                 jsonFileExists = true;
@@ -239,6 +261,43 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         }
         assertTrue(csvFileExists, "CSV file doesnot exists");
         assertTrue(jsonFileExists, "JSON file doesnot exists");
+
+        return s3CsvObjectKeys;
+    }
+
+    private void assertS3CsvContents(List<String> s3ObjKeys, List<String> expectedColHeaders,
+            Integer addRowCount, Integer removeRowCount) {
+        for (String s3ObjKey : s3ObjKeys) {
+            String fileName = s3ObjKey.substring(s3ObjKey.lastIndexOf('/'));
+            if (fileName.contains("add")) {
+                assertS3CSVContents(s3ObjKey, expectedColHeaders, addRowCount);
+            } else if (fileName.contains("delete")) {
+                assertS3CSVContents(s3ObjKey, expectedColHeaders, removeRowCount);
+            } else {
+                log.info("CSV is neither add or delete: " + s3ObjKey);
+            }
+        }
+    }
+
+    private void assertS3CSVContents(String s3ObjKey,
+            List<String> expectedColHeaders,
+            int expectedRowsIncludingHeader) {
+        InputStream inputStream = s3Service.readObjectAsStream(exportS3Bucket, s3ObjKey);
+        try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), s3ObjKey));
+            for (String[] row : csvRows) {
+                log.info(Arrays.deepToString(row));
+            }
+            assertTrue(listEqualsIgnoreOrder(expectedColHeaders, Arrays.asList(csvRows.get(0))));
+            assertEquals(csvRows.size(), expectedRowsIncludingHeader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
+        return new HashSet<>(list1).equals(new HashSet<>(list2));
     }
 
     private void cleanupS3Files(String s3FolderPath) {
@@ -251,17 +310,5 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
-    }
-
-    @Override
-    public void testWorkflow() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void verifyTest() {
-        // TODO Auto-generated method stub
-
     }
 }
