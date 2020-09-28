@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -16,13 +18,16 @@ import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
+import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.TimelineExportWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
 
 public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
 
@@ -32,6 +37,8 @@ public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
     private DataCollectionProxy dataCollectionProxy;
     @Inject
     private SegmentProxy segmentProxy;
+    @Inject
+    private TimeLineProxy timelineProxy;
 
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull String customerSpace, @NotNull TimelineExportRequest request,
@@ -49,10 +56,23 @@ public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
                 activeVersion, null);
         if (MapUtils.isEmpty(timelineTableNames)) {
             throw new IllegalArgumentException(String.format("Can't find TimelineTable, Failed to submit %s's " +
-                            "TimelineExportWorkflow",
-                    customerSpace));
+                            "TimelineExportWorkflow", customerSpace));
         }
-        TimelineExportWorkflowConfiguration configuration = generateConfig(customerSpace, request, timelineTableNames
+
+        List<TimeLine> timeLineList = timelineProxy.findAll(customerSpace);
+        Map<String, String> accountTimelineTableNames = new HashMap<>();
+        for (TimeLine timeLine : timeLineList) {
+            if (BusinessEntity.Account.name().equals(timeLine.getEntity()) && timelineTableNames.containsKey(timeLine.getTimelineId())) {
+                accountTimelineTableNames.put(timeLine.getTimelineId(),
+                        timelineTableNames.get(timeLine.getTimelineId()));
+            }
+        }
+        if (MapUtils.isEmpty(accountTimelineTableNames)) {
+            log.error("Can't find timeline item at Account level, customerSpace is {}.", customerSpace);
+            throw new IllegalArgumentException(String.format("Can't find timeline item at Account level, " +
+                    "customerSpace id {}", customerSpace));
+        }
+        TimelineExportWorkflowConfiguration configuration = generateConfig(customerSpace, request, accountTimelineTableNames
                 , latticeAccountTable, activeVersion);
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }

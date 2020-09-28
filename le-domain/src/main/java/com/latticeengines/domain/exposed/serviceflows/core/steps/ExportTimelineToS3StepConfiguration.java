@@ -7,6 +7,22 @@ public class ExportTimelineToS3StepConfiguration extends ImportExportS3StepConfi
 
     @JsonProperty
     private DataCollection.Version version;
+    @JsonProperty
+    private String sourcePath;
 
+    public DataCollection.Version getVersion() {
+        return version;
+    }
 
+    public void setVersion(DataCollection.Version version) {
+        this.version = version;
+    }
+
+    public String getSourcePath() {
+        return sourcePath;
+    }
+
+    public void setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
+    }
 }

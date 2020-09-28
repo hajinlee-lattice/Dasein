@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ExportTimelineJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
@@ -64,18 +64,23 @@ public class TimelineExportJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of("IsPrimaryDomain", Boolean.class)
     );
 
+    private static final List<Pair<String, Class<?>>> SEGMWNT_ACCOUNT_FIELDS = Arrays.asList( //
+            Pair.of(AccountId.name(), String.class)
+    );
+
     private static final long now = LocalDate.of(2019, 11, 23) //
             .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
     private Map<String, String> timelineTableNames = new HashMap<>();
     private Map<String, Integer> inputIdx = new HashMap<>();
     private Integer latticeAccountTableIdx;
+    private Integer accountListIdx;
 
     @Test(groups = "functional")
     private void test() {
         prepareData();
 
-        SparkJobResult result = runSparkJob(ExportTimelineJob.class, baseConfig());
+        SparkJobResult result = runSparkJob(GenerateTimelineExportArtifacts.class, baseConfig());
         log.info("result is {}.", result.getTargets().stream().map(HdfsDataUnit::getPath).collect(Collectors.toList()));
         verifyResult(result);
     }
@@ -145,16 +150,25 @@ public class TimelineExportJobTestNG extends SparkJobFunctionalTestNGBase {
         uploadHdfsDataUnit(latticeAccountTable, LATTICE_ACCOUNT_FIELDS);
         latticeAccountTableIdx = 2;
 
+        Object[][] segmentAccountTable = new Object[][]{ //
+                {"a100"}, //
+        };
+        uploadHdfsDataUnit(segmentAccountTable, SEGMWNT_ACCOUNT_FIELDS);
+        accountListIdx = 3;
+
     }
 
-    private ExportTimelineJobConfig baseConfig() {
-        ExportTimelineJobConfig config = new ExportTimelineJobConfig();
+    private GenerateTimelineExportArtifactsJobConfig baseConfig() {
+        GenerateTimelineExportArtifactsJobConfig config = new GenerateTimelineExportArtifactsJobConfig();
         config.inputIdx = inputIdx;
         config.latticeAccountTableIdx = latticeAccountTableIdx;
         config.timelineTableNames = timelineTableNames;
         config.fromDateTimestamp = 1573894000000L;
         config.toDateTimestamp = 1574398800000L;
         config.eventTypes = Collections.singletonList("Page Visit");
+        config.rollupToDaily = true;
+        config.timeZone = "America/New_York";
+        config.accountListIdx = accountListIdx;
         return config;
     }
 

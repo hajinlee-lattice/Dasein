@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSparkStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineUniverseStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineToS3StepConfiguration;
 
 public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -17,8 +17,8 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private TimelineExportWorkflowConfiguration configuration = new TimelineExportWorkflowConfiguration();
         private ExportTimelineSparkStepConfiguration exportTimelineSparkStepConfiguration =
                 new ExportTimelineSparkStepConfiguration();
-        private GenerateTimelineUniverseStepConfiguration timelineUniverseStepConfiguration =
-                new GenerateTimelineUniverseStepConfiguration();
+        private GenerateTimelineExportUniverseStepConfiguration timelineUniverseStepConfiguration =
+                new GenerateTimelineExportUniverseStepConfiguration();
         private ExportTimelineToS3StepConfiguration importExportS3 = new ExportTimelineToS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {

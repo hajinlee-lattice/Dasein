@@ -1,22 +1,22 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.common.exposed.util.DateTimeUtils.toDateOnlyFromMillis
+import com.latticeengines.common.exposed.util.DateTimeUtils.toDataOnlyFromMillisAndTimeZone
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId, DUNS, Domain, EventTimestamp, EventType, __StreamDate}
-import com.latticeengines.domain.exposed.spark.cdl.ExportTimelineJobConfig
+import com.latticeengines.domain.exposed.metadata.InterfaceName._
+import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.functions.{col, lit, udf}
+import org.apache.spark.sql.functions.{col, first, lit, udf}
 import org.apache.spark.sql.{DataFrame, SparkSession, functions}
 import org.json4s.jackson.Serialization
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 
-class ExportTimelineJob extends AbstractSparkJob[ExportTimelineJobConfig] {
+class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineExportArtifactsJobConfig] {
 
-  override def runJob(spark: SparkSession, lattice: LatticeContext[ExportTimelineJobConfig]): Unit = {
+  override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateTimelineExportArtifactsJobConfig]): Unit = {
 
-    val config: ExportTimelineJobConfig = lattice.config
+    val config: GenerateTimelineExportArtifactsJobConfig = lattice.config
     val inputIdx = config.inputIdx
     val timelineTableNames = config.timelineTableNames.asScala
     val latticeAccount: DataFrame = lattice.input(config.latticeAccountTableIdx)
@@ -24,28 +24,29 @@ class ExportTimelineJob extends AbstractSparkJob[ExportTimelineJobConfig] {
     val toDateTimestamp = config.toDateTimestamp
     val rollupToDaily = config.rollupToDaily
     val eventTypes = config.eventTypes
-    val countColumn = "Count"
+    val timeZone = config.timeZone
     val accountList: DataFrame =
-      if (config.timelineUniverseAccountListIdx != null) {
-        lattice.input(config.timelineUniverseAccountListIdx)
+      if (config.accountListIdx != null) {
+        lattice.input(config.accountListIdx)
       } else {
         null
       }
 
     val getDate = udf {
-      time: Long => toDateOnlyFromMillis(time.toString)
+      (time: Long, timeZone: String) => toDataOnlyFromMillisAndTimeZone(time, timeZone)
     }
 
     val timelineExportTable = immutable.Map(timelineTableNames.map{
       case (timelineId, timelineTableName) =>
         val timelineTable = lattice.input(inputIdx.get(timelineTableName))
         var timelineFilterTable = timelineTable
+        timelineFilterTable = timelineFilterTable.drop(Id.name)
         if (fromDateTimestamp != null) {
-          timelineFilterTable = timelineFilterTable.where(col(EventTimestamp.name) >=
+          timelineFilterTable = timelineFilterTable.filter(col(EventTimestamp.name) >=
             fromDateTimestamp)
         }
         if (toDateTimestamp != null) {
-          timelineFilterTable = timelineFilterTable.where(col(EventTimestamp.name) <= toDateTimestamp)
+          timelineFilterTable = timelineFilterTable.filter(col(EventTimestamp.name) <= toDateTimestamp)
         }
         if (eventTypes != null && eventTypes.size() > 0) {
           timelineFilterTable = timelineFilterTable.filter(col(EventType.name).isInCollection
@@ -54,17 +55,18 @@ class ExportTimelineJob extends AbstractSparkJob[ExportTimelineJobConfig] {
         if (accountList != null) {
           timelineFilterTable = timelineFilterTable.join(accountList.select(AccountId.name), Seq(AccountId.name),  "inner")
         }
-        timelineFilterTable = timelineFilterTable.withColumn(countColumn, lit(1))
+        timelineFilterTable = timelineFilterTable.withColumn(Count.name, lit(1))
         if (rollupToDaily) {
           timelineFilterTable = timelineFilterTable.withColumn(__StreamDate.name, getDate(col
-          (InterfaceName.EventTimestamp.name)))
-          timelineFilterTable = timelineFilterTable.groupBy(AccountId.name, ContactId
+          (InterfaceName.EventTimestamp.name), lit(timeZone)))
+          val groupTable = timelineFilterTable.groupBy(AccountId.name, ContactId
             .name, EventType.name, __StreamDate.name).agg(functions.max(EventTimestamp.name).as(EventTimestamp.name),
-            functions.sum(countColumn).as(countColumn))
-          timelineFilterTable.drop(__StreamDate.name)
+            functions.sum(Count.name).as(Count.name))
+          timelineFilterTable = timelineFilterTable.join(groupTable.select(AccountId.name, Count.name, EventTimestamp
+            .name), Seq(AccountId.name), "inner")
         }
-        timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, DUNS.name(), "DU_DUNS",
-          "GU_DUNS", Domain.name(), "IsPrimaryDomain"), Seq(AccountId.name))
+        timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, DUNS.name, DU_DUNS.name,
+          GU_DUNS.name, Domain.name, IsPrimaryDomain.name), Seq(AccountId.name))
         (timelineId, timelineFilterTable)
     }.toSeq: _*
     )

@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
-public class GenerateTimelineUniverseStepConfiguration extends BaseStepConfiguration {
+public class GenerateTimelineExportUniverseStepConfiguration extends BaseStepConfiguration {
 
     private CustomerSpace customerSpace;
     private MetadataSegment metadataSegment;

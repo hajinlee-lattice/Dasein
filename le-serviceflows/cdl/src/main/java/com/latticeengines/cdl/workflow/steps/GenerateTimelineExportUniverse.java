@@ -24,18 +24,18 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineUniverseStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("generateTimelineUniverse")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateTimelineUniverse extends BaseSparkSQLStep<GenerateTimelineUniverseStepConfiguration> {
+public class GenerateTimelineExportUniverse extends BaseSparkSQLStep<GenerateTimelineExportUniverseStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverse.class);
     private DataCollection.Version version;
     private AttributeRepository attrRepo;
 
     @Override
-    protected CustomerSpace parseCustomerSpace(GenerateTimelineUniverseStepConfiguration stepConfiguration) {
+    protected CustomerSpace parseCustomerSpace(GenerateTimelineExportUniverseStepConfiguration stepConfiguration) {
         if (customerSpace == null) {
             customerSpace = configuration.getCustomerSpace();
         }
@@ -43,7 +43,7 @@ public class GenerateTimelineUniverse extends BaseSparkSQLStep<GenerateTimelineU
     }
 
     @Override
-    protected DataCollection.Version parseDataCollectionVersion(GenerateTimelineUniverseStepConfiguration stepConfiguration) {
+    protected DataCollection.Version parseDataCollectionVersion(GenerateTimelineExportUniverseStepConfiguration stepConfiguration) {
         if (version == null) {
             version = configuration.getVersion();
         }
@@ -51,12 +51,12 @@ public class GenerateTimelineUniverse extends BaseSparkSQLStep<GenerateTimelineU
     }
 
     @Override
-    protected String parseEvaluationDateStr(GenerateTimelineUniverseStepConfiguration stepConfiguration) {
+    protected String parseEvaluationDateStr(GenerateTimelineExportUniverseStepConfiguration stepConfiguration) {
         return null;
     }
 
     @Override
-    protected AttributeRepository parseAttrRepo(GenerateTimelineUniverseStepConfiguration stepConfiguration) {
+    protected AttributeRepository parseAttrRepo(GenerateTimelineExportUniverseStepConfiguration stepConfiguration) {
         AttributeRepository attrRepo = WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
         if (attrRepo == null) {
             throw new RuntimeException("Cannot find attribute repo in context");
@@ -84,7 +84,7 @@ public class GenerateTimelineUniverse extends BaseSparkSQLStep<GenerateTimelineU
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         FrontEndQuery query = getAccountFiltererSegmentQuery();
-        log.info("Full Launch Universe Query: " + query.toString());
+        log.info("Full Launch Universe Query: {}.", query.toString());
 
         HdfsDataUnit timelineUniverseDataUnit = executeSparkJob(query);
         log.info(getHDFSDataUnitLogEntry("CurrentTimelineUniverse", timelineUniverseDataUnit));
@@ -95,14 +95,14 @@ public class GenerateTimelineUniverse extends BaseSparkSQLStep<GenerateTimelineU
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
-                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.info("(Attempt={}) extract entities via Spark SQL.", (ctx.getRetryCount() + 1));
                 log.warn("Previous failure:", ctx.getLastThrowable());
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
                 HdfsDataUnit timelineDataUniverseDataUnit = getEntityQueryData(frontEndQuery, true);
 
-                log.info("DataUnit: " + JsonUtils.serialize(timelineDataUniverseDataUnit));
+                log.info("DataUnit: {}.", JsonUtils.serialize(timelineDataUniverseDataUnit));
                 return timelineDataUniverseDataUnit;
             } finally {
                 stopSparkSQLSession();
@@ -115,6 +115,6 @@ public class GenerateTimelineUniverse extends BaseSparkSQLStep<GenerateTimelineU
         if (dataUnit == null) {
             return tag + " data set empty";
         }
-        return tag + ", " + JsonUtils.serialize(dataUnit);
+        return String.format("%s, %s", tag, JsonUtils.serialize(dataUnit));
     }
 }
