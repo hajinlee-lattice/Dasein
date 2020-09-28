@@ -4,9 +4,8 @@ import com.latticeengines.common.exposed.util.DateTimeUtils.toDataOnlyFromMillis
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName._
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig
-import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineExportColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.functions.{col, first, lit, udf, max, sum, map}
+import org.apache.spark.sql.functions.{col, collect_list, lit, udf}
 import org.apache.spark.sql.{DataFrame, SparkSession, functions}
 import org.json4s.jackson.Serialization
 
@@ -62,7 +61,7 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
           (InterfaceName.EventTimestamp.name), lit(timeZone)))
           timelineFilterTable = timelineFilterTable.groupBy(AccountId.name, ContactId
             .name, EventType.name, __StreamDate.name).agg(functions.max(EventTimestamp.name).as(EventTimestamp.name),
-            functions.sum(Count.name).as(Count.name), first(StreamType.name))
+            functions.sum(Count.name).as(Count.name), collect_list(StreamType.name).as(StreamType.name))
           timelineFilterTable = timelineFilterTable.drop(InterfaceName.__StreamDate.name)
         }
         timelineFilterTable = timelineFilterTable.drop(InterfaceName.Detail1.name).drop(InterfaceName.Detail2.name)

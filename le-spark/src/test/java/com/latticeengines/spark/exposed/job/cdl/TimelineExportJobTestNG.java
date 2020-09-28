@@ -7,9 +7,12 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.DUNS;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Detail1;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Detail2;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Domain;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DomesticUltimateDuns;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EventTimestamp;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EventType;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.GlobalUltimateDuns;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Id;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.IsPrimaryDomain;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Source;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamType;
 
@@ -57,11 +60,11 @@ public class TimelineExportJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final List<Pair<String, Class<?>>> LATTICE_ACCOUNT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
-            Pair.of("DU_DUNS", String.class), //
+            Pair.of(DomesticUltimateDuns.name(), String.class), //
             Pair.of(DUNS.name(), String.class), //
             Pair.of(Domain.name(), String.class), //
-            Pair.of("GU_DUNS", String.class), //
-            Pair.of("IsPrimaryDomain", Boolean.class)
+            Pair.of(GlobalUltimateDuns.name(), String.class), //
+            Pair.of(IsPrimaryDomain.name(), Boolean.class)
     );
 
     private static final List<Pair<String, Class<?>>> SEGMWNT_ACCOUNT_FIELDS = Arrays.asList( //
