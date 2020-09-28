@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineToS3StepConfiguration;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportTimelineToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ExportTimelineToS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
+public class ExportTimelineToS3 extends BaseImportExportS3<ExportTimelineToS3StepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportTimelineToS3.class);
 
