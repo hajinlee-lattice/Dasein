@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
@@ -99,6 +100,11 @@ public class SourceImportListener extends LEJobListener {
         if (BatchStatus.COMPLETED.equals(jobStatus)) {
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED, uploadDiagnostics);
             uploadProxy.updateProgressPercentage(tenantId, uploadId, ANALYSIS_PERCENTAGE);
+
+            UploadConfig uploadConfig = upload.getUploadConfig();
+            String usageReportFilePath = copyUsageReportToS3(uploadConfig.getUsageReportFilePath());
+            uploadConfig.setUsageReportFilePath(usageReportFilePath);
+            uploadProxy.updateUploadConfig(tenantId, uploadId, upload.getUploadConfig());
         } else {
             if (jobStatus.isUnsuccessful()) {
                 log.info("SourceImport workflow job {} failed with status {}", jobExecution.getId(), jobStatus);
@@ -155,6 +161,11 @@ public class SourceImportListener extends LEJobListener {
         uploadEmailInfo.setJobStatus(jobStatus.name());
         log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
         emailProxy.sendUploadEmail(uploadEmailInfo);
+    }
+
+    private String copyUsageReportToS3(String usageReportFilePath) {
+        // todo after DCP-1765 completed add copy to s3 process and return s3path
+        return "";
     }
 
     private String getLastStepName(JobExecution jobExecution) {

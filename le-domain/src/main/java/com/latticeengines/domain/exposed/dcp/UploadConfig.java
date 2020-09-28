@@ -34,6 +34,9 @@ public class UploadConfig {
     @JsonProperty("sourceOnHdfs")
     private Boolean sourceOnHdfs;
 
+    @JsonProperty("usageReportFilePath")
+    private String usageReportFilePath;
+
     public String getDropFilePath() {
         return dropFilePath;
     }
@@ -96,6 +99,14 @@ public class UploadConfig {
 
     public void setSourceOnHdfs(Boolean sourceOnHdfs) {
         this.sourceOnHdfs = sourceOnHdfs;
+    }
+
+    public String getUsageReportFilePath() {
+        return usageReportFilePath;
+    }
+
+    public void setUsageReportFilePath(String usageReportFilePath) {
+        this.usageReportFilePath = usageReportFilePath;
     }
 
     public List<String> getDownloadPaths() {
