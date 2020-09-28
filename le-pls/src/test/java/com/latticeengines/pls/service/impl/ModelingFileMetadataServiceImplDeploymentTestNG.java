@@ -244,6 +244,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
         // one consistency error, the other is data type warning
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataType), 2);
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataType).size(), 2);
     }
 }
