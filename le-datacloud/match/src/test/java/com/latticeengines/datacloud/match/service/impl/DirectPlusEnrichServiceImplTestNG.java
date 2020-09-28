@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -47,6 +48,18 @@ public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalT
         Assert.assertNotNull(result.getResult().get("duns_number"));
         Assert.assertNotNull(result.getResult().get("primaryname"));
         Assert.assertNotNull(result.getResult().get("latestfin_currency"));
+    }
+
+    @Test(groups = "functional")
+    public void testFetchNonExistDuns() {
+        DirectPlusEnrichRequest request = new DirectPlusEnrichRequest();
+        request.setDunsNumber("123456789");
+        List<PrimeColumn> reqColumns = primeMetadataService.getPrimeColumns(defaultSelection());
+        request.setReqColumnsByBlockId(primeMetadataService.divideIntoBlocks(reqColumns));
+        PrimeAccount result = enrichService.fetch(Collections.singleton(request)).get(0);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(MapUtils.isEmpty(result.getResult()));
+        // SleepUtils.sleep(5000); // wait for background thread to save dynamo cache
     }
 
     private List<String> defaultSelection() {

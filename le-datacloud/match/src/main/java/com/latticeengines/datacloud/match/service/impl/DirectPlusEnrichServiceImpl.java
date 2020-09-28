@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType.ENRICH;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ import com.latticeengines.datacloud.match.service.DirectPlusEnrichService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Service
@@ -124,7 +126,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                 requests.forEach(request -> //
                         callables.add(() -> {
                             try {
-                                return new PrimeAccount(fetch(request));
+                                return new PrimeAccount(request.getDunsNumber(), fetch(request));
                             } catch (Exception e) {
                                 log.error("Failed to fetch data block for DUNS {}", request.getDunsNumber(), e);
                                 return null;
@@ -165,8 +167,25 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         if (!reqColumnsByBlock.isEmpty()) {
             Set<String> blockIds = consolidateFetchBlocks(reqColumnsByBlock.keySet());
             String url = enrichUrl + "/duns/" + duns + "?blockIDs=" + StringUtils.join(blockIds, ",");
-            String resp = sendRequest(url);
-            cacheDplusResponse(resp, request.getDunsNumber());
+            String resp = null;
+            try {
+                resp = sendRequest(url);
+                cacheDplusResponse(resp, request.getDunsNumber(), blockIds);
+            } catch (LedpException e) {
+                boolean toRethrow = true;
+                if (e.getCause() instanceof HttpClientErrorException) {
+                    HttpClientErrorException httpException = (HttpClientErrorException) e.getCause();
+                    if (NOT_FOUND.equals(httpException.getStatusCode())) {
+                        // not found can be cached
+                        resp = httpException.getResponseBodyAsString();
+                        cacheDplusResponse(resp, request.getDunsNumber(), blockIds);
+                        toRethrow = false;
+                    }
+                }
+                if (toRethrow) {
+                    throw e;
+                }
+            }
             List<PrimeColumn> reqColumns = new ArrayList<>();
             reqColumnsByBlock.values().forEach(reqColumns::addAll);
             Map<String, Object> fetchResult = DirectPlusUtils.parseDataBlock(resp, reqColumns);
@@ -219,7 +238,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         });
     }
 
-    private void cacheDplusResponse(String resp, String duns) {
+    private void cacheDplusResponse(String resp, String duns, Collection<String> reqBlockIds) {
         ExecutorService writers = catchWriters();
         writers.submit(() -> {
             byte[] bytes;
@@ -231,6 +250,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
             }
 
             Set<String> blockIds = DirectPlusUtils.parseCacheableBlockIds(resp);
+            String errorCode = DirectPlusUtils.parseErrorCode(resp);
             PrimaryKey primaryKey = new PrimaryKey(ATTR_KEY, duns);
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             Item item = retry.execute(ctx -> dynamoItemService.getItem(cacheTableName, primaryKey));
@@ -238,11 +258,18 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                 int ttlDays = cacheTtlMinDays + random.nextInt(Math.abs(cacheTtlMaxDays - cacheTtlMinDays));
                 long expiredAt = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(ttlDays);
                 item = new Item().withPrimaryKey(primaryKey).withNumber(ATTR_TTL, expiredAt);
-                log.info("Going to create cache for duns={}, blockIds={}", duns, //
-                        StringUtils.join(blockIds, ","));
+                log.info("Going to create cache for duns={}, blockIds={}, errorCode={}", duns, //
+                        StringUtils.join(blockIds, ","), errorCode);
             } else {
-                log.info("Going to update cache for duns={}, blockIds={}", duns, //
-                        StringUtils.join(blockIds, ","));
+                log.info("Going to update cache for duns={}, blockIds={}, errorCode={}", duns, //
+                        StringUtils.join(blockIds, ","), errorCode);
+            }
+            if (StringUtils.isNotBlank(errorCode)) {
+                for (String reqBlockId: reqBlockIds) {
+                    if (!blockIds.contains(reqBlockId)) {
+                        item = item.withBinary(reqBlockId, bytes);
+                    }
+                }
             }
             for (String blockId: blockIds) {
                 item = item.withBinary(blockId, bytes);
