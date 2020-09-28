@@ -65,8 +65,12 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
           timelineFilterTable = timelineFilterTable.drop(InterfaceName.__StreamDate.name)
         }
         timelineFilterTable = timelineFilterTable.drop(InterfaceName.Detail1.name).drop(InterfaceName.Detail2.name)
-        timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, DUNS.name, GlobalUltimateDuns.name,
-          DomesticUltimateDuns.name, Domain.name, IsPrimaryDomain.name), Seq(AccountId.name))
+        timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, "LDC_DUNS",
+          "DOMESTIC_ULTIMATE_DUNS_NUMBER",
+          "GLOBAL_ULTIMATE_DUNS_NUMBER", "LDC_DOMAIN", "LE_IS_PRIMARY_DOMAIN"), Seq(AccountId.name))
+          .withColumnRenamed("LDC_DUNS", DUNS.name).withColumnRenamed("DOMESTIC_ULTIMATE_DUNS_NUMBER",
+          DomesticUltimateDuns.name).withColumnRenamed("GLOBAL_ULTIMATE_DUNS_NUMBER", GlobalUltimateDuns.name)
+          .withColumnRenamed("LDC_DOMAIN", Domain.name).withColumnRenamed("LE_IS_PRIMARY_DOMAIN", IsPrimaryDomain.name)
         (timelineId, timelineFilterTable)
     }.toSeq: _*
     )

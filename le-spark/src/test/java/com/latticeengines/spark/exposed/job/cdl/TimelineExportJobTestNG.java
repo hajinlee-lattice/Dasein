@@ -67,6 +67,15 @@ public class TimelineExportJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(IsPrimaryDomain.name(), Boolean.class)
     );
 
+    private static final List<Pair<String, Class<?>>> LATTICE_ACCOUNT_FIELDS1 = Arrays.asList( //
+            Pair.of(AccountId.name(), String.class), //
+            Pair.of("LDC_DUNS", String.class), //
+            Pair.of("DOMESTIC_ULTIMATE_DUNS_NUMBER", String.class), //
+            Pair.of("LDC_DOMAIN", String.class), //
+            Pair.of("GLOBAL_ULTIMATE_DUNS_NUMBER", String.class), //
+            Pair.of("LE_IS_PRIMARY_DOMAIN", Boolean.class)
+    );
+
     private static final List<Pair<String, Class<?>>> SEGMWNT_ACCOUNT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class)
     );
@@ -145,7 +154,7 @@ public class TimelineExportJobTestNG extends SparkJobFunctionalTestNGBase {
                 {"a101", "12345678", "12345678", "dnb.net", "12345678", false}, ////
                 {"A2", "1234568", "1234568", "video.net", "1234568", false}, ////
         };
-        uploadHdfsDataUnit(latticeAccountTable, LATTICE_ACCOUNT_FIELDS);
+        uploadHdfsDataUnit(latticeAccountTable, LATTICE_ACCOUNT_FIELDS1);
         latticeAccountTableIdx = 2;
 
         Object[][] segmentAccountTable = new Object[][]{ //
