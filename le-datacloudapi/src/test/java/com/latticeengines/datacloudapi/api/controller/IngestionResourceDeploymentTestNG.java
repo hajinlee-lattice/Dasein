@@ -64,8 +64,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2019_05_001.OUT.gz";
     private static final String ORB_INGESTION = "OrbTest";
     private static final String BOMBORA_INGESTION = "BomboraTest";
-    private static final String BOMBORA_FILE_VERSION1 = "20200908";
-    private static final String BOMBORA_FILE_VERSION2 = "20200915";
+    private static final String BOMBORA_FILE_VERSION1 = "20200921";
+    private static final String BOMBORA_FILE_VERSION2 = "20200928";
     private static String bomboraTestVersion1;
     private static String bomboraTestVersion2;
 
@@ -141,7 +141,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     // IngestionName, ExpectedCreatedProgressNum, Version, Size
     private static Object[][] getExpectedResult2() {
         return new Object[][] { //
-                { DNB_INGESTION, 3, DNB_VERSION, null } };
+                { DNB_INGESTION, 1, DNB_VERSION, null } };
     }
 
     // IngestionName, ExpectedCreatedProgressNum, Version, Size
@@ -203,7 +203,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         IngestionProgress progress = ingestionProxy.ingestInternal(DNB_INGESTION, request, POD_ID);
         Assert.assertNotNull(progress);
         Assert.assertNotNull(progress.getApplicationId());
-
         scan();
 
         verifyIngestions(getExpectedResult2());
@@ -295,7 +294,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
 
     private void scan() {
         List<IngestionProgress> progresses = ingestionProxy.scan(POD_ID);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(progresses));
         List<String> appIds = progresses.stream() //
                 .map(IngestionProgress::getApplicationId).collect(Collectors.toList());
         log.info("Kicked off applications: " + StringUtils.join(appIds) + ", and wait 3 sec.");
