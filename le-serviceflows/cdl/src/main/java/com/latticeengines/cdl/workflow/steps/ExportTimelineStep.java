@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,11 +28,13 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.GenerateTimelineExportArtifacts;
@@ -44,6 +48,8 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
     private static Logger log = LoggerFactory.getLogger(ExportTimelineStep.class);
     public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
     public static final String EXPORT_TIMELINE_SUFFIX = "exportTimeline";
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     protected Class<? extends AbstractSparkJob<GenerateTimelineExportArtifactsJobConfig>> getJobClz() {
@@ -53,7 +59,8 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
     @Override
     protected GenerateTimelineExportArtifactsJobConfig configureJob(ExportTimelineSparkStepConfiguration stepConfiguration) {
         Map<String, String> timelineTableNames = configuration.getTimelineTableNames();
-        Table latticeAccountTable = configuration.getLatticeAccountTable();
+        Table latticeAccountTable = dataCollectionProxy.getTable(configuration.getCustomer(), TableRoleInCollection.LatticeAccount,
+                configuration.getVersion());
         if (MapUtils.isEmpty(timelineTableNames) || latticeAccountTable == null) {
             log.info("timelineTable is empty or latticeAccountTable is null, skip this step.");
             return null;

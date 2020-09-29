@@ -93,7 +93,6 @@ public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
         }
         return new TimelineExportWorkflowConfiguration.Builder()
                 .customer(CustomerSpace.parse(customerSpace))
-                .setLatticeAccountTable(latticeAccountTable)
                 .setRequest(request)
                 .setTimelineTableNames(timelineTableNames)
                 .setVersion(version)

@@ -64,11 +64,6 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder setLatticeAccountTable(Table latticeAccountTable) {
-            exportTimelineSparkStepConfiguration.setLatticeAccountTable(latticeAccountTable);
-            return this;
-        }
-
         public TimelineExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("timelineExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
