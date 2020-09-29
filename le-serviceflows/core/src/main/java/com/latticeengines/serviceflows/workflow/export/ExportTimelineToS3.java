@@ -41,7 +41,7 @@ public class ExportTimelineToS3 extends BaseImportExportS3<ExportTimelineToS3Ste
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
-        List<String> timelineExportTablePaths = getListObjectFromContext(TIMELINE_EXPORT_TABLES, String.class);
+        List<String> timelineExportTablePaths = getListObjectFromContext(TIMELINE_EXPORT_FILES, String.class);
         if (timelineExportTablePaths == null || timelineExportTablePaths.isEmpty()) {
             return;
         }

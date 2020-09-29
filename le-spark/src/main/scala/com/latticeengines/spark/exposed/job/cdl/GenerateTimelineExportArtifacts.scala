@@ -57,12 +57,11 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
         }
         timelineFilterTable = timelineFilterTable.withColumn(Count.name, lit(1))
         if (rollupToDaily) {
-          timelineFilterTable = timelineFilterTable.withColumn(__StreamDate.name, getDate(col
-          (InterfaceName.EventTimestamp.name), lit(timeZone)))
+          timelineFilterTable = timelineFilterTable.withColumn(EventTimestamp.name, getDate(col
+          (EventTimestamp.name), lit(timeZone)))
           timelineFilterTable = timelineFilterTable.groupBy(AccountId.name, ContactId
-            .name, EventType.name, __StreamDate.name).agg(functions.max(EventTimestamp.name).as(EventTimestamp.name),
+            .name, EventType.name, EventTimestamp.name).agg(functions.max(EventTimestamp.name).as(EventTimestamp.name),
             functions.sum(Count.name).as(Count.name), collect_list(StreamType.name).as(StreamType.name))
-          timelineFilterTable = timelineFilterTable.drop(InterfaceName.__StreamDate.name)
         }
         timelineFilterTable = timelineFilterTable.drop(InterfaceName.Detail1.name).drop(InterfaceName.Detail2.name)
         timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, "LDC_DUNS",

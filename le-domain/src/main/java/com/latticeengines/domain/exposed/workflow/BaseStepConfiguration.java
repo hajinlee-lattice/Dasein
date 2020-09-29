@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.QueuePlayLaunches
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MockActivityStoreConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.TimelineExportFileGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -49,6 +50,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name =
                 "LegacyDeleteByDateRangeActionConfiguration"), //
         @Type(value = GenerateTimelineExportUniverseStepConfiguration.class, name = "GenerateTimelineUniverseStepConfiguration"),
+        @Type(value = TimelineExportFileGeneratorConfiguration.class, name = "TimelineExportFileGeneratorConfiguration"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {

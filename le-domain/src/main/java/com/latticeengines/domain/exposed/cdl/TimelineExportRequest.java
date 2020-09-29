@@ -16,7 +16,7 @@ public class TimelineExportRequest {
     private String segmentName;
 
     @JsonProperty("RollupToDaily")
-    private boolean rollupToDaily = false;
+    private boolean rollupToDaily = true;
 
     @JsonProperty("FromDate")
     private String fromDate;
