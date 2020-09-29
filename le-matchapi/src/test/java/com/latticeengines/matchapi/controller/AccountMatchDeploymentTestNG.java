@@ -592,7 +592,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null));
         return input;
     }
 
@@ -610,7 +610,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setInputBuffer(prepareBulkDataFetchOnly());
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null));
         return input;
     }
 
@@ -647,7 +647,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null));
         return input;
     }
 
@@ -671,7 +671,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         map.addMatchKey(MatchKey.Name, MatchKey.Name.name());
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_INVALID_VALUE));
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null));
         return input;
     }
 
@@ -695,7 +695,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         map.addMatchKey(MatchKey.PreferredEntityId, InterfaceName.AccountId.name());
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_PREFERRED_ID));
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null));
         return input;
     }
 

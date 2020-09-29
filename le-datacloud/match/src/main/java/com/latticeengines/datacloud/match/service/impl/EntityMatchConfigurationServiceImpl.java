@@ -151,8 +151,9 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
         return isAllocateMode;
     }
 
-    @VisibleForTesting
+    @Override
     public void setStagingTableName(String stagingTableName) {
+        Preconditions.checkNotNull(stagingTableName, "staging table name should not be null");
         this.stagingTableName = stagingTableName;
     }
 

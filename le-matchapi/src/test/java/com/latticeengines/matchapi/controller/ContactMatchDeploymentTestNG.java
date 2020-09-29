@@ -501,7 +501,7 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         input.setInputBuffer(buffer);
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING));
+        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null));
         return input;
     }
 
