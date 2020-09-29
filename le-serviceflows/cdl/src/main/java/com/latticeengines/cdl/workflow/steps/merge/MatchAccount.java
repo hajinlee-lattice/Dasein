@@ -157,8 +157,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 setRematchVersions(matchInput);
             }
             if (configuration.getEntityMatchConfiguration() != null) {
-                int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
-                log.info("set number of staging shards for match to {}", numStagingShards);
+                log.info("found custom entity match configuration = {}", configuration.getEntityMatchConfiguration());
                 matchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
             }
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,

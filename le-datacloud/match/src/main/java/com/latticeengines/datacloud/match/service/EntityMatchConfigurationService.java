@@ -43,6 +43,14 @@ public interface EntityMatchConfigurationService {
     void setNumShards(@NotNull EntityMatchEnvironment environment, int numShards);
 
     /**
+     * Overwrite table used as staging environment
+     *
+     * @param stagingTableName
+     *            table name
+     */
+    void setStagingTableName(@NotNull String stagingTableName);
+
+    /**
      * Get the expired timestamp, starting from current time.
      *
      * @return expired timestamp (epoch) in seconds

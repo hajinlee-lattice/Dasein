@@ -327,9 +327,12 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         EntityMatchConfiguration config = getConfiguration(traveler);
         if (config != null) {
             // overwrite configuration
-            if (config.getNumStagingShards() > 0) {
+            if (config.getNumStagingShards() != null) {
                 entityMatchConfigurationService.setNumShards(EntityMatchEnvironment.STAGING,
                         config.getNumStagingShards());
+            }
+            if (StringUtils.isNotBlank(config.getStagingTableName())) {
+                entityMatchConfigurationService.setStagingTableName(config.getStagingTableName());
             }
         }
     }

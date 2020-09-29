@@ -130,11 +130,11 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             setRematchVersions(matchInput);
         }
         if (configuration.getEntityMatchConfiguration() != null) {
-            int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
-            log.info("set number of staging shards for match to {}", numStagingShards);
+            log.info("found custom entity match configuration = {}", configuration.getEntityMatchConfiguration());
             matchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
         }
         matchInput.setSourceEntity(BusinessEntity.Transaction.name());
+        matchInput.setUseTransactAssociate(false);
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,

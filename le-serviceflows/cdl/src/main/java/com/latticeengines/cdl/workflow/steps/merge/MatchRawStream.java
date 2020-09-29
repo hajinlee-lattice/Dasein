@@ -241,8 +241,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
             baseMatchInput.setSourceEntity(stream.getStreamType().name());
         }
         if (configuration.getEntityMatchConfiguration() != null) {
-            int numStagingShards = configuration.getEntityMatchConfiguration().getNumStagingShards();
-            log.info("set number of staging shards for match to {}", numStagingShards);
+            log.info("found custom entity match configuration = {}", configuration.getEntityMatchConfiguration());
             baseMatchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
         }
 
