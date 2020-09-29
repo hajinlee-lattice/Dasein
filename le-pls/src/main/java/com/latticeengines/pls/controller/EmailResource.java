@@ -433,11 +433,12 @@ public class EmailResource {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String launchHistoryUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
                             appPublicUrl, tenantName, play.getName());
-                    if (playLaunchState.equals(LaunchState.Failed.name())) {
+                    if (playLaunch.getLaunchState().equals(LaunchState.Failed)
+                            || playLaunch.getLaunchState().equals(LaunchState.SyncFailed)) {
                         emailService.sendPlsCampaignFailedEmail(user, launchHistoryUrl, playDisplayName,
                                 externalSystemName,
                                 playLaunchState, playLaunchCreated, currentTime);
-                    } else if (playLaunchState.equals(LaunchState.Canceled.name())) {
+                    } else if (playLaunch.getLaunchState().equals(LaunchState.Canceled)) {
                         emailService.sendPlsCampaignCanceledEmail(user, launchHistoryUrl, playDisplayName,
                                 externalSystemName,
                                 playLaunchState, playLaunchCreated, currentTime);
