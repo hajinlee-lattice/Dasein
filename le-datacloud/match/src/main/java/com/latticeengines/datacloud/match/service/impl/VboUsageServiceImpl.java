@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.datacloud.match.service.VboUsageService;
-import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 import com.latticeengines.domain.exposed.datacloud.usage.SubmitBatchReportRequest;
+import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 
 @Service
 public class VboUsageServiceImpl implements VboUsageService {
