@@ -21,11 +21,11 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrateg
  * This test requires setup some files on the sftp server:
  *
  * 1.
- * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190714/AllDomainsAllTopicsZips_20190714_1.csv.gz
+ * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20200908/AllDomainsAllTopicsZips_20190714_1.csv.gz
  * 2.
- * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_1.csv.gz
+ * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20200915/AllDomainsAllTopicsZips_20190721_1.csv.gz
  * 3.
- * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_2.csv.gz
+ * ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20200915/AllDomainsAllTopicsZips_20190721_2.csv.gz
  * 4. ingest_test/SftpUtilsTestNG/DnB/gets/LE_SEED_OUTPUT_2019_05_001.OUT.gz
  *
  * The files can be found in
@@ -43,9 +43,9 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     // Expected returned Bombora files based on files on SFTP and prepared SFTP
     // config and calendar
     private static final List<String> BOMBORA_FILES = Arrays.asList( //
-            "20200908/AllDomainsAllTopicsZips_20190714_1.csv.gz", //
-            "20200915/AllDomainsAllTopicsZips_20190721_1.csv.gz", //
-            "20200915/AllDomainsAllTopicsZips_20190721_2.csv.gz" //
+            "20200921/AllDomainsAllTopicsZips_20190714_1.csv.gz", //
+            "20200928/AllDomainsAllTopicsZips_20190721_1.csv.gz", //
+            "20200928/AllDomainsAllTopicsZips_20190721_2.csv.gz" //
     );
 
     private static final Calendar DNB_CALENDAR = getDnBCalendar();
