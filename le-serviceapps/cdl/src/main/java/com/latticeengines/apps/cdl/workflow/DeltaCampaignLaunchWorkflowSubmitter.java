@@ -18,6 +18,7 @@ import org.springframework.util.StreamUtils;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -51,15 +52,18 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private ZKConfigService zkConfigService;
+
     public Long submit(PlayLaunch playLaunch, String channelId) {
         Map<String, String> inputProperties = new HashMap<>();
+        int accountContactRatio = zkConfigService.getAccountContactRatio();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "deltaCampaignLaunchWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playLaunch.getPlay().getName());
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID, playLaunch.getLaunchId());
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_CHANNEL_ID, channelId);
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
-
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
         DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration.Builder()
                 .workflow("deltaCampaignLaunchWorkflow") //
@@ -73,7 +77,8 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                         getAccountDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
                 .contactAttributeExportDiplayNames(
                         getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
-                .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap)).build();
+                .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap))
+                .accountContactRatio(accountContactRatio).build();
         ApplicationId appId = workflowJobService.submit(configuration);
 
         if (FakeApplicationId.isFakeApplicationId(appId.toString())) {
@@ -86,9 +91,6 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
-            return null;
-        }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
                 ? "com/latticeengines/cdl/play/launch/s3/contact_display_names.csv"
                 : "com/latticeengines/cdl/play/launch/default/contact_display_names.csv";
@@ -97,9 +99,6 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType,
             LookupIdMap lookupIdMap) {
-        if (!lookupIdMap.isTrayEnabled() && !lookupIdMap.isFileSystem()) {
-            return null;
-        }
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
                 ? "com/latticeengines/cdl/play/launch/s3/account_display_names.csv"
                 : "com/latticeengines/cdl/play/launch/default/account_display_names.csv";

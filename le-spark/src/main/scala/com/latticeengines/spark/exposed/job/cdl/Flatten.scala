@@ -12,8 +12,7 @@ import org.apache.spark.sql.types._
 
 import scala.collection.mutable.Map;
 
-class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String, onlyPopulateOneContact: Boolean)
-  extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String) extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = schema
@@ -26,55 +25,53 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
   override def dataType: DataType = StringType
 
   override def deterministic: Boolean = true
-  
+
   var cols: Seq[String] = Seq.empty[String]
   var useConfiguredCols: Boolean = false
   var sfdcContactIdEmpty: Boolean = sfdcContactId == null
-  var populateOneContact: Boolean = false
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = IndexedSeq[Map[String, String]]()
     cols = configuredColumns
     useConfiguredCols = if (cols.isEmpty) false else true
-    populateOneContact = onlyPopulateOneContact
   }
 
   // This is how to update your buffer schema given an input.
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
     var ele = Map.empty[String, String]
     if (useConfiguredCols) {
-        for (col <- cols) {
-            ele = ele + (col -> getInputValue(input, col))
-        }
+      for (col <- cols) {
+        ele = ele + (col -> getInputValue(input, col))
+      }
     } else {
       ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
-      			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
-      			  PlaymakerConstants.Address2 -> getInputValue(input, InterfaceName.Address_Street_2.name()), //
-      			  PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
-      			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
-      			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
-      			  PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
-      			  PlaymakerConstants.SfdcContactID -> (if (sfdcContactIdEmpty) "" else getInputValue(input, sfdcContactId)), //
-      			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
-      			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
-      			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
-      			  PlaymakerConstants.FirstName -> getInputValue(input, InterfaceName.FirstName.name()), //
-      			  PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()), //
-      			  PlaymakerConstants.Title -> getInputValue(input, InterfaceName.Title.name()), //
-      			  PlaymakerConstants.DoNotCall -> getInputValue(input, InterfaceName.DoNotCall.name()), //
-      			  PlaymakerConstants.DoNotMail -> getInputValue(input, InterfaceName.DoNotMail.name()), //
-      			  PlaymakerConstants.CreatedDate -> getInputValue(input, InterfaceName.CreatedDate.name()), //
-      			  PlaymakerConstants.LastModifiedDate -> getInputValue(input, InterfaceName.LastModifiedDate.name()))
+        PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
+        PlaymakerConstants.Address2 -> getInputValue(input, InterfaceName.Address_Street_2.name()), //
+        PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
+        PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
+        PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
+        PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
+        PlaymakerConstants.SfdcContactID -> (if (sfdcContactIdEmpty) "" else getInputValue(input, sfdcContactId)), //
+        PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
+        PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
+        PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
+        PlaymakerConstants.FirstName -> getInputValue(input, InterfaceName.FirstName.name()), //
+        PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()), //
+        PlaymakerConstants.Title -> getInputValue(input, InterfaceName.Title.name()), //
+        PlaymakerConstants.DoNotCall -> getInputValue(input, InterfaceName.DoNotCall.name()), //
+        PlaymakerConstants.DoNotMail -> getInputValue(input, InterfaceName.DoNotMail.name()), //
+        PlaymakerConstants.CreatedDate -> getInputValue(input, InterfaceName.CreatedDate.name()), //
+        PlaymakerConstants.LastModifiedDate -> getInputValue(input, InterfaceName.LastModifiedDate.name()))
 
     }
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     buffer(0) = cur :+ ele
   }
-  
+
   private def getInputValue(input: Row, key: String): String = {
     try {
-      return Option(input.getAs[Any](inputSchema.fieldIndex(key))).map(_.toString).getOrElse(null)
+      Option(input.getAs[Any](inputSchema.fieldIndex(key))).map(_.toString).getOrElse(null)
     } catch {
       case e: IllegalArgumentException => return null
     }
@@ -92,11 +89,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
     val mapper = new ObjectMapper() with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
     val writer: StringWriter = new StringWriter()
-    var result: IndexedSeq[Map[String, String]] = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
-    if (result.length > 1 && populateOneContact) {
-      result = result.take(1)
-    }
-    mapper.writeValue(writer, result)
+    mapper.writeValue(writer, buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]])
     writer.toString()
   }
- }
+}

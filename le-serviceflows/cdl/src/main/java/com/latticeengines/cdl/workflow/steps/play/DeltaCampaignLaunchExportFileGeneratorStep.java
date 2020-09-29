@@ -1,49 +1,42 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.common.exposed.transformer.LiveRampRecommendationAvroToCSVTransformer;
-import com.latticeengines.common.exposed.transformer.LiveRampRecommendationAvroToJsonFunction;
-import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
-import com.latticeengines.common.exposed.transformer.RecommendationAvroToJsonFunction;
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.cdl.GenerateRecommendationCSVContext;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesGeneratorConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
+import com.latticeengines.spark.exposed.job.cdl.GenerateRecommendationCSVJob;
 
 @Component("deltaCampaignLaunchExportFileGeneratorStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeltaCampaignLaunchExportFileGeneratorStep
-        extends BaseWorkflowStep<DeltaCampaignLaunchExportFilesGeneratorConfiguration> {
-
+        extends RunSparkJob<DeltaCampaignLaunchExportFilesGeneratorConfiguration, GenerateRecommendationCSVConfig> {
     private static final Logger log = LoggerFactory.getLogger(DeltaCampaignLaunchExportFileGeneratorStep.class);
 
     private boolean createAddCsvDataFrame;
@@ -55,14 +48,33 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
     private static final String DELETE_FILE_PREFIX = "delete";
 
     @Override
-    public void execute() {
-        DeltaCampaignLaunchExportFilesGeneratorConfiguration config = getConfiguration();
+    protected Class<GenerateRecommendationCSVJob> getJobClz() {
+        return GenerateRecommendationCSVJob.class;
+    }
+
+    @Override
+    protected GenerateRecommendationCSVConfig configureJob(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
         createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
         log.info("createAddCsvDataFrame=" + createAddCsvDataFrame + ", createDeleteCsvDataFrame="
                 + createDeleteCsvDataFrame);
+        GenerateRecommendationCSVConfig generateRecommendationCSVConfig = new GenerateRecommendationCSVConfig();
+        GenerateRecommendationCSVContext generateRecommendationCSVContext = new GenerateRecommendationCSVContext();
+        generateRecommendationCSVConfig.setGenerateRecommendationCSVContext(generateRecommendationCSVContext);
+        int target = 0;
+        List<DataUnit> inputs = new ArrayList<>();
+        if (createAddCsvDataFrame) {
+            target++;
+            createDateUnit(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH, inputs);
+        }
+        if (createDeleteCsvDataFrame) {
+            target++;
+            createDateUnit(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH, inputs);
+        }
+        generateRecommendationCSVConfig.setTargetNums(target);
+        generateRecommendationCSVConfig.setInput(inputs);
         Map<String, String> accountDisplayNames = getMapObjectFromContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES,
                 String.class, String.class);
         Map<String, String> contactDisplayNames = getMapObjectFromContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES,
@@ -75,84 +87,48 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         if (contactDisplayNames != null) {
             config.setContactDisplayNames(contactDisplayNames);
         }
-
-        try (PerformanceTimer timer = new PerformanceTimer(
-                String.format("Generating Delta Campaign Launch Export Files for:%s", config.getPlayName()))) {
-
-            if (createAddCsvDataFrame) {
-                String addCsvDataFraneHdfsFilePath = getStringValueFromContext(
-                        DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH);
-                List<Callable<String>> fileExporters = new ArrayList<>();
-                Date fileExportTime = new Date();
-                fileExporters.add(new CsvFileExporter(yarnConfiguration, config, addCsvDataFraneHdfsFilePath,
-                        fileExportTime, ADD_FILE_PREFIX));
-                fileExporters.add(new JsonFileExporter(yarnConfiguration, config, addCsvDataFraneHdfsFilePath,
-                        fileExportTime, ADD_FILE_PREFIX));
-
-                ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("deltaCampaignlaunch-export",
-                        2);
-                List<String> exportFiles = ThreadPoolUtils.callInParallel(executorService, fileExporters,
-                        (int) TimeUnit.DAYS.toMinutes(1), 30);
-                if (exportFiles.size() != fileExporters.size()) {
-                    throw new RuntimeException("Failed to generate some of the export files");
-                }
-                log.info("Export files for add csv " + Arrays.toString(exportFiles.toArray()));
-                putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, exportFiles);
-            }
-
-            if (createDeleteCsvDataFrame) {
-                String deleteCsvDataFraneHdfsFilePath = getStringValueFromContext(
-                        DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH);
-                List<Callable<String>> fileExporters = new ArrayList<>();
-                Date fileExportTime = new Date();
-                fileExporters.add(new CsvFileExporter(yarnConfiguration, config, deleteCsvDataFraneHdfsFilePath,
-                        fileExportTime, DELETE_FILE_PREFIX));
-
-                ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("deltaCampaignlaunch-export",
-                        2);
-                List<String> exportFiles = ThreadPoolUtils.callInParallel(executorService, fileExporters,
-                        (int) TimeUnit.DAYS.toMinutes(1), 30);
-                if (exportFiles.size() != fileExporters.size()) {
-                    throw new RuntimeException("Failed to generate some of the export files");
-                }
-                log.info("Export files for delete csv " + Arrays.toString(exportFiles.toArray()));
-                putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, exportFiles);
-            }
-
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18213, e, new String[] { e.getMessage() });
-        }
+        generateRecommendationCSVContext.setIgnoreAccountsWithoutContacts(shouldIgnoreAccountsWithoutContacts(config));
+        boolean isLiveRamp = CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName());
+        buildFieldsAndDisplayNames(generateRecommendationCSVContext, config.getAccountDisplayNames(), config.getContactDisplayNames(), isLiveRamp);
+        return generateRecommendationCSVConfig;
     }
 
-    public String buildNamespace(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
-        return String.format("%s.%s.%s.%s.%s", config.getDestinationSysType(), config.getDestinationSysName(),
-                config.getDestinationOrgId(), config.getPlayName(), config.getPlayLaunchId());
+    private void buildFieldsAndDisplayNames(GenerateRecommendationCSVContext generateRecommendationCSVContext, Map<String, String> accountDisplayNames,
+                                            Map<String, String> contactDisplayNames, boolean isLiveRamp) {
+        Map<String, String> displayNames;
+        List<String> fields;
+        if (isLiveRamp) {
+            displayNames = MapUtils.isNotEmpty(contactDisplayNames) ? contactDisplayNames : new HashMap<>();
+            fields = new ArrayList<>(contactDisplayNames.keySet());
+            Collections.sort(fields);
+        } else {
+            displayNames = MapUtils.isNotEmpty(accountDisplayNames) ? accountDisplayNames : new HashMap<>();
+            fields = new ArrayList<>(displayNames.keySet());
+            Collections.sort(fields);
+            Map<String, String> changedContactDisplayNames = MapUtils.isNotEmpty(contactDisplayNames) ? contactDisplayNames : new HashMap<>();
+            changedContactDisplayNames = changedContactDisplayNames.entrySet().stream().collect(Collectors.toMap(entry -> DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + entry.getKey(),
+                    entry -> entry.getValue()));
+            List<String> contactFields = new ArrayList<>(changedContactDisplayNames.keySet());
+            Collections.sort(contactFields);
+            fields.addAll(contactFields);
+            displayNames.putAll(changedContactDisplayNames);
+        }
+        generateRecommendationCSVContext.setFields(fields);
+        generateRecommendationCSVContext.setDisplayNames(displayNames);
     }
 
-    private class CsvFileExporter extends ExportFileCallable {
+    private void createDateUnit(String contextKey, List<DataUnit> inputs) {
+        String path = getStringValueFromContext(contextKey);
+        DataUnit dataUnit = HdfsDataUnit.fromPath(path);
+        inputs.add(dataUnit);
+    }
 
-        CsvFileExporter(Configuration yarnConfiguration, DeltaCampaignLaunchExportFilesGeneratorConfiguration config,
-                String recAvroHdfsFilePath, Date date, String filePrefix) {
-            super(yarnConfiguration, config, recAvroHdfsFilePath, date, filePrefix);
+    @Override
+    protected CustomerSpace parseCustomerSpace(DeltaCampaignLaunchExportFilesGeneratorConfiguration stepConfiguration) {
+        if (customerSpace == null) {
+            customerSpace = configuration.getCustomerSpace();
         }
-
-        @Override
-        public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            if (CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName())) {
-                AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
-                        new LiveRampRecommendationAvroToCSVTransformer(config.getContactDisplayNames()));
-            } else {
-                AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
-                        new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
-                                config.getContactDisplayNames(), shouldIgnoreAccountsWithoutContacts(config)));
-            }
-        }
-
-        @Override
-        public String getFileFormat() {
-            return "csv";
-        }
-
+        return customerSpace;
     }
 
     private boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
@@ -160,82 +136,38 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
-    private class JsonFileExporter extends ExportFileCallable {
-
-        JsonFileExporter(Configuration yarnConfiguration, DeltaCampaignLaunchExportFilesGeneratorConfiguration config,
-                String recAvroHdfsFilePath, Date date, String filePrefix) {
-            super(yarnConfiguration, config, recAvroHdfsFilePath, date, filePrefix);
-        }
-
-        @Override
-        public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            if (CDLExternalSystemName.LIVERAMP.contains(config.getDestinationSysName())) {
-                AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
-                        new LiveRampRecommendationAvroToJsonFunction(config.getContactDisplayNames()));
-            } else {
-                AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
-                        new RecommendationAvroToJsonFunction(config.getAccountDisplayNames(),
-                                config.getContactDisplayNames()));
-            }
-        }
-
-        @Override
-        public String getFileFormat() {
-            return "json";
+    @Override
+    protected void postJobExecution(SparkJobResult result) {
+        String addRenameCSVPath;
+        String deleteRenameCSVPath;
+        Date fileExportTime = new Date();
+        if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            addRenameCSVPath = renameDataUnit(result.getTargets().get(0), ADD_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(addRenameCSVPath));
+            deleteRenameCSVPath = renameDataUnit(result.getTargets().get(1), DELETE_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(deleteRenameCSVPath));
+        } else if (createAddCsvDataFrame) {
+            addRenameCSVPath = renameDataUnit(result.getTargets().get(0), ADD_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(addRenameCSVPath));
+        } else {
+            deleteRenameCSVPath = renameDataUnit(result.getTargets().get(0), DELETE_FILE_PREFIX, fileExportTime);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(deleteRenameCSVPath));
         }
     }
 
-    private abstract class ExportFileCallable implements Callable<String> {
-
-        Configuration yarnConfiguration;
-        DeltaCampaignLaunchExportFilesGeneratorConfiguration config;
-        Date fileGeneratedTime;
-        String recAvroHdfsFilePath;
-        String filePrefix;
-
-        ExportFileCallable(Configuration yarnConfiguration, DeltaCampaignLaunchExportFilesGeneratorConfiguration config,
-                String recAvroHdfsFilePath, Date date, String filePrefix) {
-            this.yarnConfiguration = yarnConfiguration;
-            this.config = config;
-            this.fileGeneratedTime = date;
-            this.recAvroHdfsFilePath = recAvroHdfsFilePath;
-            this.filePrefix = filePrefix;
+    private String renameDataUnit(HdfsDataUnit hdfsDataUnit, String filePrefix, Date fileExportTime) {
+        String fileFormat = "csv";
+        String fileName = String.format("Recommendations_%s_%s.%s", filePrefix, DateTimeUtils.currentTimeAsString(fileExportTime), fileFormat);
+        try {
+            String outputDir = hdfsDataUnit.getPath();
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".csv"));
+            String csvPath = files.get(0);
+            String renamePath = outputDir + "/" + fileName;
+            HdfsUtils.rename(yarnConfiguration, csvPath, renamePath);
+            return renamePath;
+        } catch (IOException e) {
+            log.info("Can't rename CSV file to {}.", fileName);
+            throw new RuntimeException("Unable to rename csv file on HDFS!");
         }
-
-        public abstract void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException;
-
-        public abstract String getFileFormat();
-
-        @Override
-        public String call() {
-            try {
-                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s_%s.%s", filePrefix,
-                        config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),
-                        config.getDestinationSysType(), fileGeneratedTime.getTime(), getFileFormat()));
-
-                generateFileFromAvro(recAvroHdfsFilePath, localFile);
-
-                String namespace = buildNamespace(config);
-                String path = PathBuilder
-                        .buildDataFileExportPath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), namespace)
-                        .toString();
-                path = path.endsWith("/") ? path : path + "/";
-
-                String recFilePathForDestination = (path += String.format("Recommendations_%s_%s.%s", filePrefix,
-                        DateTimeUtils.currentTimeAsString(fileGeneratedTime), getFileFormat()));
-                log.info("recFilePathForDestination : {}", recFilePathForDestination);
-                try {
-                    HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(),
-                            recFilePathForDestination);
-                } finally {
-                    FileUtils.deleteQuietly(localFile);
-                }
-                log.debug("Uploaded PlayLaunch File to HDFS : {}", recFilePathForDestination);
-                return recFilePathForDestination;
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18213, e, new String[] { getFileFormat() });
-            }
-        }
-
     }
 }
