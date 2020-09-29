@@ -25,8 +25,8 @@ public class UsageResource {
 
     @PostMapping("/batch")
     @ResponseBody
-    @ApiOperation(value = "Get all block metadata")
-    public VboBatchUsageReport getBlockMetadata(@RequestBody SubmitBatchReportRequest request) {
+    @ApiOperation(value = "Submit a batch usage report. Return the S3 location for the caller to put csv files.")
+    public VboBatchUsageReport submitBatchUsageReport(@RequestBody SubmitBatchReportRequest request) {
         return vboUsageService.submitBatchUsageReport(request);
     }
 
