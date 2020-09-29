@@ -13,11 +13,10 @@ public class PrimeAccount {
 
     public static final String DunsNumber = "duns_number";
 
-    private final String id;
-    private final Map<String, Object> result;
+    private String id;
+    private Map<String, Object> result;
 
     private PrimeAccount() {
-        throw new UnsupportedOperationException();
     }
 
     public PrimeAccount(String id, Map<String, Object> result) {

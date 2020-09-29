@@ -61,6 +61,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     private static final String ATTR_KEY = "key";
     private static final String ATTR_TTL = "ttl";
+    private static final String ATTR_CREATED_TIME = "createTime";
 
     @Inject
     private DnBAuthenticationService dnBAuthenticationService;
@@ -256,11 +257,15 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
             Item item = retry.execute(ctx -> dynamoItemService.getItem(cacheTableName, primaryKey));
             if (item == null) {
                 int ttlDays = cacheTtlMinDays + random.nextInt(Math.abs(cacheTtlMaxDays - cacheTtlMinDays));
-                long expiredAt = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(ttlDays);
-                item = new Item().withPrimaryKey(primaryKey).withNumber(ATTR_TTL, expiredAt);
+                long expireAt = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(ttlDays);
+                item = new Item().withPrimaryKey(primaryKey).withNumber(ATTR_TTL, expireAt) //
+                        .withLong(ATTR_CREATED_TIME, System.currentTimeMillis());
                 log.info("Going to create cache for duns={}, blockIds={}, errorCode={}", duns, //
                         StringUtils.join(blockIds, ","), errorCode);
             } else {
+                if (!item.hasAttribute(ATTR_CREATED_TIME)) {
+                    item = item.withLong(ATTR_CREATED_TIME, System.currentTimeMillis());
+                }
                 log.info("Going to update cache for duns={}, blockIds={}, errorCode={}", duns, //
                         StringUtils.join(blockIds, ","), errorCode);
             }
