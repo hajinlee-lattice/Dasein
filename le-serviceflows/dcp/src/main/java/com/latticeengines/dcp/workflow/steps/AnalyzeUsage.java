@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.AnalyzeUsageConfig;
+import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -41,7 +43,10 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
     private static final Logger log = LoggerFactory.getLogger(AnalyzeUsage.class);
 
     @Inject
-    UploadProxy uploadProxy;
+    private ProjectProxy projectProxy;
+
+    @Inject
+    private UploadProxy uploadProxy;
 
     @Inject
     private IDaaSService iDaaSService;
@@ -83,6 +88,10 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
         jobConfig.setOutputFields(OUTPUT_FIELDS);
         jobConfig.setRawOutputMap(RAW_USAGE_DISPLAY_NAMES);
         jobConfig.setUploadId(stepConfiguration.getUploadId());
+
+        ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
+                configuration.getProjectId(), Boolean.FALSE, null);
+        jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain() + "-" + projectDetails.getPurposeOfUse().getRecordType());
 
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.getTenantId());
         if (tenant != null && tenant.getSubscriberNumber() != null) {
