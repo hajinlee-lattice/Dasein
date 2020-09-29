@@ -99,7 +99,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   private def publishRecommendationsToDB(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, completeContactTable: DataFrame,
                                          baseAddRecDf: DataFrame, sfdcContactId: String, joinKey: String, contactCols: Seq[String], contactNums: ListBuffer[Long], accountContactRatio: Int): DataFrame = {
-    if (deltaCampaignLaunchSparkContext.getPublishRecommendationsForS3Launch) {
+    if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB) {
       var recommendations: DataFrame = null
       if (!completeContactTable.rdd.isEmpty && !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
         val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, sfdcContactId, joinKey, deltaCampaignLaunchSparkContext.getDestinationSysName, accountContactRatio)

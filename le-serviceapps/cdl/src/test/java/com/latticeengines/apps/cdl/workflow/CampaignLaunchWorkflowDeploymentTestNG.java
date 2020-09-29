@@ -144,7 +144,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     @Test(groups = "deployment-app", enabled = false)
     public void testMarketoPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
-        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoTestPlaySetupConfig, true);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoTestPlaySetupConfig);
         assertNotNull(defaultPlayLaunch);
         assertNotNull(defaultPlayLaunch.getApplicationId());
         log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
@@ -204,7 +204,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     public void testS3LaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         testPlayCreationHelper.createPlayLaunch(s3TestPlaySetupConfig);
-        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(s3TestPlaySetupConfig, true);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(s3TestPlaySetupConfig);
         assertNotNull(defaultPlayLaunch);
         assertNotNull(defaultPlayLaunch.getApplicationId());
         log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
