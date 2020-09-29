@@ -31,4 +31,36 @@ private[spark] object CSVUtils {
     }
     writer.csv(path)
   }
+
+  def dfToCSVWithCoalesceLimit(spark: SparkSession, compress: Boolean, coalesceLimit: Int,targets: List[HdfsDataUnit], output: List[DataFrame]): List[HdfsDataUnit] = {
+    if (targets.length != output.length) {
+      throw new IllegalArgumentException(s"${targets.length} targets are declared " //
+        + s"but ${output.length} outputs are generated!")
+    }
+    targets.zip(output).map { t =>
+      val tgt = t._1
+      var df: DataFrame = t._2
+      df = df.persist(StorageLevel.DISK_ONLY)
+      if (df.count() > coalesceLimit) {
+        saveToCsvToPartitions(df, tgt.getPath, compress = compress)
+      } else {
+        saveToCsv(df, tgt.getPath, compress = compress)
+      }
+      tgt.setCount(df.count())
+      tgt
+    }
+  }
+
+  private def saveToCsvToPartitions(df: DataFrame, path: String, compress: Boolean): Unit = {
+    val partitionNumber = df.count() / 100000
+    var writer = df.repartition(partitionNumber.toInt).write //
+      .option("header", value = true) //
+      .option("quote", "\"") //
+      .option("escape", "\"")
+    if (compress) {
+      writer = writer.option("compression", "gzip")
+    }
+    writer.csv(path)
+  }
+
 }

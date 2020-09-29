@@ -66,7 +66,7 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[AnalyzeUsageConfig]): List[HdfsDataUnit] = {
-    CSVUtils.dfToCSV(spark, false, latticeCtx.targets, latticeCtx.output)
+    CSVUtils.dfToCSVWithCoalesceLimit(spark, false, 1000000,  latticeCtx.targets, latticeCtx.output)
   }
 
 }
