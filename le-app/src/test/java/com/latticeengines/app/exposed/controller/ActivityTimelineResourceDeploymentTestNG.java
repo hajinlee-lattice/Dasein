@@ -31,6 +31,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -135,6 +136,11 @@ public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestN
                 getUlyssesRestAPIHostPort() + "/ulysses/activity-timeline/accounts/" + TEST_ACCOUNT_ID + "/metrics",
                 Map.class);
         Assert.assertNotNull(metrics);
+        Assert.assertNotNull(metrics.get("newActivities"));
+        Assert.assertNotNull(metrics.get("newIdentifiedContacts"));
+        Assert.assertNotNull(metrics.get("newEngagements"));
+        Assert.assertNotNull(metrics.get("newOpportunities"));
+
     }
 
     private void setupDataCollection() {

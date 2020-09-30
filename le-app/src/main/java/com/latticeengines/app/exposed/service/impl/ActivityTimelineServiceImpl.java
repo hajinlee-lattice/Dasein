@@ -71,8 +71,8 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                             accountId, customerSpace) });
         }
 
-        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Account, internalAccountId, customerSpace,
-                timelinePeriod);
+        ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Account, internalAccountId,
+                customerSpace, timelinePeriod);
 
         return activityProxy.getData(customerSpace, null, query);
     }
@@ -94,7 +94,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                             accountId, customerSpace) });
         }
 
-        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Contact, contactId, customerSpace,
+        ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Contact, contactId, customerSpace,
                 timelinePeriod);
 
         return activityProxy.getData(customerSpace, null, query);
@@ -104,15 +104,14 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     public Map<String, Integer> getActivityTimelineMetrics(String accountId, String timelinePeriod,
             Map<String, String> orgInfo) {
 
-        Map<String, Integer> metrics = new HashMap<String, Integer>();
-
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
         log.info(String.format("Retrieving Activity Timeline Metrics | tenant=%s",
                 CustomerSpace.shortenCustomerSpace(customerSpace)));
 
-        String internalAccountId = getInternalAccountId(accountId, orgInfo);
-        DataPage data = getLatestAccountData(internalAccountId, customerSpace, timelinePeriod);
+        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
+        DataPage data = getAccountActivities(accountId, timelinePeriod, orgInfo);
 
+        Map<String, Integer> metrics = new HashMap<String, Integer>();
         metrics.put("newActivities", dataFilter(data, AtlasStream.StreamType.WebVisit, null).size());
         metrics.put("newIdentifiedContacts",
                 dataFilter(data, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO).stream()
@@ -125,20 +124,6 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                         .filter(t -> !t.get("Detail1").equals("Closed") && !t.get("Detail1").equals("Closed Won"))
                         .collect(Collectors.toList()).size());
         return metrics;
-    }
-
-    private String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
-
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-
-        String internalAccountId = dataLakeService.getInternalAccountId(accountId, orgInfo);
-        if (StringUtils.isBlank(internalAccountId)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { String.format(
-                            "Unable to find any account in Atlas by accountid/lookupid of %s, customerSpace: %s",
-                            accountId, customerSpace) });
-        }
-        return internalAccountId;
     }
 
     private List<Map<String, Object>> dataFilter(DataPage dataPage, AtlasStream.StreamType streamType,
@@ -155,15 +140,8 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         return result;
     }
 
-    private DataPage getLatestAccountData(String accountId, String customerSpace, String timelinePeriod) {
-        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
-        ActivityTimelineQuery query = getActivityTimelineQuery(BusinessEntity.Account, accountId, customerSpace,
-                timelinePeriod);
-        return activityProxy.getData(customerSpace, null, query);
-    }
-
-    private ActivityTimelineQuery getActivityTimelineQuery(BusinessEntity entity, String entityId, String customerSpace,
-            String timelinePeriod) {
+    private ActivityTimelineQuery buildActivityTimelineQuery(BusinessEntity entity, String entityId,
+            String customerSpace, String timelinePeriod) {
 
         ActivityTimelineQuery query = new ActivityTimelineQuery();
         query.setMainEntity(entity);
