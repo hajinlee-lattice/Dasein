@@ -669,8 +669,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         metadataProxy.createTable(tenantId, table.getName(), table);
         log.info("Created " + table + " at " + tablePath);
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        String srcDir = pathBuilder.getFullPath(tablePath);
-        String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, shortenTenantId, s3Bucket);
+        String tgtDir = pathBuilder.getS3AtlasTablePrefix(shortenTenantId, table.getName());
         testArtifactService.copyTestArtifactFolder(s3AvroDir, version, tableName, s3Bucket, tgtDir);
         return table.getName();
     }
