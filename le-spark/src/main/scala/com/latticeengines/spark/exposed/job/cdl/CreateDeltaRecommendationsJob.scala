@@ -280,9 +280,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     )
     val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("")).otherwise(col("CONTACTS")))
     //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
-    logSpark("----- BEGIN SCRIPT OUTPUT -----")
+    logSpark("----- BEGIN SCRIPT OUTPUT AGGREGATE CONTACTS -----")
     processedAggrContacts.printSchema
-    logSpark("----- END SCRIPT OUTPUT -----")
+    logSpark("----- END SCRIPT OUTPUT AGGREGATE CONTACTS -----")
     processedAggrContacts
   }
 
