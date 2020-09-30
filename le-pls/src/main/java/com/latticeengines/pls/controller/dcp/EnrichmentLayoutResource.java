@@ -37,7 +37,7 @@ public class EnrichmentLayoutResource {
     @Inject
     private EnrichmentLayoutService enrichmentLayoutService;
 
-    @PostMapping("")
+    @PostMapping
     @ResponseBody
     @ApiOperation("Create new enrichment layout")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
@@ -70,7 +70,7 @@ public class EnrichmentLayoutResource {
                 : null;
     }
 
-    @PutMapping("")
+    @PutMapping
     @ResponseBody
     @ApiOperation("Update a EnrichmentLayout")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")

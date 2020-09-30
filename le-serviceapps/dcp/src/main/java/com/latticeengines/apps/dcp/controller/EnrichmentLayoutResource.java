@@ -59,7 +59,7 @@ public class EnrichmentLayoutResource {
         return enrichmentLayoutService.findEnrichmentLayoutDetailBySourceId(customerSpace, sourceId);
     }
 
-    @PostMapping("")
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create a EnrichmentLayout")
     public ResponseDocument<EnrichmentLayoutOperationResult> create(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
@@ -71,7 +71,7 @@ public class EnrichmentLayoutResource {
         }
     }
 
-    @PutMapping("")
+    @PutMapping
     @ResponseBody
     @ApiOperation(value = "Update EnrichmentLayout")
     public EnrichmentLayoutDetail updateEnrichmentLayout(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
