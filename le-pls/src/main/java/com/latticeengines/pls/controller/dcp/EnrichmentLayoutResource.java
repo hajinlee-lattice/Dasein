@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
-import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.dcp.EnrichmentLayoutService;
@@ -41,7 +41,7 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation("Create new enrichment layout")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public EnrichmentLayoutOperationResult create(@RequestBody EnrichmentLayout enrichmentLayout) {
+    public ResponseDocument<String> create(@RequestBody EnrichmentLayout enrichmentLayout) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return enrichmentLayoutService.create(customerSpace.toString(), enrichmentLayout);
     }
@@ -74,7 +74,7 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation("Update a EnrichmentLayout")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public EnrichmentLayoutOperationResult update(@RequestBody EnrichmentLayout enrichmentLayout) {
+    public ResponseDocument<String> update(@RequestBody EnrichmentLayout enrichmentLayout) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return enrichmentLayoutService.update(customerSpace.toString(), enrichmentLayout);
     }

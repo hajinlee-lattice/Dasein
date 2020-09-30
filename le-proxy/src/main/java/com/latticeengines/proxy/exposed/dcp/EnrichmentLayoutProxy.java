@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
@@ -35,25 +36,24 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
         return getList("Get all enrichment layout objects", url, EnrichmentLayoutDetail.class);
     }
 
-    public EnrichmentLayoutOperationResult create (String customerId, EnrichmentLayout enrichmentLayout) {
+    public ResponseDocument<String> create (String customerId, EnrichmentLayout enrichmentLayout) {
 
         String baseUrl = "/customerspaces/{customerSpace}/enrichmentlayout";
         String url = constructUrl(baseUrl, customerId);
-        String layoutId =  post("create enrichmentLayout", url, enrichmentLayout, String.class);
-        return (null != layoutId) ? new EnrichmentLayoutOperationResult(true, "success", layoutId) : null;
+        return post("create enrichmentLayout", url, enrichmentLayout, ResponseDocument.class);
     }
 
-    public EnrichmentLayoutOperationResult update (String customerId, EnrichmentLayout enrichmentLayout) {
+    public ResponseDocument<String> update (String customerId, EnrichmentLayout enrichmentLayout) {
         String baseUrl = "/customerspaces/{customerSpace}/";
         String url = getUrl(customerId, baseUrl, null);
-        return put("update enrichmentLayout", url, enrichmentLayout, EnrichmentLayoutOperationResult.class);
+        return put("update enrichmentLayout", url, enrichmentLayout, ResponseDocument.class);
     }
 
-    public EnrichmentLayoutOperationResult deleteLayout (String customerId, String layoutId) {
+    public ResponseDocument<String> deleteLayout (String customerId, String layoutId) {
         String baseUrl = "/customerspaces/{customerId}/layoutId/{layoutId}";
         String url = constructUrl(baseUrl, customerId, layoutId);
         delete("delete enrichmentLayout", url, String.class);
-        return new EnrichmentLayoutOperationResult(true, String.format("Delete of layout %s succeeded.", layoutId));
+        return ResponseDocument.successResponse("");
     }
 
     private String getUrl(String customerSpace, String baseUrl, String sourceId) {

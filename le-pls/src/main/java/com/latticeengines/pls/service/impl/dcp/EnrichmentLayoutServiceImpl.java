@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
-import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.pls.service.dcp.EnrichmentLayoutService;
 import com.latticeengines.proxy.exposed.dcp.EnrichmentLayoutProxy;
 
@@ -21,17 +21,8 @@ public class EnrichmentLayoutServiceImpl implements EnrichmentLayoutService {
     EnrichmentLayoutProxy enrichmentLayoutProxy;
 
     @Override
-    public EnrichmentLayoutOperationResult create(String customerId, EnrichmentLayout enrichmentLayout) {
-        EnrichmentLayoutOperationResult result;
-        try {
-            result = enrichmentLayoutProxy.create(customerId, enrichmentLayout);
-        } catch (Exception exception) {
-            String msg = "Exception while trying to create enrichment layout.  " + enrichmentLayout.toString() + "\n";
-            log.error(msg, exception);
-            result = new EnrichmentLayoutOperationResult(false,
-                    "Error while trying to save enrichment layout.  Please try again.");
-        }
-        return result;
+    public ResponseDocument<String> create(String customerId, EnrichmentLayout enrichmentLayout) {
+        return enrichmentLayoutProxy.create(customerId, enrichmentLayout);
     }
 
     @Override
@@ -63,21 +54,21 @@ public class EnrichmentLayoutServiceImpl implements EnrichmentLayoutService {
     }
 
     @Override
-    public EnrichmentLayoutOperationResult update(String customerId, EnrichmentLayout enrichmentLayout) {
-        EnrichmentLayoutOperationResult result;
+    public ResponseDocument<String> update(String customerId, EnrichmentLayout enrichmentLayout) {
+        ResponseDocument<String> result;
         try {
             result = enrichmentLayoutProxy.update(customerId, enrichmentLayout);
         }
         catch (Exception exception) {
             String msg = String.format("Exception while trying to update enrichment layout with layoutId = %s", enrichmentLayout.getLayoutId());
             log.error(msg, exception);
-            result = new EnrichmentLayoutOperationResult(false, "Error while trying to update enrichment layout.");
+            result = ResponseDocument.failedResponse(exception);
         }
         return result;
     }
 
     @Override
-    public EnrichmentLayoutOperationResult delete(String customerId, String layoutId) {
+    public ResponseDocument<String> delete(String customerId, String layoutId) {
 
         return enrichmentLayoutProxy.deleteLayout(customerId, layoutId);
     }

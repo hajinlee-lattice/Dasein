@@ -62,10 +62,10 @@ public class EnrichmentLayoutResource {
     @PostMapping
     @ResponseBody
     @ApiOperation(value = "Create a EnrichmentLayout")
-    public ResponseDocument<EnrichmentLayoutOperationResult> create(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
+    public ResponseDocument<String> create(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
         try {
             EnrichmentLayoutOperationResult result = enrichmentLayoutService.create(customerSpace, layout);
-            return ResponseDocument.successResponse(result);
+            return ResponseDocument.successResponse(result.getLayoutId());
         } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
         }
