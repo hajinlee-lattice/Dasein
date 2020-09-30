@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.datacloud.match.config.DplusAppendConfi
 
 public interface AppendConfigService {
 
-    DataBlockEntitlementContainer getEntitlement(String customerSpace);
+    DataBlockEntitlementContainer getEntitlement(String customerSpace, String domainName, String recordType);
 
     DplusAppendConfig getAppendConfig(String customerSpace, String sourceId);
 
