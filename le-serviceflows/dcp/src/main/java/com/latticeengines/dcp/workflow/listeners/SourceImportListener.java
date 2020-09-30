@@ -6,11 +6,13 @@ import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImport
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -56,8 +58,6 @@ import com.latticeengines.workflow.listener.LEJobListener;
 public class SourceImportListener extends LEJobListener {
 
     public static final Logger log = LoggerFactory.getLogger(SourceImportListener.class);
-
-    private static final String USAGE_FILE = "usage.csv";
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
@@ -192,27 +192,36 @@ public class SourceImportListener extends LEJobListener {
         batchReport.setBatchRef(tenantId + "_" + uploadId);
         VboBatchUsageReport vboBatchUsageReport = usageProxy.submitBatchReport(batchReport);
 
-        String s3Path = vboBatchUsageReport.getS3Prefix() + USAGE_FILE;
-        log.info("Copy from " + reportFilePath + " to " + s3Path);
+        String s3PathDir = vboBatchUsageReport.getS3Prefix();
+        log.info("Copy from " + reportFilePath + " to " + s3PathDir);
+        if(!s3Service.objectExist(vboBatchUsageReport.getS3Bucket(), s3PathDir)) {
+            s3Service.createFolder(vboBatchUsageReport.getS3Bucket(), s3PathDir);
+        }
         try {
-        long fileSize = HdfsUtils.getFileSize(yarnConfiguration, reportFilePath);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                Collections.singleton(AmazonS3Exception.class), null);
-        retry.execute(context -> {
-            if (context.getRetryCount() > 0) {
-                log.info(String.format("(Attempt=%d) Retry copying file from hdfs://%s to s3://%s/%s", //
-                        context.getRetryCount() + 1, reportFilePath, vboBatchUsageReport.getS3Bucket(), s3Path));
-            }
-            try (InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, reportFilePath)) {
-                s3Service.uploadInputStreamMultiPart(vboBatchUsageReport.getS3Bucket(), s3Path, stream, fileSize);
+            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, reportFilePath,
+                    (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".csv"));
+            for (String csvFile: csvFiles){
+                Long fileSize = HdfsUtils.getFileSize(yarnConfiguration, csvFile);
+                String filename = FilenameUtils.getName(csvFile);
+                String dstPath = Paths.get(s3PathDir, filename).toString();
+                RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                        Collections.singleton(AmazonS3Exception.class), null);
+                retry.execute(context -> {
+                    if (context.getRetryCount() > 0) {
+                        log.info(String.format("(Attempt=%d) Retry copying file from hdfs://%s to s3://%s/%s", //
+                                context.getRetryCount() + 1, reportFilePath, vboBatchUsageReport.getS3Bucket(), dstPath));
+                    }
+                    try (InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, reportFilePath)) {
+                        s3Service.uploadInputStreamMultiPart(vboBatchUsageReport.getS3Bucket(), dstPath, stream, fileSize);
 
+                    }
+                    return true;
+                });
             }
-            return true;
-        });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return s3Path;
+        return s3PathDir;
     }
 
     private String getLastStepName(JobExecution jobExecution) {

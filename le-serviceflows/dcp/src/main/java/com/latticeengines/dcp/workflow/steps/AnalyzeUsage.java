@@ -107,7 +107,7 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String usageReportPath = getCsvFilePath(result.getTargets().get(0));
+        String usageReportPath = result.getTargets().get(0).getPath();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
         UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
@@ -116,14 +116,6 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
         uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, uploadConfig);
 
         log.info("All usage report is under " + usageReportPath);
-    }
-
-    private String getCsvFilePath(HdfsDataUnit dataUnit) {
-        if (dataUnit.getCount() == 0) {
-            return null;
-        } else {
-            return getFirstCsvFilePath(dataUnit);
-        }
     }
 
 }
