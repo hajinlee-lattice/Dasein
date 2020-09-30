@@ -141,6 +141,11 @@ public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestN
         Assert.assertNotNull(metrics.get("newEngagements"));
         Assert.assertNotNull(metrics.get("newOpportunities"));
 
+        Assert.assertEquals(metrics.get("newActivities").intValue(),0);
+        Assert.assertEquals(metrics.get("newIdentifiedContacts").intValue(),0);
+        Assert.assertEquals(metrics.get("newEngagements").intValue(),0);
+        Assert.assertEquals(metrics.get("newOpportunities").intValue(),0);
+
     }
 
     private void setupDataCollection() {
