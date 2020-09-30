@@ -86,8 +86,8 @@ public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestN
     private final String ENTITY_TABLE_NAME = "_REPO_GenericTable_RECORD_GenericTableEntity_";
     private final DataCollection.Version DATA_COLLECTION_VERSION = DataCollection.Version.Blue;
     private final String TEST_TENANT_NAME = "LETest1590612472260";
-    private final boolean USE_EXISTING_TENANT = false;
-    private final String TEST_ACCOUNT_ID = "60qbq7b2sb2gq6or";
+    private final boolean USE_EXISTING_TENANT = true;
+    private final String TEST_ACCOUNT_ID = "v5k5xq52updfo67n";
     private final String CLIENT_ID = "playmaker";
 
     @BeforeClass(groups = "deployment", enabled = true)
@@ -140,12 +140,6 @@ public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestN
         Assert.assertNotNull(metrics.get("newIdentifiedContacts"));
         Assert.assertNotNull(metrics.get("newEngagements"));
         Assert.assertNotNull(metrics.get("newOpportunities"));
-
-        Assert.assertEquals(metrics.get("newActivities").intValue(),0);
-        Assert.assertEquals(metrics.get("newIdentifiedContacts").intValue(),0);
-        Assert.assertEquals(metrics.get("newEngagements").intValue(),0);
-        Assert.assertEquals(metrics.get("newOpportunities").intValue(),0);
-
     }
 
     private void setupDataCollection() {
