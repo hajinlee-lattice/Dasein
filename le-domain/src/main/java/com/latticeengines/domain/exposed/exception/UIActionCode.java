@@ -52,6 +52,7 @@ public enum UIActionCode {
 
     // dcp
     DCP_IMPORT_001(Level.User, LedpCode.LEDP_60010, "Upload failed because no records could be ingested successfully"),
+    DCP_IMPORT_002(Level.User, LedpCode.LEDP_60011, "Project is not entitled to use company entity resolution data block!"),
 
     // PA scheduler
     PA_SCHEDULER_001(Level.User, LedpCode.LEDP_40095),

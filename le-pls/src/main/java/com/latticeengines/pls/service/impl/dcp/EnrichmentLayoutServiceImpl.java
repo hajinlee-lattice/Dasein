@@ -76,8 +76,8 @@ public class EnrichmentLayoutServiceImpl implements EnrichmentLayoutService {
     }
 
     @Override
-    public void delete(String customerId, String layoutId) {
+    public EnrichmentLayoutOperationResult delete(String customerId, String layoutId) {
 
-        enrichmentLayoutProxy.delete(customerId, layoutId);
+        return enrichmentLayoutProxy.deleteLayout(customerId, layoutId);
     }
 }

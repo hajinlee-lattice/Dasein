@@ -13,5 +13,5 @@ public interface EnrichmentLayoutService {
 
     EnrichmentLayoutOperationResult update(String customerId, EnrichmentLayout enrichmentLayout);
 
-    void delete(String customerId, String layoutId);
+    EnrichmentLayoutOperationResult delete(String customerId, String layoutId);
 }

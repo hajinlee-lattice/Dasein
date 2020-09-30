@@ -135,6 +135,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("publishRecommendationsForS3Launch")
     private boolean publishRecommendationsForS3Launch;
 
+    @JsonProperty("accountContactRatio")
+    private int accountContactRatio;
+
     public DeltaCampaignLaunchSparkContext() {
     }
 
@@ -467,6 +470,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
 
     public void setDestinationSysName(String destinationSysName) {
         this.destinationSysName = destinationSysName;
+    }
+
+    public int getAccountContactRatio() {
+        return accountContactRatio;
+    }
+
+    public void setAccountContactRatio(int accountContactRatio) {
+        this.accountContactRatio = accountContactRatio;
     }
 
     public static class DeltaCampaignLaunchSparkContextBuilder {

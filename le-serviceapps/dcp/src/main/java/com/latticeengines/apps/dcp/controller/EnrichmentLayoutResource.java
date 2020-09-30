@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,7 @@ import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -36,16 +38,33 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation(value = "List Match Rule")
     @UseReaderConnection
-    public List<EnrichmentLayout> getAll(@PathVariable String customerSpace) {
-        return enrichmentLayoutService.getAll(customerSpace);
+    public List<EnrichmentLayoutDetail> getAllLayout(@PathVariable String customerSpace,
+                                                     @RequestParam(defaultValue = "0") int pageIndex,
+                                                     @RequestParam(defaultValue = "20") int pageSize,
+                                                     @RequestParam(defaultValue = "false") Boolean includeArchived) {
+        return enrichmentLayoutService.getAll(customerSpace, includeArchived, pageIndex, pageSize);
+    }
+
+    @GetMapping("/layoutId/{layoutId}")
+    @ResponseBody
+    @ApiOperation(value = "Get Enrichment Layout by layoutId")
+    public EnrichmentLayoutDetail getLayoutByLayoutId(@PathVariable String customerSpace, @PathVariable String layoutId) {
+        return enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(customerSpace, layoutId);
+    }
+
+    @GetMapping("/sourceId/{sourceId}")
+    @ResponseBody
+    @ApiOperation(value = "Get Enrichment Layout by sourceId")
+    public EnrichmentLayoutDetail getLayoutBySourceId(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        return enrichmentLayoutService.findEnrichmentLayoutDetailBySourceId(customerSpace, sourceId);
     }
 
     @PostMapping("/")
     @ResponseBody
     @ApiOperation(value = "Create a EnrichmentLayout")
-    public ResponseDocument<EnrichmentLayoutOperationResult> create(@RequestBody EnrichmentLayout layout) {
+    public ResponseDocument<EnrichmentLayoutOperationResult> create(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
         try {
-            EnrichmentLayoutOperationResult result = enrichmentLayoutService.create(layout);
+            EnrichmentLayoutOperationResult result = enrichmentLayoutService.create(customerSpace, layout);
             return ResponseDocument.successResponse(result);
         } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
@@ -55,22 +74,32 @@ public class EnrichmentLayoutResource {
     @PutMapping("/")
     @ResponseBody
     @ApiOperation(value = "Update EnrichmentLayout")
-    public void updateEnrichmentLayout(@RequestBody EnrichmentLayout layout) {
-        enrichmentLayoutService.update(layout);
+    public EnrichmentLayoutDetail updateEnrichmentLayout(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
+        enrichmentLayoutService.update(customerSpace, layout);
+        return new EnrichmentLayoutDetail(layout);
     }
 
-    @DeleteMapping("/{layoutId}")
+    /**
+     * Set the deleted flag to true.
+     * @param customerSpace
+     * @param layoutId
+     */
+    @DeleteMapping("/layoutId/{layoutId}")
     @ResponseBody
     @ApiOperation(value = "Delete enrichment layout by layoutId")
-    public void deleteByLayoutId(@PathVariable String layoutId) {
-        enrichmentLayoutService.delete(layoutId);
+    public void deleteByLayoutId(@PathVariable String customerSpace, @PathVariable String layoutId) {
+        enrichmentLayoutService.deleteLayoutByLayoutId(customerSpace, layoutId);
     }
 
-    @DeleteMapping("/source/{sourceId}")
+    /**
+     * Set the deleted flag to true.
+     * @param customerSpace
+     * @param sourceId
+     */
+    @DeleteMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation(value = "Delete enrichment layout by sourceId")
-    public void deleteBySourceId(@PathVariable String sourceId) {
-        EnrichmentLayout enrichmentLayout = enrichmentLayoutService.findBySourceId(sourceId);
-        enrichmentLayoutService.delete(enrichmentLayout);
+    public void deleteBySourceId(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        enrichmentLayoutService.deleteLayoutByLayoutId(customerSpace, sourceId);
     }
 }

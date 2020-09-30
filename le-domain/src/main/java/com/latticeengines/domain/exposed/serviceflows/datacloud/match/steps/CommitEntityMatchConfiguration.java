@@ -5,12 +5,16 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class CommitEntityMatchConfiguration extends BaseStepConfiguration {
 
     @JsonProperty("customer_space")
     private CustomerSpace customerSpace;
+
+    @JsonProperty("entity_match_configuration")
+    private EntityMatchConfiguration entityMatchConfiguration;
 
     /*
      * Set of entities that will be published. skipPublishedEntities flag will still
@@ -47,9 +51,16 @@ public class CommitEntityMatchConfiguration extends BaseStepConfiguration {
         return customerSpace;
     }
 
-
     public void setCustomerSpace(CustomerSpace customerSpace) {
         this.customerSpace = customerSpace;
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration() {
+        return entityMatchConfiguration;
+    }
+
+    public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
+        this.entityMatchConfiguration = entityMatchConfiguration;
     }
 
     public Set<String> getEntitySet() {

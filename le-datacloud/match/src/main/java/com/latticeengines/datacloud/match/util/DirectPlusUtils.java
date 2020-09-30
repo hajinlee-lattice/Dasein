@@ -138,18 +138,40 @@ public final class DirectPlusUtils {
         return blockIds;
     }
 
+    public static String parseErrorCode(String response) {
+        JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
+        return parseErrorCode(root);
+    }
+
+    private static String parseErrorCode(JsonNode root) {
+        JsonNode errorNode = JsonUtils.tryGetJsonNode(root,"error");
+        if (errorNode != null) {
+            String errorCode = JsonUtils.parseStringValueAtPath(errorNode, "errorCode");
+            if (StringUtils.isBlank(errorCode)) {
+                errorCode = "00000"; // unknown error
+            }
+            return errorCode;
+        }
+        return null;
+    }
+
     public static Map<String, Object> parseDataBlock(String response, List<PrimeColumn> metadata) {
         Map<String, Object> result = new HashMap<>();
-        JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
-        // cache of jsonPath -> jsonNode
-        ConcurrentMap<String, JsonNode> nodeCache = new ConcurrentHashMap<>();
-        metadata.forEach(md -> {
-            String jsonPath = md.getJsonPath();
-            JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
-            Object value = toTypedValue(jsonNode, md.getJavaClass());
-            String attrName = md.getAttrName();
-            result.put(attrName, value);
-        });
+        if (StringUtils.isNotBlank(response)) {
+            JsonNode root = JsonUtils.deserialize(response, JsonNode.class);
+            String errorCode = parseErrorCode(root);
+            if (StringUtils.isBlank(errorCode)) {
+                // cache of jsonPath -> jsonNode
+                ConcurrentMap<String, JsonNode> nodeCache = new ConcurrentHashMap<>();
+                metadata.forEach(md -> {
+                    String jsonPath = md.getJsonPath();
+                    JsonNode jsonNode = getNodeAt(root, jsonPath, nodeCache);
+                    Object value = toTypedValue(jsonNode, md.getJavaClass());
+                    String attrName = md.getAttrName();
+                    result.put(attrName, value);
+                });
+            }
+        }
         return result;
     }
 

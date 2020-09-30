@@ -500,7 +500,7 @@ public class PlayResource {
                 throw new LedpException(LedpCode.LEDP_32000, new String[] {
                         "Cannot kick off launch workflow since data tables for launch are not populated" });
             }
-            workflowPid = deltaCampaignLaunchWorkflowSubmitter.submit(playLaunch);
+            workflowPid = deltaCampaignLaunchWorkflowSubmitter.submit(playLaunch, channel.getId());
         } else {
             PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
             if (play.getRatingEngine() != null) {

@@ -22,9 +22,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -55,6 +57,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     @Inject
     @Lazy
+    private EntityMatchConfigurationService entityMatchConfigurationService;
+
+    @Inject
+    @Lazy
     private EntityMatchCommitter entityMatchCommitter;
 
     @Inject
@@ -74,6 +80,19 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                         "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
             }
 
+            EntityMatchConfiguration entityMatchConfiguration = configuration.getEntityMatchConfiguration();
+            if (entityMatchConfiguration != null) {
+                if (entityMatchConfiguration.getNumStagingShards() != null) {
+                    log.info("Overwriting no. staging shards to {}", entityMatchConfiguration.getNumStagingShards());
+                    entityMatchConfigurationService.setNumShards(STAGING,
+                            entityMatchConfiguration.getNumStagingShards());
+                }
+                if (entityMatchConfiguration.getStagingTableName() != null) {
+                    log.info("Overwriting no. staging table name to {}",
+                            entityMatchConfiguration.getStagingTableName());
+                    entityMatchConfigurationService.setStagingTableName(entityMatchConfiguration.getStagingTableName());
+                }
+            }
             Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
             entityMatchVersionService.invalidateCache(standardizedTenant);
             ENTITIES_TO_COMMIT.forEach(entity -> commitWithCommitter(standardizedTenant, entity));

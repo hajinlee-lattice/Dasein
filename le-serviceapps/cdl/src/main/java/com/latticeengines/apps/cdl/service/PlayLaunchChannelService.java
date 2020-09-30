@@ -34,4 +34,12 @@ public interface PlayLaunchChannelService {
     PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId);
 
     void updateAttributeSetNameToDefault(String attributeSetName);
+
+    void updateCurrentLaunchedAccountUniverseWithPrevious(PlayLaunchChannel playLaunchChannel);
+
+    void updatePreviousLaunchedAccountUniverseWithCurrent(PlayLaunchChannel playLaunchChannel);
+
+    void updateCurrentLaunchedContactUniverseWithPrevious(PlayLaunchChannel playLaunchChannel);
+
+    void updatePreviousLaunchedContactUniverseWithCurrent(PlayLaunchChannel playLaunchChannel);
 }

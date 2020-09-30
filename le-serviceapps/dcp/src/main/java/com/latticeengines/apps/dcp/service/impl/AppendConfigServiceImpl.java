@@ -251,6 +251,72 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         return appendConfig;
     }
 
+    @Override
+    public boolean checkEntitledWith(String customerSpace, DataDomain dataDomain, DataRecordType dataRecordType, String blockName) {
+        Preconditions.checkNotNull(dataDomain);
+        Preconditions.checkNotNull(dataRecordType);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(blockName));
+        String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(tenantId).toString());
+        Preconditions.checkNotNull(tenant, "No tenant with short id " + tenantId);
+        String subscriberNumber = tenant.getSubscriberNumber();
+        if (StringUtils.isNotBlank(subscriberNumber)) {
+            try {
+                String response = iDaaSService.getEntitlement(subscriberNumber);
+                JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);
+                return hasEntitlementInDomainAndRecordType(dataDomain, dataRecordType, blockName, jsonNode);
+            } catch (Exception e) {
+                log.warn("Cannot get entitlement for subscriberNumber: " + subscriberNumber);
+                return false;
+            }
+        } else {
+            log.warn("Tenant {} does not have a subscriber number", subscriberNumber);
+            return true;
+        }
+    }
+
+    private boolean hasEntitlementInDomainAndRecordType(DataDomain dataDomain, DataRecordType dataRecordType, String blockName, JsonNode jsonNode) {
+        if (hasNonEmptyArray(jsonNode, "products")) {
+            for (JsonNode productNode : jsonNode.get("products")) {
+                String productName = productNode.get("name").asText();
+                DataDomain domain = parseDataDomain(productName);
+                if (dataDomain.equals(domain)) {
+                    if (hasEntitlementInRecordType(dataRecordType, blockName, productNode)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasEntitlementInRecordType(DataRecordType dataRecordType, String blockName, JsonNode productNode) {
+        if (hasNonEmptyArray(productNode, "packages")) {
+            for (JsonNode packageNode: productNode.get("packages")) {
+                String packageName = packageNode.get("name").asText();
+                DataRecordType recordType = parseDataRecordType(packageName);
+                if (dataRecordType.equals(recordType)) {
+                    if (hasEntitlement(blockName, packageNode)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasEntitlement(String blockName, JsonNode packageNode) {
+        if (hasNonEmptyArray(packageNode, "entitlements")) {
+            for (JsonNode entitlementNode : packageNode.get("entitlements")) {
+                String canonicalName = entitlementNode.get("canonical_name").asText();
+                if (blockName.equalsIgnoreCase(canonicalName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Cacheable(cacheNames = CacheName.Constants.IDaaSEntitlementCacheName, //
             key = "T(java.lang.String).format(\"%s|entitlement\", #tenantId)", unless = "#result == null")
     public DataBlockEntitlementContainer getTenantEntitlementFromCache(String tenantId) {

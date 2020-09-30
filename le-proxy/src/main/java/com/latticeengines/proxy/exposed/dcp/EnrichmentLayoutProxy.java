@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -17,21 +18,21 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
     private static final String PREFIX = "/customerspaces/{customerSpace}";
 
     public EnrichmentLayout getEnrichmentLayoutBySourceId(String customerSpace, String sourceId) {
-        String baseUrl = PREFIX + "/enrichmentlayout?sourceId={sourceId}";
+        String baseUrl = PREFIX + "/enrichmentlayout/sourceId/{sourceId}";
         String url = getUrl(customerSpace, sourceId, baseUrl);
         return get("Get enrichment layout by sourceId", url, EnrichmentLayout.class);
     }
 
     public EnrichmentLayout getEnrichmentLayoutByLayoutId (String customerSpace, String layoutId) {
-        String baseUrl = PREFIX + "/enrichmentlayout?layoutId={layoutId}";
+        String baseUrl = PREFIX + "/enrichmentlayout/layoutId/{layoutId}";
         String url = constructUrl(baseUrl, customerSpace, layoutId);
         return get("Get enrichment layout by layoutId", url, EnrichmentLayout.class);
     }
 
-    public List<EnrichmentLayout> getAll(String customerId) {
-        String baseUrl = "customerspaces/{customerSpace}/";
+    public List<EnrichmentLayoutDetail> getAll(String customerId) {
+        String baseUrl = "customerspaces/{customerSpace}/list";
         String url = getUrl(customerId, baseUrl, null);
-        return getList("Get all enrichment layout objects", url, EnrichmentLayout.class);
+        return getList("Get all enrichment layout objects", url, EnrichmentLayoutDetail.class);
     }
 
     public EnrichmentLayoutOperationResult create (String customerId, EnrichmentLayout enrichmentLayout) {
@@ -48,10 +49,11 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
         return put("update enrichmentLayout", url, enrichmentLayout, EnrichmentLayoutOperationResult.class);
     }
 
-    public void delete (String customerId, String layoutId) {
-        String baseUrl = "/customerspaces/{customerId}/{layoutId}";
+    public EnrichmentLayoutOperationResult deleteLayout (String customerId, String layoutId) {
+        String baseUrl = "/customerspaces/{customerId}/layoutId/{layoutId}";
         String url = constructUrl(baseUrl, customerId, layoutId);
         delete("delete enrichmentLayout", url, String.class);
+        return new EnrichmentLayoutOperationResult(true, String.format("Delete of layout %s succeeded.", layoutId));
     }
 
     private String getUrl(String customerSpace, String baseUrl, String sourceId) {

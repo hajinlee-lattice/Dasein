@@ -13,21 +13,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class EntityMatchConfiguration {
-    private final int numStagingShards;
+    private final Integer numStagingShards;
+    private final String stagingTableName;
 
     @JsonCreator
-    public EntityMatchConfiguration(@JsonProperty("NumStagingShards") int numStagingShards) {
+    public EntityMatchConfiguration( //
+            @JsonProperty("NumStagingShards") Integer numStagingShards, //
+            @JsonProperty("StagingTableName") String stagingTableName) {
         this.numStagingShards = numStagingShards;
+        this.stagingTableName = stagingTableName;
     }
 
     @JsonProperty("NumStagingShards")
-    public int getNumStagingShards() {
+    public Integer getNumStagingShards() {
         return numStagingShards;
+    }
+
+    @JsonProperty("StagingTableName")
+    public String getStagingTableName() {
+        return stagingTableName;
     }
 
     @Override
     public String toString() {
-        return "EntityMatchConfiguration{" + "numStagingShards=" + numStagingShards + '}';
+        return "EntityMatchConfiguration{" + "numStagingShards=" + numStagingShards + ", stagingTableName='"
+                + stagingTableName + '\'' + '}';
     }
 
     // TODO refactor and move all configuration here

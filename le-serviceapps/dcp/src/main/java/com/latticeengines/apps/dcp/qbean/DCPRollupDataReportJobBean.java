@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.service.impl.DCPRollupDataReportJobCallable;
 import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("dcpRollupDataReportJob")
@@ -28,6 +29,9 @@ public class DCPRollupDataReportJobBean implements QuartzJobBean {
     @Inject
     private ZKConfigService zkConfigService;
 
+    @Inject
+    private WorkflowProxy workflowProxy;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         log.info(String.format("Got callback with job arguments = %s", jobArguments));
@@ -35,7 +39,7 @@ public class DCPRollupDataReportJobBean implements QuartzJobBean {
         DCPRollupDataReportJobCallable.Builder builder  = new DCPRollupDataReportJobCallable.Builder();
         builder.jobArguments(jobArguments).dataReportEntityMgr(dataReportEntityMgr)
                 .dcpDataReportWorkflowSubmitter(dcpDataReportWorkflowSubmitter)
-                .zkConfigService(zkConfigService);
+                .zkConfigService(zkConfigService).workflowProxy(workflowProxy);
         return new DCPRollupDataReportJobCallable(builder);
     }
 }

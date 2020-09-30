@@ -38,6 +38,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.StatusDocument;
@@ -567,16 +568,24 @@ public class CDLResource {
                     standardTable.getAttributes()
                             .stream()
                             .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
-            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
-            fieldPreviews.forEach(preview -> {
-                if (nameMapping.containsKey(preview.getNameInTemplate())) {
-                    preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
-                } else if (standardNameMapping.containsKey(preview.getNameInTemplate())) {
-                    preview.setDisplayName(standardNameMapping.get(preview.getNameInTemplate()));
-                } else if (!systemIds.contains(preview.getNameInTemplate())) {
-                    preview.setDisplayName(preview.getNameFromFile());
-                }
-            });
+            log.info("4. Get decorated display name mapping");
+            try (PerformanceTimer ignored =
+                         new PerformanceTimer("GetDecoratedDisplayNameMapping: Tenant=" + customerSpace.getTenantId() + " entity=" + entityType)) {
+                Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
+
+                log.info(String.format("Total %d decorated display name pair.", nameMapping.size()));
+
+                log.info("5. Update display name with decorated value.");
+                fieldPreviews.forEach(preview -> {
+                    if (nameMapping.containsKey(preview.getNameInTemplate())) {
+                        preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
+                    } else if (standardNameMapping.containsKey(preview.getNameInTemplate())) {
+                        preview.setDisplayName(standardNameMapping.get(preview.getNameInTemplate()));
+                    } else if (!systemIds.contains(preview.getNameInTemplate())) {
+                        preview.setDisplayName(preview.getNameFromFile());
+                    }
+                });
+            }
             return fieldPreviews;
         } catch (RuntimeException e) {
             log.error("Get template preview Failed: " + e.toString());
