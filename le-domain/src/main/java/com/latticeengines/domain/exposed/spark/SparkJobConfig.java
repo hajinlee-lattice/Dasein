@@ -39,8 +39,8 @@ import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobC
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
-import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JourneyStageJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;

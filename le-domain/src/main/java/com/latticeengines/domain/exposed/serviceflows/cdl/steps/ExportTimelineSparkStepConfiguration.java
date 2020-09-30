@@ -5,7 +5,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
 public class ExportTimelineSparkStepConfiguration extends SparkJobStepConfiguration {
