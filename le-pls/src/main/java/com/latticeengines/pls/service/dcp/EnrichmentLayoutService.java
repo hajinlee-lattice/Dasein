@@ -3,7 +3,6 @@ package com.latticeengines.pls.service.dcp;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
-import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 
 public interface EnrichmentLayoutService {
 

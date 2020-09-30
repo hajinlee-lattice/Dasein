@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 
 public interface EnrichmentLayoutEntityMgr extends BaseEntityMgrRepository<EnrichmentLayout, Long> {
 
-    List<EnrichmentLayoutDetail> findAllEnrichmentLayoutDetail(Pageable pageable, Boolean includeArchived);
+    List<EnrichmentLayoutDetail> findAllEnrichmentLayoutDetail(Pageable pageable);
 
     EnrichmentLayoutDetail findEnrichmentLayoutDetailByLayoutId(String layoutId);
 

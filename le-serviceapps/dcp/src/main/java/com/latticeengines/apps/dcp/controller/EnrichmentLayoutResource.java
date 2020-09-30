@@ -20,7 +20,6 @@ import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
-import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -40,9 +39,8 @@ public class EnrichmentLayoutResource {
     @UseReaderConnection
     public List<EnrichmentLayoutDetail> getAllLayout(@PathVariable String customerSpace,
                                                      @RequestParam(defaultValue = "0") int pageIndex,
-                                                     @RequestParam(defaultValue = "20") int pageSize,
-                                                     @RequestParam(defaultValue = "false") Boolean includeArchived) {
-        return enrichmentLayoutService.getAll(customerSpace, includeArchived, pageIndex, pageSize);
+                                                     @RequestParam(defaultValue = "20") int pageSize) {
+        return enrichmentLayoutService.getAll(customerSpace, pageIndex, pageSize);
     }
 
     @GetMapping("/layoutId/{layoutId}")
@@ -64,8 +62,7 @@ public class EnrichmentLayoutResource {
     @ApiOperation(value = "Create a EnrichmentLayout")
     public ResponseDocument<String> create(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
         try {
-            EnrichmentLayoutOperationResult result = enrichmentLayoutService.create(customerSpace, layout);
-            return ResponseDocument.successResponse(result.getLayoutId());
+            return enrichmentLayoutService.create(customerSpace, layout);
         } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
         }

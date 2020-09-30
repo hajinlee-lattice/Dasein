@@ -60,10 +60,8 @@ public class EnrichmentLayoutEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<EnrichmentLayoutDetail> findAllEnrichmentLayoutDetail(Pageable pageable, Boolean includeArchived) {
-        List<EnrichmentLayout> result = includeArchived
-                ? getReaderRepo().findAllEnrichmentLayoutsIncludeArchived(pageable)
-                : getReaderRepo().findAllEnrichmentLayouts(pageable);
+    public List<EnrichmentLayoutDetail> findAllEnrichmentLayoutDetail(Pageable pageable) {
+        List<EnrichmentLayout> result = getReaderRepo().findAllEnrichmentLayouts(pageable);
 
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();

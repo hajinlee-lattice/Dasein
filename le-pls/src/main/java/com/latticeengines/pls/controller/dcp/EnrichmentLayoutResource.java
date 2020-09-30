@@ -49,7 +49,6 @@ public class EnrichmentLayoutResource {
     @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get an EnrichmentLayout by sourceId")
-    @PreAuthorize("hasRole('View_DCP_Projects')")
     public EnrichmentLayoutDetail getEnrichmentLayoutBySourceId(@PathVariable String sourceId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         checkCustomerSpace(customerSpace);
@@ -61,7 +60,6 @@ public class EnrichmentLayoutResource {
     @GetMapping("/layoutId/{layoutId}")
     @ResponseBody
     @ApiOperation("Get an EnrichmentLayout by layoutId")
-    @PreAuthorize("hasRole('View_DCP_Projects')")
     public EnrichmentLayoutDetail getEnrichmentLayoutByLayoutId(@PathVariable String layoutId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         checkCustomerSpace(customerSpace);

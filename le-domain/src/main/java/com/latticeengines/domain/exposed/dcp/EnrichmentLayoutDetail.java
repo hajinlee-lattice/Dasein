@@ -34,9 +34,6 @@ public class EnrichmentLayoutDetail {
     @JsonProperty("createdBy")
     private String createdBy;
 
-    @JsonProperty("archived")
-    private Boolean deleted;
-
     @JsonProperty("teamId")
     private String teamId;
 
@@ -56,7 +53,6 @@ public class EnrichmentLayoutDetail {
         this.recordType = enrichmentLayout.getRecordType();
         this.created =    enrichmentLayout.getCreated();
         this.createdBy =  enrichmentLayout.getCreatedBy();
-        this.deleted =    enrichmentLayout.getDeleted();
         this.teamId =     enrichmentLayout.getTeamId();
         this.updated =    enrichmentLayout.getUpdated();
         this.tenantId =   enrichmentLayout.getTenant().getId();
@@ -111,14 +107,6 @@ public class EnrichmentLayoutDetail {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
     }
 
     public String getTeamId() {

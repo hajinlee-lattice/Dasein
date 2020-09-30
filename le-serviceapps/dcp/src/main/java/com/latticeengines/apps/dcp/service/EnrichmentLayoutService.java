@@ -2,17 +2,15 @@ package com.latticeengines.apps.dcp.service;
 
 import java.util.List;
 
-import org.springframework.data.domain.Pageable;
-
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
-import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 
 public interface EnrichmentLayoutService {
 
-    EnrichmentLayoutOperationResult create(String customerSpace, EnrichmentLayout enrichmentLayout);
+    ResponseDocument<String> create(String customerSpace, EnrichmentLayout enrichmentLayout);
 
-    EnrichmentLayoutOperationResult update(String customerSpace, EnrichmentLayout enrichmentLayout);
+    ResponseDocument<String> update(String customerSpace, EnrichmentLayout enrichmentLayout);
 
     EnrichmentLayout findByLayoutId(String customerSpace, String layoutId);
 
@@ -26,9 +24,5 @@ public interface EnrichmentLayoutService {
 
     void deleteLayout(EnrichmentLayout enrichmentLayout);
 
-    void hardDeleteLayoutByLayoutId(String customerSpace, String layoutId);
-
-    void hardDeleteLayout(EnrichmentLayout enrichmentLayout);
-
-    List<EnrichmentLayoutDetail> getAll(String customerSpace, Boolean includeArchived, int pageIndex, int pageSize);
+    List<EnrichmentLayoutDetail> getAll(String customerSpace, int pageIndex, int pageSize);
 }

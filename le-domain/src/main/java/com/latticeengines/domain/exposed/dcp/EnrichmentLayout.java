@@ -27,13 +27,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.pls.SoftDeletable;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "DCP_ENRICHMENT_LAYOUT")
-public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
+public class EnrichmentLayout implements HasPid, HasTenant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,10 +67,6 @@ public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
     @Column(name = "CREATED_BY", nullable = false)
     @JsonProperty("createdBy")
     private String createdBy;
-
-    @Column(name = "DELETED", nullable = false)
-    @JsonProperty("archived")
-    private Boolean deleted = Boolean.FALSE;
 
     @Column(name = "TEAM_ID")
     @JsonProperty("teamId")
@@ -148,16 +143,6 @@ public class EnrichmentLayout implements HasPid, HasTenant, SoftDeletable {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    @Override
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    @Override
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
     }
 
     public String getTeamId() {
