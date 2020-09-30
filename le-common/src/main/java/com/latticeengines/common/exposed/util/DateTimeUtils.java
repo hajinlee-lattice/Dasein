@@ -95,8 +95,12 @@ public final class DateTimeUtils {
     }
 
     public static String toDateOnlyFromMillis(long time) {
+        return toDataOnlyFromMillisAndTimeZone(time, "UTC");
+    }
+
+    public static String toDataOnlyFromMillisAndTimeZone(long time, String timeZone) {
         SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
-        dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
         return dateOnlyFormat.format(new Date(time));
     }
 

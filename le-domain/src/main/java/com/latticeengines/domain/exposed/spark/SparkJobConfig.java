@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JourneyStageJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
@@ -174,6 +175,9 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CMTpsLookupCreationConfig.class, name = CMTpsLookupCreationConfig.NAME), //
         @JsonSubTypes.Type(value = SplitTransactionConfig.class, name = SplitTransactionConfig.NAME), //
         @JsonSubTypes.Type(value = TransformTxnStreamConfig.class, name = TransformTxnStreamConfig.NAME), //
+        @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateTimelineExportArtifactsJobConfig.class, name =
+                GenerateTimelineExportArtifactsJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME) //
 })
