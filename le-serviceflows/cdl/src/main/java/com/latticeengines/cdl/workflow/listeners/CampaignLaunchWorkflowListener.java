@@ -73,8 +73,10 @@ public class CampaignLaunchWorkflowListener extends LEJobListener {
             } else {
                 log.info(String.format("CampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
+                PlayLaunchChannel channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, playName,
+                        playLaunchId);
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
-                playProxy.publishTalkingPoints(customerSpace, playName);
+                playProxy.publishTalkingPoints(customerSpace, playName, channel.getUpdatedBy());
             }
         } finally {
             cleanupIntermediateFiles(jobExecution);

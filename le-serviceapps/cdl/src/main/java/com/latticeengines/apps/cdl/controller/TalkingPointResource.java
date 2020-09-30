@@ -79,8 +79,9 @@ public class TalkingPointResource {
     @PostMapping("/publish")
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
-    public void publish(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
-        talkingPointService.publish(playName);
+    public void publish(@PathVariable String customerSpace, @RequestParam("playName") String playName,
+            @RequestBody String updatedBy) {
+        talkingPointService.publish(playName, updatedBy);
     }
 
     @PostMapping("/revert")

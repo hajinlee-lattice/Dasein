@@ -665,8 +665,8 @@ public class PlayResource {
     @ApiOperation(value = "Publish Talking Points for a given play")
     public void publishTalkingPoints( //
             @PathVariable String customerSpace, //
-            @PathVariable("playName") String playName) {
-        playService.publishTalkingPoints(playName, customerSpace);
+            @PathVariable("playName") String playName, @RequestBody String updatedBy) {
+        playService.publishTalkingPoints(playName, customerSpace, updatedBy);
     }
 
     private String createTable(PlayLaunch playLaunch) {

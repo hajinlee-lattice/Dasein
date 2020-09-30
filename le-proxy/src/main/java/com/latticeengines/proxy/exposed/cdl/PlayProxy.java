@@ -178,11 +178,11 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return post("create or update play", url, play, Play.class);
     }
 
-    public void publishTalkingPoints(String customerSpace, String playName) {
+    public void publishTalkingPoints(String customerSpace, String playName, String updatedBy) {
         String url = constructUrl(URL_PREFIX + "/{playName}/talkingpoints/publish", shortenCustomerSpace(customerSpace),
                 playName);
         log.info("url is " + url);
-        post(String.format("publish talking points for play %s", playName), url, null, Void.class);
+        post(String.format("publish talking points for play %s", playName), url, updatedBy, Void.class);
     }
 
     public void deletePlay(String customerSpace, String playName, boolean hardDelete) {

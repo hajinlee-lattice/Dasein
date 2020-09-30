@@ -48,6 +48,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
     private static final String PLAY_TYPE_DISPLAY_NAME = "TestTPPlayType";
     private static final String SEGMENT_NAME = "testTPSegment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String UPDATED_BY = "test@lattice-engines.com";
+    private static final String DIFF_UPDATED_BY = "testaccount2a@lattice-engines.com";
     private Play testPlay;
     private PlayType testPlayType;
 
@@ -125,9 +127,10 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Play play = playService.getPlayByName(tp.getPlayName(), true);
         Date previousUpdateDate = play.getUpdated();
         Thread.sleep(1000L);
-        talkingPointService.publish(tp.getPlayName());
+        talkingPointService.publish(tp.getPlayName(), DIFF_UPDATED_BY);
         play = playService.getPlayByName(tp.getPlayName(), true);
         Date nextUpdatedDate = play.getUpdated();
+        String newUpdatedBy = play.getUpdatedBy();
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
@@ -135,6 +138,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(dtps.get(1).getName(), tp2.getName());
         Assert.assertEquals(dtps.get(0).getPlayName(), tp.getPlayName());
         Assert.assertEquals((nextUpdatedDate.compareTo(previousUpdateDate) > 0), true);
+        Assert.assertEquals(newUpdatedBy, DIFF_UPDATED_BY);
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
@@ -172,7 +176,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 0);
 
-        talkingPointService.publish(tp.getPlayName());
+        talkingPointService.publish(tp.getPlayName(), UPDATED_BY);
         dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), 0);
@@ -231,7 +235,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().size(), tps.size());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), testtp.getName());
 
-        talkingPointService.publish(tp.getPlayName());
+        talkingPointService.publish(tp.getPlayName(), UPDATED_BY);
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
@@ -246,7 +250,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(testtp.getName());
-        talkingPointService.publish(tp.getPlayName());
+        talkingPointService.publish(tp.getPlayName(), UPDATED_BY);
 
         dtps = talkingPointService.findAllByPlayName(testPlay.getName(), true);
         Assert.assertEquals(dtps.size(), 0);
