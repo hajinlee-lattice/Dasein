@@ -107,7 +107,6 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        // Copy files from spark workspace to s3 location returned by DCP-1765.
         String usageReportPath = getCsvFilePath(result.getTargets().get(0));
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
