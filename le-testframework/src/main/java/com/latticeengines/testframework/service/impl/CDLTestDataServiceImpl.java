@@ -661,7 +661,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     @Override
-    public String createAddedLaunchTable(String tenantId, String s3AvroDir, String version, String tableName) throws IOException {
+    public String createLaunchTable(String tenantId, String s3AvroDir, String version, String tableName) throws IOException {
         File jsonFile = testArtifactService.downloadTestArtifact(s3AvroDir, version, tableName + ".json");
         String shortenTenantId = CustomerSpace.parse(tenantId).getTenantId();
         Table table = toTable(jsonFile, shortenTenantId);
@@ -685,6 +685,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         Pattern pattern = Pattern.compile(PATH_PATTERN);
         Matcher matcher = pattern.matcher(hdfsPath);
         String str = JsonUtils.serialize(jsonNode);
+        str = str.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
         String tenantName = null;
         if (matcher.find()) {
             tenantName = matcher.group(1);

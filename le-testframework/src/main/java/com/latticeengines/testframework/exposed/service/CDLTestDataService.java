@@ -20,6 +20,6 @@ public interface CDLTestDataService {
 
     void mockRatingTableWithSingleEngine(String tenantId, String engineId, List<BucketMetadata> coverage, boolean uploadRatingTable);
 
-    String createAddedLaunchTable(String tenantId, String s3AvroDir, String version, String tableName) throws IOException;
+    String createLaunchTable(String tenantId, String s3AvroDir, String version, String tableName) throws IOException;
 
 }
