@@ -148,6 +148,10 @@ public class SourceServiceImpl implements SourceService {
         defaultRule.setRuleType(MatchRuleRecord.RuleType.BASE_RULE);
         defaultRule.setState(MatchRuleRecord.State.ACTIVE);
         defaultRule.setAcceptCriterion(DplusMatchRule.getDefaultAcceptCriterion());
+        if (projectInfo.getPurposeOfUse() != null) {
+            defaultRule.setDomain(projectInfo.getPurposeOfUse().getDomain());
+            defaultRule.setRecordType(projectInfo.getPurposeOfUse().getRecordType());
+        }
         matchRuleService.createMatchRule(customerSpace, defaultRule);
 
         return source;
