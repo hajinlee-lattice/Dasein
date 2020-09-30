@@ -40,7 +40,7 @@ public class TimelineExportFileGeneratorStep extends BaseWorkflowStep<TimelineEx
     public void execute() {
         TimelineExportFileGeneratorConfiguration config = getConfiguration();
         List<String> avroHdfsFilePaths = getListObjectFromContext(TIMELINE_EXPORT_TABLES, String.class);
-
+        log.info("customerSpace is {}.", config.getCustomerSpace());
         try (PerformanceTimer timer = new PerformanceTimer(
                 String.format("Generating time Export Files for:%s", config.getCustomerSpace()))) {
 
