@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -49,7 +50,7 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation("Get an EnrichmentLayout by sourceId")
     @PreAuthorize("hasRole('View_DCP_Projects')")
-    public EnrichmentLayout getEnrichmentLayoutBySourceId(@PathVariable String sourceId) {
+    public EnrichmentLayoutDetail getEnrichmentLayoutBySourceId(@PathVariable String sourceId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         checkCustomerSpace(customerSpace);
         return sourceId != null
@@ -61,7 +62,7 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation("Get an EnrichmentLayout by layoutId")
     @PreAuthorize("hasRole('View_DCP_Projects')")
-    public EnrichmentLayout getEnrichmentLayoutByLayoutId(@PathVariable String layoutId) {
+    public EnrichmentLayoutDetail getEnrichmentLayoutByLayoutId(@PathVariable String layoutId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         checkCustomerSpace(customerSpace);
         return layoutId != null

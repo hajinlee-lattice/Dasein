@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutOperationResult;
 import com.latticeengines.pls.service.dcp.EnrichmentLayoutService;
 import com.latticeengines.proxy.exposed.dcp.EnrichmentLayoutProxy;
@@ -34,31 +35,31 @@ public class EnrichmentLayoutServiceImpl implements EnrichmentLayoutService {
     }
 
     @Override
-    public EnrichmentLayout getEnrichmentLayoutBySourceId(String customerId, String sourceId) {
-        EnrichmentLayout enrichmentLayout;
+    public EnrichmentLayoutDetail getEnrichmentLayoutBySourceId(String customerId, String sourceId) {
+        EnrichmentLayoutDetail enrichmentLayoutDetail;
         try {
-            enrichmentLayout = enrichmentLayoutProxy.getEnrichmentLayoutBySourceId(customerId, sourceId);
+            enrichmentLayoutDetail = enrichmentLayoutProxy.getEnrichmentLayoutBySourceId(customerId, sourceId);
         }
         catch (Exception exception) {
             String msg = String.format("Exception while trying to retrieve enrichment layout sourceId = %s", sourceId);
             log.error(msg, exception);
-            enrichmentLayout = null;
+            enrichmentLayoutDetail = null;
         }
-        return enrichmentLayout;
+        return enrichmentLayoutDetail;
     }
 
     @Override
-    public EnrichmentLayout getEnrichmentLayoutByLayoutId(String customerId, String layoutId) {
-        EnrichmentLayout enrichmentLayout;
+    public EnrichmentLayoutDetail getEnrichmentLayoutByLayoutId(String customerId, String layoutId) {
+        EnrichmentLayoutDetail enrichmentLayoutDetail;
         try {
-            enrichmentLayout = enrichmentLayoutProxy.getEnrichmentLayoutByLayoutId(customerId, layoutId);
+            enrichmentLayoutDetail = enrichmentLayoutProxy.getEnrichmentLayoutByLayoutId(customerId, layoutId);
         }
         catch (Exception exception) {
             String msg = String.format("Exception while trying to retrieve enrichment layout layoutId = %s", layoutId);
             log.error(msg, exception);
-            enrichmentLayout = null;
+            enrichmentLayoutDetail = null;
         }
-        return enrichmentLayout;
+        return enrichmentLayoutDetail;
     }
 
     @Override

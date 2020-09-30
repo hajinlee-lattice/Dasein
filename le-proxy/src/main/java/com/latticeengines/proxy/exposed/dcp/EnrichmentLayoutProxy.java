@@ -17,16 +17,16 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
 
     private static final String PREFIX = "/customerspaces/{customerSpace}";
 
-    public EnrichmentLayout getEnrichmentLayoutBySourceId(String customerSpace, String sourceId) {
+    public EnrichmentLayoutDetail getEnrichmentLayoutBySourceId(String customerSpace, String sourceId) {
         String baseUrl = PREFIX + "/enrichmentlayout/sourceId/{sourceId}";
         String url = getUrl(customerSpace, sourceId, baseUrl);
-        return get("Get enrichment layout by sourceId", url, EnrichmentLayout.class);
+        return get("Get enrichment layout by sourceId", url, EnrichmentLayoutDetail.class);
     }
 
-    public EnrichmentLayout getEnrichmentLayoutByLayoutId (String customerSpace, String layoutId) {
+    public EnrichmentLayoutDetail getEnrichmentLayoutByLayoutId (String customerSpace, String layoutId) {
         String baseUrl = PREFIX + "/enrichmentlayout/layoutId/{layoutId}";
         String url = constructUrl(baseUrl, customerSpace, layoutId);
-        return get("Get enrichment layout by layoutId", url, EnrichmentLayout.class);
+        return get("Get enrichment layout by layoutId", url, EnrichmentLayoutDetail.class);
     }
 
     public List<EnrichmentLayoutDetail> getAll(String customerId) {
