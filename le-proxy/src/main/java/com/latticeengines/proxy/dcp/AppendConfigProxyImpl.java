@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.dcp.AppendConfigProxy;
@@ -29,7 +30,7 @@ public class AppendConfigProxyImpl extends MicroserviceRestApiProxy implements A
             List<DataBlockEntitlementContainer.Domain> resultDomains = new ArrayList();
 
             for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-                if (!domainName.isEmpty() && domain.getDomain().getDisplayName() != domainName) {
+                if (!domainName.isEmpty() && domain.getDomain().equals(DataDomain.valueOf(domainName))) {
                     continue;
                 }
 
@@ -38,7 +39,7 @@ public class AppendConfigProxyImpl extends MicroserviceRestApiProxy implements A
                 } else {
                     Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredRecords = domain
                             .getRecordTypes().entrySet().stream()
-                            .filter(entry -> entry.getKey().getDisplayName() == recordType)
+                            .filter(entry -> entry.getKey().equals(DataRecordType.valueOf(recordType)))
                             .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 
                     resultDomains.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredRecords));
