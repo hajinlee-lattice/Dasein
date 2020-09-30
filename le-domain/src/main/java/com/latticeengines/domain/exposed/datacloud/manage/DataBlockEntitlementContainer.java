@@ -80,27 +80,27 @@ public class DataBlockEntitlementContainer {
         @JsonProperty("blockId")
         private String blockId;
 
-        @JsonProperty("levels")
-        private List<DataBlockLevel> levels;
+        @JsonProperty("dataBlockLevels")
+        private List<DataBlockLevel> dataBlockLevels;
 
-        @JsonProperty("elements")
-        private List<DataBlock.Level> elements;
+        @JsonProperty("levels")
+        private List<DataBlock.Level> levels;
 
         // for jackson
         private Block() {}
 
-        public Block(String blockId, List<DataBlockLevel> levels) {
+        public Block(String blockId, List<DataBlockLevel> dataBlockLevels) {
             this.blockId = blockId;
+            this.dataBlockLevels = dataBlockLevels;
+        }
+
+        public Block(String blockId, DataBlockLevel... dataBlockLevels) {
+            this.blockId = blockId;
+            this.dataBlockLevels = Arrays.asList(dataBlockLevels);
+        }
+
+        public Block(List<DataBlock.Level> levels) {
             this.levels = levels;
-        }
-
-        public Block(String blockId, DataBlockLevel... levels) {
-            this.blockId = blockId;
-            this.levels = Arrays.asList(levels);
-        }
-
-        public Block(List<DataBlock.Level> elements) {
-            this.elements = elements;
         }
 
         public void setBlockId(String blockId) {
