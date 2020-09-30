@@ -331,6 +331,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             int ccIdx = -1;
             int rnIdx = -1;
             int mtIdx = -1;
+            int matchedDunsIdx = -1;
+            int ccIdx2 = -1;
             while (nextRecord != null && (count++) < 100) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
@@ -341,6 +343,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     ccIdx = headers.indexOf("Match Confidence Code");
                     rnIdx = headers.indexOf("Registration Number");
                     mtIdx = headers.indexOf("Match Type");
+                    matchedDunsIdx = headers.indexOf("MatchedDuns");
+                    ccIdx2 = headers.indexOf("ConfidenceCode");
+                    Assert.assertTrue(idIdx < matchedDunsIdx);
+                    Assert.assertTrue(matchedDunsIdx < ccIdx2);
                 } else {
                     String customerId = nextRecord[idIdx];
                     String matchType = nextRecord[mtIdx];

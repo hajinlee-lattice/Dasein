@@ -244,15 +244,17 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         Map<String, String> dispNames = new LinkedHashMap<>();
 
         List<ColumnMetadata> customerAttrs = new ArrayList<>();
-        List<ColumnMetadata> appendedAttrs = new ArrayList<>();
+        List<ColumnMetadata> dataBlockAttrs = new ArrayList<>();
+        List<ColumnMetadata> candidateAttrs = new ArrayList<>();
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
         ColumnMetadata duns = null;
         for (ColumnMetadata cm : cms) {
             if (MatchedDuns.equals(cm.getAttrName())) {
                 duns = cm;
-            } else if (dataBlockDispNames.containsKey(cm.getAttrName()) ||
-                    candidateFieldDispNames.containsKey(cm.getAttrName())) {
-                appendedAttrs.add(cm);
+            } else if (dataBlockDispNames.containsKey(cm.getAttrName())) {
+                dataBlockAttrs.add(cm);
+            } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
+                candidateAttrs.add(cm);
             } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
                 customerAttrs.add(cm);
             } else {
@@ -263,7 +265,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         if (duns != null) {
             dispNames.put(duns.getAttrName(), duns.getDisplayName());
         }
-        appendedAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        candidateAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        dataBlockAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         otherAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         log.info("the generated map are " + JsonUtils.serialize(dispNames));
 

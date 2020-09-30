@@ -1,5 +1,7 @@
 package com.latticeengines.spark.exposed.job.dcp
 
+import java.util.stream.Collectors
+
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate
 import com.latticeengines.domain.exposed.dcp.DataReport
@@ -34,11 +36,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
     val classificationAttr: String = config.getClassificationAttr
     val matchedDunsAttr: String = config.getMatchedDunsAttr
+    val acceptedSeq = config.getAcceptedAttrsMap.values().asScala.toList
+    val rejectedSeq = config.getRejectedAttrsMap.values().asScala.toList
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
     val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
 
-    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs)
-    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs)
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, acceptedSeq)
+    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, rejectedSeq)
     val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
     val report : DataReport = new DataReport
@@ -50,16 +54,19 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     lattice.output = acceptedCsv :: rejectedCsv :: dunsCount :: Nil
   }
 
-  private def filterAccepted(input: DataFrame, classificationAttr: String, acceptedAttrs: Map[String, String]):
+  private def filterAccepted(input: DataFrame, classificationAttr: String, acceptedAttrs: Map[String, String],
+                             acceptedSeq : List[String]):
   (DataFrame, DataFrame) = {
     val accepted = DnBMatchCandidate.Classification.Accepted.name
     val acceptedDF = input.filter(col(classificationAttr) === accepted)
-    (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs))
+    (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs, acceptedSeq))
   }
 
-  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {
+  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String],
+                             rejectedSeq: List[String]): DataFrame = {
     val rejected = DnBMatchCandidate.Classification.Rejected.name
-    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected), rejectedAttrs)
+    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected), rejectedAttrs,
+      rejectedSeq)
   }
 
   private def generateGeoReport(input: DataFrame, countryAttr: String, totalCnt: Long, url: String, user: String,
@@ -113,15 +120,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     matchToDunsReport
   }
 
-  private def selectAndRename(input: DataFrame, attrNames: Map[String, String]): DataFrame = {
-    val sequenceValues = attrNames.values.toList
-    logSpark("the display names in map  are " + JsonUtils.serialize(sequenceValues.asJava))
+  private def selectAndRename(input: DataFrame, attrNames: Map[String, String], nameSeq: List[String]): DataFrame = {
+    logSpark("the display names in map  are " + JsonUtils.serialize(nameSeq.asJava))
     val selected = input.columns.filter(attrNames.keySet)
     val filtered = input.select(selected map col: _*)
     val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
-    logSpark("the unordered names  " + JsonUtils.serialize(newNames))
-    val orderedNames = newNames.sortWith((n1, n2) => sequenceValues.indexOf(n1) < sequenceValues.indexOf(n2))
-    logSpark("the ordered names in csv are " + JsonUtils.serialize(newNames))
+    val orderedNames = newNames.sortWith((n1, n2) => nameSeq.indexOf(n1) < nameSeq.indexOf(n2))
+    logSpark("the ordered names in csv are " + JsonUtils.serialize(orderedNames))
     filtered.toDF(orderedNames: _*)
   }
 
