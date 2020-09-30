@@ -93,6 +93,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
         @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration"),
+        @Type(value = TimelineExportWorkflowConfiguration.class, name = "TimelineExportWorkflowConfiguration"),
 
         @Type(value = MockActivityStoreWorkflowConfiguration.class, name = "MockActivityStoreWorkflowConfiguration"),
         @Type(value = AtlasProfileReportWorkflowConfiguration.class, name = "AtlasProfileReportWorkflowConfiguration"),

@@ -33,6 +33,7 @@ import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.MockActivityStoreWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.TimelineExportWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -43,6 +44,7 @@ import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
@@ -66,6 +68,7 @@ public class DataFeedController {
     private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
     private final MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter;
     private final AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter;
+    private final TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
@@ -82,6 +85,7 @@ public class DataFeedController {
                               CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
                               MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter,
                               AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter,
+                              TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter,
                               DataFeedService dataFeedService, PAValidationUtils paValidationUtils,
                               AtlasExportService atlasExportService, ServingStoreService servingStoreService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
@@ -91,6 +95,7 @@ public class DataFeedController {
         this.cdlEntityMatchMigrationWorkflowSubmitter = cdlEntityMatchMigrationWorkflowSubmitter;
         this.mockActivityStoreWorkflowSubmitter = mockActivityStoreWorkflowSubmitter;
         this.atlasProfileReportWorkflowSubmitter = atlasProfileReportWorkflowSubmitter;
+        this.timelineExportWorkflowSubmitter = timelineExportWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
         this.atlasExportService = atlasExportService;
@@ -153,6 +158,24 @@ public class DataFeedController {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
             ApplicationId appId = orphanRecordExportWorkflowSubmitter.submit(
+                    customerSpace, request, new WorkflowPidWrapper(-1L));
+            if (appId == null) {
+                return null;
+            }
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping("/exportTimeline")
+    @ResponseBody
+    @ApiOperation(value = "Invoke timelineExport workflow, Returns the job id.")
+    public ResponseDocument<String> timelineExport(@PathVariable String customerSpace,
+                                                   @RequestBody TimelineExportRequest request) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        try {
+            ApplicationId appId = timelineExportWorkflowSubmitter.submit(
                     customerSpace, request, new WorkflowPidWrapper(-1L));
             if (appId == null) {
                 return null;

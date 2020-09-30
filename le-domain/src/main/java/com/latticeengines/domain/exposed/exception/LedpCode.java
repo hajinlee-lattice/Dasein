@@ -935,7 +935,8 @@ public enum LedpCode {
     LEDP_60011("Project is not entitled to use company entity resolution data block!"),
 
     // le-serviceflows
-    LEDP_70000("No Add or Delete file");
+    LEDP_70000("No Add or Delete file"),
+    LEDP_70001("Failed while generating timeline export file: {0}.");
 
     private String message;
 

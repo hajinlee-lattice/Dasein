@@ -174,6 +174,9 @@ public enum InterfaceName {
     //DCP
     RegistrationNumber,
 
+    //timelineExport
+    DomesticUltimateDuns, GlobalUltimateDuns, IsPrimaryDomain, Count,
+
     // Internal
     __Row_Count__, // total row count in activity store aggregation
     __Composite_Key__; // primary key for internal use

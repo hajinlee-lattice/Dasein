@@ -210,4 +210,67 @@ public final class TimeLineStoreUtils {
         }
     }
 
+    public enum TimelineExportColumn {
+        Duns(InterfaceName.DUNS.name(), "String"), EventDate(InterfaceName.EventTimestamp.name(), "Long"), AccountId(
+                InterfaceName.AccountId.name(), "String"), ContactId(InterfaceName.ContactId.name(),
+                "String"), EventType(InterfaceName.EventType.name(), "String"), StreamType(
+                InterfaceName.StreamType.name(), "String"), GlobalUltimateDuns(InterfaceName.GlobalUltimateDuns.name(),
+                "String"), DomesticUltimateDuns(InterfaceName.GlobalUltimateDuns.name(), "String"), Domain(
+                InterfaceName.Domain.name(), "String"), Count(InterfaceName.Count.name(), "Long"),
+                InPrimaryDomain(InterfaceName.IsPrimaryDomain.name(), "boolean");
+
+        private String columnName;
+        private String dataType;
+
+        private static List<String> columnNames;
+        private static List<String> requiredColumnNames;//will failed timelineExportJob, if the table haven't contains.
+        static {
+            columnNames = new ArrayList<>();
+            for (TimelineExportColumn entry : values()) {
+                columnNames.add(entry.getColumnName());
+            }
+            requiredColumnNames = new ArrayList<>();
+            requiredColumnNames.add(TimelineStandardColumn.EventDate.columnName.toLowerCase());
+            requiredColumnNames.add(TimelineStandardColumn.EventType.columnName.toLowerCase());
+        }
+
+        TimelineExportColumn(String columnName, String dataType) {
+            this.columnName = columnName;
+            this.dataType = dataType;
+        }
+
+        public static List<String> getColumnNames() {
+            return columnNames;
+        }
+
+        public static List<String> getRequiredColumnNames() {
+            return requiredColumnNames;
+        }
+
+        public static String getDataTypeFromColumnName(String columnName) {
+            for (TimelineExportColumn entry : values()) {
+                if (entry.getColumnName().equals(columnName)) {
+                    return entry.getDataType();
+                }
+            }
+            return null;
+        }
+
+        public String getColumnName() {
+            return columnName;
+        }
+
+        public void setColumnName(String columnName) {
+            this.columnName = columnName;
+        }
+
+        public String getDataType() {
+            return dataType;
+        }
+
+        public void setDataType(String dataType) {
+            this.dataType = dataType;
+        }
+    }
+
 }

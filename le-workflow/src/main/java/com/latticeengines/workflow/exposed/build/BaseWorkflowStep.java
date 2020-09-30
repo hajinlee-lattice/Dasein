@@ -380,6 +380,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     public static final String REGISTERED_TABLE_NAMES = "REGISTERED_TABLE_NAMES";
 
+    public static final String TIMELINE_EXPORT_ACCOUNTLIST = "TIMELINE_EXPORT_ACCOUNTLIST";
+    public static final String TIMELINE_EXPORT_TABLES = "TIMELINE_EXPORT_TABLES";
+    public static final String TIMELINE_EXPORT_FILES = "TIMELINE_EXPORT_FILES";
+
     // tables to be carried over in restarted PA
     protected static final Set<String> TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
             ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
