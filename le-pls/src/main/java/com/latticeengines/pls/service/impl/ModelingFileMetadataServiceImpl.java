@@ -529,7 +529,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         fieldValidationResult.setFieldValidations(validations);
         fieldValidationResult.setGroupedValidations(groupedValidations);
         fieldValidationResult.setValidationMessages(
-                Stream.of(ValidationCategory.values()).collect(Collectors.toMap(e -> e, ValidationCategory::getValidMessage)));
+                Stream.of(ValidationCategory.values())
+                        .filter(e -> CollectionUtils.isEmpty(groupedValidations.get(e)))
+                        .collect(Collectors.toMap(e -> e, ValidationCategory::getValidMessage)));
         return fieldValidationResult;
     }
 
