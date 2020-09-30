@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -32,7 +33,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -134,11 +137,31 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     }
 
     private FrontEndQuery buildFrontEndQuery(FrontEndQuery frontEndQuery, BusinessEntity entity) {
-        FrontEndQuery result = new FrontEndQuery();
-        result.setMainEntity(entity);
-        result.setContactRestriction(frontEndQuery.getContactRestriction());
-        result.setAccountRestriction(frontEndQuery.getAccountRestriction());
-        return result;
+        FrontEndQuery query = new FrontEndQuery();
+        query.setMainEntity(entity);
+
+        FrontEndRestriction accountRestriction = frontEndQuery.getAccountRestriction();
+        FrontEndRestriction contactRestriction = frontEndQuery.getContactRestriction();
+        Restriction accountExists = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.AccountId.name()).isNotNull().build();
+
+        if (accountRestriction != null && accountRestriction.getRestriction() != null) {
+            if (BusinessEntity.Contact.equals(entity)) {
+                Restriction combined = Restriction.builder() //
+                        .and(accountRestriction.getRestriction(), accountExists).build();
+                query.setAccountRestriction(new FrontEndRestriction(combined));
+            } else {
+                query.setAccountRestriction(accountRestriction);
+            }
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            query.setAccountRestriction(new FrontEndRestriction(accountExists));
+        }
+
+        if (contactRestriction != null && contactRestriction.getRestriction() != null) {
+            query.setContactRestriction(contactRestriction);
+        }
+
+        return query;
     }
 
     private HdfsDataUnit executeSparkJob(FrontEndQuery frontEndQuery) {
