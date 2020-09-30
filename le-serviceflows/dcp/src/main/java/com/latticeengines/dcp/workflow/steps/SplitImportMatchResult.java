@@ -245,6 +245,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
         List<ColumnMetadata> customerAttrs = new ArrayList<>();
         List<ColumnMetadata> appendedAttrs = new ArrayList<>();
+        List<ColumnMetadata> otherAttrs = new ArrayList<>();
         ColumnMetadata duns = null;
         for (ColumnMetadata cm : cms) {
             if (MatchedDuns.equals(cm.getAttrName())) {
@@ -252,8 +253,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             } else if (dataBlockDispNames.containsKey(cm.getAttrName()) ||
                     candidateFieldDispNames.containsKey(cm.getAttrName())) {
                 appendedAttrs.add(cm);
-            } else {
+            } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
                 customerAttrs.add(cm);
+            } else {
+                otherAttrs.add(cm);
             }
         }
         customerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
@@ -261,6 +264,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             dispNames.put(duns.getAttrName(), duns.getDisplayName());
         }
         appendedAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        otherAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         log.info("the generated map are " + JsonUtils.serialize(dispNames));
 
         Map<String, List<String>> reversMap = dispNames.entrySet().stream()

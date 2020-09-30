@@ -115,7 +115,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
   private def selectAndRename(input: DataFrame, attrNames: Map[String, String]): DataFrame = {
     val sequenceValues = attrNames.values.toList
-    logSpark("the display names in map  are " + JsonUtils.serialize(sequenceValues))
+    logSpark("the display names in map  are " + JsonUtils.serialize(sequenceValues.asJava))
     val selected = input.columns.filter(attrNames.keySet)
     val filtered = input.select(selected map col: _*)
     val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
