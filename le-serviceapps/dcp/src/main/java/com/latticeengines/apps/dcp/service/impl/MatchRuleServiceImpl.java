@@ -169,6 +169,9 @@ public class MatchRuleServiceImpl implements MatchRuleService {
             if (CollectionUtils.isEmpty(newRule.getAllowedValues())) {
                 throw new IllegalArgumentException("AllowedValues cannot be empty for a special match rule!");
             }
+            if (newRule.getDomain() != null || newRule.getRecordType() != null) {
+                log.warn("Updating purpose of use on SPECIAL_RULE will not take effect!");
+            }
         } else if (MatchRuleRecord.RuleType.BASE_RULE.equals(newRule.getRuleType())) {
             if (newRule.getMatchKey() != null) {
                 throw new IllegalArgumentException("Base match rule cannot have MatchKey!");
@@ -184,9 +187,15 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (MatchKey.Country.equals(newRule.getMatchKey())) {
             validateCountryCode(newRule.getAllowedValues());
         }
-        if (!appendConfigService.checkEntitledWith(customerSpace, newRule.getDomain(),
-                newRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
-            throw new LedpException(LedpCode.LEDP_60011);
+        if (newRule.getDomain() != null && newRule.getRecordType() != null) {
+            if (!appendConfigService.checkEntitledWith(customerSpace, newRule.getDomain(),
+                    newRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+                throw new LedpException(LedpCode.LEDP_60011);
+            }
+        } else {
+            if (newRule.getDomain() != null || newRule.getRecordType() != null) {
+                throw new IllegalArgumentException("Incomplete purpose of use info.(Missing Domain/RecordType");
+            }
         }
     }
 
@@ -206,6 +215,9 @@ public class MatchRuleServiceImpl implements MatchRuleService {
             if (CollectionUtils.isEmpty(matchRule.getAllowedValues())) {
                 throw new IllegalArgumentException("AllowedValues cannot be empty for a special match rule!");
             }
+            if (matchRule.getDomain() != null || matchRule.getRecordType() != null) {
+                log.warn("Creating purpose of use on SPECIAL_RULE will not take effect!");
+            }
         } else if (MatchRuleRecord.RuleType.BASE_RULE.equals(matchRule.getRuleType())) {
             if (matchRule.getMatchKey() != null) {
                 throw new IllegalArgumentException("Base match rule cannot have MatchKey!");
@@ -217,9 +229,15 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (MatchKey.Country.equals(matchRule.getMatchKey())) {
             validateCountryCode(matchRule.getAllowedValues());
         }
-        if (!appendConfigService.checkEntitledWith(customerSpace, matchRule.getDomain(),
-                matchRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
-            throw new LedpException(LedpCode.LEDP_60011);
+        if (matchRule.getDomain() != null && matchRule.getRecordType() != null) {
+            if (!appendConfigService.checkEntitledWith(customerSpace, matchRule.getDomain(),
+                    matchRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+                throw new LedpException(LedpCode.LEDP_60011);
+            }
+        } else {
+            if (matchRule.getDomain() != null || matchRule.getRecordType() != null) {
+                throw new IllegalArgumentException("Incomplete purpose of use info.(Missing Domain/RecordType");
+            }
         }
     }
 
@@ -291,6 +309,14 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (record.getReviewCriterion() != null) {
             otherFieldUnChange = record.getReviewCriterion().equalTo(matchRule.getReviewCriterion());
         }
+        if (!otherFieldUnChange) {
+            return Pair.of(displayNameChange, true);
+        }
+        otherFieldUnChange = record.getDomain() == matchRule.getDomain();
+        if (!otherFieldUnChange) {
+            return Pair.of(displayNameChange, true);
+        }
+        otherFieldUnChange = record.getRecordType() == matchRule.getRecordType();
         if (!otherFieldUnChange) {
             return Pair.of(displayNameChange, true);
         }

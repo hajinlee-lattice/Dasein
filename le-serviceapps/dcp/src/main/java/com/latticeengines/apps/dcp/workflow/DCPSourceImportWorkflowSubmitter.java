@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Project;
-import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
@@ -78,9 +77,12 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         if (project == null) {
             throw new IllegalArgumentException("Cannot find project with projectId: " + importRequest.getProjectId());
         }
-        if (!verifyPurposeOfUse(customerSpace, project.getPurposeOfUse())) {
+        MatchRuleConfiguration matchRuleConfiguration = matchRuleService.getMatchConfig(customerSpace.toString(),
+                importRequest.getSourceId());
+        if (!verifyPurposeOfUse(customerSpace, matchRuleConfiguration)) {
             throw new LedpException(LedpCode.LEDP_60011);
         }
+
         DCPSourceImportWorkflowConfiguration configuration =
                 generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getUploadId(),
                         container.getPid());
@@ -93,12 +95,15 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         return applicationId;
     }
 
-    private boolean verifyPurposeOfUse(CustomerSpace customerSpace, PurposeOfUse purposeOfUse) {
-        if (purposeOfUse == null) {
+    private boolean verifyPurposeOfUse(CustomerSpace customerSpace, MatchRuleConfiguration matchRuleConfiguration) {
+        if (matchRuleConfiguration == null || matchRuleConfiguration.getBaseRule() == null) {
             return true;
         }
-        return appendConfigService.checkEntitledWith(customerSpace.toString(), purposeOfUse.getDomain(),
-                purposeOfUse.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION);
+        if (matchRuleConfiguration.getBaseRule().getDomain() != null && matchRuleConfiguration.getBaseRule().getRecordType() != null) {
+            return appendConfigService.checkEntitledWith(customerSpace.toString(), matchRuleConfiguration.getBaseRule().getDomain(),
+                    matchRuleConfiguration.getBaseRule().getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION);
+        }
+        return true;
     }
 
     private UploadConfig generateUploadConfig(CustomerSpace customerSpace, DCPImportRequest importRequest) {

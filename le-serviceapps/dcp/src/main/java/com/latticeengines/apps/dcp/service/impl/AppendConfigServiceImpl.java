@@ -257,10 +257,9 @@ public class AppendConfigServiceImpl implements AppendConfigService {
 
     @Override
     public boolean checkEntitledWith(String customerSpace, DataDomain dataDomain, DataRecordType dataRecordType, String blockName) {
+        Preconditions.checkNotNull(dataDomain);
+        Preconditions.checkNotNull(dataRecordType);
         Preconditions.checkArgument(StringUtils.isNotEmpty(blockName));
-        if (dataDomain == null || dataRecordType == null) {
-            return allowNull;
-        }
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
         Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(tenantId).toString());
         Preconditions.checkNotNull(tenant, "No tenant with short id " + tenantId);
