@@ -26,6 +26,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
@@ -83,6 +85,14 @@ public class MatchRuleRecord implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "MATCH_KEY", length = 30)
     @Enumerated(EnumType.STRING)
     private MatchKey matchKey;
+
+    @Column(name = "DATA_DOMAIN")
+    @Enumerated(EnumType.STRING)
+    private DataDomain domain;
+
+    @Column(name = "DATA_RECORD_TYPE")
+    @Enumerated(EnumType.STRING)
+    private DataRecordType recordType;
 
     @Column(name = "VERSION_ID", nullable = false)
     private Integer versionId;
@@ -189,6 +199,22 @@ public class MatchRuleRecord implements HasPid, HasTenant, HasAuditingFields {
 
     public void setMatchKey(MatchKey matchKey) {
         this.matchKey = matchKey;
+    }
+
+    public DataDomain getDomain() {
+        return domain;
+    }
+
+    public void setDomain(DataDomain domain) {
+        this.domain = domain;
+    }
+
+    public DataRecordType getRecordType() {
+        return recordType;
+    }
+
+    public void setRecordType(DataRecordType recordType) {
+        this.recordType = recordType;
     }
 
     public Integer getVersionId() {

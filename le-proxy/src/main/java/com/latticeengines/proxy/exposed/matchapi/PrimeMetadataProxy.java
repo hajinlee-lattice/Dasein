@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed.matchapi;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
@@ -13,6 +14,7 @@ public interface PrimeMetadataProxy {
     DataBlockMetadataContainer getBlockMetadata();
     List<PrimeColumn> getPrimeColumns(List<String> elementIds);
     List<PrimeColumn> getCandidateColumns();
+    Set<String> getBlocksContainingElements(List<String> elementIds);
     DataBlockEntitlementContainer enrichEntitlementContainerWithElements(DataBlockEntitlementContainer container);
 
 }

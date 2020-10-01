@@ -36,6 +36,14 @@ public class TestPlayChannelConfig {
 
     private LaunchType launchType;
 
+    private String addAccountsTable;
+
+    private String removeAccountsTable;
+
+    private String addContactsTable;
+
+    private String removeContactsTable;
+
     public static final String DEFAULT_CRON_EXPRESSION = "0 0 12 ? * THU *";
     public static final String DEFAULT_EXPIRATION = "P4W";
 
@@ -107,6 +115,26 @@ public class TestPlayChannelConfig {
             return this;
         }
 
+        public TestPlayChannelConfig.Builder addAccountsTable(String addAccountsTable) {
+            testPlayChannelSetupConfig.addAccountsTable = addAccountsTable;
+            return this;
+        }
+
+        public TestPlayChannelConfig.Builder removeAccountsTable(String removeAccountsTable) {
+            testPlayChannelSetupConfig.removeAccountsTable = removeAccountsTable;
+            return this;
+        }
+
+        public TestPlayChannelConfig.Builder addContactsTable(String addContactsTable) {
+            testPlayChannelSetupConfig.addContactsTable = addContactsTable;
+            return this;
+        }
+
+        public TestPlayChannelConfig.Builder removeContactsTable(String removeContactsTable) {
+            testPlayChannelSetupConfig.removeContactsTable = removeContactsTable;
+            return this;
+        }
+
         public TestPlayChannelConfig build() {
             return testPlayChannelSetupConfig;
         }
@@ -174,6 +202,38 @@ public class TestPlayChannelConfig {
 
     public void setTrayAuthenticationId(String trayAuthenticationId) {
         this.trayAuthenticationId = trayAuthenticationId;
+    }
+    
+    public String getAddAccountsTable() {
+        return addAccountsTable;
+    }
+
+    public void setAddAccountsTable(String addAccountsTable) {
+        this.addAccountsTable = addAccountsTable;
+    }
+
+    public String getRemoveAccountsTable() {
+        return removeAccountsTable;
+    }
+
+    public void setRemoveAccountsTable(String removeAccountsTable) {
+        this.removeAccountsTable = removeAccountsTable;
+    }
+
+    public String getAddContactsTable() {
+        return addContactsTable;
+    }
+
+    public void setAddContactsTable(String addContactsTable) {
+        this.addContactsTable = addContactsTable;
+    }
+
+    public String getRemoveContactsTable() {
+        return removeContactsTable;
+    }
+
+    public void setRemoveContactsTable(String removeContactsTable) {
+        this.removeContactsTable = removeContactsTable;
     }
 
 }

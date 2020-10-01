@@ -1,6 +1,7 @@
 package com.latticeengines.matchapi.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -53,6 +54,11 @@ public class PrimeMetadataResource {
     @GetMapping("/candidate-columns")
     public List<PrimeColumn> getCandidateColumns() {
         return candidateService.candidateColumns();
+    }
+
+    @GetMapping("/blocks-containing")
+    public Set<String> getBlocksContainingElements(@RequestParam("elementIds") List<String> elementIds) {
+        return primeMetadataService.getBlocksContainingElements(elementIds);
     }
 
 }

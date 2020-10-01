@@ -72,6 +72,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MediaMathChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -342,7 +343,7 @@ public class TestPlayCreationHelper {
         return launchPlayWorkflow(testPlaySetupConfig, false);
     }
 
-    private PlayLaunch preparePlayLaunchObject(TestPlaySetupConfig testPlaySetupConfig) {
+    public PlayLaunch preparePlayLaunchObject(TestPlaySetupConfig testPlaySetupConfig) {
         TestPlayChannelConfig testPlayChannelConfig = testPlaySetupConfig.getSinglePlayLaunchChannelConfig();
         PlayLaunch playLaunch = new PlayLaunch();
 
@@ -367,6 +368,10 @@ public class TestPlayCreationHelper {
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
         playLaunch.setChannelConfig(createChannelConfig(testPlayChannelConfig));
+        playLaunch.setAddAccountsTable(testPlayChannelConfig.getAddAccountsTable());
+        playLaunch.setRemoveAccountsTable(testPlayChannelConfig.getRemoveAccountsTable());
+        playLaunch.setAddContactsTable(testPlayChannelConfig.getAddContactsTable());
+        playLaunch.setRemoveContactsTable(testPlayChannelConfig.getRemoveContactsTable());
         return playLaunch;
     }
 
@@ -394,6 +399,9 @@ public class TestPlayCreationHelper {
             break;
         case GoogleAds:
             config = new GoogleChannelConfig();
+            break;
+        case MediaMath:
+            config = new MediaMathChannelConfig();
             break;
         default:
             config = new SalesforceChannelConfig();
@@ -512,6 +520,9 @@ public class TestPlayCreationHelper {
             break;
         case GoogleAds:
             channel.setChannelConfig(new GoogleChannelConfig());
+            break;
+        case MediaMath:
+            channel.setChannelConfig(new MediaMathChannelConfig());
             break;
         default:
             channel.setChannelConfig(new SalesforceChannelConfig());

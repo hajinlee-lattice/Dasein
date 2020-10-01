@@ -106,6 +106,10 @@ public class DataBlockEntitlementContainer {
         public String getBlockId() {
             return blockId;
         }
+
+        public List<DataBlockLevel> getDataBlockLevels() {
+            return levels;
+        }
     }
 
 }

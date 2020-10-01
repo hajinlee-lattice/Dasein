@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 public class PrimeMetadataServiceImplUnitTestNG {
 
-     @Test(groups = "unit", dataProvider = "blockElements")
+    @Test(groups = "unit", dataProvider = "blockElements")
     private void testConsolidateBlocks(List<DataBlockElement> blockElements, int expectedBlocks) {
          Map<String, List<String>> blockIds = PrimeMetadataServiceImpl.consolidateBlocks(blockElements);
          Assert.assertEquals(blockIds.size(), expectedBlocks);
