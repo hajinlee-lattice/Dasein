@@ -73,13 +73,14 @@ public class MapAttributeJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Object[][] getInput1Data() {
         return new Object[][] { //
-                { 1, "1", "duns1", "domain1", "street11", "state11", "country11" }, //
-                { 2, "2", "duns2", null, "street12", "state12", "country12" }, //
-                { 3, "3", "duns3", null, "street13", "state13", "country13" }, //
+                { 1, "1", "duns1", "domain1", "null", "state11", "country11" }, //
+                { 2, "2", "duns2", null, "street12", null, "country12" }, //
+                { 3, "3", "duns3", null, null, null, "country13" }, //
                 { 4, "4", null, "domain2", "street14", "state14", "country14" }, //
                 { 5, "5", null, null, "street15", "state15", "country15" }, //
                 { 6, "6", "duns_nomatch", "domain6", "street16", "state16", "country16" }, //
                 { 7, "7", "duns_same", "domain_same", "street17", "state17", "country17" }, //
+                { 8, "8", "duns_null", "domain_null", "street17", "state17", "country18" }, //
         };
     }
 
@@ -89,9 +90,10 @@ public class MapAttributeJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 2, "duns2", null, "street22", "state22", "country22" }, //
                 { 3, "duns3", null, "street23", "state23", "country23" }, //
                 { 4, null, "domain2", "street24", "state24", "country24" }, //
-                { 5, null, null, "street25", "state25", "country25" }, //
+                { 5, null, null, "street25", null, "country25" }, //
                 { 6, "duns_nomatch2", "domain6", "street26", "state26", "countr26" }, //
                 { 7, "duns_same", "domain_same", "street17", "state17", "countr27" }, //
+                { 8, "duns_null", "domain_null", null, null, "countr28" }, //
         };
     }
 
@@ -226,13 +228,21 @@ public class MapAttributeJobTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertNull(street, record.toString());
                 Assert.assertNull(state, record.toString());
                 Assert.assertEquals(country, "country17", record.toString());
-
+                break;
+            case "8":
+                Assert.assertEquals(latticeID, "8", record.toString());
+                Assert.assertEquals(duns, "duns_null", record.toString());
+                Assert.assertEquals(domain, "domain_null", record.toString());
+                // all nulls to all not-null
+                Assert.assertNull(street, record.toString());
+                Assert.assertNull(state, record.toString());
+                Assert.assertEquals(country, "country18", record.toString());
                 break;
             default:
             }
             rows++;
         }
-        Assert.assertEquals(rows, 7);
+        Assert.assertEquals(rows, 8);
         return true;
     }
 
