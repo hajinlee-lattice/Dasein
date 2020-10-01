@@ -2,6 +2,7 @@ package com.latticeengines.monitor.util;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -14,6 +15,9 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.TemplateUtils;
 
 public class EmailTemplateBuilder {
 
@@ -36,11 +40,22 @@ public class EmailTemplateBuilder {
         return this;
     }
 
-    public Multipart buildMultipart() throws MessagingException, IOException {
+    public EmailTemplateBuilder renderTemplate(Map<String, Object> params) {
+        Preconditions.checkNotNull(params, "template parameter map should not be null");
+        htmlTemplate = TemplateUtils.renderByMap(htmlTemplate, params);
+        return this;
+    }
+
+    public Multipart buildRawMultipart() throws MessagingException {
         Multipart mp = new MimeMultipart();
         MimeBodyPart htmlPart = new MimeBodyPart();
         htmlPart.setContent(htmlTemplate, "text/html");
         mp.addBodyPart(htmlPart);
+        return mp;
+    }
+
+    public Multipart buildMultipart() throws MessagingException, IOException {
+        Multipart mp = buildRawMultipart();
         appendImagesToMultipart(mp);
         return mp;
     }
@@ -123,6 +138,7 @@ public class EmailTemplateBuilder {
         CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html"), //
         S3_TEMPLATE_UPDATE("s3_template_update.html"), //
         S3_TEMPLATE_CREATE("s3_template_create.html"), //
+        DNB_INTENT_ALERT("dnb_intent_alert.html"), //
         DCP_UPLOAD_COMPLETED("dcp_upload_completed.html"), //
         DCP_UPLOAD_FAILED("dcp_upload_failed.html"),
         DCP_WELCOME_NEW_USER("dcp_welcome_new_user.html"); //

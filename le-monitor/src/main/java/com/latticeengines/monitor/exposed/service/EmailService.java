@@ -2,9 +2,11 @@ package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.Multipart;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
@@ -101,6 +103,23 @@ public interface EmailService {
     Long sendDCPWelcomeEmail(User user, String tenantName, String url);
 
     Long sendDCPWelcomeEmail(IDaaSUser idaasUser, String tenantName, String url);
+
+    /**
+     * Send email to specific recipients, notifying user about companies showing
+     * intent to their product/interest area TODO add attachment and maybe strong
+     * type params
+     *
+     * @param tenant
+     *            target tenant
+     * @param recipients
+     *            list of email addresses that will receive such email
+     * @param subject
+     *            email subject
+     * @param params
+     *            key/value pairs that will be used for format email body
+     */
+    void sendDnbIntentAlertEmail(@NotNull Tenant tenant, @NotNull Collection<String> recipients,
+            @NotNull String subject, @NotNull Map<String, Object> params);
 
     enum EmailFromAddress {
         DNB_CONNECT, LATTICE_ENGINES
