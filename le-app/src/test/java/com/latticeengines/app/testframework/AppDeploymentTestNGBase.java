@@ -39,12 +39,20 @@ public class AppDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
     @Value("${common.test.pls.url}")
     private String deployedPLSHostPort;
 
+    @Value("${common.test.ulysses.url}")
+    private String ulyssesHostPort;
+
     protected Tenant mainTestTenant;
     protected CustomerSpace mainTestCustomerSpace;
 
     protected String getPLSRestAPIHostPort() {
         return deployedPLSHostPort.endsWith("/") ? deployedPLSHostPort.substring(0, deployedPLSHostPort.length() - 1)
                 : deployedPLSHostPort;
+    }
+
+    protected String getUlyssesRestAPIHostPort() {
+        return ulyssesHostPort.endsWith("/") ? ulyssesHostPort.substring(0, ulyssesHostPort.length() - 1)
+                : ulyssesHostPort;
     }
 
     protected void setupTestEnvironmentWithOneTenant(Map<String, Boolean> featureFlagMap) {

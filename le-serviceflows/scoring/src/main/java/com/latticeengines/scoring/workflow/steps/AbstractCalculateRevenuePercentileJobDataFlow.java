@@ -61,7 +61,7 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
         overlayMetadata(targetTable);
         metadataProxy.createTable(customer, targetTableName, targetTable);
 
-        putStringValueInContext(SCORING_RESULT_TABLE_NAME, configuration.getTargetTableName());
+        putStringValueInContext(SCORING_RESULT_TABLE_NAME, targetTableName);
     }
 
     abstract String getTargetTableName();
