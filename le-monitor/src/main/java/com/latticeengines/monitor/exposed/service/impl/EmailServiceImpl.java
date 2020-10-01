@@ -492,34 +492,78 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsAlwaysOnCampaignExpirationEmail(User creator, User lastUpdater, String playDisplayName) {
+    public void sendPlsAlwaysOnCampaignExpirationEmail(User creator, String launchInterval, String launchSettingsUrl,
+            String playDisplayName,
+            String externalSystemName, String nextScheduledLaunch) {
         try {
             log.info(
                     String.format("Sending PLS Always On expiration email to creator %s started.", creator.getEmail()));
             EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION);
             builder.replaceToken("{{firstname}}", creator.getFirstName());
+            builder.replaceToken("{{launchInterval}}", launchInterval);
+            builder.replaceToken("{{launchSettingsUrl}}", launchSettingsUrl);
             builder.replaceToken("{{playDisplayName}}", playDisplayName);
+            builder.replaceToken("{{externalSystemName}}", externalSystemName);
+            builder.replaceToken("{{nextScheduledLaunch}}", nextScheduledLaunch);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT, playDisplayName),
+            sendMultiPartEmail(String.format(EmailSettings.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT),
                     mp, Collections.singleton(creator.getEmail()));
             log.info(String.format("Sending PLS Always On expiration email to %s succeeded.", creator.getEmail()));
 
-            if (lastUpdater.isActive() && !creator.getEmail().equals(lastUpdater.getEmail())) {
-                log.info(String.format("Sending PLS Always On expiration email to Last Updater %s started.",
-                        creator.getEmail()));
-                builder = new EmailTemplateBuilder(Template.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION);
-                builder.replaceToken("{{firstname}}", lastUpdater.getFirstName());
-                builder.replaceToken("{{playDisplayName}}", playDisplayName);
-                mp = builder.buildMultipartWithoutWelcomeHeader();
-                sendMultiPartEmail(
-                        String.format(EmailSettings.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT, playDisplayName), mp,
-                        Collections.singleton(lastUpdater.getEmail()));
-                log.info(String.format("Sending PLS Always On expiration email to %s succeeded.",
-                        lastUpdater.getEmail()));
-            }
+        } catch (Exception e) {
+            log.error(String.format("Failed to send PLS Always On expiration email to %s. Exception message=%s",
+                    creator.getEmail(), e.getMessage()), e);
+        }
+    }
+
+    @Override
+    public void sendPlsCampaignFailedEmail(User creator, String launchHistoryUrl, String playDisplayName,
+            String externalSystemName, String playLaunchState, String playLaunchCreated, String currentTime) {
+        try {
+            log.info(
+                    String.format("Sending PLS playLaunch failed email to creator %s started.", creator.getEmail()));
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_CAMPAIGN_FAILED);
+            builder.replaceToken("{{firstname}}", creator.getFirstName());
+            builder.replaceToken("{{launchHistoryLink}}", launchHistoryUrl);
+            builder.replaceToken("{{playDisplayName}}", playDisplayName);
+            builder.replaceToken("{{externalSystemName}}", externalSystemName);
+            builder.replaceToken("{{playLaunchState}}", playLaunchState);
+            builder.replaceToken("{{playLaunchCreated}}", playLaunchCreated);
+            builder.replaceToken("{{currentTime}}", currentTime);
+            
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(String.format(EmailSettings.PLS_CAMPAIGN_FAILED_SUBJECT, externalSystemName),
+                    mp, Collections.singleton(creator.getEmail()));
+            log.info(String.format("Sending PLS playLaunch failed email.", creator.getEmail()));
 
         } catch (Exception e) {
-            log.error(String.format("Failed to send PLS export segment in-progress email to %s. Exception message=%s",
+            log.error(String.format("Failed to send PLS playLaunch failed email to %s. Exception message=%s",
+                    creator.getEmail(), e.getMessage()), e);
+        }
+    }
+
+    @Override
+    public void sendPlsCampaignCanceledEmail(User creator, String launchHistoryUrl, String playDisplayName,
+            String externalSystemName, String playLaunchState, String playLaunchCreated, String currentTime) {
+        try {
+            log.info(
+                    String.format("Sending PLS playLaunch canceled email to creator %s started.", creator.getEmail()));
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_CAMPAIGN_CANCELED);
+            builder.replaceToken("{{firstname}}", creator.getFirstName());
+            builder.replaceToken("{{launchHistoryLink}}", launchHistoryUrl);
+            builder.replaceToken("{{playDisplayName}}", playDisplayName);
+            builder.replaceToken("{{externalSystemName}}", externalSystemName);
+            builder.replaceToken("{{playLaunchState}}", playLaunchState);
+            builder.replaceToken("{{playLaunchCreated}}", playLaunchCreated);
+            builder.replaceToken("{{currentTime}}", currentTime);
+
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(String.format(EmailSettings.PLS_CAMPAIGN_CANCELED_SUBJECT),
+                    mp, Collections.singleton(creator.getEmail()));
+            log.info(String.format("Sending PLS playLaunch canceled email.", creator.getEmail()));
+
+        } catch (Exception e) {
+            log.error(String.format("Failed to send PLS playLaunch canceled email to %s. Exception message=%s",
                     creator.getEmail(), e.getMessage()), e);
         }
     }

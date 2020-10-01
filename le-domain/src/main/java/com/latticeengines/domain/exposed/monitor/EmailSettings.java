@@ -22,7 +22,9 @@ public class EmailSettings {
     public static final String PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT = "Segment Export – Success";
     public static final String PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT = "Segment Export – Error";
     public static final String PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT = "Segment Export – Running";
-    public static final String PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT = "DEACTIVATED - Always On for Campaign - %s ";
+    public static final String PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT = "Your Last Automated Launch is Approaching";
+    public static final String PLS_CAMPAIGN_FAILED_SUBJECT = "We Failed to Launch Your Campaign to %s ";
+    public static final String PLS_CAMPAIGN_CANCELED_SUBJECT = "Your Launch Has Been Canceled";
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT = "Segment Orphan Export – Success";
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT = "Segment Orphan Export – Running";
     public static final String CDL_PA_COMPLETION_EMAIL_SUBJECT = "Lattice Job – Success";
