@@ -1,7 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +107,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
      * From DCP-1629: validation fails if subscriber is not entitled to given
      * elements for given domain and record type. Error should include specific
      * elements that are cause validation to fail
-     * 
+     *
      * @param enrichmentLayout
      *            - The object to validate
      * @return an EnrichmentLayoutValidationResult that tells if the layout is valid
