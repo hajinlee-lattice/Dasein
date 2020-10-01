@@ -247,6 +247,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         List<ColumnMetadata> dataBlockAttrs = new ArrayList<>();
         List<ColumnMetadata> candidateAttrs = new ArrayList<>();
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
+        // MatchedDuns belongs to candidate attribute
         ColumnMetadata duns = null;
         for (ColumnMetadata cm : cms) {
             if (MatchedDuns.equals(cm.getAttrName())) {
@@ -263,10 +264,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         }
         customerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         if (duns != null) {
-            dispNames.put(duns.getAttrName(), duns.getDisplayName());
+            dispNames.put(MatchedDuns, candidateFieldDispNames.get(MatchedDuns));
         }
-        candidateAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
-        dataBlockAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        candidateAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), candidateFieldDispNames.get(cm.getAttrName())));
+        dataBlockAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), dataBlockDispNames.get(cm.getAttrName())));
         otherAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         log.info("the generated map are " + JsonUtils.serialize(dispNames));
 
