@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scoring.SimplePercentileCalculator;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
