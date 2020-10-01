@@ -165,7 +165,7 @@ public class CDLServiceImpl implements CDLService {
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
-    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name",
+    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Standard Field Name",
             "Data Type");
 
     private static final String CUSTOM = "Custom";
