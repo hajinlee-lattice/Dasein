@@ -67,7 +67,10 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     @Override
     public DataBlockEntitlementContainer getEntitlement(String customerSpace) {
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
-        return  _self.getTenantEntitlementFromCache(tenantId);
+        log.info("Getting entitlements for Tenant " + tenantId);
+        DataBlockEntitlementContainer result =  _self.getTenantEntitlementFromCache(tenantId);
+        log.info("Returning entitlements: " + JsonUtils.serialize(result));
+        return result;
     }
 
     @Override
@@ -339,6 +342,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     DataBlockEntitlementContainer getSubscriberEntitlement(@NotNull String subsriberNumber) {
         try {
             String response = iDaaSService.getEntitlement(subsriberNumber);
+            log.info("IDaaS entitlements: " + response);
             return parseIDaaSEntitlement(response);
         } catch (RemoteLedpException e) {
             if (e.getRemoteStackTrace().contains("\"code\":\"IEC-AM-0001\"")) {
