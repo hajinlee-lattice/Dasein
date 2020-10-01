@@ -9,11 +9,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -62,6 +64,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.Validation
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
+import com.latticeengines.domain.exposed.pls.frontend.ValidationCategory;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
@@ -383,6 +386,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         List<FieldValidation> validations = new ArrayList<>();
+        Map<ValidationCategory, List<FieldValidation>> groupedValidations =
+                initializeGroupedValidation();
+
 
         FieldMappingDocument documentBestEffort = getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType);
         // multiple lattice field mapped to the same user field, the value of map should be a list
@@ -400,8 +406,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     if (mappedStandardFields.contains(fieldMapping.getMappedField())) {
                         String message =
                                 "Multiple user fields are mapped to standard field " + fieldMapping.getMappedField();
-                        validations.add(createValidation(fieldMapping.getUserField(), fieldMapping.getMappedField(),
-                                ValidationStatus.ERROR, message));
+                        FieldValidation validation = createValidation(fieldMapping.getUserField(),
+                                fieldMapping.getMappedField(),
+                                ValidationStatus.ERROR, message);
+                        validations.add(validation);
+                        groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
                     } else {
                         mappedStandardFields.add(fieldMapping.getMappedField());
                     }
@@ -409,7 +418,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
-        compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, customerSpace,
+        compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, groupedValidations,
+                customerSpace,
                 enableEntityMatch);
         // compare field mapping document after being modified with field mapping best effort
         for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
@@ -432,8 +442,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         String message = String
                                 .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
                                         bestEffortMapping.getFieldType());
-                        validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                message));
+                        FieldValidation validation = createValidation(userField, fieldMapping.getMappedField(),
+                                ValidationStatus.WARNING,
+                                message);
+                        validations.add(validation);
+                        groupedValidations.get(ValidationCategory.DataType).add(validation);
                     } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType())) {
                         String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
                                 fieldMapping.getDateFormatString() :
@@ -451,14 +464,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.getTimeFormatString(), fieldMapping.getTimezone(), warningMessage,
                                 formatWithBestEffort);
                         if (!match && warningMessage.length() > 0) {
-                            validations.add(createValidation(userField, fieldMapping.getMappedField(),
-                                    ValidationStatus.WARNING, warningMessage.toString()));
+                            FieldValidation validation = createValidation(userField, fieldMapping.getMappedField(),
+                                    ValidationStatus.WARNING, warningMessage.toString());
+                            validations.add(validation);
+                            groupedValidations.get(ValidationCategory.DataFormat).add(validation);
                         } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
                             // this is case that user change the date/time format which can be parsed
                             String message =  String.format("%s is set as %s which can parse the value from uploaded " +
                                     "file.", userField, userFormat);
-                            validations.add(createValidation(userField, fieldMapping.getMappedField(),
-                                    ValidationStatus.WARNING, message));
+                            FieldValidation validation = createValidation(userField, fieldMapping.getMappedField(),
+                                    ValidationStatus.WARNING, message);
+                            validations.add(validation);
+                            groupedValidations.get(ValidationCategory.DataFormat).add(validation);
                         }
                     }
                 }
@@ -484,7 +501,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
                             String message = String.format("%s is currently unmapped and can be mapped to Lattice " +
                                             " Field %s.", userField, attrName);
-                            validations.add(createValidation(null, attrName, ValidationStatus.WARNING, message));
+                            FieldValidation validation = createValidation(null, attrName, ValidationStatus.WARNING,
+                                    message);
+                            validations.add(validation);
+                            groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
                         }
                     }
                 }
@@ -503,9 +523,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
-        checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch || enableEntityMatchGA, enableEntityMatchGA, validations);
-        crosscheckDataType(customerSpace, entity, source, finalTemplate, dataFeedTaskUniqueId, validations);
+        checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch || enableEntityMatchGA,
+                enableEntityMatchGA, validations, groupedValidations);
+        crosscheckDataType(customerSpace, entity, source, finalTemplate, dataFeedTaskUniqueId, validations, groupedValidations);
         fieldValidationResult.setFieldValidations(validations);
+        fieldValidationResult.setGroupedValidations(groupedValidations);
+        fieldValidationResult.setValidationMessages(
+                Stream.of(ValidationCategory.values())
+                        .filter(e -> CollectionUtils.isEmpty(groupedValidations.get(e)))
+                        .collect(Collectors.toMap(e -> e, ValidationCategory::getValidMessage)));
         return fieldValidationResult;
     }
 
@@ -513,6 +539,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                        FieldMappingDocument fieldMappingDocument,
                                        Table standardTable,
                                        List<FieldValidation> validations,
+                                       Map<ValidationCategory, List<FieldValidation>> groupedValidations,
                                        CustomerSpace customerSpace,
                                        boolean entityMatchEnabled) {
         if (templateTable == null) {
@@ -545,7 +572,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         !preUserField.equals(userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
-                    validations.add(createValidation(userField, mapping.getMappedField(), ValidationStatus.WARNING, message));
+                    FieldValidation validation = createValidation(userField, mapping.getMappedField(),
+                            ValidationStatus.WARNING, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
                 }
                 previousStandardFieldMapping.remove(mapping.getMappedField());
             }
@@ -588,7 +618,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
-                                    String dataFeedTaskUniqueId, List<FieldValidation> validations) {
+                                    String dataFeedTaskUniqueId, List<FieldValidation> validations,
+                                    Map<ValidationCategory, List<FieldValidation>> groupedValidations) {
         List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(),
                 entity);
         if (dataFeedTasks != null && dataFeedTasks.size() != 0) {
@@ -607,7 +638,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     String message = String.format(
                             "The following field data type is not consistent with the one that already exists: %s",
                             String.join(",", inconsistentAttrs));
-                    validations.add(createValidation(null, null, ValidationStatus.ERROR, message));
+                    FieldValidation validation = createValidation(null, null,
+                            ValidationStatus.ERROR, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.DataType).add(validation);
                 }
             }
         }
@@ -718,7 +752,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     void checkTemplateTable(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch, boolean onlyGA,
-                            List<FieldValidation> validations) {
+                            List<FieldValidation> validations,
+                            Map<ValidationCategory, List<FieldValidation>> groupedValidations) {
         Map<String, Attribute> standardAttrs = new HashMap<>();
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true,
                 withoutId, enableEntityMatch, onlyGA);
@@ -730,7 +765,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 if(!templateAttrs.containsKey(attrEntry.getKey())) {
                     String message = String
                             .format("%s is not mapped, and is a required field.", attrEntry.getKey());
-                    validations.add(createValidation(null, attrEntry.getKey(), ValidationStatus.ERROR, message));
+                    FieldValidation validation = createValidation(null, attrEntry.getKey(), ValidationStatus.ERROR,
+                            message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.RequiredField).add(validation);
                 }
             }
             if (templateAttrs.containsKey(attrEntry.getKey())) {
@@ -740,13 +778,17 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         attr2.getSourceAttrName();
                 if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
                     String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(nameFromFile, attr2.getName(),
-                            ValidationStatus.ERROR, message));
+                    FieldValidation validation = createValidation(nameFromFile, attr2.getName(),
+                            ValidationStatus.ERROR, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.DataType).add(validation);
                 }
                 if (!attr1.getRequired().equals(attr2.getRequired())) {
                     String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(nameFromFile, attr2.getName(),
-                            ValidationStatus.ERROR, message));
+                    FieldValidation validation = createValidation(nameFromFile, attr2.getName(),
+                            ValidationStatus.ERROR, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.RequiredField).add(validation);
                 }
             }
         }
@@ -1310,8 +1352,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
     }
 
-
-
+    private Map<ValidationCategory, List<FieldValidation>> initializeGroupedValidation() {
+        Map<ValidationCategory, List<FieldValidation>> groupedValidation = new LinkedHashMap();
+        for (ValidationCategory val : ValidationCategory.values()) {
+            groupedValidation.put(val, new ArrayList<>());
+        }
+        return groupedValidation;
+    }
 
     private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {
         LatticeSchemaField latticeSchemaField = new LatticeSchemaField();
