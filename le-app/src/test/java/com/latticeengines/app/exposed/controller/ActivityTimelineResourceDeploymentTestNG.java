@@ -178,7 +178,7 @@ public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestN
         try {
             return item.with("Record", Snappy.compress(((String) item.get("Record")).getBytes()));
         } catch (Exception e) {
-            log.warn("Record attribute set failure.");
+            log.warn("Attribute set failure.");
             return null;
         }
     }
