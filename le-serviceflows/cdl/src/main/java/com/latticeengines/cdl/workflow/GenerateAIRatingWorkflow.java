@@ -13,6 +13,7 @@ import com.latticeengines.cdl.workflow.steps.rating.ExtractScoringTarget;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.steps.CalculateExpectedRevenuePercentileDataFlow;
+import com.latticeengines.scoring.workflow.steps.CalculateExpectedRevenuePercentileJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.CalculatePredictedRevenuePercentileDataFlow;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
@@ -54,8 +55,12 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     @Inject
     private RecalculateExpectedRevenueDataFlow recalculateExpectedRevenueDataFlow;
 
+    // TODO: pending migration
     @Inject
     private CalculateExpectedRevenuePercentileDataFlow calculateExpectedRevenuePercentileDataFlow;
+
+    @Inject
+    private CalculateExpectedRevenuePercentileJobDataFlow calculateExpectedRevenuePercentileJobDataFlow;
 
     @Inject
     private ScoreAggregateFlow scoreAggregate;
@@ -83,7 +88,7 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
                     .next(recalculatePercentileScore) //
                     .next(calculatePredictedRevenuePercentileDataFlow) //
                     .next(recalculateExpectedRevenueDataFlow) //
-                    .next(calculateExpectedRevenuePercentileDataFlow) //
+                    .next(calculateExpectedRevenuePercentileJobDataFlow) //
                     .next(scoreAggregate); //
         }
         return builder //

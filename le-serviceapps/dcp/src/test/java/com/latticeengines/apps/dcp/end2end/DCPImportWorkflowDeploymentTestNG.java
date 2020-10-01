@@ -341,6 +341,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     ccIdx = headers.indexOf("Match Confidence Code");
                     rnIdx = headers.indexOf("Registration Number");
                     mtIdx = headers.indexOf("Match Type");
+                    Assert.assertTrue(idIdx < dunsIdx);
+                    Assert.assertTrue(dunsIdx < ccIdx);
                 } else {
                     String customerId = nextRecord[idIdx];
                     String matchType = nextRecord[mtIdx];
