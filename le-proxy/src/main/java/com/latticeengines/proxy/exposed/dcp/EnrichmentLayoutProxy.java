@@ -19,7 +19,7 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
 
     public EnrichmentLayoutDetail getEnrichmentLayoutBySourceId(String customerSpace, String sourceId) {
         String baseUrl = PREFIX + "/enrichmentlayout/sourceId/{sourceId}";
-        String url = getUrl(customerSpace, sourceId, baseUrl);
+        String url = constructUrl(baseUrl, customerSpace, sourceId);
         return get("Get enrichment layout by sourceId", url, EnrichmentLayoutDetail.class);
     }
 
@@ -43,16 +43,23 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
     }
 
     public ResponseDocument<String> update (String customerId, EnrichmentLayout enrichmentLayout) {
-        String baseUrl = "/customerspaces/{customerSpace}/";
-        String url = getUrl(customerId, baseUrl, null);
+        String baseUrl = "/customerspaces/{customerSpace}/enrichmentlayout";
+        String url = constructUrl(baseUrl, customerId);
         return put("update enrichmentLayout", url, enrichmentLayout, ResponseDocument.class);
     }
 
     public ResponseDocument<String> deleteLayout (String customerId, String layoutId) {
-        String baseUrl = "/customerspaces/{customerId}/layoutId/{layoutId}";
+        String baseUrl = "/customerspaces/{customerId}/enrichmentlayout/layoutId/{layoutId}";
         String url = constructUrl(baseUrl, customerId, layoutId);
-        delete("delete enrichmentLayout", url, String.class);
-        return ResponseDocument.successResponse("");
+        delete("delete enrichmentLayout by layoutId", url, String.class);
+        return ResponseDocument.successResponse(String.format("EnrichmentLayout with layoutId=%s deleted.", layoutId));
+    }
+
+    public ResponseDocument<String> deleteLayoutBySourceId (String customerId, String sourceId) {
+        String baseUrl = "/customerspaces/{customerId}/enrichmentlayout/sourceId/{sourceId}";
+        String url = constructUrl(baseUrl, customerId, sourceId);
+        delete("delete enrichmentLayout by sourceId", url, String.class);
+        return ResponseDocument.successResponse(String.format("EnrichmentLayout with sourceId=%s deleted.", sourceId));
     }
 
     private String getUrl(String customerSpace, String baseUrl, String sourceId) {
