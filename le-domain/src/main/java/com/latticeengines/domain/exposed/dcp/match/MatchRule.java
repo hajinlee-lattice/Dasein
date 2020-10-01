@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
@@ -36,6 +38,12 @@ public class MatchRule {
 
     @JsonProperty("matchKey")
     private MatchKey matchKey;
+
+    @JsonProperty("domain")
+    private DataDomain domain;
+
+    @JsonProperty("recordType")
+    private DataRecordType recordType;
 
     @JsonProperty("versionId")
     private Integer versionId;
@@ -106,6 +114,22 @@ public class MatchRule {
 
     public void setMatchKey(MatchKey matchKey) {
         this.matchKey = matchKey;
+    }
+
+    public DataDomain getDomain() {
+        return domain;
+    }
+
+    public void setDomain(DataDomain domain) {
+        this.domain = domain;
+    }
+
+    public DataRecordType getRecordType() {
+        return recordType;
+    }
+
+    public void setRecordType(DataRecordType recordType) {
+        this.recordType = recordType;
     }
 
     public Integer getVersionId() {

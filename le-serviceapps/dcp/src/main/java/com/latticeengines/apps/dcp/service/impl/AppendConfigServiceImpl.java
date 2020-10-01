@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -59,6 +60,9 @@ public class AppendConfigServiceImpl implements AppendConfigService {
 
     @Inject
     private IDaaSService iDaaSService;
+
+    @Value("${dcp.entitlement.allow.param.null}")
+    private boolean allowNull;
 
     @Override
     public DataBlockEntitlementContainer getEntitlement(String customerSpace) {
@@ -271,7 +275,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
             }
         } else {
             log.warn("Tenant {} does not have a subscriber number", subscriberNumber);
-            return true;
+            return allowNull;
         }
     }
 
