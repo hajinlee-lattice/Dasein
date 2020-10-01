@@ -82,23 +82,6 @@ public class ActivityTimelineResource {
         return data;
     }
 
-    private Set<String> getDefaultStreams() {
-        return Stream.of(defaultStreams.split(",")) //
-                .map(AtlasStream.StreamType::valueOf) //
-                .map(AtlasStream.StreamType::name) //
-                .collect(Collectors.toSet());
-    }
-
-    private void filterStreamData(DataPage data, Set<String> streamTypes) {
-        List<Map<String, Object>> filteredData = new ArrayList<>();
-        for (Map<String, Object> datum : data.getData()) {
-            if (datum.containsKey(InterfaceName.StreamType.name())
-                    && streamTypes.contains((String) datum.get(InterfaceName.StreamType.name())))
-                filteredData.add(datum);
-        }
-        data.setData(filteredData);
-    }
-
     @GetMapping("/accounts/{accountId:.+}/contacts/{contactId:.+}")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity timeline data for a contact")
@@ -135,6 +118,25 @@ public class ActivityTimelineResource {
         return activityStoreProxy.getJourneyStages(customerSpace.getTenantId());
     }
 
+    @GetMapping("/accounts/{accountId:.+}/metrics")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve metrics for an account")
+    @SuppressWarnings("ConstantConditions")
+    public Map<String, Integer> getMetrics(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId,
+            @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
+
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
+        }
+
+        log.info(String.format("Retrieving metrics of accountId(ID: %s) for %s period, ( tenantId: %s )", accountId,
+                StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod, customerSpace.getTenantId()));
+
+        return activityTimelineService.getActivityTimelineMetrics(accountId, timelinePeriod, getOrgInfo(authToken));
+    }
+
     private Map<String, String> getOrgInfo(String token) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
@@ -143,5 +145,22 @@ public class ActivityTimelineResource {
             log.warn("Failed to find orginfo from the authentication token for tenant " + customerSpace);
         }
         return null;
+    }
+
+    private Set<String> getDefaultStreams() {
+        return Stream.of(defaultStreams.split(",")) //
+                .map(AtlasStream.StreamType::valueOf) //
+                .map(AtlasStream.StreamType::name) //
+                .collect(Collectors.toSet());
+    }
+
+    private void filterStreamData(DataPage data, Set<String> streamTypes) {
+        List<Map<String, Object>> filteredData = new ArrayList<>();
+        for (Map<String, Object> datum : data.getData()) {
+            if (datum.containsKey(InterfaceName.StreamType.name())
+                    && streamTypes.contains((String) datum.get(InterfaceName.StreamType.name())))
+                filteredData.add(datum);
+        }
+        data.setData(filteredData);
     }
 }
