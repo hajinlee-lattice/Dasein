@@ -14,5 +14,7 @@ public interface EnrichmentLayoutService {
 
     ResponseDocument<String> update(String customerId, EnrichmentLayout enrichmentLayout);
 
-    ResponseDocument<String> delete(String customerId, String layoutId);
+    ResponseDocument<String> deleteByLayoutId(String customerId, String layoutId);
+
+    ResponseDocument<String> deleteBySourceId(String customerId, String sourceId);
 }

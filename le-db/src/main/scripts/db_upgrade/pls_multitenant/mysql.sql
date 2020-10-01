@@ -63,6 +63,8 @@ CREATE PROCEDURE `UpdateSchema`()
           `RECORD_TYPE`  varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
           `CREATED`      datetime                                NOT NULL,
           `CREATED_BY`   varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `ELEMENTS`     json                                    DEFAULT NULL,
+          `SOURCE_ID`    varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
           `TEAM_ID`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
           `UPDATED`      datetime                                NOT NULL,
           `FK_TENANT_ID` bigint(20)                              NOT NULL,
