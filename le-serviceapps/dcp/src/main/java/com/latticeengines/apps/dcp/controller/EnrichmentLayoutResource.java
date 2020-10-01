@@ -77,7 +77,7 @@ public class EnrichmentLayoutResource {
     }
 
     /**
-     * Set the deleted flag to true.
+     * Delete the object by layout id
      * @param customerSpace
      * @param layoutId
      */
@@ -89,7 +89,7 @@ public class EnrichmentLayoutResource {
     }
 
     /**
-     * Set the deleted flag to true.
+     * Delete the object by source Id
      * @param customerSpace
      * @param sourceId
      */

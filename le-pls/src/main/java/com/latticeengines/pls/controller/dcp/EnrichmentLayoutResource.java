@@ -79,11 +79,20 @@ public class EnrichmentLayoutResource {
 
     @DeleteMapping("/layoutId/{layoutId}")
     @ResponseBody
-    @ApiOperation("Delete a EnrichmentLayout")
+    @ApiOperation("Delete a EnrichmentLayout by layoutId")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public void delete(@PathVariable String layoutId) {
+    public void deleteByLayoutId(@PathVariable String layoutId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        enrichmentLayoutService.delete(customerSpace.toString(), layoutId);
+        enrichmentLayoutService.deleteByLayoutId(customerSpace.toString(), layoutId);
+    }
+
+    @DeleteMapping("/sourceId/{sourceId}")
+    @ResponseBody
+    @ApiOperation("Delete a EnrichmentLayout by sourceId")
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
+    public void deleteBySourceId(@PathVariable String sourceId) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        enrichmentLayoutService.deleteBySourceId(customerSpace.toString(), sourceId);
     }
 
     private void checkCustomerSpace(CustomerSpace customerSpace) {

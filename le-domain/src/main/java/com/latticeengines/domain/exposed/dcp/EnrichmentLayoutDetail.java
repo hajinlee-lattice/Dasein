@@ -40,11 +40,15 @@ public class EnrichmentLayoutDetail {
     @JsonProperty("updated")
     private Date updated;
 
-    @JsonProperty("tenant")
+    @JsonProperty("tenantId")
     private String tenantId;
 
     @JsonProperty("elements")
     private List<String> elements;
+
+    private EnrichmentLayoutDetail() {
+
+    }
 
     public EnrichmentLayoutDetail(EnrichmentLayout enrichmentLayout) {
         this.layoutId =   enrichmentLayout.getLayoutId();

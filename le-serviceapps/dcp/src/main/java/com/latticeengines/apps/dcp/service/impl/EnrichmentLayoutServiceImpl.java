@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -41,29 +42,37 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
     @Inject
     private TenantService tenantService;
 
+    private static final String RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN = "Layout_%s";
+
     @Override
     public ResponseDocument<String> create(String customerSpace, EnrichmentLayout enrichmentLayout) {
+        if (null == enrichmentLayout.getLayoutId()) {
+            enrichmentLayout.setLayoutId(createLayoutId());
+        }
         Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         enrichmentLayout.setTenant(tenant);
         ResponseDocument<String> result = validate(enrichmentLayout);
         if (result.isSuccess()) {
             enrichmentLayoutEntityMgr.create(enrichmentLayout);
+            result.setResult(enrichmentLayout.getLayoutId());
         }
         return result;
     }
 
     @Override
-    public List<EnrichmentLayoutDetail> getAll(String customerSpace, int pageIndex,
-            int pageSize) {
+    public List<EnrichmentLayoutDetail> getAll(String customerSpace, int pageIndex, int pageSize) {
         PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
         return enrichmentLayoutEntityMgr.findAllEnrichmentLayoutDetail(pageRequest);
     }
 
     @Override
     public ResponseDocument<String> update(String customerSpace, EnrichmentLayout enrichmentLayout) {
+        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        enrichmentLayout.setTenant(tenant);
         ResponseDocument<String> result = validate(enrichmentLayout);
         if (result.isSuccess()) {
             enrichmentLayoutEntityMgr.update(enrichmentLayout);
+            result.setResult(enrichmentLayout.getLayoutId());
         }
         return result;
     }
@@ -134,9 +143,20 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             result = new ResponseDocument<>();
             result.setErrors(errors);
         } else {
-            String tenantId = enrichmentLayout.getTenant().getId();
-            DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService.getEntitlement(tenantId);
-            result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
+            // does this source already have an enrichmentlayout?
+            String sourceId = enrichmentLayout.getSourceId();
+            EnrichmentLayoutDetail el = enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailBySourceId(sourceId);
+            if (null != el) {
+                result = new ResponseDocument<>();
+                result.setErrors(Collections.singletonList( //
+                        String.format("Can't create.  SourceId %s already has an EnrichmentLayout and each sourceId can only have one.", //
+                                sourceId)));
+            }
+            else {
+                String tenantId = enrichmentLayout.getTenant().getId();
+                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService.getEntitlement(tenantId);
+                result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
+            }
         }
         return result;
     }
@@ -170,25 +190,29 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                 String checkingString = neededElement.substring(0, neededElement.lastIndexOf("_")); // trim the version
                                                                                                     // value off the end
                 if (!authorizedElements.contains(checkingString)) { // if not in Set then the layout isn't valid
-                    String err = String.format("EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s.",
+                    String err = String.format(
+                            "EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s.",
                             neededElement, enrichmentLayout.getTenant().getSubscriberNumber());
                     errors.add(err);
-                    /*return new EnrichmentLayoutOperationResult(false, String.format(
-                            "EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s.",
-                            neededElement, enrichmentLayout.getTenant().getSubscriberNumber()));*/
+                    /*
+                     * return new EnrichmentLayoutOperationResult(false, String.format(
+                     * "EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s."
+                     * , neededElement, enrichmentLayout.getTenant().getSubscriberNumber()));
+                     */
                 }
             }
-            //return new EnrichmentLayoutOperationResult(true, "EnrichmentLayout is valid.");
         } else {
             errors.add(String.format("Data Record Type %s does not contain any data blocks.", dataRecordType.name()));
-            /*return new EnrichmentLayoutOperationResult(false,
-                    String.format("Data Record Type %s does not contain any data blocks.", dataRecordType.name())); */
+            /*
+             * return new EnrichmentLayoutOperationResult(false,
+             * String.format("Data Record Type %s does not contain any data blocks.",
+             * dataRecordType.name()));
+             */
 
         }
         if (errors.isEmpty()) {
-            return ResponseDocument.successResponse("success");
-        }
-        else {
+            return ResponseDocument.successResponse("");
+        } else {
             ResponseDocument<String> rd0 = new ResponseDocument<>();
             rd0.setErrors(errors);
             return rd0;
@@ -209,9 +233,20 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             }
         }
         ResponseDocument<String> response = new ResponseDocument<>();
-        response.setErrors(Collections.singletonList(String.format("Enrichment Layout is not valid. %s domain is not valid domain for this user.",
-                enrichmentLayout.getDomain().name())));
+        response.setErrors(Collections.singletonList(
+                String.format("Enrichment Layout is not valid. %s domain is not valid domain for this user.",
+                        enrichmentLayout.getDomain().name())));
         return response;
+    }
+
+    private String createLayoutId() {
+        String randomLayoutId = String.format(RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN,
+                RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        while (enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailByLayoutId(randomLayoutId) != null) {
+            randomLayoutId = String.format(RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN,
+                    RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        }
+        return randomLayoutId;
     }
 
 }
