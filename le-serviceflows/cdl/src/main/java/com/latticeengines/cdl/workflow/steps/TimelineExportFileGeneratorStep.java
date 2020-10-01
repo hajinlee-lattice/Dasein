@@ -51,7 +51,7 @@ public class TimelineExportFileGeneratorStep extends BaseWorkflowStep<TimelineEx
 
             for (String avroFilePath : avroHdfsFilePaths) {
                 fileExportTime = new Date();
-                String tableName = String.format("tl_export_%s", fileExportTime);
+                String tableName = String.format("tl_export_%s", fileExportTime.getTime());
                 fileExporters.add(new TimelineExportFileGeneratorStep.CsvFileExporter(yarnConfiguration, config,
                         avroFilePath, tableName));
             }
