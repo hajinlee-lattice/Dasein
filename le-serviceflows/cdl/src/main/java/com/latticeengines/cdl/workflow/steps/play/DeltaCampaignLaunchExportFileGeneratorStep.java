@@ -141,6 +141,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         String addRenameCSVPath;
         String deleteRenameCSVPath;
         Date fileExportTime = new Date();
+        putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.NAME_SPACE, buildNamespace(configuration));
         if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
             addRenameCSVPath = renameDataUnit(result.getTargets().get(0), ADD_FILE_PREFIX, fileExportTime);
             putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, Lists.newArrayList(addRenameCSVPath));
@@ -169,5 +170,10 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
             log.info("Can't rename CSV file to {}.", fileName);
             throw new RuntimeException("Unable to rename csv file on HDFS!");
         }
+    }
+
+    public String buildNamespace(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
+        return String.format("%s.%s.%s.%s.%s", config.getDestinationSysType(), config.getDestinationSysName(),
+                config.getDestinationOrgId(), config.getPlayName(), config.getPlayLaunchId());
     }
 }

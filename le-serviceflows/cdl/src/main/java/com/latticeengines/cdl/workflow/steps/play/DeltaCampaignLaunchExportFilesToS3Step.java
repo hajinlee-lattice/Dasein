@@ -110,14 +110,14 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
         if (lookupIdMap.isTrayEnabled()) {
+            String nameSpace = getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.NAME_SPACE);
             exportFiles.keySet().forEach(k -> {
                 List<String> sourcePaths = exportFiles.get(k);
                 List<String> targetPaths = new ArrayList<>();
                 sourcePaths.stream().forEach(path -> {
                     ImportExportRequest request = new ImportExportRequest();
                     request.srcPath = path;
-                    request.tgtPath = pathBuilder.convertAtlasFileExport(path, podId, tenantId, dropBoxSummary,
-                            exportS3Bucket);
+                    request.tgtPath = pathBuilder.convertAtlasFileExport(dropBoxSummary, exportS3Bucket, nameSpace);
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
                     hdfsExportFilePaths.add(request.srcPath);

@@ -1,5 +1,6 @@
 package com.latticeengines.testframework.service.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -153,9 +154,10 @@ public class TestPlayCreationHelper {
     private PlayLaunch playLaunch;
     private List<PlayType> playTypes;
     private List<LookupIdMap> connections = new ArrayList<>();
-
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-
+    private final String addedAccounts = "addedAccounts";
+    private final String addedContacts ="addedContacts";
+    private final String completeContacts = "completeContacts";
     // Todo 1: Remove testCrud from here, this class should only be a helper class
     // no testing
     // Todo 2: Make it stateless
@@ -1010,4 +1012,19 @@ public class TestPlayCreationHelper {
         MultiTenantContext.setTenant(tenant);
     }
 
+    public PlayLaunch createAccountContactTableForLaunch(String s3AvroDir, String version) throws IOException {
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setLaunchState(LaunchState.Queued);
+        List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);
+        playLaunch = playProxy.createNewLaunchByPlayAndChannel(tenantIdentifier, play.getName(), channels.get(0).getId(), false, playLaunch);
+        playLaunch.setAddAccountsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, addedAccounts));
+        playLaunch.setAddContactsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, addedContacts));
+        playLaunch.setCompleteContactsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, completeContacts));
+        playProxy.updatePlayLaunch(tenantIdentifier, playName, playLaunch.getId(), playLaunch);
+        return playLaunch;
+    }
+
+    public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String launchId) {
+        return playProxy.kickoffWorkflowForLaunch(customerSpace, playName, launchId);
+    }
 }
