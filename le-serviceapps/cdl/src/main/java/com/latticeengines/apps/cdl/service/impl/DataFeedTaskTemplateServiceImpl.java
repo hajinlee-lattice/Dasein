@@ -582,6 +582,16 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         log.info(String.format("Delete template %s, template table name: %s", dataFeedTask.getUniqueId(),
                 dataFeedTask.getImportTemplate().getName()));
         metadataProxy.deleteImportTable(customerSpace, dataFeedTask.getImportTemplate().getName());
+        // last step: reset Import System MapToLattice flag:
+        if (importSystem != null) {
+            if (importSystem.getSystemType().getPrimaryAccount().equals(EntityTypeUtils.matchFeedType(feedType))) {
+                importSystem.setMapToLatticeAccount(false);
+                s3ImportSystemService.updateS3ImportSystem(customerSpace, importSystem);
+            } else if (importSystem.getSystemType().getPrimaryContact().equals(EntityTypeUtils.matchFeedType(feedType))) {
+                importSystem.setMapToLatticeContact(false);
+                s3ImportSystemService.updateS3ImportSystem(customerSpace, importSystem);
+            }
+        }
         return true;
     }
 
