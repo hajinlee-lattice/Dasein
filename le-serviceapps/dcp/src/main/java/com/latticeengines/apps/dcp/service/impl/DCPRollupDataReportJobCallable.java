@@ -19,15 +19,14 @@ import org.springframework.data.domain.PageRequest;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.dcp.entitymgr.DataReportEntityMgr;
 import com.latticeengines.apps.dcp.provision.impl.DCPComponent;
-import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
@@ -44,7 +43,7 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
     private DataReportEntityMgr dataReportEntityMgr;
 
-    private DCPDataReportWorkflowSubmitter dcpDataReportWorkflowSubmitter;
+    private DataReportProxy dataReportProxy;
 
     private ZKConfigService zkConfigService;
 
@@ -53,7 +52,7 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
     public DCPRollupDataReportJobCallable(Builder builder) {
         this.jobArguments = builder.jobArguments;
         this.dataReportEntityMgr = builder.dataReportEntityMgr;
-        this.dcpDataReportWorkflowSubmitter = builder.dcpDataReportWorkflowSubmitter;
+        this.dataReportProxy = builder.dataReportProxy;
         this.zkConfigService = builder.zkConfigService;
         this.workflowProxy = builder.workflowProxy;
     }
@@ -97,8 +96,7 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
                         request.setRootId(ownerId);
                         request.setLevel(DataReportRecord.Level.Tenant);
                         request.setMode(DataReportMode.RECOMPUTE_TREE);
-                        ApplicationId appId = dcpDataReportWorkflowSubmitter.submit(CustomerSpace.parse(ownerId), request,
-                                new WorkflowPidWrapper(-1L));
+                        ApplicationId appId = dataReportProxy.rollupDataReport(CustomerSpace.parse(ownerId).toString(), request);
                         log.info("ownerId {}, refresh time {}, current time {}, the appId {}", ownerId, refreshDate,
                                 currentTime, appId);
                         number++;
@@ -120,7 +118,7 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
         private DataReportEntityMgr dataReportEntityMgr;
 
-        private DCPDataReportWorkflowSubmitter dcpDataReportWorkflowSubmitter;
+        private DataReportProxy dataReportProxy;
 
         private ZKConfigService zkConfigService;
 
@@ -144,8 +142,8 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder dcpDataReportWorkflowSubmitter(DCPDataReportWorkflowSubmitter dcpDataReportWorkflowSubmitter) {
-            this.dcpDataReportWorkflowSubmitter = dcpDataReportWorkflowSubmitter;
+        public Builder dataReportProxy(DataReportProxy dataReportProxy) {
+            this.dataReportProxy = dataReportProxy;
             return this;
         }
 
