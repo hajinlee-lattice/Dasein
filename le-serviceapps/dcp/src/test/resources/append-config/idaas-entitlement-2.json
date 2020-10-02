@@ -1,0 +1,201 @@
+{
+  "code": "200",
+  "message": "success",
+  "products": [
+    {
+      "name": "D&B for Sales & Marketing",
+      "packages": [
+        {
+          "lineItemId": null,
+          "name": "Analytical Use",
+          "RUM_limits": [
+            {
+              "region": "US-Canada Records",
+              "limit": 1000000,
+              "overage": [
+                {
+                  "entitlement_canonical_name": null,
+                  "overage_selling_price": 0.0
+                }
+              ]
+            }
+          ],
+          "wallet": {
+            "allowance": 0,
+            "rate_card": []
+          },
+          "meter": null,
+          "entitlements": [
+            {
+              "canonical_name": "companyentityresolution",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companyinfo",
+              "level": "Level 2",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2"
+              ]
+            },
+            {
+              "canonical_name": "principalscontacts",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "hierarchyconnections",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companynews",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "industryprofile",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "diversityinsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companyfinancials",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "eventfilings",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "paymentinsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "salesmarketinginsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "inquiryinsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "spendinsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "businessactivityinsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "shippinginsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "externaldisruptioninsight",
+              "level": "Level 1",
+              "status": "InActive",
+              "allowed_levels": [
+                "L1"
+              ]
+            }
+          ]
+        }
+      ],
+      "domain_add_ons": [
+        {
+          "level": "Level 0",
+          "lineItemId": null,
+          "canonical_name": "research",
+          "allowed_levels": [],
+          "status": "InActive",
+          "meter": null,
+          "RUM_limits": null
+        },
+        {
+          "level": "Level 0",
+          "lineItemId": null,
+          "canonical_name": "contacts",
+          "allowed_levels": [],
+          "status": "InActive",
+          "meter": null,
+          "RUM_limits": null
+        },
+        {
+          "level": "Level 0",
+          "lineItemId": null,
+          "canonical_name": "REFDAT",
+          "allowed_levels": [],
+          "status": "InActive",
+          "meter": null,
+          "RUM_limits": null
+        },
+        {
+          "level": "Level 0",
+          "lineItemId": null,
+          "canonical_name": "shippinginsightdtls",
+          "allowed_levels": [],
+          "status": "InActive",
+          "meter": null,
+          "RUM_limits": null
+        }
+      ]
+    }
+  ]
+}

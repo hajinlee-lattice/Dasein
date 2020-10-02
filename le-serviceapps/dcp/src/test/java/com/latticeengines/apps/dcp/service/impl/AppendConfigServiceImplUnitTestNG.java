@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.Analytical;
 import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.Domain;
 import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.MasterData;
 
@@ -48,6 +49,7 @@ public class AppendConfigServiceImplUnitTestNG {
                     Assert.assertEquals(domain.getRecordTypes().size(), 1);
                     Assert.assertTrue(domain.getRecordTypes().containsKey(MasterData));
                     Assert.assertEquals(domain.getRecordTypes().get(MasterData).size(), 5);
+                    Assert.assertFalse(domain.getRecordTypes().containsKey(Analytical));
                     break;
                 default:
                     Assert.fail("Should not see domain " + domain.getDomain());
@@ -56,4 +58,12 @@ public class AppendConfigServiceImplUnitTestNG {
 
     }
 
+    @Test(groups = "unit")
+    public void parseAnalyticalOnly() throws IOException {
+        InputStream is = new ClassPathResource("append-config/idaas-entitlement-2.json").getInputStream();
+        String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
+        DataBlockEntitlementContainer container = AppendConfigServiceImpl.parseIDaaSEntitlement(idaasStr);
+        Assert.assertNotNull(container);
+        Assert.assertTrue(container.getDomains().isEmpty());
+    }
 }
