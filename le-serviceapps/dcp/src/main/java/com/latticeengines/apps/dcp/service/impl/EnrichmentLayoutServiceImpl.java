@@ -149,12 +149,13 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             if (null != el) {
                 result = new ResponseDocument<>();
                 result.setErrors(Collections.singletonList( //
-                        String.format("Can't create.  SourceId %s already has an EnrichmentLayout and each sourceId can only have one.", //
+                        String.format(
+                                "Can't create.  SourceId %s already has an EnrichmentLayout and each sourceId can only have one.", //
                                 sourceId)));
-            }
-            else {
+            } else {
                 String tenantId = enrichmentLayout.getTenant().getId();
-                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService.getEntitlement(tenantId);
+                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService
+                        .getEntitlement(tenantId, "ALL", "ALL");
                 result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
             }
         }

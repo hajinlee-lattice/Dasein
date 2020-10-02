@@ -112,7 +112,7 @@ public class DataBlockEntitlementContainer {
         }
 
         public List<DataBlockLevel> getDataBlockLevels() {
-            return levels;
+            return dataBlockLevels;
         }
     }
 
