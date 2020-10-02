@@ -37,6 +37,8 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     private static final String subscriberNumberWithManyDomains = "202007101";
 
+    private static final String sourceIdTemplate = "Source_%s";
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
@@ -44,11 +46,15 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         tenantService.updateTenant(mainTestTenant);
     }
 
+    private String getRandomSourceId () {
+        return String.format(sourceIdTemplate, RandomStringUtils.randomAlphanumeric(6));
+    }
+
     @Test(groups = "functional")
     public void testCreateValidWithFewElements() {
 
         PrimeMetadataProxy mockPrimeMetadataProxy = mock(PrimeMetadataProxy.class);
-        Set<String> mockResult = new HashSet<>(Arrays.asList("companyinfo_L1_v1"));
+        Set<String> mockResult = new HashSet<>(Arrays.asList("companyinfo_L1_v1"));  // This mock is the min set of datablocks that the user needs for the layout to be valid.
         when(mockPrimeMetadataProxy.getBlocksContainingElements(anyList())).thenReturn(mockResult);
         ReflectionTestUtils.setField(enrichmentLayoutService, "primeMetadataProxy", mockPrimeMetadataProxy);
 
@@ -61,7 +67,8 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         layout.setDomain(DataDomain.SalesMarketing);
         layout.setRecordType(DataRecordType.Domain);
-        layout.setSourceId("sourceId");
+        String rndSrcId = getRandomSourceId();
+        layout.setSourceId(rndSrcId);
         List<String> elementList = Arrays.asList("primaryname", "duns_number", //
                 "dnbassessment_decisionheadqtr_duns","dnbassessment_decisionheadqtr_decisionpowerscore");
         layout.setElements(elementList);
@@ -75,7 +82,7 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         Assert.assertNotNull(retrievedLayout);
         Assert.assertEquals(retrievedLayout.getDomain(), DataDomain.SalesMarketing);
-        Assert.assertEquals(retrievedLayout.getSourceId(), "sourceId");
+        Assert.assertEquals(retrievedLayout.getSourceId(), rndSrcId);
 
     }
 
@@ -83,7 +90,7 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
     public void testCreateNotValid () {
 
         PrimeMetadataProxy mockPrimeMetadataProxy = mock(PrimeMetadataProxy.class);
-        Set<String> mockResult = new HashSet<>(Arrays.asList("companyinfo_L1_v1", "companyinfo_L2_v1", "companyinfo_L3_v1"));
+        Set<String> mockResult = new HashSet<>(Arrays.asList("companyinfo_L1_v1", "companyinfo_L2_v1", "companyinfo_L3_v1"));  // User needs at least these
         when(mockPrimeMetadataProxy.getBlocksContainingElements(anyList())).thenReturn(mockResult);
         ReflectionTestUtils.setField(enrichmentLayoutService, "primeMetadataProxy", mockPrimeMetadataProxy);
 
@@ -134,7 +141,60 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         EnrichmentLayoutDetail updatedLayout = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, layoutId);
         Assert.assertNotNull(updatedLayout);
         Assert.assertEquals(DataDomain.Supply, updatedLayout.getDomain());
+    }
 
+    @Test(groups = "functional")
+    public void testDeleteByLayoutId () {
+        PrimeMetadataProxy mockPrimeMetadataProxy = mock(PrimeMetadataProxy.class);
+        Set<String> mockResult = new HashSet<>(Arrays.asList("companyinfo_L1_v1", "companyinfo_L2_v1", "companyinfo_L3_v1"));  // User needs at least these
+        when(mockPrimeMetadataProxy.getBlocksContainingElements(anyList())).thenReturn(mockResult);
+        ReflectionTestUtils.setField(enrichmentLayoutService, "primeMetadataProxy", mockPrimeMetadataProxy);
+
+        EnrichmentLayout enrichmentLayout = makeEnrichmentLayoutObj( //
+                Arrays.asList("primaryname", //
+                        "duns_number", //
+                        "thirdpartyassessment_val", //  This element needs companyinfo_L3 which this tenant doesn't have
+                        "finervicesprospectormodel_totalbalancesegment", //
+                        "website_url" //
+                ));
+
+        ResponseDocument<String> result = enrichmentLayoutService.create(mainTestTenant.getId(), enrichmentLayout);
+
+        Assert.assertNotNull(result);
+
+        // Now delete it
+        enrichmentLayoutService.deleteLayoutByLayoutId(mainTestTenant.getId(), enrichmentLayout.getLayoutId());
+
+        // Check that it's gone
+        EnrichmentLayout removedLayout = enrichmentLayoutService.findByLayoutId(mainTestTenant.getId(), enrichmentLayout.getLayoutId());
+        Assert.assertNull(removedLayout, "EnrichmentLayout should have been removed.");
+    }
+
+    @Test(groups = "functional")
+    public void testDeleteBySourceId () {
+        PrimeMetadataProxy mockPrimeMetadataProxy = mock(PrimeMetadataProxy.class);
+        Set<String> mockResult = new HashSet<>(Arrays.asList("companyinfo_L1_v1", "companyinfo_L2_v1", "companyinfo_L3_v1"));  // User needs at least these
+        when(mockPrimeMetadataProxy.getBlocksContainingElements(anyList())).thenReturn(mockResult);
+        ReflectionTestUtils.setField(enrichmentLayoutService, "primeMetadataProxy", mockPrimeMetadataProxy);
+
+        EnrichmentLayout enrichmentLayout = makeEnrichmentLayoutObj( //
+                Arrays.asList("primaryname", //
+                        "duns_number", //
+                        "thirdpartyassessment_val", //  This element needs companyinfo_L3 which this tenant doesn't have
+                        "finervicesprospectormodel_totalbalancesegment", //
+                        "website_url" //
+                ));
+
+        ResponseDocument<String> result = enrichmentLayoutService.create(mainTestTenant.getId(), enrichmentLayout);
+
+        Assert.assertNotNull(result);
+
+        // Now delete it
+        enrichmentLayoutService.deleteLayoutBySourceId(mainTestTenant.getId(), enrichmentLayout.getSourceId());
+
+        // Check that it's gone
+        EnrichmentLayout removedLayout = enrichmentLayoutService.findBySourceId(mainTestTenant.getId(), enrichmentLayout.getSourceId());
+        Assert.assertNull(removedLayout, "EnrichmentLayout should have been removed.");
     }
 
     private EnrichmentLayout makeEnrichmentLayoutObj(List<String> elementList) {
@@ -146,7 +206,7 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         layout.setLayoutId(layoutId);
         layout.setCreatedBy(userEmail);
 
-        layout.setSourceId("sourceId");
+        layout.setSourceId(getRandomSourceId());
         layout.setDomain(DataDomain.SalesMarketing);
         layout.setRecordType(DataRecordType.Domain);
 

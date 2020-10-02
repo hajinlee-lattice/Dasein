@@ -22,6 +22,8 @@ public interface EnrichmentLayoutService {
 
     void deleteLayoutByLayoutId(String customerSpace, String layoutId);
 
+    void deleteLayoutBySourceId(String customerSpace, String sourceId);
+
     void deleteLayout(EnrichmentLayout enrichmentLayout);
 
     List<EnrichmentLayoutDetail> getAll(String customerSpace, int pageIndex, int pageSize);
