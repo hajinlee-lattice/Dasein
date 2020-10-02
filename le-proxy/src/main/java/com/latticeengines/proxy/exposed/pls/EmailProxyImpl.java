@@ -1,5 +1,9 @@
 package com.latticeengines.proxy.exposed.pls;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,6 +16,8 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 /*
@@ -37,6 +43,7 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
         super(hostPort, "pls");
     }
 
+    @Override
     public boolean sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3import/result", result, tenantId));
@@ -47,6 +54,7 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
         }
     }
 
+    @Override
     public boolean sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3template/update", tenantId));
@@ -57,6 +65,7 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
         }
     }
 
+    @Override
     public boolean sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
         try {
             String url = constructUrl(combine("/internal/emails/s3template/create", tenantId));
@@ -110,6 +119,7 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
         }
     }
 
+    @Override
     public void sendOrphanRecordsExportEmail(String result, String tenantId, OrphanRecordsExportRequest export) {
         try {
             String url = constructUrl(combine("/internal/emails/orphanexport/result", result, tenantId));
@@ -137,6 +147,34 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
             String url = constructUrl(combine("/internal/emails/score/result", result, tenantId));
             log.info(String.format("Putting to %s", url));
             put("sendPlsScoreEmail", url, info);
+        } catch (Exception e) {
+            throw new RuntimeException("sendScoreEmail: Remote call failure", e);
+        }
+    }
+
+    @Override
+    public boolean sendPlayLaunchChannelExpiringEmail(String tenantId,
+            PlayLaunchChannel playLaunchChannel) {
+        try {
+            String url = constructUrl(combine("/playlaunchchannel/expiring", tenantId));
+            log.info(String.format("Putting to %s", url));
+            return put("sendPlayLaunchChannelExpiringEmail", url, playLaunchChannel, Boolean.class);
+        } catch (Exception e) {
+            throw new RuntimeException("sendScoreEmail: Remote call failure", e);
+        }
+    }
+
+    @Override
+    public void sendPlayLaunchErrorEmail(String tenantId, String user, PlayLaunch playLaunch) {
+        try {
+            String url = constructUrl(combine("/playlaunch/failed/", tenantId));
+            log.info(String.format("Putting to %s", url));
+            List<String> params = new ArrayList<>();
+            params.add("user=" + user);
+            if (!params.isEmpty()) {
+                url += "?" + StringUtils.join(params, "&");
+            }
+            put("sendPlayLaunchErrorEmail", url, playLaunch);
         } catch (Exception e) {
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }

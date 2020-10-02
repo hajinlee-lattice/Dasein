@@ -220,11 +220,11 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
             lookupIdMappingLaunchService.deleteConnection(configId2, faultySolInstanceOnly);
             Assert.fail("delete connection should fail");
         } catch (LedpException ex) {
-            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2));
-            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
-                    .getSolutionInstanceId());
-            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
-                    .getTrayAuthenticationId());
+            LookupIdMap fetchedLookupIdMap = lookupIdMappingLaunchService.getLookupIdMap(configId2);
+            Assert.assertNotNull(fetchedLookupIdMap);
+            Assert.assertNotNull(fetchedLookupIdMap.getExternalAuthentication().getSolutionInstanceId());
+            Assert.assertNotNull(fetchedLookupIdMap.getExternalAuthentication().getTrayAuthenticationId());
+            Assert.assertTrue(fetchedLookupIdMap.getIsRegistered());
         }
 
         when(trayService.removeSolutionInstance(faultyAuthOnly)).thenReturn(null);
@@ -235,11 +235,11 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
             lookupIdMappingLaunchService.deleteConnection(configId2, faultyAuthOnly);
             Assert.fail("delete connection should fail");
         } catch (LedpException ex) {
-            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2));
-            Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
-                    .getSolutionInstanceId());
-            Assert.assertNotNull(lookupIdMappingLaunchService.getLookupIdMap(configId2).getExternalAuthentication()
-                    .getTrayAuthenticationId());
+            LookupIdMap fetchedLookupIdMap = lookupIdMappingLaunchService.getLookupIdMap(configId2);
+            Assert.assertNotNull(fetchedLookupIdMap);
+            Assert.assertNull(fetchedLookupIdMap.getExternalAuthentication().getSolutionInstanceId());
+            Assert.assertNotNull(fetchedLookupIdMap.getExternalAuthentication().getTrayAuthenticationId());
+            Assert.assertFalse(fetchedLookupIdMap.getIsRegistered());
 
             lookupIdMappingLaunchService.deleteConnection(configId2, validSettings);
             Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId2));

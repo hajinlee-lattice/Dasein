@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -61,10 +62,16 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     @Inject
     private IDaaSService iDaaSService;
 
+    @Value("${dcp.entitlement.allow.param.null}")
+    private boolean allowNull;
+
     @Override
     public DataBlockEntitlementContainer getEntitlement(String customerSpace, String domainName, String recordType) {
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
-        return _self.getTenantEntitlementFromCache(tenantId, domainName, recordType);
+        log.info("Getting entitlements for Tenant " + tenantId);
+        DataBlockEntitlementContainer result =  _self.getTenantEntitlementFromCache(tenantId, domainName, recordType);
+        log.info("Returning entitlements: " + JsonUtils.serialize(result));
+        return result;
     }
 
     @Override
@@ -301,7 +308,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
             }
         } else {
             log.warn("Tenant {} does not have a subscriber number", subscriberNumber);
-            return true;
+            return allowNull;
         }
     }
 
@@ -359,7 +366,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         if (StringUtils.isNotBlank(subsriberNumber)) {
             container = getSubscriberEntitlement(subsriberNumber);
         } else {
-            log.warn("Tenant {} does not have a subscriber number", subsriberNumber);
+            log.warn("Tenant {} does not have a subscriber number", tenantId);
         }
         return filterDataBlockContainer(((container == null) ? getDefaultEntitlement() : container), domainName,
                 recordType);
@@ -368,6 +375,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     DataBlockEntitlementContainer getSubscriberEntitlement(@NotNull String subsriberNumber) {
         try {
             String response = iDaaSService.getEntitlement(subsriberNumber);
+            log.info("IDaaS entitlements: " + response);
             return parseIDaaSEntitlement(response);
         } catch (RemoteLedpException e) {
             if (e.getRemoteStackTrace().contains("\"code\":\"IEC-AM-0001\"")) {

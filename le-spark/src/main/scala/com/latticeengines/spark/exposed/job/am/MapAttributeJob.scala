@@ -180,11 +180,11 @@ class MapAttributeJob extends AbstractSparkJob[MapAttributeTxfmrConfig] {
           val selectedJoined = retainedJoined.select(df.columns map col: _*)
           var newJoined = selectedJoined.transform(nullSafeJoin(df, seedJoinKeys, "inner"))
 
-          val colExpr: Column = selectedJoined(mappedColumns.head) =!= df(mappedColumns.head)
+          val colExpr: Column = selectedJoined(mappedColumns.head) <=> df(mappedColumns.head)
           val fullExpr = mappedColumns.tail.foldLeft(colExpr) { 
-            (colExpr, p) => colExpr || selectedJoined(p) =!= df(p) 
+            (colExpr, p) => colExpr && selectedJoined(p) <=> df(p) 
           }
-          var filtered = newJoined.filter(fullExpr)
+          var filtered = newJoined.filter(!(fullExpr))
           filtered = filtered.select(df.columns.map(c => df(c)): _*)
           dfs += filtered
         })

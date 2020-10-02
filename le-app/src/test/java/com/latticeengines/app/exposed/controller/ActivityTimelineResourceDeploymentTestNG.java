@@ -14,11 +14,15 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.xerial.snappy.Snappy;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.latticeengines.app.testframework.AppDeploymentTestNGBase;
@@ -34,15 +38,18 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
-public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ActivityTimlineResourceDeploymentTestNG.class);
+public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(ActivityTimelineResourceDeploymentTestNG.class);
 
     @Inject
     private DynamoItemService dynamoItemService;
@@ -59,6 +66,14 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
     @Inject
     private DataUnitProxy dataUnitProxy;
 
+    @Autowired
+    protected Oauth2RestApiProxy oauth2RestApiProxy;
+
+    private OAuth2RestTemplate oAuth2RestTemplate;
+
+    @Value("${common.test.oauth.url}")
+    protected String authHostPort;
+
     @Value("${eai.export.dynamo.signature}")
     private String signature;
 
@@ -71,9 +86,12 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
     private final DataCollection.Version DATA_COLLECTION_VERSION = DataCollection.Version.Blue;
     private final String TEST_TENANT_NAME = "LETest1590612472260";
     private final boolean USE_EXISTING_TENANT = true;
+    private final String TEST_ACCOUNT_ID = "v5k5xq52updfo67n";
+    private final String CLIENT_ID = "playmaker";
 
     @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
+
         if (USE_EXISTING_TENANT) {
             testBed.useExistingTenantAsMain(TEST_TENANT_NAME);
             testBed.switchToSuperAdmin();
@@ -83,21 +101,40 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
             // Create and setup tenant
             Map<String, Boolean> featureFlagMap = new HashMap<>();
             featureFlagMap.put(LatticeFeatureFlag.ENABLE_ACCOUNT360.getName(), true);
+            featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
             setupTestEnvironmentWithOneTenant(featureFlagMap);
             setupDataCollection();
             setupAccountLookupData();
             setupActivityTimelineData();
         }
+
+        PlaymakerTenant oAuthTenant = getTenant();
+        oauth2RestApiProxy.createTenant(oAuthTenant);
+
+        Thread.sleep(500); // wait for replication lag
+
+        String oneTimeKey = oauth2RestApiProxy.createAPIToken(mainTestCustomerSpace.getTenantId());
+
+        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, mainTestCustomerSpace.getTenantId(), oneTimeKey,
+                CLIENT_ID);
+        OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
     }
 
     @Test(groups = "deployment", enabled = false)
     public void testActivityTimelineByAccount() {
-        String accountId = "v5k5xq52updfo67n";
-        DataPage data = plsRestTemplate.getForObject( //
-                getPLSRestAPIHostPort() + "/pls/activity-timeline/accounts/" + accountId, //
+        DataPage data = oAuth2RestTemplate.getForObject( //
+                getUlyssesRestAPIHostPort() + "/ulysses/activity-timeline/accounts/" + TEST_ACCOUNT_ID, //
                 DataPage.class);
         Assert.assertNotNull(data);
         Assert.assertTrue(CollectionUtils.isNotEmpty(data.getData()));
+    }
+
+    @Test(groups = "deployment", enabled = false)
+    public void testActivityTimelineMetrics() {
+        Map<String, Integer> metrics = oAuth2RestTemplate.getForObject(
+                getUlyssesRestAPIHostPort() + "/ulysses/activity-timeline/accounts/" + TEST_ACCOUNT_ID + "/metrics",
+                Map.class);
+        Assert.assertNotNull(metrics);
     }
 
     private void setupDataCollection() {
@@ -125,15 +162,24 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream dataStream = classLoader
                 .getResourceAsStream("com/latticeengines/app/exposed/controller/test-account-lookup-dynamo-items.json");
+
         List<?> raw = JsonUtils.deserialize(dataStream, List.class);
         List<Item> items = JsonUtils.convertList(raw, String.class).stream()
                 .map(itemStr -> String.format(itemStr, mainTestCustomerSpace.getTenantId(), accountLookupTableName))
                 .limit(2) //
-                .map(Item::fromJSON).map(item -> item.with("Record", ((String) item.get("Record")).getBytes()))
-                .collect(Collectors.toList());
+                .map(Item::fromJSON).map(item -> setAttribute(item)).collect(Collectors.toList());
 
         String tableName = ENTITY_TABLE_NAME + signature;
-        // dynamoItemService.batchWrite(tableName, items);
+        dynamoItemService.batchWrite(tableName, items);
+    }
+
+    private Item setAttribute(Item item) {
+        try {
+            return item.with("Record", Snappy.compress(((String) item.get("Record")).getBytes()));
+        } catch (Exception e) {
+            log.warn("Attribute set failure.");
+            return null;
+        }
     }
 
     private DataUnit generateDynamoDataUnit(String tenantId, String tableName) {
@@ -163,6 +209,7 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
     }
 
     private void setupActivityTimelineData() {
+
         // Create Default Timeline
         timeLineProxy.createDefaultTimeLine(mainTestCustomerSpace.getTenantId());
         TimeLine accTl = timeLineProxy.findByEntity(mainTestCustomerSpace.getTenantId(), BusinessEntity.Account);
@@ -189,7 +236,6 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
                 .collect(Collectors.toList());
 
         String tableName = ACTIVITY_TABLE_NAME + activity_signature;
-
         dynamoItemService.batchWrite(tableName, items);
     }
 
@@ -199,4 +245,12 @@ public class ActivityTimlineResourceDeploymentTestNG extends AppDeploymentTestNG
         return String.valueOf(ThreadLocalRandom.current().nextLong(startSeconds, endSeconds));
     }
 
+    private PlaymakerTenant getTenant() {
+        PlaymakerTenant tenant = new PlaymakerTenant();
+        tenant.setTenantName(mainTestCustomerSpace.getTenantId());
+        tenant.setExternalId(CLIENT_ID);
+        tenant.setJdbcDriver("");
+        tenant.setJdbcUrl("");
+        return tenant;
+    }
 }

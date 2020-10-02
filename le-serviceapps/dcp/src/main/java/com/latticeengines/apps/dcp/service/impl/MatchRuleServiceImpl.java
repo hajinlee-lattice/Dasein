@@ -23,12 +23,16 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.dcp.entitymgr.MatchRuleEntityMgr;
+import com.latticeengines.apps.dcp.service.AppendConfigService;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dcp.match.MatchRule;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleRecord;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.redis.lock.RedisDistributedLock;
 
 import avro.shaded.com.google.common.collect.Sets;
@@ -45,6 +49,9 @@ public class MatchRuleServiceImpl implements MatchRuleService {
 
     @Inject
     private RedisDistributedLock redisDistributedLock;
+
+    @Inject
+    private AppendConfigService appendConfigService;
 
     @Value("${dcp.lock.namespace}")
     private String lockNameSpace;
@@ -67,7 +74,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                     throw new IllegalArgumentException(String.format("Cannot update Match Rule from source %s to source %s",
                             matchRuleRecord.getSourceId(), matchRule.getSourceId()));
                 }
-                validateMatchRuleForUpdate(matchRule, matchRuleRecord);
+                validateMatchRuleForUpdate(customerSpace, matchRule, matchRuleRecord);
                 if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(matchRule.getRuleType())) {
                     List<MatchRuleRecord> currentRecords = matchRuleEntityMgr.findMatchRules(matchRule.getSourceId(),
                             MatchRuleRecord.State.ACTIVE);
@@ -93,6 +100,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                     newRecord.setDisplayName(matchRule.getDisplayName());
                     newRecord.setRuleType(matchRule.getRuleType());
                     newRecord.setMatchKey(matchRule.getMatchKey());
+                    newRecord.setDomain(matchRule.getDomain());
+                    newRecord.setRecordType(matchRule.getRecordType());
                     newRecord.setAllowedValues(matchRule.getAllowedValues());
                     newRecord.setExclusionCriterionList(matchRule.getExclusionCriterionList());
                     newRecord.setAcceptCriterion(matchRule.getAcceptCriterion());
@@ -148,16 +157,20 @@ public class MatchRuleServiceImpl implements MatchRuleService {
      * 2. AllowedValues cannot be empty for Special rule and must be empty for Base rule.
      * 3. RuleType cannot be changed.
      * 4. If MatchKey is Country, AllowedValues should be ISO-3166 alpha-2 code
+     * 5. Verify if Domain & RecordType entitled with company entity resolution.
      * @param newRule The new match rule
      * @param oldRuleRecord The original match rule
      */
-    private void validateMatchRuleForUpdate(MatchRule newRule, MatchRuleRecord oldRuleRecord) {
+    private void validateMatchRuleForUpdate(String customerSpace, MatchRule newRule, MatchRuleRecord oldRuleRecord) {
         if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(newRule.getRuleType())) {
             if (newRule.getMatchKey() == null) {
                 throw new IllegalArgumentException("Match Key cannot be NULL for a special match rule!");
             }
             if (CollectionUtils.isEmpty(newRule.getAllowedValues())) {
                 throw new IllegalArgumentException("AllowedValues cannot be empty for a special match rule!");
+            }
+            if (newRule.getDomain() != null || newRule.getRecordType() != null) {
+                log.warn("Updating purpose of use on SPECIAL_RULE will not take effect!");
             }
         } else if (MatchRuleRecord.RuleType.BASE_RULE.equals(newRule.getRuleType())) {
             if (newRule.getMatchKey() != null) {
@@ -174,6 +187,16 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (MatchKey.Country.equals(newRule.getMatchKey())) {
             validateCountryCode(newRule.getAllowedValues());
         }
+        if (newRule.getDomain() != null && newRule.getRecordType() != null) {
+            if (!appendConfigService.checkEntitledWith(customerSpace, newRule.getDomain(),
+                    newRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+                throw new LedpException(LedpCode.LEDP_60011);
+            }
+        } else {
+            if (newRule.getDomain() != null || newRule.getRecordType() != null) {
+                throw new IllegalArgumentException("Incomplete purpose of use info.(Missing Domain/RecordType");
+            }
+        }
     }
 
     /**
@@ -181,15 +204,19 @@ public class MatchRuleServiceImpl implements MatchRuleService {
      * 1. MatchKey cannot be null for Special rule and must be null for Base rule.
      * 2. AllowedValues cannot be empty for Special rule and must be empty for Base rule.
      * 3. If MatchKey is Country, AllowedValues should be ISO-3166 alpha-2 code
+     * 4. Verify if Domain & RecordType entitled with company entity resolution.
      * @param matchRule Match Rule to be created
      */
-    private void validateMatchRuleForCreate(MatchRule matchRule) {
+    private void validateMatchRuleForCreate(String customerSpace, MatchRule matchRule) {
         if (MatchRuleRecord.RuleType.SPECIAL_RULE.equals(matchRule.getRuleType())) {
             if (matchRule.getMatchKey() == null) {
                 throw new IllegalArgumentException("Match Key cannot be NULL for a special match rule!");
             }
             if (CollectionUtils.isEmpty(matchRule.getAllowedValues())) {
                 throw new IllegalArgumentException("AllowedValues cannot be empty for a special match rule!");
+            }
+            if (matchRule.getDomain() != null || matchRule.getRecordType() != null) {
+                log.warn("Creating purpose of use on SPECIAL_RULE will not take effect!");
             }
         } else if (MatchRuleRecord.RuleType.BASE_RULE.equals(matchRule.getRuleType())) {
             if (matchRule.getMatchKey() != null) {
@@ -201,6 +228,16 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         }
         if (MatchKey.Country.equals(matchRule.getMatchKey())) {
             validateCountryCode(matchRule.getAllowedValues());
+        }
+        if (matchRule.getDomain() != null && matchRule.getRecordType() != null) {
+            if (!appendConfigService.checkEntitledWith(customerSpace, matchRule.getDomain(),
+                    matchRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+                throw new LedpException(LedpCode.LEDP_60011);
+            }
+        } else {
+            if (matchRule.getDomain() != null || matchRule.getRecordType() != null) {
+                throw new IllegalArgumentException("Incomplete purpose of use info.(Missing Domain/RecordType");
+            }
         }
     }
 
@@ -275,6 +312,14 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (!otherFieldUnChange) {
             return Pair.of(displayNameChange, true);
         }
+        otherFieldUnChange = record.getDomain() == matchRule.getDomain();
+        if (!otherFieldUnChange) {
+            return Pair.of(displayNameChange, true);
+        }
+        otherFieldUnChange = record.getRecordType() == matchRule.getRecordType();
+        if (!otherFieldUnChange) {
+            return Pair.of(displayNameChange, true);
+        }
         return Pair.of(displayNameChange, false);
     }
 
@@ -284,7 +329,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         if (StringUtils.isEmpty(matchRule.getSourceId())) {
             throw new IllegalArgumentException("Cannot create Match Rule without source!");
         }
-        validateMatchRuleForCreate(matchRule);
+        validateMatchRuleForCreate(customerSpace, matchRule);
         String lockKey = getLockKey(matchRule.getSourceId(), "", true);
         String requestId = UUID.randomUUID().toString();
         if (redisDistributedLock.lock(lockKey, requestId, 30000, true)) {
@@ -303,6 +348,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
                 matchRuleRecord.setDisplayName(matchRule.getDisplayName());
                 matchRuleRecord.setRuleType(matchRule.getRuleType());
                 matchRuleRecord.setMatchKey(matchRule.getMatchKey());
+                matchRuleRecord.setDomain(matchRule.getDomain());
+                matchRuleRecord.setRecordType(matchRule.getRecordType());
                 matchRuleRecord.setAllowedValues(matchRule.getAllowedValues());
                 matchRuleRecord.setExclusionCriterionList(matchRule.getExclusionCriterionList());
                 matchRuleRecord.setAcceptCriterion(matchRule.getAcceptCriterion());
@@ -399,6 +446,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         matchRule.setDisplayName(record.getDisplayName());
         matchRule.setRuleType(record.getRuleType());
         matchRule.setMatchKey(record.getMatchKey());
+        matchRule.setDomain(record.getDomain());
+        matchRule.setRecordType(record.getRecordType());
         matchRule.setAllowedValues(record.getAllowedValues());
         matchRule.setExclusionCriterionList(record.getExclusionCriterionList());
         matchRule.setAcceptCriterion(record.getAcceptCriterion());

@@ -34,7 +34,7 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
 
         defaults = activityAlertsConfigService.createDefaultActivityAlertsConfigs(mainCustomerSpace);
         Assert.assertNotNull(defaults);
-        Assert.assertEquals(defaults.size(), 5);
+        Assert.assertEquals(defaults.size(), 4);
 
         verifyDefaultAlertConfig(defaults);
 

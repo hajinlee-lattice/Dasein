@@ -386,6 +386,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected Iterator<GenericRecord> verifyAndReadTarget(HdfsDataUnit target) {
         String path = target.getPath();
         try {
+            log.info("Target output path=" + path);
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
             if (CollectionUtils.isNotEmpty(target.getPartitionKeys())) {
                 path = path + StringUtils.repeat("/**", target.getPartitionKeys().size());

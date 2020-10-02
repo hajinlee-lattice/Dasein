@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase {
 
@@ -61,6 +63,9 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     @Inject
     private SegmentProxy segmentProxy;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     private Play play;
 
@@ -143,7 +148,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         disconnectedPlayLaunchChannel = createPlayLaunchChannel(play, disconnectedLookupIdMap);
 
         playLaunchChannel1.setIsAlwaysOn(true);
-        playLaunchChannel1.setExpirationPeriodString("P3M");
+        playLaunchChannel1.setExpirationPeriodString("P1W");
         playLaunchChannel1.setChannelConfig(new SalesforceChannelConfig());
 
         playLaunchChannel2.setIsAlwaysOn(false);
@@ -224,6 +229,14 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreateFromChannel" })
+    public void testEmailSentOnSecondToLastLaunch() throws InterruptedException {
+        playLaunchChannelService.updateNextScheduledDate(play.getName(), playLaunchChannel1.getId());
+        Assert.assertTrue(emailProxy.sendPlayLaunchChannelExpiringEmail(MultiTenantContext.getTenant().getId(),
+                playLaunchChannel1));
+
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = { "testEmailSentOnSecondToLastLaunch" })
     public void testUpdate() throws InterruptedException {
         playLaunchChannel1.setIsAlwaysOn(false);
         PlayLaunchChannel retrieved = playLaunchChannelService.update(play.getName(), playLaunchChannel1);
@@ -235,7 +248,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(retrieved.getExpirationDate());
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateFromChannel" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
     public void testRecoverLaunchUniverses() throws InterruptedException {
         String current = "CURRENT";
         String previous = "PREVIOUS";
@@ -264,7 +277,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         });
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testRecoverLaunchUniverses" })
     public void testDelete() {
         playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);
         playLaunchChannelService.deleteByChannelId(playLaunchChannel2.getId(), true);

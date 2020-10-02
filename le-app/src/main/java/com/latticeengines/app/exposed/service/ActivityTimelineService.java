@@ -11,4 +11,6 @@ public interface ActivityTimelineService {
     DataPage getContactActivities(String accountId, String contactId, String timelinePeriod,
             Map<String, String> orgInfo);
 
+    Map<String, Integer> getActivityTimelineMetrics(String accountId, String timelinePeriod, Map<String, String> orgInfo);
+
 }

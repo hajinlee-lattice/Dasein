@@ -12,13 +12,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
@@ -46,7 +43,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 
 @Service("projectService")
-public class ProjectServiceImpl implements ProjectService {
+public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectService {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
@@ -54,9 +51,6 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project path}
     private static final int MAX_RETRY = 3;
-
-    @Value("${dcp.app.project.pagesize}")
-    private int maxPageSize;
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
@@ -371,15 +365,4 @@ public class ProjectServiceImpl implements ProjectService {
         }
         return project;
     }
-
-    private PageRequest getPageRequest(int pageIndex, int pageSize) {
-        Preconditions.checkState(pageIndex >= 0);
-        Preconditions.checkState(pageSize > 0);
-        if (pageSize > maxPageSize) {
-            pageSize = maxPageSize;
-        }
-        Sort sort = Sort.by(Sort.Direction.DESC, "updated");
-        return PageRequest.of(pageIndex, pageSize, sort);
-    }
-
 }

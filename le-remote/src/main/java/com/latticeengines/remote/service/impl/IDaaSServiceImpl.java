@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +36,7 @@ import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterce
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class IDaaSServiceImpl implements IDaaSService  {
+    private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
 
     @Inject
     private ApplicationContext appCtx;
@@ -60,7 +63,9 @@ public class IDaaSServiceImpl implements IDaaSService  {
     @Override
     public String getEntitlement(String subscriberNumber) {
         refreshToken();
-        return getClient().get(null, entitlementUri(subscriberNumber));
+        String targetUri = entitlementUri(subscriberNumber);
+        log.info("Sending entitlement request to " + targetUri);
+        return getClient().get(null, targetUri);
     }
 
     private RestApiClient getClient() {

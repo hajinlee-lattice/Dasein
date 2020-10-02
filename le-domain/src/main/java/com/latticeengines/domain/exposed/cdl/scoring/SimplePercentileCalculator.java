@@ -1,9 +1,11 @@
-package com.latticeengines.dataflow.runtime.cascading.atlas;
+package com.latticeengines.domain.exposed.cdl.scoring;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SimplePercentileCalculator {
+public class SimplePercentileCalculator implements Serializable {
+    private static final long serialVersionUID = -2648607146336966275L;
     private static double MINIMUM_LOWER_BOUND = 0.0;
     private static double MAXIMUM_UPPER_BOUND = 1.0;
 

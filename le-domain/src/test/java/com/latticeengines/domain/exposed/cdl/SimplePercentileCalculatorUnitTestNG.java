@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.cdl;
+package com.latticeengines.domain.exposed.cdl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -12,7 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataflow.runtime.cascading.atlas.SimplePercentileCalculator;
+import com.latticeengines.domain.exposed.cdl.scoring.SimplePercentileCalculator;
 
 public class SimplePercentileCalculatorUnitTestNG {
 

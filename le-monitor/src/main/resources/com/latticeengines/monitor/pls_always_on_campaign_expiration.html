@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Segment Export</title>
+    <title>Campaign Expiration</title>
 
 
     <style type="text/css">
@@ -74,22 +74,21 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                 <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                     <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                        <p style="margin: 20px;">{{firstname}},</p>
+                                        <p style="margin: 20px;">Hi {{firstname}},</p>
                                         <p style="margin: 20px;">
-                                            Campaign {{playDisplayName}} has expired and will no longer be automatically launched.
+                                            Your last scheduled automated launch is approaching in a week. If you would like to continue the launch, please go back to Lattice and update your <a href={{launchSettingsLink}}>Launch Settings</a>.
                                         </p>
-                                    </td>
-                                </tr>
-
-                                <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                                    <td class="content-wrap" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0px 20px;" valign="top">
-                                        <table style="width: 100%; margin-top: -25px;" cellspacing="0" cellpadding="0">
-                                            <tbody>
-                                            <tr>
-                                                <td><img src="cid:instruction"></td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                                        <p style="margin: 40px;">
+                                            Campaign Name: <b>{{playDisplayName}}</b>
+                                        </p>
+                                        <p style="margin: 40px;">
+                                            Channel: <b>{{externalSystemName}}</b>
+                                        </p>
+                                        <p style="margin: 40px;">
+                                            Last Scheduled Launch Time: <b>{{nextScheduledLaunch}}</b>
+                                        </p>
+                                        </br><p style="margin: 20px;">Best regards, </p>
+                                        <p style="margin: 20px;">D&B Lattice Team</p>
                                     </td>
                                 </tr>
 
@@ -109,7 +108,7 @@
                     <table width="100%" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                         <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                             <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                If you didn't make a request to export a segment,
+                                If you didn't make a request to launch a campaign,
                                 please contact us at <a href="mailto:support@lattice-engines.com">support@lattice-engines.com</a>
                             </td>
                         </tr>

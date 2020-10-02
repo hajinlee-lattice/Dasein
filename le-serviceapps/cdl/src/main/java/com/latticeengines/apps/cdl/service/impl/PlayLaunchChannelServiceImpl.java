@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageR
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
@@ -77,6 +78,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
@@ -151,6 +155,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             channel.setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(channel));
         }
         playLaunchChannelEntityMgr.update(channel);
+        sendEmailIfSecondToLastLaunch(channel);
 
         return channel;
     }
@@ -412,6 +417,18 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
+        }
+    }
+
+    private void sendEmailIfSecondToLastLaunch(PlayLaunchChannel channel) {
+        Date nextNextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel,
+                channel.getNextScheduledLaunch());
+        if (channel.getExpirationDate() != null && nextNextLaunchDate.after(channel.getExpirationDate())) {
+            try {
+                emailProxy.sendPlayLaunchChannelExpiringEmail(MultiTenantContext.getTenant().getId(), channel);
+            } catch (Exception e) {
+                log.error("Can not send always on campaign is expiring email: " + e.getMessage());
+            }
         }
     }
 

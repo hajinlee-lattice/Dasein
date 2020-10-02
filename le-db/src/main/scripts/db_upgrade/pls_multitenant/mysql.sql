@@ -24,6 +24,10 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`DCP_PROJECT`
           ADD COLUMN `PURPOSE_OF_USE` JSON;
 
+      ALTER TABLE `PLS_MultiTenant`.`DCP_MATCH_RULE`
+        ADD COLUMN `DATA_DOMAIN` VARCHAR(255),
+        ADD COLUMN `DATA_RECORD_TYPE` VARCHAR(255);
+
       ALTER TABLE `PLS_MultiTenant`.`DCP_DATA_REPORT`
           DROP FOREIGN KEY `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`;
 
@@ -50,14 +54,38 @@ CREATE PROCEDURE `UpdateSchema`()
           UNIQUE KEY `UK_ALERT_NAME_TENANT` (`NAME`, `FK_TENANT_ID`)
       ) ENGINE = InnoDB;
 
+
+      CREATE TABLE `DCP_ENRICHMENT_LAYOUT`
+      (
+          `PID`          bigint(20)                              NOT NULL AUTO_INCREMENT,
+          `LAYOUT_ID`    varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `DOMAIN`       varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `RECORD_TYPE`  varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `CREATED`      datetime                                NOT NULL,
+          `CREATED_BY`   varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `ELEMENTS`     json                                    DEFAULT NULL,
+          `SOURCE_ID`    varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `TEAM_ID`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `UPDATED`      datetime                                NOT NULL,
+          `FK_TENANT_ID` bigint(20)                              NOT NULL,
+          PRIMARY KEY (`PID`),
+          UNIQUE KEY `UX_LAYOUT_ID` (`FK_TENANT_ID`,`LAYOUT_ID`),
+          KEY `IX_LAYOUT_ID` (`LAYOUT_ID`),
+          CONSTRAINT `FK_DCPENRICHMENT_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE
+      ) ENGINE = InnoDB
+        DEFAULT CHARSET = utf8mb4
+        COLLATE = utf8mb4_unicode_ci;
+
+
       ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH_CHANNEL`
         ADD COLUMN `PREVIOUS_LAUNCHED_ACCOUNT_UNIVERSE_TABLE_ID` VARCHAR(255),
         ADD COLUMN `PREVIOUS_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID` VARCHAR(255);
 
-      UPDATE `PLS_MultiTenant.PLAY_LAUNCH_CHANNEL`
+      UPDATE `PLS_MultiTenant`.`PLAY_LAUNCH_CHANNEL`
         SET PREVIOUS_LAUNCHED_ACCOUNT_UNIVERSE_TABLE_ID=CURRENT_LAUNCHED_ACCOUNT_UNIVERSE_TABLE_ID,
             PREVIOUS_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID=CURRENT_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID
         WHERE LAUNCH_TYPE='DELTA';
+
 
   END //
 -- ##############################################################

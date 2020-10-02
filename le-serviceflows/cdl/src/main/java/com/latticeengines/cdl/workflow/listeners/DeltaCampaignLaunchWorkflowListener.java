@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWor
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -32,6 +33,9 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -60,6 +64,15 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
                         playLaunchId, playName, customerSpace));
                 recoverLaunchUniverses(customerSpace, playName, channelId);
                 updateFailedPlayLaunch(playName, playLaunchId);
+                PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+                PlayLaunchChannel channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, playName,
+                        playLaunch.getId());
+                try {
+                    emailProxy.sendPlayLaunchErrorEmail(customerSpace,
+                            channel.getUpdatedBy(), playLaunch);
+                } catch (Exception e) {
+                    log.error("Can not send play launch failed email: " + e.getMessage());
+                }
             } else {
                 log.info(String.format(
                         "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",

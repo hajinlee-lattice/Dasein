@@ -13,6 +13,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEnti
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -20,6 +21,8 @@ import com.latticeengines.domain.exposed.cdl.FailedEventDetail;
 import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.proxy.exposed.pls.EmailProxy;
 
 @Component
 public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
@@ -36,6 +39,9 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
+
+    @Inject
+    private EmailProxy emailProxy;
 
     @Override
     public DataIntegrationEventType getEventType() {
@@ -60,7 +66,7 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
         handleErrorObject(statusMonitor, status);
 
         String launchId = statusMonitor.getEntityId();
-        updatePlayLaunch(launchId);
+        updatePlayLaunchAndSendEmail(launchId);
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
@@ -85,6 +91,7 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
         saveErrorFileInMonitor(statusMonitor, errorFileMap);
     }
 
+
     private void saveErrorMessage(FailedEventDetail eventDetail, DataIntegrationStatusMonitor statusMonitor) {
         if (MapUtils.isNotEmpty(eventDetail.getError()) && eventDetail.getError().containsKey(MSG)) {
             Map<String, Object> errorMap = eventDetail.getError();
@@ -94,10 +101,17 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
                 JsonUtils.serialize(eventDetail)));
     }
 
-    private void updatePlayLaunch(String launchId) {
+    private void updatePlayLaunchAndSendEmail(String launchId) {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         playLaunch.setLaunchState(LaunchState.SyncFailed);
         recoverLaunchUniverse(launchId, playLaunchChannelService, playLaunchService);
         playLaunchService.update(playLaunch);
+        PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
+        try {
+            emailProxy.sendPlayLaunchErrorEmail(
+                    MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
+        } catch (Exception e) {
+            log.error("Can not send play launch failed email: " + e.getMessage());
+        }
     }
 }

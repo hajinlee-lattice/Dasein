@@ -12,6 +12,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -31,6 +32,7 @@ public final class ExpectedRevenueDataFlowUtil {
     protected ExpectedRevenueDataFlowUtil() {
         throw new UnsupportedOperationException();
     }
+
     private static final Logger log = LoggerFactory.getLogger(ExpectedRevenueDataFlowUtil.class);
 
     public static Map<String, String> getEVFitFunctionParametersMap(CustomerSpace customerSpace,
@@ -127,6 +129,38 @@ public final class ExpectedRevenueDataFlowUtil {
             targetScoreDerivationPaths.put(modelId, path);
         });
         return targetScoreDerivationPaths;
+    }
+
+    public static Map<String, String> getTargetScoreFiDerivationInputs(CustomerSpace customerSpace,
+            Configuration yarnConfiguration, ModelSummaryProxy modelSummaryProxy, Map<String, String> scoreFieldMap) {
+        ScoreArtifactRetriever retriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
+        Map<String, String> targetScoreDerivationInputs = new HashMap<String, String>();
+        scoreFieldMap.forEach((modelId, value) -> {
+            String path = retriever.getTargetScoreDerivationPath(customerSpace, modelId);
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, path)) {
+                    targetScoreDerivationInputs.put(modelId, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
+                }
+            } catch (Exception ex) {
+                log.info("Can not read target score file. modelId=" + modelId);
+            }
+        });
+        return targetScoreDerivationInputs;
+    }
+
+    public static void writeTargetScoreFiDerivationOutputs(CustomerSpace customerSpace, Configuration yarnConfiguration,
+            ModelSummaryProxy modelSummaryProxy, Map<String, String> targetScoreDerivationOutputs) {
+        ScoreArtifactRetriever retriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
+        targetScoreDerivationOutputs.forEach((modelId, value) -> {
+            String path = retriever.getTargetScoreDerivationPath(customerSpace, modelId);
+            try {
+                if (!HdfsUtils.fileExists(yarnConfiguration, path)) {
+                    HdfsUtils.writeToFile(yarnConfiguration, path, targetScoreDerivationOutputs.get(modelId));
+                }
+            } catch (Exception ex) {
+                log.info("Can not write target score file. modelId=" + modelId);
+            }
+        });
     }
 
     private static List<RatingModelContainer> getModelContainers(List<RatingModelContainer> allContainers) {

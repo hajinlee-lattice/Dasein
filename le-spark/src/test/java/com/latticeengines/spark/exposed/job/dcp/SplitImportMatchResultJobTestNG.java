@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -61,7 +62,8 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         config.setMatchedDunsAttr(MatchedDuns);
         config.setClassificationAttr(Classification);
         config.setConfidenceCodeAttr(ConfidenceCode);
-        Map<String, String> map = FIELDS.stream().map(Pair::getLeft).collect(Collectors.toMap(e->e, e->e));
+        Map<String, String> map =
+                new LinkedHashMap<>(FIELDS.stream().map(Pair::getLeft).collect(Collectors.toMap(e->e, e->e)));
         config.setAcceptedAttrsMap(map);
         config.setRejectedAttrsMap(map);
         config.setCountryAttr(InterfaceName.Country.name());
