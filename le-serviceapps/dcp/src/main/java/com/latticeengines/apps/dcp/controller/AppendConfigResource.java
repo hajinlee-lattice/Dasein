@@ -22,11 +22,12 @@ public class AppendConfigResource {
     @Inject
     private AppendConfigService appendConfigService;
 
-    @GetMapping("/entitlement")
+    @GetMapping("/entitlement/{domainName}/{recordType}")
     @ResponseBody
     @ApiOperation(value = "Get block drt entitlement")
-    public DataBlockEntitlementContainer getEntitlement(@PathVariable String customerSpace) {
-        return appendConfigService.getEntitlement(customerSpace);
+    public DataBlockEntitlementContainer getEntitlement(@PathVariable String customerSpace,
+            @PathVariable String domainName, @PathVariable String recordType) {
+        return appendConfigService.getEntitlement(customerSpace, domainName, recordType);
     }
 
 }

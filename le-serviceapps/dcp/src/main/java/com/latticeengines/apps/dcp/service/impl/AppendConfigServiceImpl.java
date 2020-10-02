@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -49,7 +50,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(AppendConfigServiceImpl.class);
 
-    private static final Set<String> UNSUPPORTED_BLOCKS = ImmutableSet.<String>builder() //
+    private static final Set<String> UNSUPPORTED_BLOCKS = ImmutableSet.<String> builder() //
             .add("baseinfo", "companyentityresolution", "companynews", "industryprofile").build();
 
     @Inject
@@ -65,10 +66,10 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     private boolean allowNull;
 
     @Override
-    public DataBlockEntitlementContainer getEntitlement(String customerSpace) {
+    public DataBlockEntitlementContainer getEntitlement(String customerSpace, String domainName, String recordType) {
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
         log.info("Getting entitlements for Tenant " + tenantId);
-        DataBlockEntitlementContainer result =  _self.getTenantEntitlementFromCache(tenantId);
+        DataBlockEntitlementContainer result =  _self.getTenantEntitlementFromCache(tenantId, domainName, recordType);
         log.info("Returning entitlements: " + JsonUtils.serialize(result));
         return result;
     }
@@ -258,8 +259,37 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         return appendConfig;
     }
 
+    private DataBlockEntitlementContainer filterDataBlockContainer(DataBlockEntitlementContainer container,
+            String domainName, String recordType) {
+        if (container == null || ("ALL".equals(domainName) && "ALL".equals(recordType))) {
+            return container;
+        } else {
+            List<DataBlockEntitlementContainer.Domain> resultDomains = new ArrayList();
+
+            for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+                if (!"ALL".equals(domainName) && domain.getDomain().equals(DataDomain.valueOf(domainName))) {
+                    continue;
+                }
+
+                if ("ALL".equals(recordType)) {
+                    resultDomains.add(domain);
+                } else {
+                    Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredRecords = domain
+                            .getRecordTypes().entrySet().stream()
+                            .filter(entry -> entry.getKey().equals(DataRecordType.valueOf(recordType)))
+                            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+                    resultDomains.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredRecords));
+                }
+            }
+
+            return new DataBlockEntitlementContainer(resultDomains);
+        }
+    }
+
     @Override
-    public boolean checkEntitledWith(String customerSpace, DataDomain dataDomain, DataRecordType dataRecordType, String blockName) {
+    public boolean checkEntitledWith(String customerSpace, DataDomain dataDomain, DataRecordType dataRecordType,
+            String blockName) {
         Preconditions.checkNotNull(dataDomain);
         Preconditions.checkNotNull(dataRecordType);
         Preconditions.checkArgument(StringUtils.isNotEmpty(blockName));
@@ -282,7 +312,8 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         }
     }
 
-    private boolean hasEntitlementInDomainAndRecordType(DataDomain dataDomain, DataRecordType dataRecordType, String blockName, JsonNode jsonNode) {
+    private boolean hasEntitlementInDomainAndRecordType(DataDomain dataDomain, DataRecordType dataRecordType,
+            String blockName, JsonNode jsonNode) {
         if (hasNonEmptyArray(jsonNode, "products")) {
             for (JsonNode productNode : jsonNode.get("products")) {
                 String productName = productNode.get("name").asText();
@@ -299,7 +330,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
 
     private boolean hasEntitlementInRecordType(DataRecordType dataRecordType, String blockName, JsonNode productNode) {
         if (hasNonEmptyArray(productNode, "packages")) {
-            for (JsonNode packageNode: productNode.get("packages")) {
+            for (JsonNode packageNode : productNode.get("packages")) {
                 String packageName = packageNode.get("name").asText();
                 DataRecordType recordType = parseDataRecordType(packageName);
                 if (dataRecordType.equals(recordType)) {
@@ -326,7 +357,8 @@ public class AppendConfigServiceImpl implements AppendConfigService {
 
     @Cacheable(cacheNames = CacheName.Constants.IDaaSEntitlementCacheName, //
             key = "T(java.lang.String).format(\"%s|entitlement\", #tenantId)", unless = "#result == null")
-    public DataBlockEntitlementContainer getTenantEntitlementFromCache(String tenantId) {
+    public DataBlockEntitlementContainer getTenantEntitlementFromCache(String tenantId, String domainName,
+            String recordType) {
         DataBlockEntitlementContainer container = null;
         Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(tenantId).toString());
         Preconditions.checkNotNull(tenant, "No tenant with short id " + tenantId);
@@ -336,7 +368,8 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         } else {
             log.warn("Tenant {} does not have a subscriber number", tenantId);
         }
-        return (container == null) ? getDefaultEntitlement() : container;
+        return filterDataBlockContainer(((container == null) ? getDefaultEntitlement() : container), domainName,
+                recordType);
     }
 
     DataBlockEntitlementContainer getSubscriberEntitlement(@NotNull String subsriberNumber) {
@@ -346,7 +379,8 @@ public class AppendConfigServiceImpl implements AppendConfigService {
             return parseIDaaSEntitlement(response);
         } catch (RemoteLedpException e) {
             if (e.getRemoteStackTrace().contains("\"code\":\"IEC-AM-0001\"")) {
-                // {"code":"IEC-AM-0001","message":"Subscriber/Contract doesnt exists in the system"}
+                // {"code":"IEC-AM-0001","message":"Subscriber/Contract doesnt exists in the
+                // system"}
                 return null;
             }
             throw e;
@@ -356,7 +390,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     static DataBlockEntitlementContainer getDefaultEntitlement() {
         List<DataBlockEntitlementContainer.Block> blocks = new ArrayList<>();
         blocks.add(new DataBlockEntitlementContainer.Block(baseinfo, L1));
-        blocks.add(new DataBlockEntitlementContainer.Block(entityresolution,L1));
+        blocks.add(new DataBlockEntitlementContainer.Block(entityresolution, L1));
         blocks.add(new DataBlockEntitlementContainer.Block(companyinfo, L1));
         Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> types = new HashMap<>();
         types.put(DataRecordType.Domain, blocks);
@@ -389,7 +423,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         DataDomain domain = parseDataDomain(productName);
         Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> types = new HashMap<>();
         if (domain != null && hasNonEmptyArray(productNode, "packages")) {
-            for (JsonNode packageNode: productNode.get("packages")) {
+            for (JsonNode packageNode : productNode.get("packages")) {
                 String packageName = packageNode.get("name").asText();
                 DataRecordType recordType = parseDataRecordType(packageName);
                 if (recordType != null && recordType != DataRecordType.Analytical) {

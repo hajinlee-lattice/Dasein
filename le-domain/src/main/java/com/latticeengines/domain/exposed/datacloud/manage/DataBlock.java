@@ -78,6 +78,10 @@ public class DataBlock {
         return blockId;
     }
 
+    public List<Level> getLevels() {
+        return levels;
+    }
+
     @JsonProperty("displayName")
     public String getBlockName() {
         return getBlockName(blockId);

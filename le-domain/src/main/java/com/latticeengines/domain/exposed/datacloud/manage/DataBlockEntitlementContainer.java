@@ -24,7 +24,8 @@ public class DataBlockEntitlementContainer {
     private List<Domain> domains;
 
     // for jackson
-    private DataBlockEntitlementContainer() {}
+    private DataBlockEntitlementContainer() {
+    }
 
     public DataBlockEntitlementContainer(List<Domain> domains) {
         this.domains = domains;
@@ -51,7 +52,8 @@ public class DataBlockEntitlementContainer {
         private Map<DataRecordType, List<Block>> recordTypes;
 
         // for jackson
-        private Domain() {}
+        private Domain() {
+        }
 
         public Domain(DataDomain domain, Map<DataRecordType, List<Block>> recordTypes) {
             this.domain = domain;
@@ -80,27 +82,29 @@ public class DataBlockEntitlementContainer {
         @JsonProperty("blockId")
         private String blockId;
 
-        @JsonProperty("levels")
-        private List<DataBlockLevel> levels;
+        @JsonProperty("dataBlockLevels")
+        private List<DataBlockLevel> dataBlockLevels;
 
-        @JsonProperty("dataBlock")
-        private DataBlock dataBlock;
+        @JsonProperty("levels")
+        private List<DataBlock.Level> levels;
 
         // for jackson
-        private Block() {}
+        private Block() {
+        }
 
-        public Block(String blockId, List<DataBlockLevel> levels) {
+        public Block(String blockId, List<DataBlockLevel> dataBlockLevels) {
             this.blockId = blockId;
+            this.dataBlockLevels = dataBlockLevels;
+        }
+
+        public Block(String blockId, DataBlockLevel... dataBlockLevels) {
+            this.blockId = blockId;
+            this.dataBlockLevels = Arrays.asList(dataBlockLevels);
+        }
+
+        public Block(Block block, List<DataBlock.Level> levels) {
+            this.blockId = block.getBlockId();
             this.levels = levels;
-        }
-
-        public Block(String blockId, DataBlockLevel... levels) {
-            this.blockId = blockId;
-            this.levels = Arrays.asList(levels);
-        }
-
-        public void setDataBlock(DataBlock dataBlock) {
-            this.dataBlock = dataBlock;
         }
 
         public String getBlockId() {
@@ -108,7 +112,7 @@ public class DataBlockEntitlementContainer {
         }
 
         public List<DataBlockLevel> getDataBlockLevels() {
-            return levels;
+            return dataBlockLevels;
         }
     }
 
