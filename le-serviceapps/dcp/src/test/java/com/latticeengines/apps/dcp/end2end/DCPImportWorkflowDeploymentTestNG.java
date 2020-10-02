@@ -34,6 +34,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
+import com.latticeengines.domain.exposed.datacloud.usage.SubmitBatchReportRequest;
+import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
@@ -53,6 +56,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.matchapi.UsageProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -82,6 +86,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private DataReportProxy dataReportProxy;
+
+    @Inject
+    private UsageProxy usageProxy;
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
@@ -235,6 +242,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyUploadStats(upload);
         verifyDownload(upload);
         verifyDataReport();
+        verifyUsageReport(upload);
     }
 
     private void verifyErrorFile(UploadDetails upload) {
@@ -485,5 +493,58 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 DataReportRecord.Level.Tenant,
                 CustomerSpace.parse(mainCustomerSpace).toString());
         Assert.assertNull(tenantReport);
+    }
+
+    void verifyUsageReport(UploadDetails upload) {
+        String usageReportPath = upload.getUploadConfig().getUsageReportFilePath();
+        SubmitBatchReportRequest batchReport = new SubmitBatchReportRequest();
+        batchReport.setBatchRef(mainCustomerSpace + "_" + uploadId);
+        VboBatchUsageReport vboBatchUsageReport = usageProxy.submitBatchReport(batchReport);
+        Assert.assertTrue(s3Service.objectExist(vboBatchUsageReport.getS3Bucket(), usageReportPath));
+        List<String> usageReportFiles = s3Service.getFilesForDir(vboBatchUsageReport.getS3Bucket(), usageReportPath);
+        Assert.assertFalse(CollectionUtils.isEmpty(usageReportFiles));
+        verifyUsageCsvContent(vboBatchUsageReport.getS3Bucket(), usageReportFiles.get(0));
+    }
+
+    private void verifyUsageCsvContent(String bucket, String path) {
+        InputStream is = s3Service.readObjectAsStream(bucket, path);
+        InputStreamReader reader = new InputStreamReader(is);
+        try (CSVReader csvReader = new CSVReader(reader)) {
+            String[] nextRecord = csvReader.readNext();
+            int count = 0;
+            List<String> headers = new ArrayList<>();
+            while (nextRecord != null && (count++) < 100) {
+                if (count == 1) {
+                    headers.addAll(Arrays.asList(nextRecord));
+                    verifyUsageOutputHeaders(headers);
+                } else {
+                    verifyUsageCsvRecord(nextRecord);
+                    nextRecord = csvReader.readNext();
+                }
+            }
+        } catch (IOException e) {
+            Assert.fail("Failed to read output csv", e);
+        }
+    }
+
+    private void verifyUsageOutputHeaders(List<String> headers) {
+        System.out.println(headers);
+        for (int i=0; i< headers.size(); i++) {
+            Assert.assertEquals(VboUsageConstants.OUTPUT_FIELDS.get(i), headers.get(i));
+        }
+    }
+
+    private void verifyUsageCsvRecord(String[] record) {
+        System.out.println(record);
+        int drtIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_DRT);
+        Assert.assertNotNull(record[drtIndex]);
+        int poaeIdIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_POAEID);
+        Assert.assertNotNull(record[poaeIdIndex]);
+        int subscriberNumberIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_SUBSCRIBER_NUMBER);
+        Assert.assertNotNull(record[subscriberNumberIndex]);
+        int subjectDunsIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_SUBJECT_DUNS);
+        Assert.assertNotNull(record[subjectDunsIndex]);
+        int eventTypeIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_EVENT_TYPE);
+        Assert.assertNotNull(record[eventTypeIndex]);
     }
 }
