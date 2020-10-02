@@ -20,6 +20,10 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         super("dcp");
     }
 
+    public DataReportProxy(String hostPort) {
+        super(hostPort, "dcp");
+    }
+
     public void registerDunsCount(String customerSpace, DataReportRecord.Level level, String ownerId,
                                   DunsCountCache cache) {
         String baseUrl = "/customerspaces/{customerSpace}/datareport/dunscount?level={level}";
