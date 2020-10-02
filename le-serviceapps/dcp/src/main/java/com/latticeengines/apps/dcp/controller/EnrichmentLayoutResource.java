@@ -97,6 +97,6 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation(value = "Delete enrichment layout by sourceId")
     public void deleteBySourceId(@PathVariable String customerSpace, @PathVariable String sourceId) {
-        enrichmentLayoutService.deleteLayoutByLayoutId(customerSpace, sourceId);
+        enrichmentLayoutService.deleteLayoutBySourceId(customerSpace, sourceId);
     }
 }

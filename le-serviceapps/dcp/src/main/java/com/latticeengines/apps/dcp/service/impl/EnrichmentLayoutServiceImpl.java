@@ -51,7 +51,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
         }
         Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         enrichmentLayout.setTenant(tenant);
-        ResponseDocument<String> result = validate(enrichmentLayout);
+        ResponseDocument<String> result = validate(enrichmentLayout, false);
         if (result.isSuccess()) {
             enrichmentLayoutEntityMgr.create(enrichmentLayout);
             result.setResult(enrichmentLayout.getLayoutId());
@@ -69,10 +69,21 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
     public ResponseDocument<String> update(String customerSpace, EnrichmentLayout enrichmentLayout) {
         Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         enrichmentLayout.setTenant(tenant);
-        ResponseDocument<String> result = validate(enrichmentLayout);
+        ResponseDocument<String> result = validate(enrichmentLayout, true);
         if (result.isSuccess()) {
-            enrichmentLayoutEntityMgr.update(enrichmentLayout);
-            result.setResult(enrichmentLayout.getLayoutId());
+            EnrichmentLayout existingEnrichmentLayout = enrichmentLayoutEntityMgr.findByField("layoutId", enrichmentLayout.getLayoutId());
+            if (null != existingEnrichmentLayout) {
+                existingEnrichmentLayout.setElements(enrichmentLayout.getElements());
+                existingEnrichmentLayout.setRecordType(enrichmentLayout.getRecordType());
+                existingEnrichmentLayout.setDomain(enrichmentLayout.getDomain());
+                existingEnrichmentLayout.setTenant(enrichmentLayout.getTenant());
+                enrichmentLayoutEntityMgr.update(enrichmentLayout);
+                result.setResult(enrichmentLayout.getLayoutId());
+            }
+            else {
+                result.setSuccess(false);
+                result.setResult(String.format("Can't update, no existing layout found for layoutId = %s", enrichmentLayout.getLayoutId()));
+            }
         }
         return result;
     }
@@ -110,6 +121,14 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
         }
     }
 
+    @Override
+    public void deleteLayoutBySourceId(String customerSpace, String sourceId) {
+        EnrichmentLayout enrichmentLayout = findBySourceId(customerSpace, sourceId);
+        if (null != enrichmentLayout) {
+            deleteLayout(enrichmentLayout);
+        }
+    }
+
     /**
      * Validate the enrichment layout.
      *
@@ -122,9 +141,9 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
      * @return an EnrichmentLayoutValidationResult that tells if the layout is valid
      *         and why it isn't.
      */
-    protected ResponseDocument<String> validate(EnrichmentLayout enrichmentLayout) {
+    protected ResponseDocument<String> validate(EnrichmentLayout enrichmentLayout, boolean isUpdate) {
         // Are required fields present?
-        ResponseDocument<String> result;
+        ResponseDocument<String> result = null;
         if (enrichmentLayout.getSourceId() == null || enrichmentLayout.getDomain() == null
                 || enrichmentLayout.getRecordType() == null || enrichmentLayout.getTenant() == null) {
             List<String> errors = new ArrayList<>();
@@ -138,26 +157,38 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                 errors.add("Required field RecordType is null");
             }
             if (enrichmentLayout.getTenant() == null) {
-                errors.add("Required field Tenant is null");
+                errors.add("Required field tenantId is null");
             }
             result = new ResponseDocument<>();
             result.setErrors(errors);
         } else {
-            // does this source already have an enrichmentlayout?
-            String sourceId = enrichmentLayout.getSourceId();
-            EnrichmentLayoutDetail el = enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailBySourceId(sourceId);
-            if (null != el) {
-                result = new ResponseDocument<>();
-                result.setErrors(Collections.singletonList( //
-                        String.format(
-                                "Can't create.  SourceId %s already has an EnrichmentLayout and each sourceId can only have one.", //
-                                sourceId)));
-            } else {
+            if (!isUpdate) {  // Attempting to create a new record
+                // does this source already have an enrichmentlayout object?
+                String sourceId = enrichmentLayout.getSourceId();
+                EnrichmentLayoutDetail el = enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailBySourceId(sourceId);
+                if (null != el) {  // yes, the fail because they must only be one
+                    result = new ResponseDocument<>();
+                    result.setErrors(Collections.singletonList( //
+                            String.format("Can't create.  SourceId %s already has an EnrichmentLayout and each sourceId can only have one.", //
+                                    sourceId)));
+                }
+            }
+            else {  // Attempting to update an existing record
+                // validate that there is a layoutId for this update
+                if (enrichmentLayout.getLayoutId() == null) {
+                    result = new ResponseDocument<>();
+                    result.setErrors(Collections.singletonList("Required field for an update, layoutId, is null."));
+                }
+            }
+            // Are there errors?
+            if (result == null) { // no errors so far
+                // Continue validation
                 String tenantId = enrichmentLayout.getTenant().getId();
                 DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService
                         .getEntitlement(tenantId, "ALL", "ALL");
                 result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
             }
+            // else this isn't a valid layout so don't continue
         }
         return result;
     }
@@ -195,20 +226,10 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                             "EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s.",
                             neededElement, enrichmentLayout.getTenant().getSubscriberNumber());
                     errors.add(err);
-                    /*
-                     * return new EnrichmentLayoutOperationResult(false, String.format(
-                     * "EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s."
-                     * , neededElement, enrichmentLayout.getTenant().getSubscriberNumber()));
-                     */
                 }
             }
         } else {
             errors.add(String.format("Data Record Type %s does not contain any data blocks.", dataRecordType.name()));
-            /*
-             * return new EnrichmentLayoutOperationResult(false,
-             * String.format("Data Record Type %s does not contain any data blocks.",
-             * dataRecordType.name()));
-             */
 
         }
         if (errors.isEmpty()) {
@@ -233,6 +254,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                                                                                           // record type
             }
         }
+        // If it wasn't then it isn't valid
         ResponseDocument<String> response = new ResponseDocument<>();
         response.setErrors(Collections.singletonList(
                 String.format("Enrichment Layout is not valid. %s domain is not valid domain for this user.",
