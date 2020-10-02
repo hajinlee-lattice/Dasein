@@ -1210,6 +1210,10 @@ public class CDLServiceImpl implements CDLService {
             return fileContent.toString();
         }
 
+        log.info("fileContent is {}.", fileContent);//TODO: remove
+        log.info("metadataValues is {}", metadataValues);
+        log.info("templateAttrNameMap is {}.", templateAttrNameMap.keySet());
+
         for (Map<String, Object> metadataValue : metadataValues) {
             for (String attrName : templateAttrNameMap.keySet()) {
                 if (metadataValue.containsKey(attrName)) {
