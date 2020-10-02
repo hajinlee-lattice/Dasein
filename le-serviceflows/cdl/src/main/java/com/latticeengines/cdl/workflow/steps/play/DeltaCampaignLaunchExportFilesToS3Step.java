@@ -117,7 +117,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                 sourcePaths.stream().forEach(path -> {
                     ImportExportRequest request = new ImportExportRequest();
                     request.srcPath = path;
-                    request.tgtPath = pathBuilder.convertAtlasFileExport(dropBoxSummary, exportS3Bucket, nameSpace);
+                    request.tgtPath = pathBuilder.convertAtlasFileExport(path, dropBoxSummary, exportS3Bucket, nameSpace);
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
                     hdfsExportFilePaths.add(request.srcPath);

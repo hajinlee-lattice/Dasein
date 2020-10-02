@@ -292,16 +292,17 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
-    public String convertAtlasFileExport(DropBoxSummary dropBoxSummary, String s3Bucket, String nameSpace) {
+    public String convertAtlasFileExport(String inputExportFileDir, DropBoxSummary dropBoxSummary, String s3Bucket, String nameSpace) {
         StringBuilder builder = new StringBuilder();
-        return buildPathWithNamespace(builder.append(getS3AtlasFileExportsDir(s3Bucket, dropBoxSummary.getDropBox())), nameSpace).toString();
+        String fileName = FilenameUtils.getName(inputExportFileDir);
+        return buildPathWithNamespace(builder.append(getS3AtlasFileExportsDir(s3Bucket, dropBoxSummary.getDropBox())), nameSpace).append(PATH_SEPARATOR).append(fileName).toString();
     }
 
     private StringBuilder buildPathWithNamespace(StringBuilder path, String namespace) {
         if (!StringUtils.isEmpty(namespace)) {
             String[] namespaceTokens = namespace.split("\\.");
             for (String namespaceToken : namespaceTokens) {
-                path = path.append(namespaceToken);
+                path = path.append(PATH_SEPARATOR).append(namespaceToken);
             }
         }
         return path;
