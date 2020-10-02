@@ -140,6 +140,14 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
         assertPlayTargetSegment(play);
+
+        lookupIdMapMarketo = createLookIdMap(orgIdMarketo, orgNameMarketo, CDLExternalSystemType.MAP,
+                CDLExternalSystemName.Marketo);
+        playLaunchChannelMarketo = createPlayLaunchChannel(play, lookupIdMapMarketo);
+        playLaunchChannelMarketo.setIsAlwaysOn(false);
+        playLaunchChannelMarketo.setChannelConfig(new MarketoChannelConfig());
+        playLaunchChannelMarketo = playLaunchChannelService.create(play.getName(), playLaunchChannelMarketo);
+
         bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
         playLaunch1 = new PlayLaunch();
@@ -173,6 +181,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch2.setCreatedBy(CREATED_BY);
         playLaunch2.setUpdatedBy(CREATED_BY);
+        playLaunch2.setPlayLaunchChannel(playLaunchChannelMarketo);
 
         lookupIdMap1 = new LookupIdMap();
         lookupIdMap1.setExternalSystemType(CDLExternalSystemType.CRM);
@@ -317,12 +326,6 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testUpdateAudience() throws InterruptedException {
-        lookupIdMapMarketo = createLookIdMap(orgIdMarketo, orgNameMarketo, CDLExternalSystemType.MAP,
-                CDLExternalSystemName.Marketo);
-        playLaunchChannelMarketo = createPlayLaunchChannel(play, lookupIdMapMarketo);
-        playLaunchChannelMarketo.setIsAlwaysOn(false);
-        playLaunchChannelMarketo.setChannelConfig(new MarketoChannelConfig());
-        playLaunchChannelMarketo = playLaunchChannelService.create(play.getName(), playLaunchChannelMarketo);
         PlayLaunch playLaunch1 = new PlayLaunch();
         playLaunch1.setLaunchId(NamingUtils.randomSuffix("pl", 16));
         playLaunch1.setTenant(mainTestTenant);
@@ -346,7 +349,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         String audienceId = plChannel.getChannelConfig().getAudienceId();
         Assert.assertEquals(audienceId, "1");
-        playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), true);
+        playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
     }
 
     private void assertBucketsToLaunch(PlayLaunch launch, Set<RatingBucketName> expectedBucketsToLaunch) {

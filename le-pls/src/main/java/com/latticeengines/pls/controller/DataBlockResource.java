@@ -57,8 +57,8 @@ public class DataBlockResource {
     @ApiOperation(value = "Get block drt entitlement")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
     public DataBlockEntitlementContainer getEntitlement(
-            @RequestParam(value = "domainName", required = false, defaultValue = "") String domainName,
-            @RequestParam(value = "recordType", required = false, defaultValue = "") String recordType,
+            @RequestParam(value = "domainName", required = false, defaultValue = "ALL") String domainName,
+            @RequestParam(value = "recordType", required = false, defaultValue = "ALL") String recordType,
             @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
         try {
             DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigProxy

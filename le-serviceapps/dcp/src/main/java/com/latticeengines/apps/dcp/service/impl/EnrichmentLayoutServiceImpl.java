@@ -184,7 +184,8 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             if (result == null) { // no errors so far
                 // Continue validation
                 String tenantId = enrichmentLayout.getTenant().getId();
-                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService.getEntitlement(tenantId);
+                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService
+                        .getEntitlement(tenantId, "ALL", "ALL");
                 result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
             }
             // else this isn't a valid layout so don't continue
