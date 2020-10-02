@@ -5,8 +5,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName._
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.functions.{col, collect_list, lit, udf}
-import org.apache.spark.sql.{DataFrame, SparkSession, functions}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.LongType
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.json4s.jackson.Serialization
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
@@ -57,11 +58,14 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
         }
         timelineFilterTable = timelineFilterTable.withColumn(Count.name, lit(1))
         if (rollupToDaily) {
-          timelineFilterTable = timelineFilterTable.withColumn(EventTimestamp.name, getDate(col
-          (EventTimestamp.name), lit(timeZone)))
-          timelineFilterTable = timelineFilterTable.groupBy(AccountId.name, ContactId
-            .name, EventType.name, EventTimestamp.name).agg(functions.max(EventTimestamp.name).as(EventTimestamp.name),
-            functions.sum(Count.name).as(Count.name), collect_list(StreamType.name).as(StreamType.name))
+          timelineFilterTable = timelineFilterTable
+            .withColumn(EventDate.name, getDate(col(EventTimestamp.name), lit(timeZone)))
+            .groupBy(AccountId.name, ContactId.name, StreamType.name, EventType.name, EventDate.name)
+            .agg(sum(Count.name).as(Count.name))
+        } else {
+          // TODO consider timezone and maybe consider other format
+          timelineFilterTable = timelineFilterTable
+            .withColumn(EventDate.name, from_unixtime(floor(col(EventTimestamp.name) / 1000).cast(LongType), "yyyy-MM-dd HH:mm:ss"))
         }
         timelineFilterTable = timelineFilterTable.drop(InterfaceName.Detail1.name).drop(InterfaceName.Detail2.name)
         timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, "LDC_DUNS",

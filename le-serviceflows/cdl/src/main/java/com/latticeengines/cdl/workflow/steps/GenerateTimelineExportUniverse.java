@@ -4,6 +4,8 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -18,6 +20,8 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -25,12 +29,17 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("generateTimelineUniverse")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateTimelineExportUniverse extends BaseSparkSQLStep<GenerateTimelineExportUniverseStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverse.class);
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
     private DataCollection.Version version;
     private AttributeRepository attrRepo;
 
@@ -59,7 +68,8 @@ public class GenerateTimelineExportUniverse extends BaseSparkSQLStep<GenerateTim
     protected AttributeRepository parseAttrRepo(GenerateTimelineExportUniverseStepConfiguration stepConfiguration) {
         AttributeRepository attrRepo = WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
         if (attrRepo == null) {
-            throw new RuntimeException("Cannot find attribute repo in context");
+            attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
+            insertPurchaseHistory(attrRepo);
         }
         return attrRepo;
     }
@@ -81,6 +91,7 @@ public class GenerateTimelineExportUniverse extends BaseSparkSQLStep<GenerateTim
             log.info("can't find valid segment, skip this step.");
             return;
         }
+        customerSpace = parseCustomerSpace(configuration);
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         FrontEndQuery query = getAccountFiltererSegmentQuery();
@@ -89,6 +100,17 @@ public class GenerateTimelineExportUniverse extends BaseSparkSQLStep<GenerateTim
         HdfsDataUnit timelineUniverseDataUnit = executeSparkJob(query);
         log.info(getHDFSDataUnitLogEntry("CurrentTimelineUniverse", timelineUniverseDataUnit));
         putObjectInContext(TIMELINE_EXPORT_ACCOUNTLIST, timelineUniverseDataUnit);
+    }
+
+    private void insertPurchaseHistory(AttributeRepository attrRepo) {
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(), //
+                TableRoleInCollection.CalculatedPurchaseHistory, version);
+        if (table != null) {
+            log.info("Insert purchase history table into attribute repository.");
+            attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, table);
+        } else {
+            log.warn("Did not find purchase history table in version " + version);
+        }
     }
 
     private HdfsDataUnit executeSparkJob(FrontEndQuery frontEndQuery) {
