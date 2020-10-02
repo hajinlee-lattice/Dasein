@@ -175,7 +175,7 @@ public enum InterfaceName {
     RegistrationNumber,
 
     //timelineExport
-    DomesticUltimateDuns, GlobalUltimateDuns, IsPrimaryDomain, Count,
+    DomesticUltimateDuns, GlobalUltimateDuns, IsPrimaryDomain, EventDate, Count,
 
     // Internal
     __Row_Count__, // total row count in activity store aggregation

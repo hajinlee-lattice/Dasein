@@ -211,13 +211,18 @@ public final class TimeLineStoreUtils {
     }
 
     public enum TimelineExportColumn {
-        Duns(InterfaceName.DUNS.name(), "String"), EventDate(InterfaceName.EventTimestamp.name(), "Long"), AccountId(
-                InterfaceName.AccountId.name(), "String"), ContactId(InterfaceName.ContactId.name(),
-                "String"), EventType(InterfaceName.EventType.name(), "String"), StreamType(
-                InterfaceName.StreamType.name(), "String"), GlobalUltimateDuns(InterfaceName.GlobalUltimateDuns.name(),
-                "String"), DomesticUltimateDuns(InterfaceName.GlobalUltimateDuns.name(), "String"), Domain(
-                InterfaceName.Domain.name(), "String"), Count(InterfaceName.Count.name(), "Long"),
-                InPrimaryDomain(InterfaceName.IsPrimaryDomain.name(), "boolean");
+        Duns(InterfaceName.DUNS.name(), "String"), //
+        EventDate(InterfaceName.EventDate.name(), "String"), //
+        EventTimestamp(InterfaceName.EventTimestamp.name(), "Long"), //
+        AccountId(InterfaceName.AccountId.name(), "String"), //
+        ContactId(InterfaceName.ContactId.name(), "String"), //
+        EventType(InterfaceName.EventType.name(), "String"), //
+        StreamType(InterfaceName.StreamType.name(), "String"), //
+        GlobalUltimateDuns(InterfaceName.GlobalUltimateDuns.name(), "String"), //
+        DomesticUltimateDuns(InterfaceName.GlobalUltimateDuns.name(), "String"), //
+        Domain(InterfaceName.Domain.name(), "String"), //
+        Count(InterfaceName.Count.name(), "Long"), //
+        InPrimaryDomain(InterfaceName.IsPrimaryDomain.name(), "boolean");
 
         private String columnName;
         private String dataType;
