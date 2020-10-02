@@ -98,6 +98,7 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         String uploadId = configuration.getUploadId();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         uploadProxy.updateProgressPercentage(customerSpace.toString(), uploadId, MATCH_PERCENTAGE);
+        putObjectInContext(MATCH_COMMAND, command);
     }
 
     @Override
