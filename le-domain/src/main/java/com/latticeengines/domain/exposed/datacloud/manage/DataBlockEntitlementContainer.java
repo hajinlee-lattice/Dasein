@@ -24,7 +24,8 @@ public class DataBlockEntitlementContainer {
     private List<Domain> domains;
 
     // for jackson
-    private DataBlockEntitlementContainer() {}
+    private DataBlockEntitlementContainer() {
+    }
 
     public DataBlockEntitlementContainer(List<Domain> domains) {
         this.domains = domains;
@@ -51,7 +52,8 @@ public class DataBlockEntitlementContainer {
         private Map<DataRecordType, List<Block>> recordTypes;
 
         // for jackson
-        private Domain() {}
+        private Domain() {
+        }
 
         public Domain(DataDomain domain, Map<DataRecordType, List<Block>> recordTypes) {
             this.domain = domain;
@@ -87,7 +89,8 @@ public class DataBlockEntitlementContainer {
         private List<DataBlock.Level> levels;
 
         // for jackson
-        private Block() {}
+        private Block() {
+        }
 
         public Block(String blockId, List<DataBlockLevel> dataBlockLevels) {
             this.blockId = blockId;
@@ -99,12 +102,9 @@ public class DataBlockEntitlementContainer {
             this.dataBlockLevels = Arrays.asList(dataBlockLevels);
         }
 
-        public Block(List<DataBlock.Level> levels) {
+        public Block(Block block, List<DataBlock.Level> levels) {
+            this.blockId = block.getBlockId();
             this.levels = levels;
-        }
-
-        public void setBlockId(String blockId) {
-            this.blockId = blockId;
         }
 
         public String getBlockId() {

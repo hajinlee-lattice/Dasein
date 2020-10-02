@@ -70,11 +70,7 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
 
                 for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
                     List<DataBlock.Level> levels = blockIdToDataBlock.get(block.getBlockId()).getLevels();
-
-                    DataBlockEntitlementContainer.Block newBlock = new DataBlockEntitlementContainer.Block(levels);
-                    newBlock.setBlockId(block.getBlockId());
-
-                    enrichedBlocks.add(newBlock);
+                    enrichedBlocks.add(new DataBlockEntitlementContainer.Block(block, levels));
                 }
                 enrichedRecordTypes.put(entry.getKey(), enrichedBlocks);
             }

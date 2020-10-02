@@ -261,17 +261,17 @@ public class AppendConfigServiceImpl implements AppendConfigService {
 
     private DataBlockEntitlementContainer filterDataBlockContainer(DataBlockEntitlementContainer container,
             String domainName, String recordType) {
-        if (container == null || (domainName.equals("ALL") && recordType.equals("ALL"))) {
+        if (container == null || ("ALL".equals(domainName) && "ALL".equals(recordType))) {
             return container;
         } else {
             List<DataBlockEntitlementContainer.Domain> resultDomains = new ArrayList();
 
             for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-                if (!domainName.equals("ALL") && domain.getDomain().equals(DataDomain.valueOf(domainName))) {
+                if (!"ALL".equals(domainName) && domain.getDomain().equals(DataDomain.valueOf(domainName))) {
                     continue;
                 }
 
-                if (recordType.equals("ALL")) {
+                if ("ALL".equals(recordType)) {
                     resultDomains.add(domain);
                 } else {
                     Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredRecords = domain
