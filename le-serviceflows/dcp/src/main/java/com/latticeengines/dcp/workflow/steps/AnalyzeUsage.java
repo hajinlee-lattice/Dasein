@@ -2,6 +2,7 @@ package com.latticeengines.dcp.workflow.steps;
 
 import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.OUTPUT_FIELDS;
 import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.RAW_USAGE_DISPLAY_NAMES;
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.USAGE_CSV_DATA_UNIT;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,8 +23,6 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
-import com.latticeengines.domain.exposed.dcp.UploadConfig;
-import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -35,6 +34,7 @@ import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.AnalyzeUsageJob;
+import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -107,15 +107,8 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String usageReportPath = result.getTargets().get(0).getPath();
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
-        String uploadId = configuration.getUploadId();
-        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
-        UploadConfig uploadConfig = upload.getUploadConfig();
-        uploadConfig.setUsageReportFilePath(usageReportPath);
-        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, uploadConfig);
-
-        log.info("All usage report is under " + usageReportPath);
+        HdfsDataUnit usageReportDataUnit = result.getTargets().get(0);
+        WorkflowStaticContext.putObject(USAGE_CSV_DATA_UNIT, usageReportDataUnit);
     }
 
 }

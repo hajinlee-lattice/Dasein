@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -41,8 +43,6 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
-import com.latticeengines.domain.exposed.datacloud.usage.SubmitBatchReportRequest;
-import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
@@ -566,13 +566,15 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     void verifyUsageReport(UploadDetails upload) {
         String usageReportPath = upload.getUploadConfig().getUsageReportFilePath();
-        SubmitBatchReportRequest batchReport = new SubmitBatchReportRequest();
-        batchReport.setBatchRef(mainCustomerSpace + "_" + uploadId);
-        VboBatchUsageReport vboBatchUsageReport = usageProxy.submitBatchReport(batchReport);
-        Assert.assertTrue(s3Service.objectExist(vboBatchUsageReport.getS3Bucket(), usageReportPath));
-        List<String> usageReportFiles = s3Service.getFilesForDir(vboBatchUsageReport.getS3Bucket(), usageReportPath);
+        Pattern pattern = Pattern.compile("s3://(?<bucket>[^/]+)/(?<prefix>.*)");
+        Matcher matcher = pattern.matcher(usageReportPath);
+        Assert.assertTrue(matcher.matches());
+        String s3Bucket = matcher.group("bucket");
+        String s3Prefix = matcher.group("prefix");
+        log.info("Verifying usage report at {}, {}", s3Bucket, s3Prefix);
+        List<String> usageReportFiles = s3Service.getFilesForDir(s3Bucket, s3Prefix);
         Assert.assertFalse(CollectionUtils.isEmpty(usageReportFiles));
-        verifyUsageCsvContent(vboBatchUsageReport.getS3Bucket(), usageReportFiles.get(0));
+        verifyUsageCsvContent(s3Bucket, usageReportFiles.get(0));
     }
 
     private void verifyUsageCsvContent(String bucket, String path) {
@@ -604,7 +606,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     private void verifyUsageCsvRecord(String[] record) {
-        System.out.println(record);
+        System.out.println(StringUtils.join(record, ","));
         int drtIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_DRT);
         Assert.assertNotNull(record[drtIndex]);
         int poaeIdIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_POAEID);
