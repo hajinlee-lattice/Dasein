@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
@@ -57,25 +58,37 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         return blockIdToDataBlock;
     }
 
-    private DataBlockEntitlementContainer enrichContainerWithDataBlocks(DataBlockEntitlementContainer container,
+    private DataBlockEntitlementContainer enrichContainerWithElements(DataBlockEntitlementContainer container,
             Map<String, DataBlock> blockIdToDataBlock) {
-        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-            List<DataBlockEntitlementContainer.Block> blocks = domain.getRecordTypes().entrySet().stream()
-                    .map(entry -> entry.getValue()).collect(ArrayList::new, List::addAll, List::addAll);
+        List<DataBlockEntitlementContainer.Domain> enrichedDomains = new ArrayList<>();
 
-            for (DataBlockEntitlementContainer.Block block : blocks) {
-                block.setDataBlock(blockIdToDataBlock.get(block.getBlockId()));
+        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+            Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> enrichedRecordTypes = new HashMap<>();
+            for (Map.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain.getRecordTypes()
+                    .entrySet()) {
+                List<DataBlockEntitlementContainer.Block> enrichedBlocks = new ArrayList<>();
+
+                for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
+                    List<DataBlock.Level> levels = blockIdToDataBlock.get(block.getBlockId()).getLevels();
+
+                    DataBlockEntitlementContainer.Block newBlock = new DataBlockEntitlementContainer.Block(levels);
+                    newBlock.setBlockId(block.getBlockId());
+
+                    enrichedBlocks.add(newBlock);
+                }
+                enrichedRecordTypes.put(entry.getKey(), enrichedBlocks);
             }
+            enrichedDomains.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), enrichedRecordTypes));
         }
 
-        return container;
+        return new DataBlockEntitlementContainer(enrichedDomains);
     }
 
     @Override
     public DataBlockEntitlementContainer enrichEntitlementContainerWithElements(
             DataBlockEntitlementContainer container) {
         Map<String, DataBlock> blockIdToDataBlock = getContainerDataBlocks(container);
-        return enrichContainerWithDataBlocks(container, blockIdToDataBlock);
+        return enrichContainerWithElements(container, blockIdToDataBlock);
     }
 
     @Override
