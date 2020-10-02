@@ -162,7 +162,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             result = new ResponseDocument<>();
             result.setErrors(errors);
         } else {
-            if (!isUpdate) {  // Attempting to crate a new record
+            if (!isUpdate) {  // Attempting to create a new record
                 // does this source already have an enrichmentlayout object?
                 String sourceId = enrichmentLayout.getSourceId();
                 EnrichmentLayoutDetail el = enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailBySourceId(sourceId);
