@@ -1,13 +1,18 @@
 package com.latticeengines.pls.end2end;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -21,9 +26,13 @@ public class CSVFileImportTemplateResetDeploymentTestNG extends CSVFileImportDep
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")
@@ -31,9 +40,15 @@ public class CSVFileImportTemplateResetDeploymentTestNG extends CSVFileImportDep
         setupTemplateAndData();
         DataFeedTask contactDFT = dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), contactDFId);
         Assert.assertNotNull(contactDFT);
+        S3ImportSystem importSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), DEFAULT_SYSTEM);
+        Assert.assertNotNull(importSystem);
+        Assert.assertTrue(importSystem.isMapToLatticeContact());
         cdlService.resetTemplate(mainTestTenant.getId(), contactDFT.getFeedType(), false);
         contactDFT = dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), contactDFId);
         Assert.assertNull(contactDFT);
+        importSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), DEFAULT_SYSTEM);
+        Assert.assertNotNull(importSystem);
+        Assert.assertFalse(importSystem.isMapToLatticeContact());
 
         Assert.assertThrows(LedpException.class, () -> cdlService.resetTemplate(mainTestTenant.getId(), accountDataFeedTask.getFeedType(), false));
 
@@ -62,6 +77,10 @@ public class CSVFileImportTemplateResetDeploymentTestNG extends CSVFileImportDep
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+            if (fieldMapping.getUserField().equals("ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setMapToLatticeId(true);
             }
         }
 
