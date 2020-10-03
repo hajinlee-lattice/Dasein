@@ -27,8 +27,8 @@ class GenerateRecommendationCSVJob extends AbstractSparkJob[GenerateRecommendati
       if (generateRecommendationCSVContext.isIgnoreAccountsWithoutContacts) {
         finalCSVDf = finalCSVDf.filter(col(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name()).isNotNull)
       }
-      for (contactColName <- columnsNotExist) {
-        finalCSVDf = finalCSVDf.withColumn(contactColName, lit(null).cast(StringType))
+      for (colName <- columnsNotExist) {
+        finalCSVDf = finalCSVDf.withColumn(colName, lit(null).cast(StringType))
       }
       finalCSVDf = finalCSVDf.select(fields.map(name => col(name)): _*)
       finalCSVDf = changeToDisplayName(finalCSVDf, generateRecommendationCSVContext)

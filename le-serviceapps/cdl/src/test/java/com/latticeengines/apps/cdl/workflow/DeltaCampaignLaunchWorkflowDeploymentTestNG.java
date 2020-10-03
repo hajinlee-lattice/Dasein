@@ -12,10 +12,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -89,6 +87,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
     private String exportS3Bucket;
 
     private TestPlaySetupConfig liverampTestPlaySetupConfig;
+    private TestPlayChannelConfig testPerformancePlayChannelConfig;
     private TestPlayChannelConfig liverampTestPlayChannelSetupConfig;
 
     private Play defaultPlay;
@@ -99,53 +98,45 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
     private static final List<String> LIVERAMP_COL_NAME = Arrays
             .asList(LiveRampCampaignLaunchInitStep.RECORD_ID_DISPLAY_NAME);
 
-    @BeforeClass(groups = "deployment-app", enabled = false)
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-
         Mockito.doReturn(false).when(deltaCampaignWorkflowSubmitter).enableExternalLaunch(any(), any());
-
         testPlayCreationHelper.setupTenantAndData();
         moveAvroFilesToHDFS();
-
-        String existingTenant = null;
-        Map<String, Boolean> featureFlags = new HashMap<>();
-
         String addContactsTable = setupLiveRampTable("/tmp/addLiveRampResult", "AddLiveRampContacts");
         String removeContactsTable = setupLiveRampTable("/tmp/removeLiveRampResult", "RemoveLiveRampContacts");
-
+        testPerformancePlayChannelConfig = new TestPlayChannelConfig.Builder()
+                .destinationSystemType(CDLExternalSystemType.FILE_SYSTEM).destinationSystemName(
+                        CDLExternalSystemName.AWS_S3).destinationSystemId("AWS_S3_" + System.currentTimeMillis())
+                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B)))
+                .audienceId(UUID.randomUUID().toString())
+                .audienceType(AudienceType.CONTACTS).build();
         liverampTestPlayChannelSetupConfig = new TestPlayChannelConfig.Builder()
                 .destinationSystemType(CDLExternalSystemType.DSP).destinationSystemName(
                         CDLExternalSystemName.MediaMath)
-                .destinationSystemId("LiveRamp_" + System
-                        .currentTimeMillis())
+                .destinationSystemId("LiveRamp_" + System.currentTimeMillis())
                 .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B))).topNCount(160L)
-                .audienceId(UUID.randomUUID()
-                        .toString())
+                .audienceId(UUID.randomUUID().toString())
                 .audienceType(AudienceType.ACCOUNTS).addContactsTable(addContactsTable)
                 .removeContactsTable(removeContactsTable).build();
-
-        liverampTestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
-                .mockRatingTable(false).testPlayCrud(false).addChannel(liverampTestPlayChannelSetupConfig)
-                .featureFlags(featureFlags).existingTenant(testPlayCreationHelper.getCustomerSpace()).build();
-
+        liverampTestPlaySetupConfig = new TestPlaySetupConfig.Builder().mockRatingTable(false).testPlayCrud(false)
+                .addChannel(liverampTestPlayChannelSetupConfig)
+                .existingTenant(testPlayCreationHelper.getCustomerSpace()).build();
         testPlayCreationHelper.setupTenantAndCreatePlay(liverampTestPlaySetupConfig);
-        super.testBed = testPlayCreationHelper.getDeploymentTestBed();
-        setMainTestTenant(super.testBed.getMainTestTenant());
-
+        testBed = testPlayCreationHelper.getDeploymentTestBed();
+        setMainTestTenant(testBed.getMainTestTenant());
         dropboxSummary = dropBoxProxy.getDropBox(testPlayCreationHelper.getCustomerSpace());
         assertNotNull(dropboxSummary);
         log.info("Tenant DropboxSummary: {}", JsonUtils.serialize(dropboxSummary));
         assertNotNull(dropboxSummary.getDropBox());
-
         defaultPlay = testPlayCreationHelper.getPlay();
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
-
         defaultPlayLaunch.setPlay(defaultPlay);
     }
 
     @Override
-    @Test(groups = "deployment-app", enabled = false)
+    @Test(groups = "deployment-app")
     public void testWorkflow() throws Exception {
         testLiveRampPlayLaunchWorkflow();
         verifyTest();
@@ -158,15 +149,12 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     public void testLiveRampPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
-
         // TODO: Check the playlaunchchannelID instead of null
         Long pid = deltaCampaignWorkflowSubmitter.submit(defaultPlayLaunch, null);
         assertNotNull(pid);
         log.info(String.format("PlayLaunch Workflow Pid is %s", pid));
-
         String applicationId = workflowProxy.getApplicationIdByWorkflowJobPid(testPlayCreationHelper.getCustomerSpace(),
                 pid);
-
         JobStatus completedStatus = waitForWorkflowStatus(applicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
@@ -178,7 +166,6 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         config.setDestinationOrgId(liverampTestPlayChannelSetupConfig.getDestinationSystemId());
         config.setDestinationSysType(liverampTestPlayChannelSetupConfig.getDestinationSystemType());
         config.setDestinationSysName(liverampTestPlayChannelSetupConfig.getDestinationSystemName());
-
         DeltaCampaignLaunchExportFileGeneratorStep exportFileGen = new DeltaCampaignLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxSummary.getDropBox()));
@@ -186,10 +173,8 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         // sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.",
         // "/"));
         String s3FolderPath = sb.substring(sb.indexOf(exportS3Bucket) + exportS3Bucket.length());
-
         log.info("Verifying S3 Folder Path " + s3FolderPath);
-
-        List<String> s3CsvObjectKeys = assertS3FileCountAndGetS3CsvObj(s3FolderPath, 3);
+        List<String> s3CsvObjectKeys = assertS3FileCountAndGetS3CsvObj(s3FolderPath, 2);
         assertS3CsvContents(s3CsvObjectKeys, LIVERAMP_COL_NAME, 22, 15);
         cleanupS3Files(s3FolderPath);
     }
@@ -203,12 +188,10 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
     private void moveAvroFileToHDFS(String fromPath, String toPath) throws IOException {
         String toFolder = toPath.substring(0, toPath.lastIndexOf('/'));
         createDirsIfDoesntExist(toFolder);
-
         URL url = ClassLoader.getSystemResource(fromPath);
         File localFile = new File(url.getFile());
         log.info("Taking file from: " + localFile.getAbsolutePath());
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), toPath);
-
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, toPath));
         log.info("Added Match Block uploaded to: " + toPath);
     }
@@ -223,56 +206,43 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
     private String setupLiveRampTable(String filePath, String name) throws IOException {
         HdfsDataUnit dataUnit = new HdfsDataUnit();
         dataUnit.setPath(filePath);
-
         String tableName = createTableInMetadataProxy(name, ContactMasterConstants.TPS_ATTR_RECORD_ID, dataUnit);
-
         return tableName;
     }
 
     private String createTableInMetadataProxy(String tableName, String primaryKey, HdfsDataUnit jobTarget)
             throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(testPlayCreationHelper.getCustomerSpace());
-
         String tableAvroPath = PathBuilder
                 .buildDataTablePath(podId, customerSpace)
                 .toString();
         createDirsIfDoesntExist(tableAvroPath);
-
         Table table = SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration,
                 podId,
                 customerSpace);
         metadataProxy.createTable(testPlayCreationHelper.getCustomerSpace(), table.getName(), table);
-
         log.info("Created " + tableName + " at " + table.getExtracts().get(0).getPath());
-
         return tableName;
     }
 
     private List<String> assertS3FileCountAndGetS3CsvObj(String s3FolderPath, int fileCount) {
         List<String> s3CsvObjectKeys = new ArrayList<String>();
-
         List<S3ObjectSummary> s3Objects = s3Service.listObjects(exportS3Bucket, s3FolderPath);
-
         assertNotNull(s3Objects);
         assertEquals(s3Objects.size(), fileCount);
-        boolean csvFileExists = false, jsonFileExists = false;
-        for (S3ObjectSummary s3Obj : s3Objects) {            
+        boolean csvFileExists = false;
+        for (S3ObjectSummary s3Obj : s3Objects) {
             if (s3Obj.getKey().contains(".csv")) {
                 csvFileExists = true;
                 s3CsvObjectKeys.add(s3Obj.getKey());
             }
-            if (s3Obj.getKey().contains(".json")) {
-                jsonFileExists = true;
-            }
         }
         assertTrue(csvFileExists, "CSV file doesnot exists");
-        assertTrue(jsonFileExists, "JSON file doesnot exists");
-
         return s3CsvObjectKeys;
     }
 
     private void assertS3CsvContents(List<String> s3ObjKeys, List<String> expectedColHeaders,
-            Integer addRowCount, Integer removeRowCount) {
+                                     Integer addRowCount, Integer removeRowCount) {
         for (String s3ObjKey : s3ObjKeys) {
             String fileName = s3ObjKey.substring(s3ObjKey.lastIndexOf('/'));
             if (fileName.contains("add")) {
@@ -285,9 +255,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         }
     }
 
-    private void assertS3CSVContents(String s3ObjKey,
-            List<String> expectedColHeaders,
-            int expectedRowsIncludingHeader) {
+    private void assertS3CSVContents(String s3ObjKey, List<String> expectedColHeaders, int expectedRowsIncludingHeader) {
         InputStream inputStream = s3Service.readObjectAsStream(exportS3Bucket, s3ObjKey);
         try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
             List<String[]> csvRows = reader.readAll();
@@ -308,7 +276,6 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     private void cleanupS3Files(String s3FolderPath) {
         String dropboxFolderName = dropboxSummary.getDropBox();
-
         log.info("Cleaning up S3 path " + s3FolderPath);
         try {
             s3Service.cleanupDirectory(exportS3Bucket, s3FolderPath);

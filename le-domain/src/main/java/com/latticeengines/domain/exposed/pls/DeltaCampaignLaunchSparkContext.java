@@ -132,8 +132,8 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("CreateDeleteCsvDataFrame")
     private boolean createDeleteCsvDataFrame;
 
-    @JsonProperty("publishRecommendationsForS3Launch")
-    private boolean publishRecommendationsForS3Launch;
+    @JsonProperty("publishRecommendationsToDB")
+    private boolean publishRecommendationsToDB;
 
     @JsonProperty("accountContactRatio")
     private int accountContactRatio;
@@ -414,12 +414,12 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         this.createDeleteCsvDataFrame = createDeleteCsvDataFrame;
     }
 
-    public boolean getPublishRecommendationsForS3Launch() {
-        return publishRecommendationsForS3Launch;
+    public boolean getPublishRecommendationsToDB() {
+        return publishRecommendationsToDB;
     }
 
-    public void setPublishRecommendationsForS3Launch(boolean publishRecommendationsForS3Launch) {
-        this.publishRecommendationsForS3Launch = publishRecommendationsForS3Launch;
+    public void setPublishRecommendationsToDB(boolean publishRecommendationsToDB) {
+        this.publishRecommendationsToDB = publishRecommendationsToDB;
     }
 
     private void setSyncDestination(PlayLaunch playLaunch) {

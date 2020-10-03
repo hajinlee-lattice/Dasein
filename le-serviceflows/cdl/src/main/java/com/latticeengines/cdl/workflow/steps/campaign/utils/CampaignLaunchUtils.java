@@ -23,7 +23,7 @@ public final class CampaignLaunchUtils {
     @Value("${cdl.campaign.contact.limit}")
     private long contactLimit;
 
-    public boolean shouldPublishRecommendationsForS3Launch(CustomerSpace customerSpace, CDLExternalSystemName cdlExternalSystemName) {
+    public boolean shouldPublishRecommendationsToDB(CustomerSpace customerSpace, CDLExternalSystemName cdlExternalSystemName) {
         if (cdlExternalSystemName != null) {
             if (cdlExternalSystemName == CDLExternalSystemName.Salesforce
                     || cdlExternalSystemName == CDLExternalSystemName.Eloqua) {
