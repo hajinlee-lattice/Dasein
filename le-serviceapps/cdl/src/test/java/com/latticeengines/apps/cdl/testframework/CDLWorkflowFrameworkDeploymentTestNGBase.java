@@ -56,9 +56,11 @@ public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkfl
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
-    private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "6";
     private static final long MAX_WORKFLOW_RUNTIME_IN_HOURS = 2;
+
+    protected final String S3_ACCOUNT_CONTACT_RATION_AVRO_VERSION = "7";
+    protected final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
 
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;

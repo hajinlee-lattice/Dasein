@@ -17,6 +17,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import javax.inject.Inject;
@@ -43,6 +45,7 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -95,6 +98,9 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     private static final String S3_DIR = "le-testframework/cdl";
     private static final Date DATE = new Date();
+    private static final String POD_QA = "/Pods/QA/";
+    private static final String POD_PATTERN = "/Pods/%s/";
+    private static final String PATH_PATTERN = "/Contracts/(.*)/Tenants/";
 
     private static final Map<BusinessEntity, String> srcTables = new HashMap<>();
 
@@ -116,6 +122,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Inject
     private Configuration yarnConfiguration;
+
+    private ObjectMapper om = new ObjectMapper();
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
@@ -650,5 +658,50 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         retry.setBackOffPolicy(backOffPolicy);
         retry.setThrowLastExceptionOnExhausted(true);
         return retry;
+    }
+
+    @Override
+    public String createLaunchTable(String tenantId, String s3AvroDir, String version, String tableName) throws IOException {
+        File jsonFile = testArtifactService.downloadTestArtifact(s3AvroDir, version, tableName + ".json");
+        String shortenTenantId = CustomerSpace.parse(tenantId).getTenantId();
+        Table table = toTable(jsonFile, shortenTenantId);
+        String tablePath = table.getExtracts().get(0).getPath();
+        metadataProxy.createTable(tenantId, table.getName(), table);
+        log.info("Created " + table + " at " + tablePath);
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String tgtDir = pathBuilder.getS3AtlasTablePrefix(shortenTenantId, table.getName());
+        testArtifactService.copyTestArtifactFolder(s3AvroDir, version, tableName, s3Bucket, tgtDir);
+        return table.getName();
+    }
+
+    private Table toTable(File jsonFile, String tenantId) throws IOException {
+        JsonNode jsonNode = om.readTree(jsonFile);
+        String hdfsPath = jsonNode.get("extracts").get(0).get("path").asText();
+        if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
+            hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+        }
+        hdfsPath = hdfsPath.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
+        log.info("Parse extract path {}.", hdfsPath);
+        Pattern pattern = Pattern.compile(PATH_PATTERN);
+        Matcher matcher = pattern.matcher(hdfsPath);
+        String str = JsonUtils.serialize(jsonNode);
+        str = str.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
+        String tenantName = null;
+        if (matcher.find()) {
+            tenantName = matcher.group(1);
+            log.info("Found tenant name {} in json.", tenantName);
+        }
+        if (StringUtils.isNotEmpty(tenantName)) {
+            String testTenant = CustomerSpace.parse(tenantId).getTenantId();
+            String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+            String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
+            String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantName, testTenant) + hdfsPathSegment2;
+            String hdfsPathReplace = hdfsPath.replaceAll(tenantName, testTenant);
+            log.info("hdfsPathFinal is {}.", hdfsPathFinal);
+            log.info("hdfsPathReplace is {}.", hdfsPathReplace);
+            str = str.replaceAll(tenantName, testTenant);
+            str = str.replaceAll(hdfsPathReplace, hdfsPathFinal);
+        }
+        return JsonUtils.deserialize(str, Table.class);
     }
 }

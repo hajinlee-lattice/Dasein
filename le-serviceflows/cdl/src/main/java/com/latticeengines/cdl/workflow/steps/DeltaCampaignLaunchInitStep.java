@@ -137,8 +137,8 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
-        deltaCampaignLaunchSparkContext.setPublishRecommendationsForS3Launch(campaignLaunchUtils
-                .shouldPublishRecommendationsForS3Launch(customerSpace, playLaunch.getDestinationSysName()));
+        deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(campaignLaunchUtils
+                .shouldPublishRecommendationsToDB(customerSpace, playLaunch.getDestinationSysName()));
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
