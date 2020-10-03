@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.serviceflows.workflow.match.BaseMatchStep;
 
 @Lazy

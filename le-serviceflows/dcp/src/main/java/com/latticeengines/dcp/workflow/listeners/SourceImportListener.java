@@ -133,7 +133,7 @@ public class SourceImportListener extends LEJobListener {
                 UploadConfig uploadConfig = upload.getUploadConfig();
                 String usageReportFilePath = copyUsageReportToS3(usageReportDataUnit, tenantId, uploadId);
                 uploadConfig.setUsageReportFilePath(usageReportFilePath);
-                uploadProxy.updateUploadConfig(tenantId, uploadId, upload.getUploadConfig());
+                uploadProxy.updateUploadConfig(tenantId, uploadId, uploadConfig);
             } else {
                 log.info("There is no usage report data generated.");
             }

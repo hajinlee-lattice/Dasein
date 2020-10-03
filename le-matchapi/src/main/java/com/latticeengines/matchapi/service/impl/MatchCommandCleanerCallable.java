@@ -17,8 +17,9 @@ public class MatchCommandCleanerCallable implements Callable<Boolean> {
     public MatchCommandCleanerCallable(Builder builder) {
         this.matchCommandCleaner = builder.getMatchCommandCleaner();
     }
+
     @Override
-    public Boolean call() throws Exception {
+    public Boolean call() {
         log.info("MatchCommandCleaner is triggered!");
         matchCommandCleaner.clean();
         return true;

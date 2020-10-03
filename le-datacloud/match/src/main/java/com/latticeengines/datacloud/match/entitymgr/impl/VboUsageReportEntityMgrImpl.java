@@ -19,7 +19,7 @@ public class VboUsageReportEntityMgrImpl implements VboUsageReportEntityMgr {
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
     public VboUsageReport create(VboUsageReport report) {
-        vboUsageReportDao.create(report);
+        vboUsageReportDao.createOrUpdate(report);
         return vboUsageReportDao.findByKey(report);
     }
 
