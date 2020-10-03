@@ -55,7 +55,7 @@ public class ProfileReportServiceImpl implements ProfileReportService {
                 status.setLastRefreshTime(lastRefreshTime);
             } else if (READY.equals(artifact.getStatus()) || STALE.equals(artifact.getStatus())) {
                 status.setStatus(AtlasProfileReportStatus.Status.Ready);
-                status.setLastRefreshTime(inactiveArtifact.getCreateTime());
+                status.setLastRefreshTime(artifact.getCreateTime());
             }
         }
 
