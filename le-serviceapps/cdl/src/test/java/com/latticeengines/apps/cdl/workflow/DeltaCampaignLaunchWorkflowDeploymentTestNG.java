@@ -174,7 +174,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         // "/"));
         String s3FolderPath = sb.substring(sb.indexOf(exportS3Bucket) + exportS3Bucket.length());
         log.info("Verifying S3 Folder Path " + s3FolderPath);
-        List<String> s3CsvObjectKeys = assertS3FileCountAndGetS3CsvObj(s3FolderPath, 3);
+        List<String> s3CsvObjectKeys = assertS3FileCountAndGetS3CsvObj(s3FolderPath, 2);
         assertS3CsvContents(s3CsvObjectKeys, LIVERAMP_COL_NAME, 22, 15);
         cleanupS3Files(s3FolderPath);
     }
