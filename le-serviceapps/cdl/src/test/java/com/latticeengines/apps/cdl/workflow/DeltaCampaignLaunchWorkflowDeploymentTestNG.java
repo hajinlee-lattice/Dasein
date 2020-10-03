@@ -230,18 +230,14 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         List<S3ObjectSummary> s3Objects = s3Service.listObjects(exportS3Bucket, s3FolderPath);
         assertNotNull(s3Objects);
         assertEquals(s3Objects.size(), fileCount);
-        boolean csvFileExists = false, jsonFileExists = false;
+        boolean csvFileExists = false;
         for (S3ObjectSummary s3Obj : s3Objects) {
             if (s3Obj.getKey().contains(".csv")) {
                 csvFileExists = true;
                 s3CsvObjectKeys.add(s3Obj.getKey());
             }
-            if (s3Obj.getKey().contains(".json")) {
-                jsonFileExists = true;
-            }
         }
         assertTrue(csvFileExists, "CSV file doesnot exists");
-        assertTrue(jsonFileExists, "JSON file doesnot exists");
         return s3CsvObjectKeys;
     }
 
