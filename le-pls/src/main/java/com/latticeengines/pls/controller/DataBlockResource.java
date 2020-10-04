@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.exception.UIActionCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.exception.View;
-import com.latticeengines.proxy.exposed.dcp.AppendConfigProxy;
+import com.latticeengines.proxy.exposed.dcp.EntitlementProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
 import io.swagger.annotations.Api;
@@ -36,8 +36,9 @@ public class DataBlockResource {
     private PrimeMetadataProxy primeMetadataProxy;
 
     @Inject
-    private AppendConfigProxy appendConfigProxy;
+    private EntitlementProxy entitlementProxy;
 
+    @Deprecated
     @GetMapping("/metadata")
     @ResponseBody
     @ApiOperation(value = "Get block metadata")
@@ -45,6 +46,7 @@ public class DataBlockResource {
         return primeMetadataProxy.getBlockMetadata();
     }
 
+    @Deprecated
     @GetMapping("/elements")
     @ResponseBody
     @ApiOperation(value = "Get block-level-element tree")
@@ -61,7 +63,7 @@ public class DataBlockResource {
             @RequestParam(value = "recordType", required = false, defaultValue = "ALL") String recordType,
             @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
         try {
-            DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigProxy
+            DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementProxy
                     .getEntitlement(MultiTenantContext.getShortTenantId(), domainName, recordType);
 
             if ((!domainName.isEmpty() || !recordType.isEmpty())

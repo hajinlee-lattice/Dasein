@@ -4,15 +4,10 @@ import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImport
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.INGESTION_PERCENTAGE;
 import static com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration.MATCH_PERCENTAGE;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -20,23 +15,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.usage.SubmitBatchReportRequest;
-import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
-import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
@@ -83,7 +70,7 @@ public class SourceImportListener extends LEJobListener {
     @Inject
     private UsageProxy usageProxy;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     @Inject
@@ -125,10 +112,10 @@ public class SourceImportListener extends LEJobListener {
             uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED, uploadDiagnostics);
             uploadProxy.updateProgressPercentage(tenantId, uploadId, ANALYSIS_PERCENTAGE);
 
-            UploadConfig uploadConfig = upload.getUploadConfig();
-            String usageReportFilePath = copyUsageReportToS3(uploadConfig.getUsageReportFilePath(), tenantId, uploadId);
-            uploadConfig.setUsageReportFilePath(usageReportFilePath);
-            uploadProxy.updateUploadConfig(tenantId, uploadId, upload.getUploadConfig());
+//            UploadConfig uploadConfig = upload.getUploadConfig();
+//            String usageReportFilePath = copyUsageReportToS3(uploadConfig.getUsageReportFilePath(), tenantId, uploadId);
+//            uploadConfig.setUsageReportFilePath(usageReportFilePath);
+//            uploadProxy.updateUploadConfig(tenantId, uploadId, upload.getUploadConfig());
         } else {
             if (jobStatus.isUnsuccessful()) {
                 log.info("SourceImport workflow job {} failed with status {}", jobExecution.getId(), jobStatus);
@@ -185,43 +172,6 @@ public class SourceImportListener extends LEJobListener {
         uploadEmailInfo.setJobStatus(jobStatus.name());
         log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
         emailProxy.sendUploadEmail(uploadEmailInfo);
-    }
-
-    private String copyUsageReportToS3(String reportFilePath, String tenantId, String uploadId) {
-        SubmitBatchReportRequest batchReport = new SubmitBatchReportRequest();
-        batchReport.setBatchRef(tenantId + "_" + uploadId);
-        VboBatchUsageReport vboBatchUsageReport = usageProxy.submitBatchReport(batchReport);
-
-        String s3PathDir = vboBatchUsageReport.getS3Prefix();
-        log.info("Copy from " + reportFilePath + " to " + s3PathDir);
-        if(!s3Service.objectExist(vboBatchUsageReport.getS3Bucket(), s3PathDir)) {
-            s3Service.createFolder(vboBatchUsageReport.getS3Bucket(), s3PathDir);
-        }
-        try {
-            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, reportFilePath,
-                    (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".csv"));
-            for (String csvFile: csvFiles){
-                Long fileSize = HdfsUtils.getFileSize(yarnConfiguration, csvFile);
-                String filename = FilenameUtils.getName(csvFile);
-                String dstPath = Paths.get(s3PathDir, filename).toString();
-                RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                        Collections.singleton(AmazonS3Exception.class), null);
-                retry.execute(context -> {
-                    if (context.getRetryCount() > 0) {
-                        log.info(String.format("(Attempt=%d) Retry copying file from hdfs://%s to s3://%s/%s", //
-                                context.getRetryCount() + 1, reportFilePath, vboBatchUsageReport.getS3Bucket(), dstPath));
-                    }
-                    try (InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, reportFilePath)) {
-                        s3Service.uploadInputStreamMultiPart(vboBatchUsageReport.getS3Bucket(), dstPath, stream, fileSize);
-
-                    }
-                    return true;
-                });
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return s3PathDir;
     }
 
     private String getLastStepName(JobExecution jobExecution) {

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dcp.workflow.listeners.SourceImportListener;
 import com.latticeengines.dcp.workflow.steps.AnalyzeInput;
-import com.latticeengines.dcp.workflow.steps.AnalyzeUsage;
 import com.latticeengines.dcp.workflow.steps.FinishImportSource;
 import com.latticeengines.dcp.workflow.steps.ImportSource;
 import com.latticeengines.dcp.workflow.steps.MatchImport;
@@ -44,9 +43,6 @@ public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWor
     private FinishImportSource finish;
 
     @Inject
-    private AnalyzeUsage analyzeUsage;
-
-    @Inject
     private SourceImportListener sourceImportListener;
 
     @Override
@@ -56,7 +52,6 @@ public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWor
                 .next(importSource)
                 .next(analyzeInput)
                 .next(match)
-                .next(analyzeUsage)
                 .next(splitMatchResult)
                 .next(finish)
                 .listener(sourceImportListener)

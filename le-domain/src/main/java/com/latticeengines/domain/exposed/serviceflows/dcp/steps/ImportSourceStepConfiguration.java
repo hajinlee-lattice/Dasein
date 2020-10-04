@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.dcp.steps;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusAppendConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration {
@@ -24,6 +25,12 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
 
     @JsonProperty("append_config")
     private DplusAppendConfig appendConfig;
+
+    @JsonProperty("match_purpose")
+    private PurposeOfUse matchPurpose;
+
+    @JsonProperty("append_purpose")
+    private PurposeOfUse appendPurpose;
 
     public String getProjectId() {
         return projectId;
@@ -65,11 +72,27 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
         this.matchConfig = matchConfig;
     }
 
+    public PurposeOfUse getMatchPurpose() {
+        return matchPurpose;
+    }
+
+    public void setMatchPurpose(PurposeOfUse matchPurpose) {
+        this.matchPurpose = matchPurpose;
+    }
+
     public DplusAppendConfig getAppendConfig() {
         return appendConfig;
     }
 
     public void setAppendConfig(DplusAppendConfig appendConfig) {
         this.appendConfig = appendConfig;
+    }
+
+    public PurposeOfUse getAppendPurpose() {
+        return appendPurpose;
+    }
+
+    public void setAppendPurpose(PurposeOfUse appendPurpose) {
+        this.appendPurpose = appendPurpose;
     }
 }

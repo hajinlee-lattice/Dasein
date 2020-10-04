@@ -14,10 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentLayoutEntityMgr;
-import com.latticeengines.apps.dcp.service.AppendConfigService;
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
+import com.latticeengines.apps.dcp.service.EntitlementService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 
 @Service("EnrichmentLayoutService")
 public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements EnrichmentLayoutService {
@@ -34,13 +33,10 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
     private EnrichmentLayoutEntityMgr enrichmentLayoutEntityMgr;
 
     @Inject
-    private AppendConfigService appendConfigService;
+    private EntitlementService entitlementService;
 
     @Inject
     private PrimeMetadataProxy primeMetadataProxy;
-
-    @Inject
-    private TenantService tenantService;
 
     private static final String RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN = "Layout_%s";
 
@@ -49,7 +45,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
         if (null == enrichmentLayout.getLayoutId()) {
             enrichmentLayout.setLayoutId(createLayoutId());
         }
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        Tenant tenant = MultiTenantContext.getTenant();
         enrichmentLayout.setTenant(tenant);
         ResponseDocument<String> result = validate(enrichmentLayout, false);
         if (result.isSuccess()) {
@@ -67,11 +63,12 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
 
     @Override
     public ResponseDocument<String> update(String customerSpace, EnrichmentLayout enrichmentLayout) {
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        Tenant tenant = MultiTenantContext.getTenant();
         enrichmentLayout.setTenant(tenant);
         ResponseDocument<String> result = validate(enrichmentLayout, true);
         if (result.isSuccess()) {
-            EnrichmentLayout existingEnrichmentLayout = enrichmentLayoutEntityMgr.findByField("layoutId", enrichmentLayout.getLayoutId());
+            EnrichmentLayout existingEnrichmentLayout = //
+                    enrichmentLayoutEntityMgr.findByField("layoutId", enrichmentLayout.getLayoutId());
             if (null != existingEnrichmentLayout) {
                 existingEnrichmentLayout.setElements(enrichmentLayout.getElements());
                 existingEnrichmentLayout.setRecordType(enrichmentLayout.getRecordType());
@@ -82,7 +79,8 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             }
             else {
                 result.setSuccess(false);
-                result.setResult(String.format("Can't update, no existing layout found for layoutId = %s", enrichmentLayout.getLayoutId()));
+                result.setResult(String.format("Can't update, no existing layout found for layoutId = %s", //
+                        enrichmentLayout.getLayoutId()));
             }
         }
         return result;
@@ -184,7 +182,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             if (result == null) { // no errors so far
                 // Continue validation
                 String tenantId = enrichmentLayout.getTenant().getId();
-                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService
+                DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementService
                         .getEntitlement(tenantId, "ALL", "ALL");
                 result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
             }
