@@ -467,6 +467,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(headers.contains("Company Name")); // in spec
         Assert.assertTrue(headers.contains("Country")); // in spec
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
+        Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
+        Assert.assertFalse(headers.contains("__Matched_Name__")); // debug column
         if (headers.contains("D-U-N-S Number")) { // the accepted csv
             Assert.assertTrue(headers.contains("Registered Name")); // in enrichment layout
             Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name")); // in enrichment layout

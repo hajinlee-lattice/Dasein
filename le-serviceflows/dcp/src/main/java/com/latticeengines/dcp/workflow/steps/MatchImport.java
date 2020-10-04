@@ -85,6 +85,7 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         matchInput.setDplusMatchConfig(configuration.getMatchConfig());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
+        matchInput.setMatchDebugEnabled(false);
 
         List<String> columnIds = configuration.getAppendConfig().getElementIds();
         List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());

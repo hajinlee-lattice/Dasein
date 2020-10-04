@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
@@ -306,7 +307,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 InterfaceName.CustomerAccountId.name(), //
                 InterfaceName.LatticeAccountId.name(), //
                 Classification //
-        ).contains(cm.getAttrName());
+        ).contains(cm.getAttrName()) || MatchConstants.matchDebugFields.contains(cm.getAttrName());
     }
 
     private boolean isFromDataBlock(ColumnMetadata cm) {
