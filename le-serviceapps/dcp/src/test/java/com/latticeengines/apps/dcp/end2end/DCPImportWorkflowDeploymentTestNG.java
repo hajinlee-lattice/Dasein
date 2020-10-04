@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -32,7 +33,9 @@ import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
@@ -62,6 +65,7 @@ import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.matchapi.UsageProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -225,7 +229,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private void setEnrichmentLayout() {
         EnrichmentLayout enrichmentLayout = new EnrichmentLayout();
         enrichmentLayout.setSourceId(source.getSourceId());
-        enrichmentLayout.setDomain(DataDomain.Finance);
+        enrichmentLayout.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        enrichmentLayout.setDomain(DataDomain.SalesMarketing);
         enrichmentLayout.setRecordType(DataRecordType.Domain);
         enrichmentLayout.setElements(Arrays.asList( //
                 "duns_number", //
@@ -257,7 +262,18 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryaddr_longitude", //
                 "registeredname" //
         ));
-        enrichmentLayoutService.create(mainCustomerSpace, enrichmentLayout);
+        ResponseDocument<String> response =  enrichmentLayoutService.create(mainCustomerSpace, enrichmentLayout);
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.isSuccess(), "EnrichmentLayout is not valid: " + JsonUtils.serialize(response));
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        EnrichmentLayout saved = retry.execute(ctx -> {
+           EnrichmentLayout layout = enrichmentLayoutService.findBySourceId(mainCustomerSpace, source.getSourceId());
+           Assert.assertNotNull(layout);
+           return layout;
+        });
+        Assert.assertTrue(saved.getElements().contains("registeredname"));
     }
 
     private void verifyImport() {

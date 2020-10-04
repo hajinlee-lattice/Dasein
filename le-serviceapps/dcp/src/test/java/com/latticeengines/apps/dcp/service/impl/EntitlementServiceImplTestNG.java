@@ -17,7 +17,7 @@ public class EntitlementServiceImplTestNG extends DCPFunctionalTestNGBase {
     public void testGetEntitlement() {
         setupTestEnvironment();
         DataBlockEntitlementContainer container = //
-                entitlementServiceImpl.getSubscriberEntitlement("202007226");
+                entitlementServiceImpl.getSubscriberEntitlement(SUBSRIBER_NUMBER_SNMS);
         Assert.assertNotNull(container);
         container = entitlementServiceImpl.getSubscriberEntitlement("123");
         Assert.assertNull(container);

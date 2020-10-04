@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutSummary;
 
 public interface EnrichmentLayoutService {
 
@@ -29,7 +30,7 @@ public interface EnrichmentLayoutService {
 
     void deleteLayout(EnrichmentLayout enrichmentLayout);
 
-    List<EnrichmentLayoutDetail> getAll(String customerSpace, int pageIndex, int pageSize);
+    List<EnrichmentLayoutSummary> getAll(String customerSpace, int pageIndex, int pageSize);
 
     default EnrichmentLayout getDefaultLayout() {
         EnrichmentLayout enrichmentLayout = new EnrichmentLayout();

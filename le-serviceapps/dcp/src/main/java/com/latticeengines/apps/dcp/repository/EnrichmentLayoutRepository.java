@@ -12,4 +12,9 @@ public interface EnrichmentLayoutRepository extends BaseJpaRepository<Enrichment
 
     @Query("SELECT el FROM EnrichmentLayout AS el")
     List<EnrichmentLayout> findAllEnrichmentLayouts(Pageable pageable);
+
+    EnrichmentLayout findByLayoutId(String layoutId);
+
+    EnrichmentLayout findBySourceId(String sourceId);
+
 }

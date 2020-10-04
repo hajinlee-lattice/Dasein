@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,26 +79,26 @@ public class EntitlementServiceImpl implements EntitlementService {
         if (container == null || ("ALL".equals(domainName) && "ALL".equals(recordType))) {
             return container;
         } else {
-            List<DataBlockEntitlementContainer.Domain> resultDomains = new ArrayList();
+            List<DataBlockEntitlementContainer.Domain> filteredDomains = new ArrayList<>();
 
             for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-                if (!"ALL".equals(domainName) && domain.getDomain().equals(DataDomain.valueOf(domainName))) {
+                if (!"ALL".equals(domainName) && !domain.getDomain().equals(DataDomain.parse(domainName))) {
                     continue;
                 }
 
                 if ("ALL".equals(recordType)) {
-                    resultDomains.add(domain);
+                    filteredDomains.add(domain);
                 } else {
                     Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredRecords = domain
                             .getRecordTypes().entrySet().stream()
-                            .filter(entry -> entry.getKey().equals(DataRecordType.valueOf(recordType)))
+                            .filter(entry -> entry.getKey().equals(DataRecordType.parse(recordType)))
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                    resultDomains.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredRecords));
+                    filteredDomains.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredRecords));
                 }
             }
 
-            return new DataBlockEntitlementContainer(resultDomains);
+            return new DataBlockEntitlementContainer(filteredDomains);
         }
     }
 
@@ -113,64 +114,40 @@ public class EntitlementServiceImpl implements EntitlementService {
         String subscriberNumber = tenant.getSubscriberNumber();
         if (StringUtils.isNotBlank(subscriberNumber)) {
             try {
-                String response = iDaaSService.getEntitlement(subscriberNumber);
-                JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);
-                return hasEntitlementInDomainAndRecordType(dataDomain, dataRecordType, blockName, jsonNode);
+                DataBlockEntitlementContainer entitlement = //
+                        _self.getTenantEntitlementFromCache(tenantId, dataDomain.name(), dataRecordType.name());
+                if (entitlement != null) {
+                    for (DataBlockEntitlementContainer.Domain domain: entitlement.getDomains()) {
+                        if (!dataDomain.equals(domain.getDomain())) {
+                            continue;
+                        }
+                        if (!domain.getRecordTypes().containsKey(dataRecordType) || //
+                                CollectionUtils.isEmpty(domain.getRecordTypes().get(dataRecordType))) {
+                            continue;
+                        }
+                        for (DataBlockEntitlementContainer.Block block: domain.getRecordTypes().get(dataRecordType)) {
+                            if (blockName.equals(block.getBlockId())) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                log.info("Subscriber {} is not entitled to {} and {}: {}", //
+                        subscriberNumber, dataDomain, dataRecordType, JsonUtils.serialize(entitlement));
+                return false;
             } catch (Exception e) {
                 log.warn("Cannot get entitlement for subscriberNumber: " + subscriberNumber);
                 return false;
             }
         } else {
-            log.warn("Tenant {} does not have a subscriber number", subscriberNumber);
+            log.warn("Tenant {} does not have a subscriber number", tenantId);
             return allowNull;
         }
     }
 
-    private boolean hasEntitlementInDomainAndRecordType(DataDomain dataDomain, DataRecordType dataRecordType,
-            String blockName, JsonNode jsonNode) {
-        if (hasNonEmptyArray(jsonNode, "products")) {
-            for (JsonNode productNode : jsonNode.get("products")) {
-                String productName = productNode.get("name").asText();
-                DataDomain domain = parseDataDomain(productName);
-                if (dataDomain.equals(domain)) {
-                    if (hasEntitlementInRecordType(dataRecordType, blockName, productNode)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean hasEntitlementInRecordType(DataRecordType dataRecordType, String blockName, JsonNode productNode) {
-        if (hasNonEmptyArray(productNode, "packages")) {
-            for (JsonNode packageNode : productNode.get("packages")) {
-                String packageName = packageNode.get("name").asText();
-                DataRecordType recordType = parseDataRecordType(packageName);
-                if (dataRecordType.equals(recordType)) {
-                    if (hasEntitlement(blockName, packageNode)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean hasEntitlement(String blockName, JsonNode packageNode) {
-        if (hasNonEmptyArray(packageNode, "entitlements")) {
-            for (JsonNode entitlementNode : packageNode.get("entitlements")) {
-                String canonicalName = entitlementNode.get("canonical_name").asText();
-                if (blockName.equalsIgnoreCase(canonicalName)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @Cacheable(cacheNames = CacheName.Constants.IDaaSEntitlementCacheName, //
-            key = "T(java.lang.String).format(\"%s|entitlement\", #tenantId)", unless = "#result == null")
+            key = "T(java.lang.String).format(\"%s|%s|%s|entitlement\", #tenantId, #domainName, #recordType)", //
+            unless = "#result == null")
     public DataBlockEntitlementContainer getTenantEntitlementFromCache(String tenantId, String domainName,
             String recordType) {
         DataBlockEntitlementContainer container = null;
@@ -195,6 +172,9 @@ public class EntitlementServiceImpl implements EntitlementService {
             if (e.getRemoteStackTrace().contains("\"code\":\"IEC-AM-0001\"")) {
                 // {"code":"IEC-AM-0001","message":"Subscriber/Contract doesnt exists in the
                 // system"}
+                return null;
+            } else if (e.getRemoteStackTrace().contains("\"code\":\"IEC_SM_0015\"")) {
+                // {"code":"IEC_SM_0015","message":"Subscriber doesnt exists in the system"}
                 return null;
             }
             throw e;

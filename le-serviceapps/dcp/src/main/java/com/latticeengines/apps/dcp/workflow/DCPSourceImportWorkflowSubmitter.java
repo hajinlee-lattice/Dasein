@@ -115,7 +115,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         }
         if (matchRuleConfiguration.getBaseRule().getDomain() != null && matchRuleConfiguration.getBaseRule().getRecordType() != null) {
             return entitlementService.checkEntitledWith(customerSpace.toString(), matchRuleConfiguration.getBaseRule().getDomain(),
-                    matchRuleConfiguration.getBaseRule().getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION);
+                    matchRuleConfiguration.getBaseRule().getRecordType(), DataBlock.BLOCK_ENTITY_RESOLUTION);
         }
         return true;
     }

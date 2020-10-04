@@ -189,7 +189,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         }
         if (newRule.getDomain() != null && newRule.getRecordType() != null) {
             if (!entitlementService.checkEntitledWith(customerSpace, newRule.getDomain(),
-                    newRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+                    newRule.getRecordType(), DataBlock.BLOCK_ENTITY_RESOLUTION)) {
                 throw new LedpException(LedpCode.LEDP_60011);
             }
         } else {
@@ -231,7 +231,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
         }
         if (matchRule.getDomain() != null && matchRule.getRecordType() != null) {
             if (!entitlementService.checkEntitledWith(customerSpace, matchRule.getDomain(),
-                    matchRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+                            matchRule.getRecordType(), DataBlock.BLOCK_ENTITY_RESOLUTION)) {
                 throw new LedpException(LedpCode.LEDP_60011);
             }
         } else {
