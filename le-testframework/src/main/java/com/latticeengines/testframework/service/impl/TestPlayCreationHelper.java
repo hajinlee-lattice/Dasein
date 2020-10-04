@@ -314,7 +314,7 @@ public class TestPlayCreationHelper {
             lookupIdMap.setTenant(tenant);
             lookupIdMap.setExternalSystemType(config.getDestinationSystemType());
             lookupIdMap.setExternalSystemName(config.getDestinationSystemName());
-            lookupIdMap.setOrgName("OrgName_" + new Date().toString());
+            lookupIdMap.setOrgName("OrgName_" + new Date().getTime());
             lookupIdMap.setOrgId(config.getDestinationSystemId());
             ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
             extSysAuth.setTrayAuthenticationId(config.getTrayAuthenticationId());
@@ -326,6 +326,10 @@ public class TestPlayCreationHelper {
         }
         connections.addAll(createdLookups);
         return createdLookups;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Date().toString());
     }
 
     public PlayLaunch launchPlayWorkflow(TestPlaySetupConfig testPlaySetupConfig, boolean useSpark) {
@@ -1016,7 +1020,11 @@ public class TestPlayCreationHelper {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setLaunchState(LaunchState.Queued);
         List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);
-        playLaunch = playProxy.createNewLaunchByPlayAndChannel(tenantIdentifier, play.getName(), channels.get(0).getId(), false, playLaunch);
+        Optional<PlayLaunchChannel> optionalPlayLaunchChannel =
+                channels.stream().filter(playLaunchChannel -> CDLExternalSystemName.AWS_S3.equals(playLaunchChannel.getLookupIdMap().getExternalSystemName())).findFirst();
+        Assert.assertNotNull(optionalPlayLaunchChannel);
+        playLaunch = playProxy.createNewLaunchByPlayAndChannel(tenantIdentifier, play.getName(),
+                optionalPlayLaunchChannel.get().getId(), false, playLaunch);
         playLaunch.setAddAccountsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, addedAccounts));
         playLaunch.setAddContactsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, addedContacts));
         playLaunch.setCompleteContactsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, completeContacts));
