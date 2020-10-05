@@ -41,7 +41,7 @@ public class CustomerSourceAttribute implements HasPid, Serializable {
     @Column(name = "Attribute", nullable = false, length = 128)
     private String attribute;
 
-    @Column(name = "Arguments", length = 1024)
+    @Column(name = "Arguments", length = 3000)
     private String arguments;
 
     @Column(name = "DataCloudVersion", length = 50)
