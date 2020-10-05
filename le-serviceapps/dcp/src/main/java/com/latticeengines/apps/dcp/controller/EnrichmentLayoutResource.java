@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutSummary;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -37,15 +38,16 @@ public class EnrichmentLayoutResource {
     @ResponseBody
     @ApiOperation(value = "List Match Rule")
     @UseReaderConnection
-    public List<EnrichmentLayoutDetail> getAllLayout(@PathVariable String customerSpace,
-                                                     @RequestParam(defaultValue = "0") int pageIndex,
-                                                     @RequestParam(defaultValue = "20") int pageSize) {
+    public List<EnrichmentLayoutSummary> getAllLayout(@PathVariable String customerSpace,
+                                                      @RequestParam(defaultValue = "0") int pageIndex,
+                                                      @RequestParam(defaultValue = "20") int pageSize) {
         return enrichmentLayoutService.getAll(customerSpace, pageIndex, pageSize);
     }
 
     @GetMapping("/layoutId/{layoutId}")
     @ResponseBody
     @ApiOperation(value = "Get Enrichment Layout by layoutId")
+    @UseReaderConnection
     public EnrichmentLayoutDetail getLayoutByLayoutId(@PathVariable String customerSpace, @PathVariable String layoutId) {
         return enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(customerSpace, layoutId);
     }
@@ -53,6 +55,7 @@ public class EnrichmentLayoutResource {
     @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation(value = "Get Enrichment Layout by sourceId")
+    @UseReaderConnection
     public EnrichmentLayoutDetail getLayoutBySourceId(@PathVariable String customerSpace, @PathVariable String sourceId) {
         return enrichmentLayoutService.findEnrichmentLayoutDetailBySourceId(customerSpace, sourceId);
     }

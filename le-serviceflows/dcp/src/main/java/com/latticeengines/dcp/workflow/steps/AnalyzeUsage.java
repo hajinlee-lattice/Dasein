@@ -2,17 +2,15 @@ package com.latticeengines.dcp.workflow.steps;
 
 import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.OUTPUT_FIELDS;
 import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.RAW_USAGE_DISPLAY_NAMES;
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.USAGE_CSV_DATA_UNIT;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,8 +20,6 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
-import com.latticeengines.domain.exposed.dcp.UploadConfig;
-import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -31,10 +27,10 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStep
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.dcp.AnalyzeUsageConfig;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
-import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.AnalyzeUsageJob;
+import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -46,24 +42,10 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
     private ProjectProxy projectProxy;
 
     @Inject
-    private UploadProxy uploadProxy;
-
-    @Inject
     private IDaaSService iDaaSService;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
-
-    @Value("${datacloud.manage.url}")
-    private String url;
-
-    @Value("${datacloud.manage.user}")
-    private String user;
-
-    @Value("${datacloud.manage.password.encrypted}")
-    private String password;
-
-    private Map<String, String> dataBlockDispNames = new HashMap<>();
 
     @Override
     protected Class<AnalyzeUsageJob> getJobClz() {
@@ -91,14 +73,24 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
 
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
                 configuration.getProjectId(), Boolean.FALSE, null);
-        jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain() + "-" + projectDetails.getPurposeOfUse().getRecordType());
+        if (projectDetails.getPurposeOfUse() != null) {
+            jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain() //
+                    + "-" + projectDetails.getPurposeOfUse().getRecordType());
+        } else {
+            log.info("No purpose of use found for project {}", configuration.getProjectId());
+        }
 
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.getTenantId());
         if (tenant != null && tenant.getSubscriberNumber() != null) {
-            jobConfig.setSubscriberNumber(tenant.getSubscriberNumber());
-            SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(tenant.getSubscriberNumber());
-            jobConfig.setSubscriberName(subscriberDetails.getCompanyName());
-            jobConfig.setSubscriberCountry(subscriberDetails.getAddress().getCountryCode());
+            String subNumber = tenant.getSubscriberNumber();
+            jobConfig.setSubscriberNumber(subNumber);
+            SubscriberDetails subscriberDetails = iDaaSService.getSubscriberDetails(subNumber);
+            if (subscriberDetails != null) {
+                jobConfig.setSubscriberName(subscriberDetails.getCompanyName());
+                jobConfig.setSubscriberCountry(subscriberDetails.getAddress().getCountryCode());
+            } else {
+                log.info("No subscriber detail found for {}", subNumber);
+            }
         }
 
         log.info("JobConfig=" + JsonUtils.serialize(jobConfig));
@@ -107,15 +99,8 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String usageReportPath = result.getTargets().get(0).getPath();
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
-        String uploadId = configuration.getUploadId();
-        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
-        UploadConfig uploadConfig = upload.getUploadConfig();
-        uploadConfig.setUsageReportFilePath(usageReportPath);
-        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, uploadConfig);
-
-        log.info("All usage report is under " + usageReportPath);
+        HdfsDataUnit usageReportDataUnit = result.getTargets().get(0);
+        WorkflowStaticContext.putObject(USAGE_CSV_DATA_UNIT, usageReportDataUnit);
     }
 
 }

@@ -15,6 +15,7 @@ public class MatchCommandCleanerBean implements QuartzJobBean {
 
     @Inject
     private MatchCommandCleaner matchCommandCleaner;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         MatchCommandCleanerCallable.Builder builder = new MatchCommandCleanerCallable.Builder();

@@ -15,12 +15,13 @@ import com.latticeengines.proxy.exposed.matchapi.UsageProxy;
 public class UsageProxyImpl extends BaseRestApiProxy implements UsageProxy {
 
     public UsageProxyImpl() {
-        super(PropertyUtils.getProperty("common.matchapi.url"), "/usage");
+        super(PropertyUtils.getProperty("common.matchapi.url"), "/match/usage");
     }
 
     @Override
     public VboBatchUsageReport submitBatchReport(SubmitBatchReportRequest request) {
-        return post("submit batch report", "/batch", request, VboBatchUsageReport.class);
+        String url = constructUrl("/batch");
+        return post("submit batch report", url, request, VboBatchUsageReport.class);
     }
 
 }

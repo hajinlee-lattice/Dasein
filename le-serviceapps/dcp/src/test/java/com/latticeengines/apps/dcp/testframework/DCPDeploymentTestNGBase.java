@@ -35,6 +35,7 @@ import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -51,6 +52,9 @@ DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String TEST_TEMPLATE_DIR = "le-serviceapps/dcp/deployment/template";
     protected static final String TEST_TEMPLATE_VERSION = "3";
     protected static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
+    protected static final String SUBSRIBER_NUMBER_SNMS = "202007226";
+    protected static final String SUBSRIBER_NUMBER_MANY_DOMAINS = "202007101";
+
 
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
@@ -66,6 +70,9 @@ DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Inject
     protected UploadProxy uploadProxy;
+
+    @Inject
+    private TenantService tenantService;
 
     @Inject
     protected TestArtifactService testArtifactService;
@@ -100,6 +107,8 @@ DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
             testBed.bootstrapForProduct(LatticeProduct.DCP, featureFlagMap);
         }
         mainTestTenant = testBed.getMainTestTenant();
+        mainTestTenant.setSubscriberNumber(SUBSRIBER_NUMBER_SNMS);
+        tenantService.updateTenant(mainTestTenant);
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
@@ -190,7 +199,7 @@ DCPDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected PurposeOfUse getPurposeOfUse() {
         PurposeOfUse purposeOfUse = new PurposeOfUse();
-        purposeOfUse.setDomain(DataDomain.Finance);
+        purposeOfUse.setDomain(DataDomain.SalesMarketing);
         purposeOfUse.setRecordType(DataRecordType.Domain);
         return purposeOfUse;
     }

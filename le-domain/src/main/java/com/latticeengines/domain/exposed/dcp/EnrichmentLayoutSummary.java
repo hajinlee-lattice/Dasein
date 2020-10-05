@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.dcp;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class EnrichmentLayoutDetail {
+public class EnrichmentLayoutSummary {
 
     @JsonProperty("layoutId")
     private String layoutId;
@@ -40,14 +38,11 @@ public class EnrichmentLayoutDetail {
     @JsonProperty("updated")
     private Date updated;
 
-    @JsonProperty("elements")
-    private List<String> elements;
-
-    private EnrichmentLayoutDetail() {
+    private EnrichmentLayoutSummary() {
 
     }
 
-    public EnrichmentLayoutDetail(EnrichmentLayout enrichmentLayout) {
+    public EnrichmentLayoutSummary(EnrichmentLayout enrichmentLayout) {
         this.layoutId =   enrichmentLayout.getLayoutId();
         this.sourceId =   enrichmentLayout.getSourceId();
         this.domain =     enrichmentLayout.getDomain();
@@ -56,9 +51,6 @@ public class EnrichmentLayoutDetail {
         this.createdBy =  enrichmentLayout.getCreatedBy();
         this.teamId =     enrichmentLayout.getTeamId();
         this.updated =    enrichmentLayout.getUpdated();
-        if (enrichmentLayout.getElements() != null) {
-            this.elements = new ArrayList<>(enrichmentLayout.getElements());
-        }
     }
 
     public String getLayoutId() {
@@ -125,11 +117,4 @@ public class EnrichmentLayoutDetail {
         this.updated = updated;
     }
 
-    public List<String> getElements() {
-        return elements;
-    }
-
-    public void setElements(List<String> elements) {
-        this.elements = elements;
-    }
 }

@@ -36,4 +36,5 @@ public interface MatchRuleService {
     MatchRuleConfiguration getMatchConfig(String customerSpace, String sourceId);
 
     void hardDeleteMatchRuleBySourceId(String customerSpace, String sourceId);
+
 }
