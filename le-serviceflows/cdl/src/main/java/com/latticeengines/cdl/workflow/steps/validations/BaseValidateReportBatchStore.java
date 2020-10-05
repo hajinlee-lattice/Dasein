@@ -57,6 +57,7 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
     private Table reportChangeListTable;
 
     private long totalRecords;
+    private Table activeTable;
 
     @Override
     public void execute() {
@@ -77,9 +78,11 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
 
     private boolean checkCreateChangeList() {
         boolean createChangeList = isChanged(role);
-        createChangeList = createChangeList
+        activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
+        createChangeList = createChangeList && activeTable != null
                 && (entity.equals(BusinessEntity.Account) || entity.equals(BusinessEntity.Contact));
-        log.info("Create Change List ? " + createChangeList + " for entity=" + entity.name());
+        log.info("Create Change List ? " + createChangeList + " for entity=" + entity.name() + " activeTable="
+                + activeTable);
         return createChangeList;
     }
 
@@ -115,6 +118,8 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
                 setDeletedCount(chgDeletedRecords, consolidateSummaryNode);
             }
             setTotalCount(totalRecords, consolidateSummaryNode);
+            putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), report);
+            log.info("Report=" + report.toString());
 
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
@@ -126,6 +131,9 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
         if (totalRecords != null) {
             totalCnt = totalRecords;
             ((ObjectNode) consolidateSummaryNode).put(ReportConstants.TOTAL, totalRecords);
+            if (activeTable == null) {
+                setNewCount(totalRecords, consolidateSummaryNode);
+            }
         }
         updateEntityValueMapInContext(entity, TOTAL_RECORDS, totalCnt, Long.class);
         log.info(String.format("Save total count %d for entity %s to workflow context", totalCnt, entity));
@@ -135,34 +143,28 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
         long delCnt = 0;
         if (chgDeletedRecords != null) {
             delCnt = chgDeletedRecords;
-            ((ObjectNode) consolidateSummaryNode).put(ReportConstants.DELETE, chgDeletedRecords);
         }
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.DELETE, delCnt);
         updateEntityValueMapInContext(entity, DELETED_RECORDS, delCnt, Long.class);
         log.info(String.format("Save deleted count %d for entity %s to workflow context", delCnt, entity));
     }
 
     private void setNewCount(Long chgNewRecords, JsonNode consolidateSummaryNode) {
         long newCnt = 0;
-        if (consolidateSummaryNode.has(ReportConstants.NEW)) {
-            newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
-            if (chgNewRecords != null) {
-                newCnt = chgNewRecords;
-                ((ObjectNode) consolidateSummaryNode).put(ReportConstants.NEW, chgNewRecords);
-            }
+        if (chgNewRecords != null) {
+            newCnt = chgNewRecords;
         }
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.NEW, newCnt);
         updateEntityValueMapInContext(entity, NEW_RECORDS, newCnt, Long.class);
         log.info(String.format("Save new count %d for entity %s to workflow context", newCnt, entity));
     }
 
     private void setUpdateCount(Long chgUpdatedRecords, JsonNode consolidateSummaryNode) {
         long updateCnt = 0;
-        if (consolidateSummaryNode.has(ReportConstants.UPDATE)) {
-            updateCnt = consolidateSummaryNode.get(ReportConstants.UPDATE).asLong();
-            if (chgUpdatedRecords != null) {
-                updateCnt = chgUpdatedRecords;
-                ((ObjectNode) consolidateSummaryNode).put(ReportConstants.UPDATE, chgUpdatedRecords);
-            }
+        if (chgUpdatedRecords != null) {
+            updateCnt = chgUpdatedRecords;
         }
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.UPDATE, updateCnt);
         updateEntityValueMapInContext(entity, UPDATED_RECORDS, updateCnt, Long.class);
         log.info(String.format("Save updated count %d for entity %s to workflow context", updateCnt, entity));
     }
@@ -195,7 +197,6 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
     }
 
     private void createChangeList() {
-        Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
         if (activeTable == null) {
             log.info("There's no active batch store!");
             return;
