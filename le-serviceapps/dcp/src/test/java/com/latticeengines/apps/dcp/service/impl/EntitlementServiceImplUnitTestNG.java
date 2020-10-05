@@ -15,11 +15,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 
-public class AppendConfigServiceImplUnitTestNG {
+public class EntitlementServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testDefaultEntitlement() {
-        DataBlockEntitlementContainer container = AppendConfigServiceImpl.getDefaultEntitlement();
+        DataBlockEntitlementContainer container = EntitlementServiceImpl.getDefaultEntitlement();
         Assert.assertNotNull(container);
         Assert.assertEquals(container.getDomains().size(), 1);
         Assert.assertEquals(container.getDomains().get(0).getRecordTypes().size(), 1);
@@ -30,7 +30,7 @@ public class AppendConfigServiceImplUnitTestNG {
     public void parseIDaaSEntitlement() throws IOException {
         InputStream is = new ClassPathResource("append-config/idaas-entitlement.json").getInputStream();
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
-        DataBlockEntitlementContainer container = AppendConfigServiceImpl.parseIDaaSEntitlement(idaasStr);
+        DataBlockEntitlementContainer container = EntitlementServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
         Assert.assertEquals(container.getDomains().size(), 2);
         for (DataBlockEntitlementContainer.Domain domain: container.getDomains()) {
@@ -62,7 +62,7 @@ public class AppendConfigServiceImplUnitTestNG {
     public void parseAnalyticalOnly() throws IOException {
         InputStream is = new ClassPathResource("append-config/idaas-entitlement-2.json").getInputStream();
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
-        DataBlockEntitlementContainer container = AppendConfigServiceImpl.parseIDaaSEntitlement(idaasStr);
+        DataBlockEntitlementContainer container = EntitlementServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
         Assert.assertTrue(container.getDomains().isEmpty());
     }

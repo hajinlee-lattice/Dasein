@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -22,25 +24,30 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
-import com.latticeengines.domain.exposed.datacloud.usage.SubmitBatchReportRequest;
-import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -58,6 +65,7 @@ import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.matchapi.UsageProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -99,6 +107,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private UploadService uploadService;
 
+    @Inject
+    private EnrichmentLayoutService enrichmentLayoutService;
+
     private ProjectDetails projectDetails;
     private Source source;
     private String uploadId;
@@ -112,6 +123,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testImport() {
         prepareTenant();
+        setEnrichmentLayout();
 
         DCPImportRequest request = new DCPImportRequest();
         request.setProjectId(projectDetails.getProjectId());
@@ -214,6 +226,56 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         }
     }
 
+    private void setEnrichmentLayout() {
+        EnrichmentLayout enrichmentLayout = new EnrichmentLayout();
+        enrichmentLayout.setSourceId(source.getSourceId());
+        enrichmentLayout.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        enrichmentLayout.setDomain(DataDomain.SalesMarketing);
+        enrichmentLayout.setRecordType(DataRecordType.Domain);
+        enrichmentLayout.setElements(Arrays.asList( //
+                "duns_number", //
+                "primaryname", //
+                "countryisoalpha2code", //
+                "primaryaddr_country_isoalpha2code", //
+                "primaryaddr_country_name", //
+                "primaryaddr_county_name", //
+                "primaryaddr_addrlocality_name", //
+                "primaryaddr_addrregion_abbreviatedname", //
+                "primaryaddr_continentalregion_name", //
+                "primaryaddr_isregisteredaddr", //
+                "primaryaddr_language_desc", //
+                "primaryaddr_language_code", //
+                "primaryaddr_minortownname", //
+                "primaryaddr_postalcode", //
+                "primaryaddr_postalcodeposition_desc", //
+                "primaryaddr_postalcodeposition_code", //
+                "primaryaddr_postofficebox_postofficeboxnumber", //
+                "primaryaddr_postofficebox_typedesc", //
+                "primaryaddr_postofficebox_typecode", //
+                "primaryaddr_street_line1", //
+                "primaryaddr_street_line2", //
+                "primaryaddr_streetname", //
+                "primaryaddr_streetnumber", //
+                "primaryindcode_ussicv4", //
+                "primaryindcode_ussicv4desc", //
+                "primaryaddr_latitude", //
+                "primaryaddr_longitude", //
+                "registeredname" //
+        ));
+        ResponseDocument<String> response =  enrichmentLayoutService.create(mainCustomerSpace, enrichmentLayout);
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.isSuccess(), "EnrichmentLayout is not valid: " + JsonUtils.serialize(response));
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        EnrichmentLayout saved = retry.execute(ctx -> {
+           EnrichmentLayout layout = enrichmentLayoutService.findBySourceId(mainCustomerSpace, source.getSourceId());
+           Assert.assertNotNull(layout);
+           return layout;
+        });
+        Assert.assertTrue(saved.getElements().contains("registeredname"));
+    }
+
     private void verifyImport() {
         UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId, Boolean.TRUE);
         log.info(JsonUtils.serialize(upload));
@@ -242,7 +304,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyUploadStats(upload);
         verifyDownload(upload);
         verifyDataReport();
-        verifyUsageReport(upload);
+        // verifyUsageReport(upload);
     }
 
     private void verifyErrorFile(UploadDetails upload) {
@@ -405,6 +467,13 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(headers.contains("Company Name")); // in spec
         Assert.assertTrue(headers.contains("Country")); // in spec
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
+        Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
+        Assert.assertFalse(headers.contains("__Matched_Name__")); // debug column
+        if (headers.contains("D-U-N-S Number")) { // the accepted csv
+            Assert.assertTrue(headers.contains("Registered Name")); // in enrichment layout
+            Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name")); // in enrichment layout
+            Assert.assertFalse(headers.contains("Primary Address Region Name")); // not in enrichment layout
+        }
     }
 
     private void verifyDownload(UploadDetails upload) {
@@ -497,13 +566,15 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     void verifyUsageReport(UploadDetails upload) {
         String usageReportPath = upload.getUploadConfig().getUsageReportFilePath();
-        SubmitBatchReportRequest batchReport = new SubmitBatchReportRequest();
-        batchReport.setBatchRef(mainCustomerSpace + "_" + uploadId);
-        VboBatchUsageReport vboBatchUsageReport = usageProxy.submitBatchReport(batchReport);
-        Assert.assertTrue(s3Service.objectExist(vboBatchUsageReport.getS3Bucket(), usageReportPath));
-        List<String> usageReportFiles = s3Service.getFilesForDir(vboBatchUsageReport.getS3Bucket(), usageReportPath);
+        Pattern pattern = Pattern.compile("s3://(?<bucket>[^/]+)/(?<prefix>.*)");
+        Matcher matcher = pattern.matcher(usageReportPath);
+        Assert.assertTrue(matcher.matches());
+        String s3Bucket = matcher.group("bucket");
+        String s3Prefix = matcher.group("prefix");
+        log.info("Verifying usage report at {}, {}", s3Bucket, s3Prefix);
+        List<String> usageReportFiles = s3Service.getFilesForDir(s3Bucket, s3Prefix);
         Assert.assertFalse(CollectionUtils.isEmpty(usageReportFiles));
-        verifyUsageCsvContent(vboBatchUsageReport.getS3Bucket(), usageReportFiles.get(0));
+        verifyUsageCsvContent(s3Bucket, usageReportFiles.get(0));
     }
 
     private void verifyUsageCsvContent(String bucket, String path) {
@@ -535,7 +606,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     private void verifyUsageCsvRecord(String[] record) {
-        System.out.println(record);
+        System.out.println(StringUtils.join(record, ","));
         int drtIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_DRT);
         Assert.assertNotNull(record[drtIndex]);
         int poaeIdIndex = VboUsageConstants.OUTPUT_FIELDS.indexOf(VboUsageConstants.ATTR_POAEID);

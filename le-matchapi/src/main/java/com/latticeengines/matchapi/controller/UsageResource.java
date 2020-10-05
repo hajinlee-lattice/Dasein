@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.datacloud.match.service.VboUsageService;
 import com.latticeengines.domain.exposed.datacloud.usage.SubmitBatchReportRequest;
+import com.latticeengines.domain.exposed.datacloud.usage.UsageReportSubmissionSummary;
 import com.latticeengines.domain.exposed.datacloud.usage.VboBatchUsageReport;
 
 import io.swagger.annotations.Api;
@@ -28,6 +29,13 @@ public class UsageResource {
     @ApiOperation(value = "Submit a batch usage report. Return the S3 location for the caller to put csv files.")
     public VboBatchUsageReport submitBatchUsageReport(@RequestBody SubmitBatchReportRequest request) {
         return vboUsageService.submitBatchUsageReport(request);
+    }
+
+    @PostMapping("/move")
+    @ResponseBody
+    @ApiOperation(value = "Move usage report csv files to vbo S3.")
+    public UsageReportSubmissionSummary moveReportToVbo() {
+        return vboUsageService.moveReportsToVbo();
     }
 
 }

@@ -20,11 +20,22 @@ public class SubmitBatchReportRequest {
     @JsonProperty("batchRef")
     private String batchRef;
 
+    @JsonProperty("numRecords")
+    private Long numRecords;
+
     public String getBatchRef() {
         return batchRef;
     }
 
     public void setBatchRef(String batchRef) {
         this.batchRef = batchRef;
+    }
+
+    public Long getNumRecords() {
+        return numRecords;
+    }
+
+    public void setNumRecords(Long numRecords) {
+        this.numRecords = numRecords;
     }
 }

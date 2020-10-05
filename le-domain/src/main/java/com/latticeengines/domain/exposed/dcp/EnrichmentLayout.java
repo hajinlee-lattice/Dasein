@@ -18,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -31,7 +32,10 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "DCP_ENRICHMENT_LAYOUT")
+@Table(name = "DCP_ENRICHMENT_LAYOUT", uniqueConstraints = { //
+        @UniqueConstraint(name = "UX_LAYOUT_LAYOUT_ID", columnNames = { "LAYOUT_ID" }), //
+        @UniqueConstraint(name = "UX_LAYOUT_SOURCE_ID", columnNames = { "SOURCE_ID" }) //
+})
 public class EnrichmentLayout implements HasPid, HasTenant {
 
     @Id

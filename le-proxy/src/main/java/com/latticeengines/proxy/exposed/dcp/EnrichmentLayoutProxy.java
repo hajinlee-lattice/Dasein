@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutSummary;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -29,10 +30,10 @@ public class EnrichmentLayoutProxy  extends MicroserviceRestApiProxy implements 
         return get("Get enrichment layout by layoutId", url, EnrichmentLayoutDetail.class);
     }
 
-    public List<EnrichmentLayoutDetail> getAll(String customerId) {
+    public List<EnrichmentLayoutSummary> getAll(String customerId) {
         String baseUrl = "customerspaces/{customerSpace}/list";
         String url = getUrl(customerId, baseUrl, null);
-        return getList("Get all enrichment layout objects", url, EnrichmentLayoutDetail.class);
+        return getList("Get all enrichment layout objects", url, EnrichmentLayoutSummary.class);
     }
 
     public ResponseDocument<String> create (String customerId, EnrichmentLayout enrichmentLayout) {

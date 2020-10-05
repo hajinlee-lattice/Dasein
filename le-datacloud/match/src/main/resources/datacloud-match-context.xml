@@ -59,4 +59,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="vboUsageReportDao" class="com.latticeengines.datacloud.match.dao.impl.VboUsageReportDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>

@@ -8,13 +8,16 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
-import com.latticeengines.apps.dcp.service.AppendConfigService;
+import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
+import com.latticeengines.apps.dcp.service.EntitlementService;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.UploadService;
@@ -23,11 +26,15 @@ import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusAppendConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.Project;
+import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
@@ -42,6 +49,8 @@ import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Component
 public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
+
+    private static final Logger log = LoggerFactory.getLogger(DCPSourceImportWorkflowSubmitter.class);
 
     private static final String DEFAULT_DCP_S3_USER = "Default_DCP_S3_User";
     private static final int MAX_RETRY = 3;
@@ -59,13 +68,20 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
     private MatchRuleService matchRuleService;
 
     @Inject
-    private AppendConfigService appendConfigService;
+    private EnrichmentLayoutService enrichmentLayoutService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DCPImportRequest importRequest,
                                 WorkflowPidWrapper pidWrapper) {
+        String projectId = importRequest.getProjectId();
+        String sourceId = importRequest.getSourceId();
+        String customerSpaceStr = customerSpace.toString();
+
         UploadConfig uploadConfig = generateUploadConfig(customerSpace, importRequest);
-        UploadDetails upload = uploadService.createUpload(customerSpace.toString(), importRequest.getSourceId(),
+        UploadDetails upload = uploadService.createUpload(customerSpaceStr, sourceId,
                 uploadConfig, importRequest.getUserId());
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRY);
         UploadStatsContainer container = retryTemplate.execute(context -> {
@@ -73,25 +89,23 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
             containerTmp = uploadService.appendStatistics(upload.getUploadId(), containerTmp);
             return containerTmp;
         });
-        Project project = projectService.getProjectByProjectId(customerSpace.toString(), importRequest.getProjectId());
+        Project project = projectService.getProjectByProjectId(customerSpaceStr, projectId);
         if (project == null) {
-            throw new IllegalArgumentException("Cannot find project with projectId: " + importRequest.getProjectId());
+            throw new IllegalArgumentException("Cannot find project with projectId: " + projectId);
         }
-        MatchRuleConfiguration matchRuleConfiguration = matchRuleService.getMatchConfig(customerSpace.toString(),
-                importRequest.getSourceId());
+        MatchRuleConfiguration matchRuleConfiguration = matchRuleService.getMatchConfig(customerSpaceStr, sourceId);
         if (!verifyPurposeOfUse(customerSpace, matchRuleConfiguration)) {
             throw new LedpException(LedpCode.LEDP_60011);
         }
 
-        DCPSourceImportWorkflowConfiguration configuration =
-                generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getUploadId(),
-                        container.getPid());
+        DCPSourceImportWorkflowConfiguration configuration = //
+                generateConfiguration(customerSpace, projectId, sourceId, upload.getUploadId(), container.getPid());
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
         Job job = workflowJobService.findByApplicationId(applicationId.toString());
         uploadService.updateStatsWorkflowPid(upload.getUploadId(), container.getPid(), job.getPid());
         UploadDiagnostics uploadDiagnostics = new UploadDiagnostics();
         uploadDiagnostics.setApplicationId(applicationId.toString());
-        uploadService.updateUploadStatus(customerSpace.toString(), upload.getUploadId(), upload.getStatus(), uploadDiagnostics);
+        uploadService.updateUploadStatus(customerSpaceStr, upload.getUploadId(), upload.getStatus(), uploadDiagnostics);
         return applicationId;
     }
 
@@ -100,8 +114,8 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
             return true;
         }
         if (matchRuleConfiguration.getBaseRule().getDomain() != null && matchRuleConfiguration.getBaseRule().getRecordType() != null) {
-            return appendConfigService.checkEntitledWith(customerSpace.toString(), matchRuleConfiguration.getBaseRule().getDomain(),
-                    matchRuleConfiguration.getBaseRule().getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION);
+            return entitlementService.checkEntitledWith(customerSpace.toString(), matchRuleConfiguration.getBaseRule().getDomain(),
+                    matchRuleConfiguration.getBaseRule().getRecordType(), DataBlock.BLOCK_ENTITY_RESOLUTION);
         }
         return true;
     }
@@ -127,6 +141,14 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                                                                        String sourceId, String uploadId, long statsId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
+
+        DplusMatchConfig matchConfig = getMatchConfig(customerSpace.toString(), sourceId);
+        PurposeOfUse matchPurpose = getMatchPurpose(customerSpace.toString(), sourceId);
+        EnrichmentLayout enrichmentLayout = getEnrichmentLayout(customerSpace.toString(), sourceId);
+        DplusAppendConfig appendConfig = new DplusAppendConfig();
+        appendConfig.setElementIds(enrichmentLayout.getElements());
+        PurposeOfUse appendPurpose = getAppendPurpose(enrichmentLayout);
+
         return new DCPSourceImportWorkflowConfiguration.Builder()
                 .customer(customerSpace) //
                 .internalResourceHostPort(internalResourceHostPort) //
@@ -141,13 +163,77 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(DCPSourceImportWorkflowConfiguration.SOURCE_ID, sourceId) //
                         .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
                         .build()) //
-                .matchConfig(getMatchConfig(customerSpace.toString(), sourceId)) //
-                .appendConfig(getAppendConfig(customerSpace.toString(), sourceId)) //
+                .matchConfig(matchConfig, matchPurpose) //
+                .appendConfig(appendConfig, appendPurpose) //
                 .build();
     }
 
-    private DplusAppendConfig getAppendConfig(String customerSpace, String sourceId) {
-        return appendConfigService.getAppendConfig(customerSpace, sourceId);
+    private PurposeOfUse getAppendPurpose(EnrichmentLayout enrichmentLayout) {
+        DataDomain domain = enrichmentLayout.getDomain();
+        DataRecordType recordType = enrichmentLayout.getRecordType();
+        if (domain == null) {
+            return getDefaultPurposeOfUse();
+        } else if (recordType == null) {
+            recordType = getDefaultRecordType();
+        }
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain(domain);
+        purposeOfUse.setRecordType(recordType);
+        return purposeOfUse;
+    }
+
+    private EnrichmentLayout getEnrichmentLayout(String customerSpace, String sourceId) {
+        EnrichmentLayout enrichmentLayout = enrichmentLayoutService.findBySourceId(customerSpace, sourceId);
+        if (enrichmentLayout == null) {
+            log.warn("EnrichmentLayout is missing: tenant={}, source={}.", //
+                    CustomerSpace.shortenCustomerSpace(customerSpace), sourceId);
+            enrichmentLayout = enrichmentLayoutService.getDefaultLayout();
+        }
+        return enrichmentLayout;
+    }
+
+    private PurposeOfUse getMatchPurpose(String customerSpace, String sourceId) {
+        MatchRuleConfiguration matchRuleConfiguration = matchRuleService.getMatchConfig(customerSpace, sourceId);
+        PurposeOfUse purposeOfUse;
+        if (matchRuleConfiguration != null && matchRuleConfiguration.getBaseRule() != null) {
+            DataDomain domain = matchRuleConfiguration.getBaseRule().getDomain();
+            DataRecordType recordType = matchRuleConfiguration.getBaseRule().getRecordType();
+            if (domain == null && recordType == null) {
+                purposeOfUse = getDefaultPurposeOfUse();
+                log.warn("Base rule does not have purpose of use: tenant={}, source={}.", //
+                        CustomerSpace.shortenCustomerSpace(customerSpace), sourceId);
+            } else if (domain == null) {
+                purposeOfUse = getDefaultPurposeOfUse();
+                log.warn("Base rule does not have data domain: tenant={}, source={}.", //
+                        CustomerSpace.shortenCustomerSpace(customerSpace), sourceId);
+            } else if (recordType == null) {
+                recordType = getDefaultRecordType();
+                purposeOfUse = new PurposeOfUse();
+                purposeOfUse.setDomain(domain);
+                purposeOfUse.setRecordType(recordType);
+                log.warn("Base rule does not have data record type: tenant={}, source={}.", //
+                        CustomerSpace.shortenCustomerSpace(customerSpace), sourceId);
+            } else {
+                purposeOfUse = new PurposeOfUse();
+                purposeOfUse.setDomain(domain);
+                purposeOfUse.setRecordType(recordType);
+            }
+        } else {
+            purposeOfUse = getDefaultPurposeOfUse();
+        }
+
+        return purposeOfUse;
+    }
+
+    private PurposeOfUse getDefaultPurposeOfUse() {
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain(DataDomain.SalesMarketing);
+        purposeOfUse.setRecordType(DataRecordType.Domain);
+        return purposeOfUse;
+    }
+
+    private DataRecordType getDefaultRecordType() {
+        return DataRecordType.Domain;
     }
 
     private DplusMatchConfig getMatchConfig(String customerSpace, String sourceId) {

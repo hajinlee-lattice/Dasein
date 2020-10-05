@@ -6,41 +6,40 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentLayoutEntityMgr;
-import com.latticeengines.apps.dcp.service.AppendConfigService;
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
+import com.latticeengines.apps.dcp.service.EntitlementService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutDetail;
+import com.latticeengines.domain.exposed.dcp.EnrichmentLayoutSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 
-@Service("EnrichmentLayoutService")
+@Service("enrichmentLayoutService")
 public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements EnrichmentLayoutService {
 
     @Inject
     private EnrichmentLayoutEntityMgr enrichmentLayoutEntityMgr;
 
     @Inject
-    private AppendConfigService appendConfigService;
+    private EntitlementService entitlementService;
 
     @Inject
     private PrimeMetadataProxy primeMetadataProxy;
-
-    @Inject
-    private TenantService tenantService;
 
     private static final String RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN = "Layout_%s";
 
@@ -49,7 +48,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
         if (null == enrichmentLayout.getLayoutId()) {
             enrichmentLayout.setLayoutId(createLayoutId());
         }
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        Tenant tenant = MultiTenantContext.getTenant();
         enrichmentLayout.setTenant(tenant);
         ResponseDocument<String> result = validate(enrichmentLayout, false);
         if (result.isSuccess()) {
@@ -60,18 +59,24 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
     }
 
     @Override
-    public List<EnrichmentLayoutDetail> getAll(String customerSpace, int pageIndex, int pageSize) {
+    public List<EnrichmentLayoutSummary> getAll(String customerSpace, int pageIndex, int pageSize) {
         PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
-        return enrichmentLayoutEntityMgr.findAllEnrichmentLayoutDetail(pageRequest);
+        List<EnrichmentLayout> entities = enrichmentLayoutEntityMgr.findAll(pageRequest);
+        if (CollectionUtils.isEmpty(entities)) {
+            return Collections.emptyList();
+        } else {
+            return entities.stream().map(EnrichmentLayoutSummary::new).collect(Collectors.toList());
+        }
     }
 
     @Override
     public ResponseDocument<String> update(String customerSpace, EnrichmentLayout enrichmentLayout) {
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        Tenant tenant = MultiTenantContext.getTenant();
         enrichmentLayout.setTenant(tenant);
         ResponseDocument<String> result = validate(enrichmentLayout, true);
         if (result.isSuccess()) {
-            EnrichmentLayout existingEnrichmentLayout = enrichmentLayoutEntityMgr.findByField("layoutId", enrichmentLayout.getLayoutId());
+            EnrichmentLayout existingEnrichmentLayout = //
+                    enrichmentLayoutEntityMgr.findByField("layoutId", enrichmentLayout.getLayoutId());
             if (null != existingEnrichmentLayout) {
                 existingEnrichmentLayout.setElements(enrichmentLayout.getElements());
                 existingEnrichmentLayout.setRecordType(enrichmentLayout.getRecordType());
@@ -82,7 +87,8 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             }
             else {
                 result.setSuccess(false);
-                result.setResult(String.format("Can't update, no existing layout found for layoutId = %s", enrichmentLayout.getLayoutId()));
+                result.setResult(String.format("Can't update, no existing layout found for layoutId = %s", //
+                        enrichmentLayout.getLayoutId()));
             }
         }
         return result;
@@ -90,22 +96,24 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
 
     @Override
     public EnrichmentLayoutDetail findEnrichmentLayoutDetailByLayoutId(String customerSpace, String layoutId) {
-        return enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailByLayoutId(layoutId);
+        EnrichmentLayout enrichmentLayout = findByLayoutId(customerSpace, layoutId);
+        return (null != enrichmentLayout) ? new EnrichmentLayoutDetail(enrichmentLayout) : null;
     }
 
     @Override
     public EnrichmentLayoutDetail findEnrichmentLayoutDetailBySourceId(String customerSpace, String sourceId) {
-        return enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailBySourceId(sourceId);
+        EnrichmentLayout enrichmentLayout = findBySourceId(customerSpace, sourceId);
+        return (null != enrichmentLayout) ? new EnrichmentLayoutDetail(enrichmentLayout) : null;
     }
 
     @Override
     public EnrichmentLayout findByLayoutId(String customerSpace, String layoutId) {
-        return enrichmentLayoutEntityMgr.findByField("layoutId", layoutId);
+        return enrichmentLayoutEntityMgr.findByLayoutId(layoutId);
     }
 
     @Override
     public EnrichmentLayout findBySourceId(String customerSpace, String sourceId) {
-        return enrichmentLayoutEntityMgr.findByField("sourceId", sourceId);
+        return enrichmentLayoutEntityMgr.findBySourceId(sourceId);
     }
 
     @Override
@@ -165,7 +173,8 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             if (!isUpdate) {  // Attempting to create a new record
                 // does this source already have an enrichmentlayout object?
                 String sourceId = enrichmentLayout.getSourceId();
-                EnrichmentLayoutDetail el = enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailBySourceId(sourceId);
+                String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+                EnrichmentLayoutDetail el = findEnrichmentLayoutDetailBySourceId(customerSpace, sourceId);
                 if (null != el) {  // yes, the fail because they must only be one
                     result = new ResponseDocument<>();
                     result.setErrors(Collections.singletonList( //
@@ -184,7 +193,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
             if (result == null) { // no errors so far
                 // Continue validation
                 String tenantId = enrichmentLayout.getTenant().getId();
-                DataBlockEntitlementContainer dataBlockEntitlementContainer = appendConfigService
+                DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementService
                         .getEntitlement(tenantId, "ALL", "ALL");
                 result = validateDomain(enrichmentLayout, dataBlockEntitlementContainer);
             }
@@ -265,7 +274,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
     private String createLayoutId() {
         String randomLayoutId = String.format(RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN,
                 RandomStringUtils.randomAlphanumeric(8).toLowerCase());
-        while (enrichmentLayoutEntityMgr.findEnrichmentLayoutDetailByLayoutId(randomLayoutId) != null) {
+        while (enrichmentLayoutEntityMgr.findByLayoutId(randomLayoutId) != null) {
             randomLayoutId = String.format(RANDOM_ENRICHMENT_LAYOUT_ID_PATTERN,
                     RandomStringUtils.randomAlphanumeric(8).toLowerCase());
         }

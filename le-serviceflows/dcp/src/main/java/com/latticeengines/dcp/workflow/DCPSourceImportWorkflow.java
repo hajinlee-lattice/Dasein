@@ -41,25 +41,25 @@ public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWor
     private SplitImportMatchResult splitMatchResult;
 
     @Inject
-    private FinishImportSource finish;
+    private AnalyzeUsage analyzeUsage;
 
     @Inject
-    private AnalyzeUsage analyzeUsage;
+    private FinishImportSource finish;
 
     @Inject
     private SourceImportListener sourceImportListener;
 
     @Override
     public Workflow defineWorkflow(DCPSourceImportWorkflowConfiguration workflowConfig) {
-        return new WorkflowBuilder(name(), workflowConfig)
-                .next(start)
-                .next(importSource)
-                .next(analyzeInput)
-                .next(match)
-                .next(analyzeUsage)
-                .next(splitMatchResult)
-                .next(finish)
-                .listener(sourceImportListener)
+        return new WorkflowBuilder(name(), workflowConfig) //
+                .next(start) //
+                .next(importSource) //
+                .next(analyzeInput) //
+                .next(match) //
+                .next(splitMatchResult) //
+                .next(analyzeUsage) //
+                .next(finish) //
+                .listener(sourceImportListener) //
                 .build();
     }
 }

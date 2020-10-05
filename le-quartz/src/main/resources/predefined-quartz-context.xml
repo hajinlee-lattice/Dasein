@@ -248,6 +248,17 @@
         <property name="jobTimeout" value="${quartz.dcp.rollupReport.job.timeout:3600}"/>
     </bean>
 
+    <bean name="submitVboUsageReportJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="submitVboUsageReportJob"/>
+        <property name="cronTrigger" value="${quartz.matchapi.execution.vboUsageReport.job.cron}"/>
+        <property name="destUrl" value="${quartz.matchapi.predefined.job.primary.url}"/>
+        <property name="secondaryDestUrl" value="${quartz.matchapi.predefined.job.secondary.url}"/>
+        <property name="queryApi" value="${quartz.matchapi.predefined.job.query.api}"/>
+        <property name="checkJobBeanUrl" value="${quartz.matchapi.predefined.job.check.bean.url}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;submitVboUsageReportJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.matchapi.vboUsageReport.job.timeout:3600}"/>
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
@@ -271,6 +282,7 @@
         <ref bean="metadataTableCleanupJob"/>
         <ref bean="metadataMigrateDynamoJob"/>
         <ref bean="dcpRollupDataReportJob" />
+        <ref bean="submitVboUsageReportJob" />
     </util:list>
 
 </beans>
