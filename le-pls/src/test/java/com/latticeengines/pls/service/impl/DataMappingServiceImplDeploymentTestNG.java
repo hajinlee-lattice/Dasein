@@ -235,7 +235,7 @@ public class DataMappingServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.LastName.name(),
                 contactCustomFieldsSectionName, FieldValidationMessage.MessageLevel.ERROR,
-                "Multiple custom fields are mapped to lattice field LastName");
+                "Multiple custom fields are mapped to standard field LastName");
 
         // case 4: unmap the column name(Last Name in "Contact Fields") that match lattice field
         FieldDefinition lastNameInContactField = fieldNameToContactFieldDefinition.get(InterfaceName.LastName.name());
@@ -245,7 +245,7 @@ public class DataMappingServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
                 defaultSystemName, testSystemType, contactSystemObject, contactFileName, contactValidateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Contact_Fields.getName(),
                 InterfaceName.LastName.name(), contactCustomFieldsSectionName, FieldValidationMessage.MessageLevel.WARNING,
-                "Column name Last Name matched Lattice Field LastName, but they are not mapped to each other");
+                "Column name Last Name matched Standard Field LastName, but they are not mapped to each other");
 
         // case 5: set fieldName LastName to empty
         lastNameInContactField.setFieldName(null);

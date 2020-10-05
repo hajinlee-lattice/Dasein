@@ -499,7 +499,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         if (userField.equals(latticeAttr.getSourceAttrName() == null ? latticeAttr.getDisplayName() :
                                 latticeAttr.getSourceAttrName())
                                 || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
-                            String message = String.format("%s is currently unmapped and can be mapped to Lattice " +
+                            String message = String.format("%s is currently unmapped and can be mapped to Standard " +
                                             " Field %s.", userField, attrName);
                             FieldValidation validation = createValidation(null, attrName, ValidationStatus.WARNING,
                                     message);
