@@ -187,6 +187,10 @@ public class TestPlayCreationHelper {
         postInitializeTenantCreation(tenant.getId());
     }
 
+    public void removeExistingTenant(String tenantId) {
+        deploymentTestBed.removeExistingTenant(tenantId);
+    }
+
     private void postInitializeTenantCreation(String fullTenantId) {
         tenant = tenantEntityMgr.findByTenantId(fullTenantId);
         log.info("Tenant = " + tenant.getId());
