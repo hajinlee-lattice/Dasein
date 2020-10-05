@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.mail.MessagingException;
@@ -21,6 +22,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -985,6 +989,36 @@ public class EmailServiceImpl implements EmailService {
         user.setFirstName(idaasUser.getFirstName());
 
         return sendDCPWelcomeEmail(user, tenantName, url);
+    }
+
+    @Override
+    public void sendDnbIntentAlertEmail(@NotNull Tenant tenant, @NotNull Collection<String> recipients,
+            @NotNull String subject, @NotNull Map<String, Object> params) {
+        Preconditions.checkNotNull(tenant);
+        Preconditions.checkNotNull(subject);
+        Preconditions.checkNotNull(recipients);
+        Preconditions.checkNotNull(params);
+        String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
+        log.info("Sending dnb intent alert email to {} recipients, with subject {} for tenant {}",
+                CollectionUtils.size(recipients), subject, tenantId);
+        Multipart multipart = buildDnBIntentAlertEmailBody(tenantId, params);
+        sendMultiPartEmail(subject, multipart, recipients);
+    }
+
+    private Multipart buildDnBIntentAlertEmailBody(@NotNull String tenantId, @NotNull Map<String, Object> params) {
+        try {
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.DNB_INTENT_ALERT).renderTemplate(params);
+
+            // TODO minify html in email body
+            Multipart mp = builder.buildRawMultipart();
+            // TODO change logo to dnb lattice logo when UX finishes it
+            builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_logo.svg", "image/svg+xml", "logo");
+            return mp;
+        } catch (IOException | MessagingException e) {
+            String msg = String.format("Failed to generate dnb intent email for tenant %s. params = %s", tenantId,
+                    params);
+            throw new RuntimeException(msg, e);
+        }
     }
 
 }

@@ -62,4 +62,14 @@ public class TemplateUtilsUnitTestNG {
         Assert.assertEquals(rendered, "Value is others");
     }
 
+    @Test(groups = "unit")
+    private void testIterable() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("list", Arrays.asList(1, 2, 3, 4));
+        String template = "Values are <#list list as val>${val}<#if !val?is_last>,</#if></#list>";
+
+        String rendered = TemplateUtils.renderByMap(template, params, true);
+        Assert.assertEquals(rendered, "Values are 1,2,3,4");
+    }
+
 }

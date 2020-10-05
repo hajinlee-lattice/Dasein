@@ -1,0 +1,434 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Cancel Action Success</title>
+
+
+    <style type="text/css">
+        img {
+            max-width: 100%;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none;
+            width: 100% !important;
+            height: 100%;
+            line-height: 1.6;
+        }
+        body {
+            background-color: #f6f6f6;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        }
+
+        .summary {
+            background: #127DB3;
+            padding-top: 1px;
+            width: 768px;
+            height: 449px;
+            text-align: center;
+        }
+
+        .stats-container {
+            margin: 38px auto 0 auto;
+            display: inline-block;
+        }
+
+        .stat {
+            width: 253px;
+            height: 176px;
+
+            margin: 0 6px;
+
+            background: rgba(10, 71, 102, 0.3);
+            border-radius: 16px;
+            float: left;
+            position: relative;
+        }
+        .stat-text {
+            margin: 0 0 6px 0;
+        }
+
+        .white-text-lg {
+            font-style: normal;
+            font-weight: bold;
+            font-size: 24px;
+            line-height: 31px;
+            text-align: center;
+            color: #FFFFFF;
+            height: 31px;
+        }
+
+        .stage-text {
+            font-style: normal;
+            font-weight: normal;
+            font-size: 18px;
+            line-height: 31px;
+            text-align: center;
+            color: #FFFFFF;
+        }
+
+        .summary-text {
+            margin: 34px 0 0 0;
+            position: relative;
+        }
+        .summary-text p {
+            width: 444px;
+            height: 54px;
+
+            margin: 0 auto;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 17px;
+            line-height: 27px;
+            text-align: center;
+            color: #FFFFFF;
+        }
+
+        .table-container {
+            position: absolute;
+            width: 768px;
+            text-align: center;
+            background-color: white;
+            padding-bottom: 40px;
+        }
+
+        .top-category-row {
+            margin: 52px auto 0 auto;
+            display: inline-block;
+        }
+
+        .table-row {
+            margin: 38px auto 0 auto;
+            display: inline-block;
+        }
+
+        .row-container {
+            float: left;
+            position: relative;
+            margin: 0 11.5px;
+        }
+
+        .flag {
+            width: 245px;
+            height: 29px;
+            margin: 0 auto;
+            padding-top: 0px;
+            padding-left: 20px;
+            position: relative;
+            background: #127DB3;
+            color: white;
+            text-align: left;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 27px;
+        }
+        .flag:after {
+            content: ' ';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-left: 10px solid white;
+            border-top: 14.5px solid transparent;
+            border-bottom: 14.5px solid transparent;
+        }
+
+        .top-graph {
+            margin-top: 10px;
+            background: #FFFFFF;
+            border: 1px solid #D7E0E4;
+            box-sizing: border-box;
+            border-radius: 5px;
+            /* max-height: 219px; */
+            width: 265px;
+        }
+
+        .graph-container {
+            margin: 8px 0 0 0;
+            text-align: left;
+            height: 100%;
+        }
+
+        .bar-row {
+            margin: 13px 0 0 13.5px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .graph-label {
+            float: left;
+            position: relative;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 9.88px;
+            line-height: 12px;
+            padding-top: 3.5px;
+        }
+
+        .buy-bar {
+            float: left;
+            position: relative;
+            background: #717ECD;
+            height: 19px;
+            margin: 0 0 0 0;
+        }
+
+        .research-bar {
+            float: left;
+            position: relative;
+            background: #D291D6;
+            height: 19px;
+            margin: 0 15px 0 0;
+        }
+
+        .graph-legend {
+            display: inline-block;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .intent-table {
+            width: 265px;
+            border-collapse:separate;
+            border-spacing: 0 7px;
+            margin-top: 14px;
+        }
+
+        .dark-table-row {
+            background-color: rgba(18, 125, 179, 0.08);
+            mix-blend-mode: normal;
+            height: 23px;
+        }
+        tr {
+            margin-top: 7px;
+        }
+        td {
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 16px;
+
+            color: #222831;
+            text-align: left;
+        }
+
+        .intent-table tr td:first-child {
+            padding-left: 5px;
+        }
+
+        .outer {
+            display: table;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .middle {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+    </style>
+
+    <style>
+        @media screen and (max-width:640px) {
+            u ~ div .email-container {
+                min-width: 320px !important;
+            }
+
+            .summary {
+                width: 100%;
+                height: 518px;
+            }
+
+            .table-container {
+                width: 100%;
+            }
+
+            .stats-container {
+                margin: 6px auto 0 auto;
+                display: block;
+            }
+
+            .stat {
+                width: 253px;
+                height: 138px;
+                margin: 15px auto 0 auto;
+                float: none;
+            }
+
+            .summary-text {
+                margin-top: 15px;
+            }
+
+            .summary-text p {
+                width: 253px;
+                height: 81px;
+            }
+
+            .top-category-row {
+                margin: 0 auto 0 auto;
+                display: block;
+            }
+
+            .row-container {
+                margin-top: 39px;
+                float: none;
+            }
+
+            .top-graph {
+                margin: 10px auto 0 auto;
+            }
+
+            .table-row {
+                margin-top: 0px;
+            }
+        }
+    </style>
+</head>
+
+<body style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6; background: #f6f6f6; margin: 0; padding: 0;">
+<div style="width: 100%; background-color: #f6f6f6;">
+
+    <div style="max-width: 768px; margin: 0 auto;" class="email-container">
+        <div style="height: 62px; max-width: 768px; background-color: white; position: relative;">
+            <div class="outer">
+                <div class="middle">
+                    <img src="cid:logo" alt="DnB" style="margin: 0 auto; display: block;"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary">
+            <h1 style="margin: 24px 0 0 0;" class="white-text-lg">Intent Alert</h1>
+            <h3 style="margin: 11px 0 0 0; font-style: normal; font-weight: 300; font-size: 18px; line-height: 25px; text-align: center; color: #FFFFFF; height: 25px;">${date_range}</h3>
+            <div class="stats-container">
+                <div class="stat">
+                    <div class="outer">
+                        <div class="middle">
+                            <h1 class="white-text-lg stat-text">${num_buy_intents}</h1>
+                            <h3 class="stage-text stat-text">Buying Intent</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div class="outer">
+                        <div class="middle">
+                            <h1 class="white-text-lg stat-text">${num_research_intents}</h1>
+                            <h3 class="stage-text stat-text">Research Intent</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-text">
+                <div class="outer">
+                    <div class="middle">
+                        <p>${summary_text}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="top-category-row">
+                <div class="row-container">
+                    <div class="flag">Top Industries</div>
+                    <div class="top-graph">
+                        <div class="graph-container">
+                            <#list top_industries as industry>
+                            <div class="bar-row">
+                                <label class="graph-label" style="width: 64px;">${industry.name}</label>
+                                <div class="buy-bar" style="width: ${136 * industry.buy_percentage}px;"></div>
+                                <div class="research-bar" style="width: ${136 * industry.research_percentage}px;"></div>
+                                <label class="graph-label">${industry.num_intents}</label>
+                            </div>
+                            </#list>
+
+                            <div style="text-align: center;">
+                                <div class="graph-legend">
+                                    <div class="buy-bar" style="width: 15px;height: 15px;"></div>
+                                    <label class="graph-label" style="margin-left: 6px; padding-top: 1.5px;">Buying</label>
+                                    <div class="research-bar" style="width: 15px;height: 15px; margin-left: 12px; margin-right: 0px;"></div>
+                                    <label class="graph-label" style="margin-left: 6px; padding-top: 1.5px;">Research</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-container">
+                    <div class="flag">Top Locations</div>
+                    <div class="top-graph">
+                        <div class="graph-container">
+                            <#list top_locations as location>
+                            <div class="bar-row">
+                                <label class="graph-label" style="width: 64px;">${location.name}</label>
+                                <div class="buy-bar" style="width: ${136 * location.buy_percentage}px;"></div>
+                                <div class="research-bar" style="width: ${136 * location.research_percentage}px;"></div>
+                                <label class="graph-label">${location.num_intents}</label>
+                            </div>
+                            </#list>
+
+                            <div style="text-align: center;">
+                                <div class="graph-legend">
+                                    <div class="buy-bar" style="width: 15px;height: 15px;"></div>
+                                    <label class="graph-label" style="margin-left: 6px; padding-top: 1.5px;">Buying</label>
+                                    <div class="research-bar" style="width: 15px;height: 15px; margin-left: 12px; margin-right: 0px;"></div>
+                                    <label class="graph-label" style="margin-left: 6px; padding-top: 1.5px;">Research</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <#list model_pairs as model_pair>
+            <div class="table-row">
+                <#if model_pair[0]??>
+                <div class="row-container">
+                    <div class="flag">New Intent for ${model_pair[0].name}</div>
+                    <table class="intent-table" cellspacing="0" cellpadding="0">
+                        <#list model_pair[0].intents as intent>
+                        <tr <#if intent?is_odd_item> class="dark-table-row" </#if>>
+                            <td>${intent.stage}</td>
+                            <td>${intent.company_name}</td>
+                            <td>${intent.location}</td>
+                        </tr>
+                        </#list>
+                    </table>
+                </div>
+                </#if>
+
+                <#if model_pair[1]??>
+                <div class="row-container">
+                    <div class="flag">New Intent for Optimizer</div>
+                    <table class="intent-table" cellspacing="0" cellpadding="0">
+                        <#list model_pair[1].intents as intent>
+                        <tr <#if intent?is_odd_item> class="dark-table-row" </#if>>
+                            <td>${intent.stage}</td>
+                            <td>${intent.company_name}</td>
+                            <td>${intent.location}</td>
+                        </tr>
+                        </#list>
+                    </table>
+                </div>
+                </#if>
+
+            </div>
+            </#list>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
