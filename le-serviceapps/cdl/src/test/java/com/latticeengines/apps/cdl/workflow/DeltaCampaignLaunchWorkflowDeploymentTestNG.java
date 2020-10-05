@@ -133,7 +133,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         defaultPlay = testPlayCreationHelper.getPlay();
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         defaultPlayLaunch.setPlay(defaultPlay);
-        testPlayCreationHelper.removeExistingTenant(mainTestTenant.getId());
+        testPlayCreationHelper.removeExistingTenant(testBed.getMainTestTenant().getId());
     }
 
     @Override
