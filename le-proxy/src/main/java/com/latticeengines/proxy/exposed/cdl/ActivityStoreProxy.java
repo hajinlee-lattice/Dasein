@@ -55,6 +55,13 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         return post("create_stream", url, stream, AtlasStream.class);
     }
 
+    public List<AtlasStream> getStreams(@NotNull String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/streams",
+                shortenCustomerSpace(customerSpace));
+        List<?> list = get("get_all_streams", url, List.class);
+        return JsonUtils.convertList(list, AtlasStream.class);
+    }
+
     public AtlasStream findStreamByName(@NotNull String customerSpace, @NotNull String streamName,
             boolean inflateDimensions) {
         String url = constructUrl(

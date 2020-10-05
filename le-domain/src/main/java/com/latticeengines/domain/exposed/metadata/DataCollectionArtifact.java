@@ -51,6 +51,8 @@ public class DataCollectionArtifact implements HasPid, HasTenant, Serializable {
     public static final String ORPHAN_CONTACTS = "OrphanContacts";
     public static final String ORPHAN_TRXNS = "OrphanTransactions";
     public static final String FULL_PROFILE = "FullProfile";
+    public static final String CURRENTWEEK_INTENT_NEWACCOUNTS = "CurrentweekIntentNewaccounts";
+    public static final String CURRENTWEEK_INTENT_ALLACCOUNTS = "CurrentweekIntentAllaccounts";
     //=========================
     // END: Artifact Types
     //=========================

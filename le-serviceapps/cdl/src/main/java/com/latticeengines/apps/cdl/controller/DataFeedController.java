@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.workflow.AtlasProfileReportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.GenerateIntentAlertWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.MockActivityStoreWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
@@ -68,6 +69,7 @@ public class DataFeedController {
     private final MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter;
     private final AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter;
     private final TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter;
+    private final GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
@@ -83,7 +85,8 @@ public class DataFeedController {
                               AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter,
                               TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter,
                               DataFeedService dataFeedService, PAValidationUtils paValidationUtils,
-                              AtlasExportService atlasExportService, ServingStoreService servingStoreService) {
+                              AtlasExportService atlasExportService, ServingStoreService servingStoreService,
+                              GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
@@ -92,6 +95,7 @@ public class DataFeedController {
         this.mockActivityStoreWorkflowSubmitter = mockActivityStoreWorkflowSubmitter;
         this.atlasProfileReportWorkflowSubmitter = atlasProfileReportWorkflowSubmitter;
         this.timelineExportWorkflowSubmitter = timelineExportWorkflowSubmitter;
+        this.generateIntentAlertWorkflowSubmitter = generateIntentAlertWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
         this.atlasExportService = atlasExportService;
@@ -291,6 +295,18 @@ public class DataFeedController {
         try {
             ApplicationId appId = atlasProfileReportWorkflowSubmitter.submit(customerSpace, request,
                     new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping("/generateintentalert")
+    @ResponseBody
+    @ApiOperation(value = "Invoke generate intent alert workflow. Returns the job id.")
+    public ResponseDocument<String> generateIntentAlert(@PathVariable String customerSpace) {
+        try {
+            ApplicationId appId= generateIntentAlertWorkflowSubmitter.submit();
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);

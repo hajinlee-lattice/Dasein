@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.CalculateDeltaSte
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.QueuePlayLaunchesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateIntentAlertArtifactsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MockActivityStoreConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.TimelineExportFileGeneratorConfiguration;
@@ -47,11 +48,10 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = QueuePlayLaunchesStepConfiguration.class, name = "QueuePlayLaunchesStepConfiguration"), //
         @Type(value = CalculateDeltaStepConfiguration.class, name = "CalculateDeltaStepConfiguration"), //
         @Type(value = MockActivityStoreConfiguration.class, name = "MockActivityStoreConfiguration"), //
-        @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name =
-                "LegacyDeleteByDateRangeActionConfiguration"), //
-        @Type(value = GenerateTimelineExportUniverseStepConfiguration.class, name = "GenerateTimelineUniverseStepConfiguration"),
-        @Type(value = TimelineExportFileGeneratorConfiguration.class, name = "TimelineExportFileGeneratorConfiguration"),
-})
+        @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name = "LegacyDeleteByDateRangeActionConfiguration"), //
+        @Type(value = GenerateTimelineExportUniverseStepConfiguration.class, name = "GenerateTimelineUniverseStepConfiguration"), //
+        @Type(value = TimelineExportFileGeneratorConfiguration.class, name = "TimelineExportFileGeneratorConfiguration"), //
+        @Type(value = GenerateIntentAlertArtifactsStepConfiguration.class, name = "GenerateIntentAlertArtifactsStepConfiguration") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {
 
