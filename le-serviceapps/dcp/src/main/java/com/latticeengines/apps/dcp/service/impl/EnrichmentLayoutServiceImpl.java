@@ -77,8 +77,8 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                 existingEnrichmentLayout.setRecordType(enrichmentLayout.getRecordType());
                 existingEnrichmentLayout.setDomain(enrichmentLayout.getDomain());
                 existingEnrichmentLayout.setTenant(enrichmentLayout.getTenant());
-                enrichmentLayoutEntityMgr.update(enrichmentLayout);
-                result.setResult(enrichmentLayout.getLayoutId());
+                enrichmentLayoutEntityMgr.update(existingEnrichmentLayout);
+                result.setResult(existingEnrichmentLayout.getLayoutId());
             }
             else {
                 result.setSuccess(false);
