@@ -74,9 +74,8 @@ public class EnrichmentLayoutResource {
     @PutMapping
     @ResponseBody
     @ApiOperation(value = "Update EnrichmentLayout")
-    public EnrichmentLayoutDetail updateEnrichmentLayout(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
-        enrichmentLayoutService.update(customerSpace, layout);
-        return new EnrichmentLayoutDetail(layout);
+    public ResponseDocument<String> updateEnrichmentLayout(@PathVariable String customerSpace, @RequestBody EnrichmentLayout layout) {
+        return enrichmentLayoutService.update(customerSpace, layout);
     }
 
     /**
