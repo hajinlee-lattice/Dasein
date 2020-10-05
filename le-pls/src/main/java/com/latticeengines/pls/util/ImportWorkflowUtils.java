@@ -971,7 +971,7 @@ public final class ImportWorkflowUtils {
                             if (ImportWorkflowUtils.doesColumnNameMatch(unMappedColumnName,
                                     specDefinition.getMatchingColumnNames())) {
                                 String message = String.format(
-                                        "Column name %s matched Lattice Field %s, but they are not mapped to each other",
+                                        "Column name %s matched Standard Field %s, but they are not mapped to each other",
                                         unMappedColumnName, fieldName);
                                 validations.add(new FieldValidationMessage(fieldName,
                                         columnName, message, FieldValidationMessage.MessageLevel.WARNING));
@@ -1061,7 +1061,7 @@ public final class ImportWorkflowUtils {
         }
 
         if (mappedLatticeField.contains(fieldName)) {
-            String message = String.format("Multiple custom fields are mapped to lattice field %s",
+            String message = String.format("Multiple custom fields are mapped to standard field %s",
                     fieldName);
             validations.add(new FieldValidationMessage(fieldName,
                     columnName, message, FieldValidationMessage.MessageLevel.ERROR));
