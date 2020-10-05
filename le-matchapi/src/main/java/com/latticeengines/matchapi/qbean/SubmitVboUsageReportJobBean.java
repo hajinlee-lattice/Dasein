@@ -10,7 +10,7 @@ import com.latticeengines.datacloud.match.service.VboUsageService;
 import com.latticeengines.matchapi.service.impl.SubmitVboUsageReportCallable;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
-@Component("submitVboUsageReportJobBean")
+@Component("submitVboUsageReportJob")
 public class SubmitVboUsageReportJobBean implements QuartzJobBean {
 
     @Inject
