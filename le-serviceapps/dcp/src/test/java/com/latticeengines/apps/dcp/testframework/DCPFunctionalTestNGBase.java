@@ -3,6 +3,7 @@ package com.latticeengines.apps.dcp.testframework;
 import java.util.Random;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
@@ -29,11 +31,17 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(DCPFunctionalTestNGBase.class);
 
+    protected static final String SUBSRIBER_NUMBER_SNMS = "202007226";
+    protected static final String SUBSRIBER_NUMBER_MANY_DOMAINS = "202007101";
+
     @Resource(name = "globalAuthFunctionalTestBed")
     protected GlobalAuthFunctionalTestBed testBed;
 
     @Resource(name = "jdbcTemplate")
     protected JdbcTemplate jdbcTemplate;
+
+    @Inject
+    private TenantService tenantService;
 
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;
@@ -41,6 +49,8 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected void setupTestEnvironment() {
         testBed.bootstrap(1);
         mainTestTenant = testBed.getMainTestTenant();
+        mainTestTenant.setSubscriberNumber(SUBSRIBER_NUMBER_SNMS);
+        tenantService.updateTenant(mainTestTenant);
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();

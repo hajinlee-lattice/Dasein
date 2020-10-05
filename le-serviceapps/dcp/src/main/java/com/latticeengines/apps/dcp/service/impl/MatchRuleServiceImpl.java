@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.dcp.entitymgr.MatchRuleEntityMgr;
-import com.latticeengines.apps.dcp.service.AppendConfigService;
+import com.latticeengines.apps.dcp.service.EntitlementService;
 import com.latticeengines.apps.dcp.service.MatchRuleService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
@@ -51,7 +51,7 @@ public class MatchRuleServiceImpl implements MatchRuleService {
     private RedisDistributedLock redisDistributedLock;
 
     @Inject
-    private AppendConfigService appendConfigService;
+    private EntitlementService entitlementService;
 
     @Value("${dcp.lock.namespace}")
     private String lockNameSpace;
@@ -188,8 +188,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
             validateCountryCode(newRule.getAllowedValues());
         }
         if (newRule.getDomain() != null && newRule.getRecordType() != null) {
-            if (!appendConfigService.checkEntitledWith(customerSpace, newRule.getDomain(),
-                    newRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+            if (!entitlementService.checkEntitledWith(customerSpace, newRule.getDomain(),
+                    newRule.getRecordType(), DataBlock.BLOCK_ENTITY_RESOLUTION)) {
                 throw new LedpException(LedpCode.LEDP_60011);
             }
         } else {
@@ -230,8 +230,8 @@ public class MatchRuleServiceImpl implements MatchRuleService {
             validateCountryCode(matchRule.getAllowedValues());
         }
         if (matchRule.getDomain() != null && matchRule.getRecordType() != null) {
-            if (!appendConfigService.checkEntitledWith(customerSpace, matchRule.getDomain(),
-                    matchRule.getRecordType(), DataBlock.BLOCK_COMPANY_ENTITY_RESOLUTION)) {
+            if (!entitlementService.checkEntitledWith(customerSpace, matchRule.getDomain(),
+                            matchRule.getRecordType(), DataBlock.BLOCK_ENTITY_RESOLUTION)) {
                 throw new LedpException(LedpCode.LEDP_60011);
             }
         } else {

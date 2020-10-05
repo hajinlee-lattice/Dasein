@@ -20,7 +20,8 @@ public class UsageProxyImpl extends BaseRestApiProxy implements UsageProxy {
 
     @Override
     public VboBatchUsageReport submitBatchReport(SubmitBatchReportRequest request) {
-        return post("submit batch report", "/batch", request, VboBatchUsageReport.class);
+        String url = constructUrl("/batch");
+        return post("submit batch report", url, request, VboBatchUsageReport.class);
     }
 
 }

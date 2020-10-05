@@ -8,18 +8,18 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 
-public class AppendConfigServiceImplTestNG extends DCPFunctionalTestNGBase {
+public class EntitlementServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     @Inject
-    private AppendConfigServiceImpl appendConfigServiceImpl;
+    private EntitlementServiceImpl entitlementServiceImpl;
 
     @Test(groups = "functional")
     public void testGetEntitlement() {
         setupTestEnvironment();
         DataBlockEntitlementContainer container = //
-                appendConfigServiceImpl.getSubscriberEntitlement("202007226");
+                entitlementServiceImpl.getSubscriberEntitlement(SUBSRIBER_NUMBER_SNMS);
         Assert.assertNotNull(container);
-        container = appendConfigServiceImpl.getSubscriberEntitlement("123");
+        container = entitlementServiceImpl.getSubscriberEntitlement("123");
         Assert.assertNull(container);
     }
 

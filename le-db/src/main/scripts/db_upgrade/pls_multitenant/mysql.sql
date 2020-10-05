@@ -54,27 +54,30 @@ CREATE PROCEDURE `UpdateSchema`()
           UNIQUE KEY `UK_ALERT_NAME_TENANT` (`NAME`, `FK_TENANT_ID`)
       ) ENGINE = InnoDB;
 
-
-      CREATE TABLE `DCP_ENRICHMENT_LAYOUT`
+      create table `DCP_ENRICHMENT_LAYOUT`
       (
-          `PID`          bigint(20)                              NOT NULL AUTO_INCREMENT,
-          `LAYOUT_ID`    varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-          `DOMAIN`       varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-          `RECORD_TYPE`  varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-          `CREATED`      datetime                                NOT NULL,
-          `CREATED_BY`   varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-          `ELEMENTS`     json                                    DEFAULT NULL,
-          `SOURCE_ID`    varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-          `TEAM_ID`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-          `UPDATED`      datetime                                NOT NULL,
-          `FK_TENANT_ID` bigint(20)                              NOT NULL,
-          PRIMARY KEY (`PID`),
-          UNIQUE KEY `UX_LAYOUT_ID` (`FK_TENANT_ID`,`LAYOUT_ID`),
-          KEY `IX_LAYOUT_ID` (`LAYOUT_ID`),
-          CONSTRAINT `FK_DCPENRICHMENT_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE
-      ) ENGINE = InnoDB
-        DEFAULT CHARSET = utf8mb4
-        COLLATE = utf8mb4_unicode_ci;
+          `PID`          bigint       not null auto_increment,
+          `CREATED`      datetime     not null,
+          `CREATED_BY`   varchar(255) not null,
+          `domain`       varchar(255),
+          `ELEMENTS`     JSON,
+          `LAYOUT_ID`    varchar(255) not null,
+          `RECORD_TYPE`  varchar(255),
+          `SOURCE_ID`    varchar(255) not null,
+          `TEAM_ID`      varchar(255),
+          `UPDATED`      datetime     not null,
+          `FK_TENANT_ID` bigint       not null,
+          primary key (`PID`)
+      ) engine = InnoDB;
+
+      alter table `DCP_ENRICHMENT_LAYOUT`
+          add constraint `FK_DCPENRICHMENTLAYOUT_FKTENANTID_TENANT`
+              foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
+
+      alter table `DCP_ENRICHMENT_LAYOUT`
+          add constraint UX_LAYOUT_LAYOUT_ID unique (`LAYOUT_ID`);
+      alter table `DCP_ENRICHMENT_LAYOUT`
+          add constraint UX_LAYOUT_SOURCE_ID unique (`SOURCE_ID`);
 
 
       ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH_CHANNEL`

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -19,6 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
@@ -30,19 +33,17 @@ import com.latticeengines.security.exposed.service.TenantService;
 public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     @Inject
-    EnrichmentLayoutService enrichmentLayoutService;
+    private EnrichmentLayoutService enrichmentLayoutService;
 
     @Inject
-    TenantService tenantService;
-
-    private static final String subscriberNumberWithManyDomains = "202007101";
+    private TenantService tenantService;
 
     private static final String sourceIdTemplate = "Source_%s";
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
-        mainTestTenant.setSubscriberNumber(subscriberNumberWithManyDomains);
+        mainTestTenant.setSubscriberNumber(SUBSRIBER_NUMBER_MANY_DOMAINS);
         tenantService.updateTenant(mainTestTenant);
     }
 
@@ -78,9 +79,13 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isSuccess(), "EnrichmentLayout is not valid.");
 
-        EnrichmentLayoutDetail retrievedLayout = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, layoutId);
-
-        Assert.assertNotNull(retrievedLayout);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        EnrichmentLayoutDetail retrievedLayout = retry.execute(ctx -> {
+            EnrichmentLayoutDetail detail = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, layoutId);
+            Assert.assertNotNull(detail);
+            return detail;
+        });
         Assert.assertEquals(retrievedLayout.getDomain(), DataDomain.SalesMarketing);
         Assert.assertEquals(retrievedLayout.getSourceId(), rndSrcId);
 
@@ -108,8 +113,13 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertFalse(result.isSuccess(), "EnrichmentLayout should not be valid. " +
                 "'thirdpartyassessment_val' requires companyinfo level 3");
 
-        EnrichmentLayoutDetail nullLayout = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, enrichmentLayout.getLayoutId());
-        Assert.assertNull(nullLayout, "Layout should be not exists because it failed validation.");
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            EnrichmentLayoutDetail nullLayout = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, enrichmentLayout.getLayoutId());
+            Assert.assertNull(nullLayout, "Layout should be not exists because it failed validation.");
+            return true;
+        });
     }
 
     @Test(groups = "functional")
@@ -128,7 +138,6 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
 
         String layoutId = enrichmentLayout.getLayoutId();
         ResponseDocument<String> result = enrichmentLayoutService.create(mainTestTenant.getId(), enrichmentLayout);
-
         Assert.assertNotNull(result);
 
         enrichmentLayout.setDomain(DataDomain.Supply);
@@ -138,8 +147,13 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(r2);
         Assert.assertTrue(r2.isSuccess());
 
-        EnrichmentLayoutDetail updatedLayout = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, layoutId);
-        Assert.assertNotNull(updatedLayout);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        EnrichmentLayoutDetail updatedLayout = retry.execute(ctx -> {
+            EnrichmentLayoutDetail detail = enrichmentLayoutService.findEnrichmentLayoutDetailByLayoutId(mainCustomerSpace, layoutId);
+            Assert.assertNotNull(detail);
+            return detail;
+        });
         Assert.assertEquals(DataDomain.Supply, updatedLayout.getDomain());
     }
 
@@ -193,8 +207,13 @@ public class EnrichmentLayoutServiceImplTestNG extends DCPFunctionalTestNGBase {
         enrichmentLayoutService.deleteLayoutBySourceId(mainTestTenant.getId(), enrichmentLayout.getSourceId());
 
         // Check that it's gone
-        EnrichmentLayout removedLayout = enrichmentLayoutService.findBySourceId(mainTestTenant.getId(), enrichmentLayout.getSourceId());
-        Assert.assertNull(removedLayout, "EnrichmentLayout should have been removed.");
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            EnrichmentLayout removedLayout = enrichmentLayoutService.findBySourceId(mainTestTenant.getId(), enrichmentLayout.getSourceId());
+            Assert.assertNull(removedLayout, "EnrichmentLayout should have been removed.");
+            return true;
+        });
     }
 
     private EnrichmentLayout makeEnrichmentLayoutObj(List<String> elementList) {
