@@ -62,7 +62,7 @@ public class EntitlementServiceImplUnitTestNG {
     public void parseAnalyticalOnly() throws IOException {
         InputStream is = new ClassPathResource("append-config/idaas-entitlement-2.json").getInputStream();
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
-        DataBlockEntitlementContainer container = AppendConfigServiceImpl.parseIDaaSEntitlement(idaasStr);
+        DataBlockEntitlementContainer container = EntitlementServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
         Assert.assertTrue(container.getDomains().isEmpty());
     }
