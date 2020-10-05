@@ -282,6 +282,7 @@
         <ref bean="metadataTableCleanupJob"/>
         <ref bean="metadataMigrateDynamoJob"/>
         <ref bean="dcpRollupDataReportJob" />
+        <ref bean="submitVboUsageReportJob" />
     </util:list>
 
 </beans>
