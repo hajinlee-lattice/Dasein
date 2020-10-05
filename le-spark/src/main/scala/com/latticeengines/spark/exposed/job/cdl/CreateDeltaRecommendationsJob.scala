@@ -76,7 +76,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   private def createFinalRecommendationDf(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, contactCols: Seq[String],
                                           contactNums: ListBuffer[Long], joinKey: String, recDf: DataFrame, accountTable: DataFrame, contactTable: DataFrame): DataFrame = {
-    val recDfToJoin: DataFrame = recDf.withColumnRenamed(joinKey, "ACCOUNT_ID")
+    val recDfToJoin: DataFrame = recDf.withColumnRenamed("ACCOUNT_ID", joinKey)
     var result: DataFrame = generateUserConfiguredDataFrame(recDfToJoin, accountTable, deltaCampaignLaunchSparkContext, joinKey)
     if (!contactTable.rdd.isEmpty && !contactCols.isEmpty) {
       result = joinContacts(result, contactTable, contactCols, joinKey)
